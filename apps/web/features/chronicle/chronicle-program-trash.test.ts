@@ -30,7 +30,7 @@ function event(
   payload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
-    eventId: `event_${id}`,
+    eventId: id + 2,
     type: actionType,
     stateVersionBefore: id,
     stateVersionAfter: id + 1,

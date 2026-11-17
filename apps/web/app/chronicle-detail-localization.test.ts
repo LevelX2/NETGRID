@@ -32,7 +32,7 @@ function render(
     },
   }) as unknown as ChronicleTranslate;
   const event: PublicGameEvent = {
-    eventId: `fixture-${id}`,
+    eventId: id,
     type: row.payload.actionType,
     stateVersionBefore: 1,
     stateVersionAfter: 2,

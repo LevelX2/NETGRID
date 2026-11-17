@@ -802,15 +802,15 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       state = applyChoice(state, "runner", "bid_0");
       state = applyChoice(state, "runner", "pass");
       if (definitionId === 455) {
-        expect(state.runner.tags, definitionId).toBe(0);
+        expect(state.runner.tags, String(definitionId)).toBe(0);
         expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
           traceStep: "post_bid_link",
           traceSuccessful: false,
           tagsAdded: 0,
         });
       } else {
-        expect(state.runner.tags, definitionId).toBe(0);
-        expect(state.run, definitionId).toBeDefined();
+        expect(state.runner.tags, String(definitionId)).toBe(0);
+        expect(state.run, String(definitionId)).toBeDefined();
         expect(state.runnerTurnFlags?.runnerRunLockCreditCost).not.toBe(2);
         expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
           traceStep: "post_bid_link",
@@ -1118,7 +1118,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       getPlayerView(agendaState, "corp")
         .servers.find((server) => server.id === "hq")
         ?.ice.find((ice) => ice.instanceId === nonBlackIceId)?.strength,
-    ).toBe(CARD_DEFINITIONS_BY_ID.simple_barrier_ice?.strength);
+    ).toBe(CARD_DEFINITIONS_BY_ID[589]?.strength);
     agendaState.corp.scoreArea = agendaState.corp.scoreArea.filter(
       (cardId) => cardId !== agendaId,
     );
@@ -1462,8 +1462,8 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         privatePayloadMarkers,
       );
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.ok, String(definitionId)).toBe(true);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
 
       state = apply(
         state,

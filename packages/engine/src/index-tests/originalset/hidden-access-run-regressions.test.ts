@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -332,7 +333,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     expect(archivesState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
       hiddenZoneAction: "archives_breach_reveal",
-      archivesRevealDefinitionIds: 560,
+      archivesRevealDefinitionIds: "560",
       archivesAutoAccessedCount: 1,
     });
   });
@@ -358,7 +359,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
       hiddenZoneAction: "archives_breach_reveal",
-      archivesRevealDefinitionIds: 552,
+      archivesRevealDefinitionIds: "552",
       archivesAutoAccessedCount: 1,
     });
   });
@@ -376,7 +377,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     const initial = structuredClone(rdState);
     const replayStart = rdState.eventLog.length;
 
-    expect(JSON.stringify(getPlayerView(rdState, "runner"))).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(rdState, "runner")))).not.toContain(
       557,
     );
     rdState = apply(
@@ -438,7 +439,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     expect(archivesState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
       hiddenZoneAction: "archives_breach_reveal",
-      archivesRevealDefinitionIds: 557,
+      archivesRevealDefinitionIds: "557",
       archivesAutoAccessedCount: 1,
     });
   });
@@ -648,7 +649,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     expect(blackRez.costs).toEqual([{ credits: 5 }]);
     expect(blackRez.payload).toMatchObject({
       rezCostReductionSourceDefinitionIds:
-        553,
+        String(553),
       rezCostReductionAmount: 2,
       rezCostPaid: 5,
     });
@@ -817,7 +818,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       hiddenZoneAction: "v1911_expose_outermost_ice_each_data_fort",
       publicRevealKind: "expose",
       revealedCount: 2,
-      publicRevealDefinitionIds: "simple_barrier_ice,simple_sentry_ice",
+      publicRevealDefinitionIds: "589,601",
       exposedServerIds: "hq,remote_1",
       exposedPositionKeys: "ice:0,ice:1",
     });
@@ -826,7 +827,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     ).not.toMatch(
       /simple_code_gate_ice|Simple Code Gate ICE|"stack"|"rd"|"cardInstances"/,
     );
-    expect(JSON.stringify(getPlayerView(revealState, "runner"))).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(revealState, "runner")))).not.toContain(
       590,
     );
     const revealReplay = replayEvents(
@@ -2167,7 +2168,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceLinkCreditsSpent: 3,
       runnerCreditsSpent: 0,
-      traceLinkCreditSourceDefinitionIds: 350,
+      traceLinkCreditSourceDefinitionIds: "350",
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -3147,7 +3148,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(state.corp.archives).toContain(redHerringsId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       stealCostPersistedForCurrentAccess: true,
-      stealCostSourceDefinitionIds: 578,
+      stealCostSourceDefinitionIds: String(578),
       stealCostSourceTitles: "Red Herrings",
     });
     state = apply(state, "runner", (action) => action.type === "access_card");
@@ -3161,7 +3162,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       stealCost: 5,
       stealAdditionalCost: 5,
       stealCostPersistedForCurrentAccess: true,
-      stealCostSourceDefinitionIds: 578,
+      stealCostSourceDefinitionIds: String(578),
     });
     state = apply(
       state,
@@ -4117,7 +4118,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     });
     const runnerViewDuringChoice = getPlayerView(state, "runner");
     expect(runnerViewDuringChoice.pendingChoice).toBeUndefined();
-    expect(JSON.stringify(runnerViewDuringChoice)).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(runnerViewDuringChoice))).not.toContain(
       590,
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -4169,7 +4170,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       (server) => server.id === "remote_1",
     );
     expect(runnerServer?.ice[0]?.known).toBe(false);
-    expect(JSON.stringify(runnerServer)).not.toContain(590);
+    expect(serializedDefinitionReferences(JSON.stringify(runnerServer))).not.toContain(590);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneAction: "hq_ice_swap_swap",
@@ -4263,7 +4264,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       (action) => action.actionId === swapAction.actionId,
     );
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(state, "runner")))).not.toContain(
       590,
     );
 

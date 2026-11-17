@@ -39,7 +39,7 @@ export type AccessCountPayload = {
   effectiveAccessCount: number;
   highlighterCounterCount?: number;
   highlighterAccessBonus?: number;
-  installedAccessBonusSourceDefinitionIds?: number;
+  installedAccessBonusSourceDefinitionIds?: string;
 };
 
 export function buildBreachState(

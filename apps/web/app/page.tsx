@@ -1,4 +1,5 @@
 "use client";
+
 import {
   nextChronicleWidth,
   type ChronicleWidth,
@@ -73,6 +74,7 @@ import type {
   ApiSidePayload,
   ApiUserErrorPayload,
   LegalAction,
+  MatchEventId,
   PlayerView,
   PublicGameEvent,
   Side,
@@ -114,6 +116,7 @@ import {
 import {
   confirmedNextAccessAction,
   shouldKeepAccessRevealOpen,
+  type AccessPresentationId,
   type PendingAccessContinuation,
 } from "./access-reveal-ui";
 import { matchOverlayPresentation } from "./match-overlay-presentation";
@@ -229,7 +232,7 @@ import {
   preparedAiDecisionDebugTrace,
   retainPreparedAiDecisionDebugTurnPlanTrace,
 } from "./ai-decision-debug-prepared-trace";
-import type { MaintenanceAiTraceDetail } from "./maintenance";
+import type { AiDecisionDebugTrace } from "./maintenance";
 import {
   ACTION_CUE_SETTINGS_STORAGE_KEY,
   ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
@@ -837,16 +840,16 @@ export default function Page() {
   const [undoPanelOpen, setUndoPanelOpen] = useState(false);
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
   const [dismissedAccessEventIds, setDismissedAccessEventIds] = useState<
-    string[]
+    AccessPresentationId[]
   >([]);
   const [pendingAccessPresentationEvents, setPendingAccessPresentationEvents] =
     useState<PublicGameEvent[]>([]);
   const [dismissedExposeReviewEventId, setDismissedExposeReviewEventId] =
-    useState<string | null>(null);
+    useState<MatchEventId | null>(null);
   const [
     dismissedSuccessfulRunOutcomeEventId,
     setDismissedSuccessfulRunOutcomeEventId,
-  ] = useState<string | null>(null);
+  ] = useState<MatchEventId | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
   const [colorScheme, setColorScheme] = useState<ColorScheme>("black");
@@ -951,7 +954,7 @@ export default function Page() {
   const [preparedAiDecisionDebug, setPreparedAiDecisionDebug] =
     useState<PreparedAiDecisionDebug | null>(null);
   const [aiDecisionDebugTurnPlanTrace, setAiDecisionDebugTurnPlanTrace] =
-    useState<MaintenanceAiTraceDetail | null>(null);
+    useState<AiDecisionDebugTrace | null>(null);
   const [aiDecisionDebugPreview, setAiDecisionDebugPreview] =
     useState<AiDecisionPreview | null>(null);
   const [aiDecisionDebugPreviewError, setAiDecisionDebugPreviewError] =
@@ -1014,9 +1017,9 @@ export default function Page() {
   const lastAnimatedMatchIdRef = useRef<string | null>(null);
   const resultAudioPrimedRef = useRef(false);
   const lastAudioResultKeyRef = useRef<string | null>(null);
-  const lastSeenCueEventIdRef = useRef<string | null>(null);
-  const lastSeenAccessPresentationEventIdRef = useRef<string | null>(null);
-  const lastSeenExposeHighlightEventIdRef = useRef<string | null>(null);
+  const lastSeenCueEventIdRef = useRef<MatchEventId | null>(null);
+  const lastSeenAccessPresentationEventIdRef = useRef<MatchEventId | null>(null);
+  const lastSeenExposeHighlightEventIdRef = useRef<MatchEventId | null>(null);
   const exposedCardHighlightTimerRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
@@ -3100,7 +3103,7 @@ export default function Page() {
     terminalAccessFlatline: accessRevealEvent?.publicPayload.flatline === true,
   });
   const showAccessReveal = overlayPresentation.showAccessReveal;
-  const dismissAccessPresentation = useCallback((eventId: string) => {
+  const dismissAccessPresentation = useCallback((eventId: AccessPresentationId) => {
     setPendingAccessPresentationEvents((events) =>
       dismissPendingAccessPresentationEvent(events, eventId),
     );

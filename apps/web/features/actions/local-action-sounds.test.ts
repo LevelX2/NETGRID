@@ -123,7 +123,7 @@ describe("confirmed resource effect sounds", () => {
     const old = event("play_event", [effect("gain_credits", 9)]);
     const next = {
       ...event("play_operation", [effect("draw_cards", 2)]),
-      eventId: "evt_3",
+      eventId: 4,
     };
     const events = [old, next];
     expect(
@@ -133,7 +133,7 @@ describe("confirmed resource effect sounds", () => {
       publicEventsAfter(events, next.eventId).flatMap(resourceEffectSounds),
     ).toEqual([]);
     expect(
-      publicEventsAfter(events, "evicted_event").flatMap(resourceEffectSounds),
+      publicEventsAfter(events, 1).flatMap(resourceEffectSounds),
     ).toEqual([]);
   });
 });
@@ -155,7 +155,7 @@ function event(
   resolvedEffects?: ResolvedGameEffect[],
 ): PublicGameEvent {
   return {
-    eventId: "evt_2",
+    eventId: 3,
     type,
     stateVersionBefore: 1,
     stateVersionAfter: 2,

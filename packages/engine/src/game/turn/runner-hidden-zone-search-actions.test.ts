@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardInstanceId,
@@ -15,7 +16,7 @@ function state(): GameState {
 
 function definition(title: string): CardDefinition {
   return {
-    id: title.toLowerCase().replaceAll(" ", "_"),
+    id: syntheticCardDefinitionId(title.toLowerCase().replaceAll(" ", "_")),
     title,
     type: "resource",
   } as CardDefinition;

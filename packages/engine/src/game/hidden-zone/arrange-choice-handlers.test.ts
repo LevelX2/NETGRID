@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -19,23 +20,27 @@ import {
   type HiddenZoneArrangeChoiceHandlerHost,
 } from "./arrange-choice-handlers";
 
-const planningId = "planning_consultants" as CardDefinitionId;
-const roninId = "ronin_around" as CardDefinitionId;
-const corpRdTopArrangeSourceId = "too_many_doors" as CardDefinitionId;
+const planningId = 504115485 as CardDefinitionId;
+const roninId = 19491241 as CardDefinitionId;
+const corpRdTopArrangeSourceId = 1661377163 as CardDefinitionId;
 const sourceCardId = "source" as CardInstanceId;
 
 function definition(
   id: number,
   type: CardDefinition["type"] = "program",
-  title = id,
+  title = String(id),
 ): CardDefinition {
-  return { id: id as CardDefinitionId, type, title } as CardDefinition;
+  return {
+    id: id as CardDefinitionId,
+    type,
+    title: String(title),
+  } as CardDefinition;
 }
 
-function instance(definitionId: number): CardInstance {
+function instance(cardId: CardInstanceId): CardInstance {
   return {
-    id: definitionId as CardInstanceId,
-    definitionId: definitionId as CardDefinitionId,
+    instanceId: cardId,
+    definitionId: syntheticCardDefinitionId(cardId),
     owner: "corp",
     controller: "corp",
     faceup: true,
@@ -112,7 +117,8 @@ function makeHost(
     legalAction: input.legalAction ?? action(),
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
     cards: {
-      definitionFor: (cardId) => definitions[cardId] ?? definition(cardId),
+      definitionFor: (cardId) =>
+        definitions[cardId] ?? definition(syntheticCardDefinitionId(cardId)),
       hiddenReplacementLongtailKind: (definitionId) =>
         input.hiddenKinds?.[definitionId],
       isHiddenZoneReorderAssetDefinition: (definitionId) =>
@@ -185,20 +191,20 @@ describe("hidden-zone arrange choice handlers", () => {
     const host = makeHost({
       runnerHeap: [first, top],
       definitions: {
-        [first]: definition("heap_1_def", "program", "Top Heap"),
-        [top]: definition("heap_2_def", "resource", "Second Heap"),
+        [first]: definition(3256675163, "program", "Top Heap"),
+        [top]: definition(1872895866, "resource", "Second Heap"),
       },
     });
 
     const result = moveTopTrashToGripForCardImplementation(host, {
-      sourceDefinitionId: "source_def" as CardDefinitionId,
+      sourceDefinitionId: 2523707740 as CardDefinitionId,
     });
 
     expect(host.state.runner.heap).toEqual([first]);
     expect(host.state.runner.grip).toEqual([top]);
     expect(result.publicPayload).toMatchObject({
       hiddenZoneAction: "p3_38_move_top_trash_to_grip",
-      returnedCardDefinitionId: "heap_2_def",
+      returnedCardDefinitionId: 1872895866,
       destinationZone: "grip",
     });
   });
@@ -302,12 +308,12 @@ describe("hidden-zone arrange choice handlers", () => {
     const host = makeHost({
       servers: [server],
       definitions: {
-        [source]: definition("fortress_def", "event", "Fortress"),
+        [source]: definition(1503590003, "event", "Fortress"),
       },
-      hiddenKinds: { fortress_def: "successful_run_fort_ice_reorder" },
+      hiddenKinds: { 1503590003: "successful_run_fort_ice_reorder" },
       instances: {
-        [ice1]: { ...instance("ice_1_def"), faceup: false, rezzed: false },
-        [ice2]: { ...instance("ice_2_def"), faceup: true, rezzed: true },
+        [ice1]: { ...instance(ice1), faceup: false, rezzed: false },
+        [ice2]: { ...instance(ice2), faceup: true, rezzed: true },
       },
     });
 
@@ -342,16 +348,16 @@ describe("hidden-zone arrange choice handlers", () => {
     const host = makeHost({
       servers: [server],
       definitions: {
-        [source]: definition("new_blood_def", "operation", "New Blood"),
+        [source]: definition(3977091494, "operation", "New Blood"),
       },
-      hiddenKinds: { new_blood_def: "conceal_and_reorder_installed_ice" },
+      hiddenKinds: { 3977091494: "conceal_and_reorder_installed_ice" },
       legalAction: {
         side: "corp",
         payload: { cardId: source },
       } as unknown as LegalAction,
       instances: {
-        [ice1]: { ...instance("ice_1_def"), faceup: true, rezzed: false },
-        [ice2]: { ...instance("ice_2_def"), faceup: true, rezzed: true },
+        [ice1]: { ...instance(ice1), faceup: true, rezzed: false },
+        [ice2]: { ...instance(ice2), faceup: true, rezzed: true },
       },
     });
 

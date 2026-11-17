@@ -1,3 +1,4 @@
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -331,8 +332,11 @@ export function handleRevealedStackProgramInstallCorpReviewChoice(
     throw new Error("Es ist keine Revealed-Stack-Korp-Review-Choice offen.");
   if (!selectedChoiceIds(host.playerAction.selectedChoices).includes("done"))
     throw new Error("Die Revealed-Stack-Korp-Review wurde nicht bestaetigt.");
-  const [, sourceCardId = "", sourceDefinitionId = "", topCardsRaw = ""] =
+  const [, sourceCardId = "", sourceDefinitionIdToken = "", topCardsRaw = ""] =
     choice.source.split(":");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    sourceDefinitionIdToken,
+  );
   if (
     !sourceCardId ||
     !state.runner.rig.programs.includes(sourceCardId as CardInstanceId) ||
@@ -437,8 +441,11 @@ export function handleLookTopStackShowInstallChoice(
     )
   )
     throw new Error("Es ist keine Stack-Show-Install-Choice offen.");
-  const [, sourceCardId = "", sourceDefinitionId = "", topCardsRaw = ""] =
+  const [, sourceCardId = "", sourceDefinitionIdToken = "", topCardsRaw = ""] =
     choice.source.split(":");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    sourceDefinitionIdToken,
+  );
   if (
     !sourceCardId ||
     !state.runner.rig.programs.includes(sourceCardId) ||
@@ -530,7 +537,7 @@ function handleTemporaryProgramInstallSourceChoice(
     throw new Error("Es ist keine Sneak-Preview-Quellenwahl offen.");
   const parts = choice.source.split(":");
   const sourceCardId = parts[1] as CardInstanceId | undefined;
-  const sourceDefinitionId = parts[2] as CardDefinitionId | undefined;
+  const sourceDefinitionId = parseCardDefinitionIdToken(parts[2]);
   if (!sourceCardId || !sourceDefinitionId)
     throw new Error(
       "Die temporaere Programminstallation ist nicht kanonisch gebunden.",

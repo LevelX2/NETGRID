@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import {
   applyAction,
   applyEffectCommands,
@@ -425,7 +426,7 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
           (subroutine) => subroutine.type === "end_the_run",
         ),
       ).toHaveLength(subroutineCount);
-      expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(state, "runner")))).not.toContain(
         DIGICONDA,
       );
       if (subroutineCount > 0) {
@@ -1062,7 +1063,7 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
       encounterWillEndRun: false,
     });
     expect(String(continueAction.payload?.encounterSubroutineIds)).toContain(
-      "relative_ice_outside_onr_proteus_026_hunting-pack.trace.1",
+      "relative_ice_outside_84.trace.1",
     );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -1082,7 +1083,7 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
       (action) => action.type === "continue_run",
     );
     expect(secondTraceAction.payload?.encounterSubroutineIds).toBe(
-      "relative_ice_outside_onr_proteus_026_hunting-pack.trace.2",
+      "relative_ice_outside_84.trace.2",
     );
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       hiddenPayloadMarkers,

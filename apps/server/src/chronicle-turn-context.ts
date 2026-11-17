@@ -1,11 +1,11 @@
-import type { PublicGameEvent, Side } from "@netgrid/shared";
+import type { MatchEventId, PublicGameEvent, Side } from "@netgrid/shared";
 
 export function chronicleTurnContextByEventId(
   events: readonly PublicGameEvent[],
-): Record<string, { turnNumber: number; turnSide: Side }> {
+): Record<MatchEventId, { turnNumber: number; turnSide: Side }> {
   const numbers = chronicleTurnNumberByEventId(events);
   const sides = chronicleTurnSideByEventId(events);
-  const result: Record<string, { turnNumber: number; turnSide: Side }> = {};
+  const result: Record<MatchEventId, { turnNumber: number; turnSide: Side }> = {};
   for (const event of events) {
     const turnNumber = numbers[event.eventId];
     const turnSide = sides[event.eventId];
@@ -18,15 +18,15 @@ export function chronicleTurnContextByEventId(
 
 export function chronicleTurnNumberForEvent(
   events: readonly PublicGameEvent[],
-  eventId: string,
+  eventId: MatchEventId,
 ): number | undefined {
   return chronicleTurnNumberByEventId(events)[eventId];
 }
 
 function chronicleTurnNumberByEventId(
   events: readonly PublicGameEvent[],
-): Record<string, number> {
-  const numbers: Record<string, number> = {};
+): Record<MatchEventId, number> {
+  const numbers: Record<MatchEventId, number> = {};
   let activeSide: Side = "corp";
   let activeTurnNumber = 1;
   let justEndedTurn: { side: Side; turnNumber: number } | null = null;
@@ -71,8 +71,8 @@ function chronicleTurnNumberByEventId(
 
 function chronicleTurnSideByEventId(
   events: readonly PublicGameEvent[],
-): Record<string, Side> {
-  const sides: Record<string, Side> = {};
+): Record<MatchEventId, Side> {
+  const sides: Record<MatchEventId, Side> = {};
   let activeSide: Side = "corp";
   let justEndedTurn: { side: Side } | null = null;
 

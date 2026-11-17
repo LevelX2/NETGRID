@@ -49,13 +49,13 @@ describe("corp install main actions", () => {
           baseCost: 1,
           additionalCost: 2,
           reduction: 1,
-          reductionSourceDefinitionIds: "reducer",
-          increaseSourceDefinitionIds: "increaser",
+          reductionSourceDefinitionIds: "1864145823",
+          increaseSourceDefinitionIds: "600872093",
           totalCost: 2,
         },
       ),
     ).toMatchObject({
-      actionId: "corp.install_card.corp_ice_test.hq.corp_ice_test.2.reducer",
+      actionId: "corp.install_card.corp_ice_test.hq.corp_ice_test.2.1864145823",
       side: "corp",
       type: "install_card",
       label: "ICE vor HQ installieren",
@@ -68,8 +68,8 @@ describe("corp install main actions", () => {
         iceInstallBaseCost: 1,
         iceInstallAdditionalCost: 2,
         iceInstallReduction: 1,
-        iceInstallReductionSourceDefinitionIds: "reducer",
-        iceInstallIncreaseSourceDefinitionIds: "increaser",
+        iceInstallReductionSourceDefinitionIds: "1864145823",
+        iceInstallIncreaseSourceDefinitionIds: "600872093",
         iceInstallTotalCost: 2,
       },
       visibility: "private_to_actor",
@@ -82,9 +82,7 @@ describe("corp install main actions", () => {
       setupMode: "completed",
     });
     const cardId = Object.values(state.cardInstances).find(
-      (instance) =>
-        instance.owner === "corp" &&
-        instance.definitionId === 449,
+      (instance) => instance.owner === "corp" && instance.definitionId === 449,
     )?.instanceId;
     if (!cardId) throw new Error("Expected Data Wall in the Corp deck");
 

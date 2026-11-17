@@ -1,4 +1,6 @@
+import { serializedDefinitionReferences } from "./test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
+import { cardSpecSetIdsForDefinitionId } from "@netgrid/cards/engine";
 import {
   applyAction,
   applyEffectCommands,
@@ -239,7 +241,7 @@ function playCorpOperationByDefinition(
   const cardId = addCorpCardToHqForTest(
     state,
     definitionId,
-    definitionId.replace(/[^a-z0-9]/gi, "_"),
+    String(definitionId),
   );
   keepOnlyCorpHqCard(state, cardId);
   return apply(
@@ -321,7 +323,7 @@ function playRunnerEventByDefinition(
   addRunnerCardToGripForTest(
     state,
     definitionId,
-    definitionId.replace(/[^a-z0-9]/gi, "_"),
+    String(definitionId),
   );
   return apply(
     state,
@@ -580,7 +582,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
     expect(legal[0]?.payload).not.toHaveProperty(
       "traceSuccessTargetDefinitionId",
     );
-    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(state, "corp")))).not.toContain(
       186,
     );
 
@@ -596,7 +598,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
         targetCardInstanceId: hiddenResourceId,
       },
     });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(state.eventLog.at(-1)?.publicPayload))).not.toContain(
       186,
     );
 
@@ -640,7 +642,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     addRunnerCardToGripForTest(
       state,
       definitionId,
-      definitionId.replace(/[^a-z0-9]/gi, "_"),
+      String(definitionId),
     );
     const action = mustAction(
       state,
@@ -1146,7 +1148,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     let state = corpActionStateForProteusPro007(seed);
     state.corp.credits = 30;
     state.runner.credits = 30;
-    addRunnerResourceToRigForTest(state, definitionId, definitionId);
+    addRunnerResourceToRigForTest(state, definitionId, String(definitionId));
     state.runnerTurnFlags = {
       ...(state.runnerTurnFlags ?? {
         stoleAgendaThisTurn: false,
@@ -1184,14 +1186,14 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       state = applyChoice(
         state,
         "runner",
-        definitionId.endsWith("back-door-to-rivals") ? "bid_1" : "bid_0",
+        definitionId === 188 ? "bid_1" : "bid_0",
       );
       state = applyChoice(state, "runner", "pass");
       expect(state.runner.tags).toBe(0);
       const expectedCredits =
         beforeBaseLinkCredits -
-        (definitionId.endsWith("runner-sensei") ? 2 : 0) -
-        (definitionId.endsWith("back-door-to-rivals") ? 1 : 0) +
+        (definitionId === 206 ? 2 : 0) -
+        (definitionId === 188 ? 1 : 0) +
         1;
       expect(state.runner.credits).toBe(expectedCredits);
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1219,7 +1221,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
         traceChoiceOptionIdForDefinition(state, definitionId, "trace_link_"),
       );
       state = applyChoice(state, "runner", "pass");
-      const postBidCost = definitionId.endsWith("back-door-to-rivals") ? 3 : 2;
+      const postBidCost = definitionId === 188 ? 3 : 2;
       expect(state.runner.tags).toBe(0);
       expect(state.runner.credits).toBe(
         beforeRunnerBidCredits - 2 - postBidCost + 1,
@@ -1257,7 +1259,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     const cardId = addRunnerCardToGripForTest(
       state,
       definitionId,
-      definitionId.replace(/[^a-z0-9]/gi, "_"),
+      String(definitionId),
     );
     const action = mustAction(
       state,
@@ -1994,9 +1996,11 @@ describe("MVP 0.1 engine foundation", () => {
     ].map((instanceId) => state.cardInstances[instanceId]!.definitionId);
 
     expect(deckCardIds.length).toBeGreaterThan(0);
-    expect(deckCardIds.every((cardId) => cardId.startsWith("onr_v1_"))).toBe(
-      true,
-    );
+    expect(
+      deckCardIds.every((cardId) =>
+        cardSpecSetIdsForDefinitionId(cardId)?.includes("originalset-v1"),
+      ),
+    ).toBe(true);
   });
 
   it("lets the Corp rez non-ICE root cards, but not score agendas, between Runner actions", () => {
@@ -2636,7 +2640,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       588,
       599,
     ];
-    const seenDefinitions = new Set<string>();
+    const seenDefinitions = new Set<number>();
 
     for (let index = 0; index < 80; index += 1) {
       let state = toRunnerTurn(
@@ -2687,7 +2691,9 @@ describe("MVP 0.1 runs, access and scoring", () => {
         cardDefinitionId: selectedDefinitionId,
         serverLabel: "HQ",
       });
-      seenDefinitions.add(String(selectedDefinitionId));
+      if (selectedDefinitionId === undefined)
+        throw new Error("The accessed card definition is missing.");
+      seenDefinitions.add(selectedDefinitionId);
 
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok).toBe(true);

@@ -1,5 +1,7 @@
 "use client";
 
+import type { MatchEventId } from "@netgrid/shared";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -37,7 +39,7 @@ type SpectatorProjection = {
     }>;
   };
   events: Array<{
-    eventId: string;
+    eventId: MatchEventId;
     type: string;
     stateVersionAfter: number;
     eventFamily: string;

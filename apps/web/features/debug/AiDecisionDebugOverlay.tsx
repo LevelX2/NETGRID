@@ -43,7 +43,7 @@ import {
   aiTraceScoreRows,
   aiTraceTitle,
   safeStringList,
-  type MaintenanceAiTraceDetail,
+  type AiDecisionDebugTrace,
   type MaintenanceAiTraceActionRow,
 } from "../../app/maintenance";
 import { copyTextToClipboard } from "../../lib/clipboard";
@@ -81,8 +81,8 @@ export function FloatingAiDecisionDebugOverlay({
   position: RunOverlayPositionPreference;
   status: AiDecisionDebugOverlayStatus;
   error: string;
-  trace: MaintenanceAiTraceDetail | null;
-  turnPlanTrace: MaintenanceAiTraceDetail | null;
+  trace: AiDecisionDebugTrace | null;
+  turnPlanTrace: AiDecisionDebugTrace | null;
   traceCount: number;
   onPosition(position: RunOverlayPositionPreference): void;
   onClose(): void;
@@ -289,8 +289,8 @@ function AiDecisionDebugOverlayBody({
 }: {
   status: AiDecisionDebugOverlayStatus;
   error: string;
-  trace: MaintenanceAiTraceDetail | null;
-  turnPlanTrace: MaintenanceAiTraceDetail | null;
+  trace: AiDecisionDebugTrace | null;
+  turnPlanTrace: AiDecisionDebugTrace | null;
 }) {
   if (status === "error") {
     if (turnPlanTrace) {
@@ -332,7 +332,7 @@ function AiDecisionDebugOverlayBody({
 }
 
 function aiDecisionTraceSelectedActionLabel(
-  trace: MaintenanceAiTraceDetail,
+  trace: AiDecisionDebugTrace,
 ): string {
   const action =
     trace.detail.selectedActionType ?? trace.selectedActionType ?? "KI-Aktion";
@@ -347,7 +347,7 @@ function aiDecisionTraceSelectedActionLabel(
 }
 
 function aiDecisionDebugWindowHeaderStatusLabel(
-  trace: MaintenanceAiTraceDetail,
+  trace: AiDecisionDebugTrace,
   mode: "trace" | "preview",
 ): string {
   const planFirstDecision = parseAiPlanFirstDecisionDebug(
@@ -374,8 +374,8 @@ function AiDecisionDebugTraceView({
   turnPlanTrace,
   mode = "trace",
 }: {
-  trace: MaintenanceAiTraceDetail;
-  turnPlanTrace: MaintenanceAiTraceDetail | null;
+  trace: AiDecisionDebugTrace;
+  turnPlanTrace: AiDecisionDebugTrace | null;
   mode?: "trace" | "preview";
 }) {
   const decision = parseAiPlanFirstDecisionDebug(
@@ -424,8 +424,8 @@ function AiDecisionDebugPlanFirstTraceView({
   mode,
   decision,
 }: {
-  trace: MaintenanceAiTraceDetail;
-  turnPlanTrace: MaintenanceAiTraceDetail | null;
+  trace: AiDecisionDebugTrace;
+  turnPlanTrace: AiDecisionDebugTrace | null;
   mode: "trace" | "preview";
   decision: AiPlanFirstDecisionDebug;
 }) {
@@ -1101,7 +1101,7 @@ function AiDecisionDebugPlanFirstTraceView({
 function AiDecisionDebugTurnPlanSnapshotView({
   trace,
 }: {
-  trace: MaintenanceAiTraceDetail;
+  trace: AiDecisionDebugTrace;
 }) {
   const decision = parseAiPlanFirstDecisionDebug(
     trace.detail.planFirstDecision,
@@ -1531,7 +1531,7 @@ function AiDecisionDebugLegacyTraceView({
   trace,
   mode = "trace",
 }: {
-  trace: MaintenanceAiTraceDetail;
+  trace: AiDecisionDebugTrace;
   mode?: "trace" | "preview";
 }) {
   const detail = trace.detail;
@@ -1692,7 +1692,7 @@ function AiDecisionDebugLegacyTraceView({
 }
 
 export function serializeAiDecisionDebugVisibleJsonExport(
-  trace: MaintenanceAiTraceDetail,
+  trace: AiDecisionDebugTrace,
   mode: "trace" | "preview",
   exportedAt: string,
 ): string {
@@ -1754,7 +1754,7 @@ const AI_DECISION_DEBUG_OVERLAY_META_LABELS = new Set([
 ]);
 
 function aiDecisionDebugOverlayMetaRows(
-  trace: MaintenanceAiTraceDetail,
+  trace: AiDecisionDebugTrace,
   mode: "trace" | "preview",
 ): Array<[string, string]> {
   const hiddenPreviewLabels = new Set(["Entscheidung", "Ausgeführt"]);

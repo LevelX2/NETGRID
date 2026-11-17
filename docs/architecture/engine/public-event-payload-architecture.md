@@ -83,6 +83,16 @@ gemeinsamen Vertrag typgeprüft werden.
 
 ## Sichtbarkeit und Determinismus
 
+`PublicGameEvent.eventId` ist eine positive Ganzzahl pro Partie. Die Engine
+vergibt `stateVersionAfter + 1`, beginnend mit `1` für `game_created`. Der
+Server vergibt für das Ereignis bei Zeitablauf die nächste Nummer. Die
+Versionsfelder dieses Ereignisses zeigen den letzten Engine-Zustand.
+
+Nach einem Undo werden die Ereignisse des verworfenen Spielverlaufs entfernt.
+Neue Aktionen können die freigewordenen Nummern belegen. Eine Undo-Anfrage
+bindet deshalb Match, MatchVersion und Ereignisnummer. Ein Replay prüft die
+Nummer jedes Engine-Ereignisses gegen dessen StateVersion.
+
 Ein innerhalb einer Karte oder Choice neu begonnener Run veröffentlicht einen
 öffentlichen `ResolvedGameEffect` vom Typ `start_run`: `runId`, angegriffene
 `serverId` und tatsächliche `accessServerId` stammen aus dem aufgelösten

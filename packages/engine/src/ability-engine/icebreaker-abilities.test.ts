@@ -18,7 +18,7 @@ import {
   type RuntimeIcebreakerAbility,
 } from "./icebreaker-abilities";
 
-const definitionId = "test_breaker" as CardDefinitionId;
+const definitionId = 3542249158 as CardDefinitionId;
 const breakerId = "breaker_instance" as CardInstanceId;
 
 function canonicalPump(key: string, amount: number): RuntimeIcebreakerAbility {
@@ -80,9 +80,9 @@ describe("icebreaker ability identity binding", () => {
     [
       {
         kind: "ice_definition_any_of",
-        definitionIds: ["ice_a", "ice_b"] as CardDefinitionId[],
+        definitionIds: [3214874132, 3265206989] as CardDefinitionId[],
       },
-      { iceDefinitionIds: ["ice_a", "ice_b"] },
+      { iceDefinitionIds: [3214874132, 3265206989] },
     ],
     [
       { kind: "subroutine_tag", tag: "damage" },

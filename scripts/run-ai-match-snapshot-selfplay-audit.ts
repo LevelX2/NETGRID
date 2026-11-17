@@ -3,7 +3,12 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { DeckDefinition, DeckPublicMetadata, Side } from "@netgrid/shared";
+import type {
+  CardDefinitionId,
+  DeckDefinition,
+  DeckPublicMetadata,
+  Side,
+} from "@netgrid/shared";
 import {
   buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries,
   detectAiSelfplaySuspiciousDecisions,
@@ -22,7 +27,7 @@ type StoredDeckSnapshot = {
   formatProfileId: string;
   formatProfileVersion?: string;
   deckHash: string;
-  cards: Array<{ cardId: string; quantity: number }>;
+  cards: Array<{ cardId: CardDefinitionId; quantity: number }>;
   publicMetadata: DeckPublicMetadata;
 };
 

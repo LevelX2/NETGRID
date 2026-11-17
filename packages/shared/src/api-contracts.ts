@@ -1,4 +1,5 @@
 import type {
+  MatchEventId,
   PlayerView,
   PublicGameEvent,
   Side,
@@ -53,7 +54,7 @@ export type ApiPublicMatchListEntry = {
 
 export type ApiReplayAnalysisFrame = {
   index: number;
-  sourceEventId?: string;
+  sourceEventId?: MatchEventId;
   stateVersion: number;
   stateHash: string;
   stateHashVerified: boolean;
@@ -366,7 +367,7 @@ export type ApiLifecycleResultSummary = {
 export type ApiPendingUndoRequest = {
   undoRequestId: string;
   requestedBy: Side;
-  targetEventId: string;
+  targetEventId: MatchEventId;
   reason?: string;
 };
 

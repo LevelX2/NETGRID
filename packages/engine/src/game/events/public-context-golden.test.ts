@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   type CardDefinition,
@@ -743,7 +744,8 @@ function goldenDeps(
 }
 
 function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
-  const definitionId = state.cardInstances[id]?.definitionId ?? id;
+  const definitionId =
+    state.cardInstances[id]?.definitionId ?? syntheticCardDefinitionId(id);
   const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (!definition) throw new Error(`Missing test definition: ${definitionId}`);
   return definition;

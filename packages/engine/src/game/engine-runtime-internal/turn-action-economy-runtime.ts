@@ -560,5 +560,5 @@ export function resolveForcedActionNotPossible(
 }
 
 function publicCardTitle(definitionId: CardDefinitionId): string {
-  return CARD_DEFINITIONS_BY_ID[definitionId]?.title ?? definitionId;
+  return CARD_DEFINITIONS_BY_ID[definitionId]?.title ?? String(definitionId);
 }

@@ -190,7 +190,7 @@ describe("V1.8.0 Mechanikpaket G", () => {
     expect(ONR_V1_8_0_FINAL_CARD_IDS).toHaveLength(6);
     for (const definitionId of ONR_V1_8_0_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(definition?.mechanics.join(" ")).not.toMatch(
@@ -635,7 +635,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
     expect(ONR_V1_8_1_FINAL_CARD_IDS).toHaveLength(12);
     for (const definitionId of ONR_V1_8_1_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(definition?.mechanics.join(" ")).not.toMatch(
@@ -1257,7 +1257,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
     expect(rdInstall.payload?.iceInstallAdditionalCost).toBe(3);
     expect(rdInstall.payload?.iceInstallReduction).toBe(0);
     expect(rdInstall.payload?.iceInstallIncreaseSourceDefinitionIds).toBe(
-      385,
+      String(385),
     );
   });
 
@@ -1313,7 +1313,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
       iceInstallAdditionalCost: 2,
       iceInstallReduction: 0,
       iceInstallIncreaseSourceDefinitionIds:
-        385,
+        String(385),
       iceInstallTotalCost: 2,
     });
     expect(

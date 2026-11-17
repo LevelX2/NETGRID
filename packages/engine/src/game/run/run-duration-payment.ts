@@ -1,6 +1,7 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   type CardDefinition,
+  type CardDefinitionId,
   type CardInstance,
   type CardInstanceId,
   type CounterType,
@@ -156,7 +157,7 @@ export function spendRestrictedHostedCredits(
 } {
   let remaining = Math.max(0, Math.floor(amount));
   let spent = 0;
-  const sourceDefinitionIds = new Set<string>();
+  const sourceDefinitionIds = new Set<CardDefinitionId>();
   for (const cardId of restrictedHostedCreditSourceIds(state, use, options)) {
     if (remaining <= 0) break;
     const cardSpent = Math.min(cardCounter(state, cardId, "bit"), remaining);
@@ -166,7 +167,12 @@ export function spendRestrictedHostedCredits(
     spent += cardSpent;
     sourceDefinitionIds.add(definitionFor(state, cardId).id);
   }
-  return { spent, sourceDefinitionIds: [...sourceDefinitionIds].sort() };
+  return {
+    spent,
+    sourceDefinitionIds: [...sourceDefinitionIds].sort(
+      (left, right) => left - right,
+    ),
+  };
 }
 
 export function runnerRunRecurringCreditSourceIds(

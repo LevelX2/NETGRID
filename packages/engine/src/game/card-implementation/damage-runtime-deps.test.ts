@@ -13,7 +13,7 @@ import {
 } from "./damage-runtime-deps";
 
 const sourceCardId = "source" as CardInstanceId;
-const sourceDefinitionId = "source_def" as CardDefinitionId;
+const sourceDefinitionId = 2523707740 as CardDefinitionId;
 
 function state(): GameState {
   return {
@@ -165,10 +165,10 @@ describe("damage card implementation runtime deps", () => {
       "resolve",
     ]);
     expect(calls[0]?.value).toEqual({
-      damageId: "damage.7.source_def",
+      damageId: "damage.7.2523707740",
       damageType: "net",
       amount: 2,
-      source: "operation:source_def",
+      source: "operation:2523707740",
     });
     expect(result).toEqual({
       resolved: true,
@@ -233,10 +233,10 @@ describe("damage card implementation runtime deps", () => {
       {
         kind: "unpreventable",
         value: {
-          damageId: "damage.7.source_def.unpreventable",
+          damageId: "damage.7.2523707740.unpreventable",
           damageType: "core",
           amount: 1,
-          source: "unpreventable:source_def",
+          source: "unpreventable:2523707740",
         },
       },
     ]);

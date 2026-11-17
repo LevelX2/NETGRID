@@ -137,7 +137,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
     eventRecord(
       matchId,
       {
-        eventId: "evt_hidden_access",
+        eventId: 2,
         type: "access_card",
         stateVersionBefore: 1,
         stateVersionAfter: 2,
@@ -170,7 +170,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
     eventRecord(
       matchId,
       {
-        eventId: "evt_future_public_marker",
+        eventId: 3,
         type: "future_public_marker",
         stateVersionBefore: 2,
         stateVersionAfter: 3,
@@ -271,7 +271,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
     pendingUndo: {
       undoRequestId: "undo_secret",
       requestedBy: "runner",
-      targetEventId: "evt_hidden_access",
+      targetEventId: 2,
       reason: "contains Simple Agenda",
     },
   };

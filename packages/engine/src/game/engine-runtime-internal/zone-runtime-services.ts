@@ -609,8 +609,8 @@ export function createZoneRuntimeServices(
     baseCost: number;
     additionalCost: number;
     reduction: number;
-    reductionSourceDefinitionIds?: number;
-    increaseSourceDefinitionIds?: number;
+    reductionSourceDefinitionIds?: string;
+    increaseSourceDefinitionIds?: string;
     totalCost: number;
   } {
     const additionalCost = corpIceInstallAdditionalCost(state, server.id);

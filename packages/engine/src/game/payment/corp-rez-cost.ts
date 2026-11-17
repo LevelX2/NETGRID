@@ -363,12 +363,20 @@ function projectExactCorpRezCost(
       targetServerId,
       projectedServerId,
     );
-  const reductionSourceDefinitionIds = quote.modifiers
-    .filter((modifier) => modifier.kind === "reduction")
-    .map((modifier) => modifier.sourceDefinitionId);
-  const increaseSourceDefinitionIds = quote.modifiers
-    .filter((modifier) => modifier.kind === "increase")
-    .map((modifier) => modifier.sourceDefinitionId);
+  const reductionSourceDefinitionIds = [
+    ...new Set(
+      quote.modifiers
+        .filter((modifier) => modifier.kind === "reduction")
+        .map((modifier) => modifier.sourceDefinitionId),
+    ),
+  ].sort((left, right) => left - right);
+  const increaseSourceDefinitionIds = [
+    ...new Set(
+      quote.modifiers
+        .filter((modifier) => modifier.kind === "increase")
+        .map((modifier) => modifier.sourceDefinitionId),
+    ),
+  ].sort((left, right) => left - right);
   const commonCompleteFields = {
     cardId,
     projectedServerId,
@@ -537,7 +545,8 @@ export function projectInstalledCorpSequenceRezPayment(
     quote.modifiers.some(
       (modifier) =>
         !isExactNonNegativeInteger(modifier.amount) ||
-        modifier.sourceDefinitionId.trim().length === 0,
+        !Number.isSafeInteger(modifier.sourceDefinitionId) ||
+        modifier.sourceDefinitionId <= 0,
     )
   )
     return { complete: false };
@@ -569,14 +578,14 @@ export function projectInstalledCorpSequenceRezPayment(
         .filter((modifier) => modifier.kind === "reduction")
         .map((modifier) => modifier.sourceDefinitionId),
     ),
-  ].sort();
+  ].sort((left, right) => left - right);
   const increaseSourceDefinitionIds = [
     ...new Set(
       quote.modifiers
         .filter((modifier) => modifier.kind === "increase")
         .map((modifier) => modifier.sourceDefinitionId),
     ),
-  ].sort();
+  ].sort((left, right) => left - right);
   return {
     complete: true,
     cardType: definition.type as "ice" | "asset" | "upgrade",
@@ -1310,7 +1319,7 @@ function corpRezCostModifierQuoteForMatch(
   return {
     sourceCardInstanceId,
     sourceDefinitionId,
-    label: sourceDefinition?.title ?? sourceDefinitionId,
+    label: sourceDefinition?.title ?? String(sourceDefinitionId),
     amount: modifier.amount,
     kind: "reduction",
   };
@@ -1324,7 +1333,7 @@ function corpSelfRezCostModifierQuoteForMatch(
   return {
     sourceCardInstanceId,
     sourceDefinitionId,
-    label: sourceDefinition?.title ?? sourceDefinitionId,
+    label: sourceDefinition?.title ?? String(sourceDefinitionId),
     amount: modifier.amount,
     kind: "reduction",
   };
@@ -1338,7 +1347,7 @@ function corpInstallCostModifierQuoteForMatch(
   return {
     sourceCardInstanceId,
     sourceDefinitionId,
-    label: sourceDefinition?.title ?? sourceDefinitionId,
+    label: sourceDefinition?.title ?? String(sourceDefinitionId),
     amount: modifier.amount,
     kind: modifier.operation === "increase" ? "increase" : "reduction",
   };
@@ -1488,7 +1497,8 @@ export function quoteCorpRezCost(
       sourceCardInstanceId: discountedRezSourceCardId,
       sourceDefinitionId,
       label:
-        CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.title ?? sourceDefinitionId,
+        CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.title ??
+        String(sourceDefinitionId),
       amount: regularFinalCredits - finalCredits,
       kind: "reduction",
     });
@@ -1499,7 +1509,7 @@ export function quoteCorpRezCost(
     publicPayload.rezCostPaid = finalCredits;
   }
   const runRezSurcharge = currentRunRezSurcharge(state, baseCredits);
-  if (runRezSurcharge.amount > 0) {
+  if (runRezSurcharge && runRezSurcharge.amount > 0) {
     finalCredits += runRezSurcharge.amount;
     publicPayload.corpRezCostSurchargeAmount = runRezSurcharge.amount;
     publicPayload.corpRezCostSurchargeSourceDefinitionId =
@@ -1509,7 +1519,7 @@ export function quoteCorpRezCost(
       sourceDefinitionId: runRezSurcharge.sourceDefinitionId,
       label:
         CARD_DEFINITIONS_BY_ID[runRezSurcharge.sourceDefinitionId]?.title ??
-        runRezSurcharge.sourceDefinitionId,
+        String(runRezSurcharge.sourceDefinitionId),
       amount: runRezSurcharge.amount,
       kind: "increase",
     });
@@ -1593,13 +1603,14 @@ export function quoteCorpFortRunRezSupport(
     ? state.corp.servers.find((candidate) => candidate.id === serverId)
     : undefined;
   const run = state.run;
+  if (sourceDefinitionId === undefined) return undefined;
   const fortRunKind = definitionHasFortRunWindowKind(
-    sourceDefinitionId ?? "card_implementation",
+    sourceDefinitionId,
     CORP_FORT_RUN_REZ_SUPPORT_KIND,
   )
     ? CORP_FORT_RUN_REZ_SUPPORT_KIND
     : definitionHasFortRunWindowKind(
-          sourceDefinitionId ?? "card_implementation",
+          sourceDefinitionId,
           CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND,
         )
       ? CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND
@@ -1719,10 +1730,9 @@ export function corpFortRunRezSupportQuotePayload(
 function currentRunRezSurcharge(
   state: GameState,
   printedRezCost: number,
-): { amount: number; sourceDefinitionId: CardDefinitionId } {
+): { amount: number; sourceDefinitionId: CardDefinitionId } | undefined {
   const surcharge = state.run?.corpRezCostSurcharge;
-  if (surcharge?.kind !== "matching_printed_rez_cost")
-    return { amount: 0, sourceDefinitionId: "card_implementation" };
+  if (surcharge?.kind !== "matching_printed_rez_cost") return undefined;
   return {
     amount: Math.max(0, Math.floor(printedRezCost)),
     sourceDefinitionId: surcharge.sourceDefinitionId,

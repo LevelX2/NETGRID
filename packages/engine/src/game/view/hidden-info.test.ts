@@ -111,13 +111,13 @@ describe("HiddenInfo special zone projection", () => {
 });
 
 describe("Proteus Hidden-Resource Foundation Harness", () => {
-  const hiddenResourceDefinitionId = "test_hidden_runner_resource_harness";
+  const hiddenResourceDefinitionId = 1867481;
   const hiddenResourceTitle = "Hidden Resource Harness";
   const hiddenActivationDefinitionId = 373;
   const hiddenActivationTitle = "Fall Guy";
   const hiddenActivatedAbilityDefinitionId = 370;
   const hiddenActivatedAbilityTitle = "Danshi’s Second ID";
-  const hiddenOriginalSubtypesByDefinitionId = new Map<string, string[]>();
+  const hiddenOriginalSubtypesByDefinitionId = new Map<number, string[]>();
 
   afterEach(() => {
     delete TEST_CARD_DEFINITIONS_BY_ID[hiddenResourceDefinitionId];
@@ -390,10 +390,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
         corpDeck: {
           ...DEMO_DECKS.demo_corp_008,
           id: "hidden_resource_activation_corp",
-          cards: [
-            { id: 518, quantity: 1 },
-            ...DEMO_DECKS.demo_corp_008.cards,
-          ],
+          cards: [{ id: 518, quantity: 1 }, ...DEMO_DECKS.demo_corp_008.cards],
         },
         agendaPointsToWin: 7,
       }),
@@ -633,7 +630,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
     expect(
       Object.values(TEST_CARD_DEFINITIONS_BY_ID).filter(
         (card) =>
-          card.id.startsWith("onr_proteus_") &&
+          card.id !== hiddenResourceDefinitionId &&
           card.mechanics.includes("hidden_runner_resource_foundation"),
       ),
     ).toHaveLength(0);

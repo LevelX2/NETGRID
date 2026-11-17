@@ -70,7 +70,7 @@ function makeState(
   const rootDefinitionId = options.rootDefinitionId ?? 606;
   const runnerProgramDefinitionId = options.runnerProgramDefinitionId;
   const cardInstances: Record<CardInstanceId, CardInstance> = {
-    [iceId]: instance(iceId, options.iceDefinitionId ?? "simple_ice", {
+    [iceId]: instance(iceId, options.iceDefinitionId ?? 2394377751, {
       rezzed: options.iceRezzed ?? true,
     }),
     [rootId]: instance(rootId, rootDefinitionId, {
@@ -145,16 +145,13 @@ function makeState(
 
 function definitionsFor(state: GameState): Record<string, CardDefinition> {
   const definitions: Record<string, CardDefinition> = {
-    simple_ice: definition("simple_ice"),
-    simple_sentry: definition("simple_sentry", { subtypes: ["sentry"] }),
+    2394377751: definition(2394377751),
+    3585206199: definition(3585206199, { subtypes: ["sentry"] }),
     simple_upgrade: definition(606, {
       title: "Simple Upgrade",
       type: "upgrade",
     }),
-    472: definition(
-      472,
-      { title: "Pocket Virtual Reality" },
-    ),
+    472: definition(472, { title: "Pocket Virtual Reality" }),
     onr_v1_065_smarteye: definition(277, {
       title: "Smarteye",
       side: "runner",
@@ -245,12 +242,11 @@ function runnerAction(
 
 describe("encounter entry", () => {
   it("initializes encounter state for the approached ICE", () => {
-    const state = makeState({ iceDefinitionId: "simple_ice" });
+    const state = makeState({ iceDefinitionId: 2394377751 });
     state.run!.nextEncounterNoBreakSubroutines = true;
     state.run!.nextEncounterJackOutLock = true;
     state.run!.nextEncounterFatalDamage = 2;
-    state.run!.nextEncounterFatalDamageSourceDefinitionId =
-      "fatal_source" as never;
+    state.run!.nextEncounterFatalDamageSourceDefinitionId = 2126181695;
     const { host } = hostFor(state);
 
     const result = beginEncounter(host, "ice_1" as CardInstanceId);
@@ -259,7 +255,7 @@ describe("encounter entry", () => {
       handled: true,
       encounterStarted: true,
       iceId: "ice_1",
-      sourceDefinitionId: "simple_ice",
+      sourceDefinitionId: 2394377751,
     });
     expect(state.run).toMatchObject({
       phase: "encounter_ice",
@@ -271,7 +267,7 @@ describe("encounter entry", () => {
       jackOutLockedUntilEncounterEnds: true,
       fatalDamageActiveForEncounter: true,
       fatalDamageAmountForEncounter: 2,
-      fatalDamageSourceDefinitionId: "fatal_source",
+      fatalDamageSourceDefinitionId: 2126181695,
       nextEncounterFatalDamage: 0,
     });
     expect(state.timingPoint).toBe("run.encounter_ice");
@@ -279,7 +275,7 @@ describe("encounter entry", () => {
   });
 
   it("consumes Social Engineering only after entering the chosen ICE encounter", () => {
-    const state = makeState({ iceDefinitionId: "simple_ice" });
+    const state = makeState({ iceDefinitionId: 2394377751 });
     state.run!.secretSpendGuessRunAutoPassIceId = "ice_1" as CardInstanceId;
     const { host } = hostFor(state);
     const firstAction = runnerAction(state);
@@ -299,7 +295,7 @@ describe("encounter entry", () => {
     expect(firstAction.payload).toMatchObject({
       autoPassChosenIce: true,
       secretSpendGuessRunAutoPassedIce: true,
-      targetCardDefinitionId: "simple_ice",
+      targetCardDefinitionId: 2394377751,
     });
 
     state.run!.phase = "approach_ice";
@@ -320,7 +316,7 @@ describe("encounter entry", () => {
   });
 
   it("attaches a paid run-wide encounter tax and its public ICE target to the entry action", () => {
-    const state = makeState({ iceDefinitionId: "simple_ice" });
+    const state = makeState({ iceDefinitionId: 2394377751 });
     state.run!.encounterTaxForFutureIce = 2;
     state.run!.encounterTaxSourceDefinitionId = "tax_source" as never;
     const { host, calls } = hostFor(state);
@@ -331,20 +327,20 @@ describe("encounter entry", () => {
     expect(result).toMatchObject({
       handled: true,
       encounterStarted: true,
-      sourceDefinitionId: "simple_ice",
+      sourceDefinitionId: 2394377751,
     });
     expect(state.runner.credits).toBe(3);
     expect(legalAction.payload).toMatchObject({
       encounterTaxForFutureIce: 2,
       encounterTaxPaid: 2,
       encounterTaxSource: "tax_source",
-      targetIceDefinitionId: "simple_ice",
+      targetIceDefinitionId: 2394377751,
     });
     expect(calls.finish).toEqual([]);
   });
 
   it("binds pending next-sentry free breaks only to the next encountered ICE", () => {
-    const sentryState = makeState({ iceDefinitionId: "simple_sentry" });
+    const sentryState = makeState({ iceDefinitionId: 3585206199 });
     sentryState.run!.breakerState = {
       strengthModifiersByBreakerInstanceId: {},
       brokenSubroutineCountByBreakerInstanceId: {},
@@ -364,7 +360,7 @@ describe("encounter entry", () => {
       sentryState.run?.breakerState?.pendingFreeBreaks[0]?.targetIceId,
     ).toBe("ice_1");
 
-    const nonSentryState = makeState({ iceDefinitionId: "simple_ice" });
+    const nonSentryState = makeState({ iceDefinitionId: 2394377751 });
     nonSentryState.run!.breakerState = {
       strengthModifiersByBreakerInstanceId: {},
       brokenSubroutineCountByBreakerInstanceId: {},
@@ -382,7 +378,7 @@ describe("encounter entry", () => {
     beginEncounter(hostFor(nonSentryState).host, "ice_1" as CardInstanceId);
     expect(nonSentryState.run?.breakerState?.pendingFreeBreaks).toEqual([]);
 
-    const laterSentryState = makeState({ iceDefinitionId: "simple_sentry" });
+    const laterSentryState = makeState({ iceDefinitionId: 3585206199 });
     laterSentryState.run!.breakerState = {
       strengthModifiersByBreakerInstanceId: {},
       brokenSubroutineCountByBreakerInstanceId: {},
@@ -424,8 +420,7 @@ describe("encounter entry", () => {
     });
     expect(legalAction.payload).toMatchObject({
       temporaryTraceCredits: 4,
-      temporaryTraceCreditsSourceDefinitionId:
-        472,
+      temporaryTraceCreditsSourceDefinitionId: 472,
     });
     expect(calls.finish).toEqual([]);
   });
@@ -477,8 +472,8 @@ describe("encounter entry", () => {
       hiddenZoneBarrier: true,
       hiddenZoneAction: "approach_ice_expose",
       publicRevealKind: "expose",
-      publicRevealDefinitionId: "simple_ice",
-      exposedCardDefinitionId: "simple_ice",
+      publicRevealDefinitionId: 2394377751,
+      exposedCardDefinitionId: 2394377751,
     });
     expect(JSON.stringify(actions[0]!.payload)).not.toMatch(
       /"cardInstances"|"hq"|"rd"|"grip"/,

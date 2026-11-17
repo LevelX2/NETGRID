@@ -1,10 +1,15 @@
 "use client";
 
-import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
+import {
+  isCardDefinitionId,
+  type CardDefinitionId,
+  type MatchEventId,
+  type PublicGameEvent,
+  type Side,
+} from "@netgrid/shared";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "use-intl/react";
-import type { PublicGameEvent, Side } from "@netgrid/shared";
 
 import {
   chronicleAccessOutcomePlan,
@@ -214,7 +219,7 @@ export function chronicleContextByEventId(
     cardPresentationsById?: PublicCardPresentationsById;
     translate?: ChronicleTranslate;
   } = {},
-): Record<string, Omit<ChronicleContext, "side">> {
+): Record<MatchEventId, Omit<ChronicleContext, "side">> {
   const turnNumberByEventId = chronicleTurnNumberByEventId(events);
   const turnSideByEventId = chronicleTurnSideByEventId(events);
   const projectionPlan = chronicleEventProjectionPlan(
@@ -476,9 +481,9 @@ function chronicleDeduplicatedGroupLabel(label: string): boolean {
 function chronicleEntriesWithRunGroups(
   events: PublicGameEvent[],
   side: Side,
-  contextByEventId: Record<string, Omit<ChronicleContext, "side">>,
+  contextByEventId: Record<MatchEventId, Omit<ChronicleContext, "side">>,
   cardDetailsById: Record<string, CatalogCardDetail>,
-  projectionSuppressedEventIds: ReadonlySet<string>,
+  projectionSuppressedEventIds: ReadonlySet<MatchEventId>,
   accessOutcomePlan: ReturnType<typeof chronicleAccessOutcomePlan>,
   translate: ChronicleTranslate,
 ): Array<{

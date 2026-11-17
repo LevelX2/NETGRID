@@ -32,7 +32,7 @@ const RESOURCE_ID = "resource_1" as CardInstanceId;
 const ASSET_ID = "asset_1" as CardInstanceId;
 const AGENDA_ID = "agenda_1" as CardInstanceId;
 const ICE_ID = "ice_1" as CardInstanceId;
-const UNKNOWN_DEF_ID = "missing_definition" as CardDefinitionId;
+const UNKNOWN_DEF_ID = 358042617 as CardDefinitionId;
 
 function definitionIdFor(type: CardType): CardDefinitionId {
   const definition = Object.values(CARD_DEFINITIONS_BY_ID).find(
@@ -198,7 +198,7 @@ describe("card-server-lookup", () => {
     );
 
     expect(() => definitionFor(current, "broken" as CardInstanceId)).toThrow(
-      "Unbekannte Karte: missing_definition",
+      "Unbekannte Karte: 358042617",
     );
     expect(() => mustServer(current, "missing")).toThrow(
       "Server fehlt: missing",

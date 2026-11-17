@@ -3,7 +3,7 @@ import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import type { VisibleCard } from "@netgrid/shared";
 import { visibleProgramHostInstallVariants } from "./visible-program-host-install";
 
-function card(id: string, instanceId = id): VisibleCard {
+function card(id: number, instanceId = String(id)): VisibleCard {
   const definition = CARD_DEFINITIONS_BY_ID[id]!;
   return {
     ...definition,
@@ -82,10 +82,9 @@ it.each(["program", "hardware", undefined] as const)(
       known: false,
       ...(type ? { type } : {}),
     };
-    expect(
-      visibleProgramHostInstallVariants(card(228), [
-        unknown,
-      ]),
-    ).toEqual({ complete: false, reason: "unknown_public_host" });
+    expect(visibleProgramHostInstallVariants(card(228), [unknown])).toEqual({
+      complete: false,
+      reason: "unknown_public_host",
+    });
   },
 );

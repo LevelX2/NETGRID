@@ -57,11 +57,7 @@ describe("game replay facade", () => {
           return {
             ok: true,
             state,
-            event: replayEvent(
-              `arch_58_host_result_${calls.length}`,
-              action,
-              state,
-            ),
+            event: replayEvent(action, state),
             publicEvents: [],
             stateHash: hashState(state),
           };
@@ -70,8 +66,8 @@ describe("game replay facade", () => {
     };
 
     const replay = buildReplayEvents(host, initial, [
-      replayEvent("arch_58_event_1", action1, state1),
-      replayEvent("arch_58_event_2", action2, state2),
+      replayEvent(action1, state1),
+      replayEvent(action2, state2),
     ]);
 
     expect(replay.ok).toBe(true);
@@ -85,7 +81,7 @@ describe("game replay facade", () => {
       setupMode: "completed",
     });
     const event: GameEvent = {
-      eventId: "arch_58_invalid_event",
+      eventId: 2,
       type: "test_invalid_replay_payload",
       stateVersionBefore: 0,
       stateVersionAfter: 1,
@@ -98,8 +94,28 @@ describe("game replay facade", () => {
 
     expect(replay.ok).toBe(false);
     expect(replay.errors).toEqual([
-      "Event arch_58_invalid_event has no replayable action.",
+      "Event 2 has no replayable action.",
     ]);
+  });
+
+  it("rejects events whose ID does not match the state version", () => {
+    const initial = createGame({
+      seed: "replay-invalid-match-event-id",
+      setupMode: "completed",
+    });
+    const event = replayEvent(
+      replayAction(initial, "corp", "unused"),
+      nextReplayState(initial, 1),
+    );
+    for (const invalidId of ["evt_1", 0, 3]) {
+      const replay = replayGameEvents(initial, [
+        { ...event, eventId: invalidId } as GameEvent,
+      ]);
+      expect(replay.ok).toBe(false);
+      expect(replay.errors).toEqual([
+        "Invalid match event ID at state version 1.",
+      ]);
+    }
   });
 
   it("never falls back to direct action replay for an invalid randomized command", () => {
@@ -108,7 +124,7 @@ describe("game replay facade", () => {
       setupMode: "completed",
     });
     const event: GameEvent = {
-      eventId: "arch_58_invalid_randomized_event",
+      eventId: 2,
       type: "test_invalid_randomized_replay_payload",
       stateVersionBefore: 0,
       stateVersionAfter: 1,
@@ -132,7 +148,7 @@ describe("game replay facade", () => {
 
     expect(replay.ok).toBe(false);
     expect(replay.errors).toEqual([
-      "Event arch_58_invalid_randomized_event has no replayable action.",
+      "Event 2 has no replayable action.",
     ]);
   });
 
@@ -142,13 +158,13 @@ describe("game replay facade", () => {
       setupMode: "completed",
     });
     const action = replayAction(initial, "corp", "arch_58_unknown_action");
-    const event = replayEvent("arch_58_failed_action", action, initial);
+    const event = replayEvent(action, nextReplayState(initial, 1));
 
     const replay = replayGameEvents(initial, [event]);
 
     expect(replay.ok).toBe(false);
     expect(replay.errors).toEqual([
-      "Replay failed at arch_58_failed_action: ERR_UNKNOWN_ACTION",
+      "Replay failed at 2: ERR_UNKNOWN_ACTION",
     ]);
   });
 
@@ -159,7 +175,7 @@ describe("game replay facade", () => {
     });
     const action = replayAction(initial, "corp", "arch_58_action_1");
     const event = {
-      ...replayEvent("arch_58_hidden_payload", action, initial),
+      ...replayEvent(action, nextReplayState(initial, 1)),
       publicPayload: { actor: "corp", hqCardIds: "secret_card" },
     } as GameEvent;
 
@@ -191,12 +207,11 @@ function nextReplayState(state: GameState, version: number): GameState {
 }
 
 function replayEvent(
-  eventId: string,
   action: PlayerAction,
   stateAfter: GameState,
 ): GameEvent {
   return {
-    eventId,
+    eventId: stateAfter.stateVersion + 1,
     type: "test_replay_action",
     stateVersionBefore: Math.max(0, stateAfter.stateVersion - 1),
     stateVersionAfter: stateAfter.stateVersion,

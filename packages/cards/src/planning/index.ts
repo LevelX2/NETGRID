@@ -26,6 +26,7 @@ export type {
   PlanningRegistryVersionContext,
 };
 export { assertCardRegistryPlanningContext, assertCardRegistryRulesContext };
+export { canonicalSerialize } from "../serializable";
 export type { PlanningCardView } from "../projections";
 export type {
   CardPlanningAnnotations,

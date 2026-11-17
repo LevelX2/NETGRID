@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -188,7 +189,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(ONR_V1_2_3_FINAL_CARD_IDS).toHaveLength(11);
     for (const definitionId of ONR_V1_2_3_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(definition?.mechanics.join(" ")).not.toMatch(
@@ -2072,7 +2073,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         autoPassChosenIce: true,
       }),
     });
-    expect(JSON.stringify(wrong.eventLog.at(-1)?.publicPayload)).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(wrong.eventLog.at(-1)?.publicPayload))).not.toContain(
       589,
     );
     wrong = apply(

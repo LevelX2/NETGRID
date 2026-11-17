@@ -21,7 +21,7 @@ import type { ScoredAgendaFlowHost } from "./scored-agenda/scored-agenda-flow-ho
 function definition(
   id: number,
   type: CardDefinition["type"],
-  title = id,
+  title = String(id),
   subtypes: string[] = [],
 ): CardDefinition {
   return {
@@ -80,21 +80,15 @@ type MakeHostInput = {
 
 function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
   const definitions: Record<string, CardDefinition> = {
-    agenda_1: definition("agenda_1_def", "agenda", "Agenda"),
-    babylon: definition("project_babylon", "agenda", "Project Babylon"),
-    boon: definition("corporate_boon", "agenda", "Corporate Boon"),
-    code_agenda: definition("encryption_breakthrough", "agenda", "Encryption"),
-    ice_transmutation: definition(
-      "ice_transmutation",
-      "agenda",
-      "Transmutation",
-    ),
-    code_gate_1: definition("code_gate_1_def", "ice", "Code Gate 1", [
-      "code_gate",
-    ]),
-    wall_1: definition("wall_1_def", "ice", "Wall 1", ["wall"]),
+    agenda_1: definition(1086434461, "agenda", "Agenda"),
+    babylon: definition(1481016916, "agenda", "Project Babylon"),
+    boon: definition(1170625995, "agenda", "Corporate Boon"),
+    code_agenda: definition(3016177677, "agenda", "Encryption"),
+    1160031270: definition(1160031270, "agenda", "Transmutation"),
+    code_gate_1: definition(850286914, "ice", "Code Gate 1", ["code_gate"]),
+    wall_1: definition(658277277, "ice", "Wall 1", ["wall"]),
     ice_1: {
-      ...definition("ice_1_def", "ice", "ICE 1"),
+      ...definition(3274351864, "ice", "ICE 1"),
       subroutines: [{ label: "End the run." }],
     } as unknown as CardDefinition,
     ...input.definitions,
@@ -276,7 +270,7 @@ describe("scored agenda flow", () => {
       legalAction,
       effectiveDifficulty: 3,
       implementations: {
-        project_babylon: {
+        1481016916: {
           kind: "overadvance_bonus_agenda_points",
           perExcessAdvancementCounters: 2,
           visibility: "public",
@@ -300,7 +294,7 @@ describe("scored agenda flow", () => {
         boon: {
           ...instance(
             "boon" as CardInstanceId,
-            "corporate_boon" as CardDefinitionId,
+            1170625995 as CardDefinitionId,
             {
               side: "corp",
               zone: "serverRoot",
@@ -311,7 +305,7 @@ describe("scored agenda flow", () => {
         },
       },
       implementations: {
-        corporate_boon: {
+        1170625995: {
           kind: "add_counters_on_score",
           counterType: "boon",
           amount: 3,
@@ -337,7 +331,7 @@ describe("scored agenda flow", () => {
         code_agenda: {
           ...instance(
             "code_agenda" as CardInstanceId,
-            "encryption_breakthrough" as CardDefinitionId,
+            3016177677 as CardDefinitionId,
             {
               side: "corp",
               zone: "serverRoot",
@@ -348,7 +342,7 @@ describe("scored agenda flow", () => {
         },
       },
       implementations: {
-        encryption_breakthrough: {
+        3016177677: {
           kind: "reveal_installed_ice_subtype_for_credits",
           subtype: "code_gate",
           creditPerRevealedOrRezzed: 2,
@@ -363,7 +357,7 @@ describe("scored agenda flow", () => {
     const choice = host.state.pendingChoice!;
     expect(choice).toMatchObject({
       sourceCardInstanceId: "code_agenda",
-      sourceCardDefinitionId: "encryption_breakthrough",
+      sourceCardDefinitionId: 3016177677,
     });
     const resolveHost = {
       ...host,
@@ -379,7 +373,7 @@ describe("scored agenda flow", () => {
       hiddenZoneAction: "scored_subtype_reveal_code_gates",
       revealedCount: 1,
       gainedCredits: 2,
-      publicRevealDefinitionIds: "code_gate_1_def",
+      publicRevealDefinitionIds: "850286914",
     });
   });
 
@@ -393,7 +387,7 @@ describe("scored agenda flow", () => {
           code_agenda: {
             ...instance(
               "code_agenda" as CardInstanceId,
-              "encryption_breakthrough" as CardDefinitionId,
+              3016177677 as CardDefinitionId,
               {
                 side: "corp",
                 zone: "serverRoot",
@@ -404,7 +398,7 @@ describe("scored agenda flow", () => {
           },
         },
         implementations: {
-          encryption_breakthrough: {
+          3016177677: {
             kind: "reveal_installed_ice_subtype_for_credits",
             subtype: "code_gate",
             creditPerRevealedOrRezzed: 2,
@@ -437,7 +431,7 @@ describe("scored agenda flow", () => {
     const host = makeHost({
       legalAction,
       implementations: {
-        ice_transmutation: {
+        1160031270: {
           kind: "select_rezzed_ice_mark_modifier",
           target: "rezzed_installed_ice",
           counterType: "mark",
@@ -451,7 +445,7 @@ describe("scored agenda flow", () => {
         transmutation_agenda: {
           ...instance(
             "transmutation_agenda" as CardInstanceId,
-            "ice_transmutation" as CardDefinitionId,
+            1160031270 as CardDefinitionId,
             {
               side: "corp",
               zone: "serverRoot",
@@ -480,12 +474,12 @@ describe("scored agenda flow", () => {
       "Scored Agenda: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
     );
     expect(legalAction.payload).toMatchObject({
-      cardImplementationAbilityId: "ice_transmutation:scored_ice_mark:0",
+      cardImplementationAbilityId: "1160031270:scored_ice_mark:0",
       cardImplementationAbilityKey: "scored_ice_mark:0",
       cardImplementationPrimitiveKind: "select_rezzed_ice_mark_modifier",
       cardImplementationEffectKind: "mark_modifier",
       sourceCardId: "transmutation_agenda",
-      sourceDefinitionId: "ice_transmutation",
+      sourceDefinitionId: 1160031270,
       cardImplementationTargetKind: "rezzed_installed_ice",
       eligibleIceCount: 1,
     });
@@ -498,7 +492,7 @@ describe("scored agenda flow", () => {
     expect(result.handled).toBe(true);
     expect(host.state.pendingChoice).toBeUndefined();
     expect(legalAction.payload).toMatchObject({
-      cardImplementationAbilityId: "ice_transmutation:scored_ice_mark:0",
+      cardImplementationAbilityId: "1160031270:scored_ice_mark:0",
       cardImplementationAbilityKey: "scored_ice_mark:0",
       cardImplementationPrimitiveKind: "select_rezzed_ice_mark_modifier",
       cardImplementationEffectKind: "mark_modifier",
@@ -516,7 +510,7 @@ describe("scored agenda flow", () => {
     const host = makeHost({
       legalAction,
       implementations: {
-        ice_transmutation: {
+        1160031270: {
           kind: "select_rezzed_ice_mark_modifier",
           target: "rezzed_installed_ice",
           counterType: "mark",
@@ -530,7 +524,7 @@ describe("scored agenda flow", () => {
         ice_1: {
           ...instance(
             "ice_1" as CardInstanceId,
-            "simple_ice" as CardDefinitionId,
+            2394377751 as CardDefinitionId,
             {
               side: "corp",
               zone: "serverIce",
@@ -543,7 +537,7 @@ describe("scored agenda flow", () => {
         transmutation_agenda: {
           ...instance(
             "transmutation_agenda" as CardInstanceId,
-            "ice_transmutation" as CardDefinitionId,
+            1160031270 as CardDefinitionId,
             {
               side: "corp",
               zone: "serverRoot",
@@ -573,21 +567,17 @@ describe("scored agenda flow", () => {
       rd: ["rd_1" as CardInstanceId],
       scoreArea: ["employee" as CardInstanceId],
       definitions: {
-        employee_empowerment: definition(
-          "employee_empowerment",
-          "agenda",
-          "Employee Empowerment",
-        ),
+        4120022065: definition(4120022065, "agenda", "Employee Empowerment"),
       },
       instances: {
         employee: instance(
           "employee" as CardInstanceId,
-          "employee_empowerment" as CardDefinitionId,
+          4120022065 as CardDefinitionId,
           { side: "corp", zone: "scoreArea" },
         ),
       },
       implementations: {
-        employee_empowerment: {
+        4120022065: {
           kind: "corp_start_turn_optional_draw",
           drawCount: 1,
           visibility: "public",
@@ -610,7 +600,7 @@ describe("scored agenda flow", () => {
     expect(host.state.pendingChoice).toBeUndefined();
     expect(legalAction.payload).toMatchObject({
       choiceVisibility: "public",
-      sourceDefinitionId: "employee_empowerment",
+      sourceDefinitionId: 4120022065,
       scoredAgendaStartDrawDecision: "draw",
       selectedAdditionalDrawCount: 1,
     });

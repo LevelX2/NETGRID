@@ -719,7 +719,7 @@ export function applyOncePerRunBreakTagAndAllStealthLoss(
   const suspended = host.tags.addRunnerTagsWithPrevention(
     legalAction,
     1,
-    breakerDefinition.id,
+    String(breakerDefinition.id),
   );
   if (!suspended) delete host.state.pendingAddTagContinuation;
 

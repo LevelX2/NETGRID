@@ -2,12 +2,15 @@
   "schemaVersion": "scenario-v0.3",
   "id": "SCN-AI-002",
   "title": "Corp AI scores remote agenda",
-  "requirementIds": ["V03-REQ-005", "V03-REQ-006"],
+  "requirementIds": [
+    "V03-REQ-005",
+    "V03-REQ-006"
+  ],
   "seed": "ai-corp-scores-remote-agenda",
   "setup": {
     "activeSide": "corp",
     "timingPoint": "corp_action.main",
-    "remoteRootCardDefinitionId": "simple_agenda",
+    "remoteRootCardDefinitionId": 588,
     "advancementCounters": 3
   },
   "expected": {

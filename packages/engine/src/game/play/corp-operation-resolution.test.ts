@@ -104,9 +104,8 @@ function definition(
   } as CardDefinition;
 }
 
-function canonicalDefinition(id: string): CardDefinition {
-  const result =
-    CARD_DEFINITIONS_BY_ID[id as keyof typeof CARD_DEFINITIONS_BY_ID];
+function canonicalDefinition(id: number): CardDefinition {
+  const result = CARD_DEFINITIONS_BY_ID[id];
   if (!result) throw new Error(`Missing canonical card definition: ${id}`);
   return result;
 }
@@ -292,58 +291,38 @@ describe("corp-operation-resolution", () => {
     const calls: string[] = [];
     const host = hostFor(targetState, calls);
 
-    resolveCorpOperation(
-      host,
-      canonicalDefinition(596),
-      action(),
-    );
-    resolveCorpOperation(
-      host,
-      canonicalDefinition(593),
-      action(),
-    );
-    resolveCorpOperation(
-      host,
-      canonicalDefinition(604),
-      action(),
-    );
+    resolveCorpOperation(host, canonicalDefinition(596), action());
+    resolveCorpOperation(host, canonicalDefinition(593), action());
+    resolveCorpOperation(host, canonicalDefinition(604), action());
 
     expect(calls).toEqual([
-      `onPlay:simple_economy_operation:${OPERATION_ID}`,
-      `onPlay:simple_draw_operation:${OPERATION_ID}`,
-      `onPlay:simple_tag_punishment_operation:${OPERATION_ID}`,
+      `onPlay:596:${OPERATION_ID}`,
+      `onPlay:593:${OPERATION_ID}`,
+      `onPlay:604:${OPERATION_ID}`,
     ]);
   });
 
   it("delegates hidden-zone operation effects without changing choice contracts", () => {
     const calls: string[] = [];
     const offSiteState = state();
-    offSiteState.cardInstances[OPERATION_ID] = instance(
-      OPERATION_ID,
-      508,
-      { owner: "corp", controller: "corp", zone: { side: "corp", zone: "hq" } },
-    );
+    offSiteState.cardInstances[OPERATION_ID] = instance(OPERATION_ID, 508, {
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "hq" },
+    });
     const offSiteHost = hostFor(offSiteState, calls);
 
-    resolveCorpOperation(
-      offSiteHost,
-      definition(508),
-      action(),
-    );
+    resolveCorpOperation(offSiteHost, definition(508), action());
 
     const planningState = state();
-    planningState.cardInstances[OPERATION_ID] = instance(
-      OPERATION_ID,
-      510,
-      { owner: "corp", controller: "corp", zone: { side: "corp", zone: "hq" } },
-    );
+    planningState.cardInstances[OPERATION_ID] = instance(OPERATION_ID, 510, {
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "hq" },
+    });
     const planningHost = hostFor(planningState, calls);
 
-    resolveCorpOperation(
-      planningHost,
-      definition(510),
-      action(),
-    );
+    resolveCorpOperation(planningHost, definition(510), action());
 
     expect(calls).toEqual([
       `archivesToHq:${OPERATION_ID}`,
@@ -358,25 +337,19 @@ describe("corp-operation-resolution", () => {
       CORP_ASSET_DEFINITION_ID,
       { owner: "corp", controller: "corp", zone: { side: "corp", zone: "hq" } },
     );
-    targetState.cardInstances[OPERATION_ID] = instance(
-      OPERATION_ID,
-      501,
-      { owner: "corp", controller: "corp", zone: { side: "corp", zone: "hq" } },
-    );
+    targetState.cardInstances[OPERATION_ID] = instance(OPERATION_ID, 501, {
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "hq" },
+    });
     targetState.corp.hq.push("asset_1" as CardInstanceId);
     const calls: string[] = [];
     const host = hostFor(targetState, calls);
     const utilityAction = action();
 
-    expect(
-      canPlayCorpOperation(host, definition(501)),
-    ).toBe(true);
+    expect(canPlayCorpOperation(host, definition(501))).toBe(true);
 
-    resolveCorpOperation(
-      host,
-      definition(501),
-      utilityAction,
-    );
+    resolveCorpOperation(host, definition(501), utilityAction);
 
     expect(utilityAction.payload).toMatchObject({
       v1922CorpOperationAbility: "install_action_bundle",
@@ -467,10 +440,10 @@ describe("corp-operation-resolution", () => {
   it("publishes advancement move semantics on operation LegalActions", () => {
     const targetState = state();
     const host = hostFor(targetState);
-    const printedDefinition = definition(
-      503,
-      { title: "Falsified-Transactions Expert", cost: 0 },
-    );
+    const printedDefinition = definition(503, {
+      title: "Falsified-Transactions Expert",
+      cost: 0,
+    });
 
     const actions = cardImplementationOperationLegalActions(
       host,
@@ -499,15 +472,11 @@ describe("corp-operation-resolution", () => {
     targetState.corp.rd = [1, 2, 3, 4, 5].map(
       (index) => `rd_${index}` as CardInstanceId,
     );
-    targetState.cardInstances[OPERATION_ID] = instance(
-      OPERATION_ID,
-      21,
-      {
-        owner: "corp",
-        controller: "corp",
-        zone: { side: "corp", zone: "hq" },
-      },
-    );
+    targetState.cardInstances[OPERATION_ID] = instance(OPERATION_ID, 21, {
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "hq" },
+    });
     const cardDefinition = definition(21, {
       title: "Corporate Shuffle",
       cost: 0,
@@ -527,8 +496,7 @@ describe("corp-operation-resolution", () => {
         CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION,
       corpZoneTransitionProjectionComplete: true,
       corpZoneTransitionProjectionSourceCardInstanceId: OPERATION_ID,
-      corpZoneTransitionProjectionSourceDefinitionId:
-        21,
+      corpZoneTransitionProjectionSourceDefinitionId: 21,
       corpZoneTransitionProjectionStateVersion: 5,
       corpZoneTransitionProjectionTimingPoint: "corp_action.main",
       corpZoneTransitionProjectionActionId: actions[0]?.actionId,
@@ -582,18 +550,11 @@ describe("corp-operation-resolution", () => {
         root: [spgId],
       },
     ];
-    targetState.cardInstances[OPERATION_ID] = instance(
-      OPERATION_ID,
-      21,
-    );
-    targetState.cardInstances[spgId] = instance(
-      spgId,
-      29,
-      {
-        rezzed: true,
-        zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
-      },
-    );
+    targetState.cardInstances[OPERATION_ID] = instance(OPERATION_ID, 21);
+    targetState.cardInstances[spgId] = instance(spgId, 29, {
+      rezzed: true,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    });
     const [action] = cardImplementationOperationLegalActions(
       hostFor(targetState),
       OPERATION_ID,

@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardInstanceId,
@@ -80,7 +81,7 @@ export type RunContinuationExecutionHost = {
     icebreakerSpecialSourceDefinitionId: (
       breakerId: CardInstanceId,
       special: "bartmoss_post_encounter_self_trash_check",
-    ) => string | undefined;
+    ) => CardDefinitionId | undefined;
     rollDeterministicDie: (purpose: string) => number;
     trashRunnerInstalledProgram: (breakerId: CardInstanceId) => void;
   };

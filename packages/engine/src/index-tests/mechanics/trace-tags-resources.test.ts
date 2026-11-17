@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -223,10 +224,10 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.traceTags).toHaveLength(25);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.traceTags) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.rulesText, String(definitionId)).not.toContain("WIP");
     }
     expect(
       CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
@@ -341,13 +342,13 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         (action) => action.type === "continue_run",
       );
 
-      expect(state.pendingChoice?.side, definitionId).toBe("corp");
-      expect(state.pendingChoice?.kind, definitionId).toBe("bid_amount");
+      expect(state.pendingChoice?.side, String(definitionId)).toBe("corp");
+      expect(state.pendingChoice?.kind, String(definitionId)).toBe("bid_amount");
       expect(
         getPlayerView(state, "runner").pendingChoice,
-        definitionId,
+        String(definitionId),
       ).toBeUndefined();
-      expect(state.trace, definitionId).toMatchObject({
+      expect(state.trace, String(definitionId)).toMatchObject({
         status: "corp_bid",
         traceLimit,
       });
@@ -392,7 +393,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(state, "runner")))).not.toContain(
       537,
     );
     const hackerTrackerRezAction = mustAction(
@@ -527,11 +528,11 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
               (cardId) =>
                 state.cardInstances[cardId]?.definitionId === definitionId,
             );
-      expect(installed, definitionId).toBe(true);
+      expect(installed, String(definitionId)).toBe(true);
       if (definition?.type === "event")
-        expect(state.runner.tags, definitionId).toBe(0);
+        expect(state.runner.tags, String(definitionId)).toBe(0);
       if (definition?.type === "program")
-        expect(state.runner.memoryUsed, definitionId).toBeGreaterThan(0);
+        expect(state.runner.memoryUsed, String(definitionId)).toBeGreaterThan(0);
     }
 
     let shortTermState = toRunnerTurn(
@@ -928,7 +929,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       },
     });
     expect(corpPowerGridView).not.toHaveProperty("cost");
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(state, "runner")))).not.toContain(
       511,
     );
 
@@ -1285,7 +1286,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       actionType: "resolve_choice",
       hardwareTrashByCounterTrashCount: 1,
       trashedHardwareCount: 1,
-      trashedHardwareDefinitionIds: 351,
+      trashedHardwareDefinitionIds: "351",
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -1339,7 +1340,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       tagRemovalRecurringCreditsSpent: 2,
       runnerCreditsSpent: 0,
       tagRemovalCreditSourceDefinitionIds:
-        332,
+        "332",
     });
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
@@ -1413,7 +1414,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       tagRemovalRecurringCreditsSpent: 2,
       runnerCreditsSpent: 0,
       tagRemovalCreditSourceDefinitionIds:
-        338,
+        "338",
     });
     expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
       "armadilloRecurringCreditsSpent",

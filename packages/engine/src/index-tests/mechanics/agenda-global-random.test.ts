@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import { cardSpecRuntimeDefinitionIds } from "@netgrid/cards/engine";
 import {
@@ -196,16 +197,16 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.agendaScoring).toHaveLength(20);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.agendaScoring) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       if (CARD_SPEC_RUNTIME_DEFINITION_IDS.has(definitionId))
-        expect(definition?.mechanics.length, definitionId).toBeGreaterThan(0);
+        expect(definition?.mechanics.length, String(definitionId)).toBeGreaterThan(0);
       else
-        expect(definition?.mechanics.join(" "), definitionId).toMatch(
+        expect(definition?.mechanics.join(" "), String(definitionId)).toMatch(
           /scored_agenda|agenda_difficulty|overadvance|counter|generic_asset_node|generic_upgrade_root_server/,
         );
-      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.rulesText, String(definitionId)).not.toContain("WIP");
     }
     expect(
       CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
@@ -528,7 +529,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(layoffsPayload).not.toHaveProperty("targetCardDefinitionId");
     expect(layoffsPayload).not.toHaveProperty("targetCardDefinitionIds");
     expect(JSON.stringify(layoffsPayload)).not.toContain(agendaId);
-    expect(JSON.stringify(layoffsPayload)).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(layoffsPayload))).not.toContain(
       414,
     );
     const runnerPublicPayload = getPlayerView(state, "runner").publicEvents.at(
@@ -540,7 +541,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       targetVisibility: "hidden_installed_card",
     });
     expect(JSON.stringify(runnerPublicPayload)).not.toContain(agendaId);
-    expect(JSON.stringify(runnerPublicPayload)).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(runnerPublicPayload))).not.toContain(
       414,
     );
 
@@ -1347,14 +1348,14 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.globalModifiers).toHaveLength(26);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.globalModifiers) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.rulesText, String(definitionId)).not.toContain("WIP");
       if (CARD_SPEC_RUNTIME_DEFINITION_IDS.has(definitionId))
-        expect(definition?.mechanics.length, definitionId).toBeGreaterThan(0);
+        expect(definition?.mechanics.length, String(definitionId)).toBeGreaterThan(0);
       else
-        expect(definition?.mechanics.join(" "), definitionId).toMatch(
+        expect(definition?.mechanics.join(" "), String(definitionId)).toMatch(
           /persistent_special_state|action_economy|modify_hand_limit|modify_memory_limit|global_static_modifier|meat_damage|tag_condition/,
         );
     }
@@ -1482,7 +1483,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       abilityId: "tagged_meat_damage",
       agendaPointCost: 3,
       agendaPointCostPaid: 3,
-      spentAgendaDefinitionIds: 416,
+      spentAgendaDefinitionIds: String(416),
       damageResolved: true,
       damageType: "meat",
       damageAmount: 15,
@@ -1835,29 +1836,29 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           String(action.payload?.cardId) === assetId,
       );
 
-      expect(state.corp.clicks, definitionId).toBe(clicksBefore + 1);
-      expect(state.eventLog.at(-1)?.publicPayload, definitionId).toMatchObject({
+      expect(state.corp.clicks, String(definitionId)).toBe(clicksBefore + 1);
+      expect(state.eventLog.at(-1)?.publicPayload, String(definitionId)).toMatchObject({
         actionType: "activated_card_ability",
         gainedActions: 1,
         corpClicksAfter: clicksBefore + 1,
       });
       expect(
         JSON.stringify(state.eventLog.at(-1)?.publicPayload),
-        definitionId,
+        String(definitionId),
       ).not.toMatch(
         /"privatePayload"|"cardInstances"|"hq"\s*:|"rd"\s*:|"Simple Agenda"|"Simple Economy Operation"/,
       );
       expect(
         getPlayerView(state, "runner").opponent.handCount,
-        definitionId,
+        String(definitionId),
       ).toBe(state.corp.hq.length);
       expect(
         JSON.stringify(getPlayerView(state, "runner").opponent),
-        definitionId,
+        String(definitionId),
       ).not.toContain("Simple Economy Operation");
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.ok, String(definitionId)).toBe(true);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
   });
 
@@ -1893,7 +1894,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(legal.costs[0]?.credits).toBe(1);
     expect(legal.payload).toMatchObject({
       runStartTaxCredits: 1,
-      runStartTaxSourceDefinitionIds: 544,
+      runStartTaxSourceDefinitionIds: String(544),
     });
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -1906,7 +1907,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
       runStartTaxCredits: 1,
-      runStartTaxSourceDefinitionIds: 544,
+      runStartTaxSourceDefinitionIds: String(544),
       runnerCreditsAfter: 0,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -2046,7 +2047,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       iceInstallAdditionalCost: 0,
       iceInstallReduction: 1,
       iceInstallTotalCost: 1,
-      iceInstallReductionSourceDefinitionIds: 536,
+      iceInstallReductionSourceDefinitionIds: String(536),
     });
 
     const stale = structuredClone(state);
@@ -2078,7 +2079,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       iceInstallBaseCost: 2,
       iceInstallReduction: 1,
       iceInstallTotalCost: 1,
-      iceInstallReductionSourceDefinitionIds: 536,
+      iceInstallReductionSourceDefinitionIds: String(536),
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"hq"\s*:|"rd"\s*:|"Simple Agenda"|"Simple Economy Operation"/,
@@ -2592,7 +2593,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state = apply(state, "corp", (action) => action.type === "end_turn");
     expect(state.runner.credits).toBe(22);
     expect(
-      JSON.stringify(state.eventLog.at(-1)?.publicPayload ?? {}),
+      serializedDefinitionReferences(JSON.stringify(state.eventLog.at(-1)?.publicPayload ?? {})),
     ).not.toContain(380);
   });
 
@@ -3075,7 +3076,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(
       getPlayerView(sameServerNonWallAfterRez, "runner").run?.encounteredIce
         ?.strength,
-    ).toBe(CARD_DEFINITIONS_BY_ID.simple_code_gate_ice?.strength);
+    ).toBe(CARD_DEFINITIONS_BY_ID[590]?.strength);
     const unrezzedGrid = approachIce(
       "spotcheck-jerusalem-city-grid-unrezzed",
       "remote_1",
@@ -3220,13 +3221,13 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.randomEffects).toHaveLength(6);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.randomEffects) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.rulesText, String(definitionId)).not.toContain("WIP");
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
     }
     expect(
@@ -3314,12 +3315,12 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     const randomRecord = state.randomDrawRecords[randomBefore];
     expect(state.randomDrawRecords).toHaveLength(randomBefore + 11);
     expect(randomRecord?.purpose).toBe(
-      "v1921.die.onr_v1_339_schlaghund.tag_damage",
+      "v1921.die.551.tag_damage",
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
       abilityId: "schlaghund_tag_damage",
-      randomPurpose: "v1921.die.onr_v1_339_schlaghund.tag_damage",
+      randomPurpose: "v1921.die.551.tag_damage",
       randomCounterAfter: randomBefore + 1,
       runnerTags: 6,
       tagThresholdMet: true,
@@ -3351,8 +3352,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
   });
 
   it.each([
-    { seed: "rio-visible-5", expectedRoll: 1, expectedRunEnded: true },
-    { seed: "rio-visible-0", expectedRoll: 4, expectedRunEnded: false },
+    { seed: "rio-visible-7", expectedRoll: 1, expectedRunEnded: true },
+    { seed: "rio-visible-5", expectedRoll: 4, expectedRunEnded: false },
   ])(
     "rolls Rio de Janeiro City Grid visibly after passed ICE on roll $expectedRoll",
     ({ seed, expectedRoll, expectedRunEnded }) => {
@@ -3419,7 +3420,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
       const rioPurpose = String(state.randomDrawRecords.at(-1)?.purpose ?? "");
       expect(rioPurpose).toContain(
-        "v1921.die.onr_v1_367_rio-de-janeiro-city-grid.passed_ice.",
+        "v1921.die.579.passed_ice.",
       );
       expect(rioPurpose).toContain(`.${iceId}.${upgradeId}`);
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -3486,7 +3487,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
               "deterministic_die_probe" &&
             String(action.payload?.cardId) === programId,
         ),
-        definitionId,
+        String(definitionId),
       ).toBe(false);
     }
   });
@@ -3534,7 +3535,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
 
     expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
     expect(state.randomDrawRecords.at(-1)?.purpose).toBe(
-      "v1921.die.onr_v1_002_ai-boon.run_start_strength",
+      "v1921.die.214.run_start_strength",
     );
     expect(state.run?.runStartRandomStrength).toBe(
       Number(state.eventLog.at(-1)?.publicPayload.runStartRandomStrength),
@@ -3543,7 +3544,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       actionType: "start_run",
       abilityId: "run_start_random_strength_bonus",
       sourceDefinitionId: 214,
-      randomPurpose: "v1921.die.onr_v1_002_ai-boon.run_start_strength",
+      randomPurpose: "v1921.die.214.run_start_strength",
       randomCounterAfter: randomBefore + 1,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -3581,7 +3582,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
   it("ends Playful AI without a choice or credits on a high roll", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
-        seed: "playful-ai-probe-0",
+        seed: "playful-ai-probe-2",
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_random_dice_split_high_roll",
@@ -3629,7 +3630,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(state.runner.heap).toContain(eventId);
     expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
     expect(state.randomDrawRecords.at(-1)?.purpose).toBe(
-      "v1921.die.onr_v1_104_playful-ai.dice_loop.initial",
+      "v1921.die.316.dice_loop.initial",
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
@@ -3659,7 +3660,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
   it("resolves Playful AI split choices and queued dice through replay", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
-        seed: "playful-ai-probe-3",
+        seed: "playful-ai-probe-14",
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_random_dice_split_split_loop",

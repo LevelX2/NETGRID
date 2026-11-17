@@ -21,9 +21,13 @@ import type { BreachStateHost } from "../access/breach-state";
 function definition(
   id: number,
   type: CardDefinition["type"],
-  title = id,
+  title = String(id),
 ): CardDefinition {
-  return { id: id as CardDefinitionId, title, type } as CardDefinition;
+  return {
+    id: id as CardDefinitionId,
+    title: String(title),
+    type,
+  } as CardDefinition;
 }
 
 function instance(
@@ -60,9 +64,9 @@ function makeHost(
   privateLooks: Array<{ zone: string; count: number | "all" }>;
 } {
   const definitions = {
-    agenda: definition("agenda_def", "agenda"),
-    operation: definition("operation_def", "operation"),
-    ice: definition("ice_def", "ice", "Quandary"),
+    agenda: definition(2855245605, "agenda", "agenda_def"),
+    operation: definition(3983278954, "operation"),
+    ice: definition(1663273972, "ice", "Quandary"),
   };
   const servers = [
     { id: "rd", ice: [], root: [] },
@@ -71,22 +75,22 @@ function makeHost(
     { id: "remote_1", ice: [], root: ["remote_agenda"] },
   ] as unknown as CorpServer[];
   const cardInstances: Record<string, CardInstance> = {
-    rd_operation: instance("rd_operation", "operation_def", {
+    rd_operation: instance("rd_operation", 3983278954, {
       side: "corp",
       zone: "rd",
     }),
-    remote_agenda: instance("remote_agenda", "agenda_def", {
+    remote_agenda: instance("remote_agenda", 2855245605, {
       side: "corp",
       zone: "serverRoot",
       serverId: "remote_1",
     } as CardInstance["zone"]),
     archive_face_up: instance(
       "archive_face_up",
-      "operation_def",
+      3983278954,
       { side: "corp", zone: "archives" },
       true,
     ),
-    archive_face_down: instance("archive_face_down", "operation_def", {
+    archive_face_down: instance("archive_face_down", 3983278954, {
       side: "corp",
       zone: "archives",
     }),
@@ -260,7 +264,7 @@ describe("run access transition", () => {
       ...fixture.state.cardInstances.remote_agenda!,
       rezzed: true,
     };
-    fixture.state.cardInstances.hq_ice = instance("hq_ice", "ice_def", {
+    fixture.state.cardInstances.hq_ice = instance("hq_ice", 1663273972, {
       side: "corp",
       zone: "hq",
     });
@@ -274,7 +278,7 @@ describe("run access transition", () => {
     ).toBe(true);
     expect(fixture.state.pendingChoice).toMatchObject({
       sourceCardInstanceId: "remote_agenda",
-      sourceCardDefinitionId: "agenda_def",
+      sourceCardDefinitionId: 2855245605,
       prompt: "agenda_def: ICE aus HQ einsetzen?",
       presentationKey: "delayed_success",
     });
@@ -396,7 +400,7 @@ describe("run access transition", () => {
         successful: true,
         successfulRunAccessReplacement: "runner_spend_corp_lose_credits",
         successfulRunSourceCardId: "remote_agenda" as CardInstanceId,
-        successfulRunSourceDefinitionId: "agenda_def" as CardDefinitionId,
+        successfulRunSourceDefinitionId: 2855245605 as CardDefinitionId,
         successfulRunSourceTitle: "Priority Wreck",
       } as unknown as NonNullable<GameState["run"]>,
     });

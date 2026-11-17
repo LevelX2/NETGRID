@@ -1,7 +1,10 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { decodeStoredGameState } from "../apps/server/src/storage-sqlite";
+import {
+  decodeStoredEngineEvent,
+  decodeStoredGameState,
+} from "../apps/server/src/storage-sqlite";
 import { buildAiDecisionInput, chooseAiAction } from "../packages/ai/src/index";
 import { getLegalActions } from "../packages/engine/src/index";
 import type {
@@ -29,8 +32,6 @@ type TraceRow = {
   matchId: string;
   mode: string;
   status: string;
-  traceId: string;
-  eventId: string;
   stateVersion: number;
   matchVersion: number;
   side: Side;
@@ -129,7 +130,7 @@ function selectHoldoutTraces(
 ): TraceRow[] {
   const sql = `${selectTraceRowsSql()}
     ${maxCreatedAt ? "WHERE t.created_at <= ?" : ""}
-    ORDER BY m.created_at ASC, t.decision_index ASC, t.trace_id ASC`;
+    ORDER BY m.created_at ASC, m.match_id ASC, t.decision_index ASC`;
   const rows = (
     maxCreatedAt ? db.prepare(sql).all(maxCreatedAt) : db.prepare(sql).all()
   ) as TraceRow[];
@@ -149,8 +150,6 @@ function selectTraceRowsSql(): string {
       m.match_id AS matchId,
       m.mode AS mode,
       m.status AS status,
-      t.trace_id AS traceId,
-      t.event_id AS eventId,
       t.state_version AS stateVersion,
       t.match_version AS matchVersion,
       t.side AS side,
@@ -253,9 +252,6 @@ function baseEvaluation(trace: TraceRow): CurrentAiHoldoutEvaluation {
     status: "reconstruction_error",
     caseKey: currentAiHoldoutCaseKey({
       matchId: trace.matchId,
-      traceId: trace.traceId,
-      eventId: trace.eventId,
-      stateVersion: trace.stateVersion,
       decisionIndex: trace.decisionIndex,
     }),
     side: trace.side,
@@ -337,10 +333,10 @@ function stateForTrace(
 function engineEventsFor(db: DatabaseSync, matchId: string): GameEvent[] {
   const rows = db
     .prepare(
-      "SELECT event_json AS eventJson FROM engine_events WHERE match_id = ? ORDER BY event_index ASC",
+      "SELECT event_id AS eventId, event_json AS eventJson FROM engine_events WHERE match_id = ? ORDER BY event_index ASC",
     )
-    .all(matchId) as Array<{ eventJson: string }>;
-  return rows.map((row) => JSON.parse(row.eventJson) as GameEvent);
+    .all(matchId) as Array<Parameters<typeof decodeStoredEngineEvent>[0]>;
+  return rows.map(decodeStoredEngineEvent);
 }
 
 function aiControllerFor(

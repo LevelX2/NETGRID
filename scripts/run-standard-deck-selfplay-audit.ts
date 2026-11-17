@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
@@ -22,7 +23,7 @@ type StandardDeck = {
   cardPoolVersion: string;
   formatProfileId: string;
   formatProfileVersion: string;
-  cards: Array<{ cardId: string; quantity: number }>;
+  cards: Array<{ cardId: CardDefinitionId; quantity: number }>;
 };
 
 type StandardDeckCatalog = {

@@ -1,6 +1,8 @@
 import { cardDefinitionIdValue, cardDefinitionIdsFromCsv } from "./card-definition-id";
-import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
 import {
+  isCardDefinitionId,
+  type CardDefinitionId,
+  type MatchEventId,
   type PublicGameEvent,
   type ResolvedGameEffect,
   type Side,
@@ -63,8 +65,8 @@ export type ChronicleAccessContext = {
 };
 
 export type ChronicleAccessOutcomePlan = {
-  suppressedAccessEventIds: ReadonlySet<string>;
-  accessContextByOutcomeEventId: Record<string, ChronicleAccessContext>;
+  suppressedAccessEventIds: ReadonlySet<MatchEventId>;
+  accessContextByOutcomeEventId: Record<MatchEventId, ChronicleAccessContext>;
 };
 
 export type ChronicleTranslate = (
@@ -99,8 +101,8 @@ export type ChronicleActionUse = {
 };
 
 export type ChronicleEventProjectionPlan = {
-  suppressedEventIds: ReadonlySet<string>;
-  actionUseByEventId: Record<string, ChronicleActionUse>;
+  suppressedEventIds: ReadonlySet<MatchEventId>;
+  actionUseByEventId: Record<MatchEventId, ChronicleActionUse>;
 };
 
 export const CHRONICLE_CATEGORY_LABELS: Record<ChronicleCategory, string> = {
@@ -126,13 +128,13 @@ const BALL_AND_CHAIN_ID = 434;
 const VIRAL_15_ID = 488;
 const PLAYFUL_AI_ID = 316;
 const GYPSY_SCHEDULE_ANALYZER_ID = 42;
-const EMPTY_EVENT_ID_SET: ReadonlySet<string> = new Set();
+const EMPTY_EVENT_ID_SET: ReadonlySet<MatchEventId> = new Set();
 
 export function chronicleAccessOutcomePlan(
   events: PublicGameEvent[],
 ): ChronicleAccessOutcomePlan {
-  const suppressedAccessEventIds = new Set<string>();
-  const accessContextByOutcomeEventId: Record<string, ChronicleAccessContext> =
+  const suppressedAccessEventIds = new Set<MatchEventId>();
+  const accessContextByOutcomeEventId: Record<MatchEventId, ChronicleAccessContext> =
     {};
   let pendingAccess: PublicGameEvent | undefined;
 
@@ -1037,7 +1039,7 @@ function formatSemanticChronicleEvent(
             })
           : translate(`group.${category}`);
   const item: ChronicleItem = {
-    id: event.eventId,
+    id: String(event.eventId),
     category,
     importance:
       category === "danger" ||
@@ -1195,7 +1197,7 @@ export function formatChronicleEvent(
   );
   if (successfulRunCreditLoss) {
     return {
-      id: event.eventId,
+      id: String(event.eventId),
       category: "economy",
       importance: "important",
       visibility: "public",
@@ -5404,7 +5406,7 @@ export function formatChronicleEvent(
   }
 
   return {
-    id: event.eventId,
+    id: String(event.eventId),
     category,
     importance,
     visibility,
@@ -6566,7 +6568,7 @@ function traceHardwareWreckerChronicleItem(
 
 export function shouldSuppressChronicleEventItem(
   event: PublicGameEvent,
-  projectionSuppressedEventIds: ReadonlySet<string> = EMPTY_EVENT_ID_SET,
+  projectionSuppressedEventIds: ReadonlySet<MatchEventId> = EMPTY_EVENT_ID_SET,
 ): boolean {
   if (projectionSuppressedEventIds.has(event.eventId)) return true;
   const payload = event.publicPayload ?? {};
@@ -6615,8 +6617,8 @@ export function isSocialEngineeringHiddenAmountSelectionEvent(
 
 export function chronicleTurnNumberByEventId(
   events: PublicGameEvent[],
-): Record<string, number> {
-  const numbers: Record<string, number> = {};
+): Record<MatchEventId, number> {
+  const numbers: Record<MatchEventId, number> = {};
   let activeSide: Side = "corp";
   let activeTurnNumber = 1;
   let justEndedTurn: { side: Side; turnNumber: number } | null = null;
@@ -6661,8 +6663,8 @@ export function chronicleTurnNumberByEventId(
 
 export function chronicleTurnSideByEventId(
   events: PublicGameEvent[],
-): Record<string, Side> {
-  const sides: Record<string, Side> = {};
+): Record<MatchEventId, Side> {
+  const sides: Record<MatchEventId, Side> = {};
   let activeSide: Side = "corp";
   let justEndedTurn: { side: Side } | null = null;
 
@@ -6711,9 +6713,9 @@ function isDiscardPhaseResolution(event: PublicGameEvent): boolean {
 export function chronicleActionUseByEventId(
   events: PublicGameEvent[],
   translate?: ChronicleTranslate,
-): Record<string, ChronicleActionUse> {
+): Record<MatchEventId, ChronicleActionUse> {
   const spentBySide: Partial<Record<Side, number>> = {};
-  const result: Record<string, ChronicleActionUse> = {};
+  const result: Record<MatchEventId, ChronicleActionUse> = {};
 
   for (const event of events) {
     const payload = event.publicPayload ?? {};
@@ -6744,7 +6746,7 @@ export function chronicleEventProjectionPlan(
 ): ChronicleEventProjectionPlan {
   const actionUseByEventId = chronicleActionUseByEventId(events, translate);
   const pendingSingleExposeActivations = new Map<string, PublicGameEvent[]>();
-  const suppressedEventIds = new Set<string>();
+  const suppressedEventIds = new Set<MatchEventId>();
 
   for (const event of events) {
     const activationKey = singleCardExposeSourceKey(

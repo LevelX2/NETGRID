@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -23,21 +24,25 @@ import {
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "./nonsearch-choice-handlers";
 
-const offSiteId = "off_site_backups" as CardDefinitionId;
-const socialId = "social_engineering" as CardDefinitionId;
+const offSiteId = 3499602688 as CardDefinitionId;
+const socialId = 2227175182 as CardDefinitionId;
 const sourceId = "source" as CardInstanceId;
 
 function definition(
   id: number,
   type: CardDefinition["type"] = "resource",
-  title = id,
+  title = String(id),
 ): CardDefinition {
-  return { id: id as CardDefinitionId, type, title } as CardDefinition;
+  return {
+    id: id as CardDefinitionId,
+    type,
+    title: String(title),
+  } as CardDefinition;
 }
 
 function instance(
   cardId: CardInstanceId,
-  definitionId = cardId as string,
+  definitionId = syntheticCardDefinitionId(cardId),
   side: "corp" | "runner" = "runner",
 ): CardInstance {
   return {
@@ -121,7 +126,7 @@ function makeHost(
       input.instances?.[cardId] ??
         instance(
           cardId,
-          definitions[cardId]?.id ?? cardId,
+          definitions[cardId]?.id ?? syntheticCardDefinitionId(cardId),
           (input.corpHq ?? []).includes(cardId) ||
             (input.corpArchives ?? []).includes(cardId) ||
             (input.servers ?? []).some((server) => server.ice.includes(cardId))
@@ -161,7 +166,8 @@ function makeHost(
     legalAction,
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
     cards: {
-      definitionFor: (cardId) => definitions[cardId] ?? definition(cardId),
+      definitionFor: (cardId) =>
+        definitions[cardId] ?? definition(syntheticCardDefinitionId(cardId)),
       corpUtilityForCard: (cardId) => input.corpUtilities?.[cardId],
       hasCorpUtilityKind: (cardId, kind) =>
         input.corpUtilities?.[cardId]?.kind === kind,
@@ -281,14 +287,10 @@ describe("hidden-zone nonsearch choice handlers", () => {
     const host = makeHost({
       corpArchives: [sourceId, ice1, asset, ice2],
       definitions: {
-        [sourceId]: definition(
-          22,
-          "operation",
-          "Reclamation Project",
-        ),
-        [ice1]: definition("classic_ice_1", "ice", "Classic ICE 1"),
-        [ice2]: definition("classic_ice_2", "ice", "Classic ICE 2"),
-        [asset]: definition("classic_asset_1", "asset", "Classic Asset"),
+        [sourceId]: definition(22, "operation", "Reclamation Project"),
+        [ice1]: definition(1151099479, "ice", "Classic ICE 1"),
+        [ice2]: definition(1167877098, "ice", "Classic ICE 2"),
+        [asset]: definition(2704077880, "asset", "Classic Asset"),
       },
       corpUtilities: {
         [sourceId]: {
@@ -320,7 +322,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
       sourceDefinitionId: 22,
       movedCount: 2,
       archivesRevealCount: 2,
-      archivesRevealDefinitionIds: "classic_ice_1,classic_ice_2",
+      archivesRevealDefinitionIds: "1151099479,1167877098",
     });
   });
 
@@ -329,12 +331,8 @@ describe("hidden-zone nonsearch choice handlers", () => {
     const host = makeHost({
       corpArchives: [sourceId, ice],
       definitions: {
-        [sourceId]: definition(
-          22,
-          "operation",
-          "Reclamation Project",
-        ),
-        [ice]: definition("classic_ice_1", "ice", "Classic ICE 1"),
+        [sourceId]: definition(22, "operation", "Reclamation Project"),
+        [ice]: definition(1151099479, "ice", "Classic ICE 1"),
       },
       corpUtilities: {
         [sourceId]: {
@@ -365,11 +363,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     const emptyHost = makeHost({
       corpArchives: [sourceId],
       definitions: {
-        [sourceId]: definition(
-          22,
-          "operation",
-          "Reclamation Project",
-        ),
+        [sourceId]: definition(22, "operation", "Reclamation Project"),
       },
       corpUtilities: {
         [sourceId]: {
@@ -397,12 +391,8 @@ describe("hidden-zone nonsearch choice handlers", () => {
     const host = makeHost({
       corpHq: [hqCard],
       definitions: {
-        [sourceId]: definition(
-          21,
-          "operation",
-          "Corporate Shuffle",
-        ),
-        [hqCard]: definition("classic_hq_card", "operation", "HQ Card"),
+        [sourceId]: definition(21, "operation", "Corporate Shuffle"),
+        [hqCard]: definition(2795342430, "operation", "HQ Card"),
       },
       corpUtilities: {
         [sourceId]: {

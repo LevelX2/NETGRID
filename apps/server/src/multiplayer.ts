@@ -1,4 +1,9 @@
-import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
+import {
+  isCardDefinitionId,
+  isMatchEventId,
+  type CardDefinitionId,
+  type MatchEventId,
+} from "@netgrid/shared";
 import { createHash, randomBytes } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { setTimeout as yieldToEventLoop } from "node:timers/promises";
@@ -385,7 +390,7 @@ export type ActionReceipt = {
 export type UndoSnapshot = {
   undoRequestId: string;
   matchId: string;
-  targetEventId: string;
+  targetEventId: MatchEventId;
   snapshotId: StateSnapshotId | null;
   requestedBy: Side;
   status: UndoStatus;
@@ -441,9 +446,8 @@ export type StoredMatch = {
 };
 
 export type AiDecisionTraceRecord = {
-  traceId: string;
   matchId: string;
-  eventId: string;
+  eventId: MatchEventId;
   stateVersion: number;
   matchVersion: number;
   side: Side;
@@ -508,8 +512,8 @@ export type AiDecisionHistoricalAudit = {
     matchVersion: number;
     rulesBaseline: RulesBaseline;
     outcome?: "applied" | "failed_before_apply" | "rejected";
-    decisionEventId?: string;
-    eventAnchorId?: string;
+    decisionEventId?: MatchEventId;
+    eventAnchorId?: MatchEventId;
     selectedActionId?: string;
     validation: {
       actor: Side;
@@ -731,7 +735,8 @@ export type MultiplayerStorage = {
     filters?: { afterDecisionIndex?: number },
   ): Promise<StorageMaintenanceAiDecisionTraceIndexEntry[]>;
   maintenanceAiDecisionTraceDetail?(
-    traceId: string,
+    matchId: string,
+    decisionIndex: number,
   ): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined>;
   maintenanceMatchAnalysis?(
     matchId: string,
@@ -831,7 +836,7 @@ export type ReplayStateHashCheck = {
 };
 
 export type ReplayTimelineStep = {
-  eventId: string;
+  eventId: MatchEventId;
   index: number;
   side?: Side;
   actionType: string;
@@ -858,7 +863,7 @@ export type ReplayRandomDrawEntry = {
 
 export type ReplayExploitSuggestion = {
   candidateId: string;
-  eventId: string;
+  eventId: MatchEventId;
   reason: string;
   status: "review_suggestion";
 };
@@ -4195,7 +4200,7 @@ export class MultiplayerService {
     matchId: string;
     side: Side;
     sessionToken: string;
-    targetEventId: string;
+    targetEventId: MatchEventId;
     clientKnownMatchVersion: number;
     reason?: string;
   }): Promise<UndoResult> {
@@ -4234,9 +4239,9 @@ export class MultiplayerService {
           ),
           payload: this.payloadFor(record, input.side),
         };
-      const targetIndex = record.eventLog.findIndex(
-        (event) => event.eventId === input.targetEventId,
-      );
+      const targetIndex = isMatchEventId(input.targetEventId)
+        ? record.eventLog.findIndex((event) => event.eventId === input.targetEventId)
+        : -1;
       if (targetIndex < 0)
         return {
           ok: false,
@@ -4858,9 +4863,10 @@ export class MultiplayerService {
   }
 
   async storageMaintenanceAiDecisionTraceDetail(
-    traceId: string,
+    matchId: string,
+    decisionIndex: number,
   ): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined> {
-    return this.storage.maintenanceAiDecisionTraceDetail?.(traceId);
+    return this.storage.maintenanceAiDecisionTraceDetail?.(matchId, decisionIndex);
   }
 
   async storageMaintenanceMatchAnalysis(
@@ -5772,7 +5778,8 @@ export class MultiplayerService {
     delete record.pendingUndo;
     record.eventLog.push(
       timeExpiredEventRecord(
-        record,
+        record.match.matchId,
+        record.gameState.stateVersion,
         expiredSide,
         winnerSide,
         nowIso,
@@ -6505,7 +6512,6 @@ export class MultiplayerService {
         anchorEvent.eventId,
       ) ?? 1;
     const trace: AiDecisionTraceRecord = {
-      traceId: diagnosticCode,
       matchId: record.match.matchId,
       eventId: anchorEvent.eventId,
       stateVersion: state.stateVersion,
@@ -7025,15 +7031,15 @@ function initialPlayerClockState(
 }
 
 function timeExpiredEventRecord(
-  record: StoredMatch,
+  matchId: string,
+  stateVersion: number,
   expiredSide: Side,
   winnerSide: Side,
   occurredAt: string,
   finalStateHash: string,
 ): EventRecord {
-  const stateVersion = record.gameState?.stateVersion ?? 0;
   const event: PublicGameEvent = {
-    eventId: `time_expired_${record.match.matchVersion}`,
+    eventId: stateVersion + 2,
     type: "time_expired",
     stateVersionBefore: stateVersion,
     stateVersionAfter: stateVersion,
@@ -7050,7 +7056,7 @@ function timeExpiredEventRecord(
   };
   return {
     eventId: event.eventId,
-    matchId: record.match.matchId,
+    matchId,
     stateVersionBefore: stateVersion,
     stateVersionAfter: stateVersion,
     stateHashAfter: finalStateHash,
@@ -7326,7 +7332,7 @@ function replayAnalysisFrames(record: StoredMatch): ApiReplayAnalysisFrame[] {
 
 function replayAnalysisFrameFor(
   state: GameState,
-  input: { index: number; sourceEventId?: string; stateHashVerified: boolean },
+  input: { index: number; sourceEventId?: MatchEventId; stateHashVerified: boolean },
 ): ApiReplayAnalysisFrame {
   return {
     index: input.index,
@@ -7661,7 +7667,6 @@ function aiDecisionTraceFor(
   const turn =
     chronicleTurnNumberForEvent(chronologicalEvents, event.eventId) ?? 1;
   return {
-    traceId: `ai_trace_${record.match.matchId}_${decisionIndex}`,
     matchId: record.match.matchId,
     eventId: event.eventId,
     stateVersion: event.stateVersionBefore,
@@ -8051,7 +8056,7 @@ function historicalAuditFor(
 function historicalFailureAuditFor(
   state: GameState,
   snapshot: StateSnapshot,
-  eventAnchorId: string,
+  eventAnchorId: MatchEventId,
   side: Side,
   legalActions: readonly LegalAction[],
   beliefState: AiDecisionBeliefCapture,

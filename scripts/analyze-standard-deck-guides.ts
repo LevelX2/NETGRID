@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 import { buildDeckStrategyProfile } from "../packages/ai/src/deck-doctrine-strategy";
 import { createRuntimeCardsById } from "../packages/catalog/src/index";
+import type { CardDefinitionId } from "@netgrid/shared";
 import standardDeckCatalogData from "../data/decks/standard-deck-catalog-1.0.0.json";
 
 const cardsById = createRuntimeCardsById();
@@ -19,8 +20,13 @@ const analysis = activeDecks.map((deck) => {
     ...profile.secondaryStrategies,
   ];
   const keyCardCandidates = new Map<
-    string,
-    { cardId: string; title: string; quantity: number; reasons: string[] }
+    CardDefinitionId,
+    {
+      cardId: CardDefinitionId;
+      title: string;
+      quantity: number;
+      reasons: string[];
+    }
   >();
   for (const strategyId of prominentStrategyIds) {
     const score = profile.strategyScores[strategyId];
@@ -28,7 +34,7 @@ const analysis = activeDecks.map((deck) => {
     for (const evidence of score.anchorEvidence) {
       const current = keyCardCandidates.get(evidence.cardId) ?? {
         cardId: evidence.cardId,
-        title: cardsById[evidence.cardId]?.title ?? evidence.cardId,
+        title: cardsById[evidence.cardId]?.title ?? String(evidence.cardId),
         quantity: evidence.quantity,
         reasons: [],
       };

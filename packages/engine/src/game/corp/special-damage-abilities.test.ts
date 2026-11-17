@@ -56,7 +56,7 @@ function makeHost(legalAction?: LegalAction) {
   const definitions: Record<string, CardDefinition> = {
     rock: definition(539, "I Got a Rock"),
     dog: definition(551, "Schlaghund"),
-    agenda: definition("agenda", "Agenda", "agenda"),
+    agenda: definition(2974352677, "Agenda", "agenda"),
   };
   const cardInstances: Record<string, CardInstance> = {
     rock: instance("rock", definitions.rock!.id),
@@ -80,7 +80,11 @@ function makeHost(legalAction?: LegalAction) {
   const calls = {
     builtActions: [] as LegalAction[],
     spentAgendaPointCosts: [] as number[],
-    damages: [] as Array<{ type: string; amount: number; source: string }>,
+    damages: [] as Array<{
+      type: string;
+      amount: number;
+      source: CardDefinitionId;
+    }>,
     rolls: [] as string[],
     trashedCorp: [] as CardInstanceId[],
   };
@@ -154,7 +158,7 @@ function makeHost(legalAction?: LegalAction) {
           paidPoints: requiredPoints,
           bonusPointsSpent: 0,
           spentAgendaIds: ["agenda" as CardInstanceId],
-          spentAgendaDefinitionIds: ["agenda" as CardDefinitionId],
+          spentAgendaDefinitionIds: [2974352677 as CardDefinitionId],
         };
       },
     },
@@ -287,13 +291,11 @@ describe("corp special damage abilities", () => {
 
     expect(result.handled).toBe(true);
     expect(calls.spentAgendaPointCosts).toEqual([3]);
-    expect(calls.damages).toEqual([
-      { type: "meat", amount: 15, source: 539 },
-    ]);
+    expect(calls.damages).toEqual([{ type: "meat", amount: 15, source: 539 }]);
     expect(legalAction.payload).toMatchObject({
       agendaPointCost: 3,
       agendaPointCostPaid: 3,
-      spentAgendaDefinitionIds: "agenda",
+      spentAgendaDefinitionIds: "2974352677",
     });
     expect(legalAction.payload?.specialZoneReason).toBeUndefined();
   });
@@ -313,10 +315,8 @@ describe("corp special damage abilities", () => {
       dieRoll: 2,
       sourceTrashed: true,
     });
-    expect(calls.rolls).toEqual(["v1921.die.onr_v1_339_schlaghund.tag_damage"]);
-    expect(calls.damages).toEqual([
-      { type: "meat", amount: 10, source: 551 },
-    ]);
+    expect(calls.rolls).toEqual(["v1921.die.551.tag_damage"]);
+    expect(calls.damages).toEqual([{ type: "meat", amount: 10, source: 551 }]);
     expect(calls.trashedCorp).toEqual(["dog"]);
     expect(legalAction.payload).toMatchObject({
       v1921DieRoll: 2,

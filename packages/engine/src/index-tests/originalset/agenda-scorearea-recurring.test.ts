@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -761,7 +762,7 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
         .servers.find((server) => server.id === "rd")
         ?.ice.find((ice) => ice.definitionId === 590)
         ?.strength,
-    ).toBe((CARD_DEFINITIONS_BY_ID.simple_code_gate_ice?.strength ?? 0) + 2);
+    ).toBe((CARD_DEFINITIONS_BY_ID[590]?.strength ?? 0) + 2);
     canisState = continueRunThroughMovement(canisState);
     expect(canisState.run).toBeUndefined();
     const replay = replayEvents(
@@ -989,7 +990,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       cardDefinitionId: 596,
     });
     expect(
-      JSON.stringify(accessState.eventLog.at(-1)?.publicPayload),
+      serializedDefinitionReferences(JSON.stringify(accessState.eventLog.at(-1)?.publicPayload)),
     ).not.toContain(588);
     expect(
       replayEvents(accessInitial, accessState.eventLog.slice(accessReplayStart))
@@ -1357,7 +1358,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       );
     expect(
       (
-        runnerPrivateLookEvent?.publicPayload.knownRndDefinitionIds as string[]
+        runnerPrivateLookEvent?.publicPayload.knownRndDefinitionIds as number[]
       ).slice(0, 2),
     ).toEqual([588, 596]);
     expect(runnerPrivateLookEvent?.publicPayload).toMatchObject({
@@ -1405,7 +1406,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(hqRun.eventLog.at(-1)?.publicPayload).toMatchObject({
       installedAccessBonus: 1,
       effectiveAccessCount: 2,
-      installedAccessBonusSourceDefinitionIds: 341,
+      installedAccessBonusSourceDefinitionIds: String(341),
     });
 
     let rdInterfaceState = p333State("p3-33-rd-interface", [
@@ -1434,7 +1435,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(rdRun.eventLog.at(-1)?.publicPayload).toMatchObject({
       installedAccessBonus: 1,
       effectiveAccessCount: 2,
-      installedAccessBonusSourceDefinitionIds: 351,
+      installedAccessBonusSourceDefinitionIds: String(351),
     });
   });
 
@@ -2299,7 +2300,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       installedAccessBonus: 2,
       effectiveAccessCount: 3,
       installedAccessBonusSourceDefinitionIds:
-        "onr_v1_139_r-and-d-interface,onr_v1_139_r-and-d-interface",
+        "351,351",
     });
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "Simple Economy Asset",
@@ -2308,7 +2309,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: 596,
     });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(state.eventLog.at(-1)?.publicPayload))).not.toContain(
       588,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -2561,7 +2562,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       bonusTraceLinkCreditsSpent: 1,
       runnerCreditsSpent: 0,
-      traceLinkCreditSourceDefinitionIds: 376,
+      traceLinkCreditSourceDefinitionIds: "376",
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -2695,7 +2696,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_37_look_top_stack_take_matching",
-      publicRevealDefinitionIds: 602,
+      publicRevealDefinitionIds: String(602),
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -3703,7 +3704,7 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
         clientKnownStateVersion: state.stateVersion - 1,
         idempotencyKey: `spotcheck-${definitionId}-stale-score`,
       });
-      expect(stale.ok, definitionId).toBe(false);
+      expect(stale.ok, String(definitionId)).toBe(false);
       if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
@@ -3737,8 +3738,8 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
         privatePayloadMarkers,
       );
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.ok, String(definitionId)).toBe(true);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
   });
 

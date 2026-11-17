@@ -364,7 +364,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
         cardId: fetalId,
         stealCost: 2,
         stealAdditionalCost: 2,
-        stealCostSourceDefinitionIds: FETAL_AI,
+        stealCostSourceDefinitionIds: String(FETAL_AI),
       },
     });
     const declinedFetal = apply(
@@ -540,7 +540,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
         payload: {
           stealCost: 7,
           stealAdditionalCost: 7,
-          stealCostSourceDefinitionIds: `${FETAL_AI},onr_v1_366_red-herrings`,
+          stealCostSourceDefinitionIds: `${FETAL_AI},578`,
         },
       },
       {
@@ -549,7 +549,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
         payload: {
           stealCost: 7,
           stealAdditionalCost: 7,
-          stealCostSourceDefinitionIds: `${FETAL_AI},onr_v1_366_red-herrings`,
+          stealCostSourceDefinitionIds: `${FETAL_AI},578`,
         },
       },
     ]);
@@ -731,7 +731,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       const avoidOption = state.pendingChoice?.options.find((option) =>
         option.id.includes(String(sourceId)),
       )?.id;
-      expect(avoidOption, source.definitionId).toBeDefined();
+      expect(avoidOption, String(source.definitionId)).toBeDefined();
       expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
 
       const drift = structuredClone(state);
@@ -762,12 +762,12 @@ describe("Proteus PRO013 agenda suite behavior", () => {
           selectedOptionIds: [String(avoidOption)],
         },
       });
-      expect(driftResult.ok, source.definitionId).toBe(false);
+      expect(driftResult.ok, String(source.definitionId)).toBe(false);
 
       const creditsBefore = state.runner.credits;
       state = applyChoice(state, "runner", String(avoidOption));
-      expect(state.runner.tags, source.definitionId).toBe(0);
-      expect(state.runner.credits, source.definitionId).toBe(
+      expect(state.runner.tags, String(source.definitionId)).toBe(0);
+      expect(state.runner.credits, String(source.definitionId)).toBe(
         creditsBefore - source.creditCost,
       );
       if (source.trashes) expect(state.runner.heap).toContain(sourceId);

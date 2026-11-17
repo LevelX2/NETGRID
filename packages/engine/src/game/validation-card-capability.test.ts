@@ -25,8 +25,8 @@ describe("persisted card capability identity validation", () => {
     const continuation = {
       kind: "card_effect_activated" as const,
       sourceCardId: "source" as CardInstanceId,
-      sourceDefinitionId: "test_card",
-      sourceAbilityId: "test_card:draw",
+      sourceDefinitionId: 2403765484,
+      sourceAbilityId: "2403765484:draw",
       drawEffectIndex: 0,
       nextEffectIndex: 1,
       creditGainOrdinal: 0,
@@ -53,7 +53,7 @@ describe("persisted card capability identity validation", () => {
       /capability identity is invalid/,
     );
     expect(errorsFor({ sourceAbilityId: "Bad/Id" })).toMatch(/invalid/);
-    expect(errorsFor({ sourceAbilityId: "other_card:draw" })).toMatch(
+    expect(errorsFor({ sourceAbilityId: "2403765485:draw" })).toMatch(
       /another definition/,
     );
   });

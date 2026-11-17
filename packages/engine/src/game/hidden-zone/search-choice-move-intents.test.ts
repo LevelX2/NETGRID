@@ -11,8 +11,8 @@ import {
   createSearchToGripMoveIntent,
 } from "./search-choice-move-intents";
 
-const sourceDefinitionId = "source_definition" as CardDefinitionId;
-const selectedDefinitionId = "selected_definition" as CardDefinitionId;
+const sourceDefinitionId = 462381168 as CardDefinitionId;
+const selectedDefinitionId = 4269973732 as CardDefinitionId;
 
 function removeFromZone(
   zone: CardInstanceId[],
@@ -67,7 +67,7 @@ describe("hidden-zone search choice move intents", () => {
       cardDefinitionId: selectedDefinitionId,
       publicRevealKind: "reveal",
       publicRevealDefinitionId: selectedDefinitionId,
-      revealedCardDefinitionIds: selectedDefinitionId,
+      revealedCardDefinitionIds: String(selectedDefinitionId),
       revealedCount: 1,
     });
   });
@@ -108,7 +108,7 @@ describe("hidden-zone search choice move intents", () => {
       cardDefinitionId: selectedDefinitionId,
       publicRevealKind: "reveal",
       publicRevealDefinitionId: selectedDefinitionId,
-      revealedCardDefinitionIds: selectedDefinitionId,
+      revealedCardDefinitionIds: String(selectedDefinitionId),
       revealedCount: 1,
     });
   });

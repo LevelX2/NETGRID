@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -188,14 +189,14 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.runAccess).toHaveLength(14);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.runAccess) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
-      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.rulesText, String(definitionId)).not.toContain("WIP");
     }
     expect(
       CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
@@ -239,15 +240,15 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
           action.payload?.serverId === expectation.serverId,
       );
 
-      expect(state.run?.attackedServerId, expectation.definitionId).toBe(
+      expect(state.run?.attackedServerId, String(expectation.definitionId)).toBe(
         expectation.serverId,
       );
-      expect(state.run?.accessCount, expectation.definitionId).toBe(
+      expect(state.run?.accessCount, String(expectation.definitionId)).toBe(
         expectation.accessCount,
       );
       expect(
         state.eventLog.at(-1)?.publicPayload,
-        expectation.definitionId,
+        String(expectation.definitionId),
       ).toMatchObject({ actionType: "play_event" });
     }
   });
@@ -937,13 +938,13 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         (action) => action.type === "continue_run",
       );
 
-      expect(state.pendingChoice?.side, definitionId).toBe("corp");
-      expect(state.pendingChoice?.kind, definitionId).toBe("bid_amount");
+      expect(state.pendingChoice?.side, String(definitionId)).toBe("corp");
+      expect(state.pendingChoice?.kind, String(definitionId)).toBe("bid_amount");
       expect(
         getPlayerView(state, "runner").pendingChoice,
-        definitionId,
+        String(definitionId),
       ).toBeUndefined();
-      expect(state.trace, definitionId).toMatchObject({
+      expect(state.trace, String(definitionId)).toMatchObject({
         status: "corp_bid",
         traceLimit,
       });
@@ -1130,7 +1131,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       amounts: expect.objectContaining({ reorderedIceCount: 2 }),
       targets: expect.objectContaining({ hiddenOrderChoice: true }),
     });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(state.eventLog.at(-1)?.publicPayload))).not.toContain(
       590,
     );
   });

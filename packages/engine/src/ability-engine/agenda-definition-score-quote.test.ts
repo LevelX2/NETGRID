@@ -37,7 +37,7 @@ describe("public agenda definition score-point quote", () => {
       minimumAdvancementCountersForRequestedPoints: null,
     });
   });
-  it.each(["unknown-agenda", "onr_v1_133_score!", 437])(
+  it.each([0, 65535, 437])(
     "fails visibly for unavailable agenda identity %s",
     (id) => {
       expect(quoteAgendaDefinitionScorePoints(id, 3, 5, 2)).toEqual({

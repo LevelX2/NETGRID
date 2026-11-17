@@ -503,8 +503,7 @@ describe("PlayerView projection", () => {
       }),
     );
     const iceId = putCorpIceOnServer(state, "rd", 589);
-    state.cardInstances[iceId]!.definitionId =
-      73;
+    state.cardInstances[iceId]!.definitionId = 73;
     removeEverywhere(state, iceId);
     state.cardInstances[iceId]!.zone = {
       side: "special",
@@ -636,10 +635,7 @@ describe("PlayerView projection", () => {
       strengthModifier: 0,
     };
     state.corp.servers.find((server) => server.id === "rd")!.ice.push(iceId);
-    for (const [index, definitionId] of [
-      252,
-      226,
-    ].entries()) {
+    for (const [index, definitionId] of [252, 226].entries()) {
       const cardId = `alternate-subtype-breaker-${index}` as CardInstanceId;
       state.cardInstances[cardId] = {
         instanceId: cardId,
@@ -870,7 +866,7 @@ describe("PlayerView projection", () => {
       state.cardInstances[iceId] = {
         ...state.cardInstances[state.corp.identity]!,
         instanceId: iceId,
-        definitionId: definitionId as string,
+        definitionId,
         owner: "corp",
         controller: "corp",
         faceup: false,
@@ -1658,10 +1654,7 @@ describe("PlayerView projection", () => {
     const state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-stealth-block"),
     );
-    const surveillanceId = putCorpRootInRemote(
-      state,
-      585,
-    );
+    const surveillanceId = putCorpRootInRemote(state, 585);
     state.cardInstances[surveillanceId]!.rezzed = true;
     state.cardInstances[surveillanceId]!.faceup = true;
 

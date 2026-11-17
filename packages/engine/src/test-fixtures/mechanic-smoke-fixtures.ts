@@ -3,6 +3,7 @@ import { applyAction, createGameAfterSetup, getLegalActions } from "../index";
 import {
   CURRENT_RULES_BASELINE,
   DEMO_DECKS,
+  type CardDefinitionId,
   type CardInstanceId,
   type ChoiceRequest,
   type CounterType,
@@ -2222,7 +2223,7 @@ export function toRunnerTurnFromCorpMain(state: GameState): GameState {
 export function sourceDefinition(
   state: GameState,
   action: LegalAction,
-): string | undefined {
+): CardDefinitionId | undefined {
   if (
     typeof action.source !== "string" ||
     action.source === "basic_action" ||
@@ -2237,7 +2238,9 @@ export function agendaPoints(state: GameState, side: Side): number {
   const scoredPoints = ids.reduce((sum, id) => {
     const instance = state.cardInstances[id];
     const basePoints =
-      CARD_DEFINITIONS_BY_ID[instance?.definitionId ?? ""]?.agendaPoints ?? 0;
+      instance === undefined
+        ? 0
+        : (CARD_DEFINITIONS_BY_ID[instance.definitionId]?.agendaPoints ?? 0);
     const bonusPoints = instance?.counters?.agenda ?? 0;
     const spentPoints = Math.max(
       0,

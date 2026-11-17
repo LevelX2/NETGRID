@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -2056,7 +2057,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       getPlayerView(creditState, "corp"),
     );
     expect(corpCreditViewBeforeReveal).not.toContain("Credit Subversion");
-    expect(corpCreditViewBeforeReveal).not.toContain(
+    expect(serializedDefinitionReferences(corpCreditViewBeforeReveal)).not.toContain(
       194,
     );
     expect(corpCreditViewBeforeReveal).not.toContain(
@@ -2216,7 +2217,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       getPlayerView(deathState, "corp"),
     );
     expect(corpDeathViewBeforeReveal).not.toContain("Death from Above");
-    expect(corpDeathViewBeforeReveal).not.toContain(
+    expect(serializedDefinitionReferences(corpDeathViewBeforeReveal)).not.toContain(
       195,
     );
     expect(corpDeathViewBeforeReveal).not.toContain("trash_remote_fort");

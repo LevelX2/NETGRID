@@ -189,7 +189,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
     expect(ONR_V1_9_0_FINAL_CARD_IDS).toHaveLength(5);
     for (const definitionId of ONR_V1_9_0_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(cardImplementationForDefinitionId(definitionId)).toBeDefined();
@@ -255,7 +255,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
       );
       const dieRecord = state.randomDrawRecords.find((record) =>
         record.purpose.startsWith(
-          "v190.die.icebreaker.random_break_or_damage.onr_v1_007_blink.",
+          "v190.die.icebreaker.random_break_or_damage.219.",
         ),
       );
       expect(dieRecord).toBeDefined();
@@ -357,7 +357,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
       );
       const dieRecord = state.randomDrawRecords.find((record) =>
         record.purpose.startsWith(
-          "v190.die.onr_v1_005_bartmoss-memorial-icebreaker.post_encounter.",
+          "v190.die.217.post_encounter.",
         ),
       );
       expect(dieRecord).toBeDefined();
@@ -423,7 +423,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
       );
       const dieRecord = state.randomDrawRecords.find((record) =>
         record.purpose.startsWith(
-          "v190.die.icebreaker.random_break_or_damage.onr_v1_007_blink.",
+          "v190.die.icebreaker.random_break_or_damage.219.",
         ),
       );
       expect(dieRecord).toBeDefined();
@@ -538,7 +538,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
     expect(new Set(discarded).size).toBe(discarded.length);
     const discardRecords = state.randomDrawRecords.filter((record) =>
       record.purpose.startsWith(
-        "card_implementation.random.onr_v1_115_terrorist-reprisal.hq_discard",
+        "card_implementation.random.327.hq_discard",
       ),
     );
     expect(discardRecords).toHaveLength(Math.min(5, hqBefore));
@@ -1044,11 +1044,11 @@ describe("V1.9.1 Mechanikpaket J", () => {
     expect(ONR_V1_9_1_FINAL_CARD_IDS).toHaveLength(3);
     for (const definitionId of ONR_V1_9_1_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(cardImplementationForDefinitionId(definitionId)).toBeDefined();
-      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
+      expect(definition?.mechanics.join(" "), String(definitionId)).not.toMatch(
         /v2|matchmaking|ranking|deckbuilder/,
       );
     }
@@ -1264,7 +1264,7 @@ describe("V1.9.1 Mechanikpaket J", () => {
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     const dieRecords = state.randomDrawRecords.filter((record) =>
       record.purpose.startsWith(
-        "v190.die.virus_counter.onr_v1_034_incubator.start_of_turn.roll.",
+        "v190.die.virus_counter.246.start_of_turn.roll.",
       ),
     );
     expect(dieRecords.length).toBeGreaterThan(0);

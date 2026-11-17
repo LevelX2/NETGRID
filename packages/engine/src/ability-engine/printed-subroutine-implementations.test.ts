@@ -15,7 +15,7 @@ function runtimePrintedSubroutines(
   definitionId: CardDefinitionId,
 ): SubroutineDefinition[] {
   const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-  expect(definition, definitionId).toBeDefined();
+  expect(definition, String(definitionId)).toBeDefined();
   return (
     printedSubroutinesForCardImplementation(definition!) ??
     definition!.subroutines ??
@@ -26,7 +26,7 @@ function runtimePrintedSubroutines(
 describe("printed subroutine implementations", () => {
   it("maps pay-or-end-run printed subroutines with variable amounts", () => {
     const definition = {
-      id: "test_variable_pay_or_end_ice",
+      id: 3474921859,
     } as CardDefinition;
 
     expect(
@@ -40,7 +40,7 @@ describe("printed subroutine implementations", () => {
         0,
       ),
     ).toEqual({
-      id: "card_implementation.test_variable_pay_or_end_ice.printed_subroutine.1.end_the_run_unless_runner_pays",
+      id: "card_implementation.3474921859.printed_subroutine.1.end_the_run_unless_runner_pays",
       type: "end_the_run_unless_runner_pays",
       amount: 2,
     });
@@ -76,11 +76,11 @@ describe("printed subroutine implementations", () => {
     for (const [definitionId, subroutineCount] of p325IceCases) {
       expect(
         runtimePrintedSubroutines(definitionId),
-        definitionId,
+        String(definitionId),
       ).toHaveLength(subroutineCount);
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).toBe("implemented");
     }
   });
@@ -96,7 +96,7 @@ describe("printed subroutine implementations", () => {
     ] as const;
 
     for (const definitionId of p326IceCases) {
-      expect(runtimePrintedSubroutines(definitionId), definitionId).toEqual([
+      expect(runtimePrintedSubroutines(definitionId), String(definitionId)).toEqual([
         expect.objectContaining({
           type: "trash_installed_program",
         }),
@@ -106,7 +106,7 @@ describe("printed subroutine implementations", () => {
       ]);
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).toBe("implemented");
     }
   });
@@ -164,12 +164,12 @@ describe("printed subroutine implementations", () => {
     ] as const;
 
     for (const { definitionId, subroutines } of p327IceCases) {
-      expect(runtimePrintedSubroutines(definitionId), definitionId).toEqual(
+      expect(runtimePrintedSubroutines(definitionId), String(definitionId)).toEqual(
         subroutines,
       );
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).toBe("implemented");
     }
   });
@@ -232,12 +232,12 @@ describe("printed subroutine implementations", () => {
     ] as const;
 
     for (const { definitionId, subroutines } of p330IceCases) {
-      expect(runtimePrintedSubroutines(definitionId), definitionId).toEqual(
+      expect(runtimePrintedSubroutines(definitionId), String(definitionId)).toEqual(
         subroutines,
       );
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).toBe("implemented");
     }
     expect(runtimePrintedSubroutines(434)).toEqual([

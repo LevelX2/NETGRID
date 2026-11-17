@@ -5,7 +5,7 @@ import { projectEngineEventToPublicEvent } from "./event-projection";
 describe("server event projection", () => {
   it("preserves the Engine turn serial as a public cadence fact", () => {
     const event: GameEvent = {
-      eventId: "event_turn_9",
+      eventId: 10,
       type: "start_run",
       stateVersionBefore: 20,
       stateVersionAfter: 21,

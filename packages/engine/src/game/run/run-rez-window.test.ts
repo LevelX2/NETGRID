@@ -46,7 +46,7 @@ function definition(
 ): CardDefinition {
   return {
     id,
-    title: options.title ?? id,
+    title: options.title ?? String(id),
     side: options.side ?? "corp",
     type: options.type ?? "upgrade",
     rezCost: options.rezCost ?? 0,
@@ -147,17 +147,17 @@ function makeState(
 
 function definitionsFor(state: GameState): Record<string, CardDefinition> {
   const definitions: Record<string, CardDefinition> = {
-    simple_barrier_ice: definition(589, {
+    589: definition(589, {
       title: "Simple Barrier ICE",
       type: "ice",
       rezCost: 3,
     }),
-    simple_upgrade: definition(606, {
+    606: definition(606, {
       title: "Simple Upgrade",
       type: "upgrade",
       rezCost: 1,
     }),
-    simple_economy_asset: definition(594, {
+    594: definition(594, {
       title: "Simple Economy Asset",
       type: "asset",
       rezCost: 0,
@@ -511,13 +511,9 @@ describe("run rez window", () => {
 
     const changedIceCount = structuredClone(state);
     const outerIceId = "ice_2" as CardInstanceId;
-    changedIceCount.cardInstances[outerIceId] = instance(
-      outerIceId,
-      589,
-      {
-        zone: { side: "corp", zone: "serverIce", serverId: "rd" },
-      },
-    );
+    changedIceCount.cardInstances[outerIceId] = instance(outerIceId, 589, {
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+    });
     changedIceCount.corp.servers[0]!.ice.push(outerIceId);
     expect(() =>
       assertCorpRootRezCostQuoteValid(changedIceCount, "root_1", action),
@@ -565,13 +561,9 @@ describe("run rez window", () => {
     const state = makeState({ rootRezzed: true });
     const remoteRootId = "remote_root" as CardInstanceId;
     const rezzedRemoteRootId = "remote_root_rezzed" as CardInstanceId;
-    state.cardInstances[remoteRootId] = instance(
-      remoteRootId,
-      594,
-      {
-        zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
-      },
-    );
+    state.cardInstances[remoteRootId] = instance(remoteRootId, 594, {
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    });
     state.cardInstances[rezzedRemoteRootId] = instance(
       rezzedRemoteRootId,
       594,
@@ -729,13 +721,9 @@ describe("run rez window", () => {
   it("keeps the movement root rez window open when another root can be rezzed", () => {
     const state = makeState({ rootRezzed: true });
     const secondRootId = "root_2" as CardInstanceId;
-    state.cardInstances[secondRootId] = instance(
-      secondRootId,
-      594,
-      {
-        zone: { side: "corp", zone: "serverRoot", serverId: "rd" },
-      },
-    );
+    state.cardInstances[secondRootId] = instance(secondRootId, 594, {
+      zone: { side: "corp", zone: "serverRoot", serverId: "rd" },
+    });
     state.corp.servers[0]!.root.push(secondRootId);
     const { host, calls } = hostFor(state);
     const action = legalAction(state, "corp", "rez_card", {

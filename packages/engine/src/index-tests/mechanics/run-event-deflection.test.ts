@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import type { CardInstanceId, GameState } from "@netgrid/shared";
 import {
@@ -110,7 +111,7 @@ describe("fixed-fort run-event benefits after deflection", () => {
       expect(state.run?.successfulRunEffectTargetServerId).toBe(target);
       const runnerView = JSON.stringify(getPlayerView(state, "runner"));
       expect(runnerView).not.toContain(fixture.agendaId);
-      expect(runnerView).not.toContain(7);
+      expect(serializedDefinitionReferences(runnerView)).not.toContain(7);
       state = apply(state, "runner", (a) => a.type === "continue_run");
       expect(state.pendingChoice).toBeUndefined();
       expect(state.run).toMatchObject({

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import {
   type CardInstance,
   type CardInstanceId,
@@ -28,7 +29,7 @@ function card(
 ): CardInstance {
   return {
     instanceId: id,
-    definitionId: `${id}_definition`,
+    definitionId: syntheticCardDefinitionId(`${id}_definition`),
     owner: side,
     controller: side,
     zone,

@@ -50,7 +50,7 @@ describe("mechanical StateHash baseline", () => {
       trace: {
         traceId: "trace_hash",
         sourceCardInstanceId: "source",
-        sourceDefinitionId: "source_definition",
+        sourceDefinitionId: 462381168,
         traceLimit: 3,
         status: "runner_bid",
         successEffect: { type: "add_tag", amount: 1 },
@@ -137,7 +137,7 @@ describe("mechanical StateHash baseline", () => {
         continuation: {
           kind: "card_effect_activated",
           sourceCardId: "source",
-          sourceDefinitionId: "test_card",
+          sourceDefinitionId: 2403765484,
           sourceAbilityId: "test_card:draw",
           drawEffectIndex: 0,
           nextEffectIndex: 1,

@@ -191,7 +191,7 @@ export function startTraceFromOperation(
   const sourceCardInstanceId = String(legalAction.payload?.cardId ?? "");
   if (!sourceCardInstanceId || !state.cardInstances[sourceCardInstanceId])
     throw new Error("Trace-Operation hat keine gueltige Quellenkarte.");
-  const traceId = `op_trace.${state.stateVersion + 1}.${host.callbacks.sanitizeId(sourceDefinitionId)}.${sourceCardInstanceId}`;
+  const traceId = `op_trace.${state.stateVersion + 1}.${sourceDefinitionId}.${sourceCardInstanceId}`;
   const fortTraceBitPoolSource = host.fort.fortTraceBitPoolSource();
   const corpTraceCounterPool = host.counters.corpTraceCounterPoolTotal();
   const paymentCapacity =
@@ -1445,7 +1445,7 @@ function completeTraceWithoutRun(
   const hackerTrackerCountersAdded =
     host.callbacks.addCorpTraceCounterPoolCounters();
   const traceAvoidReward = successful
-    ? { amount: 0, sourceDefinitionIds: [] as string[] }
+    ? { amount: 0, sourceDefinitionIds: [] as CardDefinitionId[] }
     : applyTraceAvoidRewardsForOperation(state, trace);
   const traceResourceTrashPayload =
     successful &&
@@ -1496,7 +1496,9 @@ function completeTraceWithoutRun(
           gainedCredits: traceAvoidReward.amount,
           runnerCreditsAfter: state.runner.credits,
           traceAvoidRewardSourceDefinitionIds:
-            traceAvoidReward.sourceDefinitionIds.sort().join(","),
+            traceAvoidReward.sourceDefinitionIds
+              .sort((left, right) => left - right)
+              .join(","),
         }
       : {}),
     ...traceResourceTrashPayload,
@@ -1527,9 +1529,9 @@ function traceSuccessTagAmountForOperation(
 function applyTraceAvoidRewardsForOperation(
   state: GameState,
   trace: CurrentTrace,
-): { amount: number; sourceDefinitionIds: number[] } {
+): { amount: number; sourceDefinitionIds: CardDefinitionId[] } {
   let amount = 0;
-  const sourceDefinitionIds: number[] = [];
+  const sourceDefinitionIds: CardDefinitionId[] = [];
   for (const reward of trace.traceAvoidRewardUsages ?? []) {
     if (!Number.isInteger(reward.amount) || reward.amount <= 0) continue;
     amount += reward.amount;
@@ -1538,7 +1540,7 @@ function applyTraceAvoidRewardsForOperation(
   if (amount > 0)
     credits(state, "runner", amount, {
       kind: "trace_effect",
-      sourceDefinitionIds: sourceDefinitionIds as CardDefinitionId[],
+      sourceDefinitionIds,
       reason: "trace_avoid_rewards",
     });
   return { amount, sourceDefinitionIds };

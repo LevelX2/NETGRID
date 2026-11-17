@@ -1,4 +1,4 @@
-import { DEMO_DECKS, type DeckDefinition } from "@netgrid/shared";
+import { DEMO_DECKS, type CardDefinitionId, type DeckDefinition } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 
 export const CARD_REGISTRY_RETENTION_STRESS_IDS = Object.freeze([
@@ -34,7 +34,10 @@ export function cardRegistryRetentionDecks(lane: "stress" | "control"): {
     lane === "stress"
       ? CARD_REGISTRY_RETENTION_STRESS_IDS
       : CARD_REGISTRY_RETENTION_CARD_SPEC_CONTROL_IDS;
-  const cardsBySide = { runner: [] as string[], corp: [] as string[] };
+  const cardsBySide = {
+    runner: [] as CardDefinitionId[],
+    corp: [] as CardDefinitionId[],
+  };
   for (const definitionId of definitionIds) {
     const definition = CARD_DEFINITIONS_BY_ID[definitionId];
     if (!definition)

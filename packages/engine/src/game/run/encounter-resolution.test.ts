@@ -410,7 +410,7 @@ describe("encounter resolution boundary", () => {
         damageId: "run_1.ice_1.post_encounter_net_damage",
         damageType: "net",
         amount: 3,
-        source: "subroutine:onr_v1_242_fatal-attractor:next_encounter",
+        source: "subroutine:454:next_encounter",
       },
     ]);
     expect(damagePayload).toMatchObject({
@@ -421,8 +421,7 @@ describe("encounter resolution boundary", () => {
     const fullyBroken = makeState();
     fullyBroken.run!.fatalDamageActiveForEncounter = true;
     fullyBroken.run!.fatalDamageAmountForEncounter = 3;
-    fullyBroken.run!.fatalDamageSourceDefinitionId =
-      454;
+    fullyBroken.run!.fatalDamageSourceDefinitionId = 454;
     fullyBroken.run!.brokenSubroutineIndexes = [0];
     const fullyBrokenDealt: unknown[] = [];
     resolvePostEncounterNetDamage(encounterResolutionHost(fullyBroken), {

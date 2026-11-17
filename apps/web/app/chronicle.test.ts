@@ -1622,14 +1622,14 @@ describe("formatChronicleEvent", () => {
     });
     const sameCardInRemoteTwo = makeEvent("resolve_choice", {
       ...remoteOne.publicPayload,
-      eventId: "evt_expose_remote_2",
+      eventId: 100,
       exposedServerId: "remote_2",
       exposedServerLabel: "Remote 2",
       exposedIndex: 1,
     });
     const iceInRemoteOne = makeEvent("resolve_choice", {
       ...remoteOne.publicPayload,
-      eventId: "evt_expose_remote_1_ice_2",
+      eventId: 101,
       title: "Simple Barrier ICE",
       publicRevealDefinitionId: 589,
       cardDefinitionId: 589,
@@ -1683,7 +1683,7 @@ describe("formatChronicleEvent", () => {
     "summarizes Mouse activation and resolved expose once for $label",
     ({ viewer, aiExplanation, expectedSubject }) => {
       const activation = makeEvent("activated_card_ability", {
-        eventId: "evt_mouse_activation",
+        eventId: 102,
         actor: "runner",
         label: "Mouse: installierte Korp-Karte exposen",
         actionCostClicks: 1,
@@ -1694,7 +1694,7 @@ describe("formatChronicleEvent", () => {
         sourceDefinitionId: 254,
       });
       const result = makeEvent("resolve_choice", {
-        eventId: "evt_mouse_result",
+        eventId: 103,
         actor: "runner",
         ...(aiExplanation ? { aiExplanation } : {}),
         hiddenZoneBarrier: true,
@@ -1749,7 +1749,7 @@ describe("formatChronicleEvent", () => {
 
   it("keeps unresolved or unrelated single-expose activations visible", () => {
     const activation = makeEvent("activated_card_ability", {
-      eventId: "evt_mouse_unresolved",
+      eventId: 104,
       actor: "runner",
       actionCostClicks: 1,
       turnActionOrdinalStart: 2,
@@ -1759,7 +1759,7 @@ describe("formatChronicleEvent", () => {
       sourceDefinitionId: 254,
     });
     const unrelatedSeeYaResult = makeEvent("resolve_choice", {
-      eventId: "evt_seeya_result",
+      eventId: 105,
       actor: "runner",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "expose_installed_card_review",
@@ -1768,7 +1768,7 @@ describe("formatChronicleEvent", () => {
       sourceDefinitionId: 270,
     });
     const batchExpose = makeEvent("resolve_choice", {
-      eventId: "evt_batch_expose",
+      eventId: 106,
       actor: "runner",
       hiddenZoneBarrier: true,
       hiddenZoneAction:
@@ -7735,21 +7735,21 @@ describe("formatChronicleEvent", () => {
     const events = [
       makeEvent("gain_credit", {
         actor: "corp",
-        eventId: "evt_1",
+        eventId: 2,
         actionCostClicks: 1,
         turnActionOrdinalStart: 1,
         turnActionOrdinalEnd: 1,
       }),
       makeEvent("gain_credit", {
         actor: "corp",
-        eventId: "evt_2",
+        eventId: 3,
         actionCostClicks: 1,
         turnActionOrdinalStart: 2,
         turnActionOrdinalEnd: 2,
       }),
       makeEvent("play_operation", {
         actor: "corp",
-        eventId: "evt_overtime",
+        eventId: 107,
         actionCostClicks: 1,
         turnActionOrdinalStart: 3,
         turnActionOrdinalEnd: 3,
@@ -7758,22 +7758,22 @@ describe("formatChronicleEvent", () => {
       }),
       makeEvent("gain_credit", {
         actor: "corp",
-        eventId: "evt_extra_1",
+        eventId: 108,
         actionCostClicks: 1,
         turnActionOrdinalStart: 2,
         turnActionOrdinalEnd: 2,
       }),
       makeEvent("gain_credit", {
         actor: "corp",
-        eventId: "evt_extra_2",
+        eventId: 109,
         actionCostClicks: 1,
         turnActionOrdinalStart: 3,
         turnActionOrdinalEnd: 3,
       }),
     ];
     const actionUseByEventId = chronicleActionUseByEventId(events);
-    const firstExtraActionUse = actionUseByEventId.evt_extra_1;
-    const secondExtraActionUse = actionUseByEventId.evt_extra_2;
+    const firstExtraActionUse = actionUseByEventId[108];
+    const secondExtraActionUse = actionUseByEventId[109];
     expect(firstExtraActionUse).toBeDefined();
     expect(secondExtraActionUse).toBeDefined();
     const firstExtra = formatChronicleEvent(events[3]!, "runner", {
@@ -7783,7 +7783,7 @@ describe("formatChronicleEvent", () => {
       actionUse: secondExtraActionUse ?? null,
     });
 
-    expect(actionUseByEventId.evt_overtime).toMatchObject({
+    expect(actionUseByEventId[107]).toMatchObject({
       label: "3",
       title: "3. Aktion in diesem Zug",
     });
@@ -7826,60 +7826,60 @@ describe("formatChronicleEvent", () => {
     const events = [
       makeEvent("mandatory_draw", {
         actor: "corp",
-        eventId: "evt_corp_draw_1",
+        eventId: 110,
       }),
-      makeEvent("gain_credit", { actor: "corp", eventId: "evt_corp_credit_1" }),
-      makeEvent("end_turn", { actor: "corp", eventId: "evt_corp_end_1" }),
+      makeEvent("gain_credit", { actor: "corp", eventId: 111 }),
+      makeEvent("end_turn", { actor: "corp", eventId: 112 }),
       makeEvent("resolve_choice", {
         actor: "corp",
-        eventId: "evt_corp_discard_1",
+        eventId: 113,
         discardResolved: true,
         hiddenZoneAction: "discard_phase",
       }),
-      makeEvent("draw_card", { actor: "runner", eventId: "evt_runner_draw_1" }),
+      makeEvent("draw_card", { actor: "runner", eventId: 114 }),
       makeEvent("play_event", {
         actor: "runner",
-        eventId: "evt_runner_forged",
+        eventId: 115,
         cardDefinitionId: 298,
       }),
       makeEvent("resolve_choice", {
         actor: "corp",
-        eventId: "evt_corp_forged_response",
+        eventId: 116,
         v1922RunnerEventAbility: "force_rez_or_trash_ice",
       }),
-      makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_1" }),
+      makeEvent("end_turn", { actor: "runner", eventId: 117 }),
       makeEvent("resolve_choice", {
         actor: "runner",
-        eventId: "evt_runner_discard_1",
+        eventId: 118,
         discardResolved: true,
         hiddenZoneAction: "discard_phase",
       }),
       makeEvent("mandatory_draw", {
         actor: "corp",
-        eventId: "evt_corp_draw_2",
+        eventId: 119,
       }),
-      makeEvent("end_turn", { actor: "corp", eventId: "evt_corp_end_2" }),
-      makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_2" }),
+      makeEvent("end_turn", { actor: "corp", eventId: 120 }),
+      makeEvent("end_turn", { actor: "runner", eventId: 121 }),
     ];
     const turnNumbers = chronicleTurnNumberByEventId(events);
     const turnSides = chronicleTurnSideByEventId(events);
 
     expect(turnNumbers).toMatchObject({
-      evt_corp_draw_1: 1,
-      evt_corp_end_1: 1,
-      evt_corp_discard_1: 1,
-      evt_runner_draw_1: 2,
-      evt_runner_forged: 2,
-      evt_corp_forged_response: 2,
-      evt_runner_end_1: 2,
-      evt_runner_discard_1: 2,
-      evt_corp_draw_2: 3,
-      evt_corp_end_2: 3,
-      evt_runner_end_2: 4,
+      110: 1,
+      112: 1,
+      113: 1,
+      114: 2,
+      115: 2,
+      116: 2,
+      117: 2,
+      118: 2,
+      119: 3,
+      120: 3,
+      121: 4,
     });
-    expect(turnSides.evt_corp_forged_response).toBe("runner");
+    expect(turnSides[116]).toBe("runner");
 
-    expect(turnSides.evt_runner_end_1).toBe("runner");
+    expect(turnSides[117]).toBe("runner");
   });
 
   it("groups start-turn effects carried by discard resolution under the next turn", () => {
@@ -8032,7 +8032,7 @@ describe("formatChronicleEvent", () => {
     const sourceTitle = 'Omnitech "Spinal Tap" Cybermodem';
     const damageEvent = makeEvent("end_turn", {
       actor: "corp",
-      eventId: "evt_corp_end_spinal_damage",
+      eventId: 122,
       resolvedEffects: [
         {
           effectId: "spinal.damage",
@@ -8052,7 +8052,7 @@ describe("formatChronicleEvent", () => {
     });
     const noEffectEvent = makeEvent("end_turn", {
       actor: "corp",
-      eventId: "evt_corp_end_spinal_no_effect",
+      eventId: 123,
       resolvedEffects: [
         {
           effectId: "spinal.no_effect",
@@ -9083,7 +9083,7 @@ function makeEvent(
       ? "corp"
       : "runner");
   const eventId =
-    typeof payload.eventId === "string" ? payload.eventId : `evt_${actionType}`;
+    typeof payload.eventId === "number" ? payload.eventId : 1;
   const payloadWithoutEventId = { ...payload };
   delete payloadWithoutEventId.eventId;
   return {

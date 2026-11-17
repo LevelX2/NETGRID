@@ -35,10 +35,10 @@ function instance(
   } as CardInstance;
 }
 
-function definition(id: number, title = id): CardDefinition {
+function definition(id: number, title = String(id)): CardDefinition {
   return {
     id,
-    title,
+    title: String(title),
     side: "corp",
     type: "ice",
   } as CardDefinition;
@@ -101,8 +101,8 @@ function makeState(
       ],
     },
     cardInstances: {
-      [outer]: instance(outer, "outer_ice"),
-      [inner]: instance(inner, "inner_ice", { rezzed: false }),
+      [outer]: instance(outer, 3872123020),
+      [inner]: instance(inner, 1420618623, { rezzed: false }),
     },
     run: {
       runId: "run_1",
@@ -359,7 +359,7 @@ describe("run movement execution", () => {
     });
     state.run!.postPassPayOrEndRun = {
       sourceCardInstanceIds: ["source_1" as CardInstanceId],
-      sourceDefinitionIds: ["source_definition"],
+      sourceDefinitionIds: [462381168],
       passedIceId: "ice_outer" as CardInstanceId,
       serverId: "rd",
       amount: 2,

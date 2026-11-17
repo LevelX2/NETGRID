@@ -1312,7 +1312,7 @@ function certifyActivatedStep(
 function certifyEncounterTagStep(
   state: GameState,
   request: CorpPunishRouteQuoteRequest["steps"][number],
-  definition: (typeof CARD_DEFINITIONS_BY_ID)[string],
+  definition: (typeof CARD_DEFINITIONS_BY_ID)[number],
 ):
   | { ok: true; step: CertifiedStep }
   | { ok: false; reason: CorpPunishRouteIncompleteReason }
@@ -1373,7 +1373,7 @@ function certifyEncounterTagStep(
 function certifyHardwareTrashStep(
   state: GameState,
   request: CorpPunishRouteQuoteRequest["steps"][number],
-  definition: (typeof CARD_DEFINITIONS_BY_ID)[string],
+  definition: (typeof CARD_DEFINITIONS_BY_ID)[number],
 ):
   | { ok: true; step: CertifiedStep }
   | { ok: false; reason: CorpPunishRouteIncompleteReason } {
@@ -1567,7 +1567,7 @@ function exactRequestedHardwareTrashAction(
 }
 
 function onPlayCapability(
-  definition: (typeof CARD_DEFINITIONS_BY_ID)[string] & {},
+  definition: (typeof CARD_DEFINITIONS_BY_ID)[number] & {},
   bindingKind: "card_spec_capability_key",
   capabilityId: string,
 ): OnPlayCardAbilityImplementation | undefined {

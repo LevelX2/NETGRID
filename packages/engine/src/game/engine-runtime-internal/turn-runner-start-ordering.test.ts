@@ -11,7 +11,7 @@ function candidate(
 ): RunnerStartOrderingCandidate {
   return {
     sourceId: sourceId as CardInstanceId,
-    sourceDefinitionId: "safe_definition" as CardDefinitionId,
+    sourceDefinitionId: 3671532016 as CardDefinitionId,
     lifecycleOnly: true,
     orderIndependentBetweenCopies: true,
     ...patch,
@@ -30,7 +30,7 @@ describe("Runner start ordering", () => {
       automaticRunnerStartSourceId([
         candidate("safe_1"),
         candidate("other_1", {
-          sourceDefinitionId: "other_definition" as CardDefinitionId,
+          sourceDefinitionId: 1906373255 as CardDefinitionId,
         }),
       ]),
     ).toBeUndefined();

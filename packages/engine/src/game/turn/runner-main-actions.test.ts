@@ -88,7 +88,7 @@ describe("runner main action generation", () => {
       state.cardInstances[eventCardId] = {
         id: eventCardId,
         instanceId: eventCardId,
-        definitionId: "locked_run_event",
+        definitionId: 1992158918,
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "grip" },
@@ -178,9 +178,7 @@ describe("runner main action generation", () => {
       },
     });
     expect(actions[0]?.payload?.optionalBonusRun).toBeUndefined();
-    expect(actions[0]?.actionId).toBe(
-      "runner.start_run.rd.bonus_run.onr_proteus_116_pirate-broadcast",
-    );
+    expect(actions[0]?.actionId).toBe("runner.start_run.rd.bonus_run.174");
   });
 
   it("gives the immediate Bodyweight decision priority over normal actions and pending run sequences", () => {
@@ -190,7 +188,7 @@ describe("runner main action generation", () => {
     state.cardInstances[sourceCardId] = {
       id: sourceCardId,
       instanceId: sourceCardId,
-      definitionId: "bodyweight_data_creche",
+      definitionId: 2334816537,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -271,7 +269,7 @@ describe("runner main action generation", () => {
     state.cardInstances[sourceCardId] = {
       id: sourceCardId,
       instanceId: sourceCardId,
-      definitionId: "all_nighter",
+      definitionId: 1235935470,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "heap" },
@@ -390,7 +388,7 @@ describe("runner main action generation", () => {
     expect(action?.costs).toEqual([{ clicks: 2, credits: 0 }]);
     expect(action?.abilityRef).toMatchObject({
       sourceCardInstanceId: eventCardId,
-      sourceAbilityId: expect.stringContaining("onr_classic_041_networking:"),
+      sourceAbilityId: expect.stringContaining("45:"),
     });
   });
 

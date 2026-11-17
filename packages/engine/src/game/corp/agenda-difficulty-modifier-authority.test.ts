@@ -20,7 +20,7 @@ const corporateWar = 408;
 const directors = 401;
 const washington = 586;
 
-function prepare(region?: string, agenda = tycho, directorsCount = 1) {
+function prepare(region?: number, agenda = tycho, directorsCount = 1) {
   const state = apply(
     createGameAfterSetup({
       seed: "agenda-difficulty-modifier-authority",

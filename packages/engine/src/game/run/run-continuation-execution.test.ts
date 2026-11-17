@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardInstance,
@@ -29,7 +30,7 @@ const BARTMOSS_BREAKER_ID = "bartmoss_breaker" as CardInstanceId;
 
 function instance(
   id: CardInstanceId,
-  definitionId = id,
+  definitionId = syntheticCardDefinitionId(id),
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {
@@ -46,14 +47,14 @@ function instance(
 }
 
 function definitionForId(
-  id: string,
+  id: number,
   subroutines: readonly SubroutineDefinition[] = [],
 ): CardDefinition {
   return {
     id,
-    title: id,
-    side: id.startsWith("runner") ? "runner" : "corp",
-    type: id.includes("ice") ? "ice" : "program",
+    title: String(id),
+    side: "corp",
+    type: "ice",
     subroutines,
   } as CardDefinition;
 }
@@ -109,11 +110,15 @@ function makeState(
     cardInstances: {
       [ICE_ID]: instance(ICE_ID, 589),
       [INNER_ICE_ID]: instance(INNER_ICE_ID, 590),
-      [BARTMOSS_BREAKER_ID]: instance(BARTMOSS_BREAKER_ID, "runner_bartmoss", {
-        owner: "runner",
-        controller: "runner",
-        zone: { side: "runner", zone: "rig" },
-      }),
+      [BARTMOSS_BREAKER_ID]: instance(
+        BARTMOSS_BREAKER_ID,
+        syntheticCardDefinitionId("runner_bartmoss"),
+        {
+          owner: "runner",
+          controller: "runner",
+          zone: { side: "runner", zone: "rig" },
+        },
+      ),
     },
     run: {
       runId: "run_8",
@@ -292,7 +297,8 @@ function hostFor(
       },
       callbacks: {
         finishRun: (successful) => calls.push(`finishRun:${successful}`),
-        icebreakerSpecialSourceDefinitionId: () => "bartmoss_def",
+        icebreakerSpecialSourceDefinitionId: () =>
+          syntheticCardDefinitionId("bartmoss_def"),
         rollDeterministicDie: () => 1,
         trashRunnerInstalledProgram: (breakerId) =>
           calls.push(`trashRunnerInstalledProgram:${breakerId}`),

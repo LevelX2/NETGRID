@@ -129,7 +129,7 @@ describe("credit economy execution", () => {
     state.runner.rig.programs.push(sourceCardId);
     state.cardInstances[sourceCardId] = instance(
       sourceCardId,
-      "random_program",
+      1038876825,
       "runner",
     );
     const randomCounterBefore = state.randomCounter;
@@ -145,7 +145,7 @@ describe("credit economy execution", () => {
       ),
     ).toEqual({ handled: true, actionType: "gain_credit" });
     expect(action.payload).toMatchObject({
-      randomPurpose: "v1921.die.random_program.program_probe",
+      randomPurpose: "v1921.die.1038876825.program_probe",
       v1921DieRoll: 1,
       randomCounterAfter: randomCounterBefore + 1,
     });
@@ -161,7 +161,7 @@ describe("credit economy execution", () => {
     state.runner.rig.programs.push(sourceCardId);
     state.cardInstances[sourceCardId] = instance(
       sourceCardId,
-      "random_program",
+      1038876825,
       "runner",
     );
     const action = gainCreditAction(state, "runner", {
@@ -379,7 +379,7 @@ function definitionFor(
   const card = mustInstance(state.cardInstances, cardId);
   return {
     id: card.definitionId,
-    title: card.definitionId,
+    title: String(card.definitionId),
     side: card.owner,
     type: card.owner === "corp" ? "asset" : "resource",
   } as CardDefinition;

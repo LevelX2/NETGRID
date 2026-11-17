@@ -20,8 +20,12 @@ import {
 } from "./run-end-cleanup";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
 
-function definition(id: number, type: CardDefinition["type"]): CardDefinition {
-  return { id: id as CardDefinitionId, title: id, type } as CardDefinition;
+function definition(
+  id: number,
+  type: CardDefinition["type"],
+  title = String(id),
+): CardDefinition {
+  return { id: id as CardDefinitionId, title, type } as CardDefinition;
 }
 
 function instance(
@@ -73,16 +77,16 @@ function makeHost(
   cleanupDelayedCount: () => number;
 } {
   const definitions: Record<string, CardDefinition> = {
-    ice_def: definition("ice_def", "ice"),
-    onr_v1_020_dupre: definition(232, "program"),
-    tokyo_def: definition("tokyo_def", "upgrade"),
-    lucidrine_def: definition("lucidrine_def", "operation"),
+    1663273972: definition(1663273972, "ice"),
+    232: definition(232, "program"),
+    1433344137: definition(1433344137, "upgrade", "tokyo_def"),
+    932235382: definition(932235382, "operation"),
     ...(options.definitions ?? {}),
   };
   const instances: Record<string, CardInstance> = {
     ice_1: instance(
       "ice_1",
-      "ice_def",
+      1663273972,
       {
         side: "corp",
         zone: "serverIce",
@@ -98,7 +102,7 @@ function makeHost(
     ),
     tokyo: instance(
       "tokyo",
-      "tokyo_def",
+      1433344137,
       {
         side: "corp",
         zone: "serverRoot",
@@ -363,8 +367,7 @@ describe("multi-server success sequence run-end cleanup", () => {
           kind: "multi_server_success_sequence",
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1" as CardInstanceId,
-          sourceDefinitionId:
-            174 as CardDefinitionId,
+          sourceDefinitionId: 174 as CardDefinitionId,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["archives"],
           successfulServerIds: ["hq"],
@@ -415,8 +418,7 @@ describe("multi-server success sequence run-end cleanup", () => {
           kind: "multi_server_success_sequence",
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1" as CardInstanceId,
-          sourceDefinitionId:
-            174 as CardDefinitionId,
+          sourceDefinitionId: 174 as CardDefinitionId,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: [],
           successfulServerIds: ["hq"],
@@ -456,8 +458,7 @@ describe("multi-server success sequence run-end cleanup", () => {
           kind: "multi_server_success_sequence",
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1" as CardInstanceId,
-          sourceDefinitionId:
-            174 as CardDefinitionId,
+          sourceDefinitionId: 174 as CardDefinitionId,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["archives"],
           successfulServerIds: ["hq"],
@@ -506,11 +507,11 @@ describe("run end cleanup", () => {
           amount: 9,
           remaining: 4,
           returnUnusedAtRunEnd: true,
-          sourceDefinitionId: "lucidrine_def",
+          sourceDefinitionId: 932235382,
         },
         unpreventableCoreDamageAtRunEnd: {
           amount: 1,
-          sourceDefinitionId: "lucidrine_def",
+          sourceDefinitionId: 932235382,
         },
       } as unknown as NonNullable<GameState["run"]>,
     });
@@ -530,7 +531,7 @@ describe("run end cleanup", () => {
       stateChanged: true,
     });
     expect(fixture.damageCalls).toEqual([
-      { sourceDefinitionId: "lucidrine_def", amount: 1 },
+      { sourceDefinitionId: 932235382, amount: 1 },
     ]);
     expect(fixture.legalAction.payload).toMatchObject({
       temporaryRunCreditsReturned: 4,
@@ -587,10 +588,7 @@ describe("run end cleanup", () => {
         ),
       },
       definitions: {
-        onr_proteus_090_highlighter: definition(
-          148,
-          "program",
-        ),
+        148: definition(148, "program"),
       },
       virusImplementations: {
         highlighter: {
@@ -639,7 +637,7 @@ describe("run end cleanup", () => {
         ),
       },
       definitions: {
-        onr_v1_010_cascade: definition(222, "program"),
+        222: definition(222, "program"),
       },
       virusImplementations: {
         cascade: {
@@ -701,10 +699,7 @@ describe("run end cleanup", () => {
         ),
       },
       definitions: {
-        147: definition(
-          147,
-          "program",
-        ),
+        147: definition(147, "program"),
       },
       virusImplementations: {
         garbage: {
@@ -750,10 +745,7 @@ describe("run end cleanup", () => {
         ),
       },
       definitions: {
-        onr_proteus_094_scaldan: definition(
-          152,
-          "program",
-        ),
+        152: definition(152, "program"),
       },
       virusImplementations: {
         scaldan: {
@@ -814,15 +806,9 @@ describe("run end cleanup", () => {
         ),
       },
       definitions: {
-        onr_v1_010_cascade: definition(222, "program"),
-        onr_proteus_090_highlighter: definition(
-          148,
-          "program",
-        ),
-        147: definition(
-          147,
-          "program",
-        ),
+        222: definition(222, "program"),
+        148: definition(148, "program"),
+        147: definition(147, "program"),
       },
       virusImplementations: {
         cascade: {
@@ -900,10 +886,7 @@ describe("run end cleanup", () => {
         ),
       },
       definitions: {
-        157: definition(
-          157,
-          "program",
-        ),
+        157: definition(157, "program"),
       },
       virusImplementations: {
         viral_pipeline: {
@@ -975,10 +958,7 @@ describe("run end cleanup", () => {
         ),
       },
       definitions: {
-        157: definition(
-          157,
-          "program",
-        ),
+        157: definition(157, "program"),
       },
       virusImplementations: {
         viral_pipeline: {
@@ -1214,7 +1194,7 @@ describe("run end cleanup", () => {
     expect(fixture.legalAction.payload).toMatchObject({
       abilityId: "broken_ice_virus_counter",
       brokenIceVirusCounterAdded: 2,
-      targetCardDefinitionId: "ice_def",
+      targetCardDefinitionId: 1663273972,
       remainingCounters: 2,
       choiceVisibility: "public",
     });
@@ -1225,18 +1205,18 @@ describe("run end cleanup", () => {
       instances: {
         pattel_1: instance(
           "pattel_1",
-          "pattel_def",
+          2022055323,
           { side: "runner", zone: "rig" },
           { faceup: true },
         ),
         pattel_2: instance(
           "pattel_2",
-          "pattel_def",
+          2022055323,
           { side: "runner", zone: "rig" },
           { faceup: true },
         ),
       },
-      definitions: { pattel_def: definition("pattel_def", "resource") },
+      definitions: { 2022055323: definition(2022055323, "resource") },
     });
     fixture.state.pendingChoice = {
       choiceId: "broken_ice_virus_counter_8",
@@ -1299,10 +1279,10 @@ describe("run end cleanup", () => {
       } as unknown as NonNullable<GameState["run"]>,
       runnerPrograms: ["rent" as CardInstanceId],
       definitions: {
-        rent_def: definition("rent_def", "program"),
+        4209413918: definition(4209413918, "program"),
       },
       instances: {
-        rent: instance("rent", "rent_def", { side: "runner", zone: "rig" }),
+        rent: instance("rent", 4209413918, { side: "runner", zone: "rig" }),
       },
       dupreSourceIds: [],
       runEndTrashSourceIds: ["rent" as CardInstanceId],
@@ -1326,8 +1306,8 @@ describe("run end cleanup", () => {
     expect(fixture.legalAction.payload).toMatchObject({
       v1922RunnerProgramAbility: "run_end_trash_used_breaker",
       trashedCount: 1,
-      trashedCardDefinitionId: "rent_def",
-      publicRevealDefinitionIds: "rent_def",
+      trashedCardDefinitionId: 4209413918,
+      publicRevealDefinitionIds: "4209413918",
     });
   });
 
@@ -1342,10 +1322,10 @@ describe("run end cleanup", () => {
       } as unknown as NonNullable<GameState["run"]>,
       runnerPrograms: ["rent" as CardInstanceId],
       definitions: {
-        rent_def: definition("rent_def", "program"),
+        4209413918: definition(4209413918, "program"),
       },
       instances: {
-        rent: instance("rent", "rent_def", { side: "runner", zone: "rig" }),
+        rent: instance("rent", 4209413918, { side: "runner", zone: "rig" }),
       },
       runEndTrashSourceIds: ["rent" as CardInstanceId],
       resolveRunnerInstalledProgramTrash: (state, cardId, source) => {
@@ -1408,7 +1388,7 @@ describe("run end cleanup", () => {
       runEndTrashEffectCount: 2,
       runEndTrashPreventedOrReplacedCount: 1,
       trashedCount: 1,
-      trashedCardDefinitionId: "rent_def",
+      trashedCardDefinitionId: 4209413918,
     });
   });
 
@@ -1428,7 +1408,7 @@ describe("run end cleanup", () => {
     ).toBeUndefined();
     expect(fixture.legalAction.payload).toMatchObject({
       unsuccessfulRunCorpCreditBonus: true,
-      sourceDefinitionId: "tokyo_def",
+      sourceDefinitionId: 1433344137,
       serverId: "remote_1",
       corpCreditsGained: 3,
       corpCreditsAfter: 7,
@@ -1441,7 +1421,7 @@ describe("run end cleanup", () => {
         side: "corp",
         amount: 3,
         reason: "unsuccessful_run",
-        sourceDefinitionId: "tokyo_def",
+        sourceDefinitionId: 1433344137,
         sourceTitle: "tokyo_def",
         serverId: "remote_1",
         serverLabel: "Remote 1",
@@ -1455,7 +1435,7 @@ describe("run end cleanup", () => {
       attackedServerId: "remote_1",
       encounterTemporaryTraceCredits: {
         remaining: 2,
-        sourceDefinitionId: "trace_pool_def",
+        sourceDefinitionId: 3532417201,
       },
     } as unknown as NonNullable<GameState["run"]>;
     const legalAction = { payload: {} } as LegalAction;
@@ -1465,7 +1445,7 @@ describe("run end cleanup", () => {
     expect(run.encounterTemporaryTraceCredits).toBeUndefined();
     expect(legalAction.payload).toMatchObject({
       temporaryCreditsReturned: 2,
-      temporaryTraceCreditsSourceDefinitionId: "trace_pool_def",
+      temporaryTraceCreditsSourceDefinitionId: 3532417201,
     });
   });
 
@@ -1477,7 +1457,7 @@ describe("run end cleanup", () => {
         attackedServerId: "remote_1",
         encounterTemporaryTraceCredits: {
           remaining,
-          sourceDefinitionId: "trace_pool_def",
+          sourceDefinitionId: 3532417201,
         },
       } as unknown as NonNullable<GameState["run"]>;
       const legalAction = {

@@ -318,7 +318,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
           (implementation) =>
             implementation.cardDefinitionId === cardDefinitionId,
         ),
-        cardDefinitionId,
+        String(cardDefinitionId),
       ).toHaveLength(1);
     }
   });

@@ -92,7 +92,7 @@ function makeState(): GameState {
         amount: 2,
         remaining: 2,
         returnUnusedAtRunEnd: true,
-        sourceDefinitionId: "lucidrine_def",
+        sourceDefinitionId: 932235382,
       },
     },
   } as unknown as GameState;
@@ -207,7 +207,7 @@ describe("run duration payment", () => {
     cannotPay.run!.runnerRunTemporaryCredits = {
       remaining: 0,
       returnUnusedAtRunEnd: true,
-      sourceDefinitionId: "lucidrine_def",
+      sourceDefinitionId: 932235382,
     };
     cannotPay.run!.encounterTaxForFutureIce = 3;
     cannotPay.run!.encounterTaxSourceDefinitionId = 434;

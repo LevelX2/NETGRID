@@ -7,11 +7,11 @@ import {
   visibleRunnerNextTurnPreparationCreditGain,
 } from "./visible-runner-preparation-income";
 
-function visible(id: string): VisibleCard {
+function visible(id: number): VisibleCard {
   const definition = CARD_DEFINITIONS_BY_ID[id]!;
   return {
     ...definition,
-    instanceId: id,
+    instanceId: String(id),
     definitionId: id,
     known: true,
     owner: definition.side,
@@ -38,9 +38,10 @@ describe("visible Corp defense mechanics", () => {
     expect(
       visibleFortPassProtection({ instanceId: "hidden", known: false }),
     ).toMatchObject({ complete: false });
-    expect(
-      visibleFortPassProtection(visible(491)),
-    ).toEqual({ complete: true, kind: "none" });
+    expect(visibleFortPassProtection(visible(491))).toEqual({
+      complete: true,
+      kind: "none",
+    });
   });
   it("quotes repeatable public income without assuming hidden events", () => {
     const program = visible(257);
@@ -55,7 +56,7 @@ describe("visible Corp defense mechanics", () => {
 function bank(id: string, amount: number): VisibleCard {
   return {
     ...visible(366),
-    instanceId: id,
+    instanceId: String(id),
     rezzed: true,
     counters: { bit: amount },
   };

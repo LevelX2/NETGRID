@@ -171,6 +171,11 @@ export type CardType =
   | "upgrade"
   | "ice";
 export type CardDefinitionId = number;
+
+export function isCardDefinitionId(value: unknown): value is CardDefinitionId {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
 export type CardInstanceId = string;
 export type FixedPlayCostDefinition = {
   kind: "fixed";
@@ -667,7 +672,7 @@ export type PublicEventPayload = Record<string, unknown> & {
   abilityId?: string;
   effectKind?: string;
   sourceCardInstanceId?: CardInstanceId;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: CardDefinitionId;
   amounts?: Record<string, number>;
   targets?: Record<string, string | number | boolean>;
   visibility?: PublicAbilityVisibility;
@@ -2021,8 +2026,14 @@ export type RandomDrawRecord = {
   value: number;
 };
 
+export type MatchEventId = number;
+
+export function isMatchEventId(value: unknown): value is MatchEventId {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
 export type PublicGameEvent = {
-  eventId: string;
+  eventId: MatchEventId;
   type: string;
   stateVersionBefore: number;
   stateVersionAfter: number;
@@ -4996,7 +5007,7 @@ export type AiTurnPlanningDebug = {
     reactionReasonCode: string;
     publicOutcomes: Array<{
       outcomeId: string;
-      eventId: string;
+      eventId: MatchEventId;
       eventType: string;
       stateVersionAfter: number;
       kind:
@@ -5955,11 +5966,11 @@ function isAiTurnPlanningCampaigns(value: unknown): boolean {
         ]) &&
         [
           "outcomeId",
-          "eventId",
           "eventType",
           "milestoneId",
           "evidenceCode",
         ].every((field) => typeof record[field] === "string") &&
+        isMatchEventId(record.eventId) &&
         typeof record.stateVersionAfter === "number" &&
         Number.isFinite(record.stateVersionAfter) &&
         [

@@ -188,7 +188,7 @@ describe("V1.0.6K Card Release", () => {
     for (const definitionId of ONR_V1_0_6K_FINAL_CARD_IDS) {
       expect(
         CARD_DEFINITIONS_BY_ID[definitionId]?.implementationStatus,
-        definitionId,
+        String(definitionId),
       ).toBe("playable_mvp");
     }
 

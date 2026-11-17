@@ -10,6 +10,7 @@ import type {
 } from "@netgrid/shared";
 
 import {
+  buildMaintenanceAiTraceDetailPath,
   buildMaintenanceAiTraceEnablePath,
   buildMaintenanceAiTraceIndexPath,
   findForbiddenMaintenanceMarkers,
@@ -338,12 +339,13 @@ export async function fetchAiDecisionDebugTraceIndex(
 }
 
 export async function fetchAiDecisionDebugTraceDetail(
-  traceId: string,
+  matchId: string,
+  decisionIndex: number,
 ): Promise<MaintenanceAiTraceDetail> {
   let response: Response;
   try {
     response = await fetch(
-      `${configuredServerHttp()}/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(traceId)}`,
+      `${configuredServerHttp()}${buildMaintenanceAiTraceDetailPath(matchId, decisionIndex)}`,
       { cache: "no-store" },
     );
   } catch {

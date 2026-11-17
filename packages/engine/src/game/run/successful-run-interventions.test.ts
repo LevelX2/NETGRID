@@ -83,8 +83,7 @@ function makeHost(
   finishedRuns: boolean[];
   canonicallyRezzedIceIds: CardInstanceId[];
 } {
-  const sourceDefinitionId =
-    options.sourceDefinitionId ?? 570;
+  const sourceDefinitionId = options.sourceDefinitionId ?? 570;
   const sourceTitle = options.sourceTitle ?? "Dr. Dreff";
   const hqIceRezCost = options.hqIceRezCost ?? 5;
   const existingIceCount = options.existingIceCount ?? 1;
@@ -94,43 +93,19 @@ function makeHost(
       sourceTitle,
       "upgrade",
     ),
-    hq_ice_def: definition("hq_ice_def", "HQ ICE", "ice", {
+    2966027182: definition(2966027182, "HQ ICE", "ice", {
       rezCost: hqIceRezCost,
     }),
-    existing_ice_def: definition("existing_ice_def", "Existing ICE", "ice", {
+    3582045320: definition(3582045320, "Existing ICE", "ice", {
       rezCost: 3,
     }),
-    238: definition(
-      238,
-      "False Echo",
-      "program",
-    ),
-    256: definition(
-      256,
-      "Netspace Inverter",
-      "program",
-    ),
+    238: definition(238, "False Echo", "program"),
+    256: definition(256, "Netspace Inverter", "program"),
     244: definition(244, "I Spy", "program"),
-    335: definition(
-      335,
-      "Bodyweight Data Creche",
-      "hardware",
-    ),
-    378: definition(
-      378,
-      "Karl de Veres",
-      "resource",
-    ),
-    194: definition(
-      194,
-      "Credit Subversion",
-      "resource",
-    ),
-    onr_proteus_078_armageddon: definition(
-      136,
-      "Armageddon",
-      "program",
-    ),
+    335: definition(335, "Bodyweight Data Creche", "hardware"),
+    378: definition(378, "Karl de Veres", "resource"),
+    194: definition(194, "Credit Subversion", "resource"),
+    136: definition(136, "Armageddon", "program"),
   };
   const existingIceIds = Array.from(
     { length: existingIceCount },
@@ -158,7 +133,7 @@ function makeHost(
       } as CardInstance["zone"],
       { faceup: true, rezzed: true },
     ),
-    hq_ice: instance("hq_ice", "hq_ice_def", { side: "corp", zone: "hq" }),
+    hq_ice: instance("hq_ice", 2966027182, { side: "corp", zone: "hq" }),
     false_echo: instance("false_echo", 238, {
       side: "runner",
       zone: "rig",
@@ -179,21 +154,17 @@ function makeHost(
       side: "runner",
       zone: "rig",
     }),
-    credit_subversion: instance(
-      "credit_subversion",
-      194,
-      {
-        side: "runner",
-        zone: "rig",
-      },
-    ),
+    credit_subversion: instance("credit_subversion", 194, {
+      side: "runner",
+      zone: "rig",
+    }),
     armageddon: instance("armageddon", 136, {
       side: "runner",
       zone: "rig",
     }),
   };
   for (const iceId of existingIceIds) {
-    cardInstances[iceId] = instance(iceId, "existing_ice_def", {
+    cardInstances[iceId] = instance(iceId, 3582045320, {
       side: "corp",
       zone: "serverIce",
       serverId: "remote_1",
@@ -605,7 +576,7 @@ describe("successful run interventions", () => {
     expect(fixture.begunEncounters).toEqual(["hq_ice"]);
     expect(legalAction.payload).toMatchObject({
       publicRevealKind: "reveal",
-      publicRevealDefinitionId: "hq_ice_def",
+      publicRevealDefinitionId: 2966027182,
       hiddenZoneBarrier: true,
       hiddenZoneAction: "successful_run_temporary_encounter",
     });
@@ -710,7 +681,7 @@ describe("successful run interventions", () => {
     expect(fixture.state.run?.delayedSuccessfulRun).toBeUndefined();
     expect(legalAction.payload).toMatchObject({
       temporaryEncounterTrashed: true,
-      temporaryIceDefinitionId: "hq_ice_def",
+      temporaryIceDefinitionId: 2966027182,
       sourceDefinitionId: 570,
       serverId: "remote_1",
       successfulRunFinalizedAfterIntervention: true,
@@ -857,11 +828,9 @@ describe("successful run interventions", () => {
     expect(action).toMatchObject({
       abilityRef: {
         sourceCardInstanceId: "credit_subversion",
-        sourceAbilityId:
-          "194:hq_success_reveal_trash_source_corp_lose_three",
+        sourceAbilityId: "194:hq_success_reveal_trash_source_corp_lose_three",
       },
-      effectRef:
-        "effect.onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+      effectRef: "effect.194:hq_success_reveal_trash_source_corp_lose_three",
     });
     if (!action) throw new Error("Missing Credit Subversion action");
 

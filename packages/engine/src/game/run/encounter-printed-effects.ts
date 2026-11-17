@@ -604,7 +604,7 @@ export function applyPrintedTraceSuccessFollowups(
   const hackerTrackerCountersAdded =
     host.callbacks.addCorpTraceCounterPoolCounters();
   const traceAvoidReward = successful
-    ? { amount: 0, sourceDefinitionIds: [] as string[] }
+    ? { amount: 0, sourceDefinitionIds: [] as CardDefinition["id"][] }
     : applyTraceAvoidRewards(host, trace);
   let runnerRunLockCreditCost = 0;
   let runnerRunEnded = false;
@@ -793,7 +793,9 @@ export function applyPrintedTraceSuccessFollowups(
           gainedCredits: traceAvoidReward.amount,
           runnerCreditsAfter: state.runner.credits,
           traceAvoidRewardSourceDefinitionIds:
-            traceAvoidReward.sourceDefinitionIds.sort().join(","),
+            traceAvoidReward.sourceDefinitionIds
+              .sort((left, right) => left - right)
+              .join(","),
         }
       : {}),
     ...(runnerRunEnded
@@ -861,9 +863,9 @@ export function applyPrintedTraceSuccessFollowups(
 function applyTraceAvoidRewards(
   host: EncounterPrintedEffectHost,
   trace: CurrentTrace,
-): { amount: number; sourceDefinitionIds: number[] } {
+): { amount: number; sourceDefinitionIds: CardDefinition["id"][] } {
   let amount = 0;
-  const sourceDefinitionIds: number[] = [];
+  const sourceDefinitionIds: CardDefinition["id"][] = [];
   for (const reward of trace.traceAvoidRewardUsages ?? []) {
     if (!Number.isInteger(reward.amount) || reward.amount <= 0) continue;
     amount += reward.amount;
@@ -872,7 +874,7 @@ function applyTraceAvoidRewards(
   if (amount > 0)
     credits(host.state, "runner", amount, {
       kind: "trace_effect",
-      sourceDefinitionIds: sourceDefinitionIds as CardDefinition["id"][],
+      sourceDefinitionIds,
       reason: "trace_avoid_rewards",
     });
   return { amount, sourceDefinitionIds };

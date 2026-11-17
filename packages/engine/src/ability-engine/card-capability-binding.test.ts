@@ -24,7 +24,7 @@ import {
 } from "./card-capability-binding";
 
 const definition = {
-  id: "test_card",
+  id: 2403765484,
   title: "Test Card",
   side: "runner",
   type: "resource",
@@ -293,7 +293,7 @@ describe("stable CardSpec capability binding", () => {
     expect(() =>
       activatedAbilityBindingForPersistedIdentity(
         definition,
-        { sourceAbilityId: "test_card:missing" },
+        { sourceAbilityId: canonicalCapabilityId(definition.id, "missing" as CapabilityKey) },
         sources({ engine: engineCard([activated("gain", 1)]) }),
       ),
     ).toThrowError(/existiert nicht/);
@@ -340,7 +340,7 @@ describe("stable CardSpec capability binding", () => {
         definition,
         {
           kind: "card_spec_capability_key",
-          sourceCapabilityId: "test_card:play",
+          sourceCapabilityId: canonicalCapabilityId(definition.id, "play" as CapabilityKey),
         },
         registry,
       ),
@@ -350,7 +350,7 @@ describe("stable CardSpec capability binding", () => {
         definition,
         {
           kind: "card_spec_capability_key",
-          sourceCapabilityId: "test_card:missing",
+          sourceCapabilityId: canonicalCapabilityId(definition.id, "missing" as CapabilityKey),
         },
         registry,
       ),

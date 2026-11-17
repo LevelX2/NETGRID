@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { CardInstanceId } from "@netgrid/shared";
 import {
@@ -17,7 +18,10 @@ describe("runner program install memory", () => {
   it.each(["hidden_search", "nonsearch", "access"] as const)(
     "uses a converted program's actual MU in the %s continuation",
     (kind) => {
-      const definition = { id: "converted-agenda", memoryCost: 0 };
+      const definition = {
+        id: syntheticCardDefinitionId("converted-agenda"),
+        memoryCost: 0,
+      };
       const instance = {
         definitionId: definition.id,
         installedAsRunnerProgram: {
@@ -66,18 +70,18 @@ describe("runner program install memory", () => {
 
   it("fails closed for an unbound instance or invalid effective MU", () => {
     expect(() =>
-      runnerInstalledProgramMemoryCost(undefined, { id: "agenda" }),
+      runnerInstalledProgramMemoryCost(undefined, { id: 2974352677 }),
     ).toThrow("Kartenbindung");
     expect(() =>
       runnerInstalledProgramMemoryCost(
-        { definitionId: "other" },
-        { id: "agenda" },
+        { definitionId: 3363681541 },
+        { id: 2974352677 },
       ),
     ).toThrow("Kartenbindung");
     expect(() =>
       runnerInstalledProgramMemoryCost(
-        { definitionId: "program" },
-        { id: "program", memoryCost: -1 },
+        { definitionId: 1032097243 },
+        { id: 1032097243, memoryCost: -1 },
       ),
     ).toThrow("ungültig");
   });

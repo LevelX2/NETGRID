@@ -1,3 +1,4 @@
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import * as runtimePorts from "./runtime-port-bindings";
 import { temporaryIceStrengthPulseBonus } from "../../ability-engine/temporary-ice-strength-pulse";
@@ -993,11 +994,17 @@ export function configureCardRuntimeBootstrap() {
     const [
       ,
       sourceCardId = "",
-      sourceDefinitionId = "",
+      sourceDefinitionIdToken = "",
       targetCardId = "",
-      targetDefinitionId = "",
+      targetDefinitionIdToken = "",
       targetServerId = "",
     ] = choice.source.split(":");
+    const sourceDefinitionId = parseCardDefinitionIdToken(
+      sourceDefinitionIdToken,
+    );
+    const targetDefinitionId = parseCardDefinitionIdToken(
+      targetDefinitionIdToken,
+    );
     if (!state.runner.heap.includes(sourceCardId as CardInstanceId))
       throw new Error("Die Quelle liegt nicht mehr im Heap.");
     if (

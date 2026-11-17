@@ -26,7 +26,7 @@ function definition(
 ): CardDefinition {
   return {
     id: id as CardDefinitionId,
-    title: id,
+    title: String(id),
     type,
     ...(trashCost > 0 ? { trashCost } : {}),
   } as CardDefinition;
@@ -71,9 +71,9 @@ function makeHost(
   trashedCards: CardInstanceId[];
 } {
   const definitions = options.definitions ?? {
-    agenda: definition("agenda_def", "agenda"),
-    asset: definition("asset_def", "asset", 3),
-    ice: definition("ice_def", "ice"),
+    agenda: definition(2855245605, "agenda"),
+    asset: definition(1151438755, "asset", 3),
+    ice: definition(1663273972, "ice"),
   };
   const servers =
     options.servers ??
@@ -86,17 +86,17 @@ function makeHost(
   const instances =
     options.instances ??
     ({
-      asset: instance("asset", "asset_def", {
+      asset: instance("asset", 1151438755, {
         side: "corp",
         zone: "serverRoot",
         serverId: "remote_1",
       } as CardInstance["zone"]),
-      agenda: instance("agenda", "agenda_def", {
+      agenda: instance("agenda", 2855245605, {
         side: "corp",
         zone: "serverRoot",
         serverId: "remote_1",
       } as CardInstance["zone"]),
-      ice: instance("ice", "ice_def", {
+      ice: instance("ice", 1663273972, {
         side: "corp",
         zone: "serverRoot",
         serverId: "remote_1",
@@ -347,12 +347,12 @@ describe("access flow execution", () => {
   });
 
   it("publishes central root and HQ card access origins without card identity guesses", () => {
-    const hqRoot = instance("hq_root", "asset_def", {
+    const hqRoot = instance("hq_root", 1151438755, {
       side: "corp",
       zone: "serverRoot",
       serverId: "hq",
     } as CardInstance["zone"]);
-    const hqCard = instance("hq_card", "ice_def", {
+    const hqCard = instance("hq_card", 1663273972, {
       side: "corp",
       zone: "hq",
     });
@@ -447,25 +447,22 @@ describe("access flow execution", () => {
         attackedServerId: "hq",
       } as unknown as NonNullable<GameState["run"]>,
       definitions: {
-        hqCard: definition("hq_card_def", "operation"),
-        asset: definition("asset_def", "asset", 3),
-        ice: definition("ice_def", "ice"),
-        schematics: definition(
-          36,
-          "program",
-        ),
+        hqCard: definition(2268447633, "operation"),
+        asset: definition(1151438755, "asset", 3),
+        ice: definition(1663273972, "ice"),
+        schematics: definition(36, "program"),
       },
       instances: {
-        hq_card: instance("hq_card", "hq_card_def", {
+        hq_card: instance("hq_card", 2268447633, {
           side: "corp",
           zone: "hq",
         }),
-        asset: instance("asset", "asset_def", {
+        asset: instance("asset", 1151438755, {
           side: "corp",
           zone: "serverRoot",
           serverId: "remote_1",
         } as CardInstance["zone"]),
-        ice: instance("ice", "ice_def", {
+        ice: instance("ice", 1663273972, {
           side: "corp",
           zone: "serverIce",
           serverId: "remote_1",
@@ -473,8 +470,7 @@ describe("access flow execution", () => {
         schematics: {
           id: "schematics" as CardInstanceId,
           instanceId: "schematics" as CardInstanceId,
-          definitionId:
-            36 as CardDefinitionId,
+          definitionId: 36 as CardDefinitionId,
           owner: "runner",
           controller: "runner",
           zone: { side: "runner", zone: "rig" },
@@ -518,8 +514,8 @@ describe("access flow execution", () => {
       publicRevealKind: "expose",
       sourceDefinitionId: 36,
       revealedCount: 2,
-      publicRevealDefinitionIds: "asset_def,ice_def",
-      publicRevealTitles: "asset_def||ice_def",
+      publicRevealDefinitionIds: "1151438755,1663273972",
+      publicRevealTitles: "1151438755||1663273972",
       exposedServerLabels: "remote_1 root,remote_1 ICE 1",
       exposedCardInstanceIds: "asset,ice",
     });
@@ -533,7 +529,7 @@ describe("access flow execution", () => {
       visibility: "hidden_info_barrier",
     });
     expect(state.pendingChoice?.source).toContain(
-      "p3_36.expose_installed_cards_review:asset|ice:schematics:onr_classic_032_schematics-search-engine:",
+      "p3_36.expose_installed_cards_review:asset|ice:schematics:36:",
     );
     expect(JSON.stringify(legalAction.payload)).not.toMatch(
       /"cardInstances"|"privatePayload"|"hq"\s*:/,
@@ -581,10 +577,7 @@ describe("access flow execution", () => {
 
   it("opens cost support before paying a self-costed accessed agenda", () => {
     const fetalDefinition = definition(62, "agenda");
-    const swissDefinition = definition(
-      210,
-      "resource",
-    );
+    const swissDefinition = definition(210, "resource");
     const swissId = "steal_support_swiss" as CardInstanceId;
     const { host, state, spentRunnerCredits } = makeHost({
       run: {
@@ -677,13 +670,10 @@ describe("access flow execution", () => {
 
   it("revalidates Mercenary-style hidden resource current-access trash and pays its source cost", () => {
     const definitions = {
-      operation: definition("operation_def", "operation"),
-      mercenary: definition(
-        203,
-        "resource",
-      ),
+      operation: definition(3983278954, "operation"),
+      mercenary: definition(203, "resource"),
       boltHole: definition(190, "resource"),
-      agenda: definition("agenda_def", "agenda"),
+      agenda: definition(2855245605, "agenda"),
     };
     const { host, state, spentRunnerCredits, trashPayments, trashedCards } =
       makeHost({
@@ -694,7 +684,7 @@ describe("access flow execution", () => {
         } as unknown as NonNullable<GameState["run"]>,
         definitions,
         instances: {
-          operation: instance("operation", "operation_def", {
+          operation: instance("operation", 3983278954, {
             side: "corp",
             zone: "rd",
           }),
@@ -722,7 +712,7 @@ describe("access flow execution", () => {
             tapped: false,
             advancementCounters: 0,
           } as unknown as CardInstance,
-          agenda: instance("agenda", "agenda_def", {
+          agenda: instance("agenda", 2855245605, {
             side: "corp",
             zone: "rd",
           }),
@@ -744,8 +734,7 @@ describe("access flow execution", () => {
         freeAccessTrash: true,
         hiddenResourceCurrentAccessTrash: true,
         hiddenResourceSourceCardId: "mercenary",
-        hiddenResourceSourceDefinitionId:
-          203,
+        hiddenResourceSourceDefinitionId: 203,
       },
     } as unknown as LegalAction;
 
@@ -812,7 +801,7 @@ describe("access flow execution", () => {
       } as unknown as NonNullable<GameState["run"]>,
       definitions,
       instances: {
-        operation: instance("operation", "operation_def", {
+        operation: instance("operation", 3983278954, {
           side: "corp",
           zone: "rd",
         }),
@@ -844,7 +833,7 @@ describe("access flow execution", () => {
       } as unknown as NonNullable<GameState["run"]>,
       definitions,
       instances: {
-        agenda: instance("agenda", "agenda_def", {
+        agenda: instance("agenda", 2855245605, {
           side: "corp",
           zone: "rd",
         }),
@@ -898,7 +887,7 @@ describe("access flow execution", () => {
       } as unknown as NonNullable<GameState["run"]>,
       definitions,
       instances: {
-        operation: instance("operation", "operation_def", {
+        operation: instance("operation", 3983278954, {
           side: "corp",
           zone: "rd",
         }),
@@ -926,12 +915,9 @@ describe("access flow execution", () => {
 
   it("lets Mercenary trash a paid subset of already revealed current-breach cards including agendas", () => {
     const definitions = {
-      asset: definition("asset_def", "asset"),
-      agenda: definition("agenda_def", "agenda"),
-      mercenary: definition(
-        203,
-        "resource",
-      ),
+      asset: definition(1151438755, "asset"),
+      agenda: definition(2855245605, "agenda"),
+      mercenary: definition(203, "resource"),
     };
     const run = {
       runId: "run_multi",
@@ -965,7 +951,7 @@ describe("access flow execution", () => {
           {
             entryId: "run_multi.breach.0",
             status: "declined",
-            cardDefinitionId: "asset_def",
+            cardDefinitionId: 1151438755,
           },
         ],
       },
@@ -974,8 +960,8 @@ describe("access flow execution", () => {
       run,
       definitions,
       instances: {
-        asset: instance("asset", "asset_def", { side: "corp", zone: "rd" }),
-        agenda: instance("agenda", "agenda_def", {
+        asset: instance("asset", 1151438755, { side: "corp", zone: "rd" }),
+        agenda: instance("agenda", 2855245605, {
           side: "corp",
           zone: "rd",
         }),
@@ -1012,8 +998,7 @@ describe("access flow execution", () => {
         freeAccessTrash: true,
         hiddenResourceCurrentAccessTrash: true,
         hiddenResourceSourceCardId: "mercenary",
-        hiddenResourceSourceDefinitionId:
-          203,
+        hiddenResourceSourceDefinitionId: 203,
       },
     } as unknown as LegalAction;
 
@@ -1055,7 +1040,7 @@ describe("access flow execution", () => {
     expect(state.run).toBeUndefined();
     expect(resolution.payload).toMatchObject({
       currentAccessTrashCount: 2,
-      currentAccessTrashDefinitionIds: "asset_def,agenda_def",
+      currentAccessTrashDefinitionIds: "1151438755,2855245605",
     });
   });
 
@@ -1101,9 +1086,9 @@ describe("access flow execution", () => {
         breach,
       } as unknown as NonNullable<GameState["run"]>,
       instances: {
-        asset: instance("asset", "asset_def", { side: "corp", zone: "rd" }),
-        asset_2: instance("asset_2", "asset_def", { side: "corp", zone: "rd" }),
-        asset_3: instance("asset_3", "asset_def", { side: "corp", zone: "rd" }),
+        asset: instance("asset", 1151438755, { side: "corp", zone: "rd" }),
+        asset_2: instance("asset_2", 1151438755, { side: "corp", zone: "rd" }),
+        asset_3: instance("asset_3", 1151438755, { side: "corp", zone: "rd" }),
       },
       corpRd: ["asset", "asset_2", "asset_3"],
     });
@@ -1156,10 +1141,10 @@ describe("access flow execution", () => {
         breach,
       } as unknown as NonNullable<GameState["run"]>,
       definitions: {
-        operation: definition("operation_def", "operation"),
+        operation: definition(3983278954, "operation"),
       },
       instances: {
-        operation: instance("operation", "operation_def", {
+        operation: instance("operation", 3983278954, {
           side: "corp",
           zone: "rd",
         }),
@@ -1305,7 +1290,7 @@ describe("access flow execution", () => {
       {
         entryId: "entry_0",
         status: "accessed",
-        cardDefinitionId: "ice_def",
+        cardDefinitionId: 1663273972,
       },
     ]);
     expect(legalAction.payload).toEqual({ archivesAutoAccessedCount: 1 });

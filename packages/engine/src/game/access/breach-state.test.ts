@@ -16,7 +16,11 @@ import {
 } from "./breach-state";
 
 function definition(id: number, type: CardDefinition["type"]): CardDefinition {
-  return { id: id as CardDefinitionId, title: id, type } as CardDefinition;
+  return {
+    id: id as CardDefinitionId,
+    title: String(id),
+    type,
+  } as CardDefinition;
 }
 
 function instance(
@@ -39,10 +43,10 @@ function instance(
 
 function makeHost(): BreachStateHost {
   const definitions = {
-    agenda: definition("agenda_def", "agenda"),
-    asset: definition("asset_def", "asset"),
-    upgrade: definition("upgrade_def", "upgrade"),
-    operation: definition("operation_def", "operation"),
+    agenda: definition(2855245605, "agenda"),
+    asset: definition(1151438755, "asset"),
+    upgrade: definition(1848640239, "upgrade"),
+    operation: definition(3983278954, "operation"),
   };
   const servers = [
     { id: "rd", ice: [], root: [] },
@@ -51,22 +55,22 @@ function makeHost(): BreachStateHost {
     { id: "remote_1", ice: [], root: ["remote_asset", "remote_upgrade"] },
   ] as unknown as CorpServer[];
   const cardInstances: Record<string, CardInstance> = {
-    rd_top: instance("rd_top", "operation_def", { side: "corp", zone: "rd" }),
-    rd_second: instance("rd_second", "agenda_def", {
+    rd_top: instance("rd_top", 3983278954, { side: "corp", zone: "rd" }),
+    rd_second: instance("rd_second", 2855245605, {
       side: "corp",
       zone: "rd",
     }),
-    hq_card_a: instance("hq_card_a", "operation_def", {
+    hq_card_a: instance("hq_card_a", 3983278954, {
       side: "corp",
       zone: "hq",
     }),
-    hq_card_b: instance("hq_card_b", "agenda_def", {
+    hq_card_b: instance("hq_card_b", 2855245605, {
       side: "corp",
       zone: "hq",
     }),
     hq_upgrade: instance(
       "hq_upgrade",
-      "upgrade_def",
+      1848640239,
       {
         side: "corp",
         zone: "serverRoot",
@@ -75,24 +79,24 @@ function makeHost(): BreachStateHost {
       true,
       true,
     ),
-    archive_face_down: instance("archive_face_down", "operation_def", {
+    archive_face_down: instance("archive_face_down", 3983278954, {
       side: "corp",
       zone: "archives",
     }),
     archive_face_up: instance(
       "archive_face_up",
-      "agenda_def",
+      2855245605,
       { side: "corp", zone: "archives" },
       true,
     ),
-    remote_asset: instance("remote_asset", "asset_def", {
+    remote_asset: instance("remote_asset", 1151438755, {
       side: "corp",
       zone: "serverRoot",
       serverId: "remote_1",
     } as CardInstance["zone"]),
     remote_upgrade: instance(
       "remote_upgrade",
-      "upgrade_def",
+      1848640239,
       {
         side: "corp",
         zone: "serverRoot",
@@ -195,7 +199,7 @@ describe("breach state builder", () => {
     server.root.push("rd_upgrade" as CardInstanceId);
     host.state.cardInstances["rd_upgrade"] = instance(
       "rd_upgrade",
-      "upgrade_def",
+      1848640239,
       {
         side: "corp",
         zone: "serverRoot",

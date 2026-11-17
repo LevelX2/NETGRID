@@ -1,3 +1,5 @@
+import type { CardDefinitionId } from "./index";
+
 export const CORP_RESTRICTED_CREDIT_ROUTE_QUOTE_VERSION =
   "corp-restricted-credit-route-v1" as const;
 
@@ -56,7 +58,7 @@ export type CorpRestrictedCreditRouteQuote = {
   payoutAdvancementCounterCost: number;
   consumer: CorpRestrictedCreditConsumer & {
     availableBeforePayout: boolean;
-    sourceCardDefinitionId: string;
+    sourceCardDefinitionId: CardDefinitionId;
     clickCost: number;
     creditCost: number;
     restrictedCreditsApplied: number;

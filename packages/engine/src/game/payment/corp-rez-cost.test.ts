@@ -126,7 +126,7 @@ describe("corp rez costs", () => {
       finalCredits: 5,
       costs: [{ credits: 5 }],
       publicPayload: {
-        rezCostReductionSourceDefinitionIds: BASKERVILLE_DEFINITION_ID,
+        rezCostReductionSourceDefinitionIds: String(BASKERVILLE_DEFINITION_ID),
         rezCostReductionAmount: 5,
         rezCostPaid: 5,
       },

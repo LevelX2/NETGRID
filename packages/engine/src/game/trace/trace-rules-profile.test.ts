@@ -77,7 +77,7 @@ function trace(
   return {
     traceId: "trace_1",
     sourceCardInstanceId: "source_1",
-    sourceDefinitionId: "source",
+    sourceDefinitionId: 466571496,
     traceRulesProfile,
     traceLimit,
     status: "runner_bid",

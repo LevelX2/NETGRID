@@ -448,7 +448,12 @@ function activeCreditGainModifiers(
     sourceDefinitionIds.push(sourceDefinitionId);
   }
 
-  return { amount, sourceDefinitionIds: sourceDefinitionIds.sort() };
+  return {
+    amount,
+    sourceDefinitionIds: sourceDefinitionIds.sort(
+      (left, right) => left - right,
+    ),
+  };
 }
 
 function interceptCorpCreditForfeitDebt(

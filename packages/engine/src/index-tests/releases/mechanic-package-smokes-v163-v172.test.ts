@@ -189,7 +189,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
     expect(ONR_V1_6_3_FINAL_CARD_IDS).toHaveLength(5);
     for (const definitionId of ONR_V1_6_3_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(definition?.mechanics.join(" ")).not.toMatch(
@@ -623,7 +623,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
     expect(ONR_V1_7_0_FINAL_CARD_IDS).toHaveLength(5);
     for (const definitionId of ONR_V1_7_0_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(definition?.mechanics.join(" ")).not.toMatch(
@@ -1046,7 +1046,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
     expect(ONR_V1_7_1_FINAL_CARD_IDS).toHaveLength(5);
     for (const definitionId of ONR_V1_7_1_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
     }
@@ -1611,7 +1611,7 @@ describe("V1.7.2 Mechanikpaket F", () => {
     expect(ONR_V1_7_2_FINAL_CARD_IDS).toHaveLength(5);
     for (const definitionId of ONR_V1_7_2_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
     }

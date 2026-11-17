@@ -529,11 +529,17 @@ function collectCardIdBehaviorFindings(sources) {
     {
       message: "card-id set or constant can control behavior",
       regex:
-        /\b[A-Z][A-Z0-9_]*(?:_CARD_ID|_CARD_IDS|_DEFINITION_ID|_DEFINITION_IDS)\b|\bnew\s+Set\s*<\s*[^>]*CardDefinitionId[^>]*>\s*\(/g,
+        /\b[A-Z][A-Z0-9_]*(?:_CARD_ID|_CARD_IDS|_DEFINITION_ID|_DEFINITION_IDS)\b|\bnew\s+Set\s*<\s*[^>]*CardDefinitionId[^>]*>\s*\((?=\s*[^\s)])/g,
     },
     {
       message: "direct ONR/Proteus definition id in productive rule path",
       regex: /["']onr_(?:v1|proteus|classic)_\d+_[^"']+["']/g,
+    },
+    {
+      message: "direct numeric definition id in productive rule path",
+      engineOnly: true,
+      regex:
+        /\b(?:definition\.id|definitionId|[a-zA-Z]+DefinitionId)\s*[!=]==\s*[1-9][0-9]*\b/g,
     },
   ];
   for (const { file, text } of sources) {
@@ -555,6 +561,8 @@ function collectCardIdBehaviorFindings(sources) {
       continue;
     }
     for (const pattern of patterns) {
+      if (pattern.engineOnly && !file.startsWith("packages/engine/src/"))
+        continue;
       let match = pattern.regex.exec(text);
       while (match) {
         const line = lineText(text, lineNumber(text, match.index));
@@ -638,6 +646,8 @@ function lookupCapability(name: string) {
 }
 const proxy = new Proxy({}, { get: (_target, property) => runtime[property as string] });
 const IDS = new Set<CardDefinitionId>([SOME_CARD_ID]);
+const sources = new Set<CardDefinitionId>();
+if (definition.id === 418) runCardRule();
 `,
     },
     {
@@ -670,6 +680,16 @@ const IDS = new Set<CardDefinitionId>([SOME_CARD_ID]);
     ["registry uses real grouped registries", "all-card registry monolith"],
   ]);
   const failures = [];
+  const identityFindings =
+    checks.find(
+      (entry) => entry.name === "active card-id rule decisions removed",
+    )?.findings ?? [];
+  if (!identityFindings.some((finding) => finding.message.includes("numeric")))
+    failures.push("numeric definition ID check");
+  if (
+    identityFindings.some((finding) => finding.detail.includes("const sources"))
+  )
+    failures.push("empty definition collection");
   for (const [checkName, label] of required) {
     const check = checks.find((candidate) => candidate.name === checkName);
     if (!check || check.findings.length === 0) failures.push(label);

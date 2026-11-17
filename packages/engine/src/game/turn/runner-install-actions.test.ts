@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type { CardDefinition, CardInstanceId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
@@ -8,13 +9,13 @@ import {
 } from "./runner-install-actions";
 
 function runnerCardDefinition(
-  id: string,
+  id: number | string,
   type: CardDefinition["type"],
   title: string,
   installCost: number,
 ): CardDefinition {
   return {
-    id,
+    id: typeof id === "number" ? id : syntheticCardDefinitionId(id),
     title,
     side: "runner",
     type,
@@ -62,12 +63,7 @@ describe("runner install main actions", () => {
       buildRunnerResourceInstallAction(
         game,
         "loan-instance" as never,
-        runnerCardDefinition(
-          380,
-          "resource",
-          "Credit Exchange",
-          0,
-        ),
+        runnerCardDefinition(380, "resource", "Credit Exchange", 0),
       ).payload,
     ).toMatchObject({
       cardId: "loan-instance",

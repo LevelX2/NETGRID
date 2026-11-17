@@ -397,12 +397,12 @@ describe("visibleBreakerCoverageQuote", () => {
     expect(
       visibleBreakerCoverageQuote({
         breakerDefinitionId: 214,
-        iceDefinitionId: "missing_ice",
+        iceDefinitionId: 3949173407,
       }),
     ).toBeUndefined();
     expect(
       visibleBreakerCoverageQuote({
-        breakerDefinitionId: "missing_breaker",
+        breakerDefinitionId: 4552044,
         iceDefinitionId: 435,
       }),
     ).toBeUndefined();

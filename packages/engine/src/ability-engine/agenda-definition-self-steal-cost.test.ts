@@ -19,7 +19,7 @@ it.each(["hq", "rd", "archives", "remote_1"])(
   },
 );
 it.each([
-  ["missing", "hq"],
+  [65535, "hq"],
   [251, "hq"],
   [62, "new_remote"],
   [62, "remote_bad"],

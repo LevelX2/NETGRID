@@ -1,4 +1,4 @@
-import type { LegalAction, PublicGameEvent, Side } from "@netgrid/shared";
+import type { LegalAction, MatchEventId, PublicGameEvent, Side } from "@netgrid/shared";
 
 import {
   actionSoundForActionType,
@@ -7,7 +7,7 @@ import {
 
 export function publicEventsAfter(
   events: PublicGameEvent[],
-  lastPresentedEventId: string | null,
+  lastPresentedEventId: MatchEventId | null,
 ): PublicGameEvent[] {
   if (!lastPresentedEventId) return events;
   const index = events.findIndex(

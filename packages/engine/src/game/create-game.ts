@@ -231,7 +231,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
 
   const initialHash = hashStateSnapshot(state);
   state.eventLog.push({
-    eventId: "evt_0",
+    eventId: state.stateVersion + 1,
     type: "game_created",
     stateVersionBefore: 0,
     stateVersionAfter: 0,

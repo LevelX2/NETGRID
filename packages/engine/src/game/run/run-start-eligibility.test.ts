@@ -23,10 +23,7 @@ describe("run-start eligibility", () => {
         corpDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
       }),
     );
-    const sourceCardInstanceId = putCorpRootInRemote(
-      state,
-      580,
-    );
+    const sourceCardInstanceId = putCorpRootInRemote(state, 580);
     const source = state.cardInstances[sourceCardInstanceId]!;
     source.rezzed = true;
     source.faceup = true;
@@ -82,10 +79,7 @@ describe("run-start eligibility", () => {
       runnerDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
       corpDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
     });
-    const sourceCardInstanceId = putCorpRootInRemote(
-      state,
-      580,
-    );
+    const sourceCardInstanceId = putCorpRootInRemote(state, 580);
     const source = state.cardInstances[sourceCardInstanceId]!;
     source.selectedServerId = "rd";
 
@@ -107,26 +101,26 @@ describe("run-start eligibility", () => {
     type Restriction = Parameters<typeof runStartRestrictionCapabilityKey>[1];
 
     expect(
-      runStartRestrictionCapabilityKey("canonical", {
+      runStartRestrictionCapabilityKey(1843825557, {
         ...base,
         capabilityKey: "fort_activity_gate",
       } as Restriction),
     ).toBe("fort_activity_gate");
     expect(
-      runStartRestrictionCapabilityKey("legacy", {
+      runStartRestrictionCapabilityKey(3167603822, {
         ...base,
         abilityKey: "legacy_fort_activity_gate",
       } as Restriction),
     ).toBe("legacy_fort_activity_gate");
     expect(() =>
-      runStartRestrictionCapabilityKey("hybrid", {
+      runStartRestrictionCapabilityKey(2368939379, {
         ...base,
         capabilityKey: "fort_activity_gate",
         abilityKey: "legacy_fort_activity_gate",
       } as Restriction),
-    ).toThrow("hybrid_run_restriction_capability_identity: hybrid");
+    ).toThrow("hybrid_run_restriction_capability_identity: 2368939379");
     expect(() =>
-      runStartRestrictionCapabilityKey("missing", base as Restriction),
-    ).toThrow("run_restriction_capability_identity_missing: missing");
+      runStartRestrictionCapabilityKey(3069454615, base as Restriction),
+    ).toThrow("run_restriction_capability_identity_missing: 3069454615");
   });
 });

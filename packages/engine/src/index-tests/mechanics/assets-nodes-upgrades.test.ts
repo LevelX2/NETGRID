@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -190,16 +191,16 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.assetNodeEffects).toHaveLength(18);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.assetNodeEffects) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.side, definitionId).toBe("corp");
-      expect(definition?.type, definitionId).toBe("asset");
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.side, String(definitionId)).toBe("corp");
+      expect(definition?.type, String(definitionId)).toBe("asset");
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
-      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.rulesText, String(definitionId)).not.toContain("WIP");
     }
     expect(
       CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
@@ -433,7 +434,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
             action.payload?.cardId === assetId,
         ),
       ).toBe(false);
-      expect(validateGameState(state).ok, definitionId).toBe(true);
+      expect(validateGameState(state).ok, String(definitionId)).toBe(true);
     }
   });
 
@@ -1220,9 +1221,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       sourceDefinitionId: 526,
       sourceTitle: "Corporate Negotiating Center",
       publicRevealKind: "reveal",
-      publicRevealDefinitionIds: 588,
+      publicRevealDefinitionIds: String(588),
       publicRevealTitles: "Simple Agenda",
-      revealedAgendaDefinitionIds: 588,
+      revealedAgendaDefinitionIds: "588",
       revealedCount: 1,
       gainedCredits: 1,
     });
@@ -1234,14 +1235,14 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       runnerPublicEvent?.publicPayload ?? {},
     );
     expect(runnerPublicEvent?.publicPayload).toMatchObject({
-      publicRevealDefinitionIds: 588,
+      publicRevealDefinitionIds: String(588),
       publicRevealTitles: "Simple Agenda",
       revealedCount: 1,
     });
     expect(JSON.stringify(runnerPublicEvent?.publicPayload)).not.toContain(
       operationId,
     );
-    expect(JSON.stringify(runnerPublicEvent?.publicPayload)).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(runnerPublicEvent?.publicPayload))).not.toContain(
       596,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -1684,16 +1685,16 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.serverUpgrades).toHaveLength(15);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.serverUpgrades) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.side, definitionId).toBe("corp");
-      expect(definition?.type, definitionId).toBe("upgrade");
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.side, String(definitionId)).toBe("corp");
+      expect(definition?.type, String(definitionId)).toBe("upgrade");
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
-      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.rulesText, String(definitionId)).not.toContain("WIP");
     }
     expect(
       CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
@@ -2088,7 +2089,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(stealAction?.payload).toMatchObject({
       stealCost: 5,
       stealAdditionalCost: 5,
-      stealCostSourceDefinitionIds: 578,
+      stealCostSourceDefinitionIds: String(578),
       stealCostSourceTitles: "Red Herrings",
     });
     expect(declineStealAction).toMatchObject({
@@ -2098,7 +2099,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         cardId: agendaId,
         stealCost: 5,
         stealAdditionalCost: 5,
-        stealCostSourceDefinitionIds: 578,
+        stealCostSourceDefinitionIds: String(578),
       },
     });
 
@@ -2154,7 +2155,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       actionType: "steal_agenda",
       stealCost: 5,
       stealAdditionalCost: 5,
-      stealCostSourceDefinitionIds: 578,
+      stealCostSourceDefinitionIds: String(578),
     });
     expect(validateGameState(state).ok).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -2382,7 +2383,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(state.corp.archives).toContain(firstGridId);
     const eventText = JSON.stringify(state.eventLog.at(-1)?.publicPayload);
     expect(eventText).not.toContain("Crystal Palace Station Grid");
-    expect(eventText).not.toContain(567);
+    expect(serializedDefinitionReferences(eventText)).not.toContain(567);
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -2693,7 +2694,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       breakSubroutineTotalCost: 2,
       breakSubroutineCostPerSubroutine: 1,
       breakSubroutineCostSourceDefinitionIds:
-        567,
+        "567",
       breakSubroutineCostSourceTitles: "Crystal Palace Station Grid",
     });
     expect(JSON.stringify(breakActions[0]?.payload)).not.toContain(crystalId);
@@ -2936,7 +2937,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       breakSubroutineTotalCost: 7,
       breakSubroutineCostPerSubroutine: 1,
       breakSubroutineCostSourceDefinitionIds:
-        567,
+        "567",
     });
   });
 
@@ -2970,7 +2971,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     );
     const agendaId = putCorpRootInRemote(state, 588);
     const printedDifficulty =
-      CARD_DEFINITIONS_BY_ID.simple_agenda?.advancementRequirement ?? 0;
+      CARD_DEFINITIONS_BY_ID[588]?.advancementRequirement ?? 0;
     state.cardInstances[agendaId] = {
       ...state.cardInstances[agendaId]!,
       advancementCounters: printedDifficulty - 1,

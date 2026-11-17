@@ -35,7 +35,7 @@ describe("SQLite maintenance match sizes", () => {
         )
         .run(
           created.matchId,
-          "maintenance-engine-event",
+          2,
           1,
           largeEnginePayload,
         );
@@ -45,7 +45,7 @@ describe("SQLite maintenance match sizes", () => {
         )
         .run(
           created.matchId,
-          "maintenance-engine-event",
+          2,
           1,
           1,
           1,
@@ -56,12 +56,11 @@ describe("SQLite maintenance match sizes", () => {
         );
       database
         .prepare(
-          `INSERT INTO ai_decision_traces (match_id, trace_id, event_id, state_version, match_version, side, turn, decision_index, created_at, schema_version, trace_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO ai_decision_traces (match_id, event_id, state_version, match_version, side, turn, decision_index, created_at, schema_version, trace_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         )
         .run(
           created.matchId,
-          "maintenance-ai-trace",
-          "maintenance-engine-event",
+          2,
           1,
           1,
           "runner",

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -13,13 +14,13 @@ import {
 } from "./runner-special-zone-install-actions";
 
 function runnerCardDefinition(
-  id: string,
+  id: number | string,
   type: CardDefinition["type"],
   title: string,
   installCost = 0,
 ): CardDefinition {
   return {
-    id,
+    id: typeof id === "number" ? id : syntheticCardDefinitionId(id),
     title,
     side: "runner",
     type,
@@ -105,8 +106,7 @@ describe("runner special zone install action builders", () => {
     const before = structuredClone(state);
     const sourceCardId = "shell_traders_source" as CardInstanceId;
     const targetCardId = "shell_traders_target" as CardInstanceId;
-    const sourceDefinitionId =
-      "onr_v1_091_the-shell-traders" as CardDefinitionId;
+    const sourceDefinitionId = 190454860 as CardDefinitionId;
     const targetDefinition = runnerCardDefinition(
       "runner_shell_target_definition",
       "program",

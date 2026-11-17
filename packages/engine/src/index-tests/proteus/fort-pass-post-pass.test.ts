@@ -340,7 +340,7 @@ describe("Proteus Public Fort Pass Windows", () => {
     );
     expect(payAction.costs).toEqual([{ credits: 1 }]);
     expect(payAction.payload).toMatchObject({
-      sourceDefinitionIds: RASMIN,
+      sourceDefinitionIds: String(RASMIN),
       serverId: "remote_1",
       paymentAmount: 1,
     });

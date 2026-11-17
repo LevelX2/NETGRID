@@ -1,4 +1,6 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
+import { cardSpecSourceRefByDefinitionId } from "@netgrid/cards/engine";
 import {
   applyAction,
   applyEffectCommands,
@@ -188,7 +190,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.damagePrevention).toHaveLength(17);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.damagePrevention) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       if (definitionId === 351) {
@@ -251,7 +253,8 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       expect.arrayContaining(
         MECHANIC_SMOKE_CARD_IDS.damagePrevention.filter(
           (id) =>
-            !id.startsWith("onr_v1_2") && id !== 367,
+            !cardSpecSourceRefByDefinitionId(id)?.sourcePath.includes("/onr_v1_2") &&
+            id !== 367,
         ),
       ),
     );
@@ -700,7 +703,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       const replayStart = state.eventLog.length;
       const gripBefore = state.runner.grip.length;
       const tagsBefore = state.runner.tags;
-      expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(state, "runner")))).not.toContain(
         557,
       );
       state = apply(

@@ -87,29 +87,25 @@ function makeState(): GameState {
       ],
     },
     cardInstances: {
-      runner_identity: instance("runner_identity", "runner_identity", {
+      runner_identity: instance("runner_identity", 2123179990, {
         side: "runner",
         zone: "rig",
       }),
-      ice_1: instance("ice_1", "test_ice", {
+      ice_1: instance("ice_1", 2579180997, {
         side: "corp",
         zone: "serverIce",
         serverId: "rd",
       }),
-      cheap_program: instance("cheap_program", "cheap_program_def", {
+      cheap_program: instance("cheap_program", 1180041019, {
         side: "runner",
         zone: "rig",
       }),
-      expensive_program: instance(
-        "expensive_program",
-        "expensive_program_def",
-        {
-          side: "runner",
-          zone: "rig",
-        },
-      ),
-      rd_1: instance("rd_1", "rd_card_1", { side: "corp", zone: "rd" }),
-      rd_2: instance("rd_2", "rd_card_2", { side: "corp", zone: "rd" }),
+      expensive_program: instance("expensive_program", 304614869, {
+        side: "runner",
+        zone: "rig",
+      }),
+      rd_1: instance("rd_1", 1112284426, { side: "corp", zone: "rd" }),
+      rd_2: instance("rd_2", 1095506807, { side: "corp", zone: "rd" }),
     },
     run: {
       runId: "run_1",
@@ -135,34 +131,19 @@ function makeHost(
   } = {},
 ): EncounterPrintedNonTraceHost {
   const definitions: Record<string, CardDefinition> = {
-    test_ice: definition("test_ice", "Test ICE", "ice"),
-    462: definition(
-      462,
-      "Ice Pick Willie",
-      "ice",
-    ),
-    484: definition(
-      484,
-      "Secret Spend Compare",
-      "ice",
-    ),
-    cheap_program_def: definition(
-      "cheap_program_def",
-      "Cheap Program",
-      "program",
-      {
-        installCost: 1,
-        memoryCost: 2,
-      },
-    ),
-    expensive_program_def: definition(
-      "expensive_program_def",
-      "Expensive Program",
-      "program",
-      { installCost: 5, memoryCost: 1 },
-    ),
-    rd_card_1: definition("rd_card_1", "R&D Card 1", "operation"),
-    rd_card_2: definition("rd_card_2", "R&D Card 2", "operation"),
+    2579180997: definition(2579180997, "Test ICE", "ice"),
+    462: definition(462, "Ice Pick Willie", "ice"),
+    484: definition(484, "Secret Spend Compare", "ice"),
+    1180041019: definition(1180041019, "Cheap Program", "program", {
+      installCost: 1,
+      memoryCost: 2,
+    }),
+    304614869: definition(304614869, "Expensive Program", "program", {
+      installCost: 5,
+      memoryCost: 1,
+    }),
+    1112284426: definition(1112284426, "R&D Card 1", "operation"),
+    1095506807: definition(1095506807, "R&D Card 2", "operation"),
     ...(options.definitions ?? {}),
   };
   const mustServer = (serverId: string) => {
@@ -297,7 +278,7 @@ describe("encounter printed non-trace effects boundary", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;
     const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition("test_ice", "Test ICE", "ice"),
+      definition: definition(2579180997, "Test ICE", "ice"),
       subroutine: { id: "end", type: "end_the_run" } as SubroutineDefinition,
       subroutineIndex: 0,
       legalAction,
@@ -306,13 +287,13 @@ describe("encounter printed non-trace effects boundary", () => {
     expect(result).toMatchObject({
       handled: true,
       runShouldEnd: true,
-      sourceDefinitionId: "test_ice",
+      sourceDefinitionId: 2579180997,
       iceId: "ice_1",
     });
     expect(legalAction.resolvedEffects).toEqual([
       expect.objectContaining({
         kind: "resolve_subroutine",
-        sourceDefinitionId: "test_ice",
+        sourceDefinitionId: 2579180997,
         subroutineIndex: 0,
         subroutineType: "end_the_run",
         endedRun: true,
@@ -365,7 +346,7 @@ describe("encounter printed non-trace effects boundary", () => {
     const paid = new Set([0]);
 
     const paidResult = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition("test_ice", "Test ICE", "ice"),
+      definition: definition(2579180997, "Test ICE", "ice"),
       subroutine: {
         id: "pay",
         type: "end_the_run_unless_runner_pays",
@@ -378,7 +359,7 @@ describe("encounter printed non-trace effects boundary", () => {
     const unpaidResult = resolveEncounterPrintedNonTraceEffect(
       makeHost(state),
       {
-        definition: definition("test_ice", "Test ICE", "ice"),
+        definition: definition(2579180997, "Test ICE", "ice"),
         subroutine: {
           id: "unpaid",
           type: "end_the_run_unless_runner_pays",
@@ -409,10 +390,10 @@ describe("encounter printed non-trace effects boundary", () => {
       id: "trash_program",
       type: "trash_installed_program",
     } as SubroutineDefinition;
-    const ice = definition("test_ice", "Test ICE", "ice", {
+    const ice = definition(2579180997, "Test ICE", "ice", {
       subroutines: [subroutine],
     });
-    const host = makeHost(state, { definitions: { test_ice: ice } });
+    const host = makeHost(state, { definitions: { [ice.id]: ice } });
     const result = resolveEncounterPrintedNonTraceEffect(host, {
       definition: ice,
       subroutine,
@@ -470,10 +451,10 @@ describe("encounter printed non-trace effects boundary", () => {
       id: "trash_program",
       type: "trash_installed_program",
     } as SubroutineDefinition;
-    const ice = definition("test_ice", "Test ICE", "ice", {
+    const ice = definition(2579180997, "Test ICE", "ice", {
       subroutines: [subroutine],
     });
-    const host = makeHost(state, { definitions: { test_ice: ice } });
+    const host = makeHost(state, { definitions: { [ice.id]: ice } });
     resolveDirectTrashProgramSubroutine(host, {
       definition: ice,
       subroutine,
@@ -500,11 +481,11 @@ describe("encounter printed non-trace effects boundary", () => {
       id: "trash_program",
       type: "trash_installed_program",
     } as SubroutineDefinition;
-    const ice = definition("test_ice", "Test ICE", "ice", {
+    const ice = definition(2579180997, "Test ICE", "ice", {
       subroutines: [subroutine],
     });
     const host = makeHost(state, {
-      definitions: { test_ice: ice },
+      definitions: { [ice.id]: ice },
       preventTrash: true,
     });
     resolveDirectTrashProgramSubroutine(host, {
@@ -542,10 +523,10 @@ describe("encounter printed non-trace effects boundary", () => {
       id: "trash_program",
       type: "trash_installed_program",
     } as SubroutineDefinition;
-    const ice = definition("test_ice", "Test ICE", "ice", {
+    const ice = definition(2579180997, "Test ICE", "ice", {
       subroutines: [subroutine],
     });
-    const host = makeHost(state, { definitions: { test_ice: ice } });
+    const host = makeHost(state, { definitions: { [ice.id]: ice } });
     resolveDirectTrashProgramSubroutine(host, {
       definition: ice,
       subroutine,
@@ -568,7 +549,7 @@ describe("encounter printed non-trace effects boundary", () => {
   it("delegates direct action-forgo markers through the encounter-resolution callback", () => {
     const state = makeState();
     const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition("test_ice", "Test ICE", "ice"),
+      definition: definition(2579180997, "Test ICE", "ice"),
       subroutine: {
         id: "forgo",
         type: "set_runner_forgo_next_action",
@@ -597,7 +578,7 @@ describe("encounter printed non-trace effects boundary", () => {
         },
       }),
       {
-        definition: definition("tko", "TKO 2.0", "ice"),
+        definition: definition(3188103717, "TKO 2.0", "ice"),
         subroutine: {
           id: "tko_single_subroutine",
           type: "end_the_run_and_runner_forgoes_next_action",
@@ -620,7 +601,7 @@ describe("encounter printed non-trace effects boundary", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;
     const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition("haunting", "Haunting Inquisition", "ice"),
+      definition: definition(2975322553, "Haunting Inquisition", "ice"),
       subroutine: {
         id: "run_lock",
         type: "set_runner_run_lock_actions",
@@ -639,12 +620,12 @@ describe("encounter printed non-trace effects boundary", () => {
       v1922CorpIceAbility: "direct_run_lock",
       runLockActionsAdded: 6,
       runLockActionsPending: 6,
-      sourceDefinitionId: "haunting",
+      sourceDefinitionId: 2975322553,
     });
     expect(legalAction.resolvedEffects).toEqual([
       expect.objectContaining({
         kind: "resolve_subroutine",
-        sourceDefinitionId: "haunting",
+        sourceDefinitionId: 2975322553,
         subroutineIndex: 1,
         subroutineType: "set_runner_run_lock_actions",
         amount: 6,
@@ -655,7 +636,7 @@ describe("encounter printed non-trace effects boundary", () => {
   it("keeps next-ICE cannot-break and cannot-jack-out markers in encounter-resolution", () => {
     const state = makeState();
     const noBreak = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition("shock", "Shock.r", "ice"),
+      definition: definition(2868353601, "Shock.r", "ice"),
       subroutine: {
         id: "next_no_break",
         type: "set_next_encounter_no_break_subroutines",
@@ -663,7 +644,7 @@ describe("encounter printed non-trace effects boundary", () => {
       subroutineIndex: 0,
     });
     const lock = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition("shock", "Shock.r", "ice"),
+      definition: definition(2868353601, "Shock.r", "ice"),
       subroutine: {
         id: "next_lock",
         type: "set_next_encounter_lock",
@@ -697,11 +678,7 @@ describe("encounter printed non-trace effects boundary", () => {
     };
     const legalAction = { payload: {} } as LegalAction;
     const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition(
-        484,
-        "Secret Spend Compare",
-        "ice",
-      ),
+      definition: definition(484, "Secret Spend Compare", "ice"),
       subroutine: {
         id: "reorder",
         type: "reorder_corp_rd_top2",
@@ -726,13 +703,13 @@ describe("encounter printed non-trace effects boundary", () => {
     ];
     state.cardInstances.archives_inner = instance(
       "archives_inner",
-      "archives_ice",
+      3417295354,
       { side: "corp", zone: "serverIce", serverId: "archives" },
       { rezzed: false, faceup: false },
     );
     state.cardInstances.archives_outer = instance(
       "archives_outer",
-      "archives_ice",
+      3417295354,
       { side: "corp", zone: "serverIce", serverId: "archives" },
       { rezzed: true, faceup: true },
     );
@@ -773,7 +750,7 @@ describe("encounter printed non-trace effects boundary", () => {
     ];
     state.cardInstances.archives_inner = instance(
       "archives_inner",
-      "archives_ice",
+      3417295354,
       { side: "corp", zone: "serverIce", serverId: "archives" },
       { rezzed: false, faceup: false },
     );
@@ -808,11 +785,7 @@ describe("encounter printed non-trace effects boundary", () => {
   it("opens and resolves a paid Deflector target choice", () => {
     const state = makeState();
     state.cardInstances.ice_1!.definitionId = 14;
-    const entrapmentDefinition = definition(
-      14,
-      "Entrapment",
-      "ice",
-    );
+    const entrapmentDefinition = definition(14, "Entrapment", "ice");
     state.corp.servers.push({
       id: "remote_1",
       kind: "remote",
@@ -822,7 +795,7 @@ describe("encounter printed non-trace effects boundary", () => {
     });
     state.cardInstances.remote_outer = instance(
       "remote_outer",
-      "remote_ice",
+      685917163,
       { side: "corp", zone: "serverIce", serverId: "remote_1" },
       { rezzed: true, faceup: true },
     );

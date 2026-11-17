@@ -189,7 +189,7 @@ describe("V1.6.1 Mechanikpaket A", () => {
     expect(ONR_V1_6_1_FINAL_CARD_IDS).toHaveLength(6);
     for (const definitionId of ONR_V1_6_1_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(definition?.mechanics.join(" ")).not.toMatch(

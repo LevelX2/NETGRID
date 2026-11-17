@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { serializeAiPlanFirstDecisionVisibleJsonExport } from "../../app/ai-plan-first-decision-export";
-import type { MaintenanceAiTraceDetail } from "../../app/maintenance";
+import type { AiDecisionDebugTrace } from "../../app/maintenance";
 
 describe("AI plan-first decision export", () => {
   it("exports the structured authority contract without legacy score semantics", () => {
@@ -30,11 +30,10 @@ describe("AI plan-first decision export", () => {
   });
 });
 
-function trace(): MaintenanceAiTraceDetail {
+function trace(): AiDecisionDebugTrace {
   return {
-    traceId: "trace-plan-first",
     matchId: "match-plan-first",
-    eventId: "event-plan-first",
+    eventId: 8,
     stateVersion: 7,
     matchVersion: 8,
     side: "corp",

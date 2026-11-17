@@ -104,7 +104,7 @@ function makeState(
       ],
     },
     cardInstances: {
-      [iceInner]: instance(iceInner, "simple_ice", {
+      [iceInner]: instance(iceInner, 2394377751, {
         zone: { side: "corp", zone: "serverIce", serverId: "rd" },
         faceup: false,
         rezzed: false,
@@ -115,10 +115,10 @@ function makeState(
         rezzed: false,
       }),
       [sourceRoot]: instance(sourceRoot, 120),
-      [targetRoot]: instance(targetRoot, "agenda_target", {
+      [targetRoot]: instance(targetRoot, 1078402943, {
         advancementCounters: 0,
       }),
-      [hqIce]: instance(hqIce, "hq_ice_def", {
+      [hqIce]: instance(hqIce, 2966027182, {
         zone: { side: "corp", zone: "hq" },
         faceup: false,
         rezzed: false,
@@ -150,26 +150,20 @@ function makeState(
 
 function definitionsFor(state: GameState): Record<string, CardDefinition> {
   const definitions: Record<string, CardDefinition> = {
-    simple_ice: definition("simple_ice", { type: "ice", title: "Simple ICE" }),
-    hq_ice_def: definition("hq_ice_def", { type: "ice", title: "HQ ICE" }),
-    agenda_target: definition("agenda_target", {
+    2394377751: definition(2394377751, { type: "ice", title: "Simple ICE" }),
+    2966027182: definition(2966027182, { type: "ice", title: "HQ ICE" }),
+    1078402943: definition(1078402943, {
       type: "agenda",
       title: "Agenda Target",
     }),
     120: definition(120, {
       title: "Lesley Major",
     }),
-    581: definition(
-      581,
-      { title: "HQ Ice Swap" },
-    ),
+    581: definition(581, { title: "HQ Ice Swap" }),
     576: definition(576, {
       title: "Omni Kismet, Ph.D.",
     }),
-    91: definition(
-      91,
-      { type: "ice", title: "Mobile Barricade" },
-    ),
+    91: definition(91, { type: "ice", title: "Mobile Barricade" }),
     onr_classic_011_glacier: definition(15, {
       type: "ice",
       title: "Glacier",
@@ -255,10 +249,7 @@ describe("fort pass window", () => {
   it("builds and resolves fort pass advancement actions with stable payload", () => {
     const state = makeState();
     const plainTargetId = "plain_target" as CardInstanceId;
-    state.cardInstances[plainTargetId] = instance(
-      plainTargetId,
-      "plain_nonadvanceable_asset",
-    );
+    state.cardInstances[plainTargetId] = instance(plainTargetId, 3999870048);
     state.corp.servers[0]!.root.push(plainTargetId);
     const host = hostFor(state);
 
@@ -277,7 +268,7 @@ describe("fort pass window", () => {
       cardId: "source_root",
       sourceDefinitionId: 120,
       targetCardId: "target_root",
-      targetCardDefinitionId: "agenda_target",
+      targetCardDefinitionId: 1078402943,
       serverId: "rd",
       serverLabel: "R&D",
       passedIceId: "ice_outer",
@@ -475,12 +466,12 @@ describe("fort pass window", () => {
       positionIceIndex: 3,
       serverIce: [iceInner, iceMiddleOne, iceMiddleTwo, iceOuter],
     });
-    state.cardInstances[iceMiddleOne] = instance(iceMiddleOne, "simple_ice", {
+    state.cardInstances[iceMiddleOne] = instance(iceMiddleOne, 2394377751, {
       zone: { side: "corp", zone: "serverIce", serverId: "rd" },
       faceup: false,
       rezzed: false,
     });
-    state.cardInstances[iceMiddleTwo] = instance(iceMiddleTwo, "simple_ice", {
+    state.cardInstances[iceMiddleTwo] = instance(iceMiddleTwo, 2394377751, {
       zone: { side: "corp", zone: "serverIce", serverId: "rd" },
       faceup: false,
       rezzed: false,
@@ -530,8 +521,7 @@ describe("fort pass window", () => {
     });
     // Relocation actions include real Engine rez projections. Every installed
     // card inspected by that projection must belong to the canonical registry.
-    state.cardInstances.target_root!.definitionId =
-      401;
+    state.cardInstances.target_root!.definitionId = 401;
     state.cardInstances.target_root!.rezzed = false;
     state.cardInstances.ice_inner!.definitionId = 449;
     state.cardInstances.hq_ice!.definitionId = 449;
@@ -542,15 +532,11 @@ describe("fort pass window", () => {
       ice: ["glacier" as CardInstanceId],
       root: [],
     });
-    state.cardInstances.glacier = instance(
-      "glacier",
-      15,
-      {
-        zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
-        faceup: false,
-        rezzed: false,
-      },
-    );
+    state.cardInstances.glacier = instance("glacier", 15, {
+      zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+      faceup: false,
+      rezzed: false,
+    });
     const host = hostFor(state);
     const server = host.servers.mustServer("rd");
     const run = state.run!;

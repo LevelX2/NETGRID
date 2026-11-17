@@ -53,7 +53,7 @@ function state(): GameState {
     cardInstances: {
       [CARD_ID]: {
         id: CARD_ID,
-        definitionId: "agenda",
+        definitionId: 2974352677,
         owner: "corp",
         controller: "corp",
         zone: { side: "corp", zone: "hq" },
@@ -201,15 +201,15 @@ function hostFor(calls: string[]): AccessFlowCompositionHost {
       installedRevealHelperCount: () => 0,
     },
     constants: {
-      setup: "setup",
-      trap: "trap",
-      crybaby: "crybaby",
-      taggedRunnerMeatDamageUpgrade: "drt",
-      accessNetDamageUpgrade: "dieter",
-      oncePerRunAccessTraceUpgrade: "turbeau",
-      hardwareTrashByAdvancementAsset: "shattered",
-      programTrashByAdvancementAsset: "experimental",
-      advancementCoreDamageAsset: "soulkiller",
+      setup: 1652316486,
+      trap: 1619048978,
+      crybaby: 3019838199,
+      taggedRunnerMeatDamageUpgrade: 3643140533,
+      accessNetDamageUpgrade: 3535329764,
+      oncePerRunAccessTraceUpgrade: 2191907399,
+      hardwareTrashByAdvancementAsset: 3872476703,
+      programTrashByAdvancementAsset: 3394580047,
+      advancementCoreDamageAsset: 1544035109,
       advancementNetDamageAsset: "virus",
     },
   } as AccessFlowCompositionHost;

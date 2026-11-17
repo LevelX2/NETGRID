@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type {
+import type { CardDefinitionId,
   AiDecisionActionAlternative,
   AiDecisionScoreComponent,
   DeckDefinition,
@@ -26,7 +26,7 @@ type StoredDeckSnapshot = {
   name: string;
   side: Side;
   identityCardId: string;
-  cards: Array<{ cardId: string; quantity: number }>;
+  cards: Array<{ cardId: CardDefinitionId; quantity: number }>;
   publicMetadata?: DeckPublicMetadata;
   deckHash?: string;
 };

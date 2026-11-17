@@ -188,14 +188,14 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.programSubtypeHosting).toHaveLength(16);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.programSubtypeHosting) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
-      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.rulesText, String(definitionId)).not.toContain("WIP");
     }
     expect(
       CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,

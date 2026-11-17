@@ -209,7 +209,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     for (const definitionId of CLASSIC_09_IDS) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -567,7 +567,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       creditGainBaseAmount: baseGain,
       creditGainBonusAmount: 1,
       firstPrepCreditGainBonus: 1,
-      firstPrepCreditGainBonusSourceDefinitionIds: ELENA_LASKOVA,
+      firstPrepCreditGainBonusSourceDefinitionIds: String(ELENA_LASKOVA),
     });
 
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -629,7 +629,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
       choiceVisibility: "hidden_info_barrier",
       publicRevealKind: "reveal",
-      publicRevealDefinitionIds: 596,
+      publicRevealDefinitionIds: String(596),
       publicRevealTitles: "Simple Economy Operation",
       revealedAgendaDefinitionIds: "",
       revealedCount: 1,
@@ -644,7 +644,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
-      publicRevealDefinitionIds: "simple_economy_operation,simple_barrier_ice",
+      publicRevealDefinitionIds: "596,589",
       publicRevealTitles: "Simple Economy Operation||Simple Barrier ICE",
       revealedAgendaDefinitionIds: "",
       revealedCount: 2,
@@ -661,11 +661,10 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
-      publicRevealDefinitionIds:
-        "simple_economy_operation,simple_barrier_ice,simple_agenda",
+      publicRevealDefinitionIds: "596,589,588",
       publicRevealTitles:
         "Simple Economy Operation||Simple Barrier ICE||Simple Agenda",
-      revealedAgendaDefinitionIds: 588,
+      revealedAgendaDefinitionIds: "588",
       revealedCount: 3,
       revealedNonAgendaCount: 2,
       agendaStoredInHq: false,
@@ -689,11 +688,10 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
       choiceVisibility: "hidden_info_barrier",
       publicRevealKind: "reveal",
-      publicRevealDefinitionIds:
-        "simple_economy_operation,simple_barrier_ice,simple_agenda",
+      publicRevealDefinitionIds: "596,589,588",
       publicRevealTitles:
         "Simple Economy Operation||Simple Barrier ICE||Simple Agenda",
-      revealedAgendaDefinitionIds: 588,
+      revealedAgendaDefinitionIds: "588",
       revealedCount: 3,
       revealedNonAgendaCount: 2,
       agendaStoredInHq: true,
@@ -742,7 +740,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
-      publicRevealDefinitionIds: 596,
+      publicRevealDefinitionIds: String(596),
       publicRevealTitles: "Simple Economy Operation",
       revealedAgendaDefinitionIds: "",
       revealedCount: 1,
@@ -757,7 +755,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
-      publicRevealDefinitionIds: "simple_economy_operation,simple_barrier_ice",
+      publicRevealDefinitionIds: "596,589",
       publicRevealTitles: "Simple Economy Operation||Simple Barrier ICE",
       revealedAgendaDefinitionIds: "",
       revealedCount: 2,
@@ -778,7 +776,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       hiddenZoneBarrier: true,
       hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
       choiceVisibility: "hidden_info_barrier",
-      publicRevealDefinitionIds: "simple_economy_operation,simple_barrier_ice",
+      publicRevealDefinitionIds: "596,589",
       publicRevealTitles: "Simple Economy Operation||Simple Barrier ICE",
       revealedAgendaDefinitionIds: "",
       revealedCount: 2,
@@ -885,7 +883,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       cardDefinitionId: LIBRARY_SEARCH,
       runnerEventRun: true,
       hostedCreditsSpent: 1,
-      hostedCreditSourceDefinitionIds: ZETATECH_PORTASTATION,
+      hostedCreditSourceDefinitionIds: String(ZETATECH_PORTASTATION),
       normalCreditsSpent: 1,
       runnerCreditsAfter: 0,
     });

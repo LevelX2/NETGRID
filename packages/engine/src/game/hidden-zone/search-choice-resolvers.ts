@@ -1,3 +1,4 @@
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import type {
   CardDefinitionId,
   CardInstanceId,
@@ -105,7 +106,7 @@ export function resolveSearchToGripSelections(input: {
   const sourceParts = choice.source.split(":");
   const kind = sourceParts[0];
   const sourceCardId = sourceParts[1] as CardInstanceId | undefined;
-  const sourceDefinitionId = sourceParts[2] as CardDefinitionId | undefined;
+  const sourceDefinitionId = parseCardDefinitionIdToken(sourceParts[2]);
   const filter = sourceParts[3] as SearchToGripFilter | undefined;
   if (
     (kind !== "p3_37.search_trash_to_grip" &&
@@ -158,11 +159,14 @@ export function resolveSearchStackInstallSelection(input: {
   const [
     ,
     sourceCardId = "",
-    sourceDefinitionId = "",
+    sourceDefinitionIdToken = "",
     filter = "",
     installCostRaw = "",
     shuffleRaw = "",
   ] = choice.source.split(":");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    sourceDefinitionIdToken,
+  );
   if (
     !sourceCardId ||
     !sourceDefinitionId ||
@@ -206,13 +210,16 @@ export function resolveLookTopStackTakeMatchingSelection(input: {
   const [
     ,
     sourceCardId = "",
-    sourceDefinitionId = "",
+    sourceDefinitionIdToken = "",
     countRaw = "0",
     allowedTypesRaw = "",
     costPerTakenRaw = "0",
     revealRaw = "",
     shuffleRaw = "",
   ] = choice.source.split(":");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    sourceDefinitionIdToken,
+  );
   const count = Number(countRaw);
   const costPerTaken = Number(costPerTakenRaw);
   const allowedTypes = allowedTypesRaw
@@ -316,7 +323,7 @@ export function resolveTemporaryProgramSearchInstallSelection(input: {
     "p3_38.stack_or_trash_program_install",
   );
   const sourceDefinitionId = isCardImplementationChoice
-    ? (choice.source.split(":")[2] as CardDefinitionId | undefined)
+    ? parseCardDefinitionIdToken(choice.source.split(":")[2])
     : input.defaultSourceDefinitionId;
   if (!sourceDefinitionId)
     throw new Error("Die Sneak-Preview-Choice ist ungueltig.");

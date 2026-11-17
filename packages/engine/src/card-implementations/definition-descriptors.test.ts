@@ -1552,7 +1552,7 @@ describe("CardImplementation definition descriptors", () => {
     ]) {
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).toBe("implemented");
     }
   });
@@ -1656,7 +1656,7 @@ describe("CardImplementation definition descriptors", () => {
     ]) {
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).toBe("implemented");
     }
   });
@@ -1755,7 +1755,7 @@ describe("CardImplementation definition descriptors", () => {
     ]) {
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).toBe(
         [11, 17].includes(
           definitionId,
@@ -1826,7 +1826,7 @@ describe("CardImplementation definition descriptors", () => {
       expect(
         cardImplementationForDefinitionId(definitionId)
           ?.damagePreventionSources,
-        definitionId,
+        String(definitionId),
       ).toMatchObject([
         {
           kind: "damage_prevention",
@@ -2080,7 +2080,7 @@ describe("CardImplementation definition descriptors", () => {
     for (const implementation of CARD_IMPLEMENTATIONS) {
       expect(
         containsFunction(implementation),
-        implementation.cardDefinitionId,
+        String(implementation.cardDefinitionId),
       ).toBe(false);
     }
   });

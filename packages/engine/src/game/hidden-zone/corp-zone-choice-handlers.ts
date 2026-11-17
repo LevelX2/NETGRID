@@ -1,3 +1,4 @@
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -377,9 +378,12 @@ function resolveShowHqAgendasForCreditsChoice(
   const [
     ,
     sourceCardId = "",
-    sourceDefinitionId = "",
+    sourceDefinitionIdToken = "",
     creditPerAgendaRaw = "",
   ] = choice.source.split(":");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    sourceDefinitionIdToken,
+  );
   const creditPerAgenda = Number(creditPerAgendaRaw);
   const continuation = choice.continuation;
   const expectedCreditPerAgenda = sourceCardId

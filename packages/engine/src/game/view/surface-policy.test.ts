@@ -83,13 +83,13 @@ describe("surface policy", () => {
       sanitizePayloadForSurface(
         {
           revealedCount: 1,
-          publicRevealDefinitionIds: "ice_wall",
+          publicRevealDefinitionIds: "2521798093",
         },
         { surface: "public_event", family: "scored_agenda_sequence" },
       ),
     ).toEqual({
       revealedCount: 1,
-      publicRevealDefinitionIds: "ice_wall",
+      publicRevealDefinitionIds: "2521798093",
     });
 
     expect(() =>

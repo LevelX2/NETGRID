@@ -22,8 +22,8 @@ if (cards.length !== 54)
     `effektiver Icebreaker-Pool hat ${cards.length} statt 54 Karten`,
   );
 for (const cardId of [
-  "onr_proteus_080_black-widow",
-  "onr_proteus_092_morphing-tool",
+  138,
+  150,
 ])
   if (!cards.some((card) => card.id === cardId))
     failures.push(`effektiver Icebreaker-Pool vermisst ${cardId}`);

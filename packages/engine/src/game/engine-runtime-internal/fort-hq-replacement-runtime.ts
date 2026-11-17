@@ -1,3 +1,4 @@
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -334,8 +335,11 @@ export function resolveFortHqReplacementChoice(
   const choice = state.pendingChoice;
   if (!choice?.source.startsWith("card_implementation.fort_hq_replacement"))
     throw new Error("Es ist keine Fort-Ersatz-Choice offen.");
-  const [, sourceCardId = "", sourceDefinitionId = "", , count = ""] =
+  const [, sourceCardId = "", sourceDefinitionIdToken = "", , count = ""] =
     choice.source.split(":");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    sourceDefinitionIdToken,
+  );
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
   if (selectedIds.length !== Number(count))
     throw new Error(

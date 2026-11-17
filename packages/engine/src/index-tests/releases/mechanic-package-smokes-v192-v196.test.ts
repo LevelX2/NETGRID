@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -189,11 +190,11 @@ describe("V1.9.2 Mechanikpaket K", () => {
     expect(ONR_V1_9_2_FINAL_CARD_IDS).toHaveLength(7);
     for (const definitionId of ONR_V1_9_2_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(cardImplementationForDefinitionId(definitionId)).toBeDefined();
-      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
+      expect(definition?.mechanics.join(" "), String(definitionId)).not.toMatch(
         /trace|tag|damage_prevention|v2|matchmaking|ranking/,
       );
     }
@@ -495,11 +496,11 @@ describe("V1.9.3 Mechanikpaket L", () => {
     expect(ONR_V1_9_3_FINAL_CARD_IDS).toHaveLength(4);
     for (const definitionId of ONR_V1_9_3_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(cardImplementationForDefinitionId(definitionId)).toBeDefined();
-      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
+      expect(definition?.mechanics.join(" "), String(definitionId)).not.toMatch(
         /damage_prevention|replacement|v2|matchmaking|ranking/,
       );
     }
@@ -692,14 +693,14 @@ describe("V1.9.4 Mechanikpaket M", () => {
     expect(ONR_V1_9_4_FINAL_CARD_IDS).toHaveLength(2);
     for (const definitionId of ONR_V1_9_4_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(
+      expect(definition?.mechanics.join(" "), String(definitionId)).toMatch(
         /runner_is_tagged/,
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(/damage/);
-      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
+      expect(definition?.mechanics.join(" "), String(definitionId)).toMatch(/damage/);
+      expect(definition?.mechanics.join(" "), String(definitionId)).not.toMatch(
         /v2|matchmaking|ranking/,
       );
     }
@@ -797,10 +798,10 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(ONR_V1_9_5_FINAL_CARD_IDS).toHaveLength(2);
     for (const definitionId of ONR_V1_9_5_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
+      expect(definition?.mechanics.join(" "), String(definitionId)).not.toMatch(
         /v2|matchmaking|ranking/,
       );
     }
@@ -904,7 +905,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       actionType: "rez_card",
       cardDefinitionId: 520,
       agendaPointCost: 1,
-      spentAgendaDefinitionIds: 415,
+      spentAgendaDefinitionIds: String(415),
       gainedCredits: 12,
       selfTrashed: true,
       obligationDebtCountAfter: 1,
@@ -977,7 +978,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       cardDefinitionId: 520,
       agendaPointCost: 1,
       agendaPointCostPaid: 1,
-      spentAgendaDefinitionIds: 432,
+      spentAgendaDefinitionIds: String(432),
       gainedCredits: 12,
     });
   });
@@ -1170,7 +1171,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(
       String(state.eventLog.at(-1)?.publicPayload.publicRevealDefinitionIds),
     ).toContain(491);
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(state.eventLog.at(-1)?.publicPayload))).not.toContain(
       590,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));

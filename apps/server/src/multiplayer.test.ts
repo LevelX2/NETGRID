@@ -1674,7 +1674,7 @@ describe("Backend 0.5 private storage maintenance", () => {
     );
     expect(index?.[0]).toMatchObject({
       matchId: traced.matchId,
-      eventId: expect.any(String),
+      eventId: expect.any(Number),
       side: "corp",
       turn: 1,
       schemaVersion: "ai-decision-trace-v2",
@@ -1686,11 +1686,14 @@ describe("Backend 0.5 private storage maintenance", () => {
         { afterDecisionIndex: index?.[0]?.decisionIndex ?? 0 },
       );
     expect(
-      cursorIndex?.some((entry) => entry.traceId === index?.[0]?.traceId),
+      cursorIndex?.some((entry) => entry.decisionIndex === index?.[0]?.decisionIndex),
     ).toBe(false);
     const details = await Promise.all(
       (index ?? []).map((entry) =>
-        reopenedService.storageMaintenanceAiDecisionTraceDetail(entry.traceId),
+        reopenedService.storageMaintenanceAiDecisionTraceDetail(
+          traced.matchId,
+          entry.decisionIndex,
+        ),
       ),
     );
     const detail = details[0];
@@ -1746,7 +1749,7 @@ describe("Backend 0.5 private storage maintenance", () => {
         `/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}`,
       );
       const httpIndex = (await indexResponse.json()) as {
-        traces?: Array<{ traceId: string }>;
+        traces?: Array<{ decisionIndex: number }>;
       };
       expect(indexResponse.status).toBe(200);
       expect(httpIndex.traces?.length).toBeGreaterThan(0);
@@ -1754,18 +1757,21 @@ describe("Backend 0.5 private storage maintenance", () => {
         `/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}?afterDecisionIndex=${encodeURIComponent(String(index?.[0]?.decisionIndex ?? 0))}`,
       );
       const cursorBody = (await cursorResponse.json()) as {
-        traces?: Array<{ traceId: string }>;
+        traces?: Array<{ decisionIndex: number }>;
       };
       expect(cursorResponse.status).toBe(200);
       expect(
         cursorBody.traces?.some(
-          (entry) => entry.traceId === httpIndex.traces?.[0]?.traceId,
+          (entry) => entry.decisionIndex === httpIndex.traces?.[0]?.decisionIndex,
         ),
       ).toBe(false);
-      const detailResponse = await maintenance.request(
-        `/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(httpIndex.traces?.[0]?.traceId ?? "")}`,
-      );
+      const decisionIndex = httpIndex.traces?.[0]?.decisionIndex;
+      const decisionTracePath = (matchId: string) =>
+        `/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(matchId)}/decisions/${decisionIndex}`;
+      const detailResponse = await maintenance.request(decisionTracePath(traced.matchId));
       expect(detailResponse.status).toBe(200);
+      const missingTraceResponse = await maintenance.request(decisionTracePath(untraced.matchId));
+      expect(missingTraceResponse.status).toBe(404);
       const httpDetail = (await detailResponse.json()) as {
         detail?: {
           actionAlternatives?: Array<{
@@ -1853,7 +1859,7 @@ describe("Backend 0.5 private storage maintenance", () => {
           afterEventIndex?: number;
           eventLimit?: number;
         };
-        events?: Array<{ eventId: string }>;
+        events?: Array<{ eventId: number }>;
         traces?: Array<{ detail: Record<string, unknown> }>;
         schemaVersions?: {
           decisionIndex?: string;
@@ -2132,7 +2138,7 @@ describe("Backend 0.5 private storage maintenance", () => {
           runtime?: { schemaVersion?: string };
           validation?: Record<string, boolean>;
         };
-        surroundingEvents?: Array<{ eventId?: string }>;
+        surroundingEvents?: Array<{ eventId?: number }>;
         beliefState?: {
           schemaVersion?: string;
           provenance?: string;
@@ -2833,10 +2839,10 @@ describe("Backend 0.5 private storage maintenance", () => {
 
       traceAuditDb = new DatabaseSync(dbPath);
       traceAuditDb.exec(`
-        CREATE TABLE trace_write_audit (op TEXT NOT NULL, trace_id TEXT NOT NULL);
-        CREATE TRIGGER audit_ai_traces_insert AFTER INSERT ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('insert', NEW.trace_id); END;
-        CREATE TRIGGER audit_ai_traces_update AFTER UPDATE ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('update', NEW.trace_id); END;
-        CREATE TRIGGER audit_ai_traces_delete AFTER DELETE ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('delete', OLD.trace_id); END;
+        CREATE TABLE trace_write_audit (op TEXT NOT NULL, decision_index INTEGER NOT NULL);
+        CREATE TRIGGER audit_ai_traces_insert AFTER INSERT ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('insert', NEW.decision_index); END;
+        CREATE TRIGGER audit_ai_traces_update AFTER UPDATE ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('update', NEW.decision_index); END;
+        CREATE TRIGGER audit_ai_traces_delete AFTER DELETE ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('delete', OLD.decision_index); END;
       `);
       const traceAuditCounts = (): Record<string, number> =>
         Object.fromEntries(
@@ -2859,8 +2865,8 @@ describe("Backend 0.5 private storage maintenance", () => {
         knownStateVersion: humanReadyPayload.playerView.stateVersion,
         mode: "single_step",
       });
-      expect(advanced.ok).toBe(true);
-      if (!advanced.ok) throw new Error(advanced.error.message);
+      if (!advanced.ok)
+        throw new Error(`${advanced.error.code}: ${advanced.error.message}`);
       const aiEventId = advanced.publicEvent?.eventId;
       expect(aiEventId).toBeTruthy();
       if (!aiEventId) throw new Error("Missing AI event id");
@@ -3501,7 +3507,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const addedEngineEvents: GameEvent[] = [];
     const traces: NonNullable<StoredMatch["aiDecisionTraces"]> = [];
     for (let index = 1; index <= 120; index += 1) {
-      const eventId = `evt_bounded_${index}`;
+      const eventId = index + 1;
       const actor: Side = index % 2 === 0 ? "corp" : "runner";
       const actionType = index % 10 === 0 ? "end_turn" : "gain_credit";
       const accessIndex =
@@ -3545,7 +3551,6 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         publicPayload: { actor, actionType },
       } as GameEvent);
       traces.push({
-        traceId: `trace_bounded_${index}`,
         matchId: record.match.matchId,
         eventId,
         stateVersion: index,
@@ -4354,7 +4359,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         side: "corp",
         sessionToken: created.hostSessionToken,
         clientKnownMatchVersion: mandatory.actorPayload.matchVersion,
-        targetEventId: `evt_${mandatory.receipt.stateVersionAfter}`,
+        targetEventId: mandatory.receipt.stateVersionAfter + 1,
         reason: "Compaction undo",
       });
       if (!undo.ok || !undo.undoRequest)
@@ -4502,7 +4507,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         side: "corp",
         sessionToken: created.hostSessionToken,
         clientKnownMatchVersion: credit.actorPayload.matchVersion,
-        targetEventId: `evt_${credit.receipt.stateVersionAfter}`,
+        targetEventId: credit.receipt.stateVersionAfter + 1,
         reason: "Incremental event write regression",
       });
       expect(undo.ok).toBe(true);
@@ -6419,6 +6424,10 @@ describe("MVP 0.2 multiplayer service", () => {
       loserSide: "corp",
       finalEngineStateHash: beforeHash,
     });
+    expect(payload.playerView.publicEvents.slice(-2).map((event) => event.eventId)).toEqual([
+      before.playerView.stateVersion + 1,
+      before.playerView.stateVersion + 2,
+    ]);
     expect(payload.playerView.publicEvents.at(-1)?.publicPayload.type).toBe(
       "time_expired",
     );
@@ -6950,12 +6959,24 @@ describe("MVP 0.2 multiplayer service", () => {
       (action) => action.type === "mandatory_draw",
       "mandatory",
     );
+    const targetEventId = firstAction.receipt.stateVersionAfter + 1;
+    const stringUndo = await first.service.requestUndo({
+      matchId: first.matchId,
+      side: "corp",
+      sessionToken: first.corp.sessionToken,
+      clientKnownMatchVersion: firstAction.actorPayload.matchVersion,
+      targetEventId: String(targetEventId) as unknown as number,
+    });
+    expect(stringUndo).toMatchObject({
+      ok: false,
+      error: { code: "undo_not_available" },
+    });
     const undo = await first.service.requestUndo({
       matchId: first.matchId,
       side: "corp",
       sessionToken: first.corp.sessionToken,
       clientKnownMatchVersion: firstAction.actorPayload.matchVersion,
-      targetEventId: firstAction.receipt.stateVersionAfter === 1 ? "evt_1" : "",
+      targetEventId,
       reason: "Misclick",
     });
     expect(undo.ok).toBe(true);
@@ -7023,7 +7044,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: declineMatch.corp.sessionToken,
       clientKnownMatchVersion: declineAction.actorPayload.matchVersion,
-      targetEventId: `evt_${declineAction.receipt.stateVersionAfter}`,
+      targetEventId: declineAction.receipt.stateVersionAfter + 1,
     });
     expect(declineRequest.ok).toBe(true);
     if (!declineRequest.ok || !declineRequest.undoRequest)
@@ -7070,7 +7091,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: invalidMatch.corp.sessionToken,
       clientKnownMatchVersion: invalidAction.actorPayload.matchVersion,
-      targetEventId: `evt_${invalidAction.receipt.stateVersionAfter}`,
+      targetEventId: invalidAction.receipt.stateVersionAfter + 1,
     });
     expect(invalidRequest.ok).toBe(true);
     if (!invalidRequest.ok || !invalidRequest.undoRequest)
@@ -7139,7 +7160,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: second.runner.sessionToken,
       clientKnownMatchVersion: access.actorPayload.matchVersion,
-      targetEventId: `evt_${run.receipt.stateVersionAfter}`,
+      targetEventId: run.receipt.stateVersionAfter + 1,
       reason: "Undo after access",
     });
     expect(blocked.ok).toBe(false);
@@ -7193,7 +7214,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: match.runner.sessionToken,
       clientKnownMatchVersion: access.actorPayload.matchVersion,
-      targetEventId: `evt_${run.receipt.stateVersionAfter}`,
+      targetEventId: run.receipt.stateVersionAfter + 1,
       reason: "Lokale Debug-Zurücknahme über Access hinweg",
     });
     expect(requested.ok).toBe(true);
@@ -7222,12 +7243,12 @@ describe("MVP 0.2 multiplayer service", () => {
     const afterUndo = await match.service.loadForTest(match.matchId);
     expect(
       afterUndo?.eventLog.some(
-        (event) => event.eventId === `evt_${run.receipt.stateVersionAfter}`,
+        (event) => event.eventId === run.receipt.stateVersionAfter + 1,
       ),
     ).toBe(false);
     expect(
       afterUndo?.eventLog.some(
-        (event) => event.eventId === `evt_${access.receipt.stateVersionAfter}`,
+        (event) => event.eventId === access.receipt.stateVersionAfter + 1,
       ),
     ).toBe(false);
   });
@@ -7263,7 +7284,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: match.corp.sessionToken,
       clientKnownMatchVersion: credit.actorPayload.matchVersion,
-      targetEventId: `evt_${credit.receipt.stateVersionAfter}`,
+      targetEventId: credit.receipt.stateVersionAfter + 1,
       reason: "Snapshot event history regression",
     });
     expect(undo.ok).toBe(true);
@@ -7283,7 +7304,7 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect(
       storedAfterUndo?.gameState.eventLog.map((event) => event.eventId),
-    ).toEqual(["evt_0", `evt_${mandatory.receipt.stateVersionAfter}`]);
+    ).toEqual([1, mandatory.receipt.stateVersionAfter + 1]);
     expect(
       storedAfterUndo?.stateSnapshots
         .filter(
@@ -7339,7 +7360,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: created.hostSessionToken,
       clientKnownMatchVersion: mandatoryResult.actorPayload.matchVersion,
-      targetEventId: `evt_${mandatoryResult.receipt.stateVersionAfter}`,
+      targetEventId: mandatoryResult.receipt.stateVersionAfter + 1,
       reason: "Misclick",
     });
     expect(undo.ok).toBe(true);
@@ -7496,7 +7517,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: reconnectedRunner.sessionToken,
       clientKnownMatchVersion: prevented.actorPayload.matchVersion,
-      targetEventId: `evt_${prevented.receipt.stateVersionAfter}`,
+      targetEventId: prevented.receipt.stateVersionAfter + 1,
       reason: "Event modification undo",
     });
     expect(blocked.ok).toBe(false);
@@ -7698,7 +7719,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: match.runner.sessionToken,
       clientKnownMatchVersion: moved.actorPayload.matchVersion,
-      targetEventId: `evt_${moved.receipt.stateVersionAfter}`,
+      targetEventId: moved.receipt.stateVersionAfter + 1,
       reason: "Special zone undo",
     });
     expect(blocked.ok).toBe(false);
@@ -7819,7 +7840,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: runner.sessionToken,
       clientKnownMatchVersion: reconnectedCorp.matchVersion,
-      targetEventId: `evt_${played.receipt.stateVersionAfter}`,
+      targetEventId: played.receipt.stateVersionAfter + 1,
       reason: "V1.2.3 hidden-zone shuffle undo",
     });
     expect(blocked.ok).toBe(false);
@@ -8156,7 +8177,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: reconnected.sessionToken,
       clientKnownMatchVersion: duplicate.actorPayload.matchVersion,
-      targetEventId: `evt_${started.receipt.stateVersionAfter}`,
+      targetEventId: started.receipt.stateVersionAfter + 1,
       reason: "Archives reveal undo",
     });
     expect(blocked.ok).toBe(false);
@@ -9073,7 +9094,7 @@ describe("MVP 0.2 multiplayer service", () => {
   });
 
   it("counts a multiaccess breach as one successful run", () => {
-    const accessEvent = (eventId: string, accessIndex: number): EventRecord =>
+    const accessEvent = (eventId: number, accessIndex: number): EventRecord =>
       ({
         eventId,
         matchId: "multiaccess-result-test",
@@ -9094,17 +9115,17 @@ describe("MVP 0.2 multiplayer service", () => {
 
     expect(
       successfulRunCountForResult([
-        accessEvent("first-run-0", 0),
-        accessEvent("first-run-1", 1),
-        accessEvent("first-run-2", 2),
-        accessEvent("second-run-0", 0),
+        accessEvent(2, 0),
+        accessEvent(3, 1),
+        accessEvent(4, 2),
+        accessEvent(5, 0),
       ]),
     ).toBe(2);
   });
 
   it("counts only a completed agenda steal after a runner payment-support window", () => {
     const stealEvent = (
-      eventId: string,
+      eventId: number,
       publicPayload: Record<string, unknown>,
     ): EventRecord =>
       ({
@@ -9127,11 +9148,11 @@ describe("MVP 0.2 multiplayer service", () => {
 
     expect(
       stolenAgendaCountForResult([
-        stealEvent("support-window", {
+        stealEvent(2, {
           runnerCostPenaltySupportWindowOpened: true,
           runnerCostPenaltySupportOriginalActionId: "steal-fetal-ai",
         }),
-        stealEvent("completed-steal", {
+        stealEvent(3, {
           agendaPoints: 3,
           totalAgendaPoints: 5,
         }),
@@ -10253,7 +10274,7 @@ describe("MVP 0.2 multiplayer service", () => {
       (action) => action.type === "mandatory_draw",
       "ws-undo-clear-mandatory",
     );
-    const targetEventId = `evt_${mandatory.receipt.stateVersionAfter}`;
+    const targetEventId = mandatory.receipt.stateVersionAfter + 1;
     const handle = createNetgridHttpServer(match.service);
     await new Promise<void>((resolve) =>
       handle.server.listen(0, "127.0.0.1", resolve),
@@ -11480,8 +11501,8 @@ describe("MVP 0.2 multiplayer service", () => {
       knownStateVersion: afterDiscard.playerView.stateVersion,
       knownMatchVersion: afterDiscard.matchVersion,
     });
-    expect(advanced.ok).toBe(true);
-    if (!advanced.ok) throw new Error(advanced.error.message);
+    if (!advanced.ok)
+      throw new Error(`${advanced.error.code}: ${advanced.error.message}`);
     expect(advanced.requesterPayload.playerView.stateVersion).toBeGreaterThan(
       afterDiscard.playerView.stateVersion,
     );
@@ -11908,8 +11929,8 @@ describe("MVP 0.2 multiplayer service", () => {
       knownMatchVersion: before.matchVersion,
       mode: "single_step",
     });
-    expect(advanced.ok).toBe(true);
-    if (!advanced.ok) throw new Error(advanced.error.message);
+    if (!advanced.ok)
+      throw new Error(`${advanced.error.code}: ${advanced.error.message}`);
     expect(advanced.publicEvent?.publicPayload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: 595,
@@ -13402,12 +13423,13 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect(afterFailure?.eventLog).toHaveLength(beforeFailure.eventLog.length);
     expect(afterFailure?.aiDecisionTraces?.at(-1)).toMatchObject({
-      traceId: `ai_attempt_${created.matchId}_${failureDecisionIndex}`,
+      decisionIndex: failureDecisionIndex,
       schemaVersion: "ai-decision-failure-attempt-v1",
       traceJson: {
         attempt: {
           phase: "input",
           code: "ai_input_exception",
+          diagnosticCode: `ai_attempt_${created.matchId}_${failureDecisionIndex}`,
           error: {
             code: "test.input_exception",
             message: "private input binding detail belongs only in maintenance",
@@ -13632,7 +13654,6 @@ describe("MVP 0.2 multiplayer service", () => {
       );
       expect(bundle?.decisions).toHaveLength(failureDecisionIndex);
       expect(bundle?.decisions.at(-1)).toMatchObject({
-        traceId: `ai_attempt_${created.matchId}_${failureDecisionIndex}`,
         eventId: eventAnchorId,
         stateVersion: beforeFailure.gameState.stateVersion,
         decisionIndex: failureDecisionIndex,
@@ -13837,7 +13858,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(after?.gameState?.stateVersion).toBe(before.gameState.stateVersion);
     const failureAttempt = after?.aiDecisionTraces?.at(-1);
     expect(advanced.error).toMatchObject({
-      diagnosticCode: failureAttempt?.traceId,
+      diagnosticCode: `ai_attempt_${created.matchId}_${failureAttempt?.decisionIndex}`,
     });
     expect(JSON.stringify(advanced.error)).not.toContain(
       "Private target detail",
@@ -14339,7 +14360,9 @@ describe("MVP 0.2 multiplayer service", () => {
     ).toContain(runnerPreview.preview.actionId);
     const runnerPreviewJson = JSON.stringify(runnerPreview);
     expect(runnerPreviewJson).not.toContain(hiddenCorpCard.instanceId);
-    expect(runnerPreviewJson).not.toContain(hiddenCorpCard.definitionId);
+    expect(runnerPreviewJson).not.toMatch(
+      new RegExp(`"(?:[a-z]*definitionId|cardId)":${hiddenCorpCard.definitionId}\\b`, "i"),
+    );
     expect(runnerPreviewJson).not.toContain(hiddenCorpCard.title);
     expect(runnerPreviewJson).not.toMatch(
       /aiPrivateHandPreview|developerPrivateHandsPreview|privateDeckSnapshots|cardInstances/,
@@ -14500,7 +14523,9 @@ describe("MVP 0.2 multiplayer service", () => {
     const corpPreviewJson = JSON.stringify(corpPreview);
     for (const hiddenRunnerCard of hiddenRunnerCards) {
       expect(corpPreviewJson).not.toContain(hiddenRunnerCard.instanceId);
-      expect(corpPreviewJson).not.toContain(hiddenRunnerCard.definitionId);
+      expect(corpPreviewJson).not.toMatch(
+        new RegExp(`"(?:[a-z]*definitionId|cardId)":${hiddenRunnerCard.definitionId}\\b`, "i"),
+      );
       expect(corpPreviewJson).not.toContain(hiddenRunnerCard.title);
     }
     expect(corpPreviewJson).not.toMatch(
@@ -14988,7 +15013,7 @@ describe("MVP 0.2 multiplayer service", () => {
         metadata?: { participantSides?: { player_a?: Side; player_b?: Side } };
         timeline?: Array<{ hiddenInfoBarrier?: boolean }>;
         publicEvents?: Array<{
-          eventId?: string;
+          eventId?: number;
           stateVersionAfter?: number;
         }>;
         frames?: Array<{

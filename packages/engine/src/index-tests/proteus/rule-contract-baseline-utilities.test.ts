@@ -300,7 +300,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
           (implementation) =>
             implementation.cardDefinitionId === cardDefinitionId,
         ),
-        cardDefinitionId,
+        String(cardDefinitionId),
       ).toHaveLength(1);
     }
   });
@@ -1393,7 +1393,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "expose_installed_cards_single_fort",
       publicRevealKind: "expose",
-      publicRevealDefinitionIds: WALL,
+      publicRevealDefinitionIds: String(WALL),
       exposedCardInstanceIds: "wall_3",
       exposedServerLabels: "Remote 1 ICE 1",
     });

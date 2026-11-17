@@ -1,10 +1,11 @@
-import { isCardDefinitionId } from "@netgrid/shared";
 "use client";
 
-import type {
-  ApiReplayAnalysisFrame,
-  PublicGameEvent,
-  Side,
+import {
+  isCardDefinitionId,
+  type ApiReplayAnalysisFrame,
+  type MatchEventId,
+  type PublicGameEvent,
+  type Side,
 } from "@netgrid/shared";
 import {
   ChevronLeft,
@@ -65,7 +66,7 @@ type ReplayIndexEntry = {
 };
 
 type ReplayTimelineStep = {
-  eventId: string;
+  eventId: MatchEventId;
   index: number;
   side?: Side;
   label: string;

@@ -15,7 +15,7 @@ import {
   type HiddenZoneTriggerExecutionHost,
 } from "./hidden-zone-trigger-execution";
 
-const MYSTERY_BOX_ID = "mystery_box";
+const MYSTERY_BOX_ID = 3156754700;
 
 describe("hidden zone trigger execution", () => {
   it("returns unhandled for actions outside the hidden-zone trigger boundary", () => {
@@ -55,10 +55,10 @@ describe("hidden zone trigger execution", () => {
       MYSTERY_BOX_ID,
       "runner",
     );
-    state.cardInstances[programId] = instance(programId, "program_a", "runner");
+    state.cardInstances[programId] = instance(programId, 3126340663, "runner");
     state.cardInstances[resourceId] = instance(
       resourceId,
-      "resource_a",
+      1272389757,
       "runner",
     );
     const action = triggerAction(state, {
@@ -114,7 +114,7 @@ describe("hidden zone trigger execution", () => {
     );
     state.cardInstances[resourceId] = instance(
       resourceId,
-      "resource_a",
+      1272389757,
       "runner",
     );
     const shuffledPurposes: string[] = [];
@@ -239,13 +239,12 @@ function definitionFor(
   const card = state.cardInstances[cardId];
   if (!card) throw new Error(`CardInstance fehlt: ${cardId}`);
   const type =
-    card.definitionId.startsWith("program") ||
-    card.definitionId === MYSTERY_BOX_ID
+    card.definitionId === 3126340663 || card.definitionId === MYSTERY_BOX_ID
       ? "program"
       : "resource";
   return {
     id: card.definitionId,
-    title: card.definitionId,
+    title: cardId,
     side: "runner",
     type,
     mechanics: [],

@@ -75,7 +75,7 @@ describe("replay chronicle card tooltips", () => {
 
 function replayEvent(payload: Record<string, unknown>): PublicGameEvent {
   return {
-    eventId: "evt_replay_systematic_layoffs",
+    eventId: 100,
     type: "play_operation",
     stateVersionBefore: 4,
     stateVersionAfter: 5,

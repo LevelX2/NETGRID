@@ -189,7 +189,7 @@ describe("V1.0.5K Card Release", () => {
     for (const definitionId of ONR_V1_0_5K_FINAL_CARD_IDS) {
       expect(
         CARD_DEFINITIONS_BY_ID[definitionId]?.implementationStatus,
-        definitionId,
+        String(definitionId),
       ).toBe("playable_mvp");
     }
 
@@ -397,7 +397,7 @@ describe("V1.0.5K Card Release", () => {
       },
       targets: {
         installedProgramDefinitionId: 227,
-        trashedCardDefinitionIds: 264,
+        trashedCardDefinitionIds: "264",
         installed: true,
       },
     });

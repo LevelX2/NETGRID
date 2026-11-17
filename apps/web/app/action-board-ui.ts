@@ -1,6 +1,8 @@
-import { isCardDefinitionId } from "@netgrid/shared";
+import type { AccessPresentationId } from "./access-reveal-ui";
 import {
+  isCardDefinitionId,
   type LegalAction,
+  type MatchEventId,
   type PlayerView,
   type PublicGameEvent,
   type Side,
@@ -2740,7 +2742,7 @@ function stealCostSourceLabel(value: unknown): string {
 
 export function retainedAccessRevealEvent(
   events: PublicGameEvent[],
-  dismissedEventId: string | null,
+  dismissedEventId: AccessPresentationId | null,
 ): PublicGameEvent | null {
   const newerEvents: PublicGameEvent[] = [];
   for (let index = events.length - 1; index >= 0; index -= 1) {
@@ -2769,7 +2771,7 @@ export function latestRetainableAccessRevealEvent(
 
 export function retainedExposeReviewEvent(
   events: PublicGameEvent[],
-  dismissedEventId: string | null,
+  dismissedEventId: MatchEventId | null,
 ): PublicGameEvent | null {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];

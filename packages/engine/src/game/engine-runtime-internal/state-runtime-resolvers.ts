@@ -1698,7 +1698,7 @@ export function createStateRuntimeResolvers(
       hostedCreditsSpent: 0,
       recurringCreditsSpent: 0,
       temporaryCreditsSpent: 0,
-      sourceDefinitionIds: [] as string[],
+      sourceDefinitionIds: [] as CardDefinitionId[],
       runnerCreditsAfter: state.runner.credits,
     };
     if (amount <= 0) return result;
@@ -1712,7 +1712,7 @@ export function createStateRuntimeResolvers(
       throw new Error(
         "Der Runner kann die Installationskosten nicht bezahlen.",
       );
-    const sourceDefinitionIds = new Set<string>();
+    const sourceDefinitionIds = new Set<CardDefinitionId>();
     const declaredSourcePayments =
       runnerInstallPaymentSourcePaymentsFromPayload(paymentPayload);
     if (declaredSourcePayments) {
@@ -1766,7 +1766,9 @@ export function createStateRuntimeResolvers(
       }
       spendCredits(state, "runner", remaining);
       result.normalCreditsSpent = remaining;
-      result.sourceDefinitionIds = [...sourceDefinitionIds].sort();
+      result.sourceDefinitionIds = [...sourceDefinitionIds].sort(
+        (left, right) => left - right,
+      );
       result.runnerCreditsAfter = state.runner.credits;
       return result;
     }
@@ -1802,7 +1804,9 @@ export function createStateRuntimeResolvers(
       sourceDefinitionIds.add(definitionId);
     spendCredits(state, "runner", remaining);
     result.normalCreditsSpent = remaining;
-    result.sourceDefinitionIds = [...sourceDefinitionIds].sort();
+    result.sourceDefinitionIds = [...sourceDefinitionIds].sort(
+      (left, right) => left - right,
+    );
     result.runnerCreditsAfter = state.runner.credits;
     return result;
   }

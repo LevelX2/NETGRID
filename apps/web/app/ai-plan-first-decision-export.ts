@@ -3,12 +3,12 @@ import {
   aiTraceTitle,
   findForbiddenMaintenanceMarkers,
   safeStringList,
-  type MaintenanceAiTraceDetail,
+  type AiDecisionDebugTrace,
 } from "./maintenance";
 import { parseAiPlanFirstDecisionDebug } from "./ai-plan-first-decision-ui";
 
 export function serializeAiPlanFirstDecisionVisibleJsonExport(
-  trace: MaintenanceAiTraceDetail,
+  trace: AiDecisionDebugTrace,
   mode: "trace" | "preview",
   exportedAt: string,
 ): string {
@@ -26,12 +26,11 @@ export function serializeAiPlanFirstDecisionVisibleJsonExport(
     )
     .slice(0, 16);
   const payload = {
-    schemaVersion: "netgrid-ai-decision-display-export-v2",
+    schemaVersion: "netgrid-ai-decision-display-export-v3",
     redaction: "client-visible-ai-decision-debug-projection",
     exportedAt,
     mode,
     source: {
-      traceId: trace.traceId,
       eventId: trace.eventId,
       turn: trace.turn,
       decisionIndex: trace.decisionIndex,
@@ -86,7 +85,7 @@ export function serializeAiPlanFirstDecisionVisibleJsonExport(
   return output;
 }
 
-function selectedActionLabel(trace: MaintenanceAiTraceDetail): string {
+function selectedActionLabel(trace: AiDecisionDebugTrace): string {
   const action =
     trace.detail.selectedActionType ?? trace.selectedActionType ?? "KI-Aktion";
   const label = recordList(trace.detail.actionAlternatives).find(

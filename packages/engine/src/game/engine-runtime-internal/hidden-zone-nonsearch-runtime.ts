@@ -1,3 +1,4 @@
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -1005,8 +1006,15 @@ export function createHiddenZoneNonSearchRuntime(
     sourceDefinitionId: CardDefinitionId;
     count: number;
   } {
-    const [kind, sourceCardId = "", sourceDefinitionId = "", countRaw = ""] =
-      source.split(":");
+    const [
+      kind,
+      sourceCardId = "",
+      sourceDefinitionIdToken = "",
+      countRaw = "",
+    ] = source.split(":");
+    const sourceDefinitionId = parseCardDefinitionIdToken(
+      sourceDefinitionIdToken,
+    );
     if (kind !== RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE)
       throw new Error("Es ist keine Runner-Connection-Trash-Choice offen.");
     const count = Number(countRaw);

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import { afterEach, describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import type {
@@ -43,7 +44,7 @@ describe("damage core", () => {
     const gripCardId = "grip_1" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+        [gripCardId]: instance(gripCardId, 3202026548, "runner", "grip"),
       },
       runnerGrip: [gripCardId],
     });
@@ -78,18 +79,8 @@ describe("damage core", () => {
     const createState = (matchId: string) => {
       const state = minimalState({
         cardInstances: {
-          [firstCardId]: instance(
-            firstCardId,
-            "grip_first_definition",
-            "runner",
-            "grip",
-          ),
-          [secondCardId]: instance(
-            secondCardId,
-            "grip_second_definition",
-            "runner",
-            "grip",
-          ),
+          [firstCardId]: instance(firstCardId, 2350464868, "runner", "grip"),
+          [secondCardId]: instance(secondCardId, 2457450858, "runner", "grip"),
         },
         runnerGrip: [firstCardId, secondCardId],
       });
@@ -129,7 +120,7 @@ describe("damage core", () => {
     const gripCardId = "grip_action" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+        [gripCardId]: instance(gripCardId, 3202026548, "runner", "grip"),
       },
       runnerGrip: [gripCardId],
     });
@@ -157,7 +148,7 @@ describe("damage core", () => {
     const gripCardId = "grip_bonus_run" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+        [gripCardId]: instance(gripCardId, 3202026548, "runner", "grip"),
       },
       runnerGrip: [gripCardId],
     });
@@ -182,7 +173,7 @@ describe("damage core", () => {
     const gripCardId = "grip_action_run" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+        [gripCardId]: instance(gripCardId, 3202026548, "runner", "grip"),
       },
       runnerGrip: [gripCardId],
     });
@@ -262,7 +253,7 @@ describe("damage core", () => {
       );
       const state = minimalState({
         cardInstances: Object.fromEntries(
-          grip.map((id) => [id, instance(id, "grip_card", "runner", "grip")]),
+          grip.map((id) => [id, instance(id, 3202026548, "runner", "grip")]),
         ),
         runnerGrip: grip,
       });
@@ -290,7 +281,7 @@ describe("damage core", () => {
     const gripCardId = "grip_1" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+        [gripCardId]: instance(gripCardId, 3202026548, "runner", "grip"),
       },
       runnerGrip: [gripCardId],
     });
@@ -344,27 +335,15 @@ describe("damage core", () => {
     const secondId = "bioweapons_2" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [firstId]: instance(
-          firstId,
-          402,
-          "corp",
-          "identity",
-        ),
-        [secondId]: instance(
-          secondId,
-          402,
-          "corp",
-          "identity",
-        ),
+        [firstId]: instance(firstId, 402, "corp", "identity"),
+        [secondId]: instance(secondId, 402, "corp", "identity"),
       },
       runnerGrip: [],
     });
     state.corp.scoreArea = [firstId, secondId];
     const host = testHost();
     host.cards.scoredAgendaKindForDefinition = (definition) =>
-      definition.id === 402
-        ? "meat_damage_bonus"
-        : undefined;
+      definition.id === 402 ? "meat_damage_bonus" : undefined;
     configureDamageCoreHost(host);
 
     expect(
@@ -387,21 +366,16 @@ describe("damage core", () => {
     const secondTargetId = "program_b" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [umbrellaId]: instance(
-          umbrellaId,
-          398,
-          "runner",
-          "identity",
-        ),
+        [umbrellaId]: instance(umbrellaId, 398, "runner", "identity"),
         [firstTargetId]: instance(
           firstTargetId,
-          "program_a_def",
+          2381570239,
           "runner",
           "identity",
         ),
         [secondTargetId]: instance(
           secondTargetId,
-          "program_b_def",
+          2562566734,
           "runner",
           "identity",
         ),
@@ -436,7 +410,12 @@ describe("damage core", () => {
       cardInstances: Object.fromEntries(
         targetIds.map((cardId) => [
           cardId,
-          instance(cardId, `${cardId}_def`, "runner", "identity"),
+          instance(
+            cardId,
+            syntheticCardDefinitionId(`${cardId}_def`),
+            "runner",
+            "identity",
+          ),
         ]),
       ),
       runnerGrip: [],
@@ -484,7 +463,7 @@ describe("damage core", () => {
       cardInstances: Object.fromEntries(
         gripCardIds.map((cardId) => [
           cardId,
-          instance(cardId, "grip_card", "runner", "grip"),
+          instance(cardId, 3202026548, "runner", "grip"),
         ]),
       ),
       runnerGrip: gripCardIds,
@@ -728,12 +707,7 @@ describe("damage core", () => {
     const state = minimalState({
       cardInstances: {
         [camaroId]: {
-          ...instance(
-            camaroId,
-            55,
-            "runner",
-            "grip",
-          ),
+          ...instance(camaroId, 55, "runner", "grip"),
           faceup: true,
           rezzed: true,
           zone: { side: "runner", zone: "rig" },
@@ -776,7 +750,7 @@ describe("damage core", () => {
     const gripCardId = "grip_1" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+        [gripCardId]: instance(gripCardId, 3202026548, "runner", "grip"),
       },
       runnerGrip: [gripCardId],
     });
@@ -874,7 +848,7 @@ function minimalState(input: {
     cardInstances: {
       runner_identity: instance(
         "runner_identity" as CardInstanceId,
-        "runner_identity_def",
+        198573098,
         "runner",
         "identity",
       ),
@@ -947,7 +921,7 @@ function testHost(): DamageCoreHost {
       definitionFor: (state, cardId) => {
         const definitionId = state.cardInstances[cardId]?.definitionId;
         if (!definitionId) throw new Error(`Definition fehlt: ${cardId}`);
-        if (definitionId === "runner_identity_def")
+        if (definitionId === 198573098)
           return { ...definition(definitionId, "identity"), baseLink: 0 };
         return definition(definitionId, "program");
       },

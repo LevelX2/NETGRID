@@ -27,7 +27,7 @@ describe("publicContextForAction", () => {
         effectiveTraceLimit: 3,
         corpBidMax: 5,
         temporaryTraceCreditsAvailable: 2,
-        temporaryTraceCreditsSourceDefinitionId: "hidden_pool",
+        temporaryTraceCreditsSourceDefinitionId: 1980406800,
       },
     } as unknown as LegalAction;
 
@@ -69,7 +69,7 @@ describe("publicContextForAction", () => {
         recurringTraceCreditPoolSpent: 1,
         traceLimitAndValueBoost: 1,
         effectiveTraceLimit: 4,
-        temporaryTraceCreditsSourceDefinitionId: "secret_trace_pool",
+        temporaryTraceCreditsSourceDefinitionId: 2919910038,
       },
     } as unknown as LegalAction;
 

@@ -150,7 +150,8 @@ export function buildEventWithHost(
       previousState,
       state,
       legalAction,
-      actionContext.serverId === "hq" && installedPositionContext.installPlacement !== "root",
+      actionContext.serverId === "hq" &&
+        installedPositionContext.installPlacement !== "root",
     ),
     ...buildPublicAbilitySchemaContext(
       legalAction.type,
@@ -190,7 +191,7 @@ export function buildEventWithHost(
     }
   }
   return {
-    eventId: `evt_${after}`,
+    eventId: after + 1,
     type: publicEventType,
     stateVersionBefore: before,
     stateVersionAfter: after,
@@ -531,7 +532,7 @@ function revealForPublicEvent(
       const definition = definitionForEvent(state, cardId);
       return { cardDefinitionId: definition.id, title: definition.title };
     }
-    if (typeof cardId === "string" && CARD_DEFINITIONS_BY_ID[cardId])
+    if (typeof cardId === "number" && CARD_DEFINITIONS_BY_ID[cardId])
       return {
         cardDefinitionId: cardId,
         title: CARD_DEFINITIONS_BY_ID[cardId]?.title,

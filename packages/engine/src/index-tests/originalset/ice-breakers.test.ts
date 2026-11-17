@@ -630,7 +630,7 @@ describe("Originalset Spotcheck 2026-05-16 Breaker/Ice Subtype Mix hardening", (
             action.type === "pump_breaker" &&
             String(action.payload?.breakerId) === installedId,
         );
-        expect(pumpAction, breakerDefinitionId).toBeDefined();
+        expect(pumpAction, String(breakerDefinitionId)).toBeDefined();
         if (!pumpAction) break;
         state = apply(
           state,
@@ -961,8 +961,8 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
         privatePayloadMarkers,
       );
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.errors, definitionId).toEqual([]);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.errors, String(definitionId)).toEqual([]);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
   });
 
@@ -1410,7 +1410,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE Trace/Barriers hardening", (
         clientKnownStateVersion: state.stateVersion,
         idempotencyKey: `spotcheck-${definitionId}-wrong-side`,
       });
-      expect(wrongSide.ok, definitionId).toBe(false);
+      expect(wrongSide.ok, String(definitionId)).toBe(false);
       if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
       const stale = applyAction(state, {
         matchId: state.matchId,
@@ -1419,7 +1419,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE Trace/Barriers hardening", (
         clientKnownStateVersion: state.stateVersion - 1,
         idempotencyKey: `spotcheck-${definitionId}-stale`,
       });
-      expect(stale.ok, definitionId).toBe(false);
+      expect(stale.ok, String(definitionId)).toBe(false);
       if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
 
       state = apply(
@@ -1464,17 +1464,17 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE Trace/Barriers hardening", (
         state = applyChoice(state, "corp", "bid_5");
         state = applyChoice(state, "runner", "bid_0");
         if (definitionId === 433) {
-          expect(state.runner.tags, definitionId).toBe(0);
-          expect(state.run, definitionId).toBeUndefined();
+          expect(state.runner.tags, String(definitionId)).toBe(0);
+          expect(state.run, String(definitionId)).toBeUndefined();
           expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
             runnerRunEnded: true,
             runnerRunLockCreditCost: 1,
           });
         } else {
-          expect(state.runner.tags, definitionId).toBe(1);
+          expect(state.runner.tags, String(definitionId)).toBe(1);
         }
       } else {
-        expect(state.run, definitionId).toBeUndefined();
+        expect(state.run, String(definitionId)).toBeUndefined();
       }
 
       if (kind === "trash_program") {
@@ -1501,8 +1501,8 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE Trace/Barriers hardening", (
         privatePayloadMarkers,
       );
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.ok, String(definitionId)).toBe(true);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
   });
 });
@@ -1876,7 +1876,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
         clientKnownStateVersion: state.stateVersion - 1,
         idempotencyKey: `${testCase.definitionId}-stale`,
       });
-      expect(stale.ok, testCase.definitionId).toBe(false);
+      expect(stale.ok, String(testCase.definitionId)).toBe(false);
       if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
 
       const wrongSide = applyAction(state, {
@@ -1886,7 +1886,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
         clientKnownStateVersion: state.stateVersion,
         idempotencyKey: `${testCase.definitionId}-wrong-side`,
       });
-      expect(wrongSide.ok, testCase.definitionId).toBe(false);
+      expect(wrongSide.ok, String(testCase.definitionId)).toBe(false);
       if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
 
       const wrongActionId = applyAction(state, {
@@ -1896,7 +1896,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
         clientKnownStateVersion: state.stateVersion,
         idempotencyKey: `${testCase.definitionId}-wrong-action-id`,
       });
-      expect(wrongActionId.ok, testCase.definitionId).toBe(false);
+      expect(wrongActionId.ok, String(testCase.definitionId)).toBe(false);
 
       const noClicks = structuredClone(state);
       noClicks.runner.clicks = 0;
@@ -1908,7 +1908,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
           clientKnownStateVersion: noClicks.stateVersion,
           idempotencyKey: `${testCase.definitionId}-no-clicks`,
         }).ok,
-        testCase.definitionId,
+        String(testCase.definitionId),
       ).toBe(false);
 
       const removedSource = structuredClone(state);
@@ -1922,9 +1922,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
           clientKnownStateVersion: removedSource.stateVersion,
           idempotencyKey: `${testCase.definitionId}-removed-source`,
         }).ok,
-        testCase.definitionId,
+        String(testCase.definitionId),
       ).toBe(false);
-      expect(hashState(removedSource), testCase.definitionId).toBe(removedHash);
+      expect(hashState(removedSource), String(testCase.definitionId)).toBe(removedHash);
 
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
@@ -1938,16 +1938,16 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
         (action) => action.actionId === legal.actionId,
       );
 
-      expect(state.runner.credits, testCase.definitionId).toBe(
+      expect(state.runner.credits, String(testCase.definitionId)).toBe(
         creditsBefore + testCase.gainedCredits,
       );
-      expect(state.runner.grip.length, testCase.definitionId).toBe(
+      expect(state.runner.grip.length, String(testCase.definitionId)).toBe(
         gripBefore + testCase.expectedGripDelta,
       );
-      expect(state.runner.stack.length, testCase.definitionId).toBe(
+      expect(state.runner.stack.length, String(testCase.definitionId)).toBe(
         stackBefore - testCase.drawnCount,
       );
-      expect(state.runner.heap, testCase.definitionId).toContain(eventId);
+      expect(state.runner.heap, String(testCase.definitionId)).toContain(eventId);
       expect(state.cardInstances[eventId]?.zone).toMatchObject({
         side: "runner",
         zone: "heap",
@@ -1980,8 +1980,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
         privatePayloadMarkers,
       );
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, testCase.definitionId).toBe(true);
-      expect(hashState(replay.state), testCase.definitionId).toBe(
+      expect(replay.ok, String(testCase.definitionId)).toBe(true);
+      expect(hashState(replay.state), String(testCase.definitionId)).toBe(
         hashState(state),
       );
     }

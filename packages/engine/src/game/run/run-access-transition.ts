@@ -365,7 +365,7 @@ export function enterAccessFromSuccessfulRun(
 
 export function sourcePayloadForSuccessfulRunReplacement(
   run: ActiveRun,
-): Record<string, string> {
+): Record<string, string | number> {
   return {
     ...(run.successfulRunSourceCardId
       ? { cardId: run.successfulRunSourceCardId }
@@ -725,7 +725,9 @@ function applySuccessfulRunAccessReplacement(
       host.tags.addRunnerTagsWithPrevention(
         legalAction,
         runnerTagGain,
-        run.successfulRunSourceDefinitionId ?? "successful_run_replacement",
+        run.successfulRunSourceDefinitionId !== undefined
+          ? String(run.successfulRunSourceDefinitionId)
+          : "successful_run_replacement",
       )
     ) {
       legalAction.payload = {
@@ -1001,7 +1003,7 @@ function finishGypsyRdReveal(
       ? { storedAgendaDefinitionId: host.cards.definitionFor(agendaId).id }
       : {}),
     revealedAgendaDefinitionIds: agendaId
-      ? host.cards.definitionFor(agendaId).id
+      ? String(host.cards.definitionFor(agendaId).id)
       : "",
     publicRevealDefinitionIds: revealedDefinitions
       .map((definition) => definition.id)

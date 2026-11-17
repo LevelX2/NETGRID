@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -17,7 +18,7 @@ import {
 } from "./card-implementation-runtime-deps";
 
 const sourceCardId = "source" as CardInstanceId;
-const sourceDefinitionId = "source_def" as CardDefinitionId;
+const sourceDefinitionId = 2523707740 as CardDefinitionId;
 
 function state(): GameState {
   return {
@@ -92,13 +93,13 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
         definition(
           cardId === sourceCardId
             ? sourceDefinitionId
-            : (`${cardId}_def` as CardDefinitionId),
+            : syntheticCardDefinitionId(`${cardId}_def`),
         ),
       mustInstance: (instances, cardId) =>
         instances[cardId] ??
         ({
           id: cardId,
-          definitionId: `${cardId}_def` as CardDefinitionId,
+          definitionId: syntheticCardDefinitionId(`${cardId}_def`),
           rezzed: true,
           zone: { side: "runner", zone: "rig", rigType: "program" },
         } as unknown as CardInstance),
@@ -209,7 +210,7 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
       runtimeDepsHost: {
         cards: {
           definitionFor: (_state, cardId) =>
-            definition(`${cardId}_def` as CardDefinitionId),
+            definition(syntheticCardDefinitionId(`${cardId}_def`)),
         },
         install: { runnerInstallableProgramIdsForValuPak: () => [] },
         rez: {

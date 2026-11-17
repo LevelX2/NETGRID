@@ -1,5 +1,5 @@
 import { AlertTriangle, Check, RotateCcw, X } from "lucide-react";
-import type { Side } from "@netgrid/shared";
+import type { MatchEventId, Side } from "@netgrid/shared";
 import { useTranslations } from "use-intl/react";
 
 type PendingUndo = {
@@ -19,7 +19,7 @@ export function UndoPanel({
   open: boolean;
   pendingUndo: PendingUndo | undefined;
   undoNotice: string;
-  latestEventId: string | undefined;
+  latestEventId: MatchEventId | undefined;
   connection: "offline" | "connecting" | "online";
   onRequest(): void;
   onResolve(accepted: boolean): void;

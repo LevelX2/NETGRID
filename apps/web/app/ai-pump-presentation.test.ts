@@ -5,16 +5,16 @@ import { coalesceAiPumpPresentationEvents } from "./ai-pump-presentation";
 describe("coalesceAiPumpPresentationEvents", () => {
   it("combines contiguous pumps by the same AI-controlled breaker", () => {
     const events = [
-      pumpEvent("evt_10", 1, 1),
-      pumpEvent("evt_11", 2, 1),
-      pumpEvent("evt_12", 3, 1),
-      event("evt_13", "break_subroutine", { actor: "runner" }),
+      pumpEvent(11, 1, 1),
+      pumpEvent(12, 2, 1),
+      pumpEvent(13, 3, 1),
+      event(14, "break_subroutine", { actor: "runner" }),
     ];
 
     const presentationEvents = coalesceAiPumpPresentationEvents(events);
 
     expect(presentationEvents).toHaveLength(2);
-    expect(presentationEvents[0]?.eventId).toBe("evt_10");
+    expect(presentationEvents[0]?.eventId).toBe(11);
     expect(presentationEvents[0]?.stateVersionAfter).toBe(12);
     expect(presentationEvents[0]?.publicPayload).toMatchObject({
       aiPumpPresentation: true,
@@ -24,22 +24,22 @@ describe("coalesceAiPumpPresentationEvents", () => {
       breakerStrengthAfter: 3,
       pumpCreditCostTotal: 6,
     });
-    expect(presentationEvents[1]?.eventId).toBe("evt_13");
+    expect(presentationEvents[1]?.eventId).toBe(14);
     expect(events[0]?.publicPayload).not.toHaveProperty("aiPumpPresentation");
   });
 
   it("keeps pumps separate when the source changes or an effect occurs", () => {
     const differentBreaker = {
-      ...pumpEvent("evt_21", 2, 1),
+      ...pumpEvent(22, 2, 1),
       publicPayload: {
-        ...pumpEvent("evt_21", 2, 1).publicPayload,
+        ...pumpEvent(22, 2, 1).publicPayload,
         pumpBreakerId: "other_breaker",
       },
     };
     const effectPump = {
-      ...pumpEvent("evt_22", 3, 1),
+      ...pumpEvent(23, 3, 1),
       publicPayload: {
-        ...pumpEvent("evt_22", 3, 1).publicPayload,
+        ...pumpEvent(23, 3, 1).publicPayload,
         resolvedEffects: [
           {
             effectId: "public-effect",
@@ -52,7 +52,7 @@ describe("coalesceAiPumpPresentationEvents", () => {
 
     expect(
       coalesceAiPumpPresentationEvents([
-        pumpEvent("evt_20", 1, 1),
+        pumpEvent(21, 1, 1),
         differentBreaker,
         effectPump,
       ]),
@@ -61,7 +61,7 @@ describe("coalesceAiPumpPresentationEvents", () => {
 });
 
 function pumpEvent(
-  eventId: string,
+  eventId: number,
   breakerStrengthAfter: number,
   pumpStrengthAmount: number,
 ): PublicGameEvent {
@@ -76,15 +76,15 @@ function pumpEvent(
 }
 
 function event(
-  eventId: string,
+  eventId: number,
   actionType: string,
   payload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
     eventId,
     type: actionType,
-    stateVersionBefore: Number(eventId.slice(-2)) - 1,
-    stateVersionAfter: Number(eventId.slice(-2)),
+    stateVersionBefore: eventId - 2,
+    stateVersionAfter: eventId - 1,
     stateHashAfter: `fnv1a:${eventId}`,
     publicPayload: { actionType, ...payload },
   };

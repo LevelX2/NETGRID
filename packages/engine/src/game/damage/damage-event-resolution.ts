@@ -44,7 +44,7 @@ export function doDamage(
     damageId: string;
     damageType: DamageType;
     amount: number;
-    source: string;
+    source: string | CardDefinitionId;
     runnerActionOrdinal?: number;
   },
 ): DamageSummary {
@@ -65,7 +65,7 @@ export function doDamage(
       cardsTrashed: 0,
       flatline: true,
       runnerGripBefore,
-        runnerGripAfter: state.runner.grip.length,
+      runnerGripAfter: state.runner.grip.length,
     };
   }
 
@@ -124,7 +124,7 @@ export function doDamage(
 
 export function damageResolutionId(
   state: Pick<GameState, "stateVersion">,
-  source: string,
+  source: string | CardDefinitionId,
   variant?: string,
 ): string {
   return `damage.${state.stateVersion}.${source}${variant ? `.${variant}` : ""}`;
@@ -436,7 +436,8 @@ export function addTagPublicContextFromPayload(
     "accessedFromZone",
   ] as const) {
     const value = payload[key];
-    if (typeof value === "string") context[key] = value;
+    if (typeof value === "string" || typeof value === "number")
+      context[key] = value;
   }
   return context;
 }

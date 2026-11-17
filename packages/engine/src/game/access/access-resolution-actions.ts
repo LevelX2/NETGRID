@@ -1,3 +1,4 @@
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import { delayedAgendaAccessReplacementEffect } from "./access-run-effects";
 import type {
   CardDefinition,
@@ -237,7 +238,11 @@ export function resolveMercenaryCurrentAccessTrashChoice(
     )
   )
     throw new Error("Die Current-Access-Trash-Choice ist nicht offen.");
-  const [, runId, sourceCardId, sourceDefinitionId] = choice.source.split(":");
+  const [, runId, sourceCardId, sourceDefinitionIdToken] =
+    choice.source.split(":");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    sourceDefinitionIdToken,
+  );
   const run = mustRun(host);
   if (run.runId !== runId)
     throw new Error(

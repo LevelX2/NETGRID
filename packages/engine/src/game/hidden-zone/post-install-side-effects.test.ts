@@ -13,7 +13,7 @@ import {
 const selectedProgramId = "selected_program" as CardInstanceId;
 const installedProgramId = "installed_program" as CardInstanceId;
 const sourceCardId = "source_card" as CardInstanceId;
-const sourceDefinitionId = "source_definition" as CardDefinitionId;
+const sourceDefinitionId = 462381168 as CardDefinitionId;
 
 function execution(
   overrides: Partial<FreeProgramInstallExecutionResult> = {},

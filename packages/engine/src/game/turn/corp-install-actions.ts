@@ -27,8 +27,8 @@ export type CorpIceInstallCostDetails = {
   baseCost: number;
   additionalCost: number;
   reduction: number;
-  reductionSourceDefinitionIds?: number;
-  increaseSourceDefinitionIds?: number;
+  reductionSourceDefinitionIds?: string;
+  increaseSourceDefinitionIds?: string;
   totalCost: number;
 };
 

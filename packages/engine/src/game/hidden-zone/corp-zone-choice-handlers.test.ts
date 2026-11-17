@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -18,20 +19,20 @@ import {
   type CorpZoneChoiceHandlerHost,
 } from "./corp-zone-choice-handlers";
 
-const cncDefinitionId = "corp_negotiating_center" as CardDefinitionId;
-const downsizingDefinitionId = "corporate_downsizing" as CardDefinitionId;
-const aiCfoDefinitionId = "ai_cfo" as CardDefinitionId;
+const cncDefinitionId = 1738948723 as CardDefinitionId;
+const downsizingDefinitionId = 2996006827 as CardDefinitionId;
+const aiCfoDefinitionId = 3460737206 as CardDefinitionId;
 
 function definition(
   id: number,
   type: CardDefinition["type"],
-  title = id,
+  title = String(id),
   agendaPoints?: number,
 ): CardDefinition {
   return {
     id: id as CardDefinitionId,
     type,
-    title,
+    title: String(title),
     ...(agendaPoints === undefined ? {} : { agendaPoints }),
   } as CardDefinition;
 }
@@ -115,11 +116,11 @@ function makeHost(
       "HQ/Archives-Shuffle-Draw",
       2,
     ),
-    hq_agenda_1: definition("agenda_alpha", "agenda", "Agenda Alpha", 2),
-    hq_agenda_2: definition("agenda_beta", "agenda", "Agenda Beta", 3),
-    hq_operation: definition("operation_alpha", "operation", "Operation Alpha"),
-    rd_1: definition("rd_alpha", "operation", "R&D Alpha"),
-    archives_1: definition("archives_alpha", "operation", "Archives Alpha"),
+    hq_agenda_1: definition(3481987414, "agenda", "Agenda Alpha", 2),
+    hq_agenda_2: definition(2106644172, "agenda", "Agenda Beta", 3),
+    hq_operation: definition(3209985469, "operation", "Operation Alpha"),
+    rd_1: definition(422337080, "operation", "R&D Alpha"),
+    archives_1: definition(3135447945, "operation", "Archives Alpha"),
     ...input.definitions,
   };
   const allIds = [
@@ -132,7 +133,10 @@ function makeHost(
   const cardInstances: Record<string, CardInstance> = Object.fromEntries(
     allIds.map((cardId) => [
       cardId,
-      instance(cardId, definitions[cardId]?.id ?? (cardId as CardDefinitionId)),
+      instance(
+        cardId,
+        definitions[cardId]?.id ?? syntheticCardDefinitionId(cardId),
+      ),
     ]),
   );
   const legalAction = { side: "corp", payload: {} } as LegalAction;
@@ -157,7 +161,8 @@ function makeHost(
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
     cards: {
       definitionFor: (cardId) =>
-        definitions[cardId] ?? definition(cardId, "operation"),
+        definitions[cardId] ??
+        definition(syntheticCardDefinitionId(cardId), "operation"),
       hasLifecycleEffect: (cardId, effectKind) =>
         effectKind === "show_hq_agendas_for_credits" &&
         definitions[cardId]?.id === cncDefinitionId &&
@@ -239,7 +244,7 @@ describe("corp zone choice handlers", () => {
       hiddenZoneAction: "corp_hq_agenda_reveal",
       revealedCount: 1,
       gainedCredits: 1,
-      publicRevealDefinitionIds: "agenda_alpha",
+      publicRevealDefinitionIds: String(3481987414),
     });
     expect(JSON.stringify(host.legalAction.payload)).not.toContain(
       "hq_agenda_2",
@@ -334,7 +339,7 @@ describe("corp zone choice handlers", () => {
       hiddenZoneOrderChanged: true,
       hiddenZoneChangesHq: true,
       hiddenZoneChangesRd: true,
-      shownCardDefinitionIds: "agenda_alpha,agenda_beta",
+      shownCardDefinitionIds: [3481987414, 2106644172].join(","),
       shownCount: 2,
       shuffledIntoRndCount: 2,
       combinedAgendaPoints: 5,

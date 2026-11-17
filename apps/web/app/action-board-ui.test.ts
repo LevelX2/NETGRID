@@ -3573,11 +3573,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
   it("derives bonus-action slot capacity from current turn action history", () => {
     const events = [
-      publicEvent("evt_1", "mandatory_draw", {
+      publicEvent(2, "mandatory_draw", {
         actor: "corp",
         actionType: "mandatory_draw",
       }),
-      publicEvent("evt_2", "play_operation", {
+      publicEvent(3, "play_operation", {
         actor: "corp",
         actionType: "play_operation",
         actionCostClicks: 1,
@@ -3606,21 +3606,21 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
   it("counts a continued payment-support action only once", () => {
     const events = [
-      publicEvent("evt_1", "draw_card", {
+      publicEvent(2, "draw_card", {
         actor: "runner",
         actionType: "draw_card",
         actionCostClicks: 1,
         turnActionOrdinalStart: 1,
         turnActionOrdinalEnd: 1,
       }),
-      publicEvent("evt_2", "install_card", {
+      publicEvent(3, "install_card", {
         actor: "runner",
         actionType: "install_card",
         actionCostClicks: 1,
         turnActionOrdinalStart: 2,
         turnActionOrdinalEnd: 2,
       }),
-      publicEvent("evt_3", "play_event", {
+      publicEvent(4, "play_event", {
         actor: "runner",
         actionType: "play_event",
         actionCostClicks: 1,
@@ -3628,12 +3628,12 @@ describe("V1.0.6 resource and card-display helpers", () => {
         turnActionOrdinalEnd: 3,
         costPenaltySupportWindowId: "runner_cost_penalty_support.227",
       }),
-      publicEvent("evt_4", "activated_card_ability", {
+      publicEvent(5, "activated_card_ability", {
         actor: "runner",
         actionType: "activated_card_ability",
         costPenaltySupportWindowId: "runner_cost_penalty_support.227",
       }),
-      publicEvent("evt_5", "play_event", {
+      publicEvent(6, "play_event", {
         actor: "runner",
         actionType: "play_event",
         actionCostClicks: 1,
@@ -3649,7 +3649,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
   it("keeps action-cost history additive when ordinal metadata is absent", () => {
     const events = [
-      publicEvent("evt_1", "play_event", {
+      publicEvent(2, "play_event", {
         actor: "runner",
         actionType: "play_event",
         actionCostClicks: 2,
@@ -6555,38 +6555,38 @@ describe("V1.0.6 resource and card-display helpers", () => {
   });
 
   it("retains the latest visible access reveal after later cleanup events until it is dismissed", () => {
-    const hqReveal = publicEvent("evt_access", "action", {
+    const hqReveal = publicEvent(100, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "HQ",
       cardDefinitionId: 596,
       title: "Simple Economy Operation",
     });
-    const runCleanup = publicEvent("evt_cleanup", "action", {
+    const runCleanup = publicEvent(101, "action", {
       actionType: "continue_run",
       actor: "runner",
     });
 
     expect(
       retainedAccessRevealEvent([hqReveal, runCleanup], null)?.eventId,
-    ).toBe("evt_access");
+    ).toBe(100);
     expect(
-      retainedAccessRevealEvent([hqReveal, runCleanup], "evt_access"),
+      retainedAccessRevealEvent([hqReveal, runCleanup], 100),
     ).toBeNull();
     expect(
       latestRetainableAccessRevealEvent([hqReveal, runCleanup])?.eventId,
-    ).toBe("evt_access");
+    ).toBe(100);
   });
 
   it("retains access reveal after an access ambush payment choice resolves", () => {
-    const rdReveal = publicEvent("evt_access", "action", {
+    const rdReveal = publicEvent(100, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "R&D",
       cardDefinitionId: 115,
       title: "Doppelganger Antibody",
     });
-    const ambushPayment = publicEvent("evt_ambush", "action", {
+    const ambushPayment = publicEvent(102, "action", {
       actionType: "resolve_choice",
       actor: "corp",
       ambushDefinitionId: 115,
@@ -6595,11 +6595,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
     expect(
       latestRetainableAccessRevealEvent([rdReveal, ambushPayment])?.eventId,
-    ).toBe("evt_access");
+    ).toBe(100);
   });
 
   it("retains a visible access reveal across turn end until it is dismissed", () => {
-    const rdReveal = publicEvent("evt_access", "action", {
+    const rdReveal = publicEvent(100, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "R&D",
@@ -6607,7 +6607,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       title: "Simple Economy Operation",
     });
     const runnerEndTurn = {
-      ...publicEvent("evt_runner_end", "action", {
+      ...publicEvent(103, "action", {
         actionType: "end_turn",
         actor: "runner",
       }),
@@ -6616,14 +6616,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
     expect(
       retainedAccessRevealEvent([rdReveal, runnerEndTurn], null)?.eventId,
-    ).toBe("evt_access");
+    ).toBe(100);
     expect(
-      retainedAccessRevealEvent([rdReveal, runnerEndTurn], "evt_access"),
+      retainedAccessRevealEvent([rdReveal, runnerEndTurn], 100),
     ).toBeNull();
   });
 
   it("retains a visible access reveal across access resolution and automatic turn end until it is dismissed", () => {
-    const remoteReveal = publicEvent("evt_access", "action", {
+    const remoteReveal = publicEvent(100, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "Remote 1",
@@ -6631,14 +6631,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
       title: "Simple Upgrade",
     });
     const declineTrash = {
-      ...publicEvent("evt_decline", "action", {
+      ...publicEvent(104, "action", {
         actionType: "decline_trash",
         actor: "runner",
       }),
       stateVersionAfter: 2,
     };
     const runnerEndTurn = {
-      ...publicEvent("evt_runner_end", "action", {
+      ...publicEvent(103, "action", {
         actionType: "end_turn",
         actor: "runner",
       }),
@@ -6650,17 +6650,17 @@ describe("V1.0.6 resource and card-display helpers", () => {
         [remoteReveal, declineTrash, runnerEndTurn],
         null,
       )?.eventId,
-    ).toBe("evt_access");
+    ).toBe(100);
     expect(
       retainedAccessRevealEvent(
         [remoteReveal, declineTrash, runnerEndTurn],
-        "evt_access",
+        100,
       ),
     ).toBeNull();
   });
 
   it("does not retain an old access reveal after later turn and Corp action events", () => {
-    const access = publicEvent("evt_access", "action", {
+    const access = publicEvent(100, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "Remote 1",
@@ -6668,14 +6668,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
       title: "Simple Agenda",
     });
     const runnerEndTurn = {
-      ...publicEvent("evt_runner_end", "action", {
+      ...publicEvent(103, "action", {
         actionType: "end_turn",
         actor: "runner",
       }),
       stateVersionAfter: 2,
     };
     const corpInstall = {
-      ...publicEvent("evt_corp_install", "action", {
+      ...publicEvent(105, "action", {
         actionType: "install_card",
         actor: "corp",
         serverLabel: "Remote 2",
@@ -6689,14 +6689,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
   });
 
   it("does not fall back to an older visible reveal after a newer redacted access", () => {
-    const visibleRemoteAccess = publicEvent("evt_remote_access", "action", {
+    const visibleRemoteAccess = publicEvent(106, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "Remote 1",
       cardDefinitionId: 588,
       title: "Simple Agenda",
     });
-    const redactedRdAccess = publicEvent("evt_rd_access", "action", {
+    const redactedRdAccess = publicEvent(107, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "R&D",
@@ -6709,7 +6709,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
   });
 
   it("retains access reveal across same-action public follow-up events", () => {
-    const access = publicEvent("evt_access", "action", {
+    const access = publicEvent(100, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "Remote 1",
@@ -6717,7 +6717,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       title: "Simple Ambush",
     });
     const sameActionEffect = {
-      ...publicEvent("evt_effect", "effect", {
+      ...publicEvent(108, "effect", {
         actionType: "net_damage",
         actor: "corp",
       }),
@@ -6726,11 +6726,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
     expect(
       retainedAccessRevealEvent([access, sameActionEffect], null)?.eventId,
-    ).toBe("evt_access");
+    ).toBe(100);
   });
 
   it("retains expose review events until local dismissal", () => {
-    const expose = publicEvent("evt_expose", "action", {
+    const expose = publicEvent(109, "action", {
       actionType: "resolve_choice",
       actor: "runner",
       publicRevealKind: "expose",
@@ -6738,35 +6738,35 @@ describe("V1.0.6 resource and card-display helpers", () => {
       exposedServerLabels: "HQ,R&D",
     });
     const followUp = {
-      ...publicEvent("evt_followup", "effect", {
+      ...publicEvent(110, "effect", {
         actionType: "gain_credit",
         actor: "runner",
       }),
       stateVersionAfter: 3,
     };
-    const smarteye = publicEvent("evt_smarteye", "action", {
+    const smarteye = publicEvent(111, "action", {
       actionType: "trigger_ability",
       actor: "runner",
       publicRevealKind: "expose",
       hiddenZoneAction: "approach_ice_expose",
       publicRevealDefinitionId: 589,
     });
-    const smarteyeFinish = publicEvent("evt_smarteye_finish", "action", {
+    const smarteyeFinish = publicEvent(112, "action", {
       actionType: "trigger_ability",
       actor: "runner",
       approachIceExposeViewDecision: "finish",
       hiddenZoneAction: "approach_ice_expose_finish",
     });
-    const jackOut = publicEvent("evt_jack_out", "action", {
+    const jackOut = publicEvent(113, "action", {
       actionType: "jack_out",
       actor: "runner",
     });
 
     expect(retainedExposeReviewEvent([expose, followUp], null)?.eventId).toBe(
-      "evt_expose",
+      109,
     );
     expect(
-      retainedExposeReviewEvent([expose, followUp], "evt_expose"),
+      retainedExposeReviewEvent([expose, followUp], 109),
     ).toBeNull();
     expect(retainedExposeReviewEvent([smarteye], null)).toBeNull();
     expect(
@@ -6776,27 +6776,27 @@ describe("V1.0.6 resource and card-display helpers", () => {
   });
 
   it("uses only public instance ids from supported installed-card expose events", () => {
-    const exposed = publicEvent("evt_ice_data", "resolve_choice", {
+    const exposed = publicEvent(114, "resolve_choice", {
       actionType: "resolve_choice",
       actor: "runner",
       hiddenZoneAction: "expose_installed_cards_single_fort",
       publicRevealKind: "expose",
       exposedCardInstanceIds: "ice_1, root_1,ice_1",
     });
-    const unrelated = publicEvent("evt_other", "resolve_choice", {
+    const unrelated = publicEvent(115, "resolve_choice", {
       actionType: "resolve_choice",
       actor: "runner",
       publicRevealKind: "expose",
       exposedCardInstanceIds: "hidden_card",
     });
-    const huntClub = publicEvent("evt_hunt_club", "resolve_choice", {
+    const huntClub = publicEvent(116, "resolve_choice", {
       actionType: "resolve_choice",
       actor: "runner",
       hiddenZoneAction: "multi_expose_installed_corp_cards",
       publicRevealKind: "expose",
       exposedCardInstanceIds: "hq_ice,remote_asset,hq_ice",
     });
-    const schematicsReview = publicEvent("evt_schematics", "action", {
+    const schematicsReview = publicEvent(117, "action", {
       actionType: "access_card",
       actor: "runner",
       hiddenZoneAction:
@@ -6805,7 +6805,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       exposedCardInstanceIds: "remote_asset,hq_ice",
     });
     const schematicsWithoutReview = publicEvent(
-      "evt_schematics_no_review",
+      118,
       "action",
       {
         actionType: "access_card",
@@ -6861,7 +6861,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
   });
 
   it("does not retain redacted central-access events without the accessed card identity", () => {
-    const redactedRdAccess = publicEvent("evt_access", "action", {
+    const redactedRdAccess = publicEvent(100, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "R&D",
@@ -7059,7 +7059,7 @@ function card(
 }
 
 function publicEvent(
-  eventId: string,
+  eventId: number,
   type: string,
   publicPayload: Record<string, unknown>,
 ): PublicGameEvent {

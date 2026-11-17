@@ -17,10 +17,14 @@ import type { CardImplementationDefinition } from "../../card-implementations/ty
 
 function definition(
   id: number,
-  title = id,
+  title = String(id),
   type: CardDefinition["type"] = "agenda",
 ): CardDefinition {
-  return { id: id as CardDefinitionId, title, type } as CardDefinition;
+  return {
+    id: id as CardDefinitionId,
+    title: String(title),
+    type,
+  } as CardDefinition;
 }
 
 function instance(
@@ -107,23 +111,13 @@ type HostInput = {
 
 function makeHost(input: HostInput = {}) {
   const definitions: Record<string, CardDefinition> = {
-    netwatch: definition(
-      419,
-      "Netwatch Operations Office",
-    ),
-    private: definition(
-      425,
-      "Private Cybernet Police",
-    ),
+    netwatch: definition(419, "Netwatch Operations Office"),
+    private: definition(425, "Private Cybernet Police"),
     on_call: definition(420, "On-Call Solo Team"),
     kali: definition(429, "Strike Force Kali"),
     blood_cat: definition(522, "Blood Cat", "asset"),
     solo_squad: definition(554, "Solo Squad", "asset"),
-    i_got_a_rock: definition(
-      539,
-      "I Got a Rock",
-      "asset",
-    ),
+    i_got_a_rock: definition(539, "I Got a Rock", "asset"),
     schlaghund: definition(551, "Schlaghund", "asset"),
     ...input.definitions,
   };

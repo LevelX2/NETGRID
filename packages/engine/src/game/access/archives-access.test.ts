@@ -28,21 +28,9 @@ function currentRunGame(seed: string) {
 describe("V1.1.2 Full Archives Access", () => {
   it("turns existing facedown Archives cards faceup at breach start and skips cards without decisions", () => {
     let state = toRunnerTurn(currentRunGame("v112-archives-queue"));
-    const faceupOperation = moveCorpCardToArchives(
-      state,
-      596,
-      true,
-    );
-    const facedownAsset = moveCorpCardToArchives(
-      state,
-      594,
-      false,
-    );
-    const facedownAgenda = moveCorpCardToArchives(
-      state,
-      588,
-      false,
-    );
+    const faceupOperation = moveCorpCardToArchives(state, 596, true);
+    const facedownAsset = moveCorpCardToArchives(state, 594, false);
+    const facedownAgenda = moveCorpCardToArchives(state, 588, false);
     keepOnlyCorpArchivesCards(state, [
       faceupOperation,
       facedownAsset,
@@ -94,10 +82,10 @@ describe("V1.1.2 Full Archives Access", () => {
       hiddenZoneBarrier: true,
       hiddenZoneAction: "archives_breach_reveal",
       archivesRevealCount: 2,
-      archivesRevealDefinitionIds: "simple_economy_asset,simple_agenda",
+      archivesRevealDefinitionIds: "594,588",
       archivesRevealTitles: "Simple Economy Asset|Simple Agenda",
-      archivesRevealAgendaDefinitionIds: 588,
-      publicRevealDefinitionIds: "simple_economy_asset,simple_agenda",
+      archivesRevealAgendaDefinitionIds: "588",
+      publicRevealDefinitionIds: "594,588",
       publicRevealTitles: "Simple Economy Asset|Simple Agenda",
       archivesAutoAccessedCount: 2,
     });
@@ -112,21 +100,9 @@ describe("V1.1.2 Full Archives Access", () => {
   it("preserves Archives queue progress, forbids Archives trash, and replays deterministically", () => {
     let state = toRunnerTurn(currentRunGame("v112-archives-access"));
     state.runner.credits = 10;
-    const faceupOperation = moveCorpCardToArchives(
-      state,
-      596,
-      true,
-    );
-    const facedownAsset = moveCorpCardToArchives(
-      state,
-      594,
-      false,
-    );
-    const facedownAgenda = moveCorpCardToArchives(
-      state,
-      588,
-      false,
-    );
+    const faceupOperation = moveCorpCardToArchives(state, 596, true);
+    const facedownAsset = moveCorpCardToArchives(state, 594, false);
+    const facedownAgenda = moveCorpCardToArchives(state, 588, false);
     keepOnlyCorpArchivesCards(state, [
       faceupOperation,
       facedownAsset,
@@ -206,18 +182,14 @@ describe("V1.1.2 Full Archives Access", () => {
     expect(state.cardInstances[setupId]?.faceup).toBe(true);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
-      archivesRevealDefinitionIds: 552,
+      archivesRevealDefinitionIds: "552",
       archivesAutoAccessedCount: 1,
     });
   });
 
   it("auto-accesses Bizarre Encryption Scheme in Archives without a pointless window", () => {
     let state = toRunnerTurn(v199CardReleaseGame("v112-archives-bizarre"));
-    const bizarreId = moveCorpCardToArchives(
-      state,
-      563,
-      false,
-    );
+    const bizarreId = moveCorpCardToArchives(state, 563, false);
     keepOnlyCorpArchivesCards(state, [bizarreId]);
 
     state = apply(
@@ -269,7 +241,7 @@ describe("V1.1.2 Full Archives Access", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
       hiddenZoneAction: "archives_breach_reveal",
-      archivesRevealDefinitionIds: 535,
+      archivesRevealDefinitionIds: "535",
       archivesAutoAccessedCount: 1,
     });
   });
@@ -304,7 +276,7 @@ describe("V1.1.2 Full Archives Access", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
       hiddenZoneAction: "archives_breach_reveal",
-      archivesRevealDefinitionIds: 535,
+      archivesRevealDefinitionIds: "535",
       archivesAutoAccessedCount: 1,
     });
   });

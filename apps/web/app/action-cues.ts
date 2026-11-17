@@ -1,6 +1,7 @@
 import { cardDefinitionIdValue } from "./card-definition-id";
-import { type CardDefinitionId } from "@netgrid/shared";
 import type {
+  CardDefinitionId,
+  MatchEventId,
   PlayerView,
   PublicGameEvent,
   Side,
@@ -29,7 +30,7 @@ import { payloadHasAbility } from "./action-payload";
 
 export type OpponentActionCue = {
   cueId: string;
-  eventId: string;
+  eventId: MatchEventId;
   viewerSide: Side;
   actor?: Side;
   actorLabel: string;
@@ -66,7 +67,7 @@ type TraceTagOutcome =
 
 export type DamageImpactCue = {
   cueId: string;
-  eventId: string;
+  eventId: MatchEventId;
   viewerSide: Side;
   damageType: "net" | "meat" | "core";
   amount: number;
@@ -159,11 +160,11 @@ export type CueDerivationInput = {
   viewerSide: Side;
   playerView: PlayerView;
   events: PublicGameEvent[];
-  lastPresentedEventId?: string | null;
+  lastPresentedEventId?: MatchEventId | null;
   includeOwnActions?: boolean;
   includeAutomaticEffectCues?: boolean;
   translate?: ChronicleTranslate;
-  contextByEventId?: Record<string, Omit<ChronicleContext, "side">>;
+  contextByEventId?: Record<MatchEventId, Omit<ChronicleContext, "side">>;
 };
 
 export function deriveOpponentActionCues(
@@ -397,15 +398,15 @@ function isTraceResult(payload: Record<string, unknown>): boolean {
 
 function traceTagPresentationEvents(
   events: PublicGameEvent[],
-  lastPresentedEventId?: string | null,
+  lastPresentedEventId?: MatchEventId | null,
 ) {
   const openings = new Map<string, PublicGameEvent>();
-  const owners = new Map<string, PublicGameEvent>();
+  const owners = new Map<MatchEventId, PublicGameEvent>();
   const prevention = new Map<
     string,
     { amount: number; cardIds: Set<CardDefinitionId> }
   >();
-  const outcomes = new Map<string, TraceTagOutcome>();
+  const outcomes = new Map<MatchEventId, TraceTagOutcome>();
   for (const event of events) {
     const payload = event.publicPayload;
     const tagEventId = stringValue(payload.imminentEventId);
@@ -636,7 +637,7 @@ export function cueHasHiddenLeak(cue: OpponentActionCue): boolean {
 
 export function eventsAfter(
   events: PublicGameEvent[],
-  lastPresentedEventId?: string | null,
+  lastPresentedEventId?: MatchEventId | null,
 ): PublicGameEvent[] {
   if (!lastPresentedEventId) return events;
   const index = events.findIndex(

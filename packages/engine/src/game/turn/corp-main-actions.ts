@@ -115,7 +115,7 @@ export type CorpMainActionGenerationHost = {
     rootInstallRezzesOnInstall: HostFn<boolean>;
     rezCostForCard: HostFn<number>;
     quoteCorpRootRezCost: HostFn<any>;
-    rezCostReductionSourceDefinitionIdsFor: HostFn<string[]>;
+    rezCostReductionSourceDefinitionIdsFor: HostFn<CardDefinition["id"][]>;
     isObligationDebtDefinition: HostFn<boolean>;
   };
   abilities: {

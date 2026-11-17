@@ -16,7 +16,7 @@ import type {
 describe("install card execution", () => {
   it("installs a Runner program by moving the existing instance into the rig", () => {
     const programId = "program_1" as CardInstanceId;
-    const programDefinition = definition("program_def", "program", {
+    const programDefinition = definition(3524801715, "program", {
       memoryCost: 2,
       mechanics: ["icebreaker"],
     });
@@ -53,10 +53,10 @@ describe("install card execution", () => {
   it("keeps Runner hardware deck replacement payloads stable", () => {
     const oldDeckId = "old_deck" as CardInstanceId;
     const newDeckId = "new_deck" as CardInstanceId;
-    const oldDefinition = definition("old_deck_def", "hardware", {
+    const oldDefinition = definition(776018786, "hardware", {
       mechanics: ["hardware_deck"],
     });
-    const newDefinition = definition("new_deck_def", "hardware", {
+    const newDefinition = definition(553314523, "hardware", {
       mechanics: ["hardware_deck"],
     });
     const state = minimalState({
@@ -81,13 +81,13 @@ describe("install card execution", () => {
     expect(state.runner.heap).toEqual([oldDeckId]);
     expect(action.payload).toMatchObject({
       deckUniqueReplacement: true,
-      trashedDeckDefinitionIds: oldDefinition.id,
+      trashedDeckDefinitionIds: String(oldDefinition.id),
     });
   });
 
   it("installs Corp ICE on an existing server without changing payload shape", () => {
     const iceId = "ice_1" as CardInstanceId;
-    const iceDefinition = definition("ice_def", "ice");
+    const iceDefinition = definition(1663273972, "ice");
     const state = minimalState({
       cardInstances: {
         [iceId]: instance(iceId, iceDefinition.id, "corp", "hq"),
@@ -138,9 +138,7 @@ describe("install card execution", () => {
         testHost(state, { [iceDefinition.id]: iceDefinition }),
         action,
       ),
-    ).toThrow(
-      "corp_ice_install_restriction_violation: onr_classic_009_dumpster:archives",
-    );
+    ).toThrow("corp_ice_install_restriction_violation: 13:archives");
     expect(state.corp.clicks).toBe(3);
     expect(state.corp.hq).toEqual([iceId]);
     expect(state.corp.archives).toEqual([]);
@@ -151,7 +149,7 @@ describe("install card execution", () => {
 
   it("delegates Corp root region replacement to the host", () => {
     const regionId = "region_1" as CardInstanceId;
-    const regionDefinition = definition("region_def", "upgrade", {
+    const regionDefinition = definition(4122982525, "upgrade", {
       subtypes: ["region"],
     });
     const state = minimalState({
@@ -178,11 +176,11 @@ describe("install card execution", () => {
   it("records public rez-on-install effects for cards that enter play rezzed", () => {
     const regionId = "region_1" as CardInstanceId;
     const forcedRezId = "forced_rez_1" as CardInstanceId;
-    const regionDefinition = definition("region_def", "upgrade", {
+    const regionDefinition = definition(4122982525, "upgrade", {
       title: "Test Region",
       subtypes: ["region"],
     });
-    const forcedRezDefinition = definition("forced_rez_def", "upgrade", {
+    const forcedRezDefinition = definition(943777354, "upgrade", {
       title: "Forced Rez Upgrade",
     });
     const state = minimalState({
@@ -249,7 +247,7 @@ describe("install card execution", () => {
 
   it("preserves Proteus doom install roll payloads and trash behavior", () => {
     const assetId = "asset_1" as CardInstanceId;
-    const assetDefinition = definition("asset_def", "asset");
+    const assetDefinition = definition(1151438755, "asset");
     const state = minimalState({
       cardInstances: {
         [assetId]: instance(assetId, assetDefinition.id, "corp", "hq"),

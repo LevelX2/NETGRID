@@ -25,14 +25,10 @@ describe("trigger ability execution", () => {
     const sourceCardId = "lockjaw" as CardInstanceId;
     const targetCardId = "breaker" as CardInstanceId;
     state.runner.rig.programs = [sourceCardId, targetCardId];
-    state.cardInstances[sourceCardId] = instance(
-      sourceCardId,
-      149,
-      "runner",
-    );
+    state.cardInstances[sourceCardId] = instance(sourceCardId, 149, "runner");
     state.cardInstances[targetCardId] = instance(
       targetCardId,
-      "simple_code_gate_breaker",
+      258120186,
       "runner",
     );
     state.run = {
@@ -93,7 +89,7 @@ describe("trigger ability execution", () => {
     state.runner.rig.resources.push(sourceCardId);
     state.cardInstances[sourceCardId] = instance(
       sourceCardId,
-      "code_viral_cache_definition",
+      1756968242,
       "runner",
     );
     state.corp.clicks = 3;
@@ -135,8 +131,8 @@ describe("trigger ability execution", () => {
       corpAbility: "trash_installed_runner_resource_source",
       abilityKind: "corp_trash_installed_runner_resource",
       cardId: sourceCardId,
-      trashedCardDefinitionId: "code_viral_cache_definition",
-      sourceDefinitionId: "code_viral_cache_definition",
+      trashedCardDefinitionId: 1756968242,
+      sourceDefinitionId: 1756968242,
       trashCostPaid: 5,
       corpCreditsAfter: 1,
     });
@@ -213,11 +209,7 @@ describe("trigger ability execution", () => {
     state.timingPoint = "runner_action.main";
     const sourceCardId = "bodyweight_1" as CardInstanceId;
     state.runner.rig.hardware.push(sourceCardId);
-    state.cardInstances[sourceCardId] = instance(
-      sourceCardId,
-      335,
-      "runner",
-    );
+    state.cardInstances[sourceCardId] = instance(sourceCardId, 335, "runner");
     state.runnerTurnFlags = {
       ...(state.runnerTurnFlags ?? {}),
       successfulRunExtraRunPending: true,
@@ -498,7 +490,7 @@ function definitionFor(
   if (!card) throw new Error(`CardInstance fehlt: ${cardId}`);
   return {
     id: card.definitionId,
-    title: card.definitionId,
+    title: String(card.definitionId),
     side: card.owner,
     type: card.owner === "corp" ? "asset" : "resource",
   } as CardDefinition;

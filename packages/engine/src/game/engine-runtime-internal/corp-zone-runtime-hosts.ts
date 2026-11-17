@@ -1,3 +1,4 @@
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -839,8 +840,11 @@ export function createCorpZoneRuntimeHosts(
         ,
         targetCardIdsText = "",
         sourceCardId = "",
-        sourceDefinitionId = "",
+        sourceDefinitionIdToken = "",
       ] = choice.source.split(":");
+      const sourceDefinitionId = parseCardDefinitionIdToken(
+        sourceDefinitionIdToken,
+      );
       const targetCardIds = targetCardIdsText
         .split("|")
         .filter((cardId) => cardId.length > 0);
@@ -854,6 +858,8 @@ export function createCorpZoneRuntimeHosts(
       }
       if (!sourceCardId || !state.cardInstances[sourceCardId])
         throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
+      if (deps.definitionFor(state, sourceCardId).id !== sourceDefinitionId)
+        throw new Error("Die Expose-Quelle passt nicht mehr zur Choice.");
       const selected =
         deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
       if (selected !== "done")
@@ -878,12 +884,21 @@ export function createCorpZoneRuntimeHosts(
       return;
     }
     if (choice?.source.startsWith("p3_36.expose_installed_card_review:")) {
-      const [, targetCardId = "", sourceCardId = "", sourceDefinitionId = ""] =
-        choice.source.split(":");
+      const [
+        ,
+        targetCardId = "",
+        sourceCardId = "",
+        sourceDefinitionIdToken = "",
+      ] = choice.source.split(":");
+      const sourceDefinitionId = parseCardDefinitionIdToken(
+        sourceDefinitionIdToken,
+      );
       if (!targetCardId || !state.cardInstances[targetCardId])
         throw new Error("Die angezeigte Korp-Karte ist nicht mehr vorhanden.");
       if (!sourceCardId || !state.cardInstances[sourceCardId])
         throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
+      if (deps.definitionFor(state, sourceCardId).id !== sourceDefinitionId)
+        throw new Error("Die Expose-Quelle passt nicht mehr zur Choice.");
       const selected =
         deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
       if (selected !== "done")
@@ -909,13 +924,15 @@ export function createCorpZoneRuntimeHosts(
       const [
         ,
         sourceCardId = "",
-        sourceDefinitionId = "",
+        sourceDefinitionIdToken = "",
         scopeText = "any_installed",
       ] = choice.source.split(":");
+      const sourceDefinitionId = parseCardDefinitionIdToken(
+        sourceDefinitionIdToken,
+      );
       if (!sourceCardId || !state.cardInstances[sourceCardId])
         throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
-      const sourceDefinition = deps.definitionFor(state, sourceCardId);
-      if (sourceDefinition.id !== sourceDefinitionId)
+      if (deps.definitionFor(state, sourceCardId).id !== sourceDefinitionId)
         throw new Error("Die Expose-Quelle passt nicht mehr zur Choice.");
       const selectedIds = selectedChoiceCardIds(choice, playerAction);
       if (selectedIds.length !== 1)
@@ -947,12 +964,17 @@ export function createCorpZoneRuntimeHosts(
       const [
         ,
         sourceCardId = "",
-        sourceDefinitionId = "",
+        sourceDefinitionIdToken = "",
         minText = "0",
         maxText = "0",
       ] = choice.source.split(":");
+      const sourceDefinitionId = parseCardDefinitionIdToken(
+        sourceDefinitionIdToken,
+      );
       if (!sourceCardId || !state.cardInstances[sourceCardId])
         throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
+      if (deps.definitionFor(state, sourceCardId).id !== sourceDefinitionId)
+        throw new Error("Die Expose-Quelle passt nicht mehr zur Choice.");
       const selected =
         deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
       if (selected === "fort_none") {
@@ -1000,8 +1022,16 @@ export function createCorpZoneRuntimeHosts(
     if (
       choice.source.startsWith("p3_36.expose_installed_cards:single_data_fort")
     ) {
-      const [, , serverId = "", sourceCardId = "", sourceDefinitionId = ""] =
-        choice.source.split(":");
+      const [
+        ,
+        ,
+        serverId = "",
+        sourceCardId = "",
+        sourceDefinitionIdToken = "",
+      ] = choice.source.split(":");
+      const sourceDefinitionId = parseCardDefinitionIdToken(
+        sourceDefinitionIdToken,
+      );
       if (!sourceCardId || !state.cardInstances[sourceCardId])
         throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
       const sourceDefinition = deps.definitionFor(state, sourceCardId);
@@ -1043,8 +1073,11 @@ export function createCorpZoneRuntimeHosts(
       };
       return;
     }
-    const [, sourceCardId = "", sourceDefinitionId = ""] =
+    const [, sourceCardId = "", sourceDefinitionIdToken = ""] =
       choice.source.split(":");
+    const sourceDefinitionId = parseCardDefinitionIdToken(
+      sourceDefinitionIdToken,
+    );
     if (!sourceCardId || !state.cardInstances[sourceCardId])
       throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
     const sourceDefinition = deps.definitionFor(state, sourceCardId);
@@ -1098,9 +1131,20 @@ export function createCorpZoneRuntimeHosts(
     const [
       targetCardId = "",
       exposeSourceCardId = "",
-      exposeSourceDefinitionId = "",
+      exposeSourceDefinitionIdToken = "",
       scopeText = "any_installed",
     ] = choice.source.slice("corp.expose_prevention:".length).split(":");
+    const exposeSourceDefinitionId = parseCardDefinitionIdToken(
+      exposeSourceDefinitionIdToken,
+    );
+    if (
+      exposeSourceDefinitionId === undefined ||
+      state.cardInstances[exposeSourceCardId]?.definitionId !==
+        exposeSourceDefinitionId
+    )
+      throw new Error(
+        "Die Expose-Prevention-Quelle passt nicht mehr zur Choice.",
+      );
     const selected =
       deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
     if (selected === "pass") {

@@ -1,7 +1,9 @@
+import type { AccessPresentationId } from "../../app/access-reveal-ui";
 import { cardDefinitionIdValue, cardDefinitionIdsFromCsv } from "../../app/card-definition-id";
-import { type CardDefinitionId } from "@netgrid/shared";
 import type {
+  CardDefinitionId,
   LegalAction,
+  MatchEventId,
   PlayerView,
   PublicGameEvent,
   Side,
@@ -146,7 +148,7 @@ export function accessRevealFromCurrentRun(
   viewerSide: Side,
   events: PublicGameEvent[],
   accessEvent: PublicGameEvent | null,
-  eventId?: string,
+  eventId?: MatchEventId,
 ): AccessReveal | null {
   const accessedCard = view.run?.accessedCard;
   if (!accessedCard?.known || !accessedCard.title) return null;
@@ -506,7 +508,7 @@ export function exposeReviewFromLatestEvent(
 
 export function retainedArchivesRevealEvent(
   events: PublicGameEvent[],
-  dismissedEventIds: string[],
+  dismissedEventIds: AccessPresentationId[],
 ): PublicGameEvent | null {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
@@ -520,7 +522,7 @@ export function retainedArchivesRevealEvent(
 
 export function retainedHqAgendaRevealEvent(
   events: PublicGameEvent[],
-  dismissedEventIds: string[],
+  dismissedEventIds: AccessPresentationId[],
 ): PublicGameEvent | null {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
@@ -539,7 +541,7 @@ export function retainedHqAgendaRevealEvent(
 
 export function retainedSecurityPurgeRevealEvent(
   events: PublicGameEvent[],
-  dismissedEventIds: string[],
+  dismissedEventIds: AccessPresentationId[],
   options: { suppressTargetChoiceOpened?: boolean } = {},
 ): PublicGameEvent | null {
   for (let index = events.length - 1; index >= 0; index -= 1) {

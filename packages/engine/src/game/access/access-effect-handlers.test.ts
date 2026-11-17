@@ -47,28 +47,13 @@ function makeHost(legalAction: LegalAction) {
   const definitions: Record<string, CardDefinition> = {
     setup: definition(552, "Setup!"),
     trap: definition(557, "TRAP!"),
-    dedicated: definition(
-      568,
-      "Dedicated Response Team",
-      "upgrade",
-    ),
+    dedicated: definition(568, "Dedicated Response Team", "upgrade"),
     dieter: definition(569, "Dieter Esslin", "upgrade"),
-    crybaby: definition("onr_v1_352_crybaby", "Crybaby", "upgrade"),
-    turbeau: definition(
-      "onr_v1_361_turbeau-delacroix",
-      "Turbeau Delacroix",
-      "upgrade",
-    ),
-    remains: definition(
-      "onr_v1_346_corprunners-shattered-remains",
-      "Corprunner's Shattered Remains",
-    ),
-    bizarre: definition(
-      563,
-      "Bizarre Encryption Scheme",
-      "upgrade",
-    ),
-    daemon: definition("daemon", "Daemon", "program"),
+    crybaby: definition(1467723152, "Crybaby", "upgrade"),
+    turbeau: definition(3313239812, "Turbeau Delacroix", "upgrade"),
+    remains: definition(3558012119, "Corprunner's Shattered Remains"),
+    bizarre: definition(563, "Bizarre Encryption Scheme", "upgrade"),
+    daemon: definition(953318085, "Daemon", "program"),
   };
   const cardInstances: Record<string, CardInstance> = {
     setup: instance("setup", definitions.setup!.id),
@@ -247,8 +232,12 @@ function makeHost(legalAction: LegalAction) {
     },
   } as unknown as GameState;
   const calls = {
-    damages: [] as Array<{ type: string; amount: number; source: string }>,
-    traces: [] as Array<{ base: number; source: string }>,
+    damages: [] as Array<{
+      type: string;
+      amount: number;
+      source: CardDefinitionId;
+    }>,
+    traces: [] as Array<{ base: number; source: CardDefinitionId }>,
     counters: [] as Array<{
       cardId: string;
       counterType: string;
@@ -268,8 +257,8 @@ function makeHost(legalAction: LegalAction) {
       accessNetDamageUpgrade: definitions.dieter!.id,
       oncePerRunAccessTraceUpgrade: definitions.turbeau!.id,
       hardwareTrashByAdvancementAsset: definitions.remains!.id,
-      programTrashByAdvancementAsset: "experimental" as CardDefinitionId,
-      advancementCoreDamageAsset: "soulkiller" as CardDefinitionId,
+      programTrashByAdvancementAsset: 3394580047 as CardDefinitionId,
+      advancementCoreDamageAsset: 1544035109 as CardDefinitionId,
     },
     cards: {
       definitionFor: (cardId) => definitions[cardId]!,
@@ -428,9 +417,7 @@ describe("access effect handlers", () => {
     const result = handleAccessEffectsForCard(host, "setup" as CardInstanceId);
 
     expect(result.handled).toBe(true);
-    expect(calls.damages).toEqual([
-      { type: "net", amount: 2, source: 552 },
-    ]);
+    expect(calls.damages).toEqual([{ type: "net", amount: 2, source: 552 }]);
     expect(action.payload).toMatchObject({
       hiddenZoneAction: "v1917_access_ambush",
       damageResolved: true,
@@ -473,9 +460,7 @@ describe("access effect handlers", () => {
     resolveAccessPaymentChoice(host, "pay");
 
     expect(calls.spentCredits).toEqual([4]);
-    expect(calls.damages).toEqual([
-      { type: "net", amount: 3, source: 557 },
-    ]);
+    expect(calls.damages).toEqual([{ type: "net", amount: 3, source: 557 }]);
     expect(action.payload).toMatchObject({
       ambushPaidCost: 4,
       corpCreditsAfter: 2,
@@ -600,9 +585,7 @@ describe("access effect handlers", () => {
     };
     handleAccessEffectsForCard(trash.host, "remains" as CardInstanceId);
 
-    expect(trace.calls.traces).toEqual([
-      { source: "onr_v1_361_turbeau-delacroix", base: 10 },
-    ]);
+    expect(trace.calls.traces).toEqual([{ source: 3313239812, base: 10 }]);
     expect(traceAction.payload).toMatchObject({
       hiddenZoneAction: "v1918_upgrade_access_trace",
       traceLimit: 10,
@@ -618,7 +601,7 @@ describe("access effect handlers", () => {
     expect(trashAction.payload).toMatchObject({
       hiddenZoneAction: "v1919_access_ambush_trash_installed",
       trashedCount: 1,
-      trashedCardDefinitionIds: "daemon",
+      trashedCardDefinitionIds: "953318085",
     });
   });
 });

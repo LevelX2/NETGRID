@@ -151,7 +151,7 @@ describe("game facade", () => {
     state.trace = {
       traceId: "arch-12.trace",
       sourceCardInstanceId: state.runner.identity,
-      sourceDefinitionId: "demo_runner_identity",
+      sourceDefinitionId: 2958753808,
       traceLimit: 2,
       status: "corp_bid",
       successEffect: { type: "add_tag", amount: 1 },
@@ -178,7 +178,7 @@ describe("game facade", () => {
     const trace = {
       traceId: "arch-13.trace",
       sourceCardInstanceId: "runner-identity",
-      sourceDefinitionId: "demo_runner_identity",
+      sourceDefinitionId: 2958753808,
       traceRulesProfile: "classic_blind_corp_ties",
       traceLimit: 4,
       status: "post_bid_link",
@@ -215,7 +215,7 @@ describe("game facade", () => {
     const trace = {
       traceId: "arch-13.strict-success",
       sourceCardInstanceId: "runner-identity",
-      sourceDefinitionId: "demo_runner_identity",
+      sourceDefinitionId: 2958753808,
       traceRulesProfile: "classic_blind_corp_ties",
       traceLimit: 5,
       status: "post_bid_link",

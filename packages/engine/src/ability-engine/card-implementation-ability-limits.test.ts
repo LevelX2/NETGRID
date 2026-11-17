@@ -111,7 +111,7 @@ describe("card-implementation-ability-limits", () => {
     current.trace = {
       traceId: "trace_1",
       sourceCardInstanceId: "trace_source" as CardInstanceId,
-      sourceDefinitionId: "trace_definition",
+      sourceDefinitionId: 2594286542,
       traceLimit: 2,
       status: "post_bid_link",
       successEffect: { type: "none" },
@@ -145,7 +145,7 @@ describe("card-implementation-ability-limits", () => {
     current.trace = {
       traceId: "trace_1",
       sourceCardInstanceId: "trace_source" as CardInstanceId,
-      sourceDefinitionId: "trace_definition",
+      sourceDefinitionId: 2594286542,
       traceLimit: 2,
       status: "base_link",
       successEffect: { type: "none" },

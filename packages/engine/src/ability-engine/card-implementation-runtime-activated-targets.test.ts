@@ -18,7 +18,7 @@ function binding(
     kind: "card_spec_capability_key",
     ability,
     capabilityKey: key,
-    sourceAbilityId: canonicalCapabilityId("test_card" as never, key),
+    sourceAbilityId: canonicalCapabilityId(65535, key),
   };
 }
 

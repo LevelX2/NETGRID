@@ -274,7 +274,7 @@ describe("trace payment pools", () => {
         {
           kind: "corp_trace_bit_pool",
           sourceCardInstanceId: sourceId,
-          sourceDefinitionId: "trace_pool" as CardDefinitionId,
+          sourceDefinitionId: 2011192609 as CardDefinitionId,
           available,
         },
       ],
@@ -375,7 +375,7 @@ describe("trace payment pools", () => {
       const trace = corpBidTrace({
         corpTemporaryTraceCredits: {
           sourceCardInstanceId: "temporary_trace_source" as CardInstanceId,
-          sourceDefinitionId: "temporary_trace_source" as CardDefinitionId,
+          sourceDefinitionId: 437695242 as CardDefinitionId,
           remaining: invalidAmount,
           includedInCorpCreditPool: true,
           usableFor: "unrestricted_during_current_trace",
@@ -406,7 +406,7 @@ describe("trace payment pools", () => {
           {
             kind: "corp_trace_bit_pool",
             sourceCardInstanceId,
-            sourceDefinitionId: "specialized_pool" as CardDefinitionId,
+            sourceDefinitionId: 583524301 as CardDefinitionId,
             available: invalidAmount,
           },
         ],
@@ -458,8 +458,8 @@ describe("trace payment pools", () => {
   it("quotes and spends Runner trace-link pools without a Hells Run payment kind", () => {
     const pkId = "pk_1" as CardInstanceId;
     const hellsId = "hells_1" as CardInstanceId;
-    const pkDefinitionId = "pk_6089a" as CardDefinitionId;
-    const hellsDefinitionId = "hells_run" as CardDefinitionId;
+    const pkDefinitionId = 2851424055 as CardDefinitionId;
+    const hellsDefinitionId = 55983445 as CardDefinitionId;
     const trace = runnerBidTrace();
     const state = stateForTrace(trace, { runnerCredits: 2 });
     const hostedCredits = new Map<CardInstanceId, number>([
@@ -516,7 +516,7 @@ describe("trace payment pools", () => {
       traceLinkCreditsSpent: 2,
       bonusTraceLinkCreditsSpent: 1,
       runnerCreditsSpent: 2,
-      traceLinkCreditSourceDefinitionIds: "hells_run,pk_6089a",
+      traceLinkCreditSourceDefinitionIds: "55983445,2851424055",
     });
     expect(hostedCredits.get(pkId)).toBe(0);
     expect(hostedCredits.get(hellsId)).toBe(0);
@@ -589,7 +589,7 @@ function corpBidTrace(extras: Partial<TraceState> = {}): TraceState {
   return {
     traceId: "trace_1",
     sourceCardInstanceId: "source_1" as CardInstanceId,
-    sourceDefinitionId: "trace_source" as CardDefinitionId,
+    sourceDefinitionId: 2680416230 as CardDefinitionId,
     traceLimit: 2,
     status: "corp_bid",
     successEffect: { type: "add_tag", amount: 1 },

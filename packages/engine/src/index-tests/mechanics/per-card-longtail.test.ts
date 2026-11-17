@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import { cardSpecRuntimeDefinitionIds } from "@netgrid/cards/engine";
 import {
@@ -206,15 +207,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.longtailEffects).toHaveLength(47);
     for (const definitionId of runnerHardwareIds) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.side, definitionId).toBe("runner");
-      expect(definition?.type, definitionId).toBe("hardware");
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.side, String(definitionId)).toBe("runner");
+      expect(definition?.type, String(definitionId)).toBe("hardware");
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.rulesText, String(definitionId)).not.toContain("WIP");
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
     }
     expect(
@@ -281,9 +282,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         clientKnownStateVersion: state.stateVersion,
         idempotencyKey: `v1922-${definitionId}-wrong-side`,
       });
-      expect(wrongSide.ok, definitionId).toBe(false);
+      expect(wrongSide.ok, String(definitionId)).toBe(false);
       if (!wrongSide.ok)
-        expect(wrongSide.error.code, definitionId).toBe("ERR_WRONG_SIDE");
+        expect(wrongSide.error.code, String(definitionId)).toBe("ERR_WRONG_SIDE");
 
       const stale = applyAction(state, {
         matchId: state.matchId,
@@ -292,9 +293,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         clientKnownStateVersion: state.stateVersion - 1,
         idempotencyKey: `v1922-${definitionId}-stale`,
       });
-      expect(stale.ok, definitionId).toBe(false);
+      expect(stale.ok, String(definitionId)).toBe(false);
       if (!stale.ok)
-        expect(stale.error.code, definitionId).toBe("ERR_STALE_STATE");
+        expect(stale.error.code, String(definitionId)).toBe("ERR_STALE_STATE");
 
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
@@ -310,27 +311,27 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         state.runner.rig.hardware.map(
           (id) => state.cardInstances[id]?.definitionId,
         ),
-        definitionId,
+        String(definitionId),
       ).toContain(definitionId);
       expect(
         getPlayerView(state, "runner").own.rig?.some(
           (card) => card.definitionId === definitionId,
         ),
-        definitionId,
+        String(definitionId),
       ).toBe(true);
       expect(
         getPlayerView(state, "corp").opponent.rig?.some(
           (card) => card.definitionId === definitionId,
         ),
-        definitionId,
+        String(definitionId),
       ).toBe(true);
       expect(
         JSON.stringify(state.eventLog.at(-1)?.publicPayload),
-        definitionId,
+        String(definitionId),
       ).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.errors, definitionId).toEqual([]);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.errors, String(definitionId)).toEqual([]);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
   });
 
@@ -511,15 +512,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     ] as const;
     for (const definitionId of runnerEventIds) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.side, definitionId).toBe("runner");
-      expect(definition?.type, definitionId).toBe("event");
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.side, String(definitionId)).toBe("runner");
+      expect(definition?.type, String(definitionId)).toBe("event");
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.rulesText, String(definitionId)).not.toContain("WIP");
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
     }
   });
@@ -1205,7 +1206,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(state.pendingChoice?.visibility).toBe("public");
     const runnerChoice = getPlayerView(state, "runner").pendingChoice;
-    expect(JSON.stringify(runnerChoice)).not.toContain(589);
+    expect(serializedDefinitionReferences(JSON.stringify(runnerChoice))).not.toContain(589);
     expect(runnerChoice?.options).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -1650,7 +1651,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(state.pendingChoice?.visibility).toBe("public");
     expect(
-      JSON.stringify(getPlayerView(state, "runner").pendingChoice),
+      serializedDefinitionReferences(JSON.stringify(getPlayerView(state, "runner").pendingChoice)),
     ).not.toContain(589);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
@@ -2998,9 +2999,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         clientKnownStateVersion: state.stateVersion,
         idempotencyKey: `v1922-${definitionId}-wrong-side`,
       });
-      expect(wrongSide.ok, definitionId).toBe(false);
+      expect(wrongSide.ok, String(definitionId)).toBe(false);
       if (!wrongSide.ok)
-        expect(wrongSide.error.code, definitionId).toBe("ERR_WRONG_SIDE");
+        expect(wrongSide.error.code, String(definitionId)).toBe("ERR_WRONG_SIDE");
 
       const stale = applyAction(state, {
         matchId: state.matchId,
@@ -3009,9 +3010,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         clientKnownStateVersion: state.stateVersion - 1,
         idempotencyKey: `v1922-${definitionId}-stale`,
       });
-      expect(stale.ok, definitionId).toBe(false);
+      expect(stale.ok, String(definitionId)).toBe(false);
       if (!stale.ok)
-        expect(stale.error.code, definitionId).toBe("ERR_STALE_STATE");
+        expect(stale.error.code, String(definitionId)).toBe("ERR_STALE_STATE");
 
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
@@ -3023,39 +3024,39 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           sourceDefinition(state, action) === definitionId,
       );
 
-      expect(state.runner.credits, definitionId).toBe(expectedCreditsAfter);
-      expect(state.runner.memoryUsed, definitionId).toBe(expectedMemoryUsed);
+      expect(state.runner.credits, String(definitionId)).toBe(expectedCreditsAfter);
+      expect(state.runner.memoryUsed, String(definitionId)).toBe(expectedMemoryUsed);
       expect(
         state.runner.rig.programs.map(
           (id) => state.cardInstances[id]?.definitionId,
         ),
-        definitionId,
+        String(definitionId),
       ).toContain(definitionId);
       expect(
         getLegalActions(state, "runner").some(
           (action) => sourceDefinition(state, action) === definitionId,
         ),
-        definitionId,
+        String(definitionId),
       ).toBe(false);
       expect(
         getPlayerView(state, "runner").own.rig?.some(
           (card) => card.definitionId === definitionId,
         ),
-        definitionId,
+        String(definitionId),
       ).toBe(true);
       expect(
         getPlayerView(state, "corp").opponent.rig?.some(
           (card) => card.definitionId === definitionId,
         ),
-        definitionId,
+        String(definitionId),
       ).toBe(true);
       expect(
         JSON.stringify(state.eventLog.at(-1)?.publicPayload),
-        definitionId,
+        String(definitionId),
       ).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.errors, definitionId).toEqual([]);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.errors, String(definitionId)).toEqual([]);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
   });
 
@@ -3241,7 +3242,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       runnerInstallNormalCreditsPaid: 1,
       runnerInstallHostedCreditsPaid: 1,
       runnerInstallPaymentSourceDefinitionIds:
-        287,
+        "287",
     });
     expect(
       JSON.stringify(oneBitState.eventLog.at(-1)?.publicPayload),
@@ -3474,7 +3475,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       trashedCount: 1,
-      trashedCardDefinitionIds: 287,
+      trashedCardDefinitionIds: "287",
       installed: true,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -5633,7 +5634,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       agendaPurgeRunnerReviewOpened: true,
       agendaPurgeTargetChoiceOpened: false,
       publicRevealDefinitionIds:
-        "simple_barrier_ice,simple_code_gate_ice,simple_economy_operation",
+        "589,590,596",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"/,
@@ -5678,7 +5679,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       installedIceCount: 0,
       trashedCount: 0,
       publicRevealDefinitionIds:
-        "simple_barrier_ice,simple_code_gate_ice,simple_economy_operation",
+        "589,590,596",
     });
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
@@ -5793,10 +5794,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       agendaPurgeInstallContract: "corp_server_choice_per_ice",
       agendaPurgeTargetChoiceResolved: true,
       publicRevealDefinitionIds:
-        "simple_barrier_ice,simple_code_gate_ice,simple_economy_operation",
-      installedIceDefinitionIds: "simple_barrier_ice,simple_code_gate_ice",
+        "589,590,596",
+      installedIceDefinitionIds: "589,590",
       installedIceServerLabels: `R&D,${createdRemote?.label}`,
-      trashedDefinitionIds: 596,
+      trashedDefinitionIds: "596",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"/,
@@ -7403,7 +7404,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     for (const definitionId of corpLongtailIds) {
       expect(
         CARD_DEFINITIONS_BY_ID[definitionId]?.implementationStatus,
-        definitionId,
+        String(definitionId),
       ).toBe("playable_mvp");
     }
     for (const definitionId of [
@@ -7423,17 +7424,17 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     ] as const) {
       expect(
         CARD_DEFINITIONS_BY_ID[definitionId]?.implementationStatus,
-        definitionId,
+        String(definitionId),
       ).toBe("playable_mvp");
       expect(
         CARD_DEFINITIONS_BY_ID[definitionId]?.rulesText,
-        definitionId,
+        String(definitionId),
       ).not.toContain("WIP");
       const mechanics = CARD_DEFINITIONS_BY_ID[definitionId]?.mechanics ?? [];
       if (CARD_SPEC_RUNTIME_DEFINITION_IDS.has(definitionId)) {
-        expect(mechanics.length, definitionId).toBeGreaterThan(0);
-        expect(mechanics, definitionId).not.toContain("per_card_longtail");
-      } else expect(mechanics, definitionId).toContain("per_card_longtail");
+        expect(mechanics.length, String(definitionId)).toBeGreaterThan(0);
+        expect(mechanics, String(definitionId)).not.toContain("per_card_longtail");
+      } else expect(mechanics, String(definitionId)).toContain("per_card_longtail");
     }
   });
 });

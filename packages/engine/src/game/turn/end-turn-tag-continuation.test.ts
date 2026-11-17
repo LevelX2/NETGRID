@@ -29,8 +29,7 @@ describe("end-turn tag continuation", () => {
       state,
       sources: {
         activeSourceIds: () => sourceIds,
-        definitionId: () =>
-          "onr_v1_195_omniscience-foundation" as CardDefinitionId,
+        definitionId: () => 1669393972 as CardDefinitionId,
       },
       tags: {
         addRunnerTagsWithPrevention: () => true,
@@ -94,8 +93,7 @@ describe("end-turn tag continuation", () => {
       state,
       sources: {
         activeSourceIds: () => ["omniscience_1" as CardInstanceId],
-        definitionId: () =>
-          "onr_v1_195_omniscience-foundation" as CardDefinitionId,
+        definitionId: () => 1669393972 as CardDefinitionId,
       },
       tags: { addRunnerTagsWithPrevention: () => false },
       finishEndTurn: vi.fn(),

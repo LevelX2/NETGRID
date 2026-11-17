@@ -1,4 +1,4 @@
-import type { LegalAction, PlayerView } from "@netgrid/shared";
+import type { LegalAction, MatchEventId, PlayerView } from "@netgrid/shared";
 import {
   normalizeVisibleTerms,
   stealCostPaymentLabel,
@@ -24,8 +24,13 @@ export type AccessDecisionContext = {
   hasMoreAccesses?: boolean | undefined;
 };
 
+export type AccessPresentationId =
+  | MatchEventId
+  | `current-access:${number}:${string}`
+  | `gypsy-rd-reveal:${number}:${string}`;
+
 export type PendingAccessContinuation = {
-  accessEventId: string;
+  accessEventId: AccessPresentationId;
   breachId: string;
   fromStateVersion: number;
   nextAccessSubmitted: boolean;

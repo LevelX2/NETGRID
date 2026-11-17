@@ -1,10 +1,11 @@
-import type { PublicGameEvent, Side } from "@netgrid/shared";
+import type { AccessPresentationId } from "./access-reveal-ui";
+import type { MatchEventId, PublicGameEvent, Side } from "@netgrid/shared";
 import { cardDefinitionIdValue } from "./card-definition-id";
 
 export type AccessPresentationOutcomeKind = "trashed" | "stolen" | "declined";
 
 export type AccessPresentationOutcome = {
-  eventId: string;
+  eventId: MatchEventId;
   kind: AccessPresentationOutcomeKind;
   status: string;
 };
@@ -154,7 +155,7 @@ export function accessPresentationOutcomeAfter(
 
 export function latestStolenAgendaEvent(
   events: PublicGameEvent[],
-  dismissedEventIds: readonly string[],
+  dismissedEventIds: readonly AccessPresentationId[],
 ): PublicGameEvent | null {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];

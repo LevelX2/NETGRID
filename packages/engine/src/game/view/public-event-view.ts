@@ -8,6 +8,7 @@ import {
   type Side,
 } from "@netgrid/shared";
 import { sanitizeEventPayloadForSurface } from "./surface-policy";
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 
 export function toPublicEvent(event: GameEvent): PublicGameEvent {
   return {
@@ -135,21 +136,17 @@ function sidePrivatePublicPayload(
   const zone = payload.privateLookZone;
   if (zone !== "hq" && zone !== "rd")
     return Object.keys(result).length > 0 ? result : undefined;
-  const definitionIds = payload.knownHqDefinitionIds;
-  const csvDefinitionIds =
-    typeof payload.knownPrivateLookDefinitionIdsCsv === "string"
-      ? payload.knownPrivateLookDefinitionIdsCsv
-          .split("|")
-          .filter((value) => value.length > 0)
-      : [];
-  const knownHqDefinitionIds = Array.isArray(definitionIds)
-    ? definitionIds.filter(
-        (value): value is string =>
-          typeof value === "string" && value.length > 0,
-      )
-    : csvDefinitionIds;
-  if (knownHqDefinitionIds.length === 0)
+  const encodedDefinitionIds = payload.knownPrivateLookDefinitionIdsCsv;
+  if (encodedDefinitionIds === undefined || encodedDefinitionIds === "")
     return Object.keys(result).length > 0 ? result : undefined;
+  if (typeof encodedDefinitionIds !== "string")
+    throw new Error("Ungültige Kartenreferenzen in der privaten Sicht.");
+  const knownHqDefinitionIds = encodedDefinitionIds.split("|").map((value) => {
+    const id = parseCardDefinitionIdToken(value);
+    if (id === undefined)
+      throw new Error("Ungültige Kartenreferenzen in der privaten Sicht.");
+    return id;
+  });
   if (zone === "rd") {
     return {
       ...result,

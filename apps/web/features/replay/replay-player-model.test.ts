@@ -24,7 +24,7 @@ describe("replay player model", () => {
   it("reveals every repeated pump event at its own replay frame", () => {
     const events: PublicGameEvent[] = [1, 2, 3, 4].map(
       (breakerStrengthAfter, index) => ({
-        eventId: `evt_pump_${index + 1}`,
+        eventId: 22 + index,
         type: "pump_breaker",
         stateVersionBefore: 20 + index,
         stateVersionAfter: 21 + index,
@@ -32,7 +32,7 @@ describe("replay player model", () => {
         publicPayload: {
           actor: "runner",
           actionType: "pump_breaker",
-          cardDefinitionId: "onr_v1_164_krash",
+          cardDefinitionId: 251,
           pumpStrengthAmount: 1,
           pumpBreakerCreditCost: 1,
           breakerStrengthAfter,
@@ -43,9 +43,9 @@ describe("replay player model", () => {
     expect(publicEventsThroughReplayFrame(events, 20)).toHaveLength(0);
     expect(
       publicEventsThroughReplayFrame(events, 21).map((event) => event.eventId),
-    ).toEqual(["evt_pump_1"]);
+    ).toEqual([22]);
     expect(
       publicEventsThroughReplayFrame(events, 24).map((event) => event.eventId),
-    ).toEqual(["evt_pump_1", "evt_pump_2", "evt_pump_3", "evt_pump_4"]);
+    ).toEqual([22, 23, 24, 25]);
   });
 });

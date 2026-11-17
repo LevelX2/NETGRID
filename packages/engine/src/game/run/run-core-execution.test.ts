@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardInstance,
@@ -26,8 +27,8 @@ function instance(
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {
-    id,
-    definitionId,
+    instanceId: id,
+    definitionId: syntheticCardDefinitionId(definitionId),
     owner: options.owner ?? "corp",
     controller: options.controller ?? "corp",
     zone: options.zone ?? { side: "corp", zone: "serverIce", serverId: "hq" },
@@ -41,9 +42,15 @@ function instance(
 function definition(id: number): CardDefinition {
   return {
     id,
-    title: id,
-    side: id.startsWith("runner") ? "runner" : "corp",
-    type: id.includes("ice") ? "ice" : "resource",
+    title: String(id),
+    side:
+      id === syntheticCardDefinitionId("runner_resource") ? "runner" : "corp",
+    type: [
+      syntheticCardDefinitionId("inner_ice"),
+      syntheticCardDefinitionId("outer_ice"),
+    ].includes(id)
+      ? "ice"
+      : "resource",
   } as CardDefinition;
 }
 
@@ -296,7 +303,7 @@ describe("run-core-execution", () => {
     const { host } = hostFor(state);
     const legalAction = action(state);
     const temporaryCredits = {
-      sourceDefinitionId: "runner_credit_source",
+      sourceDefinitionId: 3377491711,
       remaining: 3,
       returnUnusedAtRunEnd: true,
     } as NonNullable<StartRunOptions["runnerRunTemporaryCredits"]>;
@@ -304,10 +311,10 @@ describe("run-core-execution", () => {
       successfulRunCreditLoss: 2,
       successfulRunRunnerCreditGain: 1,
       successfulRunSourceCardId: "source_card" as CardInstanceId,
-      successfulRunSourceDefinitionId: "source_definition",
+      successfulRunSourceDefinitionId: 462381168,
       successfulRunSourceTitle: "Source",
       runTraceLinkBonus: 2,
-      runTraceLinkBonusSourceDefinitionId: "link_source",
+      runTraceLinkBonusSourceDefinitionId: 2198629711,
       runnerRunTemporaryCredits: temporaryCredits,
     };
 
@@ -318,10 +325,10 @@ describe("run-core-execution", () => {
       successfulRunCreditLoss: 2,
       successfulRunRunnerCreditGain: 1,
       successfulRunSourceCardId: "source_card",
-      successfulRunSourceDefinitionId: "source_definition",
+      successfulRunSourceDefinitionId: 462381168,
       successfulRunSourceTitle: "Source",
       runTraceLinkBonus: 2,
-      runTraceLinkBonusSourceDefinitionId: "link_source",
+      runTraceLinkBonusSourceDefinitionId: 2198629711,
       runnerRunTemporaryCredits: temporaryCredits,
     });
     expect(state.run?.runnerRunTemporaryCredits).not.toBe(temporaryCredits);

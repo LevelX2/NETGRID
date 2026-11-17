@@ -17,13 +17,12 @@ const programId = "program_1" as CardInstanceId;
 const secondProgramId = "program_2" as CardInstanceId;
 const hardwareId = "hardware_1" as CardInstanceId;
 const sourceCardId = "source_card" as CardInstanceId;
-const sourceDefinitionId = "source_definition" as CardDefinitionId;
+const sourceDefinitionId = 462381168 as CardDefinitionId;
 const sneakPreviewInstanceId = "sneak_preview_instance" as CardInstanceId;
 const sneakPreviewDefinitionId = 322 as CardDefinitionId;
-const stackProgramFreeInstallSourceId =
-  271 as CardDefinitionId;
-const aujourdOuiId = "onr_v1_089_aujourd-oui" as CardDefinitionId;
-const shortCircuitId = "onr_v1_096_the-short-circuit" as CardDefinitionId;
+const stackProgramFreeInstallSourceId = 271 as CardDefinitionId;
+const aujourdOuiId = 1712273553 as CardDefinitionId;
+const shortCircuitId = 618591423 as CardDefinitionId;
 
 function definition(
   id: CardDefinitionId,
@@ -32,7 +31,7 @@ function definition(
 ): CardDefinition {
   return {
     id,
-    title: id,
+    title: String(id),
     side:
       type === "agenda" ||
       type === "asset" ||
@@ -94,26 +93,15 @@ function host(
   } = {},
 ): HiddenZoneSearchChoiceHandlerHost {
   const definitions = {
-    [programId]: definition(
-      "program_definition" as CardDefinitionId,
-      "program",
-      {
-        installCost: 1,
-        memoryCost: 1,
-      },
-    ),
-    [secondProgramId]: definition(
-      "second_program_definition" as CardDefinitionId,
-      "program",
-      {
-        installCost: 1,
-        memoryCost: 1,
-      },
-    ),
-    [hardwareId]: definition(
-      "hardware_definition" as CardDefinitionId,
-      "hardware",
-    ),
+    [programId]: definition(2683187541 as CardDefinitionId, "program", {
+      installCost: 1,
+      memoryCost: 1,
+    }),
+    [secondProgramId]: definition(2364053046 as CardDefinitionId, "program", {
+      installCost: 1,
+      memoryCost: 1,
+    }),
+    [hardwareId]: definition(2480275603 as CardDefinitionId, "hardware"),
     [sourceCardId]: definition(sourceDefinitionId, "resource"),
     [sneakPreviewInstanceId]: definition(sneakPreviewDefinitionId, "event", {
       title: "Sneak Preview",
@@ -491,7 +479,7 @@ describe("hidden-zone search choice handlers", () => {
         rigPrograms: [secondProgramId],
         definitions: {
           [secondProgramId]: definition(
-            "second_program_definition" as CardDefinitionId,
+            2364053046 as CardDefinitionId,
             "program",
             { memoryCost: 1 },
           ),
@@ -530,7 +518,7 @@ describe("hidden-zone search choice handlers", () => {
     expect(testHost.legalAction.payload).toMatchObject({
       runnerProgramTrashBeforeInstallResolved: true,
       trashedCount: 1,
-      installedProgramDefinitionId: "program_definition",
+      installedProgramDefinitionId: 2683187541,
     });
   });
 
@@ -538,10 +526,7 @@ describe("hidden-zone search choice handlers", () => {
     const testHost = host(choice({ source: "unused" }), playerAction(), {
       stack: [hardwareId],
       definitions: {
-        [sourceCardId]: definition(
-          "revealed_stack_program_install" as CardDefinitionId,
-          "program",
-        ),
+        [sourceCardId]: definition(430857689 as CardDefinitionId, "program"),
       },
     });
     testHost.legalAction.payload = { cardId: sourceCardId };
@@ -569,10 +554,7 @@ describe("hidden-zone search choice handlers", () => {
       playerAction(`card_${programId}`),
       {
         definitions: {
-          [sourceCardId]: definition(
-            "revealed_stack_program_install" as CardDefinitionId,
-            "program",
-          ),
+          [sourceCardId]: definition(430857689 as CardDefinitionId, "program"),
         },
         installForFree: (cardId) => {
           installed.push(cardId);
@@ -593,7 +575,7 @@ describe("hidden-zone search choice handlers", () => {
     expect(installed).toEqual([programId]);
     expect(testHost.legalAction.payload).toMatchObject({
       hiddenZoneAction: "revealed_stack_program_install",
-      installedProgramDefinitionId: "program_definition",
+      installedProgramDefinitionId: 2683187541,
       installedProgramCount: 1,
       selfTrashed: true,
     });
@@ -736,11 +718,11 @@ describe("hidden-zone search choice handlers", () => {
       hiddenZoneAction:
         "p3_38_look_top_stack_show_to_corp_then_install_matching",
       revealCount: 2,
-      revealedCardDefinitionIds: "program_definition,hardware_definition",
+      revealedCardDefinitionIds: [2683187541, 2480275603].join(","),
       revealedProgramCount: 1,
       programFound: true,
-      publicRevealDefinitionId: "program_definition",
-      installedProgramDefinitionId: "program_definition",
+      publicRevealDefinitionId: 2683187541,
+      installedProgramDefinitionId: 2683187541,
       installedProgramCount: 1,
       selfTrashed: true,
       shufflePerformed: true,

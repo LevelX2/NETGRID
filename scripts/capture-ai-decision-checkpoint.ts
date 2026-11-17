@@ -1,7 +1,10 @@
 import { DatabaseSync } from "node:sqlite";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { decodeStoredGameState } from "../apps/server/src/storage-sqlite";
+import {
+  decodeStoredGameState,
+  decodeStoredPublicEvent,
+} from "../apps/server/src/storage-sqlite";
 
 import {
   hashGameState,
@@ -9,6 +12,7 @@ import {
 } from "../packages/engine/src/index";
 import type {
   AiDifficulty,
+  CardDefinitionId,
   GameState,
   PublicGameEvent,
   Side,
@@ -191,7 +195,7 @@ function deckSnapshotFor(
     state.cardInstances[
       side === "corp" ? state.corp.identity : state.runner.identity
     ]?.definitionId;
-  const counts = new Map<string, number>();
+  const counts = new Map<CardDefinitionId, number>();
   for (const card of Object.values(state.cardInstances)) {
     if (card.owner !== side || card.definitionId === identityDefinitionId)
       continue;
@@ -210,7 +214,7 @@ function deckSnapshotFor(
       : {}),
     ...(metadata?.deckHash ? { deckHash: metadata.deckHash } : {}),
     cards: [...counts.entries()]
-      .sort(([left], [right]) => left.localeCompare(right))
+      .sort(([left], [right]) => left - right)
       .map(([cardId, quantity]) => ({ cardId, quantity })),
   };
 }
@@ -218,12 +222,14 @@ function deckSnapshotFor(
 function loadAllEvents(): PublicGameEvent[] {
   const rows = db
     .prepare(
-      `select public_payload_json from events
+      `select event_id as eventId, state_version_before as stateVersionBefore,
+        state_version_after as stateVersionAfter, state_hash_after as stateHashAfter,
+        public_payload_json as publicPayloadJson from events
        where match_id = ? order by event_index`,
     )
-    .all(args.matchId) as Array<{ public_payload_json: string }>;
+    .all(args.matchId) as Array<Parameters<typeof decodeStoredPublicEvent>[0]>;
   return rows.map((row) => {
-    const event = JSON.parse(row.public_payload_json) as PublicGameEvent;
+    const event = decodeStoredPublicEvent(row);
     const {
       aiDecisionDebug: _debug,
       aiExplanation: _explanation,

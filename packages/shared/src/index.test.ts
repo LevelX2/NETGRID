@@ -102,7 +102,7 @@ describe("public counter mutation contract", () => {
           after: 0,
           cards: [
             {
-              definitionId: "known_remote_card",
+              definitionId: 9112,
               serverId: "remote_1",
               area: "root",
               positionKey: "root:0",
@@ -128,7 +128,7 @@ describe("public counter mutation contract", () => {
       activeAtOrAbove: 1,
       before: 1,
       after: 0,
-      cards: [{ definitionId: "known_remote_card", positionKey: "root:0" }],
+      cards: [{ definitionId: 9112, positionKey: "root:0" }],
     });
   });
 
@@ -533,7 +533,7 @@ describe("AI decision debug sanitizing", () => {
                 publicOutcomes: [
                   {
                     outcomeId: "event-run:run_declared:campaign",
-                    eventId: "event-run",
+                    eventId: 2,
                     eventType: "start_run",
                     stateVersionAfter: 8,
                     kind: "run_declared",

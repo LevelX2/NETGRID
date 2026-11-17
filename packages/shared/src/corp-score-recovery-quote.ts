@@ -1,3 +1,5 @@
+import type { CardDefinitionId } from "./index";
+
 /** Own-side facts for one current Archives recovery action, not future actions. */
 export type CorpScoreRecoveryQuote = Readonly<{
   schemaVersion: "corp-score-recovery-quote-v1";
@@ -6,7 +8,7 @@ export type CorpScoreRecoveryQuote = Readonly<{
   stateVersion: number;
   options: readonly Readonly<{
     cardId: string;
-    definitionId: string;
+    definitionId: CardDefinitionId;
     playClicks: number;
     playCredits: number;
     advancementAmount: number;

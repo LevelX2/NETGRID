@@ -74,7 +74,7 @@ Die Datenbank speichert strukturierte Spalten und JSON. Sie speichert kein HTML,
 
 Empfohlene Spalten:
 
-- `traceId`;
+- `decisionIndex` als positive, matchlokale Entscheidungsnummer;
 - `matchId`;
 - `matchVersion`;
 - `stateVersion`;
@@ -92,6 +92,11 @@ Empfohlene Spalten:
 - `traceJson`.
 
 `traceJson` enthält nur das versionierte Schema. Anzeige-ViewModels werden serverseitig daraus abgeleitet. HTML entsteht erst im Webclient oder in der lokalen Maintenance-Ansicht.
+
+Wartungsdetails verwenden die Adresse
+`/api/storage/maintenance/ai-decision-traces/matches/{matchId}/decisions/{decisionIndex}`.
+Der Diagnosecode eines fehlgeschlagenen KI-Versuchs steht in
+`traceJson.attempt.diagnosticCode`.
 
 Die Entscheidungskette nutzt denselben Persistenzvertrag. Bei
 `aiTraceMode: summary` enthält `traceJson.decisionChain` die kompakte
@@ -116,7 +121,7 @@ Die Metaebene ist die Standardansicht pro Entscheidung. Sie muss ohne Drilldown 
 
 Erlaubte Meta-Felder:
 
-- `traceId`, `matchId`, `matchVersion`, `stateVersion`, `turn`, `side`;
+- `decisionIndex`, `matchId`, `matchVersion`, `stateVersion`, `turn`, `side`;
 - `schemaVersion`, `aiLevel`, `profileId`, `planId`, `planKind`, `selectedActionType`;
 - gewählte `actionId`, sofern diese aus LegalActions stammt;
 - `score`, `confidence`, `fallbackUsed`, `timeoutUsed`, `timeBudgetMs`;

@@ -49,7 +49,7 @@ describe("authoritative credit gain pipeline", () => {
       creditGainBaseAmount: 10,
       creditGainBonusAmount: 1,
       firstPrepCreditGainBonus: 1,
-      firstPrepCreditGainBonusSourceDefinitionIds: ELENA_LASKOVA,
+      firstPrepCreditGainBonusSourceDefinitionIds: String(ELENA_LASKOVA),
     });
     expect(second).toMatchObject({ bonusAmount: 0, creditedAmount: 3 });
     expect(state.runner.credits).toBe(14);

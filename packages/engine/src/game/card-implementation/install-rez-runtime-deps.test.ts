@@ -13,7 +13,7 @@ import {
 } from "./install-rez-runtime-deps";
 
 const sourceCardId = "source" as CardInstanceId;
-const sourceDefinitionId = "source_def" as CardDefinitionId;
+const sourceDefinitionId = 2523707740 as CardDefinitionId;
 const programId = "program" as CardInstanceId;
 
 function state(): GameState {

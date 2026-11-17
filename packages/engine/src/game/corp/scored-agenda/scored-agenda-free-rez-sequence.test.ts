@@ -67,7 +67,7 @@ describe("priority requisition sequence routing", () => {
       hiddenZoneAction: "scored_agenda_free_rez",
       scoredAgendaFreeRezFreeRez: true,
       scoredAgendaFreeRezTarget: "ice_1",
-      scoredAgendaFreeRezTargetDefinitionId: "ice_1_def",
+      scoredAgendaFreeRezTargetDefinitionId: 3274351864,
       rezBaseCreditCostWaived: 7,
       rezAdditionalCreditsPaid: 0,
       rezAgendaPointsPaid: 0,
@@ -92,20 +92,20 @@ function makeScoredAgendaFreeRezHost(
   } as CorpServer;
   const definitions: Record<string, CardDefinition> = {
     ice_1: {
-      id: "ice_1_def" as CardDefinitionId,
+      id: 3274351864 as CardDefinitionId,
       type: "ice",
       title: "Archer",
       rezCost: 7,
     } as CardDefinition,
     priority_agenda: {
-      id: "priority_agenda_def" as CardDefinitionId,
+      id: 3265303990 as CardDefinitionId,
       type: "agenda",
       title: "Priority Requisition",
     } as CardDefinition,
   };
   const iceInstance = {
     id: "ice_1" as CardInstanceId,
-    definitionId: "ice_1_def" as CardDefinitionId,
+    definitionId: 3274351864 as CardDefinitionId,
     owner: "corp",
     controller: "corp",
     faceup: false,

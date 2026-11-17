@@ -17,7 +17,7 @@ import type { CostQuote } from "../payment";
 describe("rez card execution", () => {
   it("rezzes installed ICE by mutating the existing card instance and continuing the encounter", () => {
     const iceId = "ice_1" as CardInstanceId;
-    const iceDefinition = definition("ice_def", "ice", { rezCost: 3 });
+    const iceDefinition = definition(1663273972, "ice", { rezCost: 3 });
     const state = minimalState({
       cardInstances: {
         [iceId]: instance(iceId, iceDefinition.id, "serverIce"),
@@ -47,7 +47,7 @@ describe("rez card execution", () => {
 
   it("preserves variable ICE rez payload validation and stored variable state", () => {
     const iceId = "variable_ice" as CardInstanceId;
-    const iceDefinition = definition("variable_ice_def", "ice", { rezCost: 2 });
+    const iceDefinition = definition(3265875237, "ice", { rezCost: 2 });
     const state = minimalState({
       cardInstances: {
         [iceId]: instance(iceId, iceDefinition.id, "serverIce"),
@@ -91,7 +91,7 @@ describe("rez card execution", () => {
 
   it("uses the current quoted base cost when a run surcharge affects variable ICE", () => {
     const iceId = "surcharged_variable_ice" as CardInstanceId;
-    const iceDefinition = definition("surcharged_variable_ice_def", "ice", {
+    const iceDefinition = definition(1542369052, "ice", {
       rezCost: 2,
     });
     const state = minimalState({
@@ -136,7 +136,7 @@ describe("rez card execution", () => {
 
   it("waives only printed rez credits while preserving variable additional credits", () => {
     const iceId = "effect_variable_ice" as CardInstanceId;
-    const iceDefinition = definition("effect_variable_ice_def", "ice", {
+    const iceDefinition = definition(345607497, "ice", {
       rezCost: 4,
     });
     const state = minimalState({
@@ -217,7 +217,7 @@ describe("rez card execution", () => {
 
   it("keeps ACME agenda-point rez payloads stable", () => {
     const assetId = "acme" as CardInstanceId;
-    const assetDefinition = definition("acme_def", "asset", { rezCost: 0 });
+    const assetDefinition = definition(2827789559, "asset", { rezCost: 0 });
     const state = minimalState({
       cardInstances: {
         [assetId]: instance(assetId, assetDefinition.id, "serverRoot"),
@@ -282,7 +282,7 @@ describe("rez card execution", () => {
 
   it("preserves Paris trace-pool counter payloads", () => {
     const upgradeId = "paris" as CardInstanceId;
-    const upgradeDefinition = definition("paris_def", "upgrade", {
+    const upgradeDefinition = definition(3414179284, "upgrade", {
       rezCost: 1,
     });
     const state = minimalState({

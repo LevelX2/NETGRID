@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -301,7 +302,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
 
     for (const cardId of state.runner.rig.programs.filter((candidate) =>
       [214, 220].includes(
-        state.cardInstances[candidate]?.definitionId ?? "",
+        state.cardInstances[candidate]?.definitionId ?? 0,
       ),
     ))
       expect(cardCounterAmount(state, cardId, "recurring_credit")).toBe(0);
@@ -641,7 +642,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     }
     const p349VirusGame = (
       seed: string,
-      runnerCardIds: readonly string[],
+      runnerCardIds: readonly number[],
     ): GameState =>
       toRunnerTurn(
         createGameAfterSetup({
@@ -707,7 +708,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       (action) => action.type === "end_turn",
     );
     expect(boardwalk.pendingChoice?.source).toContain(
-      "p3_33.private_look:ability:onr_v1_008_boardwalk:hq",
+      "p3_33.private_look:ability:220:hq",
     );
     expect(
       boardwalk.pendingChoice?.options.filter((option) =>
@@ -735,7 +736,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
     thought = apply(thought, "corp", (action) => action.type === "end_turn");
     expect(thought.pendingChoice?.source).toContain(
-      "p3_33.private_look:ability:onr_v1_017_deep-thought:rd",
+      "p3_33.private_look:ability:229:rd",
     );
     expect(getPlayerView(thought, "corp").pendingChoice).toBeUndefined();
 
@@ -1400,7 +1401,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
     expect(trashAction.payload?.accessTrashCostModifier).toBe(2);
     expect(trashAction.payload?.accessTrashCostSourceDefinitionIds).toBe(
-      574,
+      String(574),
     );
     state = apply(
       state,
@@ -1409,7 +1410,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       accessTrashCostModifier: 2,
-      accessTrashCostSourceDefinitionIds: 574,
+      accessTrashCostSourceDefinitionIds: String(574),
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"rd"|R&D|cardInstances/,
@@ -1485,7 +1486,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       accessTrashBaseCost: 4,
       accessTrashCostModifier: 2,
       accessTrashTotalCost: 6,
-      accessTrashCostSourceDefinitionIds: 574,
+      accessTrashCostSourceDefinitionIds: String(574),
     });
 
     const stale = structuredClone(upgradeState);
@@ -1644,7 +1645,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       runnerCreditsAfter: runnerState.runner.credits,
       resolvedEffects: [
         expect.objectContaining({
-          effectId: "onr_v1_097_livewires-contacts.effect.0.gain_credits",
+          effectId: "309.effect.0.gain_credits",
           kind: "gain_credits",
           visibility: "public",
           side: "runner",
@@ -1726,7 +1727,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       corpCreditsAfter: corpState.corp.credits,
       resolvedEffects: [
         expect.objectContaining({
-          effectId: "onr_v1_290_efficiency-experts.effect.0.gain_credits",
+          effectId: "502.effect.0.gain_credits",
           kind: "gain_credits",
           visibility: "public",
           side: "corp",
@@ -1814,7 +1815,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         resolvedEffects: [
           expect.objectContaining({
             effectId:
-              "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+              "291.effect.0.draw_cards",
             kind: "draw_cards",
             visibility: "public",
             side: "runner",
@@ -1853,7 +1854,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
             runnerCreditsAfter: 0,
             resolvedEffects: [
               expect.objectContaining({
-                effectId: "onr_v1_285_closed-accounts.effect.0.lose_credits",
+                effectId: "497.effect.0.lose_credits",
                 kind: "lose_credits",
                 visibility: "public",
                 side: "runner",
@@ -1876,7 +1877,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
             runnerTagsAfter: 3,
             resolvedEffects: [
               expect.objectContaining({
-                effectId: "onr_v1_287_datapool-by-zetatech.effect.0.add_tags",
+                effectId: "499.effect.0.add_tags",
                 kind: "add_tags",
                 visibility: "public",
                 side: "runner",
@@ -2016,7 +2017,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
             resolvedEffects: [
               expect.objectContaining({
                 effectId:
-                  "onr_v1_293_netwatch-credit-voucher.effect.0.add_tags",
+                  "505.effect.0.add_tags",
                 kind: "add_tags",
                 visibility: "public",
                 side: "runner",
@@ -2028,7 +2029,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
               }),
               expect.objectContaining({
                 effectId:
-                  "onr_v1_293_netwatch-credit-voucher.effect.1.gain_credits",
+                  "505.effect.1.gain_credits",
                 kind: "gain_credits",
                 visibility: "public",
                 side: "corp",
@@ -2296,7 +2297,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       cardsTrashed: 1,
       resolvedEffects: [
         expect.objectContaining({
-          effectId: "onr_v1_342_solo-squad.effect.0.damage",
+          effectId: "554.effect.0.damage",
           kind: "damage",
           side: "runner",
           amount: 1,
@@ -2518,7 +2519,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
     piState.corp.credits = 20;
     installRunnerProgramForTest(piState, 252);
     putCorpIceOnServer(piState, "rd", 471);
-    expect(JSON.stringify(getPlayerView(piState, "runner"))).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(piState, "runner")))).not.toContain(
       471,
     );
     const piInitial = structuredClone(piState);
@@ -3015,7 +3016,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     expect(cancelPayload).toMatchObject({
       eventModificationDecision: "cancel",
       agendaPointCost: 1,
-      spentAgendaDefinitionIds: 588,
+      spentAgendaDefinitionIds: String(588),
       damageAmount: 2,
       cardsTrashed: 2,
     });
@@ -3993,7 +3994,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       publicTargetCount: 1,
       hiddenTargetCount: 1,
       targetVisibility: "mixed_public_and_hidden_installed_cards",
-      targetCardDefinitionIds: 560,
+      targetCardDefinitionIds: "560",
     });
     expect(advancementPayload).not.toHaveProperty("targetCardDefinitionId");
     expect(JSON.stringify(advancementPayload)).not.toMatch(
@@ -4283,7 +4284,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       runnerMemoryDeficit: 1,
       memoryFreed: 1,
       trashedProgramCount: 1,
-      trashedCardDefinitionIds: trashedProgramDefinitionId,
+      trashedCardDefinitionIds: String(trashedProgramDefinitionId),
       runnerMemoryUsedAfter: 4,
       runnerMemoryLimitAfter: 4,
     });

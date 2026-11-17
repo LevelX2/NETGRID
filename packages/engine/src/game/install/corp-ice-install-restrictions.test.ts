@@ -64,7 +64,7 @@ describe("Classic Corp ICE install restrictions", () => {
   });
 });
 
-function ice(id: string): CardDefinition {
+function ice(id: number): CardDefinition {
   return {
     id: id as CardDefinitionId,
     title: id,

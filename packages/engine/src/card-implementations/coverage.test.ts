@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   cardSpecImplementationDefinitionIds,
   cardSpecRuntimeDefinitionIds,
+  cardSpecSetIdsForDefinitionId,
   cardSpecSourceRefByDefinitionId,
 } from "@netgrid/cards/engine";
 import { CARD_DEFINITIONS_BY_ID } from "../index";
@@ -21,9 +22,13 @@ import {
 
 const repoRoot = fileURLToPath(new URL("../../../../", import.meta.url));
 
-function duplicateIds(ids: readonly string[]): string[] {
+function duplicateIds(ids: readonly number[]): number[] {
   return ids.filter((id, index) => ids.indexOf(id) !== index);
 }
+
+const runtimeDefinitionIds = Object.values(CARD_DEFINITIONS_BY_ID).map(
+  (definition) => definition.id,
+);
 
 describe("CardImplementation coverage and registry invariants", () => {
   it("reports exact CardSpec registry source authority for the active runtime partition", () => {
@@ -31,7 +36,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     const activeCardSpecDefinitionIds = cardSpecRuntimeDefinitionIds();
     for (const definitionId of activeCardSpecDefinitionIds) {
       const sourceRef = cardSpecSourceRefByDefinitionId(definitionId);
-      expect(sourceRef, definitionId).toBeDefined();
+      expect(sourceRef, String(definitionId)).toBeDefined();
       if (sourceRef === undefined)
         throw new Error(`Missing CardSpec source ref for ${definitionId}`);
       const sourcePath = sourceRef.sourcePath;
@@ -108,7 +113,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const [definitionId, cost, priority] of cases) {
       expect(
         cardImplementationForDefinitionId(definitionId)?.tagPreventionSources,
-        definitionId,
+        String(definitionId),
       ).toEqual([
         expect.objectContaining({
           kind: "avoid_tag",
@@ -147,7 +152,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       const implementation = cardImplementationForDefinitionId(definitionId);
       expect(
         implementation?.icebreakerAbilities?.length,
-        definitionId,
+        String(definitionId),
       ).toBeGreaterThan(0);
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -184,7 +189,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       const implementation = cardImplementationForDefinitionId(definitionId);
       expect(
         implementation?.icebreakerAbilities?.length,
-        definitionId,
+        String(definitionId),
       ).toBeGreaterThan(0);
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -334,7 +339,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of implemented) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -386,7 +391,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of p351Cards) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -421,7 +426,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of p352Cards) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -477,7 +482,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of p353Cards) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -549,7 +554,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of p354Cards) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -605,7 +610,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of p355Cards) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -676,7 +681,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of p356Cards) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -723,7 +728,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -755,7 +760,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of phase1bCards) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -796,7 +801,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of phase1dCards) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -827,7 +832,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     const definitionId = 143;
     expect(
       cardImplementationForDefinitionId(definitionId),
-      definitionId,
+      String(definitionId),
     ).toBeDefined();
     expect(
       cardImplementationCoverageForDefinitionId(definitionId),
@@ -856,11 +861,11 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of implemented) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
@@ -877,11 +882,11 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of implemented) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
@@ -898,11 +903,11 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of implemented) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
@@ -914,7 +919,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     const definitionId = 60;
     expect(
       cardImplementationForDefinitionId(definitionId),
-      definitionId,
+      String(definitionId),
     ).toBeDefined();
     expect(
       cardImplementationCoverageForDefinitionId(definitionId),
@@ -941,7 +946,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     const definitionId = 166;
     expect(
       cardImplementationForDefinitionId(definitionId),
-      definitionId,
+      String(definitionId),
     ).toBeDefined();
     expect(
       cardImplementationCoverageForDefinitionId(definitionId),
@@ -970,7 +975,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     const definitionId = 175;
     expect(
       cardImplementationForDefinitionId(definitionId),
-      definitionId,
+      String(definitionId),
     ).toBeDefined();
     expect(
       cardImplementationCoverageForDefinitionId(definitionId),
@@ -1012,7 +1017,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const { definitionId, variableRez } of cases) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -1073,7 +1078,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const { definitionId, variableRez } of cases) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -1098,7 +1103,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of cases) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -1123,7 +1128,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of cases) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -1194,7 +1199,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       const implementation = cardImplementationForDefinitionId(
         testCase.definitionId,
       );
-      expect(implementation, testCase.definitionId).toBeDefined();
+      expect(implementation, String(testCase.definitionId)).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(testCase.definitionId),
       ).toMatchObject({
@@ -1203,26 +1208,26 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
 
       const abilities = implementation?.icebreakerAbilities ?? [];
-      expect(abilities.length, testCase.definitionId).toBeGreaterThanOrEqual(2);
+      expect(abilities.length, String(testCase.definitionId)).toBeGreaterThanOrEqual(2);
 
       const breakAbility = abilities.find(
         (ability) => ability.kind === "break_subroutine",
       );
-      expect(breakAbility, testCase.definitionId).toMatchObject({
+      expect(breakAbility, String(testCase.definitionId)).toMatchObject({
         kind: "break_subroutine",
         cost: { kind: "credit", amount: testCase.breakCost },
         matches: testCase.matcher,
         visibility: "public",
       });
       if ("count" in testCase) {
-        expect(breakAbility, testCase.definitionId).toMatchObject({
+        expect(breakAbility, String(testCase.definitionId)).toMatchObject({
           count: testCase.count,
         });
       } else {
-        expect(breakAbility, testCase.definitionId).not.toHaveProperty("count");
+        expect(breakAbility, String(testCase.definitionId)).not.toHaveProperty("count");
       }
       if ("stealthLoss" in testCase) {
-        expect(breakAbility, testCase.definitionId).toMatchObject({
+        expect(breakAbility, String(testCase.definitionId)).toMatchObject({
           onSuccessfulBreak: [
             {
               kind: "lose_bits_from_stealth_sources",
@@ -1236,7 +1241,7 @@ describe("CardImplementation coverage and registry invariants", () => {
 
       expect(
         abilities.find((ability) => ability.kind === "increase_strength"),
-        testCase.definitionId,
+        String(testCase.definitionId),
       ).toMatchObject({
         kind: "increase_strength",
         cost: { kind: "credit", amount: testCase.pumpCost },
@@ -1288,7 +1293,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const testCase of cases) {
       expect(
         cardImplementationForDefinitionId(testCase.definitionId),
-        testCase.definitionId,
+        String(testCase.definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(testCase.definitionId),
@@ -1345,7 +1350,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of p357Cards) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -1375,7 +1380,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of p358Cards) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -1405,7 +1410,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of p359Cards) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -1430,7 +1435,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of p360ImplementedCards) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -1465,7 +1470,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of p361Cards) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -1486,7 +1491,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of implementedCards) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -1507,16 +1512,14 @@ describe("CardImplementation coverage and registry invariants", () => {
   });
 
   it("keeps Proteus exclusively in the canonical CardSpec source partition", () => {
-    const proteusRuntimeIds = cardSpecRuntimeDefinitionIds().filter((id) =>
-      id.startsWith("onr_proteus_"),
-    );
+    const isProteus = (id: number) =>
+      cardSpecSetIdsForDefinitionId(id)?.includes("proteus") === true;
+    const proteusRuntimeIds = cardSpecRuntimeDefinitionIds().filter(isProteus);
     const proteusImplementationIds =
-      cardSpecImplementationDefinitionIds().filter((id) =>
-        id.startsWith("onr_proteus_"),
-      );
+      cardSpecImplementationDefinitionIds().filter(isProteus);
     const legacyProteusImplementationIds = CARD_IMPLEMENTATIONS.filter(
       (implementation) =>
-        implementation.cardDefinitionId.startsWith("onr_proteus_") &&
+        isProteus(implementation.cardDefinitionId) &&
         !proteusImplementationIds.includes(implementation.cardDefinitionId),
     );
 
@@ -1540,12 +1543,12 @@ describe("CardImplementation coverage and registry invariants", () => {
 
     for (const definitionId of proteusRuntimeIds) {
       const sourceRef = cardSpecSourceRefByDefinitionId(definitionId);
-      expect(sourceRef?.sourcePath, definitionId).toMatch(
+      expect(sourceRef?.sourcePath, String(definitionId)).toMatch(
         /^packages\/cards\/src\/specs\/proteus\/.+\.card-spec\.ts$/,
       );
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).toBe(
         proteusImplementationIds.includes(definitionId)
           ? "implemented"
@@ -1571,11 +1574,11 @@ describe("CardImplementation coverage and registry invariants", () => {
       ),
     ).toEqual([]);
 
-    for (const definitionId of Object.keys(CARD_DEFINITIONS_BY_ID)) {
+    for (const definitionId of runtimeDefinitionIds) {
       const coverage = cardImplementationCoverageForDefinitionId(definitionId);
-      expect(coverage, definitionId).toBeDefined();
+      expect(coverage, String(definitionId)).toBeDefined();
       expect(coverage?.cardDefinitionId).toBe(definitionId);
-      expect(coverage?.reason.trim(), definitionId).not.toBe("");
+      expect(coverage?.reason.trim(), String(definitionId)).not.toBe("");
     }
 
     for (const entry of CARD_IMPLEMENTATION_COVERAGE_ENTRIES) {
@@ -1587,12 +1590,12 @@ describe("CardImplementation coverage and registry invariants", () => {
       const implementation =
         CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[entry.cardDefinitionId];
       if (entry.status === "partial_implementation") {
-        expect(entry.reason, entry.cardDefinitionId).toMatch(
+        expect(entry.reason, String(entry.cardDefinitionId)).toMatch(
           /missing|fehlt|removed|no generic/i,
         );
         if (!implementation) continue;
       }
-      expect(implementation, entry.cardDefinitionId).toBeDefined();
+      expect(implementation, String(entry.cardDefinitionId)).toBeDefined();
     }
 
     for (const implementation of CARD_IMPLEMENTATIONS) {
@@ -1600,7 +1603,7 @@ describe("CardImplementation coverage and registry invariants", () => {
         cardImplementationCoverageForDefinitionId(
           implementation.cardDefinitionId,
         )?.status,
-        implementation.cardDefinitionId,
+        String(implementation.cardDefinitionId),
       ).toMatch(/^(implemented|partial_implementation)$/);
     }
   });
@@ -1614,14 +1617,10 @@ describe("CardImplementation coverage and registry invariants", () => {
       );
     }
 
-    const currentReleaseDefinitionIds = Object.keys(
-      CARD_DEFINITIONS_BY_ID,
-    ).filter((definitionId) =>
+    const currentReleaseDefinitionIds = runtimeDefinitionIds.filter((definitionId) =>
       isCurrentCardImplementationReleaseScopeDefinitionId(definitionId),
     );
-    const outsideScopeDefinitionIds = Object.keys(
-      CARD_DEFINITIONS_BY_ID,
-    ).filter(
+    const outsideScopeDefinitionIds = runtimeDefinitionIds.filter(
       (definitionId) =>
         !isCurrentCardImplementationReleaseScopeDefinitionId(definitionId),
     );
@@ -1654,11 +1653,11 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of currentReleaseDefinitionIds) {
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).not.toBe("outside_current_release_scope");
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).not.toBe("pending_implementation");
     }
 
@@ -1666,17 +1665,17 @@ describe("CardImplementation coverage and registry invariants", () => {
       if (CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId]) {
         expect(
           cardImplementationCoverageForDefinitionId(definitionId)?.status,
-          definitionId,
+          String(definitionId),
         ).toBe("implemented");
       } else if (cardSpecRuntimeIdSet.has(definitionId)) {
         expect(
           cardImplementationCoverageForDefinitionId(definitionId)?.status,
-          definitionId,
+          String(definitionId),
         ).toBe("no_engine_behavior_required");
       } else {
         expect(
           cardImplementationCoverageForDefinitionId(definitionId)?.status,
-          definitionId,
+          String(definitionId),
         ).toBe("outside_current_release_scope");
       }
     }
@@ -1705,11 +1704,11 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of p332Cases) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).toBe("implemented");
     }
   });
@@ -1787,7 +1786,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       if (definitionOnly) {
         expect(
           cardImplementationForDefinitionId(testCase.definitionId),
-          testCase.definitionId,
+          String(testCase.definitionId),
         ).toBeUndefined();
         expect(
           cardImplementationCoverageForDefinitionId(testCase.definitionId),
@@ -1797,7 +1796,7 @@ describe("CardImplementation coverage and registry invariants", () => {
         });
         expect(
           CARD_DEFINITIONS_BY_ID[testCase.definitionId]?.subroutines,
-          testCase.definitionId,
+          String(testCase.definitionId),
         ).toEqual(
           testCase.definitionId === 69
             ? [
@@ -1835,7 +1834,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }
       expect(
         cardImplementationForDefinitionId(testCase.definitionId),
-        testCase.definitionId,
+        String(testCase.definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(testCase.definitionId),
@@ -1845,7 +1844,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
       expect(
         CARD_DEFINITIONS_BY_ID[testCase.definitionId]?.subroutines,
-        testCase.definitionId,
+        String(testCase.definitionId),
       ).toEqual([
         {
           id: "subroutine_end_run_unless_runner_pays_one",
@@ -1856,7 +1855,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       if ("lifecycle" in testCase) {
         expect(
           cardImplementationForDefinitionId(testCase.definitionId)?.lifecycle,
-          testCase.definitionId,
+          String(testCase.definitionId),
         ).toEqual(testCase.lifecycle);
       }
     }
@@ -1968,7 +1967,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const testCase of cases) {
       expect(
         cardImplementationForDefinitionId(testCase.definitionId),
-        testCase.definitionId,
+        String(testCase.definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(testCase.definitionId),
@@ -2002,7 +2001,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of cases) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -2059,7 +2058,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of cases) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -2100,7 +2099,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of cases) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -2156,7 +2155,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     for (const definitionId of cases) {
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),

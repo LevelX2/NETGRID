@@ -462,7 +462,7 @@ export function applyBadPublicityRunAftermath(
         host.tags.addRunnerTagsWithPrevention(
           legalAction,
           tagsAdded,
-          aftermath.sourceDefinitionId,
+          String(aftermath.sourceDefinitionId),
         )
       ) {
         legalAction.payload = {

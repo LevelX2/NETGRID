@@ -187,7 +187,7 @@ describe("V1.1.2K Card Release", () => {
     expect(ONR_V1_1_2K_FINAL_CARD_IDS).toHaveLength(20);
     for (const definitionId of ONR_V1_1_2K_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(definition?.mechanics.join(" ")).not.toMatch(

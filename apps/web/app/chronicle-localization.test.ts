@@ -29,7 +29,7 @@ function event(
   payload: Record<string, unknown> = {},
 ): PublicGameEvent {
   return {
-    eventId: `evt_${actionType}`,
+    eventId: 1,
     type: actionType,
     stateVersionBefore: 3,
     stateVersionAfter: 4,
@@ -769,7 +769,7 @@ describe("semantic chronicle localization", () => {
         pumpBreakerCreditCost: 1,
         breakerStrengthAfter: strengthAfter,
       }),
-      eventId: `evt_pump_breaker_${index + 1}`,
+      eventId: index + 2,
     }));
     const [coalesced] = coalesceAiPumpPresentationEvents(pumpEvents);
 
@@ -1111,7 +1111,7 @@ describe("semantic chronicle localization", () => {
     );
 
     expect(de).toMatchObject({
-      id: "evt_resolve_choice:tag-gain",
+      id: "1:tag-gain",
       title: "Der Runner hat 1 Tag erhalten.",
       description: "Auslöser: Manhunt. Der Runner hat jetzt 1 Tag.",
     });
@@ -1689,7 +1689,7 @@ describe("semantic chronicle localization", () => {
         redactedKind: "hidden_zone",
         hiddenZoneBarrier: true,
       }),
-      eventId: "evt_access_1",
+      eventId: 100,
     };
     const stolen = {
       ...event("steal_agenda", {
@@ -1703,7 +1703,7 @@ describe("semantic chronicle localization", () => {
         redactedKind: "hidden_zone",
         hiddenZoneBarrier: true,
       }),
-      eventId: "evt_steal_1",
+      eventId: 101,
     };
     const secondAccess = {
       ...event("access_card", {
@@ -1718,7 +1718,7 @@ describe("semantic chronicle localization", () => {
         redactedKind: "hidden_zone",
         hiddenZoneBarrier: true,
       }),
-      eventId: "evt_access_2",
+      eventId: 102,
     };
     const trashed = {
       ...event("trash_accessed_card", {
@@ -1732,7 +1732,7 @@ describe("semantic chronicle localization", () => {
         redactedKind: "hidden_zone",
         hiddenZoneBarrier: true,
       }),
-      eventId: "evt_trash_2",
+      eventId: 103,
     };
     const events = [firstAccess, stolen, secondAccess, trashed];
     const plan = chronicleAccessOutcomePlan(events);
@@ -1752,7 +1752,7 @@ describe("semantic chronicle localization", () => {
       "Karte 1 von 2: Die Runner-KI hat in R&D auf Project Babylon zugegriffen.",
     );
     expect(plan.suppressedAccessEventIds).toEqual(
-      new Set(["evt_access_1", "evt_access_2"]),
+      new Set([100, 102]),
     );
     expect(stolenItem.title).toBe(
       "Karte 1 von 2: Die Runner-KI hat in R&D auf Project Babylon zugegriffen und die Agenda gestohlen.",

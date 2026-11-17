@@ -1,3 +1,4 @@
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import {
   type CardDefinition,
   type CardInstanceId,
@@ -773,6 +774,11 @@ function parseClassicDeflectorChoiceSource(
     throw new Error("Deflector-Choice-Quelle ist ungueltig.");
   const subroutineIndex = Number(indexRaw);
   const cost = Number(costRaw ?? "0");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    decodeURIComponent(encodedSourceDefinitionId),
+  );
+  if (sourceDefinitionId === undefined)
+    throw new Error("Deflector-Quelldefinition ist ungültig.");
   if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0)
     throw new Error("Deflector-Subroutine-Index ist ungueltig.");
   if (!Number.isInteger(cost) || cost < 0)
@@ -781,7 +787,7 @@ function parseClassicDeflectorChoiceSource(
     runId: decodeURIComponent(encodedRunId),
     sourceIceId: decodeURIComponent(encodedSourceIceId) as CardInstanceId,
     subroutineIndex,
-    sourceDefinitionId: decodeURIComponent(encodedSourceDefinitionId),
+    sourceDefinitionId,
     subroutineId: decodeURIComponent(encodedSubroutineId),
     target: targetRaw,
     cost,
@@ -1104,11 +1110,16 @@ function parseTrashProgramChoiceSource(
     runId,
     sourceIceId,
     index,
-    sourceDefinitionId,
+    sourceDefinitionIdToken,
     subroutineId,
     subroutineType,
     continuation,
   ] = source.split(":");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    decodeURIComponent(sourceDefinitionIdToken ?? ""),
+  );
+  if (sourceDefinitionId === undefined)
+    throw new Error("Programmtrash-Quelldefinition ist ungültig.");
   if (prefix !== TRASH_PROGRAM_CHOICE_SOURCE_PREFIX)
     throw new Error("Programmtrash-Choice-Quelle ist ungültig.");
   const subroutineIndex = Number(index);
@@ -1135,7 +1146,7 @@ function parseTrashProgramChoiceSource(
     runId: decodeURIComponent(runId ?? ""),
     sourceIceId: decodeURIComponent(sourceIceId ?? "") as CardInstanceId,
     subroutineIndex,
-    sourceDefinitionId: decodeURIComponent(sourceDefinitionId ?? ""),
+    sourceDefinitionId,
     subroutineId: decodeURIComponent(subroutineId ?? ""),
     subroutineType: parsedSubroutineType,
     continuation,

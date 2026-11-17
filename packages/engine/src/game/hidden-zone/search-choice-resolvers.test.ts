@@ -34,7 +34,7 @@ describe("hidden-zone search choice resolvers", () => {
     const result = resolveSearchToGripSelection({
       choice: choice({
         source:
-          "p3_37.search_stack_to_grip:source_card:source_definition:program:reveal:shuffle:13",
+          "p3_37.search_stack_to_grip:source_card:462381168:program:reveal:shuffle:13",
       }),
       selectedCardId,
       legalTargetIdsFor: () => legalTargetIds,
@@ -42,7 +42,7 @@ describe("hidden-zone search choice resolvers", () => {
 
     expect(result).toEqual({
       sourceCardId: "source_card",
-      sourceDefinitionId: "source_definition",
+      sourceDefinitionId: 462381168,
       filter: "program",
       sourceZone: "stack",
       selectedCardId,
@@ -54,7 +54,7 @@ describe("hidden-zone search choice resolvers", () => {
       resolveSearchToGripSelection({
         choice: choice({
           source:
-            "p3_37.search_trash_to_grip:source_card:source_definition:any_card:13",
+            "p3_37.search_trash_to_grip:source_card:462381168:any_card:13",
         }),
         selectedCardId: "other_card" as CardInstanceId,
         legalTargetIdsFor: () => legalTargetIds,
@@ -68,14 +68,14 @@ describe("hidden-zone search choice resolvers", () => {
       resolveSearchStackInstallSelection({
         choice: choice({
           source:
-            "p3_38.search_stack_install:source_card:source_definition:program:free:shuffle:3",
+            "p3_38.search_stack_install:source_card:462381168:program:free:shuffle:3",
         }),
         selectedCardId: installProgramId,
         legalTargetIdsFor: () => [installProgramId],
       }),
     ).toEqual({
       sourceCardId: "source_card",
-      sourceDefinitionId: "source_definition",
+      sourceDefinitionId: 462381168,
       filter: "program",
       installCost: "free",
       selectedCardId: installProgramId,
@@ -87,7 +87,7 @@ describe("hidden-zone search choice resolvers", () => {
       resolveLookTopStackTakeMatchingSelection({
         choice: choice({
           source:
-            "p3_37.look_top_stack_take_matching:source_card:source_definition:5:program,event:2:reveal:shuffle:8",
+            "p3_37.look_top_stack_take_matching:source_card:462381168:5:program,event:2:reveal:shuffle:8",
         }),
         selectedCardIds: [takenCardId],
         topCardIdsForCount: () => [takenCardId, "other_card" as CardInstanceId],
@@ -96,7 +96,7 @@ describe("hidden-zone search choice resolvers", () => {
       }),
     ).toEqual({
       sourceCardId: "source_card",
-      sourceDefinitionId: "source_definition",
+      sourceDefinitionId: 462381168,
       count: 5,
       allowedTypes: ["program", "event"],
       costPerTaken: 2,
@@ -108,7 +108,7 @@ describe("hidden-zone search choice resolvers", () => {
       resolveLookTopStackTakeMatchingSelection({
         choice: choice({
           source:
-            "p3_37.look_top_stack_take_matching:source_card:source_definition:5:program:2:reveal:shuffle:8",
+            "p3_37.look_top_stack_take_matching:source_card:462381168:5:program:2:reveal:shuffle:8",
         }),
         selectedCardIds: [takenCardId],
         topCardIdsForCount: () => [takenCardId],
@@ -141,12 +141,12 @@ describe("hidden-zone search choice resolvers", () => {
         }),
         selectedCardId: programId,
         legalTargetIds: [programId],
-        defaultSourceDefinitionId: "onr_v1_089_sneak-preview",
+        defaultSourceDefinitionId: 932244832,
       }),
     ).toEqual({
       selectedCardId: programId,
       sourceZone: "stack",
-      sourceDefinitionId: "onr_v1_089_sneak-preview",
+      sourceDefinitionId: 932244832,
       isCardImplementationChoice: false,
       shuffleNeeded: true,
     });
@@ -154,8 +154,7 @@ describe("hidden-zone search choice resolvers", () => {
     expect(
       resolveTemporaryProgramSearchInstallSelection({
         choice: choice({
-          source:
-            "p3_38.stack_or_trash_program_install:source_card:onr_v1_110_sneak-preview:heap:8",
+          source: "p3_38.stack_or_trash_program_install:source_card:322:heap:8",
         }),
         selectedCardId: programId,
         legalTargetIds: [programId],

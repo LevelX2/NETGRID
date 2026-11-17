@@ -35,8 +35,8 @@ describe("multiplayer side payload projection", () => {
     expect(payload).not.toHaveProperty("eventTail");
     expect(payload).not.toHaveProperty("legalActions");
     expect(payload).not.toHaveProperty("pendingChoice");
-    expect(payload.playerView.publicEvents[0]?.eventId).toBe("evt_7");
-    expect(payload.playerView.publicEvents.at(-1)?.eventId).toBe("evt_86");
+    expect(payload.playerView.publicEvents[0]?.eventId).toBe(8);
+    expect(payload.playerView.publicEvents.at(-1)?.eventId).toBe(87);
     expect(
       payload.playerView.publicEvents[0]?.publicPayload.chronicleTurnNumber,
     ).toBeGreaterThan(1);
@@ -364,7 +364,7 @@ function session(
 
 function eventRecord(index: number): EventRecord {
   const publicEvent: PublicGameEvent = {
-    eventId: `evt_${index}`,
+    eventId: index + 1,
     type: "action",
     stateVersionBefore: index,
     stateVersionAfter: index + 1,

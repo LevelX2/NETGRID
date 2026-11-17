@@ -206,7 +206,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     expect(ONR_V1_6_2_FINAL_CARD_IDS).toHaveLength(5);
     for (const definitionId of ONR_V1_6_2_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(definition?.mechanics.join(" ")).not.toMatch(
@@ -453,7 +453,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
       state,
       {
         sourceCardId: state.corp.identity,
-        sourceDefinitionId: "synthetic_hidden_source" as CardDefinitionId,
+        sourceDefinitionId: 2150374623 as CardDefinitionId,
         sourceTitle: "Synthetic Hidden Source",
         controller: "corp",
       },
@@ -503,7 +503,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
         visibility: "public",
         expiresAtStateVersion: state.stateVersion,
         payload: {
-          sourceDefinitionId: "synthetic_hidden_source",
+          sourceDefinitionId: 2150374623,
           ...result.publicPayload,
         },
         resolvedEffects: result.resolvedEffects,
@@ -514,7 +514,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
         cardStrengthModifier: () => 0,
         creditCostForAction: () => 0,
         definitionFor: () =>
-          CARD_DEFINITIONS_BY_ID.simple_agenda ??
+          CARD_DEFINITIONS_BY_ID[588] ??
           Object.values(CARD_DEFINITIONS_BY_ID)[0]!,
         pumpAmountForLegalAction: () => 0,
         runnerHqAccessBonus: () => 0,
@@ -688,7 +688,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     });
     expect(result.resolvedEffects).toEqual([
       expect.objectContaining({
-        effectId: "onr_v1_287_datapool-by-zetatech.effect.0.add_tags",
+        effectId: "499.effect.0.add_tags",
         kind: "add_tags",
         visibility: "public",
         side: "runner",
@@ -911,7 +911,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     });
     expect(result.resolvedEffects).toEqual([
       expect.objectContaining({
-        effectId: "onr_v1_301_punitive-counterstrike.effect.0.damage",
+        effectId: "513.effect.0.damage",
         kind: "damage",
         visibility: "public",
         side: "runner",
@@ -1632,7 +1632,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
       "printed_subroutines_end_the_run",
       "printed_subroutines_end_the_run_a",
       "printed_subroutines_end_the_run_b",
-      "card_implementation.onr_v1_320_encoder-inc.additional_subroutine.1.end_the_run",
+      "card_implementation.532.additional_subroutine.1.end_the_run",
     ]);
     expect(breakActions[3]?.payload).toMatchObject({
       dynamicSourceDefinitionId: 532,
@@ -1902,7 +1902,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     ).toEqual([3]);
     expect(breakActions[0]?.payload).toMatchObject({
       subroutineId:
-        "card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
+        "card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
       dynamicSourceDefinitionId: 582,
       dynamicSourceTitle: "Tesseract Fort Construction",
       dynamicSourceKind: "additional_subroutine",
@@ -1963,7 +1963,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     expect(refuseContinue.payload).toMatchObject({
       unbrokenSubroutineCount: 1,
       encounterSubroutineIds:
-        "card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
+        "card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
     });
     const refused = apply(
       refusing,

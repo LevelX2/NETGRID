@@ -116,10 +116,10 @@ function makeState(): GameState {
       [paris]: instance(paris, 577, {
         counters: { bit: 3 },
       }),
-      [ice]: instance(ice, "ice_definition", {
+      [ice]: instance(ice, 2630481112, {
         zone: { side: "corp", zone: "serverIce", serverId: "rd" },
       }),
-      [worm]: instance(worm, "worm_definition", {
+      [worm]: instance(worm, 245004634, {
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "rig" },
@@ -129,7 +129,7 @@ function makeState(): GameState {
         controller: "runner",
         zone: { side: "runner", zone: "rig" },
       }),
-      [stealth]: instance(stealth, "stealth_definition", {
+      [stealth]: instance(stealth, 4146168588, {
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "rig" },
@@ -151,29 +151,19 @@ function makeState(): GameState {
 
 function definitions(): Record<string, CardDefinition> {
   return {
-    onr_v1_349_aardvark: definition(561, "Aardvark", {
+    561: definition(561, "Aardvark", {
       rezCost: 1,
     }),
-    580: definition(
-      580,
-      "Roving Submarine",
-    ),
-    577: definition(
-      577,
-      "Paris City Grid",
-    ),
-    ice_definition: definition("ice_definition", "Simple ICE", { type: "ice" }),
-    worm_definition: definition("worm_definition", "Worm", {
+    580: definition(580, "Roving Submarine"),
+    577: definition(577, "Paris City Grid"),
+    2630481112: definition(2630481112, "Simple ICE", { type: "ice" }),
+    245004634: definition(245004634, "Worm", {
       side: "runner",
       type: "program",
       subtypes: ["worm"],
     }),
-    265: definition(
-      265,
-      "Ramming Piston",
-      { side: "runner", type: "program" },
-    ),
-    stealth_definition: definition("stealth_definition", "Stealth Source", {
+    265: definition(265, "Ramming Piston", { side: "runner", type: "program" }),
+    4146168588: definition(4146168588, "Stealth Source", {
       side: "runner",
       type: "program",
       subtypes: ["stealth"],
@@ -504,7 +494,7 @@ describe("fort run side families", () => {
     state.runner.rig.programs.push(secondStealthId);
     state.cardInstances[secondStealthId] = instance(
       secondStealthId,
-      "stealth_definition",
+      4146168588,
       {
         owner: "runner",
         controller: "runner",

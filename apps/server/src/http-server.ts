@@ -14,6 +14,7 @@ import type {
   ApiAccountActivePublicMatchIds,
   ApiMatchCardPool,
   ApiUserErrorPayload,
+  MatchEventId,
 } from "@netgrid/shared";
 import {
   isApiUserErrorCode,
@@ -130,6 +131,8 @@ const MAINTENANCE_DECISION_ANALYSIS_ROUTE =
   /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/decisions\/(\d+)$/;
 const MAINTENANCE_AI_TRACE_INDEX_ROUTE =
   /^\/api\/storage\/maintenance\/ai-decision-traces\/matches\/([^/]+)$/;
+const MAINTENANCE_AI_TRACE_DETAIL_ROUTE =
+  /^\/api\/storage\/maintenance\/ai-decision-traces\/matches\/([^/]+)\/decisions\/([1-9]\d*)$/;
 const CARD_IMAGE_MAINTENANCE_JOB_ROUTE =
   /^\/api\/storage\/maintenance\/card-images\/jobs\/([^/]+)$/;
 
@@ -172,7 +175,7 @@ type ClientWsMessage =
   | {
       type: "request_undo";
       payload: {
-        targetEventId: string;
+        targetEventId: MatchEventId;
         clientKnownMatchVersion: number;
         reason?: string;
       };
@@ -2855,13 +2858,21 @@ async function routeHttp(
     }
 
     const maintenanceAiTraceDetailRoute =
-      /^\/api\/storage\/maintenance\/ai-decision-traces\/([^/]+)$/.exec(
-        url.pathname,
-      );
+      MAINTENANCE_AI_TRACE_DETAIL_ROUTE.exec(url.pathname);
     if (maintenanceAiTraceDetailRoute && request.method === "GET") {
-      const traceId = decodeURIComponent(
+      const matchId = decodeURIComponent(
         maintenanceAiTraceDetailRoute[1] ?? "",
       );
+      const decisionIndex = Number(maintenanceAiTraceDetailRoute[2]);
+      if (!Number.isSafeInteger(decisionIndex)) {
+        sendJson(response, 400, {
+          error: {
+            code: "invalid_decision_index",
+            message: "Die KI-Entscheidungsnummer ist ungültig.",
+          },
+        });
+        return;
+      }
       if (
         !checkRateLimit(
           response,
@@ -2869,12 +2880,14 @@ async function routeHttp(
           "token_probe",
           request,
           deploymentConfig,
-          `storage-maintenance-ai-trace-detail:${traceId}`,
+          `storage-maintenance-ai-trace-detail:${matchId}`,
         )
       )
         return;
-      const trace =
-        await service.storageMaintenanceAiDecisionTraceDetail(traceId);
+      const trace = await service.storageMaintenanceAiDecisionTraceDetail(
+        matchId,
+        decisionIndex,
+      );
       if (!trace) {
         sendJson(response, 404, {
           error: {

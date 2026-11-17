@@ -17,7 +17,7 @@ import {
   type RunFortTriggerExecutionHost,
 } from "./run-fort-trigger-execution";
 
-const MICROTECH_BACKUP_DRIVE_ID = "microtech_backup_drive";
+const MICROTECH_BACKUP_DRIVE_ID = 2993267245;
 
 describe("run fort trigger execution", () => {
   it("returns unhandled for actions outside the run/fort trigger boundary", () => {
@@ -105,8 +105,8 @@ describe("run fort trigger execution", () => {
         MICROTECH_BACKUP_DRIVE_ID,
         "hardware",
       ),
-      simple_fracter: definition(597, "program"),
-      simple_decoder: definition(591, "program"),
+      597: definition(597, "program"),
+      591: definition(591, "program"),
     });
     const action = triggerAction(state, {
       cardId: microtechId,
@@ -281,7 +281,7 @@ function instance(
 function definition(id: number, type: CardDefinition["type"]): CardDefinition {
   return {
     id,
-    title: id,
+    title: String(id),
     side: "runner",
     type,
     mechanics: [],

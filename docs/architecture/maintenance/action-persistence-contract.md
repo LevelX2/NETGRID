@@ -27,7 +27,23 @@ Undo entfernt den Vor-Aktionssnapshot des verworfenen Übergangs, damit
 das nächste Aktionsangebot an diesem Zustand einen Snapshot mit der
 aktuellen MatchVersion erhält.
 
-Das Match-Schema 4 erfordert einen passenden Matchdatenpfad. Ein konfigurierter
+Karteninstanzen werden in Zuständen und Snapshots als kompakte Zeilen
+gespeichert. Jede Zeile trägt Instanzreferenz, Definition, Zonenposition,
+Flags und Grundwerte. Besitzer, Controller, Aufdeckung und Rez-Zustand
+belegen jeweils ein Bit. Die Kartenzeilen verweisen auf eine gemeinsame
+Zonenliste des Zustands. Optionale kartenspezifische Felder werden bei
+Bedarf angehängt.
+Identitäten, Hand, Deck, Ablage, Punktebereiche, Server und Rig verwenden
+beim Speichern die Position der zugehörigen Kartenzeile. Beim Laden
+stellt der Codec daraus die Instanzreferenzen der Engine wieder her.
+
+KI-Traces verwenden die Entscheidungsnummer als Schlüssel im Match. Die
+Detailabfrage liest genau die durch Match und Nummer adressierte Zeile.
+Fehlgeschlagene KI-Versuche führen ihren Diagnosecode im Fehlerdatensatz.
+Ereignisblobs beziehen ihre ID aus der Tabellenzeile. Öffentliche
+Ereignisblobs beziehen daraus auch StateVersions und StateHash.
+
+Das Match-Schema 6 erfordert einen passenden Matchdatenpfad. Ein konfigurierter
 separater Accountpfad kann die Konto-Tabellen einer Datenbank mit Schema 3
 weiterverwenden.
 

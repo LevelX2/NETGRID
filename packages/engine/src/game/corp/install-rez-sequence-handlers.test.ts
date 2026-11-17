@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -22,8 +23,7 @@ import {
   type CorpInstallRezSequenceHandlerHost,
 } from "./install-rez-sequence-handlers";
 
-const DATA_FORT_RECLAMATION_DEFINITION_ID =
-  409 as CardDefinitionId;
+const DATA_FORT_RECLAMATION_DEFINITION_ID = 409 as CardDefinitionId;
 const DATA_FORT_RECLAMATION_CAPABILITY_KEY = "hq_to_new_remote_install_rez";
 
 const DATA_FORT_SEQUENCE = {
@@ -45,14 +45,14 @@ const DATA_FORT_SEQUENCE = {
 function definition(
   id: number,
   type: CardDefinition["type"],
-  title = id,
+  title = String(id),
   rezCost = 0,
   subtypes: string[] = [],
 ): CardDefinition {
   return {
     id: id as CardDefinitionId,
     type,
-    title,
+    title: String(title),
     rezCost,
     subtypes,
   } as CardDefinition;
@@ -143,18 +143,14 @@ function makeHost(
       "agenda",
       "Data Fort Reclamation",
     ),
-    priority_agenda: definition(
-      "scored_agenda_free_rez",
-      "agenda",
-      "Priority Requisition",
-    ),
-    agenda_purge_agenda: definition("agenda_purge", "agenda", "Security Purge"),
-    ice_1: definition("ice_1_def", "ice", "ICE 1", 3),
-    ice_2: definition("ice_2_def", "ice", "ICE 2", 4),
-    asset_1: definition("asset_1_def", "asset", "Asset 1", 6),
-    asset_2: definition("asset_2_def", "asset", "Asset 2", 1),
-    upgrade_1: definition("upgrade_1_def", "upgrade", "Upgrade 1", 2),
-    operation_1: definition("operation_1_def", "operation", "Operation 1"),
+    priority_agenda: definition(1143930169, "agenda", "Priority Requisition"),
+    agenda_purge_agenda: definition(542401969, "agenda", "Security Purge"),
+    ice_1: definition(3274351864, "ice", "ICE 1", 3),
+    ice_2: definition(2099279373, "ice", "ICE 2", 4),
+    asset_1: definition(832702815, "asset", "Asset 1", 6),
+    asset_2: definition(972225774, "asset", "Asset 2", 1),
+    upgrade_1: definition(3164290067, "upgrade", "Upgrade 1", 2),
+    operation_1: definition(1990551442, "operation", "Operation 1"),
     ...input.definitions,
   };
   const servers = input.servers ?? [];
@@ -208,7 +204,8 @@ function makeHost(
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
     cards: {
       definitionFor: (cardId) =>
-        definitions[cardId] ?? definition(cardId, "operation"),
+        definitions[cardId] ??
+        definition(syntheticCardDefinitionId(cardId), "operation"),
       mustInstance: (cardId) => {
         const found = cardInstances[cardId];
         if (!found) throw new Error(`missing instance ${cardId}`);
@@ -248,7 +245,7 @@ function makeHost(
         cardDefinition.subtypes?.includes("region") ?? false,
       rootInstallRezzesOnInstall: (cardDefinition) =>
         (cardDefinition.subtypes?.includes("region") ?? false) ||
-        cardDefinition.id === "forced_rez_root_def",
+        cardDefinition.id === 3874383631,
       isScoredAgendaFreeRezCandidate: (cardId) => {
         const cardInstance = cardInstances[cardId];
         return (
@@ -396,7 +393,7 @@ function makeHost(
           if (
             !cardDefinition ||
             (!cardDefinition.subtypes?.includes("region") &&
-              cardDefinition.id !== "forced_rez_root_def")
+              cardDefinition.id !== 3874383631)
           )
             continue;
           const finalCredits = cardDefinition.rezCost ?? 0;
@@ -585,8 +582,7 @@ function zoneFor(
 
 function expectCanonicalDataFortPrimitiveIdentity(payload: unknown): void {
   expect(payload).toMatchObject({
-    cardImplementationAbilityId:
-      "409:hq_to_new_remote_install_rez",
+    cardImplementationAbilityId: "409:hq_to_new_remote_install_rez",
     cardImplementationAbilityKey: DATA_FORT_RECLAMATION_CAPABILITY_KEY,
     cardImplementationCapabilityBindingKind: "card_spec_capability_key",
     sourceDefinitionId: DATA_FORT_RECLAMATION_DEFINITION_ID,
@@ -616,8 +612,7 @@ describe("corp install rez sequence handlers", () => {
       host.state.pendingChoice?.options.map((option) => option.value),
     ).toEqual(["asset_1", "ice_1"]);
     expect(host.legalAction.payload).toMatchObject({
-      cardImplementationAbilityId:
-        "409:hq_to_new_remote_install_rez",
+      cardImplementationAbilityId: "409:hq_to_new_remote_install_rez",
       cardImplementationAbilityKey: DATA_FORT_RECLAMATION_CAPABILITY_KEY,
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationPrimitiveKind:
@@ -870,18 +865,9 @@ describe("corp install rez sequence handlers", () => {
         data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
       },
       definitions: {
-        region_1: definition("region_1_def", "upgrade", "Region 1", 2, [
-          "region",
-        ]),
-        forced_rez_root: definition(
-          "forced_rez_root_def",
-          "asset",
-          "Forced Rez Root",
-          3,
-        ),
-        region_2: definition("region_2_def", "upgrade", "Region 2", 4, [
-          "region",
-        ]),
+        region_1: definition(2849531429, "upgrade", "Region 1", 2, ["region"]),
+        forced_rez_root: definition(3874383631, "asset", "Forced Rez Root", 3),
+        region_2: definition(2950836304, "upgrade", "Region 2", 4, ["region"]),
       },
       pendingChoice: selectCardsChoice(
         "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
@@ -943,12 +929,8 @@ describe("corp install rez sequence handlers", () => {
         data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
       },
       definitions: {
-        region_1: definition("region_1_def", "upgrade", "Region 1", 10, [
-          "region",
-        ]),
-        region_2: definition("region_2_def", "upgrade", "Region 2", 10, [
-          "region",
-        ]),
+        region_1: definition(2849531429, "upgrade", "Region 1", 10, ["region"]),
+        region_2: definition(2950836304, "upgrade", "Region 2", 10, ["region"]),
       },
       pendingChoice: selectCardsChoice(
         "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
@@ -1195,7 +1177,7 @@ describe("corp install rez sequence handlers", () => {
       agendaPurgeInstallContract: "corp_server_choice_per_ice",
       agendaPurgeRunnerReviewOpened: true,
       agendaPurgeTargetChoiceOpened: false,
-      publicRevealDefinitionIds: "ice_1_def,operation_1_def,ice_2_def",
+      publicRevealDefinitionIds: "3274351864,1990551442,2099279373",
     });
 
     host.playerAction = playerAction(["done"]);
@@ -1316,10 +1298,10 @@ describe("corp install rez sequence handlers", () => {
       agendaPurgeInstallContract: "corp_server_choice_per_ice",
       agendaPurgeRunnerReviewResolved: true,
       agendaPurgeTargetChoiceResolved: true,
-      publicRevealDefinitionIds: "ice_1_def,operation_1_def,ice_2_def",
-      installedIceDefinitionIds: "ice_1_def,ice_2_def",
+      publicRevealDefinitionIds: "3274351864,1990551442,2099279373",
+      installedIceDefinitionIds: "3274351864,2099279373",
       installedIceServerLabels: "R&D,Remote 2",
-      trashedDefinitionIds: "operation_1_def",
+      trashedDefinitionIds: "1990551442",
     });
   });
 
@@ -1367,7 +1349,7 @@ describe("corp install rez sequence handlers", () => {
       revealedIceCount: 0,
       installedIceCount: 0,
       trashedCount: 3,
-      trashedDefinitionIds: "operation_1_def,asset_1_def,upgrade_1_def",
+      trashedDefinitionIds: "1990551442,832702815,3164290067",
     });
   });
 
@@ -1432,7 +1414,7 @@ describe("corp install rez sequence handlers", () => {
       hiddenZoneAction: "scored_agenda_free_rez",
       scoredAgendaFreeRezFreeRez: true,
       scoredAgendaFreeRezTarget: "ice_1",
-      scoredAgendaFreeRezTargetDefinitionId: "ice_1_def",
+      scoredAgendaFreeRezTargetDefinitionId: 3274351864,
       rezBaseCreditCostWaived: 3,
       rezAdditionalCreditsPaid: 0,
       rezAgendaPointsPaid: 0,

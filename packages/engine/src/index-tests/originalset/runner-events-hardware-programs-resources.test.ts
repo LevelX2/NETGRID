@@ -1,4 +1,6 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
+import { cardSpecSetIdsForDefinitionId } from "@netgrid/cards/engine";
 import {
   applyAction,
   applyEffectCommands,
@@ -795,7 +797,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
         clientKnownStateVersion: state.stateVersion,
         idempotencyKey: `spotcheck-${definitionId}-wrong-side`,
       });
-      expect(wrongSide.ok, definitionId).toBe(false);
+      expect(wrongSide.ok, String(definitionId)).toBe(false);
       const removed = structuredClone(state);
       removeEverywhere(removed, eventId);
       const drift = applyAction(removed, {
@@ -805,7 +807,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
         clientKnownStateVersion: removed.stateVersion,
         idempotencyKey: `spotcheck-${definitionId}-removed-source`,
       });
-      expect(drift.ok, definitionId).toBe(false);
+      expect(drift.ok, String(definitionId)).toBe(false);
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
       state = apply(
@@ -814,8 +816,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
         (action) => action.actionId === legal.actionId,
       );
       if (definitionId === 310)
-        expect(state.run, definitionId).toBeUndefined();
-      else expect(state.run?.attackedServerId, definitionId).toBe(serverId);
+        expect(state.run, String(definitionId)).toBeUndefined();
+      else expect(state.run?.attackedServerId, String(definitionId)).toBe(serverId);
       if (state.run) {
         expect(
           state.eventLog.at(-1)?.publicPayload.resolvedEffects,
@@ -837,8 +839,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
         privatePayloadMarkers,
       );
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.ok, String(definitionId)).toBe(true);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
   });
 
@@ -894,8 +896,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
         privatePayloadMarkers,
       );
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.ok, String(definitionId)).toBe(true);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
   });
 
@@ -940,7 +942,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
       sourceDefinitionId: 301,
     });
     expect(JSON.stringify(gideonSearchStartedPayload)).not.toContain(programId);
-    expect(JSON.stringify(gideonSearchStartedPayload)).not.toContain(
+    expect(serializedDefinitionReferences(JSON.stringify(gideonSearchStartedPayload))).not.toContain(
       591,
     );
     const optionId =
@@ -1081,7 +1083,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
     const initialMemory = getPlayerView(state, "runner").own.memoryLimit ?? 0;
     for (const definitionId of runnerDeck.cards
       .map((card) => card.id)
-      .filter((id) => id.startsWith("onr_v1_")) as string[]) {
+      .filter((id) => cardSpecSetIdsForDefinitionId(id)?.includes("originalset-v1"))) {
       moveRunnerCardToGrip(state, definitionId);
       const installInitial = structuredClone(state);
       const installReplayStart = state.eventLog.length;
@@ -1102,8 +1104,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
         installInitial,
         state.eventLog.slice(installReplayStart),
       );
-      expect(replay.ok, definitionId).toBe(true);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.ok, String(definitionId)).toBe(true);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
     expect(getPlayerView(state, "runner").own.memoryLimit ?? 0).toBeGreaterThan(
       initialMemory,
@@ -1178,7 +1180,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
       const optionId = state.pendingChoice?.options.find(
         (option) => option.id !== "pass",
       )?.id;
-      expect(optionId, definitionId).toBeDefined();
+      expect(optionId, String(definitionId)).toBeDefined();
       if (!optionId)
         throw new Error(`Missing prevention option for ${definitionId}`);
       state = applyChoice(state, "runner", optionId);
@@ -1190,8 +1192,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
         privatePayloadMarkers,
       );
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.errors, definitionId).toEqual([]);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.errors, String(definitionId)).toEqual([]);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
   });
 
@@ -1385,7 +1387,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
           action.payload?.hostOnCardId === undefined,
       );
 
-      expect(plainInstallActions, definitionId).toHaveLength(1);
+      expect(plainInstallActions, String(definitionId)).toHaveLength(1);
     }
   });
 
@@ -1408,7 +1410,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
         clientKnownStateVersion: state.stateVersion,
         idempotencyKey: `spotcheck-${definitionId}-install-wrong-side`,
       });
-      expect(wrongSide.ok, definitionId).toBe(false);
+      expect(wrongSide.ok, String(definitionId)).toBe(false);
       const stale = applyAction(state, {
         matchId: state.matchId,
         side: "runner",
@@ -1416,9 +1418,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
         clientKnownStateVersion: state.stateVersion - 1,
         idempotencyKey: `spotcheck-${definitionId}-install-stale`,
       });
-      expect(stale.ok, definitionId).toBe(false);
+      expect(stale.ok, String(definitionId)).toBe(false);
       if (!stale.ok)
-        expect(stale.error.code, definitionId).toBe("ERR_STALE_STATE");
+        expect(stale.error.code, String(definitionId)).toBe("ERR_STALE_STATE");
       const removed = structuredClone(state);
       removeEverywhere(removed, cardId);
       const removedSource = applyAction(removed, {
@@ -1428,7 +1430,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
         clientKnownStateVersion: removed.stateVersion,
         idempotencyKey: `spotcheck-${definitionId}-install-removed-source`,
       });
-      expect(removedSource.ok, definitionId).toBe(false);
+      expect(removedSource.ok, String(definitionId)).toBe(false);
 
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
@@ -1455,8 +1457,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
         ).toBeUndefined();
       }
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.ok, String(definitionId)).toBe(true);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
   });
 
@@ -1576,7 +1578,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
       const breakerId = state.runner.rig.programs.find(
         (id) => state.cardInstances[id]?.definitionId === breakerDefinitionId,
       );
-      expect(breakerId, breakerDefinitionId).toBeDefined();
+      expect(breakerId, String(breakerDefinitionId)).toBeDefined();
       if (!breakerId) throw new Error(`Missing ${breakerDefinitionId}`);
       putCorpIceOnServer(state, "rd", iceDefinitionId);
       const initial = structuredClone(state);
@@ -1610,7 +1612,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
             action.type === "pump_breaker" &&
             String(action.payload?.breakerId) === breakerId,
         );
-        expect(pumpAction, breakerDefinitionId).toBeDefined();
+        expect(pumpAction, String(breakerDefinitionId)).toBeDefined();
         if (!pumpAction) break;
         state = apply(
           state,
@@ -1618,7 +1620,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
           (action) => action.actionId === pumpAction.actionId,
         );
       }
-      expect(breakAction, breakerDefinitionId).toBeDefined();
+      expect(breakAction, String(breakerDefinitionId)).toBeDefined();
       if (!breakAction)
         throw new Error(`Missing break action for ${breakerDefinitionId}`);
       const wrongSide = applyAction(state, {
@@ -1628,7 +1630,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
         clientKnownStateVersion: state.stateVersion,
         idempotencyKey: `spotcheck-${breakerDefinitionId}-break-wrong-side`,
       });
-      expect(wrongSide.ok, breakerDefinitionId).toBe(false);
+      expect(wrongSide.ok, String(breakerDefinitionId)).toBe(false);
       const stale = applyAction(state, {
         matchId: state.matchId,
         side: "runner",
@@ -1636,7 +1638,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
         clientKnownStateVersion: state.stateVersion - 1,
         idempotencyKey: `spotcheck-${breakerDefinitionId}-break-stale`,
       });
-      expect(stale.ok, breakerDefinitionId).toBe(false);
+      expect(stale.ok, String(breakerDefinitionId)).toBe(false);
       const removed = structuredClone(state);
       removeEverywhere(removed, breakerId);
       const removedSource = applyAction(removed, {
@@ -1646,7 +1648,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
         clientKnownStateVersion: removed.stateVersion,
         idempotencyKey: `spotcheck-${breakerDefinitionId}-break-removed-source`,
       });
-      expect(removedSource.ok, breakerDefinitionId).toBe(false);
+      expect(removedSource.ok, String(breakerDefinitionId)).toBe(false);
 
       state = apply(
         state,
@@ -1667,8 +1669,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
         privatePayloadMarkers,
       );
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, breakerDefinitionId).toBe(true);
-      expect(hashState(replay.state), breakerDefinitionId).toBe(
+      expect(replay.ok, String(breakerDefinitionId)).toBe(true);
+      expect(hashState(replay.state), String(breakerDefinitionId)).toBe(
         hashState(state),
       );
     }
@@ -1892,7 +1894,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
           clientKnownStateVersion: state.stateVersion,
           idempotencyKey: `spotcheck-${definitionId}-install-wrong-side`,
         }).ok,
-        definitionId,
+        String(definitionId),
       ).toBe(false);
       const stale = applyAction(state, {
         matchId: state.matchId,
@@ -1901,9 +1903,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
         clientKnownStateVersion: state.stateVersion - 1,
         idempotencyKey: `spotcheck-${definitionId}-install-stale`,
       });
-      expect(stale.ok, definitionId).toBe(false);
+      expect(stale.ok, String(definitionId)).toBe(false);
       if (!stale.ok)
-        expect(stale.error.code, definitionId).toBe("ERR_STALE_STATE");
+        expect(stale.error.code, String(definitionId)).toBe("ERR_STALE_STATE");
       const removed = structuredClone(state);
       removeEverywhere(removed, cardId);
       expect(
@@ -1914,7 +1916,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
           clientKnownStateVersion: removed.stateVersion,
           idempotencyKey: `spotcheck-${definitionId}-install-removed-source`,
         }).ok,
-        definitionId,
+        String(definitionId),
       ).toBe(false);
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
@@ -1940,8 +1942,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
         );
       }
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.ok, String(definitionId)).toBe(true);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
   });
 
@@ -2008,7 +2010,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
       [252, 601],
     ] as const;
     for (const [breakerDefinitionId, iceDefinitionId] of specs) {
-      let state = preventionToolState(breakerDefinitionId);
+      let state = preventionToolState(String(breakerDefinitionId));
       const gripId = moveRunnerCardToGrip(state, breakerDefinitionId);
       state = apply(
         state,
@@ -2020,7 +2022,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
       const breakerId = state.runner.rig.programs.find(
         (id) => state.cardInstances[id]?.definitionId === breakerDefinitionId,
       );
-      expect(breakerId, breakerDefinitionId).toBeDefined();
+      expect(breakerId, String(breakerDefinitionId)).toBeDefined();
       if (!breakerId) throw new Error(`Missing ${breakerDefinitionId}`);
       putCorpIceOnServer(state, "rd", iceDefinitionId);
       const initial = structuredClone(state);
@@ -2052,7 +2054,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
             action.type === "pump_breaker" &&
             String(action.payload?.breakerId) === breakerId,
         );
-        expect(pumpAction, breakerDefinitionId).toBeDefined();
+        expect(pumpAction, String(breakerDefinitionId)).toBeDefined();
         if (!pumpAction) break;
         state = apply(
           state,
@@ -2060,7 +2062,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
           (action) => action.actionId === pumpAction.actionId,
         );
       }
-      expect(breakAction, breakerDefinitionId).toBeDefined();
+      expect(breakAction, String(breakerDefinitionId)).toBeDefined();
       if (!breakAction)
         throw new Error(`Missing break action for ${breakerDefinitionId}`);
       const removed = structuredClone(state);
@@ -2073,7 +2075,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
           clientKnownStateVersion: removed.stateVersion,
           idempotencyKey: `spotcheck-${breakerDefinitionId}-break-removed-source`,
         }).ok,
-        breakerDefinitionId,
+        String(breakerDefinitionId),
       ).toBe(false);
       state = apply(
         state,
@@ -2088,8 +2090,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
         privatePayloadMarkers,
       );
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, breakerDefinitionId).toBe(true);
-      expect(hashState(replay.state), breakerDefinitionId).toBe(
+      expect(replay.ok, String(breakerDefinitionId)).toBe(true);
+      expect(hashState(replay.state), String(breakerDefinitionId)).toBe(
         hashState(state),
       );
     }
@@ -2337,7 +2339,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
           clientKnownStateVersion: state.stateVersion,
           idempotencyKey: `spotcheck-${definitionId}-install-wrong-side`,
         }).ok,
-        definitionId,
+        String(definitionId),
       ).toBe(false);
       const stale = applyAction(state, {
         matchId: state.matchId,
@@ -2346,9 +2348,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
         clientKnownStateVersion: state.stateVersion - 1,
         idempotencyKey: `spotcheck-${definitionId}-install-stale`,
       });
-      expect(stale.ok, definitionId).toBe(false);
+      expect(stale.ok, String(definitionId)).toBe(false);
       if (!stale.ok)
-        expect(stale.error.code, definitionId).toBe("ERR_STALE_STATE");
+        expect(stale.error.code, String(definitionId)).toBe("ERR_STALE_STATE");
       const removed = structuredClone(state);
       removeEverywhere(removed, cardId);
       expect(
@@ -2359,7 +2361,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
           clientKnownStateVersion: removed.stateVersion,
           idempotencyKey: `spotcheck-${definitionId}-install-removed-source`,
         }).ok,
-        definitionId,
+        String(definitionId),
       ).toBe(false);
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
@@ -2405,8 +2407,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
         );
       }
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.ok, String(definitionId)).toBe(true);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
   });
 

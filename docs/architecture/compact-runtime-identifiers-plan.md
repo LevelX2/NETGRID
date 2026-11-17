@@ -12,36 +12,42 @@ Schema. Die Abnahme prüft das Verhalten mit neu erzeugten Partien.
 
 ## Stand im Worktree
 
-Der Branch `codex/compact-runtime-identifiers` enthält den gemeinsamen
-Spieltransport, die MatchVersion-Bindung für neue Aktionen und Undo, die
-einmalige SQLite-Ablage des aktuellen Spielstands, numerische Snapshot-IDs
-und kompakte Zufallszeilen.
-Variable Rez-Varianten, Pflichttrash vor der Installation und die
-Playful-AI-Aufteilung lesen ihre fachlichen Werte aus Engine-Daten. Der
-Playful-AI-Optionsschlüssel besteht aus seiner Auswahlnummer im
-bestehenden Stringvertrag.
+Der Worktree-Branch `codex/compact-runtime-card-ids` bündelt die
+numerische Kartenbasis und den gemeinsamen Spieltransport. Neue
+Aktionen und Undo sind an die MatchVersion gebunden. SQLite speichert
+den aktuellen Spielstand einmal, mit festen Zeilen für Karteninstanzen
+und Zufallsaufzeichnungen. Ereignis- und Snapshot-Referenzen sind
+numerisch. KI-Trace-Details verwenden Match und Entscheidungsnummer.
+Die Betriebsdaten für dieses Schema beginnen mit einer frischen
+Matchdatenbank.
 
-`codex/compact-runtime-card-ids` enthält die numerische Kartenbasis
-mit geprüften CardSpec-, Katalog- und Deckpaketen. Der Umstieg von Engine,
-KI und App auf diese Kartennummern ist in Arbeit. Der nächste Schnitt
-vervollständigt die typisierten Referenzen und den Neuaufbau der aktiven
-Fixtures. Danach folgen die Nummerierung der Fähigkeiten, Instanzen,
-übrigen Spielreferenzen und Angebote sowie die Instanzzeilen in SQLite.
+Variable Rez-Varianten, Pflichttrash vor der Installation, zusätzliche
+Aktionsangebote und die Playful-AI-Aufteilung lesen ihre fachlichen
+Werte aus Engine-Daten. Die Engine verwendet im öffentlichen Verlauf
+die Nummer des Übergangs plus eins und der Server für terminalen
+Zeitablauf die nächste Nummer.
+
+Die Abnahme umfasst noch die KI-Regressionen und ihre aktiven
+Aufzeichnungen. Die weiteren Schritte betreffen insbesondere
+Kartenexemplare und Slotbezüge, Fähigkeiten, Aktionen, Choices,
+Server, Runs, Spiel-Traces, Fenster, Effekte und Subroutinen. Beim
+SQLite-Format bleiben die Positionsadressierung der Instanzzeilen
+und numerisch typisierte Zufallszwecke Teil dieser Schritte.
 
 ## Umfang und Vergabe der Schlüssel
 
-| Bezeichner | Zielformat und Gültigkeitsbereich |
-| --- | --- |
-| `CardDefinitionId` | Feste positive Ganzzahl pro Regelkarte. In der CardSpec verankert, über alle Sets einschließlich System-, Katalog- und Testkarten eindeutig. Releasefilter behalten dieselben Nummern. |
-| `CardInstanceId` | Dichte positive Ganzzahl pro Partie. Gilt für genau ein Exemplar einschließlich Identitäten, gehosteter und aus dem Spiel entfernter Karten. |
-| Verdeckter Kartenslot | Kurze Zahl in der jeweiligen side-sicheren Projektion. Bereich und Position binden die Referenz. Bekannte Karten führen eine `CardInstanceId`, verdeckte Slots eine eigene Slotreferenz. |
-| Adressierbare Fähigkeit | Feste positive Nummer innerhalb einer CardSpec. Ein Register-Lookup verwendet Kartendefinition und Fähigkeitsnummer. Eine Instanzbindung verwendet Quelleninstanz und Fähigkeitsnummer. |
-| `ActionId` | Laufende positive Nummer im deterministisch erzeugten LegalAction-Satz einer Seite und StateVersion. Die Einreichung beim Server bindet auch Match und MatchVersion. |
-| `ChoiceId`, `ChoiceOptionId` | Nummer der geöffneten Choice innerhalb der Partie und Nummer einer Option innerhalb dieser Choice. Reihenfolge und fachlicher Wert der Option sind eigene Eigenschaften. |
-| Server, Run, Trace und Fenster | Partielokale Ganzzahlen mit je eigenem Typ. Feste Nummern für HQ, R&D und Archives, laufende Nummern für Remotes. „Neuer Remote“ ist ein eigenes Installationsziel. |
-| Ereignis, Snapshot, KI-Trace | Nummern in der jeweiligen Match-Tabelle. Historienreferenzen enthalten den Matchkontext. Eine Diagnosekennung für einen fehlgeschlagenen KI-Versuch bleibt eine Fehlerreferenz. |
-| Aufgelöster Effekt, Subroutine | Effektposition innerhalb des Ereignisses. Subroutinen werden innerhalb des konkreten Encounters adressiert; gedruckte Herkunft, zusätzliche Beiträge und Ausführungsreihenfolge haben eigene Felder. |
-| Zufallszweck und wiederholte Speicherfelder | Numerischer Zweckcode mit typisierten Argumenten. In SQLite verwenden die Karteninstanzliste und die Zufallsprotokolle kompakte, fest definierte Zeilen. |
+| Bezeichner                                  | Zielformat und Gültigkeitsbereich                                                                                                                                                                    |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CardDefinitionId`                          | Feste positive Ganzzahl pro Regelkarte. In der CardSpec verankert, über alle Sets einschließlich System-, Katalog- und Testkarten eindeutig. Releasefilter behalten dieselben Nummern.               |
+| `CardInstanceId`                            | Dichte positive Ganzzahl pro Partie. Gilt für genau ein Exemplar einschließlich Identitäten, gehosteter und aus dem Spiel entfernter Karten.                                                         |
+| Verdeckter Kartenslot                       | Kurze Zahl in der jeweiligen side-sicheren Projektion. Bereich und Position binden die Referenz. Bekannte Karten führen eine `CardInstanceId`, verdeckte Slots eine eigene Slotreferenz.             |
+| Adressierbare Fähigkeit                     | Feste positive Nummer innerhalb einer CardSpec. Ein Register-Lookup verwendet Kartendefinition und Fähigkeitsnummer. Eine Instanzbindung verwendet Quelleninstanz und Fähigkeitsnummer.              |
+| `ActionId`                                  | Laufende positive Nummer im deterministisch erzeugten LegalAction-Satz einer Seite und StateVersion. Die Einreichung beim Server bindet auch Match und MatchVersion.                                 |
+| `ChoiceId`, `ChoiceOptionId`                | Nummer der geöffneten Choice innerhalb der Partie und Nummer einer Option innerhalb dieser Choice. Reihenfolge und fachlicher Wert der Option sind eigene Eigenschaften.                             |
+| Server, Run, Trace und Fenster              | Partielokale Ganzzahlen mit je eigenem Typ. Feste Nummern für HQ, R&D und Archives, laufende Nummern für Remotes. „Neuer Remote“ ist ein eigenes Installationsziel.                                  |
+| Ereignis, Snapshot, KI-Trace                | Nummern in der jeweiligen Match-Tabelle. Historienreferenzen enthalten den Matchkontext. Eine Diagnosekennung für einen fehlgeschlagenen KI-Versuch bleibt eine Fehlerreferenz.                      |
+| Aufgelöster Effekt, Subroutine              | Effektposition innerhalb des Ereignisses. Subroutinen werden innerhalb des konkreten Encounters adressiert; gedruckte Herkunft, zusätzliche Beiträge und Ausführungsreihenfolge haben eigene Felder. |
+| Zufallszweck und wiederholte Speicherfelder | Numerischer Zweckcode mit typisierten Argumenten. In SQLite verwenden die Karteninstanzliste und die Zufallsprotokolle kompakte, fest definierte Zeilen.                                             |
 
 Die internen KI-Plan- und Kampagnenschlüssel enthalten heute Modul- und
 Deduplizierungsmerkmale und binden wiederkehrende Vorschläge an residente
@@ -108,15 +114,15 @@ herstellt. [CardSpec und Drucke](central-card-specification-and-registry-target-
 
 ## Reihenfolge der Umsetzung
 
-| Schritt | Abhängigkeit | Ergebnis |
-| --- | --- | --- |
-| 1. Worktree und Einstieg | Lokaler Integrationsstand | Eigener Branch, getrennte Testumgebung, betroffene Quellen und Gates festgelegt. |
-| 2. Fachliche Bindungen aus IDs lösen | 1 | Aktion, Choice und ihre Fortsetzungen lesen typisierte Engine-Fakten. |
-| 3. Kartendefinitionen und Fähigkeiten nummerieren | 2 | Vollständiger Katalog und Deckpfad verwenden dieselben neuen IDs. |
-| 4. Instanzen, Ziele und Spielreferenzen nummerieren | 3 | Engine-State, Projektionen und Historienreferenzen sind numerisch. |
-| 5. Aktionen, Choices und Spielupdates umstellen | 2–4 | Kurze Angebote, sichere Einreichung über HTTP/WS und ein vollständiges Update pro Empfänger. |
-| 6. SQLite und wiederholte Listen kompakt speichern | 3–5 | Ein aktueller Spielstand je Match und kompakte Zeilen in neuen Zuständen und Snapshots. |
-| 7. Integrierte Abnahme | 1–6 | Funktional geprüfter Schnitt, aktueller Betriebspfad und übernommene Architekturverträge. |
+| Schritt                                             | Abhängigkeit              | Ergebnis                                                                                     |
+| --------------------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------- |
+| 1. Worktree und Einstieg                            | Lokaler Integrationsstand | Eigener Branch, getrennte Testumgebung, betroffene Quellen und Gates festgelegt.             |
+| 2. Fachliche Bindungen aus IDs lösen                | 1                         | Aktion, Choice und ihre Fortsetzungen lesen typisierte Engine-Fakten.                        |
+| 3. Kartendefinitionen und Fähigkeiten nummerieren   | 2                         | Vollständiger Katalog und Deckpfad verwenden dieselben neuen IDs.                            |
+| 4. Instanzen, Ziele und Spielreferenzen nummerieren | 3                         | Engine-State, Projektionen und Historienreferenzen sind numerisch.                           |
+| 5. Aktionen, Choices und Spielupdates umstellen     | 2–4                       | Kurze Angebote, sichere Einreichung über HTTP/WS und ein vollständiges Update pro Empfänger. |
+| 6. SQLite und wiederholte Listen kompakt speichern  | 3–5                       | Ein aktueller Spielstand je Match und kompakte Zeilen in neuen Zuständen und Snapshots.      |
+| 7. Integrierte Abnahme                              | 1–6                       | Funktional geprüfter Schnitt, aktueller Betriebspfad und übernommene Architekturverträge.    |
 
 ### 1. Worktree und Einstieg
 

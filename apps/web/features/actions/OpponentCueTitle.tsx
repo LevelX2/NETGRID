@@ -30,7 +30,7 @@ export function OpponentCueTitle({
   const index = cue.title.indexOf(cue.cardTitle);
   if (index < 0) return <>{cue.title}</>;
   const item: ChronicleItem = {
-    id: cue.eventId,
+    id: String(cue.eventId),
     category: cue.actionType === "continue_run" ? "run" : "card",
     importance: cue.importance,
     visibility: cue.visibility,

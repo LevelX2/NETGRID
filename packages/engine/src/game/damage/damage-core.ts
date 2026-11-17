@@ -78,7 +78,7 @@ export function resolveDamageOperation(
   legalAction: LegalAction,
   damageType: DamageType,
   amount: number,
-  source: string,
+  source: string | CardDefinitionId,
 ): boolean {
   const request = {
     damageId: damageResolutionId(state, source),
@@ -102,7 +102,7 @@ export function addRunnerTagsWithPrevention(
   state: GameState,
   legalAction: LegalAction,
   amount: number,
-  source: string,
+  source: string | CardDefinitionId,
 ): boolean {
   if (amount <= 0) return false;
   const oneShotAvoidance = Math.max(
@@ -123,7 +123,7 @@ export function addRunnerTagsWithPrevention(
     const remainingEvent = createAddTagImminentEvent(
       state,
       remainingTags,
-      source,
+      String(source),
       addTagPublicContextFromPayload(legalAction.payload),
     );
     if (openEventModificationWindow(state, remainingEvent, legalAction))
@@ -134,7 +134,7 @@ export function addRunnerTagsWithPrevention(
   const event = createAddTagImminentEvent(
     state,
     amount,
-    source,
+    String(source),
     addTagPublicContextFromPayload(legalAction.payload),
   );
   if (openEventModificationWindow(state, event, legalAction)) return true;
@@ -146,7 +146,7 @@ export function openRunnerInstalledTrashPreventionWindow(
   state: GameState,
   legalAction: LegalAction,
   targetCardIds: CardInstanceId[],
-  source: string,
+  source: string | CardDefinitionId,
   resolutionMode: "sequential" | "ordered_batch" = "sequential",
 ): boolean {
   const installedTargets = targetCardIds.filter((cardId) =>
@@ -160,7 +160,7 @@ export function openRunnerInstalledTrashPreventionWindow(
   const event = createRunnerInstalledTrashImminentEvent(
     state,
     [...new Set([...installedTargets, ...simultaneousProgramTargets])],
-    source,
+    String(source),
     resolutionMode,
     typeof legalAction.payload?.cardId === "string"
       ? (legalAction.payload.cardId as CardInstanceId)

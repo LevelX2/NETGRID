@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -231,19 +232,19 @@ describe("V1.9.8 Mechanikpaket Q", () => {
     expect(ONR_V1_9_8_FINAL_CARD_IDS).toHaveLength(2);
     for (const definitionId of ONR_V1_9_8_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(/break/);
+      expect(definition?.mechanics.join(" "), String(definitionId)).toMatch(/break/);
       expect(
         cardImplementationForDefinitionId(
           definitionId,
         )?.icebreakerAbilities?.some(
           (ability) => ability.kind === "increase_strength",
         ),
-        definitionId,
+        String(definitionId),
       ).toBe(true);
-      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
+      expect(definition?.mechanics.join(" "), String(definitionId)).not.toMatch(
         /v2|matchmaking|ranking/,
       );
     }
@@ -302,11 +303,11 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(ONR_V1_9_9_FINAL_CARD_IDS).toHaveLength(4);
     for (const definitionId of ONR_V1_9_9_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.type, definitionId).toBe("upgrade");
-      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
+      expect(definition?.type, String(definitionId)).toBe("upgrade");
+      expect(definition?.mechanics.join(" "), String(definitionId)).not.toMatch(
         /v2|matchmaking|ranking/,
       );
     }
@@ -443,7 +444,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       temporaryEncounterHasAdditionalMechanics: false,
     });
     const runnerView = JSON.stringify(getPlayerView(state, "runner"));
-    expect(runnerView).not.toContain(74);
+    expect(serializedDefinitionReferences(runnerView)).not.toContain(74);
     state = applyChoice(state, "corp", option.id);
     expect(state.corp.credits).toBe(creditsBefore);
     expect(state.cardInstances[iceId]).toMatchObject({
@@ -462,7 +463,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       rezCostPaid: 0,
     });
     const publicEvent = JSON.stringify(state.eventLog.at(-1)?.publicPayload);
-    expect(publicEvent).not.toContain(435);
+    expect(serializedDefinitionReferences(publicEvent)).not.toContain(435);
     expect(publicEvent).not.toContain(unselectedIceId);
     expect(validateGameState(state).ok).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -589,7 +590,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     const runnerView = JSON.stringify(getPlayerView(state, "runner"));
     expect(runnerView).not.toContain("corp-fort-run-rez-support-quote-v1");
     expect(runnerView).not.toContain(hqIceId);
-    expect(runnerView).not.toContain(473);
+    expect(serializedDefinitionReferences(runnerView)).not.toContain(473);
 
     const changedState = structuredClone(state);
     changedState.stateVersion += 1;
@@ -614,7 +615,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       "corp-fort-run-rez-support-quote-v1",
     );
     expect(runnerViewAfterRez).not.toContain(hqIceId);
-    expect(runnerViewAfterRez).not.toContain(473);
+    expect(serializedDefinitionReferences(runnerViewAfterRez)).not.toContain(473);
     state = applyChoice(
       state,
       "corp",
@@ -927,7 +928,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(
       String(
         sameFortInstall.payload?.iceInstallReductionSourceDefinitionIds,
-      ).split(","),
+      ).split(",").map(Number),
     ).toEqual(
       expect.arrayContaining([
         564,
@@ -948,7 +949,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       iceInstallBaseCost: 1,
       iceInstallReduction: 1,
       iceInstallTotalCost: 0,
-      iceInstallReductionSourceDefinitionIds: 536,
+      iceInstallReductionSourceDefinitionIds: String(536),
     });
     expect(
       getPlayerView(state, "corp").servers.find(

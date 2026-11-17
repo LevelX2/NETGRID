@@ -18,13 +18,19 @@ import { publicCounterMutation } from "../counters/public-counter-mutations";
 
 describe("game event builder", () => {
   it("publishes actual draw and hand sizes without exposing drawn cards", () => {
-    const state = createGame({ seed: "public-draw-count", setupMode: "completed" });
+    const state = createGame({
+      seed: "public-draw-count",
+      setupMode: "completed",
+    });
     const drawnId = state.corp.rd[0];
     const legalAction = mandatoryDrawLegalAction(state);
     const result = applyAction(state, playerActionFor(state, legalAction));
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error("Expected a completed draw");
-    for (const surface of [toPublicEvent(result.event), toPublicEventForSide(result.event, "runner")]) {
+    for (const surface of [
+      toPublicEvent(result.event),
+      toPublicEventForSide(result.event, "runner"),
+    ]) {
       expect(surface.publicPayload).toMatchObject({
         corpHqCountBefore: state.corp.hq.length,
         corpHqCountAfter: result.state.corp.hq.length,
@@ -130,7 +136,7 @@ describe("game event builder", () => {
 
     expect(JSON.stringify(state)).toBe(before);
     expect(event).toMatchObject({
-      eventId: `evt_${next.stateVersion}`,
+      eventId: next.stateVersion + 1,
       type: legalAction.type,
       stateVersionBefore: state.stateVersion,
       stateVersionAfter: next.stateVersion,
@@ -236,7 +242,7 @@ describe("game event builder", () => {
           after: 0,
           cards: [
             {
-              definitionId: "known_remote_card",
+              definitionId: 342907630,
               serverId: "remote_1",
               area: "root",
               positionKey: "root:0",
@@ -274,7 +280,7 @@ describe("game event builder", () => {
         after: 0,
         cards: [
           expect.objectContaining({
-            definitionId: "known_remote_card",
+            definitionId: 342907630,
             positionKey: "root:0",
           }),
         ],
@@ -340,8 +346,8 @@ describe("game event builder", () => {
     const event = buildEventWithHost(
       testBuildEventHost({
         sourceVisibility: "redacted",
-        sourceCardDefinitionId: "hidden_source",
-        sourceDefinitionId: "hidden_source",
+        sourceCardDefinitionId: 129984511,
+        sourceDefinitionId: 129984511,
         sourceTitle: "Hidden Source",
       }),
       previous.stateVersion,

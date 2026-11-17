@@ -1,10 +1,16 @@
 import { Award as AgendaIcon, Check, Eye, Trash2, X } from "lucide-react";
-import type { LegalAction, Side, VisibleChoiceRequest } from "@netgrid/shared";
+import type {
+  LegalAction,
+  MatchEventId,
+  Side,
+  VisibleChoiceRequest,
+} from "@netgrid/shared";
 import type { DamageImpactCue } from "../../app/action-cues";
 import { useLocale, useTranslations } from "use-intl/react";
 import type { AccessPresentationOutcomeKind } from "../../app/access-presentation";
 
 import {
+  type AccessPresentationId,
   accessDecisionDisplayLabel,
   accessDecisionLabel,
   accessRevealActionGroups,
@@ -27,7 +33,7 @@ const reviewCardPreviewStyle = {
 } as const;
 
 export type AccessReveal = {
-  eventId: string;
+  eventId: AccessPresentationId;
   kind:
     | "access"
     | "archives_reveal"
@@ -57,7 +63,7 @@ export type AccessReveal = {
 };
 
 export type ExposeReview = {
-  eventId: string;
+  eventId: MatchEventId;
   actorSide: Side;
   viewerSide: Side;
   cards: DisplayVisibleCard[];

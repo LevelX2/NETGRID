@@ -264,7 +264,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     for (const definitionId of CLASSIC_08_IDS) {
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).toBe("implemented");
     }
   });
@@ -284,7 +284,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     expect(legal.costs[0]?.credits).toBeUndefined();
     expect(legal.payload).toMatchObject({
       runStartLossCredits: 3,
-      runStartLossSourceDefinitionIds: STREET_ENFORCER,
+      runStartLossSourceDefinitionIds: String(STREET_ENFORCER),
     });
 
     state = apply(
@@ -297,7 +297,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
       runStartLossCredits: 3,
-      runStartLossSourceDefinitionIds: STREET_ENFORCER,
+      runStartLossSourceDefinitionIds: String(STREET_ENFORCER),
       runStartLossApplied: 2,
       runnerCreditsAfter: 0,
     });
@@ -404,7 +404,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       breakSubroutineAdditionalCost: 1,
       breakSubroutineTotalCost: 4,
       breakAbilityUseAdditionalCost: 1,
-      breakAbilityUseCostSourceDefinitionIds: LONDON_CITY_GRID,
+      breakAbilityUseCostSourceDefinitionIds: String(LONDON_CITY_GRID),
     });
 
     state = apply(

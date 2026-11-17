@@ -556,7 +556,7 @@ describe("Proteus Phase 2d Installed-Connection Bad Publicity Cost", () => {
 
   function preparePoisonedWaterSupply(
     seed: string,
-    installedConnections: readonly string[],
+    installedConnections: readonly number[],
     badPublicityBefore = 0,
   ): {
     initial: GameState;

@@ -1,3 +1,4 @@
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import type { CardDefinitionId, CardInstanceId } from "@netgrid/shared";
 
 export function parseTemporaryInstallChoiceSource(source: string): {
@@ -5,8 +6,11 @@ export function parseTemporaryInstallChoiceSource(source: string): {
   sourceDefinitionId: CardDefinitionId;
   value: string;
 } {
-  const [, sourceCardId = "", sourceDefinitionId = "", value = ""] =
+  const [, sourceCardId = "", sourceDefinitionIdToken = "", value = ""] =
     source.split(":");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    sourceDefinitionIdToken,
+  );
   if (!sourceCardId || !sourceDefinitionId)
     throw new Error("Die Temporary-Install-Choice ist ungültig.");
   return {

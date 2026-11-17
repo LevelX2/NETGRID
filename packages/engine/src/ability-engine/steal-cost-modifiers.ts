@@ -269,9 +269,8 @@ export function quoteStealCostForKnownAgenda(
       accessZone,
     ),
   ].sort((a, b) =>
-    `${a.sourceDefinitionId}:${a.sourceCardInstanceId ?? ""}`.localeCompare(
-      `${b.sourceDefinitionId}:${b.sourceCardInstanceId ?? ""}`,
-    ),
+    a.sourceDefinitionId - b.sourceDefinitionId ||
+    (a.sourceCardInstanceId ?? "").localeCompare(b.sourceCardInstanceId ?? ""),
   );
   return stealCostQuoteFromModifiers(modifiers);
 }
@@ -308,9 +307,8 @@ export function quoteStealCostForAccessedAgenda(
   );
   const self = currentAccessSelfStealCostsForAgenda(state, agendaDefinition);
   const modifiers = [...active, ...persisted, ...self].sort((a, b) =>
-    `${a.sourceDefinitionId}:${a.sourceCardInstanceId ?? ""}`.localeCompare(
-      `${b.sourceDefinitionId}:${b.sourceCardInstanceId ?? ""}`,
-    ),
+    a.sourceDefinitionId - b.sourceDefinitionId ||
+    (a.sourceCardInstanceId ?? "").localeCompare(b.sourceCardInstanceId ?? ""),
   );
   return stealCostQuoteFromModifiers(modifiers);
 }

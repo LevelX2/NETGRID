@@ -1,6 +1,6 @@
 import type { PublicGameEvent, Side } from "@netgrid/shared";
 
-import type { MaintenanceAiTraceDetail } from "./maintenance";
+import type { AiDecisionDebugTrace } from "./maintenance";
 
 /**
  * Rebuilds the visible inspector entry from the actual AI action event that
@@ -13,7 +13,7 @@ export function latestAiDecisionDebugEventTrace(input: {
   matchVersion: number;
   eventTail: PublicGameEvent[];
   observedAt: string;
-}): MaintenanceAiTraceDetail | null {
+}): AiDecisionDebugTrace | null {
   for (const event of [...input.eventTail].reverse()) {
     const payload = record(event.publicPayload);
     const detail = record(payload?.aiDecisionDebug);
@@ -28,8 +28,7 @@ export function latestAiDecisionDebugEventTrace(input: {
     const planKind = stringValue(selectedPlan?.moduleId);
     const confidence = finiteNumber(detail.confidence);
     return {
-      traceId: `event_trace_${event.eventId}`,
-      matchId: input.matchId,
+        matchId: input.matchId,
       eventId: event.eventId,
       stateVersion: event.stateVersionBefore,
       matchVersion: input.matchVersion,

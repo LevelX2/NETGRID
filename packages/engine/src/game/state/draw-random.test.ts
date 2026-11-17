@@ -59,7 +59,7 @@ describe("draw-random", () => {
     current.cardInstances = {
       [HQ_A]: {
         instanceId: HQ_A,
-        definitionId: "corp_card",
+        definitionId: 3324707508,
         owner: "corp",
         controller: "corp",
         zone: { side: "corp", zone: "rd" },

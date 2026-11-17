@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardInstance,
@@ -60,7 +61,7 @@ function state(): GameState {
     cardInstances: {
       [BREAKER_ID]: {
         id: BREAKER_ID,
-        definitionId: "breaker_definition",
+        definitionId: 1482612353,
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "rig" },
@@ -70,7 +71,7 @@ function state(): GameState {
       } as unknown as CardInstance,
       [ICE_ID]: {
         id: ICE_ID,
-        definitionId: "ice_definition",
+        definitionId: 2630481112,
         owner: "corp",
         controller: "corp",
         zone: { side: "corp", zone: "serverIce", serverId: "hq" },
@@ -116,7 +117,7 @@ function legalAction(
 
 function definition(id = "breaker_definition"): CardDefinition {
   return {
-    id,
+    id: syntheticCardDefinitionId(id),
     title: id,
     side: id === "ice_definition" ? "corp" : "runner",
     type: id === "ice_definition" ? "ice" : "program",
@@ -288,7 +289,7 @@ describe("runner-breaker-action-execution", () => {
     expect(targetState.run?.usedNoisyIcebreakerThisRun).toBe(true);
     expect(action.payload).toMatchObject({
       noisyIcebreakerUsedThisRun: true,
-      noisyIcebreakerDefinitionId: "breaker_definition",
+      noisyIcebreakerDefinitionId: 1482612353,
     });
     expect(calls).toEqual([
       `spend:1:${BREAKER_ID}`,
@@ -357,7 +358,7 @@ describe("runner-breaker-action-execution", () => {
       [
         {
           sourceCardInstanceId: BREAKER_ID,
-          sourceDefinitionId: "breaker_definition",
+          sourceDefinitionId: 1482612353,
           targetBreakerId: BREAKER_ID,
           amount: 2,
           turnSerial: 7,

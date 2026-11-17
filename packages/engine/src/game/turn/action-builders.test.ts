@@ -85,9 +85,7 @@ describe("turn action builders", () => {
     );
 
     expect(normalRun).toBe("runner.start_run.rd");
-    expect(bonusRun).toBe(
-      "runner.start_run.rd.bonus_run.onr_v1_123_bodyweight-data-creche",
-    );
+    expect(bonusRun).toBe("runner.start_run.rd.bonus_run.335");
     expect(bonusRun).not.toBe(normalRun);
   });
 
