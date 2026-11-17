@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { CURRENT_RULES_BASELINE } from "@netgrid/shared";
 import type {
@@ -424,7 +425,7 @@ function visibleBreaker(
   return {
     instanceId,
     definitionId,
-    title: definitionId,
+    title: String(definitionId),
     owner: "runner",
     controller: "runner",
     type: "program",
@@ -449,7 +450,7 @@ function visibleGripCard(instanceId: string): VisibleCard {
 function visibleIdentity(side: Side): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: syntheticCardDefinitionId(`${side}-identity`),
     title: `${side} identity`,
     owner: side,
     controller: side,

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   CURRENT_RULES_BASELINE,
   type AiDecisionInput,
@@ -1000,7 +1001,7 @@ function offer(
     stateVersion: setup.stateIdentity.stateVersion,
     sourceKind: "card",
     sourceCardInstanceId,
-    sourceDefinitionId: `definition:${id}`,
+    sourceDefinitionId: syntheticCardDefinitionId(`definition:${id}`),
     abilityBindingMethod: "unresolved",
     semanticActionType,
     cardContextSignals: [],
@@ -1234,7 +1235,7 @@ function card(
 ): VisibleCard {
   return {
     instanceId,
-    definitionId: `${instanceId}-definition`,
+    definitionId: syntheticCardDefinitionId(`${instanceId}-definition`),
     title: instanceId,
     type,
     known: true,

@@ -67,7 +67,7 @@ describe("action-capacity hint contracts", () => {
           ].includes(profile.restriction)
         )
           continue;
-        expect(profile.actionTypes?.length, hint.cardId).toBeGreaterThan(0);
+        expect(profile.actionTypes?.length, String(hint.cardId)).toBeGreaterThan(0);
       }
     }
   });

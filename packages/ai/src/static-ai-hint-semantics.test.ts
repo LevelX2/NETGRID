@@ -69,13 +69,13 @@ describe("static AI hint semantics", () => {
 
   it("keeps every stored semantic array duplicate-free", () => {
     for (const hint of hints) {
-      expect(new Set(hint.tacticSignals ?? []).size, hint.cardId).toBe(
+      expect(new Set(hint.tacticSignals ?? []).size, String(hint.cardId)).toBe(
         hint.tacticSignals?.length ?? 0,
       );
-      expect(new Set(hint.functionSignals ?? []).size, hint.cardId).toBe(
+      expect(new Set(hint.functionSignals ?? []).size, String(hint.cardId)).toBe(
         hint.functionSignals?.length ?? 0,
       );
-      expect(new Set(hint.strategyAnchors ?? []).size, hint.cardId).toBe(
+      expect(new Set(hint.strategyAnchors ?? []).size, String(hint.cardId)).toBe(
         hint.strategyAnchors?.length ?? 0,
       );
     }

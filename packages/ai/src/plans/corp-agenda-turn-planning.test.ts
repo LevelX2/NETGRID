@@ -722,7 +722,7 @@ function scoreProtectionProvider(
     delegatedPriorityClass: "P4",
     actionId,
     sourceCardInstanceId: actionId,
-    sourceDefinitionId: `${actionId}-definition`,
+    sourceDefinitionId: syntheticCardDefinitionId(`${actionId}-definition`),
     evidenceCode: "score_protection_staging_install:test",
   };
 }
@@ -735,7 +735,7 @@ function protectionProjection(
   return {
     actionId,
     sourceCardInstanceId: actionId,
-    sourceDefinitionId: `${actionId}-definition`,
+    sourceDefinitionId: syntheticCardDefinitionId(`${actionId}-definition`),
     targetServerId: serverId,
     knowledge: "known",
     effect: "satisfied",
@@ -860,7 +860,7 @@ function candidate(params: {
     stateVersion: 20,
     sourceKind: "card",
     sourceCardInstanceId: params.sourceCardInstanceId,
-    sourceDefinitionId: `${params.sourceCardInstanceId}-definition`,
+    sourceDefinitionId: syntheticCardDefinitionId(`${params.sourceCardInstanceId}-definition`),
     abilityBindingMethod: "unresolved",
     semanticActionType: params.semanticActionType,
     cardContextSignals: [],

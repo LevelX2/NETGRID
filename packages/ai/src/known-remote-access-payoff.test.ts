@@ -32,7 +32,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
       "r1",
       "root:4",
       422,
-      "old-access",
+      1,
     );
     expect(
       evaluateKnownRemoteAccessPayoff(input, "r1", belief).payoff,

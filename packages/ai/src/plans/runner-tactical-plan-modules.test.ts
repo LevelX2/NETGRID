@@ -931,7 +931,7 @@ describe("Runner tactical plan modules", () => {
 
   it("does not create generic development without admission", () => {
     const module = tacticalModule("runner.develop_board_and_hand");
-    const install = cardAction("install-special", "special");
+    const install = cardAction("install-special", syntheticCardDefinitionId("special"));
     expect(
       module.discover(
         context([install], {
@@ -1021,7 +1021,7 @@ describe("Runner tactical plan modules", () => {
       "economy.gain_credit",
     );
     bank.sourceKind = "card";
-    bank.sourceDefinitionId = "broker";
+    bank.sourceDefinitionId = syntheticCardDefinitionId("broker");
     bank.economyProjection = {
       ...basic.economyProjection,
       grossLiquidCreditGain: 3,
@@ -1081,7 +1081,7 @@ describe("Runner tactical plan modules", () => {
       "card_ability.trigger",
     );
     expose.sourceKind = "card";
-    expose.sourceDefinitionId = "seeya";
+    expose.sourceDefinitionId = syntheticCardDefinitionId("seeya");
     const module = tacticalModule("runner.contest_remote");
     const runnerContext = context([expose], {
       remoteContests: [

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { afterEach, describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction, PlayerView } from "@netgrid/shared";
 import { buildStrategicIntentState } from "./strategic-intent-state";
@@ -209,7 +210,7 @@ function score(strategyId: string): DeckStrategyScore {
     runtimeBlockers: [],
     anchorEvidence: [
       {
-        cardId: "fixture-anchor",
+        cardId: syntheticCardDefinitionId("fixture-anchor"),
         quantity: 1,
         source: "derivedStrategyAnchor",
         strategyId,

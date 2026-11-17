@@ -938,7 +938,7 @@ function input(params: {
       stateVersion: params.stateVersion,
       own: {
         gripOrHq: Array.from({ length: params.handCount }, (_, index) =>
-          card({ definitionId: `hand-${index}`, type: "event" }),
+          card({ definitionId: syntheticCardDefinitionId(`hand-${index}`), type: "event" }),
         ),
         heapOrArchives: [],
         rig: [],
@@ -973,7 +973,7 @@ function card(params: {
   return {
     instanceId: `${params.definitionId}-instance`,
     definitionId: params.definitionId,
-    title: params.definitionId,
+    title: String(params.definitionId),
     owner: "corp",
     controller: "corp",
     type: params.type,
@@ -982,7 +982,7 @@ function card(params: {
     ...(params.advancementCounters !== undefined
       ? { advancementCounters: params.advancementCounters }
       : {}),
-  } as VisibleCard;
+  };
 }
 
 function action(
@@ -1005,17 +1005,17 @@ function action(
 }
 
 function event(
-  eventId: string,
+  label: string,
   stateVersionAfter: number,
-  publicPayload: Record<string, unknown>,
+  publicPayload: PublicGameEvent["publicPayload"],
 ): PublicGameEvent {
   return {
-    eventId,
-    type: String(publicPayload.actionType ?? "corp_action"),
+    eventId: stateVersionAfter + 1,
+    type: publicPayload.actionType ?? "corp_action",
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateHashAfter: `fnv1a:${label}`,
     visibilityClass: "public",
     publicPayload: { actor: publicPayload.actor ?? "corp", ...publicPayload },
-  } as PublicGameEvent;
+  };
 }

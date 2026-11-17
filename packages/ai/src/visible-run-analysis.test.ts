@@ -2432,7 +2432,7 @@ function quotedSpecialIce(
 ): VisibleCard {
   return {
     instanceId,
-    definitionId: `test_${instanceId}`,
+    definitionId: syntheticCardDefinitionId(`test_${instanceId}`),
     title,
     type: "ice",
     subtypes: ["sentry"],
@@ -2441,7 +2441,7 @@ function quotedSpecialIce(
     strength: 3,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: `test_${instanceId}`,
+      iceDefinitionId: syntheticCardDefinitionId(`test_${instanceId}`),
       effectiveStrength: 3,
       subroutines,
     },

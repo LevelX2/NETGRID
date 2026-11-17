@@ -972,17 +972,17 @@ function decisionInput(
 }
 
 function publicEvent(
-  eventId: string,
+  label: string,
   stateVersionAfter: number,
   actor: Side,
   actionType: string,
 ) {
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type: actionType,
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateHashAfter: `fnv1a:${label}`,
     visibilityClass: "public" as const,
     publicPayload: { actor, actionType },
   };

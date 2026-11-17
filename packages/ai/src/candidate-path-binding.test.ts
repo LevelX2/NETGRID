@@ -68,7 +68,7 @@ describe("candidate path bindings", () => {
         actionType: "install_card",
         semanticActionType: "coverage_setup",
         sourceKind: "visible_card_or_ability",
-        sourceDefinitionId: "Wall of Static",
+        sourceDefinitionId: 491,
         targetIdentity: "unknown_target",
       }),
       redactedActionRef: "redacted:install",

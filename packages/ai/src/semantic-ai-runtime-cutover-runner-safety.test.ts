@@ -495,7 +495,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       ),
     ];
     input.playerView.run = {
-      runId: "match-979-canis-major",
+      runId: 1,
       attackedServerId: "r1",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "r1", iceIndex: 2 },

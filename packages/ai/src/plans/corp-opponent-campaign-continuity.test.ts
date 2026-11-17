@@ -383,7 +383,7 @@ describe("Corp opponent-turn campaign continuity", () => {
     equivalentInput.playerView.publicEvents[0]!.publicPayload.label =
       "different public label";
     equivalentInput.playerView.publicEvents[0]!.publicPayload.sourceDefinitionId =
-      "public-definition-b";
+      syntheticCardDefinitionId("public-definition-b");
     equivalentInput.eventTail = equivalentInput.playerView.publicEvents;
 
     const first = reconcileCorpCampaignContinuity({
@@ -663,7 +663,7 @@ function event(
   publicPayload: PublicGameEvent["publicPayload"],
 ): PublicGameEvent {
   return {
-    eventId: `event-${stateVersionAfter}-${type}`,
+    eventId: stateVersionAfter + 1,
     type,
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDeckStrategyProfile,
@@ -742,7 +743,7 @@ function score(params: {
       params.anchor > 0
         ? [
             {
-              cardId: "fixture-card",
+              cardId: syntheticCardDefinitionId("fixture-card"),
               quantity: 1,
               source: "derivedStrategyAnchor",
               strategyId: "fixture.strategy",
@@ -754,7 +755,7 @@ function score(params: {
       params.support > 0
         ? [
             {
-              cardId: "fixture-support",
+              cardId: syntheticCardDefinitionId("fixture-support"),
               quantity: 1,
               source: "functionSignal",
               signal: "fixture.support",

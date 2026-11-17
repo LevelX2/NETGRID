@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import type { ActionCapacityProjection } from "../action-semantic-candidate-types";
@@ -415,7 +416,7 @@ function candidate(
     ...(overrides.sourceCardInstanceId
       ? { sourceCardInstanceId: overrides.sourceCardInstanceId }
       : {}),
-    sourceDefinitionId: actionId,
+    sourceDefinitionId: syntheticCardDefinitionId(actionId),
     costProfile: {
       clickCost: listedActionCost,
       creditCost: overrides.creditCost ?? 0,

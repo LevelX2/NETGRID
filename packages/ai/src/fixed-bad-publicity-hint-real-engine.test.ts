@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { CardDefinitionId } from "@netgrid/shared";
 import { cardSpecPlanningCards } from "@netgrid/cards/planning";
 import {
   applyAction,
@@ -26,7 +27,7 @@ const payoff = {
   amount: 1,
   finite: true,
 };
-function nativeInput(eventId = id, additionalCards: readonly string[] = []) {
+function nativeInput(eventId = id, additionalCards: readonly CardDefinitionId[] = []) {
   let state = createGameAfterSetup({
     seed: "fixed-bad-publicity-profile",
     runnerDeck: {

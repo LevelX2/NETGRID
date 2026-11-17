@@ -806,7 +806,7 @@ function baseCandidate(
     stateVersion: 30,
     sourceKind: "card",
     sourceCardInstanceId: sourceId,
-    sourceDefinitionId: `${sourceId}-definition`,
+    sourceDefinitionId: syntheticCardDefinitionId(`${sourceId}-definition`),
     abilityBindingMethod: "unresolved",
     semanticActionType,
     cardContextSignals: [],
@@ -952,7 +952,7 @@ function visibleCard(
 ): VisibleCard {
   return {
     instanceId,
-    definitionId: `${instanceId}-definition`,
+    definitionId: syntheticCardDefinitionId(`${instanceId}-definition`),
     title: instanceId,
     type,
     known: true,

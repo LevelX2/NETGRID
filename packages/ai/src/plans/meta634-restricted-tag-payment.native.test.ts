@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import type { AiDecisionInputWithDeckCapabilities } from "../runtime/ai-decision-input";
@@ -75,7 +76,7 @@ it("uses the typed pool rather than its card name, and quotes the liquid remaind
   const card = input.playerView.own.rig!.find((c) =>
     c.counterDisplays?.some((d) => d.creditPool?.uses?.includes("remove_tags")),
   )!;
-  card.definitionId = "generic-tag-credit-source";
+  card.definitionId = syntheticCardDefinitionId("generic-tag-credit-source");
   card.title = "Generic tag credit source";
   card.counters!.bit = 1;
   card.counterDisplays![0]!.amount = 1;

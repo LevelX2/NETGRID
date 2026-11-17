@@ -1416,7 +1416,7 @@ describe("Runner core plan modules", () => {
     delete unprojected.economyProjection;
     const cardCredit = exactBasicCreditCandidate("card-credit");
     cardCredit.sourceKind = "card";
-    cardCredit.sourceDefinitionId = "test-card-credit";
+    cardCredit.sourceDefinitionId = syntheticCardDefinitionId("test-card-credit");
     cardCredit.economyProjection = {
       ...cardCredit.economyProjection!,
       source: "unknown",
