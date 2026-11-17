@@ -27,12 +27,18 @@ Werte aus Engine-Daten. Die Engine verwendet im öffentlichen Verlauf
 die Nummer des Übergangs plus eins und der Server für terminalen
 Zeitablauf die nächste Nummer.
 
+`codex/compact-runtime-run-ids` ergänzt positive Run-IDs aus der
+StateVersion des eröffnenden Übergangs. Engine, Spieleransicht, KI und
+SQLite führen diese Referenz als Zahl. Der Branch enthält den separaten
+Speicherschnitt mit Schema 7. Kartenlisten in SQLite referenzieren
+bereits die Position der zugehörigen Instanzzeile.
+
 Die Abnahme umfasst noch die KI-Regressionen und ihre aktiven
 Aufzeichnungen. Die weiteren Schritte betreffen insbesondere
-Kartenexemplare und Slotbezüge, Fähigkeiten, Aktionen, Choices,
-Server, Runs, Spiel-Traces, Fenster, Effekte und Subroutinen. Beim
-SQLite-Format bleiben die Positionsadressierung der Instanzzeilen
-und numerisch typisierte Zufallszwecke Teil dieser Schritte.
+Kartenexemplare in der Engine, Slotbezüge, Fähigkeiten, Aktionen,
+Choices, Server, Spiel-Traces, Fenster, Effekte und Subroutinen.
+Für Zufallsaufzeichnungen stehen die numerisch typisierten
+Zufallszwecke aus.
 
 ## Umfang und Vergabe der Schlüssel
 
