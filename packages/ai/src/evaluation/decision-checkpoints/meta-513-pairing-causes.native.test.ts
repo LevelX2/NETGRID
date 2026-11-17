@@ -164,18 +164,23 @@ it("retains mature development cashout as an executable ordinary-priority candid
     },
   });
 });
-it("keeps G23/D288 bank cashout but binds it to the newly admitted exact run", () => {
+it("keeps both Broker balances when changing the funded remote would leave a safer R&D route", () => {
   const { input } = native("g23d288");
   const { d, pf } = decide(input);
-  expect(d.actionId).toContain(
-    "broker_1.activated.onr_v1_154_broker:withdraw_credits",
-  );
-  expect(pf.selectedPlan?.moduleId).toBe("runner.credit_bank");
+  expect(d.actionId).toBe("runner.start_run.rd");
+  expect(pf.selectedPlan?.moduleId).toBe("runner.pressure_central");
   expect(
-    pf.selectedPlan?.evidenceCodes.some((x) =>
-      x.startsWith("runner_credit_bank_bound_run_action:"),
+    d.decisionDebug?.actionAlternatives?.filter((entry) =>
+      entry.actionId.includes("broker") && entry.actionId.includes("withdraw_credits"),
     ),
-  ).toBe(true);
+  ).toEqual([
+    expect.objectContaining({ whyNot: expect.arrayContaining([
+      expect.stringContaining("runner_credit_bank_hold_spending_budget_funded"),
+    ]) }),
+    expect.objectContaining({ whyNot: expect.arrayContaining([
+      expect.stringContaining("runner_credit_bank_hold_spending_budget_funded"),
+    ]) }),
+  ]);
   const route = evaluateRunnerRunTargets({ input }).find(
     (t) => t.actionId === "runner.start_run.remote_1",
   )!;

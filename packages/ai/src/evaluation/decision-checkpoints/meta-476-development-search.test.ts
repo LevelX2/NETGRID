@@ -108,8 +108,7 @@ it.each([38, 40])(
         [],
         [],
       );
-    if (game === 38) expect(discovery).toThrow(/invalid_plan_identity/);
-    else expect(discovery()).toEqual([]);
+    expect(discovery()).toEqual([]);
     // The historical wrong commitment remains invalid: no resolver substitute.
     expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
   },

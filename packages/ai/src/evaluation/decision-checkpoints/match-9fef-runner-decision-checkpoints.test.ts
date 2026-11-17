@@ -40,7 +40,7 @@ describe("match 9FEF runner decision checkpoints", () => {
       "F05 follows the current HQ pressure route at D95",
       rdAfterKnownTopInvalidatedD95Json,
     ],
-    ["F06 builds the liquid reserve at D109", hqProbeD109Json],
+    ["F06 certifies the zero-cost HQ probe at D109", hqProbeD109Json],
     ["F05 avoids the repeated costly R&D run at D115", noRepeatRdD115Json],
     ["F07 builds the liquid reserve at D127", noDeadFundingD127Json],
     ["F08 classifies the D143 remote run as a probe", remote2ProbeD143Json],
@@ -128,6 +128,22 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
           "runner_hq_success_window_setup:onr_v1_080_core-command-jettison-ice",
         ],
       },
+    };
+  }
+  if (checkpoint.checkpointId === "9FEF-F06-HQ-PROBE-CLASSIFICATION-D109") {
+    checkpoint.expectation = {
+      acceptableActions: [{ actionId: "runner.start_run.hq" }],
+      planExecution: {
+        acceptablePlanKinds: ["runner.pressure_central"],
+        acceptableCapabilities: ["pressure_hq_information"],
+      },
+      runTargets: [{
+        actionId: "runner.start_run.hq",
+        targetServerId: "hq",
+        pathPassability: "reachable",
+        pathCost: 0,
+        recommendation: "run_if_free",
+      }],
     };
   }
   if (checkpoint.checkpointId === "9FEF-F04-PROBE-NOT-FUNDING-D88") {

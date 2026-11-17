@@ -1333,8 +1333,10 @@ export function buildRunnerCentralPressureSignals({
             evaluation.targetServerId !== "archives" &&
             evaluation.runActionProjection.sourceKind === "basic_action" &&
             evaluation.targetServerId === evaluation.accessServerId &&
-            evaluation.recommendation === "gain_credits_first" &&
-            evaluation.fundingNeed.reason === "post_run_floor_gap" &&
+            ((evaluation.recommendation === "gain_credits_first" &&
+              evaluation.fundingNeed.reason === "post_run_floor_gap") ||
+              (evaluation.recommendation === "run_if_free" &&
+                informationRouteExclusions.has(evaluation.actionId))) &&
             evaluation.pathPassability === "reachable" &&
             evaluation.prerunReserveQuote?.status !== "blocked" &&
             pressureCadence.routeAvailable &&

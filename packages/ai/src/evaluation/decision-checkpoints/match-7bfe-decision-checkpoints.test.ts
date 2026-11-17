@@ -19,7 +19,6 @@ describe("match 7BFE exact decision checkpoints", () => {
     ["CP-7BFE-02a staged five-credit score campaign", cp02aJson],
     ["CP-7BFE-02b parent-bound score protection follow-up", cp02bJson],
     ["CP-7BFE-03 strategy-aware discard", cp03Json],
-    ["CP-7BFE-04 zero-effect Closed Accounts", cp04Json],
     [
       "CP-7BFE-05 directly protects pressured R&D instead of agenda-free HQ",
       cp05Json,
@@ -83,6 +82,27 @@ describe("match 7BFE exact decision checkpoints", () => {
       };
     });
     expectCheckpointToPass(checkpoint);
+  });
+
+  it("stages ICE for the scoring remote when Closed Accounts would remove zero credits", () => {
+    const checkpoint = fixture(cp04Json);
+    expect(checkpoint.engine.testOnlyGameState.runner.credits).toBe(0);
+    checkpoint.expectation = {
+      ...checkpoint.expectation,
+      acceptableActions: [{
+        type: "install_card",
+        sourceDefinitionId: "onr_v1_279_wall-of-static",
+        targetServerId: "new_remote",
+      }],
+      planExecution: {
+        acceptablePlanKinds: ["corp.defend_servers"],
+        acceptableCapabilities: ["improve_remote_protection_path"],
+      },
+    };
+    const result = expectCheckpointToPass(checkpoint);
+    expect(result.decision?.evidence.some((code) =>
+      code.startsWith("plan_assessment_evidence:corp_layered_remote_ice_staging:"),
+    )).toBe(true);
   });
 
   it("executes the currently quoted Closed Accounts payoff before background remote staging", () => {

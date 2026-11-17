@@ -69,6 +69,38 @@ describe("real preparation admission in meta 461", () => {
     ).toBe(false);
     const funded = structuredClone(input);
     funded.playerView.own.credits += 2;
+    const fundedProbe = evaluateRunnerRunTargets({ input: funded }).find(
+      (r) => r.actionId === target.actionId,
+    )!;
+    expect(fundedProbe.recommendation).toBe("run_if_free");
+    expect(
+      runnerSameTurnAccessPreparationFitsTarget(
+        funded,
+        preparation.actionId,
+        fundedProbe,
+        { candidates: preparationCandidates(funded), minimumHandBuffer: 0 },
+      ),
+    ).toBe(false);
+    // A separate control removes the four unrezzed positions. The remaining
+    // visible route must be affordable after paying for the preparation.
+    const hq = funded.playerView.servers.find((server) => server.id === "hq")!;
+    hq.ice = hq.ice.filter((ice) => ice.known && ice.rezzed);
+    funded.playerView.opponent.handCount = 1;
+    funded.playerView.publicEvents = [];
+    funded.eventTail = [{
+      eventId: "known-hq-agenda",
+      type: "access_card",
+      stateVersionBefore: funded.playerView.stateVersion - 1,
+      stateVersionAfter: funded.playerView.stateVersion,
+      stateHashAfter: "synthetic-known-hq-access",
+      publicPayload: {
+        actor: "runner",
+        actionType: "access_card",
+        serverId: "hq",
+        cardDefinitionId: "onr_v1_196_corporate-war",
+        corpHqCountAfter: 1,
+      },
+    }];
     const fundedTarget = evaluateRunnerRunTargets({ input: funded }).find(
       (r) => r.actionId === target.actionId,
     )!;

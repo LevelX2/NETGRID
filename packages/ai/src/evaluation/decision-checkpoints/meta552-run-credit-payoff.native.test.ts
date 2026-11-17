@@ -127,7 +127,7 @@ describe("current-rule companions for captured run-credit differential payoff", 
       expect(hash(f.input)).toBe(before);
     },
   );
-  it.each(["g31", "g24"])("retains actual paid-route funding in %s", (key) => {
+  it.each(["g31", "g24"])("distinguishes paid access from a paid information probe in %s", (key) => {
     const f = capture(key),
       event = candidates(f.input).find(
         (c) => c.actionId === f.observedActionId,
@@ -144,10 +144,25 @@ describe("current-rule companions for captured run-credit differential payoff", 
       f.runtime,
     );
     const d = chooseAiAction(f.input);
-    expect(d.actionId).toBe(f.observedActionId);
-    expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
-      "runner.pressure_central",
-    );
+    if (key === "g31") {
+      expect(d.actionId).toBe(f.observedActionId);
+      expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
+        "runner.pressure_central",
+      );
+    } else {
+      expect(d.actionId).toContain("newsgroup-filter");
+      expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
+        "runner.economy",
+      );
+      expect(d.decisionDebug?.actionAlternatives).toContainEqual(
+        expect.objectContaining({
+          actionId: f.observedActionId,
+          whyNot: expect.arrayContaining([
+            "runner_central_information_probe_known_path_not_admitted:hq",
+          ]),
+        }),
+      );
+    }
     expect(d.decisionDebug?.planFirstDecision?.route?.actionId).toBe(
       d.actionId,
     );

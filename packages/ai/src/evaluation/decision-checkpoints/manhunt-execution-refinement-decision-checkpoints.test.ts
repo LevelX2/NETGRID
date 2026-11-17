@@ -107,12 +107,17 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     const liveAgendaInventory = mutateFixture(cp05Json, (current) => {
       restoreCorpScoredAgendaToHq(current);
       current.expectation = {
-        acceptableActions: [{ actionId: "corp.gain_credit" }],
+        acceptableActions: [{
+          type: "install_card",
+          sourceDefinitionId: "onr_v1_196_corporate-war",
+          targetServerId: "remote_1",
+        }],
+        forbiddenActions: [{ type: "install_card", targetServerId: "hq" }],
         planExecution: {
-          acceptablePlanKinds: ["corp.economy"],
-          acceptableCapabilities: ["develop_or_convert_corp_economy"],
+          acceptablePlanKinds: ["corp.score_agenda"],
+          acceptableCapabilities: ["install_score_agenda"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_basic_liquidity_development",
+            "corp_same_turn_score_conversion_prevents_terminal_steal:install_score_target",
           ],
         },
       };
@@ -121,7 +126,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(liveAgendaInventory);
 
     expect(result.ok, diagnostic(result)).toBe(true);
-    expect(result.decision?.decisionDebug?.planKind).toBe("corp.economy");
+    expect(result.decision?.decisionDebug?.planKind).toBe("corp.score_agenda");
   });
 
   it("bids zero when the trace has no visible punish conversion", () => {

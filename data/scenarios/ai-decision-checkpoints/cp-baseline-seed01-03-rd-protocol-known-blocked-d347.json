@@ -34656,13 +34656,13 @@
         "actionId": "runner.activated_card_ability.runner_onr_v1_050_r-and-d-protocol-files_2.rd.runner_onr_v1_050_r-and-d-protocol-files_2.activated.onr_v1_050_r-and-d-protocol-files:abilities_activated_runner_main_make_run",
         "targetServerId": "rd",
         "pathPassability": "reachable",
-        "pathCost": 15,
+        "pathCost": 27,
         "recommendation": "gain_credits_first",
         "requiredEvidence": [
           "run_action_projection_access_replacement:private_look_top_rd",
-          "prerun_reserve_status:blocked",
-          "prerun_reserve_credit_gap:13",
-          "prerun_reserve_hand_buffer_gap:1"
+          "visible_ice_hazard:trace_damage",
+          "run_target_route_funding_gap:12",
+          "visible_corp_max_trace_funding_gap:7"
         ]
       }
     ]

@@ -38,14 +38,16 @@ it("SP-459 consumes the real next-encounter lock at Canis before the deeper Keep
   expect(path(input).paidSubroutineBreaks).toEqual([
     { iceInstanceId: "corp_onr_v1_258_neural-blade_3", subroutineId: "printed_subroutines_damage_net" },
   ]);
-  expect(chooseAiAction(input)).toMatchObject({
-    actionId: "runner.start_run.hq", fallbackUsed: false,
-    decisionDebug: { planFirstDecision: {
-      rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-      leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ahq",
-      route: { actionId: "runner.start_run.hq", stateVersion: 256 },
-    } },
-  });
+  const decision = chooseAiAction(input);
+  expect(decision.fallbackUsed).toBe(false);
+  expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+    expect.objectContaining({
+      actionId: "runner.start_run.hq",
+      whyNot: expect.arrayContaining([
+        "runner_central_information_probe_known_path_not_admitted:hq",
+      ]),
+    }),
+  );
 });
 
 it("prices the complete corrected path at exactly eight, and rejects seven", () => {

@@ -1,5 +1,6 @@
+import { canonicalCapabilityId, cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import { runnerCandidateSourceDefinitionId } from "./runner-action-source-facts";
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
@@ -23,8 +24,35 @@ export function runnerCandidateExecutesProgramSearch(
       candidate.actionType === "trigger_ability") &&
     (candidate.semanticActionType === "search.program_to_grip" ||
       candidate.actionTacticSignals.includes("setup.program_search") ||
-      candidate.functionalEffects?.some(isProgramSearchEffect) === true)
+      candidate.functionalEffects?.some(isProgramSearchEffect) === true ||
+      opensProgramInstallSourceChoice(input, action, candidate))
   );
+}
+
+function opensProgramInstallSourceChoice(
+  input: AiDecisionInput,
+  action: LegalAction,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  const definitionId = runnerCandidateSourceDefinitionId(input, candidate);
+  const card = definitionId
+    ? cardSpecPlanningCardByDefinitionId(definitionId)?.planning
+    : undefined;
+  const abilityId = action.abilityRef?.sourceAbilityId;
+  if (
+    card?.side !== "runner" ||
+    !abilityId ||
+    action.abilityRef?.sourceCardInstanceId !== action.source
+  )
+    return false;
+  return card.engine.abilities?.some(
+    (ability) =>
+      canonicalCapabilityId(card.cardDefinitionId, ability.capabilityKey) ===
+        abilityId &&
+      ability.effects?.some(
+        (effect) => effect.kind === "choose_stack_or_trash_program_install",
+      ),
+  ) === true;
 }
 
 function isProgramSearchEffect(
