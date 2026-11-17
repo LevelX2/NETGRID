@@ -44,7 +44,7 @@ const SCORE_NEED =
 function decide(
   source: unknown,
   knownProtectionCompanion = false,
-): { capture: ReconstructedDecisionCapture; decision: AiDecision } {
+): { capture: ReconstructedDecisionCapture; input: AiDecisionInputWithDeckCapabilities; decision: AiDecision } {
   const capture = structuredClone(source) as ReconstructedDecisionCapture;
   const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
   expect(deckSnapshotId).toBeDefined();
@@ -76,6 +76,7 @@ function decide(
   restoreAiRuntimeCheckpoint(input, deckSnapshotId!, capture.runtime);
   return {
     capture,
+    input,
     decision: chooseAiAction(input as AiDecisionInput),
   };
 }
@@ -84,6 +85,14 @@ describe("SP-082 score campaign continuity checkpoints", () => {
   it("keeps an exactly quoted current funding head bound across the opponent turn", () => {
     const first = decide(fundingCaptureJson, true);
     const second = decide(fundingCaptureJson, true);
+    const agendaId = first.input.playerView.own.gripOrHq.find(
+      (card) => card.definitionId === 63,
+    )?.instanceId;
+    if (!agendaId) throw new Error("The native companion requires its exact score agenda.");
+    const target = `agenda:${agendaId}:r1`;
+    const scoreRoot = `plan:corp.score_agenda:${encodeURIComponent(target)}`;
+    const scoreSupport = `plan:corp.economy:${encodeURIComponent(`score-support:${target}`)}`;
+    const scoreNeed = `score-support:${target}`;
 
     expect(first.capture.stateVersion).toBe(117);
     expect(first.decision).toMatchObject({
@@ -96,17 +105,17 @@ describe("SP-082 score campaign continuity checkpoints", () => {
       planFirstDecision: {
         selectedPlan: {
           moduleId: "corp.economy",
-          instanceId: SCORE_SUPPORT,
+          instanceId: scoreSupport,
         },
       },
     });
     expect(first.decision.evidence).toEqual(
       expect.arrayContaining([
-        `plan_first_root:${SCORE_ROOT}`,
-        `plan_first_executor:${SCORE_SUPPORT}`,
-        `plan_priority_delegated_from:${SCORE_ROOT}`,
-        `plan_priority_need:${SCORE_NEED}`,
-        `plan_step_id:${SCORE_SUPPORT}:fund`,
+        `plan_first_root:${scoreRoot}`,
+        `plan_first_executor:${scoreSupport}`,
+        `plan_priority_delegated_from:${scoreRoot}`,
+        `plan_priority_need:${scoreNeed}`,
+        `plan_step_id:${scoreSupport}:fund`,
       ]),
     );
     expect(
@@ -115,7 +124,7 @@ describe("SP-082 score campaign continuity checkpoints", () => {
     ).toMatchObject({
       phases: [
         {
-          rootPlanInstanceId: SCORE_ROOT,
+          rootPlanInstanceId: scoreRoot,
           nodes: [
             {
               semanticActionType: "economy.gain_credit",

@@ -35,11 +35,11 @@ describe("meta 409 zero-damage encounter purpose", () => {
           (a) => a.type === "continue_run",
         )!;
         continuation.actionId =
-          "runner.continue_run.subroutine_relative_net_damage";
+          "runner.continue_run.0";
         continuation.payload!.encounterWillEndRun = false;
         continuation.payload!.unbrokenSubroutineCount = 1;
         continuation.payload!.encounterSubroutineIds =
-          "subroutine_relative_net_damage";
+          "0";
         expected = continuation.actionId;
       }
       resetResidentPlanPortfolioMemory();

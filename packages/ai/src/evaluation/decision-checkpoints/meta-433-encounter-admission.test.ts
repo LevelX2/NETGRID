@@ -96,5 +96,5 @@ it("does not promise a paid subtype continuation when the run pool is empty", ()
   const input = fixture(subtype);
   input.playerView.run!.badPublicityCredits = 0;
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.continue_run.subroutine_end_run");
+  expect(decision.actionId).toBe("runner.continue_run.0");
 });
