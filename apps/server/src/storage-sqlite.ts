@@ -5141,6 +5141,9 @@ function gameStateForStorage(
   if (!state) return undefined;
   const {
     eventLog: _eventLog,
+    corp: _corp,
+    runner: _runner,
+    specialZones: _specialZones,
     cardInstances,
     randomDrawRecords,
     aiTurnPlanRandomDrawRecords,
@@ -5232,6 +5235,9 @@ export function decodeStoredGameState(json: string): GameState {
   const {
     cardInstances,
     cardZones,
+    corp: _corp,
+    runner: _runner,
+    specialZones: _specialZones,
     randomPurposes,
     randomDrawRecords,
     aiTurnPlanRandomDrawRecords,
