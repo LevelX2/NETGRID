@@ -2167,14 +2167,14 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
       visibility: "hidden_info_barrier",
     });
     expect(toolState.pendingChoice?.options).toContainEqual({
-      id: expect.stringMatching(/^card_hidden_/),
+      id: expect.stringMatching(/^card_h[a-z0-9]{1,7}$/),
       label: "Remote 1 Root 1",
       value: mouseTargetId,
     });
     const mouseTargetOptionId = toolState.pendingChoice?.options.find(
       (option) => option.value === mouseTargetId,
     )?.id;
-    expect(mouseTargetOptionId).toMatch(/^card_hidden_/);
+    expect(mouseTargetOptionId).toMatch(/^card_h[a-z0-9]{1,7}$/);
     expect(
       JSON.stringify(getPlayerView(toolState, "runner").pendingChoice),
     ).not.toMatch(/"value"|simple_upgrade|Simple Upgrade/);

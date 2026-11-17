@@ -704,14 +704,14 @@ describe("Originalset Spotcheck 2026-05-16 Breaker/Ice Subtype Mix hardening", (
       visibility: "hidden_info_barrier",
     });
     expect(seeya.pendingChoice?.options).toContainEqual({
-      id: expect.stringMatching(/^card_hidden_/),
+      id: expect.stringMatching(/^card_h[a-z0-9]{1,7}$/),
       label: "Remote 1 Root 1",
       value: upgradeId,
     });
     const upgradeOptionId = seeya.pendingChoice?.options.find(
       (option) => option.value === upgradeId,
     )?.id;
-    expect(upgradeOptionId).toMatch(/^card_hidden_/);
+    expect(upgradeOptionId).toMatch(/^card_h[a-z0-9]{1,7}$/);
     const runnerExposeChoice = getPlayerView(seeya, "runner").pendingChoice;
     expect(runnerExposeChoice?.options).toContainEqual({
       id: upgradeOptionId,

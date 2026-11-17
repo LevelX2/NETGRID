@@ -429,7 +429,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     const targetOptionId = state.pendingChoice?.options.find(
       (option) => option.value === targetId,
     )?.id;
-    expect(targetOptionId).toMatch(/^card_hidden_/);
+    expect(targetOptionId).toMatch(/^card_h[a-z0-9]{1,7}$/);
     state = applyChoice(state, "runner", targetOptionId ?? "");
     expect(state.pendingChoice?.source).toContain("corp.expose_prevention");
     expect(state.cardInstances[targetId]?.faceup).toBe(false);
@@ -473,7 +473,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     const useTargetOptionId = state.pendingChoice?.options.find(
       (option) => option.value === useTarget,
     )?.id;
-    expect(useTargetOptionId).toMatch(/^card_hidden_/);
+    expect(useTargetOptionId).toMatch(/^card_h[a-z0-9]{1,7}$/);
     state = applyChoice(state, "runner", useTargetOptionId ?? "");
     state = applyChoice(state, "corp", "department_department_2");
     expect(state.cardInstances["department_2" as CardInstanceId]?.rezzed).toBe(

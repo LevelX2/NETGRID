@@ -27,6 +27,7 @@ import {
 } from "../payment";
 import { rezCard as executeRezCard } from "../rez/rez-card";
 import { buildLegalAction } from "../turn/action-builders";
+import { hiddenCardReference } from "../state/card-instance-id";
 
 export function createCorpZoneRuntimeHosts(
   deps: RuntimeDeps,
@@ -291,19 +292,10 @@ export function createCorpZoneRuntimeHosts(
       : `${context.server.label} Root ${context.index + 1}`;
   }
 
-  function hiddenInstalledCorpCardChoiceSlotId(cardId: CardInstanceId): string {
-    let hash = 0x811c9dc5;
-    for (let index = 0; index < cardId.length; index += 1) {
-      hash ^= cardId.charCodeAt(index);
-      hash = Math.imul(hash, 0x01000193);
-    }
-    return `hidden_${(hash >>> 0).toString(16).padStart(8, "0")}`;
-  }
-
   function exposeInstalledCorpCardChoiceOptionId(
     cardId: CardInstanceId,
   ): string {
-    return `card_${hiddenInstalledCorpCardChoiceSlotId(cardId)}`;
+    return `card_${hiddenCardReference(cardId, "h")}`;
   }
 
   function startExposeInstalledCorpCardReviewChoice(
