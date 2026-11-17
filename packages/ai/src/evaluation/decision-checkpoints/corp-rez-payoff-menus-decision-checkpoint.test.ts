@@ -7,7 +7,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("Corp rez payoff decision checkpoint", () => {
   it("rezzes Menus for certified qualitative encounter defense", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(checkpointJson) as AiDecisionCheckpointV1,
+      structuredClone(checkpointJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);

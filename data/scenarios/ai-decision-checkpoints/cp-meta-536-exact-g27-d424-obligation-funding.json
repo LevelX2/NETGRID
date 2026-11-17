@@ -1269,7 +1269,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -1309,7 +1309,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 464,
                     "sourceTitle": "Keeper"
@@ -1351,7 +1351,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                    "id": "0",
                     "type": "set_next_encounter_lock",
                     "breakTags": [
                       "stun"
@@ -1405,7 +1405,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 456,
                       "sourceTitle": "Filter"
@@ -1469,7 +1469,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+                      "id": "0",
                       "type": "rewind_run_to_rezzed_ice_by_die",
                       "sourceDefinitionId": 487,
                       "sourceTitle": "Vacuum Link"
@@ -1532,7 +1532,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 456,
                       "sourceTitle": "Filter"
@@ -1594,7 +1594,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -1642,7 +1642,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 449,
                       "sourceTitle": "Data Wall"
@@ -1697,7 +1697,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -1737,7 +1737,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -1777,7 +1777,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -2094,7 +2094,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 444,
                     "sourceTitle": "Crystal Wall"
@@ -2136,7 +2136,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                    "id": "0",
                     "type": "set_next_encounter_lock",
                     "breakTags": [
                       "stun"
@@ -2191,7 +2191,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+                      "id": "0",
                       "type": "rewind_run_to_rezzed_ice_by_die",
                       "sourceDefinitionId": 487,
                       "sourceTitle": "Vacuum Link"
@@ -2261,7 +2261,7 @@
                   "encounterStrength": 3,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 444,
                       "sourceTitle": "Crystal Wall"
@@ -2326,7 +2326,7 @@
                   "encounterStrength": 3,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                      "id": "0",
                       "type": "set_next_encounter_lock",
                       "breakTags": [
                         "stun"
@@ -2402,7 +2402,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 457,
                       "sourceTitle": "Fire Wall"
@@ -2465,7 +2465,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 449,
                       "sourceTitle": "Data Wall"
@@ -17589,7 +17589,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 423,
-      "sideSafePlanningFingerprint": "fnv1a:655598e2"
+      "sideSafePlanningFingerprint": "fnv1a:4d708a0b"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_tycho_ice_stack_1.1.0",

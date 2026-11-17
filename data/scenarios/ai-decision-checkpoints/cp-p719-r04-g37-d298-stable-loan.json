@@ -547,7 +547,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -578,7 +578,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -609,7 +609,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -640,7 +640,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -684,7 +684,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -721,7 +721,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 464,
                     "sourceTitle": "Keeper"
@@ -915,7 +915,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -946,7 +946,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 464,
                     "sourceTitle": "Keeper"
@@ -11077,7 +11077,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 297,
-      "sideSafePlanningFingerprint": "fnv1a:a487f6e5"
+      "sideSafePlanningFingerprint": "fnv1a:6ca084e5"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.1.0",

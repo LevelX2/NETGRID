@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "corp",
   "stateVersion": 400,
-  "stateHash": "fnv1a:64575c73",
+  "stateHash": "fnv1a:3ed54bf6",
   "input": {
     "matchId": "match_6532a19c6d465afc",
     "side": "corp",
@@ -1022,7 +1022,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -1096,7 +1096,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 473,
                       "sourceTitle": "Quandary"
@@ -1154,7 +1154,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 6,
                     "traceSuccessEffect": {
@@ -1577,7 +1577,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -1588,7 +1588,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_net_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -1599,13 +1599,13 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
@@ -1645,7 +1645,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                    "id": "0",
                     "type": "set_run_encounter_tax",
                     "amount": 2,
                     "sourceDefinitionId": 434,
@@ -1689,7 +1689,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -1700,7 +1700,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_net_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -1711,13 +1711,13 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
@@ -1757,7 +1757,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                    "id": "0",
                     "type": "set_run_encounter_tax",
                     "amount": 2,
                     "sourceDefinitionId": 434,
@@ -15443,7 +15443,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 400,
-      "sideSafePlanningFingerprint": "fnv1a:adc373d6"
+      "sideSafePlanningFingerprint": "fnv1a:23a0bbc2"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_siren_fortress_1.1.0",

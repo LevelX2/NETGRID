@@ -104,7 +104,7 @@ it("keeps the exact native Jack continuation and the genuine run-duration lock",
   expect(d.fallbackUsed).toBe(false);
   expect(d.timeoutUsed).not.toBe(true);
   expect(d.actionId).toBe(
-    "runner.continue_run.printed_subroutines_run_duration_cannot_jack_out,printed_subroutines_trace",
+    "runner.continue_run.0,1",
   );
   expect(d.decisionDebug!.planFirstDecision!.selectedStep?.planInstanceId).toBe(
     "rules.window_resolution",

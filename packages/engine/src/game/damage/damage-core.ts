@@ -78,13 +78,14 @@ export function resolveDamageOperation(
   legalAction: LegalAction,
   damageType: DamageType,
   amount: number,
-  source: string | CardDefinitionId,
+  source: CardDefinitionId,
 ): boolean {
-  const request = {
+  const request: Parameters<typeof createDamageImminentEvent>[1] = {
     damageId: damageResolutionId(state, source),
     damageType,
     amount,
     source: `operation:${source}`,
+    randomSource: ["c", source],
   };
   const event = createDamageImminentEvent(state, request);
   if (openDamageResolutionWindow(state, event, legalAction)) return true;

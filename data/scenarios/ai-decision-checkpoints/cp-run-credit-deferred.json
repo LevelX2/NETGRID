@@ -658,7 +658,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -701,7 +701,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -737,7 +737,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -918,7 +918,7 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -953,7 +953,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -983,7 +983,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -11410,7 +11410,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 300,
-      "sideSafePlanningFingerprint": "fnv1a:03469ba2"
+      "sideSafePlanningFingerprint": "fnv1a:8576453c"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0:simulation",

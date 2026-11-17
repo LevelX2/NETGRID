@@ -50,7 +50,7 @@ it("retains the direct central run root across both real Pocket traces and Chiba
       selectedAtStateVersion: d === 124 ? 123 : 125,
       originalActionId:
         d === 124
-          ? "runner.continue_run.printed_subroutines_trace_a"
+          ? "runner.continue_run.1"
           : "runner.resolve_choice",
     });
     if (d === 126)
@@ -205,10 +205,10 @@ it("executes the full second-trace, Chiba and exact original bid sequence twice 
       state = r.state;
       expect(validateGameState(state).ok).toBe(true);
     }
-    expect(actions[0]).toBe("runner.continue_run.printed_subroutines_trace_a");
+    expect(actions[0]).toBe("runner.continue_run.1");
     expect(actions[4]).toBe("runner.resolve_choice");
     expect(state.runner.credits).toBe(0);
     hashes.push(hashGameState(state));
   }
-  expect(hashes).toEqual(["fnv1a:9495773f", "fnv1a:9495773f"]);
+  expect(hashes).toEqual(["fnv1a:3fb11493", "fnv1a:3fb11493"]);
 });

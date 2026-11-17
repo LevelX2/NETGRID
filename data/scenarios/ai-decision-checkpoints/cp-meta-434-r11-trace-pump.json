@@ -633,7 +633,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -663,7 +663,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -697,7 +697,7 @@
                 "effectiveStrength": 8,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 6,
                     "traceSuccessEffect": {
@@ -732,7 +732,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -854,7 +854,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -884,7 +884,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -1194,7 +1194,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -1228,7 +1228,7 @@
                 "effectiveStrength": 8,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 6,
                     "traceSuccessEffect": {
@@ -1286,7 +1286,7 @@
             "effectiveStrength": 8,
             "subroutines": [
               {
-                "id": "printed_subroutines_trace",
+                "id": "0",
                 "type": "initiate_trace",
                 "traceLimit": 6,
                 "traceSuccessEffect": {
@@ -10034,7 +10034,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_trace",
+          "actionId": "runner.continue_run.0",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen",
@@ -10047,7 +10047,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "printed_subroutines_trace",
+            "encounterSubroutineIds": "0",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": false,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -12146,7 +12146,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_trace",
+        "actionId": "runner.continue_run.0",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen",
@@ -12159,7 +12159,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "printed_subroutines_trace",
+          "encounterSubroutineIds": "0",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": false,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -12210,7 +12210,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 334,
-      "sideSafePlanningFingerprint": "fnv1a:d6b35200"
+      "sideSafePlanningFingerprint": "fnv1a:5b1e6114"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

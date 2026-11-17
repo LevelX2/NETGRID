@@ -89,10 +89,10 @@ it("prices both same-encounter breaks once before the inner wall", () => {
   expect(quote.paidSubroutineBreaks).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
-        subroutineId: "printed_subroutines_damage_net",
+        subroutineId: "0",
       }),
       expect.objectContaining({
-        subroutineId: "printed_subroutines_prohibit_break_next_ice",
+        subroutineId: "1",
       }),
     ]),
   );

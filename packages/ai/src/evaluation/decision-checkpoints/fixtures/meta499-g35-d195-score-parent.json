@@ -778,7 +778,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -818,7 +818,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -858,7 +858,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -8736,7 +8736,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 194,
-      "sideSafePlanningFingerprint": "fnv1a:3803297f"
+      "sideSafePlanningFingerprint": "fnv1a:a2154125"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_universal_fast_advance_1.1.0",

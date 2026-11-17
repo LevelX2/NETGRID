@@ -149,7 +149,7 @@ it.each([2, 3])(
     )!;
     Object.assign(continuation.payload!, {
       encounterSubroutineIds:
-        "printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+        "2,3",
       unbrokenSubroutineCount: 2,
     });
     continuation.actionId = `runner.continue_run.${continuation.payload!.encounterSubroutineIds}`;
@@ -194,14 +194,10 @@ it("keeps the remaining end-the-run barrier after damage subroutines are broken"
   const encounterQuote =
     input.playerView.run?.encounteredIce?.effectiveRunQuote;
   expect(encounterQuote).toBeDefined();
-  Object.assign(encounterQuote!, {
-    subroutines: encounterQuote!.subroutines.filter(
-      (subroutine) => subroutine.type !== "do_damage",
-    ),
-  });
+  // Resolved damage retains its positions in the full Engine quote.
   Object.assign(continuation.payload!, {
     encounterSubroutineIds:
-      "printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+      "2,3",
     unbrokenSubroutineCount: 2,
   });
   resetResidentPlanPortfolioMemory();

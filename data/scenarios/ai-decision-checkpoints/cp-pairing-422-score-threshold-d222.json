@@ -836,7 +836,7 @@
                   "effectiveStrength": 6,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_damage_brain",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "core",
@@ -847,7 +847,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_damage_brain_a",
+                      "id": "1",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "core",
@@ -858,7 +858,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_damage_brain_b",
+                      "id": "2",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "core",
@@ -869,7 +869,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "3",
                       "type": "end_the_run",
                       "sourceDefinitionId": 466,
                       "sourceTitle": "Liche"
@@ -931,7 +931,7 @@
                   "effectiveStrength": 6,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_damage_net",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 2,
                       "damageType": "net",
@@ -942,7 +942,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_damage_net_a",
+                      "id": "1",
                       "type": "do_damage",
                       "amount": 2,
                       "damageType": "net",
@@ -953,13 +953,13 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "2",
                       "type": "end_the_run",
                       "sourceDefinitionId": 490,
                       "sourceTitle": "Wall of Ice"
                     },
                     {
-                      "id": "printed_subroutines_end_the_run_a",
+                      "id": "3",
                       "type": "end_the_run",
                       "sourceDefinitionId": 490,
                       "sourceTitle": "Wall of Ice"
@@ -1013,7 +1013,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -1060,7 +1060,7 @@
                   "effectiveStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 449,
                       "sourceTitle": "Data Wall"
@@ -1121,7 +1121,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -1333,7 +1333,7 @@
                 "effectiveStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions",
+                    "id": "0",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -1343,7 +1343,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
@@ -1384,7 +1384,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                    "id": "0",
                     "type": "set_next_encounter_lock",
                     "breakTags": [
                       "stun"
@@ -1489,7 +1489,7 @@
                   "effectiveStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 491,
                       "sourceTitle": "Wall of Static"
@@ -4048,7 +4048,7 @@
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 89,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2rx.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2rx.0.0.48",
             "targets": {
               "targetIceDefinitionId": 449
             },
@@ -4947,7 +4947,7 @@
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 121,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2rx.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2rx.0.0.48",
             "targets": {
               "targetIceDefinitionId": 449
             },
@@ -7951,7 +7951,7 @@
             "postInstallRezQuoteCardId": "c2ta",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r3",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7988,7 +7988,7 @@
             "postInstallRezQuoteCardId": "c2ta",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8025,7 +8025,7 @@
             "postInstallRezQuoteCardId": "c2ta",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8061,7 +8061,7 @@
             "postInstallRezQuoteCardId": "c2ta",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8098,7 +8098,7 @@
             "postInstallRezQuoteCardId": "c2ta",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8135,7 +8135,7 @@
             "postInstallRezQuoteCardId": "c2ta",
             "postInstallRezQuoteTargetServerId": "r2",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8167,7 +8167,7 @@
             "postInstallRezQuoteCardId": "c2om",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r3",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8204,7 +8204,7 @@
             "postInstallRezQuoteCardId": "c2om",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8241,7 +8241,7 @@
             "postInstallRezQuoteCardId": "c2om",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8277,7 +8277,7 @@
             "postInstallRezQuoteCardId": "c2om",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8314,7 +8314,7 @@
             "postInstallRezQuoteCardId": "c2om",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8351,7 +8351,7 @@
             "postInstallRezQuoteCardId": "c2om",
             "postInstallRezQuoteTargetServerId": "r2",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8383,7 +8383,7 @@
             "postInstallRezQuoteCardId": "c2ol",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r3",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8420,7 +8420,7 @@
             "postInstallRezQuoteCardId": "c2ol",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8457,7 +8457,7 @@
             "postInstallRezQuoteCardId": "c2ol",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8493,7 +8493,7 @@
             "postInstallRezQuoteCardId": "c2ol",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8530,7 +8530,7 @@
             "postInstallRezQuoteCardId": "c2ol",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8567,7 +8567,7 @@
             "postInstallRezQuoteCardId": "c2ol",
             "postInstallRezQuoteTargetServerId": "r2",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 221,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11015,7 +11015,7 @@
           "postInstallRezQuoteCardId": "c2ta",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r3",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11052,7 +11052,7 @@
           "postInstallRezQuoteCardId": "c2ta",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11089,7 +11089,7 @@
           "postInstallRezQuoteCardId": "c2ta",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11125,7 +11125,7 @@
           "postInstallRezQuoteCardId": "c2ta",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11162,7 +11162,7 @@
           "postInstallRezQuoteCardId": "c2ta",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11199,7 +11199,7 @@
           "postInstallRezQuoteCardId": "c2ta",
           "postInstallRezQuoteTargetServerId": "r2",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ta\",\"iceDefinitionId\":455,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":3,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":455,\"sourceTitle\":\"Fetch 4.0.1\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11231,7 +11231,7 @@
           "postInstallRezQuoteCardId": "c2om",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r3",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11268,7 +11268,7 @@
           "postInstallRezQuoteCardId": "c2om",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11305,7 +11305,7 @@
           "postInstallRezQuoteCardId": "c2om",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11341,7 +11341,7 @@
           "postInstallRezQuoteCardId": "c2om",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11378,7 +11378,7 @@
           "postInstallRezQuoteCardId": "c2om",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11415,7 +11415,7 @@
           "postInstallRezQuoteCardId": "c2om",
           "postInstallRezQuoteTargetServerId": "r2",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2om\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11447,7 +11447,7 @@
           "postInstallRezQuoteCardId": "c2ol",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r3",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11484,7 +11484,7 @@
           "postInstallRezQuoteCardId": "c2ol",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11521,7 +11521,7 @@
           "postInstallRezQuoteCardId": "c2ol",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11557,7 +11557,7 @@
           "postInstallRezQuoteCardId": "c2ol",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11594,7 +11594,7 @@
           "postInstallRezQuoteCardId": "c2ol",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11631,7 +11631,7 @@
           "postInstallRezQuoteCardId": "c2ol",
           "postInstallRezQuoteTargetServerId": "r2",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 221,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11717,7 +11717,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 221,
-      "sideSafePlanningFingerprint": "fnv1a:d0cb64ae"
+      "sideSafePlanningFingerprint": "fnv1a:03fd5e3d"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_rent_to_own_war_engine_1.1.0",

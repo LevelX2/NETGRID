@@ -632,7 +632,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -688,7 +688,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -720,7 +720,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 2,
                     "sourceDefinitionId": 437,
@@ -755,7 +755,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 482,
                     "sourceTitle": "Sleeper"
@@ -956,7 +956,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -987,7 +987,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 478,
                     "sourceTitle": "Scramble"
@@ -2863,7 +2863,7 @@
             "targetIceDefinitionId": 491,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 60,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c319.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c319.0.0.48",
             "targets": {
               "targetIceDefinitionId": 491
             },
@@ -3865,7 +3865,7 @@
             "targetIceDefinitionId": 482,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 96,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2z9.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2z9.0.0.48",
             "targets": {
               "targetIceDefinitionId": 482
             },
@@ -4139,7 +4139,7 @@
             "targetIceDefinitionId": 491,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 107,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c319.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c319.0.0.48",
             "targets": {
               "targetIceDefinitionId": 491
             },
@@ -4933,7 +4933,7 @@
             "targetIceDefinitionId": 482,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 135,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2z9.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2z9.0.0.48",
             "targets": {
               "targetIceDefinitionId": 482
             },
@@ -11527,7 +11527,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 253,
-      "sideSafePlanningFingerprint": "fnv1a:e63bd926"
+      "sideSafePlanningFingerprint": "fnv1a:295af8f1"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",

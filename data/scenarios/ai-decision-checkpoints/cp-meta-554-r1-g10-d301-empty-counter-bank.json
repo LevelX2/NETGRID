@@ -913,7 +913,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -961,7 +961,7 @@
                   "encounterStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 450,
                       "sourceTitle": "Data Wall 2.0"
@@ -1024,7 +1024,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 473,
                       "sourceTitle": "Quandary"
@@ -1086,7 +1086,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -1126,7 +1126,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -1168,7 +1168,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -1179,7 +1179,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 470,
                     "sourceTitle": "Neural Blade",
@@ -1490,7 +1490,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -1530,7 +1530,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -1578,7 +1578,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 449,
                       "sourceTitle": "Data Wall"
@@ -1641,7 +1641,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 464,
                       "sourceTitle": "Keeper"
@@ -13139,7 +13139,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 300,
-      "sideSafePlanningFingerprint": "fnv1a:bca46da2"
+      "sideSafePlanningFingerprint": "fnv1a:1a59489f"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_neon_escrow_1.1.0",

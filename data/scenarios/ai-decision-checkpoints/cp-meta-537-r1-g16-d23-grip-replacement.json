@@ -259,7 +259,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -1815,7 +1815,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 22,
-      "sideSafePlanningFingerprint": "fnv1a:b3fc4f39"
+      "sideSafePlanningFingerprint": "fnv1a:ff5487eb"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",

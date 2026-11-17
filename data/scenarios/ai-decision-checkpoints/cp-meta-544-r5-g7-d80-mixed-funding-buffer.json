@@ -363,7 +363,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_brain",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -374,7 +374,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 443,
                     "sourceTitle": "Cortical Scrub"
@@ -5333,7 +5333,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 79,
-      "sideSafePlanningFingerprint": "fnv1a:99bd475a"
+      "sideSafePlanningFingerprint": "fnv1a:2bc420e4"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_cybernetics_risk_rig_2026_07_01_1.0.0",

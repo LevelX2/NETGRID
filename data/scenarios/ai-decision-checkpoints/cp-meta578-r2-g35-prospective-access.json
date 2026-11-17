@@ -304,7 +304,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 3,
                     "damageType": "net",
@@ -315,7 +315,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 446,
                     "sourceTitle": "Data Darts",
@@ -2535,7 +2535,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 34,
-      "sideSafePlanningFingerprint": "fnv1a:b31ae715"
+      "sideSafePlanningFingerprint": "fnv1a:2f23a792"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_purge_window_1.0.0",

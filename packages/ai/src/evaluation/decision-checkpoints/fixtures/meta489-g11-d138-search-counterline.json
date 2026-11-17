@@ -630,7 +630,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -675,7 +675,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -820,7 +820,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 97,
                     "sourceTitle": "Sphinx 2006"
@@ -887,7 +887,7 @@
             "encounterStrength": 5,
             "subroutines": [
               {
-                "id": "subroutine_end_run",
+                "id": "0",
                 "type": "end_the_run",
                 "sourceDefinitionId": 97,
                 "sourceTitle": "Sphinx 2006"
@@ -9753,7 +9753,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 138,
-      "sideSafePlanningFingerprint": "fnv1a:3a8f669e"
+      "sideSafePlanningFingerprint": "fnv1a:5f4569b4"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_ghost_circuit_2.0.0",

@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "runner",
   "stateVersion": 304,
-  "stateHash": "fnv1a:ad62ae02",
+  "stateHash": "fnv1a:bc046aeb",
   "input": {
     "matchId": "match_e82e4c40897fcc59",
     "side": "runner",
@@ -818,7 +818,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 482,
                     "sourceTitle": "Sleeper"
@@ -891,7 +891,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 485,
                     "sourceTitle": "Triggerman",
@@ -900,7 +900,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 485,
                     "sourceTitle": "Triggerman"
@@ -1315,7 +1315,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -1326,7 +1326,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_net_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -1337,13 +1337,13 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
@@ -1413,7 +1413,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                    "id": "0",
                     "type": "set_next_encounter_lock",
                     "breakTags": [
                       "stun"
@@ -1657,7 +1657,7 @@
             "encounterStrength": 3,
             "subroutines": [
               {
-                "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                "id": "0",
                 "type": "set_next_encounter_lock",
                 "breakTags": [
                   "stun"
@@ -10129,7 +10129,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+          "actionId": "runner.continue_run.0",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen",
@@ -10142,7 +10142,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+            "encounterSubroutineIds": "0",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": false,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -12822,7 +12822,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+        "actionId": "runner.continue_run.0",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen",
@@ -12835,7 +12835,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+          "encounterSubroutineIds": "0",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": false,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -13198,7 +13198,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 304,
-      "sideSafePlanningFingerprint": "fnv1a:41a5c2ff"
+      "sideSafePlanningFingerprint": "fnv1a:8e04589f"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",
@@ -21136,7 +21136,7 @@
           "sideSafePlanningFingerprint": "fnv1a:e927f52b"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+          "actionId": "runner.continue_run.0",
           "stateVersion": 304,
           "semanticActionSetFingerprint": "fnv1a:71f1ac1d",
           "invocationKey": "fnv1a:16ed1dc7"
@@ -21150,7 +21150,7 @@
         "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar2",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A303",
         "sourceStepId": "plan:runner.convert_run_window:run%3A303:convert",
-        "originalActionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+        "originalActionId": "runner.continue_run.0",
         "selectedAtStateVersion": 304
       }
     }

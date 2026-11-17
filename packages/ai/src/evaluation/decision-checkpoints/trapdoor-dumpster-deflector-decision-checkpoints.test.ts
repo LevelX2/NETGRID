@@ -41,7 +41,7 @@ describe("Trapdoor and Dumpster exact decision checkpoints", () => {
   it("does not spend Disgruntled Ice Technician on empty Archives when historical central cadence is uncertified", () => {
     const archivesOnlyControl = structuredClone(
       avoidUnaffordableRunJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     archivesOnlyControl.expectation = {
       forbiddenActions: [
         {
@@ -59,7 +59,7 @@ describe("Trapdoor and Dumpster exact decision checkpoints", () => {
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
   return bindHistoricalRunEventCadence(
-    structuredClone(value) as AiDecisionCheckpointV1,
+    structuredClone(value) as unknown as AiDecisionCheckpointV1,
     ["cp-trapdoor-dumpster-deflector-02-no-run"],
   );
 }

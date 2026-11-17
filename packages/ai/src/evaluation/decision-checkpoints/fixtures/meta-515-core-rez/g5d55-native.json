@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "corp",
   "stateVersion": 54,
-  "stateHash": "fnv1a:5bc9cb53",
+  "stateHash": "fnv1a:24809dbc",
   "input": {
     "matchId": "match_adc76b1b2748588c",
     "side": "corp",

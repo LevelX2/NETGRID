@@ -1345,6 +1345,7 @@ export function createScoredEconomyRuntimeHosts(
             damageType: "meat",
             amount,
             source: `scored_agenda:${definition.id}`,
+            randomSource: ["c", definition.id, sourceCardId],
           });
           if (openDamageResolutionWindow(state, event, legalAction)) {
             return {

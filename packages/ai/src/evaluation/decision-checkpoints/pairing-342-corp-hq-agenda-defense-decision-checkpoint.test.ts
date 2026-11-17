@@ -7,7 +7,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("pairing 342 Corp HQ agenda-defense checkpoint", () => {
   it("keeps the global HQ allocation ahead of the locally acute R&D layer", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(checkpointJson) as AiDecisionCheckpointV1,
+      structuredClone(checkpointJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, result.message).toBe(true);

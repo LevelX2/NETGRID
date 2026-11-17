@@ -843,7 +843,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -883,7 +883,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -923,7 +923,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -970,7 +970,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -1012,7 +1012,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -1023,7 +1023,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 470,
                     "sourceTitle": "Neural Blade",
@@ -1298,7 +1298,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -1346,7 +1346,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 473,
                       "sourceTitle": "Quandary"
@@ -1409,7 +1409,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 449,
                       "sourceTitle": "Data Wall"
@@ -1530,7 +1530,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 456,
                       "sourceTitle": "Filter"
@@ -9952,7 +9952,7 @@
             "postInstallRezQuoteCardId": "c2ry",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r5",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 274,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -9989,7 +9989,7 @@
             "postInstallRezQuoteCardId": "c2ry",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 274,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -10026,7 +10026,7 @@
             "postInstallRezQuoteCardId": "c2ry",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 274,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -10062,7 +10062,7 @@
             "postInstallRezQuoteCardId": "c2ry",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 274,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -10099,7 +10099,7 @@
             "postInstallRezQuoteCardId": "c2ry",
             "postInstallRezQuoteTargetServerId": "r2",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 274,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -10136,7 +10136,7 @@
             "postInstallRezQuoteCardId": "c2ry",
             "postInstallRezQuoteTargetServerId": "r3",
             "postInstallRezQuoteProjectedServerId": "r3",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 274,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -10172,7 +10172,7 @@
             "postInstallRezQuoteCardId": "c2ry",
             "postInstallRezQuoteTargetServerId": "r4",
             "postInstallRezQuoteProjectedServerId": "r4",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 274,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -13043,7 +13043,7 @@
           "postInstallRezQuoteCardId": "c2ry",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r5",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 274,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13080,7 +13080,7 @@
           "postInstallRezQuoteCardId": "c2ry",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 274,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13117,7 +13117,7 @@
           "postInstallRezQuoteCardId": "c2ry",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 274,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13153,7 +13153,7 @@
           "postInstallRezQuoteCardId": "c2ry",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 274,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13190,7 +13190,7 @@
           "postInstallRezQuoteCardId": "c2ry",
           "postInstallRezQuoteTargetServerId": "r2",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 274,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13227,7 +13227,7 @@
           "postInstallRezQuoteCardId": "c2ry",
           "postInstallRezQuoteTargetServerId": "r3",
           "postInstallRezQuoteProjectedServerId": "r3",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 274,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13263,7 +13263,7 @@
           "postInstallRezQuoteCardId": "c2ry",
           "postInstallRezQuoteTargetServerId": "r4",
           "postInstallRezQuoteProjectedServerId": "r4",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 274,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13411,7 +13411,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 274,
-      "sideSafePlanningFingerprint": "fnv1a:be852c60"
+      "sideSafePlanningFingerprint": "fnv1a:28130fa5"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_neon_escrow_1.1.0",

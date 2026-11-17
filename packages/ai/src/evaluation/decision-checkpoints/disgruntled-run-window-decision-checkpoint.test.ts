@@ -11,7 +11,7 @@ describe("Disgruntled Ice Technician run-window checkpoint", () => {
   it("binds the persisted Rent-I-Con continuation to its canonical CardSpec capability", () => {
     const checkpoint = structuredClone(
       checkpointJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     const portfolio = checkpoint.runtime.residentPlanPortfolio;
     if (!portfolio)
       throw new Error("Expected persisted resident plan portfolio");
@@ -48,7 +48,7 @@ describe("Disgruntled Ice Technician run-window checkpoint", () => {
       expectationId: "fnv1a:43abb6cc",
       currentBinding: {
         actionId:
-          "runner.break_subroutine.c7t.c7t.c7t.c2rx.0.printed_subroutines_end_the_run.48",
+          "runner.break_subroutine.c7t.c7t.c7t.c2rx.0.0.48",
         stateVersion: 275,
         semanticActionSetFingerprint: "fnv1a:5911b86e",
         invocationKey: "fnv1a:95cb89ce",
@@ -58,7 +58,7 @@ describe("Disgruntled Ice Technician run-window checkpoint", () => {
 
   it("keeps the real post-pass ability inside runner.convert_run_window", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(checkpointJson) as AiDecisionCheckpointV1,
+      structuredClone(checkpointJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);

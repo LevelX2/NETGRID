@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "corp",
   "stateVersion": 342,
-  "stateHash": "fnv1a:479c87a2",
+  "stateHash": "fnv1a:5c377a12",
   "input": {
     "matchId": "match_04fc0446c3b75ba0",
     "side": "corp",
@@ -695,7 +695,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -735,7 +735,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -786,7 +786,7 @@
                   "encounterStrength": 6,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_trace",
+                      "id": "0",
                       "type": "initiate_trace",
                       "traceLimit": 6,
                       "traceSuccessEffect": {
@@ -854,7 +854,7 @@
                   "encounterStrength": 6,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_runner_run_lock_actions",
+                      "id": "0",
                       "type": "set_runner_run_lock_actions",
                       "amount": 6,
                       "sourceDefinitionId": 459,
@@ -864,7 +864,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 459,
                       "sourceTitle": "Haunting Inquisition"
@@ -929,7 +929,7 @@
                   "encounterStrength": 3,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                      "id": "0",
                       "type": "set_next_encounter_lock",
                       "breakTags": [
                         "stun"
@@ -1110,7 +1110,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -1152,7 +1152,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                    "id": "0",
                     "type": "set_next_encounter_lock",
                     "breakTags": [
                       "stun"
@@ -1206,7 +1206,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 491,
                       "sourceTitle": "Wall of Static"
@@ -1509,7 +1509,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                      "id": "0",
                       "type": "set_run_encounter_tax",
                       "amount": 2,
                       "sourceDefinitionId": 434,
@@ -1576,7 +1576,7 @@
                   "encounterStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 450,
                       "sourceTitle": "Data Wall 2.0"
@@ -1642,7 +1642,7 @@
                   "encounterStrength": 6,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_trace",
+                      "id": "0",
                       "type": "initiate_trace",
                       "traceLimit": 6,
                       "traceSuccessEffect": {
@@ -1710,7 +1710,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 473,
                       "sourceTitle": "Quandary"
@@ -10882,7 +10882,7 @@
             "postInstallRezQuoteCardId": "c2wm",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -10919,7 +10919,7 @@
             "postInstallRezQuoteCardId": "c2wm",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -10956,7 +10956,7 @@
             "postInstallRezQuoteCardId": "c2wm",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -10992,7 +10992,7 @@
             "postInstallRezQuoteCardId": "c2wm",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11029,7 +11029,7 @@
             "postInstallRezQuoteCardId": "c2wm",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11061,7 +11061,7 @@
             "postInstallRezQuoteCardId": "c2u6",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11098,7 +11098,7 @@
             "postInstallRezQuoteCardId": "c2u6",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11135,7 +11135,7 @@
             "postInstallRezQuoteCardId": "c2u6",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11171,7 +11171,7 @@
             "postInstallRezQuoteCardId": "c2u6",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11208,7 +11208,7 @@
             "postInstallRezQuoteCardId": "c2u6",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11240,7 +11240,7 @@
             "postInstallRezQuoteCardId": "c2s6",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11277,7 +11277,7 @@
             "postInstallRezQuoteCardId": "c2s6",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11314,7 +11314,7 @@
             "postInstallRezQuoteCardId": "c2s6",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11350,7 +11350,7 @@
             "postInstallRezQuoteCardId": "c2s6",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11387,7 +11387,7 @@
             "postInstallRezQuoteCardId": "c2s6",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 342,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -13759,7 +13759,7 @@
           "postInstallRezQuoteCardId": "c2wm",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13796,7 +13796,7 @@
           "postInstallRezQuoteCardId": "c2wm",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13833,7 +13833,7 @@
           "postInstallRezQuoteCardId": "c2wm",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13869,7 +13869,7 @@
           "postInstallRezQuoteCardId": "c2wm",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13906,7 +13906,7 @@
           "postInstallRezQuoteCardId": "c2wm",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2wm\",\"iceDefinitionId\":470,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":470,\"sourceTitle\":\"Neural Blade\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13938,7 +13938,7 @@
           "postInstallRezQuoteCardId": "c2u6",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13975,7 +13975,7 @@
           "postInstallRezQuoteCardId": "c2u6",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -14012,7 +14012,7 @@
           "postInstallRezQuoteCardId": "c2u6",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -14048,7 +14048,7 @@
           "postInstallRezQuoteCardId": "c2u6",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -14085,7 +14085,7 @@
           "postInstallRezQuoteCardId": "c2u6",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u6\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -14117,7 +14117,7 @@
           "postInstallRezQuoteCardId": "c2s6",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -14154,7 +14154,7 @@
           "postInstallRezQuoteCardId": "c2s6",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -14191,7 +14191,7 @@
           "postInstallRezQuoteCardId": "c2s6",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -14227,7 +14227,7 @@
           "postInstallRezQuoteCardId": "c2s6",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -14264,7 +14264,7 @@
           "postInstallRezQuoteCardId": "c2s6",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 342,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -14394,7 +14394,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 342,
-      "sideSafePlanningFingerprint": "fnv1a:abc3a7aa"
+      "sideSafePlanningFingerprint": "fnv1a:35b490b0"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_siren_fortress_1.1.0",

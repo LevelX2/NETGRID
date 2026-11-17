@@ -739,6 +739,7 @@ export function createStateRuntimeResolvers(
       damageType: "meat",
       amount: continuation.damageAmount,
       source: `trace_success:${continuation.sourceDefinitionId}`,
+      randomSource: ["c", continuation.sourceDefinitionId, continuation.sourceCardInstanceId],
     });
     event.payload = { ...event.payload, cannotBePrevented: true };
     if (openDamageResolutionWindow(state, event, legalAction)) return;
@@ -893,6 +894,7 @@ export function createStateRuntimeResolvers(
             damageType: command.damageType,
             amount: command.amount,
             source: command.source ?? "effect_command",
+            randomSource: command.randomSource,
           });
           break;
         case "remove_tag":

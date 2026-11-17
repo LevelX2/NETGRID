@@ -832,7 +832,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 444,
                     "sourceTitle": "Crystal Wall"
@@ -872,7 +872,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 464,
                     "sourceTitle": "Keeper"
@@ -912,7 +912,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -954,7 +954,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -965,7 +965,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 470,
                     "sourceTitle": "Neural Blade",
@@ -1017,7 +1017,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -1028,7 +1028,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 470,
                     "sourceTitle": "Neural Blade",
@@ -1071,7 +1071,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 444,
                     "sourceTitle": "Crystal Wall"
@@ -1120,7 +1120,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+                      "id": "0",
                       "type": "rewind_run_to_rezzed_ice_by_die",
                       "sourceDefinitionId": 487,
                       "sourceTitle": "Vacuum Link"
@@ -1184,7 +1184,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_run_duration_ice_strength",
+                      "id": "0",
                       "type": "set_run_future_strength_bonus",
                       "amount": 1,
                       "sourceDefinitionId": 438,
@@ -1521,7 +1521,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 464,
                     "sourceTitle": "Keeper"
@@ -1562,7 +1562,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "sourceDefinitionId": 438,
@@ -1621,7 +1621,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 464,
                       "sourceTitle": "Keeper"
@@ -3597,7 +3597,7 @@
             "targetIceDefinitionId": 444,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 65,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qv.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qv.0.0.48",
             "targets": {
               "targetIceDefinitionId": 444
             },
@@ -9415,7 +9415,7 @@
             "postInstallRezQuoteCardId": "c2qu",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r3",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 275,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -9452,7 +9452,7 @@
             "postInstallRezQuoteCardId": "c2qu",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 275,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -9489,7 +9489,7 @@
             "postInstallRezQuoteCardId": "c2qu",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 275,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -9525,7 +9525,7 @@
             "postInstallRezQuoteCardId": "c2qu",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 275,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -9562,7 +9562,7 @@
             "postInstallRezQuoteCardId": "c2qu",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 275,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -9599,7 +9599,7 @@
             "postInstallRezQuoteCardId": "c2qu",
             "postInstallRezQuoteTargetServerId": "r2",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 275,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -12194,7 +12194,7 @@
           "postInstallRezQuoteCardId": "c2qu",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r3",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 275,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -12231,7 +12231,7 @@
           "postInstallRezQuoteCardId": "c2qu",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 275,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -12268,7 +12268,7 @@
           "postInstallRezQuoteCardId": "c2qu",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 275,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -12304,7 +12304,7 @@
           "postInstallRezQuoteCardId": "c2qu",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 275,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -12341,7 +12341,7 @@
           "postInstallRezQuoteCardId": "c2qu",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 275,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -12378,7 +12378,7 @@
           "postInstallRezQuoteCardId": "c2qu",
           "postInstallRezQuoteTargetServerId": "r2",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 275,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -12515,7 +12515,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 275,
-      "sideSafePlanningFingerprint": "fnv1a:5f424c8e"
+      "sideSafePlanningFingerprint": "fnv1a:a408d25f"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_original_speed_v10_1.0.0",

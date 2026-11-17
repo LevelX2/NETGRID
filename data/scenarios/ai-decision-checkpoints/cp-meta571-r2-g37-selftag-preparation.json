@@ -220,7 +220,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -1586,7 +1586,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 10,
-      "sideSafePlanningFingerprint": "fnv1a:10f6e1b4"
+      "sideSafePlanningFingerprint": "fnv1a:a05430c6"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

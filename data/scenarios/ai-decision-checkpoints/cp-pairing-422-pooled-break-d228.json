@@ -507,7 +507,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -544,7 +544,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 3,
                     "traceSuccessEffect": {
@@ -599,7 +599,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -738,7 +738,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -810,7 +810,7 @@
             "effectiveStrength": 0,
             "subroutines": [
               {
-                "id": "printed_subroutines_end_the_run",
+                "id": "0",
                 "type": "end_the_run",
                 "sourceDefinitionId": 449,
                 "sourceTitle": "Data Wall"
@@ -6544,7 +6544,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c7u.c7u.c7u.c2rx.0.printed_subroutines_end_the_run.48",
+          "actionId": "runner.break_subroutine.c7u.c7u.c7u.c2rx.0.0.48",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Rent-I-Con: Subroutine brechen",
@@ -6586,7 +6586,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -6599,7 +6599,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "printed_subroutines_end_the_run",
+            "encounterSubroutineIds": "0",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -8636,7 +8636,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c7u.c7u.c7u.c2rx.0.printed_subroutines_end_the_run.48",
+        "actionId": "runner.break_subroutine.c7u.c7u.c7u.c2rx.0.0.48",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Rent-I-Con: Subroutine brechen",
@@ -8678,7 +8678,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+        "actionId": "runner.continue_run.0",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -8691,7 +8691,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "printed_subroutines_end_the_run",
+          "encounterSubroutineIds": "0",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -8742,7 +8742,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 227,
-      "sideSafePlanningFingerprint": "fnv1a:c05136fc"
+      "sideSafePlanningFingerprint": "fnv1a:69d4801a"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",
@@ -16150,7 +16150,7 @@
           "sideSafePlanningFingerprint": "fnv1a:2d3014a4"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0",
           "stateVersion": 227,
           "semanticActionSetFingerprint": "fnv1a:22526bb7",
           "invocationKey": "fnv1a:091c840a"
@@ -16162,7 +16162,7 @@
         "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A222",
         "sourceStepId": "plan:runner.convert_run_window:run%3A222:convert",
-        "originalActionId": "runner.continue_run.printed_subroutines_end_the_run",
+        "originalActionId": "runner.continue_run.0",
         "selectedAtStateVersion": 227
       },
       "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Ar1",

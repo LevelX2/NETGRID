@@ -1,3 +1,4 @@
+import { applyPostSetupDeckOrder, type PostSetupDeckOrder } from "./post-setup-deck-order.test-support";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
@@ -71,6 +72,7 @@ function fixture() {
         matchId: string;
         seed: string;
         prefixActions: RecordedAction[];
+        setupArrangement: PostSetupDeckOrder;
       }
     >;
   };
@@ -124,7 +126,10 @@ function original(key: string) {
     runnerDeckMetadata: runner.publicMetadata!,
     corpDeckMetadata: corp.publicMetadata!,
   });
-  for (const a of p.prefixActions) state = advance(state, a);
+  for (const [index, action] of p.prefixActions.entries()) {
+    state = advance(state, action);
+    if (index === 1) applyPostSetupDeckOrder(state, p.setupArrangement);
+  }
   expect(hashState(state)).toBe(p.native.stateHash);
   const input = buildAiDecisionInput(state, "runner", {
     ownDeckSnapshot: runner,

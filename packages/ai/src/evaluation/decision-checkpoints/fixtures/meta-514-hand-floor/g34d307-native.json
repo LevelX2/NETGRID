@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "runner",
   "stateVersion": 306,
-  "stateHash": "fnv1a:7e69a76c",
+  "stateHash": "fnv1a:93b307ff",
   "input": {
     "matchId": "match_bfd577e0407bcdca",
     "side": "runner",
@@ -831,7 +831,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -842,7 +842,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 469,
                     "sourceTitle": "Nerve Labyrinth"
@@ -892,7 +892,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -903,7 +903,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 465,
                     "sourceTitle": "Laser Wire"
@@ -1315,7 +1315,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -1326,7 +1326,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 465,
                     "sourceTitle": "Laser Wire"
@@ -12861,7 +12861,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 306,
-      "sideSafePlanningFingerprint": "fnv1a:b521f7d8"
+      "sideSafePlanningFingerprint": "fnv1a:2b643e95"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_krashkurs_clown_kreditmaschine_2026_07_11_1.0.0",

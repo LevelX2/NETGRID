@@ -4,6 +4,7 @@ import {
   type CardInstance,
   type CardInstanceId,
   type DamageType,
+  type DamageRandomSource,
   type GameState,
   type ImminentEvent,
   type LegalAction,
@@ -504,6 +505,7 @@ export function resolvePostEncounterNetDamage(
       damageType: "net";
       amount: number;
       source: string;
+      randomSource: DamageRandomSource;
     }) => ImminentEvent;
     openDamageResolutionWindow: (
       event: ImminentEvent,
@@ -526,11 +528,15 @@ export function resolvePostEncounterNetDamage(
       Math.floor(run.fatalDamageAmountForEncounter ?? 0),
     );
     if (!encounterFullyBroken && fatalDamageAmount > 0 && encounteredIceId) {
+      const sourceDefinitionId = run.fatalDamageSourceDefinitionId;
+      if (!sourceDefinitionId)
+        throw new Error("Nächster Encounter-Schaden hat keine Quellenbindung.");
       const event = options.createDamageImminentEvent({
         damageId: `${run.runId}.${encounteredIceId}.post_encounter_net_damage`,
         damageType: "net",
         amount: fatalDamageAmount,
-        source: nextEncounterFatalDamageSource(run),
+        source: `subroutine:${sourceDefinitionId}:next_encounter`,
+        randomSource: ["c", sourceDefinitionId],
       });
       run.fatalDamageActiveForEncounter = false;
       delete run.fatalDamageAmountForEncounter;
@@ -558,12 +564,6 @@ export function cleanupEncounterDurationMarkers(
   delete run.fatalDamageAmountForEncounter;
   run.noBreakSubroutinesActive = false;
   run.jackOutLockedUntilEncounterEnds = false;
-}
-
-function nextEncounterFatalDamageSource(run: ActiveRun): string {
-  if (!run.fatalDamageSourceDefinitionId)
-    throw new Error("Naechste-Encounter-Schaden hat keine Quellenbindung.");
-  return `subroutine:${run.fatalDamageSourceDefinitionId}:next_encounter`;
 }
 
 export function passedIceFollowupMarkersForCurrentIce(

@@ -778,7 +778,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "relative_ice_outside_84.trace.1",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -789,7 +789,7 @@
                     "sourceTitle": "Hunting Pack"
                   },
                   {
-                    "id": "relative_ice_outside_84.trace.2",
+                    "id": "1",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -824,7 +824,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 75,
                     "sourceTitle": "Credit Blocks"
@@ -854,7 +854,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_net_damage_one",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -865,7 +865,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 91,
                     "sourceTitle": "Mobile Barricade"
@@ -917,7 +917,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -928,7 +928,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 79,
                     "sourceTitle": "Dog Pile"
@@ -958,7 +958,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_net_damage_one",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -969,7 +969,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 91,
                     "sourceTitle": "Mobile Barricade"
@@ -1002,7 +1002,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_brain_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "core",
@@ -1013,7 +1013,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 88,
                     "sourceTitle": "Mastermind"
@@ -1354,7 +1354,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -1365,7 +1365,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 79,
                     "sourceTitle": "Dog Pile"
@@ -1403,7 +1403,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "net",
@@ -1414,7 +1414,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 70,
                     "sourceTitle": "Bug Zapper"
@@ -1485,7 +1485,7 @@
             "effectiveStrength": 0,
             "subroutines": [
               {
-                "id": "subroutine_relative_brain_damage",
+                "id": "0",
                 "type": "do_damage",
                 "amount": 0,
                 "damageType": "core",
@@ -1496,7 +1496,7 @@
                 }
               },
               {
-                "id": "subroutine_end_run",
+                "id": "1",
                 "type": "end_the_run",
                 "sourceDefinitionId": 88,
                 "sourceTitle": "Mastermind"
@@ -14736,7 +14736,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.cup.cup.cup.cjp.0.subroutine_relative_brain_damage.185",
+          "actionId": "runner.break_subroutine.cup.cup.cup.cjp.0.0.185",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Black Widow: Subroutine 1 brechen",
@@ -14779,7 +14779,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.cup.cup.cup.cjp.1.subroutine_end_run.185",
+          "actionId": "runner.break_subroutine.cup.cup.cup.cjp.1.1.185",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Black Widow: Subroutine 2 brechen",
@@ -14821,7 +14821,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.subroutine_relative_brain_damage,subroutine_end_run",
+          "actionId": "runner.continue_run.0,1",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -14834,7 +14834,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 2,
-            "encounterSubroutineIds": "subroutine_relative_brain_damage,subroutine_end_run",
+            "encounterSubroutineIds": "0,1",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -16894,7 +16894,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.cup.cup.cup.cjp.0.subroutine_relative_brain_damage.185",
+        "actionId": "runner.break_subroutine.cup.cup.cup.cjp.0.0.185",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Black Widow: Subroutine 1 brechen",
@@ -16937,7 +16937,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.cup.cup.cup.cjp.1.subroutine_end_run.185",
+        "actionId": "runner.break_subroutine.cup.cup.cup.cjp.1.1.185",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Black Widow: Subroutine 2 brechen",
@@ -16979,7 +16979,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.subroutine_relative_brain_damage,subroutine_end_run",
+        "actionId": "runner.continue_run.0,1",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -16992,7 +16992,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 2,
-          "encounterSubroutineIds": "subroutine_relative_brain_damage,subroutine_end_run",
+          "encounterSubroutineIds": "0,1",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -17043,7 +17043,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 534,
-      "sideSafePlanningFingerprint": "fnv1a:6e444b7b"
+      "sideSafePlanningFingerprint": "fnv1a:eb15e570"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",
@@ -24887,7 +24887,7 @@
           "sideSafePlanningFingerprint": "fnv1a:1a882547"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.subroutine_relative_brain_damage,subroutine_end_run",
+          "actionId": "runner.continue_run.0,1",
           "stateVersion": 534,
           "semanticActionSetFingerprint": "fnv1a:1a767d91",
           "invocationKey": "fnv1a:aa4044bd"
@@ -24901,7 +24901,7 @@
         "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A532",
         "sourceStepId": "plan:runner.convert_run_window:run%3A532:convert",
-        "originalActionId": "runner.continue_run.subroutine_relative_brain_damage,subroutine_end_run",
+        "originalActionId": "runner.continue_run.0,1",
         "selectedAtStateVersion": 534
       }
     }

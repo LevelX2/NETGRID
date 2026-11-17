@@ -234,7 +234,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 3,
                     "traceSuccessEffect": {
@@ -4826,7 +4826,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 60,
-      "sideSafePlanningFingerprint": "fnv1a:24e9db4d"
+      "sideSafePlanningFingerprint": "fnv1a:61f1773d"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_redline_riot_1.0.0",

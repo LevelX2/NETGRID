@@ -217,7 +217,7 @@
                   "effectiveStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 457,
                       "sourceTitle": "Fire Wall"
@@ -1047,7 +1047,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 8,
-      "sideSafePlanningFingerprint": "fnv1a:08fe2b58"
+      "sideSafePlanningFingerprint": "fnv1a:3e241f7e"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_cheap_bag_tricks_1.0.0",

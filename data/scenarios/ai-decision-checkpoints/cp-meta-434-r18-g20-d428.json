@@ -609,7 +609,7 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                    "id": "0",
                     "type": "set_run_encounter_tax",
                     "amount": 2,
                     "sourceDefinitionId": 434,
@@ -658,7 +658,7 @@
                 "effectiveStrength": 7,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions",
+                    "id": "0",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -668,7 +668,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions.scored_rezzed_ice_mark_modifier.1",
+                    "id": "1",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -678,13 +678,13 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run.scored_rezzed_ice_mark_modifier.1",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
@@ -753,7 +753,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -795,7 +795,7 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                    "id": "0",
                     "type": "set_run_encounter_tax",
                     "amount": 2,
                     "sourceDefinitionId": 434,
@@ -1289,7 +1289,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -1300,7 +1300,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 470,
                     "sourceTitle": "Neural Blade",
@@ -1333,7 +1333,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -1399,7 +1399,7 @@
             "effectiveStrength": 1,
             "subroutines": [
               {
-                "id": "printed_subroutines_end_the_run",
+                "id": "0",
                 "type": "end_the_run",
                 "sourceDefinitionId": 450,
                 "sourceTitle": "Data Wall 2.0"
@@ -13148,7 +13148,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -13161,7 +13161,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "printed_subroutines_end_the_run",
+            "encounterSubroutineIds": "0",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -15327,7 +15327,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+        "actionId": "runner.continue_run.0",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -15340,7 +15340,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "printed_subroutines_end_the_run",
+          "encounterSubroutineIds": "0",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -15391,7 +15391,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 427,
-      "sideSafePlanningFingerprint": "fnv1a:a93ee2f0"
+      "sideSafePlanningFingerprint": "fnv1a:e1811a05"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -20679,7 +20679,7 @@
           "sideSafePlanningFingerprint": "fnv1a:705c9c9e"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0",
           "stateVersion": 427,
           "semanticActionSetFingerprint": "fnv1a:d5c9c66f",
           "invocationKey": "fnv1a:6bd722aa"
@@ -20693,7 +20693,7 @@
         "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A427",
         "sourceStepId": "plan:runner.convert_run_window:run%3A427:convert",
-        "originalActionId": "runner.continue_run.printed_subroutines_end_the_run",
+        "originalActionId": "runner.continue_run.0",
         "selectedAtStateVersion": 427
       }
     }

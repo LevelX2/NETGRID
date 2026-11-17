@@ -466,7 +466,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 491,
                       "sourceTitle": "Wall of Static"
@@ -626,7 +626,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 435,
                     "sourceTitle": "Banpei",
@@ -635,7 +635,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 435,
                     "sourceTitle": "Banpei"
@@ -7193,7 +7193,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 139,
-      "sideSafePlanningFingerprint": "fnv1a:09f9fad6"
+      "sideSafePlanningFingerprint": "fnv1a:77ebb49b"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_cheap_bag_tricks_1.0.0",

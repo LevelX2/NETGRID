@@ -27,7 +27,7 @@ function hq(input: AiDecisionInputWithDeckCapabilities) {
 function path(input: AiDecisionInputWithDeckCapabilities, credits = 50) {
   return assessKnownRezzedIcePath(hq(input).ice, input.playerView.own.rig!, credits);
 }
-const lockId = "printed_subroutines_prohibit_break_next_ice";
+const lockId = "1";
 
 it("SP-459 consumes the real next-encounter lock at Canis before the deeper Keeper", () => {
   const input = fixture();
@@ -36,7 +36,7 @@ it("SP-459 consumes the real next-encounter lock at Canis before the deeper Keep
   });
   expect(path(input)).toMatchObject({ canReachAccess: true, visibleBreakCost: 8 });
   expect(path(input).paidSubroutineBreaks).toEqual([
-    { iceInstanceId: "c2wn", subroutineId: "printed_subroutines_damage_net" },
+    { iceInstanceId: "c2wn", subroutineId: "0" },
   ]);
   const decision = chooseAiAction(input);
   expect(decision.fallbackUsed).toBe(false);
@@ -118,7 +118,7 @@ it("does not require remainder bindings when the quoted ICE has no remainder eff
 
 it("retains a still-open damage effect rather than treating it as already paid", () => {
   const input = fixture(windowCheckpoint), action = input.legalActions.find((a) => a.type === "continue_run")!;
-  action.payload!.encounterSubroutineIds = "printed_subroutines_damage_net," + lockId;
+  action.payload!.encounterSubroutineIds = "0," + lockId;
   action.payload!.unbrokenSubroutineCount = 2;
   expect(encounterRunRemainderEffectAssessment(input).evidence).toContain("run_remainder_effect_subroutines:0,1");
 });

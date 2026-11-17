@@ -477,7 +477,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 444,
                     "sourceTitle": "Crystal Wall"
@@ -525,7 +525,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 462,
                     "sourceTitle": "Ice Pick Willie",
@@ -534,7 +534,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 462,
                     "sourceTitle": "Ice Pick Willie"
@@ -583,7 +583,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_run_duration_ice_strength",
+                      "id": "0",
                       "type": "set_run_future_strength_bonus",
                       "amount": 2,
                       "sourceDefinitionId": 437,
@@ -650,7 +650,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_run_duration_break_subroutine_cost",
+                      "id": "0",
                       "type": "set_run_break_subroutine_cost_modifier",
                       "amount": 1,
                       "sourceDefinitionId": 489,
@@ -825,7 +825,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_damage_net",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "net",
@@ -836,7 +836,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_prohibit_break_next_ice",
+                      "id": "1",
                       "type": "set_next_encounter_no_break_subroutines",
                       "sourceDefinitionId": 470,
                       "sourceTitle": "Neural Blade",
@@ -903,7 +903,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_run_duration_ice_strength",
+                      "id": "0",
                       "type": "set_run_future_strength_bonus",
                       "amount": 2,
                       "sourceDefinitionId": 437,
@@ -2098,7 +2098,7 @@
             "targetIceDefinitionId": 462,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 38,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2ut.0.printed_subroutines_trash_program.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2ut.0.0.48",
             "targets": {
               "targetIceDefinitionId": 462
             },
@@ -2147,7 +2147,7 @@
             "targetIceDefinitionId": 462,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 40,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2ut.1.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2ut.1.1.48",
             "targets": {
               "targetIceDefinitionId": 462
             },
@@ -3076,7 +3076,7 @@
             "targetIceDefinitionId": 444,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 76,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qt.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qt.0.0.48",
             "targets": {
               "targetIceDefinitionId": 444
             },
@@ -3892,7 +3892,7 @@
             "targetIceDefinitionId": 444,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 106,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qt.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qt.0.0.48",
             "targets": {
               "targetIceDefinitionId": 444
             },
@@ -5454,7 +5454,7 @@
           "targetIceDefinitionId": 444,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 76,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qt.0.printed_subroutines_end_the_run.48",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qt.0.0.48",
           "targets": {
             "targetIceDefinitionId": 444
           },
@@ -6270,7 +6270,7 @@
           "targetIceDefinitionId": 444,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 106,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qt.0.printed_subroutines_end_the_run.48",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qt.0.0.48",
           "targets": {
             "targetIceDefinitionId": 444
           },
@@ -7239,7 +7239,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 131,
-      "sideSafePlanningFingerprint": "fnv1a:1e7d8ccf"
+      "sideSafePlanningFingerprint": "fnv1a:8d909ede"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_original_speed_v10_1.0.0",

@@ -817,7 +817,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -848,7 +848,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -879,7 +879,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions",
+                    "id": "0",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -889,7 +889,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
@@ -921,7 +921,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 3,
                     "traceSuccessEffect": {
@@ -1003,7 +1003,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 3,
                     "traceSuccessEffect": {
@@ -1045,7 +1045,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                    "id": "0",
                     "type": "set_run_encounter_tax",
                     "amount": 2,
                     "sourceDefinitionId": 434,
@@ -1080,7 +1080,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                    "id": "0",
                     "type": "set_run_encounter_tax",
                     "amount": 2,
                     "sourceDefinitionId": 434,
@@ -1506,7 +1506,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                    "id": "0",
                     "type": "set_next_encounter_lock",
                     "breakTags": [
                       "stun"
@@ -1551,7 +1551,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                    "id": "0",
                     "type": "set_next_encounter_lock",
                     "breakTags": [
                       "stun"
@@ -1616,7 +1616,7 @@
             "encounterStrength": 3,
             "subroutines": [
               {
-                "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                "id": "0",
                 "type": "set_next_encounter_lock",
                 "breakTags": [
                   "stun"
@@ -15640,7 +15640,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+          "actionId": "runner.continue_run.0",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen",
@@ -15653,8 +15653,8 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
-            "encounterRemainingSubroutineIds": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+            "encounterSubroutineIds": "0",
+            "encounterRemainingSubroutineIds": "0",
             "encounterRemainingSubroutineCount": 1,
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": false,
@@ -17988,7 +17988,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+        "actionId": "runner.continue_run.0",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen",
@@ -18001,8 +18001,8 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
-          "encounterRemainingSubroutineIds": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+          "encounterSubroutineIds": "0",
+          "encounterRemainingSubroutineIds": "0",
           "encounterRemainingSubroutineCount": 1,
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": false,
@@ -18054,7 +18054,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 502,
-      "sideSafePlanningFingerprint": "fnv1a:8f344b25"
+      "sideSafePlanningFingerprint": "fnv1a:d301b324"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_deep_market_engine_1.0.0",

@@ -44,7 +44,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       activateBbsEconomyJson,
     ],
   ])("passes the corrected Corp behavior: %s", (_label, json) => {
-    const checkpoint = structuredClone(json) as AiDecisionCheckpointV1;
+    const checkpoint = structuredClone(json) as unknown as AiDecisionCheckpointV1;
     if (json === activateBbsEconomyJson) {
       // The old selected BBS sequence borrowed a remote_1 score-draw quote
       // for the independent urgent R&D draw. That replaced its P2 priority
@@ -206,7 +206,7 @@ function mutateFixture(
   value: unknown,
   mutation: (fixture: AiDecisionCheckpointV1) => void,
 ): AiDecisionCheckpointV1 {
-  const fixture = structuredClone(value) as AiDecisionCheckpointV1;
+  const fixture = structuredClone(value) as unknown as AiDecisionCheckpointV1;
   mutation(fixture);
   fixture.source.kind = "synthetic_companion";
   fixture.engine.stateHash = hashGameState(fixture.engine.testOnlyGameState);

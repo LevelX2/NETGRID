@@ -52,13 +52,13 @@ it("keeps the original run executor through untargeted Corp rez passes, Hunter t
       executorInstanceId: origin.executorInstanceId,
       originalActionId:
         d === 149
-          ? "runner.continue_run.printed_subroutines_trace"
+          ? "runner.continue_run.0"
           : "runner.resolve_choice",
       selectedAtStateVersion: d === 149 ? 148 : 150,
     });
     if (d === 149)
       expect(result.actionId).toBe(
-        "runner.continue_run.printed_subroutines_trace",
+        "runner.continue_run.0",
       );
     if (d === 151)
       expect(result.selectedChoices?.selectedOptionIds).toEqual(["bid_5"]);

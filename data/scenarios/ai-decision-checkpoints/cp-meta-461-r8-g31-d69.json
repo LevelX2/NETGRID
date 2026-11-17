@@ -353,7 +353,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -4329,7 +4329,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 68,
-      "sideSafePlanningFingerprint": "fnv1a:9ea6033f"
+      "sideSafePlanningFingerprint": "fnv1a:e72687d5"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_neon_escrow_1.1.0",

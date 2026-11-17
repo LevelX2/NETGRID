@@ -625,7 +625,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -655,7 +655,7 @@
                 "effectiveStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -666,7 +666,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_net_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -677,13 +677,13 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
@@ -764,7 +764,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -794,7 +794,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -824,7 +824,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -1158,7 +1158,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -1190,7 +1190,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -1201,7 +1201,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 470,
                     "sourceTitle": "Neural Blade",
@@ -1234,7 +1234,7 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                    "id": "0",
                     "type": "set_run_encounter_tax",
                     "amount": 2,
                     "sourceDefinitionId": 434,
@@ -13204,7 +13204,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 345,
-      "sideSafePlanningFingerprint": "fnv1a:3e9e2ca1"
+      "sideSafePlanningFingerprint": "fnv1a:c33c4cc9"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

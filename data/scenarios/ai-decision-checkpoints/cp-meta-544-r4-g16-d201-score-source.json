@@ -743,7 +743,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 457,
                       "sourceTitle": "Fire Wall"
@@ -798,7 +798,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -846,7 +846,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 457,
                       "sourceTitle": "Fire Wall"
@@ -909,7 +909,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 456,
                       "sourceTitle": "Filter"
@@ -971,7 +971,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -1019,7 +1019,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 456,
                       "sourceTitle": "Filter"
@@ -1273,7 +1273,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 71,
                     "sourceTitle": "Caryatid"
@@ -1328,7 +1328,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 464,
                       "sourceTitle": "Keeper"
@@ -1440,7 +1440,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "subroutine_relative_net_damage",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 0,
                       "damageType": "net",
@@ -1451,7 +1451,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_end_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 79,
                       "sourceTitle": "Dog Pile"
@@ -7021,7 +7021,7 @@
             "postInstallRezQuoteCardId": "c2xh",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r4",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 200,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7058,7 +7058,7 @@
             "postInstallRezQuoteCardId": "c2xh",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 200,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7095,7 +7095,7 @@
             "postInstallRezQuoteCardId": "c2xh",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 200,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7131,7 +7131,7 @@
             "postInstallRezQuoteCardId": "c2xh",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 200,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7168,7 +7168,7 @@
             "postInstallRezQuoteCardId": "c2xh",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 200,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7205,7 +7205,7 @@
             "postInstallRezQuoteCardId": "c2xh",
             "postInstallRezQuoteTargetServerId": "r2",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 200,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7242,7 +7242,7 @@
             "postInstallRezQuoteCardId": "c2xh",
             "postInstallRezQuoteTargetServerId": "r3",
             "postInstallRezQuoteProjectedServerId": "r3",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 200,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -9568,7 +9568,7 @@
           "postInstallRezQuoteCardId": "c2xh",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r4",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 200,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9605,7 +9605,7 @@
           "postInstallRezQuoteCardId": "c2xh",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 200,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9642,7 +9642,7 @@
           "postInstallRezQuoteCardId": "c2xh",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 200,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9678,7 +9678,7 @@
           "postInstallRezQuoteCardId": "c2xh",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 200,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9715,7 +9715,7 @@
           "postInstallRezQuoteCardId": "c2xh",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 200,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9752,7 +9752,7 @@
           "postInstallRezQuoteCardId": "c2xh",
           "postInstallRezQuoteTargetServerId": "r2",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 200,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9789,7 +9789,7 @@
           "postInstallRezQuoteCardId": "c2xh",
           "postInstallRezQuoteTargetServerId": "r3",
           "postInstallRezQuoteProjectedServerId": "r3",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xh\",\"iceDefinitionId\":474,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":474,\"sourceTitle\":\"Razor Wire\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 200,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -10047,7 +10047,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 200,
-      "sideSafePlanningFingerprint": "fnv1a:3dd2f17a"
+      "sideSafePlanningFingerprint": "fnv1a:97e4d0cf"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_mr96xg94_1.2.0",

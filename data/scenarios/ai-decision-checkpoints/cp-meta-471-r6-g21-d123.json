@@ -456,7 +456,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions",
+                    "id": "0",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -466,7 +466,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
@@ -6321,7 +6321,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 122,
-      "sideSafePlanningFingerprint": "fnv1a:c4f5e481"
+      "sideSafePlanningFingerprint": "fnv1a:45b0c13f"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_cybernetics_risk_rig_2026_07_01_1.0.0",

@@ -764,7 +764,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -796,7 +796,7 @@
                 "effectiveStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_brain",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -807,7 +807,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_brain_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -818,7 +818,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_brain_b",
+                    "id": "2",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -829,7 +829,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 466,
                     "sourceTitle": "Liche"
@@ -872,7 +872,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -12285,7 +12285,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 295,
-      "sideSafePlanningFingerprint": "fnv1a:82c352e1"
+      "sideSafePlanningFingerprint": "fnv1a:55cd6299"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",

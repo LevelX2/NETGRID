@@ -293,7 +293,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -329,7 +329,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -359,7 +359,7 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                    "id": "0",
                     "type": "set_run_encounter_tax",
                     "amount": 2,
                     "sourceDefinitionId": 434,
@@ -400,7 +400,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -468,7 +468,7 @@
             "effectiveStrength": 1,
             "subroutines": [
               {
-                "id": "printed_subroutines_end_the_run",
+                "id": "0",
                 "type": "end_the_run",
                 "sourceDefinitionId": 450,
                 "sourceTitle": "Data Wall 2.0"
@@ -2267,7 +2267,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1ju.c1ju.c1ju.c2s6.0.printed_subroutines_end_the_run.328",
+          "actionId": "runner.break_subroutine.c1ju.c1ju.c1ju.c2s6.0.0.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine brechen",
@@ -2309,7 +2309,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -2322,7 +2322,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "printed_subroutines_end_the_run",
+            "encounterSubroutineIds": "0",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -4095,7 +4095,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1ju.c1ju.c1ju.c2s6.0.printed_subroutines_end_the_run.328",
+        "actionId": "runner.break_subroutine.c1ju.c1ju.c1ju.c2s6.0.0.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine brechen",
@@ -4137,7 +4137,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+        "actionId": "runner.continue_run.0",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -4150,7 +4150,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "printed_subroutines_end_the_run",
+          "encounterSubroutineIds": "0",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -4201,7 +4201,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 62,
-      "sideSafePlanningFingerprint": "fnv1a:bd330dea"
+      "sideSafePlanningFingerprint": "fnv1a:1787877b"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -9298,7 +9298,7 @@
           "sideSafePlanningFingerprint": "fnv1a:f79e8657"
         },
         "currentBinding": {
-          "actionId": "runner.break_subroutine.c1ju.c1ju.c1ju.c2s6.0.printed_subroutines_end_the_run.328",
+          "actionId": "runner.break_subroutine.c1ju.c1ju.c1ju.c2s6.0.0.328",
           "stateVersion": 62,
           "semanticActionSetFingerprint": "fnv1a:18b112e1",
           "invocationKey": "fnv1a:048eeba4"
@@ -9310,7 +9310,7 @@
         "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ahq",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A57",
         "sourceStepId": "plan:runner.convert_run_window:run%3A57:convert",
-        "originalActionId": "runner.break_subroutine.c1ju.c1ju.c1ju.c2s6.0.printed_subroutines_end_the_run.328",
+        "originalActionId": "runner.break_subroutine.c1ju.c1ju.c1ju.c2s6.0.0.328",
         "selectedAtStateVersion": 62
       },
       "rootForegroundInstanceId": "plan:runner.pressure_central:central%3Ahq",

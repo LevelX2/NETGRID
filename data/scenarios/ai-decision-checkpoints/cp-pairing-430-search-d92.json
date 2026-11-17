@@ -332,7 +332,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 445,
                     "sourceTitle": "D'Arc Knight",
@@ -341,7 +341,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 445,
                     "sourceTitle": "D'Arc Knight"
@@ -378,7 +378,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -5966,7 +5966,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 91,
-      "sideSafePlanningFingerprint": "fnv1a:7b9c19c7"
+      "sideSafePlanningFingerprint": "fnv1a:bcd3d2ea"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_stealth_interface_starter_1.0.0",

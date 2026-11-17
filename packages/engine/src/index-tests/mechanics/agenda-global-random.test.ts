@@ -1574,6 +1574,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     const afterPermanentPrevention = applyEffectCommands(state, [
       {
         type: "do_damage",
+        randomSource: ["g", 0],
         damageType: "meat",
         amount: 1,
         source: "typed_emergency_flatline_replacement_witness",
@@ -3314,13 +3315,11 @@ describe("V1.9.21 Deterministic Random WIP", () => {
 
     const randomRecord = state.randomDrawRecords[randomBefore];
     expect(state.randomDrawRecords).toHaveLength(randomBefore + 11);
-    expect(randomRecord?.purpose).toBe(
-      "v1921.die.551.tag_damage",
-    );
+    expect(randomRecord?.purpose).toEqual([13, 551]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
       abilityId: "schlaghund_tag_damage",
-      randomPurpose: "v1921.die.551.tag_damage",
+      randomPurpose: 13,
       randomCounterAfter: randomBefore + 1,
       runnerTags: 6,
       tagThresholdMet: true,
@@ -3353,7 +3352,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
 
   it.each([
     { seed: "rio-visible-6", expectedRoll: 1, expectedRunEnded: true },
-    { seed: "rio-visible-4", expectedRoll: 2, expectedRunEnded: false },
+    { seed: "rio-visible-3", expectedRoll: 2, expectedRunEnded: false },
   ])(
     "rolls Rio de Janeiro City Grid visibly after passed ICE on roll $expectedRoll",
     ({ seed, expectedRoll, expectedRunEnded }) => {
@@ -3418,11 +3417,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       );
 
       expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
-      const rioPurpose = String(state.randomDrawRecords.at(-1)?.purpose ?? "");
-      expect(rioPurpose).toContain(
-        "v1921.die.579.passed_ice.",
-      );
-      expect(rioPurpose).toContain(`.${iceId}.${upgradeId}`);
+      const rioPurpose = state.randomDrawRecords.at(-1)?.purpose;
+      expect(rioPurpose).toEqual([18, 579, initial.run!.runId, iceId, upgradeId]);
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "continue_run",
         abilityId: "rio_de_janeiro_passed_ice",
@@ -3534,9 +3530,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     );
 
     expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
-    expect(state.randomDrawRecords.at(-1)?.purpose).toBe(
-      "v1921.die.214.run_start_strength",
-    );
+    expect(state.randomDrawRecords.at(-1)?.purpose).toEqual([29, 214]);
     expect(state.run?.runStartRandomStrength).toBe(
       Number(state.eventLog.at(-1)?.publicPayload.runStartRandomStrength),
     );
@@ -3544,7 +3538,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       actionType: "start_run",
       abilityId: "run_start_random_strength_bonus",
       sourceDefinitionId: 214,
-      randomPurpose: "v1921.die.214.run_start_strength",
+      randomPurpose: 29,
       randomCounterAfter: randomBefore + 1,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -3629,13 +3623,11 @@ describe("V1.9.21 Deterministic Random WIP", () => {
 
     expect(state.runner.heap).toContain(eventId);
     expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
-    expect(state.randomDrawRecords.at(-1)?.purpose).toBe(
-      "v1921.die.316.dice_loop.initial",
-    );
+    expect(state.randomDrawRecords.at(-1)?.purpose).toEqual([21, 316]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       abilityId: "random_dice_loop",
-      v1921DieRoll: 4,
+      v1921DieRoll: 5,
       randomDiceSplitChoiceOpened: false,
       randomDiceLoopComplete: true,
       randomDiceLoopRemainingDice: 0,
@@ -3660,7 +3652,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
   it("resolves Playful AI split choices and queued dice through replay", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
-        seed: "playful-ai-probe-14",
+        seed: "playful-ai-probe-16",
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_random_dice_split_split_loop",

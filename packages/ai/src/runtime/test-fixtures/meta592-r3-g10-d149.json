@@ -405,7 +405,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -461,7 +461,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 482,
                     "sourceTitle": "Sleeper"
@@ -594,7 +594,7 @@
                 "encounterStrength": 7,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -631,7 +631,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 2,
                     "sourceDefinitionId": 437,
@@ -704,7 +704,7 @@
             "encounterStrength": 7,
             "subroutines": [
               {
-                "id": "printed_subroutines_trace",
+                "id": "0",
                 "type": "initiate_trace",
                 "traceLimit": 5,
                 "traceSuccessEffect": {
@@ -2848,7 +2848,7 @@
             "targetIceDefinitionId": 482,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 77,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2z9.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2z9.0.0.48",
             "targets": {
               "targetIceDefinitionId": 482
             },
@@ -3411,7 +3411,7 @@
             "targetIceDefinitionId": 482,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 98,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2z9.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2z9.0.0.48",
             "targets": {
               "targetIceDefinitionId": 482
             },
@@ -4137,7 +4137,7 @@
             "targetIceDefinitionId": 482,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 125,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2z9.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2z9.0.0.48",
             "targets": {
               "targetIceDefinitionId": 482
             },
@@ -4751,7 +4751,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.continue_run.printed_subroutines_trace",
+          "actionId": "runner.continue_run.0",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen",
@@ -4764,8 +4764,8 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "printed_subroutines_trace",
-            "encounterRemainingSubroutineIds": "printed_subroutines_trace",
+            "encounterSubroutineIds": "0",
+            "encounterRemainingSubroutineIds": "0",
             "encounterRemainingSubroutineCount": 1,
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": false,
@@ -4989,7 +4989,7 @@
           "targetIceDefinitionId": 482,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 77,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2z9.0.printed_subroutines_end_the_run.48",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2z9.0.0.48",
           "targets": {
             "targetIceDefinitionId": 482
           },
@@ -5552,7 +5552,7 @@
           "targetIceDefinitionId": 482,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 98,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2z9.0.printed_subroutines_end_the_run.48",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2z9.0.0.48",
           "targets": {
             "targetIceDefinitionId": 482
           },
@@ -6278,7 +6278,7 @@
           "targetIceDefinitionId": 482,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 125,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2z9.0.printed_subroutines_end_the_run.48",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2z9.0.0.48",
           "targets": {
             "targetIceDefinitionId": 482
           },
@@ -6892,7 +6892,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.continue_run.printed_subroutines_trace",
+        "actionId": "runner.continue_run.0",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen",
@@ -6905,8 +6905,8 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "printed_subroutines_trace",
-          "encounterRemainingSubroutineIds": "printed_subroutines_trace",
+          "encounterSubroutineIds": "0",
+          "encounterRemainingSubroutineIds": "0",
           "encounterRemainingSubroutineCount": 1,
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": false,
@@ -6958,7 +6958,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 148,
-      "sideSafePlanningFingerprint": "fnv1a:24b7393f"
+      "sideSafePlanningFingerprint": "fnv1a:393c8850"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",

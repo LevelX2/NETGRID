@@ -782,7 +782,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -813,7 +813,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 445,
                     "sourceTitle": "D'Arc Knight",
@@ -822,7 +822,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 445,
                     "sourceTitle": "D'Arc Knight"
@@ -858,7 +858,7 @@
                 "effectiveStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions",
+                    "id": "0",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -868,7 +868,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
@@ -912,7 +912,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -1280,7 +1280,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -1310,7 +1310,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 478,
                     "sourceTitle": "Scramble"
@@ -8960,7 +8960,7 @@
             "targetIceDefinitionId": 478,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 295,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ye.0.printed_subroutines_end_the_run.328",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ye.0.0.328",
             "targets": {
               "targetIceDefinitionId": 478
             },
@@ -9136,7 +9136,7 @@
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 303,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2rx.0.printed_subroutines_end_the_run.328",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2rx.0.0.328",
             "targets": {
               "targetIceDefinitionId": 449
             },
@@ -10567,7 +10567,7 @@
             "targetIceDefinitionId": 478,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 362,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ye.0.printed_subroutines_end_the_run.328",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ye.0.0.328",
             "targets": {
               "targetIceDefinitionId": 478
             },
@@ -10743,7 +10743,7 @@
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 370,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2rx.0.printed_subroutines_end_the_run.328",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2rx.0.0.328",
             "targets": {
               "targetIceDefinitionId": 449
             },
@@ -11402,7 +11402,7 @@
           "targetIceDefinitionId": 449,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 303,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2rx.0.printed_subroutines_end_the_run.328",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2rx.0.0.328",
           "targets": {
             "targetIceDefinitionId": 449
           },
@@ -12833,7 +12833,7 @@
           "targetIceDefinitionId": 478,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 362,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ye.0.printed_subroutines_end_the_run.328",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ye.0.0.328",
           "targets": {
             "targetIceDefinitionId": 478
           },
@@ -13009,7 +13009,7 @@
           "targetIceDefinitionId": 449,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 370,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2rx.0.printed_subroutines_end_the_run.328",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2rx.0.0.328",
           "targets": {
             "targetIceDefinitionId": 449
           },
@@ -13612,7 +13612,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 378,
-      "sideSafePlanningFingerprint": "fnv1a:63f840e0"
+      "sideSafePlanningFingerprint": "fnv1a:5b910223"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",

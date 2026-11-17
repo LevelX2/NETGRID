@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "runner",
   "stateVersion": 67,
-  "stateHash": "fnv1a:5eec7fd8",
+  "stateHash": "fnv1a:c643f67a",
   "input": {
     "matchId": "match_2ccd429501007d7a",
     "side": "runner",
@@ -349,7 +349,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_cannot_jack_out",
+                    "id": "0",
                     "type": "set_run_jack_out_lock",
                     "sourceDefinitionId": 463,
                     "sourceTitle": "Jack Attack",
@@ -358,7 +358,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "1",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -408,7 +408,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -539,7 +539,7 @@
             "encounterStrength": 3,
             "subroutines": [
               {
-                "id": "printed_subroutines_run_duration_cannot_jack_out",
+                "id": "0",
                 "type": "set_run_jack_out_lock",
                 "sourceDefinitionId": 463,
                 "sourceTitle": "Jack Attack",
@@ -548,7 +548,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_trace",
+                "id": "1",
                 "type": "initiate_trace",
                 "traceLimit": 5,
                 "traceSuccessEffect": {
@@ -2428,7 +2428,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.continue_run.printed_subroutines_run_duration_cannot_jack_out,printed_subroutines_trace",
+          "actionId": "runner.continue_run.0,1",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen",
@@ -2441,7 +2441,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 2,
-            "encounterSubroutineIds": "printed_subroutines_run_duration_cannot_jack_out,printed_subroutines_trace",
+            "encounterSubroutineIds": "0,1",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": false,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -4291,7 +4291,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.continue_run.printed_subroutines_run_duration_cannot_jack_out,printed_subroutines_trace",
+        "actionId": "runner.continue_run.0,1",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen",
@@ -4304,7 +4304,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 2,
-          "encounterSubroutineIds": "printed_subroutines_run_duration_cannot_jack_out,printed_subroutines_trace",
+          "encounterSubroutineIds": "0,1",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": false,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -4355,7 +4355,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 67,
-      "sideSafePlanningFingerprint": "fnv1a:5c2d8c19"
+      "sideSafePlanningFingerprint": "fnv1a:1042ef8c"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rd_express_1.1.0",

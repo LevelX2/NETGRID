@@ -757,7 +757,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_unless_runner_pays_one",
+                      "id": "0",
                       "type": "end_the_run_unless_runner_pays",
                       "amount": 1,
                       "sourceDefinitionId": 96,
@@ -789,7 +789,7 @@
                   "encounterStrength": 3,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 75,
                       "sourceTitle": "Credit Blocks"
@@ -851,7 +851,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 97,
                       "sourceTitle": "Sphinx 2006"
@@ -894,7 +894,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 457,
                       "sourceTitle": "Fire Wall"
@@ -1182,7 +1182,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 457,
                       "sourceTitle": "Fire Wall"
@@ -1213,7 +1213,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_unless_runner_pays_one",
+                      "id": "0",
                       "type": "end_the_run_unless_runner_pays",
                       "amount": 1,
                       "sourceDefinitionId": 96,
@@ -1245,7 +1245,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 473,
                       "sourceTitle": "Quandary"
@@ -1276,7 +1276,7 @@
                   "encounterStrength": 1,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_unless_runner_pays_one",
+                      "id": "0",
                       "type": "end_the_run_unless_runner_pays",
                       "amount": 1,
                       "sourceDefinitionId": 90,
@@ -11404,7 +11404,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 269,
-        "sideSafePlanningFingerprint": "fnv1a:6028b677"
+        "sideSafePlanningFingerprint": "fnv1a:28fd003e"
       },
       "observedTurnPlanAction": {
         "matchId": "match_dc0dcfdf7bf554f7",

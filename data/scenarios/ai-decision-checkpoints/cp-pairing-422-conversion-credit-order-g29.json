@@ -550,7 +550,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -599,7 +599,7 @@
                   "effectiveStrength": 6,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_damage_brain",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "core",
@@ -610,7 +610,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_damage_brain_a",
+                      "id": "1",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "core",
@@ -621,7 +621,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_damage_brain_b",
+                      "id": "2",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "core",
@@ -632,7 +632,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "3",
                       "type": "end_the_run",
                       "sourceDefinitionId": 466,
                       "sourceTitle": "Liche"
@@ -693,7 +693,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -781,7 +781,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -3401,7 +3401,7 @@
             "postInstallRezQuoteCardId": "c2vq",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_brain\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_a\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_b\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 83,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3438,7 +3438,7 @@
             "postInstallRezQuoteCardId": "c2vq",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_brain\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_a\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_b\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 83,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3475,7 +3475,7 @@
             "postInstallRezQuoteCardId": "c2vq",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_brain\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_a\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_b\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 83,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3511,7 +3511,7 @@
             "postInstallRezQuoteCardId": "c2vq",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_brain\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_a\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_b\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 83,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3548,7 +3548,7 @@
             "postInstallRezQuoteCardId": "c2vq",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_brain\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_a\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_b\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 83,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3668,7 +3668,7 @@
             "postInstallRezQuoteCardId": "c311",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 83,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3705,7 +3705,7 @@
             "postInstallRezQuoteCardId": "c311",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 83,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3742,7 +3742,7 @@
             "postInstallRezQuoteCardId": "c311",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 83,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3778,7 +3778,7 @@
             "postInstallRezQuoteCardId": "c311",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 83,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3815,7 +3815,7 @@
             "postInstallRezQuoteCardId": "c311",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 83,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6225,7 +6225,7 @@
           "postInstallRezQuoteCardId": "c2vq",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_brain\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_a\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_b\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 83,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6262,7 +6262,7 @@
           "postInstallRezQuoteCardId": "c2vq",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_brain\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_a\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_b\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 83,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6299,7 +6299,7 @@
           "postInstallRezQuoteCardId": "c2vq",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_brain\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_a\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_b\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 83,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6335,7 +6335,7 @@
           "postInstallRezQuoteCardId": "c2vq",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_brain\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_a\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_b\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 83,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6372,7 +6372,7 @@
           "postInstallRezQuoteCardId": "c2vq",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_brain\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_a\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_brain_b\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2vq\",\"iceDefinitionId\":466,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"core\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":466,\"sourceTitle\":\"Liche\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 83,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6492,7 +6492,7 @@
           "postInstallRezQuoteCardId": "c311",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 83,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6529,7 +6529,7 @@
           "postInstallRezQuoteCardId": "c311",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 83,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6566,7 +6566,7 @@
           "postInstallRezQuoteCardId": "c311",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 83,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6602,7 +6602,7 @@
           "postInstallRezQuoteCardId": "c311",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 83,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6639,7 +6639,7 @@
           "postInstallRezQuoteCardId": "c311",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 83,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6705,7 +6705,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 83,
-      "sideSafePlanningFingerprint": "fnv1a:efe5c47b"
+      "sideSafePlanningFingerprint": "fnv1a:7bd6ebfb"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_rent_to_own_war_engine_1.1.0",

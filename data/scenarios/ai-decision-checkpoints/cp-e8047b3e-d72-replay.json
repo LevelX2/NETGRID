@@ -444,7 +444,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 3,
                     "traceSuccessEffect": {
@@ -486,7 +486,7 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -6942,7 +6942,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 136,
-      "sideSafePlanningFingerprint": "fnv1a:46c7c8b8"
+      "sideSafePlanningFingerprint": "fnv1a:eebc44dc"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_deep_market_engine_1.0.0",

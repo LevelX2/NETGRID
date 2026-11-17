@@ -20,6 +20,7 @@ import {
   resolveRunDurationMarkerSubroutine,
 } from "./encounter-resolution";
 import { credits } from "../state/economy-mutation";
+import { effectiveIceRunSubroutines } from "./effective-ice-run-subroutines";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type DeflectorTarget = NonNullable<SubroutineDefinition["deflectorTarget"]>;
@@ -949,7 +950,11 @@ export function resolveTrashProgramChoice(
   const sourceDefinition = host.cards.definitionFor(context.sourceIceId);
   if (sourceDefinition.id !== context.sourceDefinitionId)
     throw new Error("Die Programmtrash-Choice-Quelle passt nicht mehr.");
-  const subroutine = sourceDefinition.subroutines?.find(
+  const subroutine = effectiveIceRunSubroutines(
+    host.state,
+    context.sourceIceId,
+    sourceDefinition,
+  ).find(
     (candidate) =>
       candidate.id === context.subroutineId &&
       candidate.type === context.subroutineType,

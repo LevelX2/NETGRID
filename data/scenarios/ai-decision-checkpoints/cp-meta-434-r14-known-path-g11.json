@@ -677,7 +677,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -714,7 +714,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -842,7 +842,7 @@
                 "effectiveStrength": 8,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions",
+                    "id": "0",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -852,7 +852,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions.scored_rezzed_ice_mark_modifier.1",
+                    "id": "1",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -862,7 +862,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions.scored_rezzed_ice_mark_modifier.2",
+                    "id": "2",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -872,19 +872,19 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run.scored_rezzed_ice_mark_modifier.1",
+                    "id": "4",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run.scored_rezzed_ice_mark_modifier.2",
+                    "id": "5",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
@@ -916,7 +916,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -927,7 +927,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 470,
                     "sourceTitle": "Neural Blade",
@@ -9365,7 +9365,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 211,
-      "sideSafePlanningFingerprint": "fnv1a:eaae209e"
+      "sideSafePlanningFingerprint": "fnv1a:afd3d1af"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

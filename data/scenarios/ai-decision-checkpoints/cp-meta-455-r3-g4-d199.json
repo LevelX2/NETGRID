@@ -539,7 +539,7 @@
                   "effectiveStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 482,
                       "sourceTitle": "Sleeper"
@@ -593,7 +593,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -632,7 +632,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -678,7 +678,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -725,7 +725,7 @@
                   "effectiveStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 456,
                       "sourceTitle": "Filter"
@@ -787,7 +787,7 @@
                   "effectiveStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 482,
                       "sourceTitle": "Sleeper"
@@ -849,7 +849,7 @@
                   "effectiveStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 491,
                       "sourceTitle": "Wall of Static"
@@ -1072,7 +1072,7 @@
                   "effectiveStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 482,
                       "sourceTitle": "Sleeper"
@@ -1134,7 +1134,7 @@
                   "effectiveStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 456,
                       "sourceTitle": "Filter"
@@ -6396,7 +6396,7 @@
             "postInstallRezQuoteCardId": "c2va",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 198,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6433,7 +6433,7 @@
             "postInstallRezQuoteCardId": "c2va",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 198,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6469,7 +6469,7 @@
             "postInstallRezQuoteCardId": "c2va",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 198,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6506,7 +6506,7 @@
             "postInstallRezQuoteCardId": "c2va",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 198,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8725,7 +8725,7 @@
           "postInstallRezQuoteCardId": "c2va",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 198,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8762,7 +8762,7 @@
           "postInstallRezQuoteCardId": "c2va",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 198,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8798,7 +8798,7 @@
           "postInstallRezQuoteCardId": "c2va",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 198,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8835,7 +8835,7 @@
           "postInstallRezQuoteCardId": "c2va",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 198,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8901,7 +8901,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 198,
-      "sideSafePlanningFingerprint": "fnv1a:242d66fe"
+      "sideSafePlanningFingerprint": "fnv1a:9419c358"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_chrome_rush_bureau_1.1.0",

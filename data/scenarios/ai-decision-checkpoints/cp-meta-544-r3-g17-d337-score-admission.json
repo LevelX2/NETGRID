@@ -911,7 +911,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -922,7 +922,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 474,
                     "sourceTitle": "Razor Wire"
@@ -970,7 +970,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_damage_net",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 2,
                       "damageType": "net",
@@ -981,7 +981,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 481,
                       "sourceTitle": "Shotgun Wire"
@@ -1044,7 +1044,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 464,
                       "sourceTitle": "Keeper"
@@ -1106,7 +1106,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -1146,7 +1146,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 71,
                     "sourceTitle": "Caryatid"
@@ -1527,7 +1527,7 @@
                   "encounterStrength": 3,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_damage_brain",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "core",
@@ -1538,7 +1538,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 443,
                       "sourceTitle": "Cortical Scrub"
@@ -1593,7 +1593,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -1633,7 +1633,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -12321,7 +12321,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 336,
-      "sideSafePlanningFingerprint": "fnv1a:92a003bf"
+      "sideSafePlanningFingerprint": "fnv1a:21faaed9"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_mr96xg94_1.2.0",

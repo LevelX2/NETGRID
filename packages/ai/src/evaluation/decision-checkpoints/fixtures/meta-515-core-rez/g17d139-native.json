@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "runner",
   "stateVersion": 138,
-  "stateHash": "fnv1a:174e6f87",
+  "stateHash": "fnv1a:f0a16ec7",
   "input": {
     "matchId": "match_33c0810a364a5676",
     "side": "runner",

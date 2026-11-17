@@ -600,7 +600,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_brain_damage_one",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -666,7 +666,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -677,7 +677,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 469,
                     "sourceTitle": "Nerve Labyrinth"
@@ -713,7 +713,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -724,7 +724,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 465,
                     "sourceTitle": "Laser Wire"
@@ -987,7 +987,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_brain_damage_one",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -1044,7 +1044,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 3,
                     "damageType": "net",
@@ -1055,7 +1055,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 446,
                     "sourceTitle": "Data Darts",
@@ -1116,7 +1116,7 @@
             "effectiveStrength": 3,
             "subroutines": [
               {
-                "id": "printed_subroutines_damage_net",
+                "id": "0",
                 "type": "do_damage",
                 "amount": 3,
                 "damageType": "net",
@@ -1127,7 +1127,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_prohibit_break_next_ice",
+                "id": "1",
                 "type": "set_next_encounter_no_break_subroutines",
                 "sourceDefinitionId": 446,
                 "sourceTitle": "Data Darts",
@@ -11110,7 +11110,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 307,
-      "sideSafePlanningFingerprint": "fnv1a:ffc17309"
+      "sideSafePlanningFingerprint": "fnv1a:fbcbfadb"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_stealth_interface_starter_1.0.0",
@@ -18937,7 +18937,7 @@
           "sideSafePlanningFingerprint": "fnv1a:18c3ff9a"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.printed_subroutines_damage_net,printed_subroutines_prohibit_break_next_ice",
+          "actionId": "runner.continue_run.0,1",
           "stateVersion": 305,
           "semanticActionSetFingerprint": "fnv1a:f004f119",
           "invocationKey": "fnv1a:e9f0fcfe"

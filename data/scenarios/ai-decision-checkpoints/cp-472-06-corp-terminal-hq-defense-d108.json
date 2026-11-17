@@ -405,7 +405,7 @@
                   "encounterStrength": 6,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_runner_run_lock_actions",
+                      "id": "0",
                       "type": "set_runner_run_lock_actions",
                       "amount": 6,
                       "sourceDefinitionId": 459,
@@ -415,7 +415,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 459,
                       "sourceTitle": "Haunting Inquisition"
@@ -487,7 +487,7 @@
                   "encounterStrength": 3,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                      "id": "0",
                       "type": "set_next_encounter_lock",
                       "breakTags": [
                         "stun"
@@ -556,7 +556,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                      "id": "0",
                       "type": "set_run_encounter_tax",
                       "amount": 2,
                       "sourceDefinitionId": 434,
@@ -616,7 +616,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 3,
                     "traceSuccessEffect": {
@@ -721,7 +721,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                      "id": "0",
                       "type": "set_run_encounter_tax",
                       "amount": 2,
                       "sourceDefinitionId": 434,
@@ -5620,7 +5620,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 107,
-      "sideSafePlanningFingerprint": "fnv1a:20035288"
+      "sideSafePlanningFingerprint": "fnv1a:2a31d89d"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_rent_to_own_war_engine_1.1.0",

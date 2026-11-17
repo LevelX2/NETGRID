@@ -709,7 +709,7 @@
                   "effectiveStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 450,
                       "sourceTitle": "Data Wall 2.0"
@@ -770,7 +770,7 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 71,
                     "sourceTitle": "Caryatid"
@@ -817,7 +817,7 @@
                   "effectiveStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 450,
                       "sourceTitle": "Data Wall 2.0"
@@ -1073,7 +1073,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -1120,7 +1120,7 @@
                   "effectiveStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 457,
                       "sourceTitle": "Fire Wall"
@@ -6413,7 +6413,7 @@
             "postInstallRezQuoteCardId": "chp",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 195,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6450,7 +6450,7 @@
             "postInstallRezQuoteCardId": "chp",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 195,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6487,7 +6487,7 @@
             "postInstallRezQuoteCardId": "chp",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 195,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6525,7 +6525,7 @@
             "postInstallRezQuoteCardId": "chp",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 195,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6562,7 +6562,7 @@
             "postInstallRezQuoteCardId": "chp",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 195,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8757,7 +8757,7 @@
           "postInstallRezQuoteCardId": "chp",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 195,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8794,7 +8794,7 @@
           "postInstallRezQuoteCardId": "chp",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 195,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8831,7 +8831,7 @@
           "postInstallRezQuoteCardId": "chp",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 195,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8869,7 +8869,7 @@
           "postInstallRezQuoteCardId": "chp",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 195,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8906,7 +8906,7 @@
           "postInstallRezQuoteCardId": "chp",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chp\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 195,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9021,7 +9021,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 195,
-      "sideSafePlanningFingerprint": "fnv1a:bda4a0a2"
+      "sideSafePlanningFingerprint": "fnv1a:ef1664c4"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_mr96xg94_1.2.0",

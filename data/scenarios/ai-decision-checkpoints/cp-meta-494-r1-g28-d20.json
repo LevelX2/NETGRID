@@ -211,7 +211,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -2141,7 +2141,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 19,
-      "sideSafePlanningFingerprint": "fnv1a:06d29da9"
+      "sideSafePlanningFingerprint": "fnv1a:18ec6745"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_prep_economy_pressure_2026_07_01_1.0.0",

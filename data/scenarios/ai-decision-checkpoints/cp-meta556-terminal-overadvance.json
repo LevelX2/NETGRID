@@ -1027,7 +1027,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+                    "id": "0",
                     "type": "rewind_run_to_rezzed_ice_by_die",
                     "sourceDefinitionId": 487,
                     "sourceTitle": "Vacuum Link"
@@ -1068,7 +1068,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 2,
                     "sourceDefinitionId": 437,
@@ -1113,7 +1113,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "sourceDefinitionId": 438,
@@ -1165,7 +1165,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 473,
                       "sourceTitle": "Quandary"
@@ -1227,7 +1227,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 444,
                     "sourceTitle": "Crystal Wall"
@@ -1268,7 +1268,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 462,
                     "sourceTitle": "Ice Pick Willie",
@@ -1277,7 +1277,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 462,
                     "sourceTitle": "Ice Pick Willie"
@@ -1318,7 +1318,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+                    "id": "0",
                     "type": "rewind_run_to_rezzed_ice_by_die",
                     "sourceDefinitionId": 487,
                     "sourceTitle": "Vacuum Link"
@@ -1936,7 +1936,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 444,
                     "sourceTitle": "Crystal Wall"
@@ -1976,7 +1976,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 464,
                     "sourceTitle": "Keeper"
@@ -13240,7 +13240,7 @@
             "postInstallRezQuoteCardId": "c2pa",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2pa\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2pa\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 429,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -13276,7 +13276,7 @@
             "postInstallRezQuoteCardId": "c2pa",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2pa\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2pa\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 429,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -13313,7 +13313,7 @@
             "postInstallRezQuoteCardId": "c2pa",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2pa\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2pa\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 429,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -15580,7 +15580,7 @@
           "postInstallRezQuoteCardId": "c2pa",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2pa\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2pa\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 429,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -15616,7 +15616,7 @@
           "postInstallRezQuoteCardId": "c2pa",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2pa\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2pa\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 429,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -15653,7 +15653,7 @@
           "postInstallRezQuoteCardId": "c2pa",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2pa\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2pa\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 429,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -15770,7 +15770,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 429,
-      "sideSafePlanningFingerprint": "fnv1a:8b2864c2"
+      "sideSafePlanningFingerprint": "fnv1a:1e1a0994"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_original_speed_v10_1.0.0",

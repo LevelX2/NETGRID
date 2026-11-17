@@ -12,7 +12,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("MRGSG recurring draw-tax removal and reserve recovery", () => {
   it("keeps the run owner through trashing and opens a finite refill need afterwards", () => {
     const checkpoint = bindHistoricalRunEventCadence(
-      structuredClone(cp01Json) as AiDecisionCheckpointV1,
+      structuredClone(cp01Json) as unknown as AiDecisionCheckpointV1,
       ["CP-MRGSG-01"],
     );
     let state = checkpoint.engine.testOnlyGameState;

@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -411,12 +412,12 @@ export type RunFlowHost = {
     revealCorpRdTop: (state: GameState, legalAction: LegalAction) => void;
   };
   rng: {
-    nextRandom: (state: GameState, purpose: string) => number;
-    rollDie: (state: GameState, purpose: string) => number;
+    nextRandom: (state: GameState, purpose: RandomPurpose) => number;
+    rollDie: (state: GameState, purpose: RandomPurpose) => number;
     shuffleStateIds: (
       state: GameState,
       ids: CardInstanceId[],
-      purpose: string,
+      purpose: RandomPurpose,
     ) => CardInstanceId[];
   };
   callbacks: {

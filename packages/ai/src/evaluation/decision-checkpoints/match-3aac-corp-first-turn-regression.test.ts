@@ -13,7 +13,7 @@ describe("match 3aac Corp regression evidence", () => {
   it("funds the exact measurable HQ-defense route and installs it instead of completing the turn", () => {
     const checkpoint = structuredClone(
       checkpointJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     checkpoint.expectation.acceptableActions = [
       { actionId: "corp.gain_credit" },
     ];
@@ -135,7 +135,7 @@ describe("match 3aac Corp regression evidence", () => {
 
   it("rejects a three-action purge for one visible virus counter", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(singleCounterPurgeJson) as AiDecisionCheckpointV1,
+      structuredClone(singleCounterPurgeJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);

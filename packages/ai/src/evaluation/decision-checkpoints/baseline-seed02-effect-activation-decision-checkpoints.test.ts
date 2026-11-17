@@ -10,7 +10,7 @@ describe("baseline Seed 02 effect-activation checkpoint", () => {
   it("funds the agenda protection gap through its exact economy continuation", () => {
     const fixture = structuredClone(
       inactiveAgendaProtectionJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     const state = fixture.engine.testOnlyGameState;
     // The native visible Bartmoss/Krash rig and prepared income can now pass
     // Fragmentation Storm. This positive funding control needs a real blocker.
@@ -33,7 +33,7 @@ describe("baseline Seed 02 effect-activation checkpoint", () => {
   it("preserves hand capacity when the native public rig defeats the installed ICE", () => {
     const fixture = structuredClone(
       inactiveAgendaProtectionJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     fixture.expectation = {
       acceptableActions: [{ type: "gain_credit" }],
       planExecution: { acceptablePlanKinds: ["corp.economy"] },
@@ -57,7 +57,7 @@ describe("baseline Seed 02 effect-activation checkpoint", () => {
   it("does not claim a hand-capacity blocker when the Corp has room to draw", () => {
     const fixture = structuredClone(
       inactiveAgendaProtectionJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     const state = fixture.engine.testOnlyGameState;
     RealEngineFixtureBuilder.forState(state).withCorpHqSize(4);
     fixture.source.kind = "synthetic_companion";

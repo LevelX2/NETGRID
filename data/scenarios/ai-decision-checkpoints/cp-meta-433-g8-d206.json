@@ -501,7 +501,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "relative_ice_outside_84.trace.1",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -536,7 +536,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_net_damage_one",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -547,7 +547,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 91,
                     "sourceTitle": "Mobile Barricade"
@@ -592,7 +592,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "net",
@@ -603,7 +603,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 70,
                     "sourceTitle": "Bug Zapper"
@@ -806,7 +806,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_brain_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "core",
@@ -817,7 +817,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 88,
                     "sourceTitle": "Mastermind"
@@ -904,7 +904,7 @@
             "effectiveStrength": 0,
             "subroutines": [
               {
-                "id": "subroutine_relative_brain_damage",
+                "id": "0",
                 "type": "do_damage",
                 "amount": 0,
                 "damageType": "core",
@@ -915,7 +915,7 @@
                 }
               },
               {
-                "id": "subroutine_end_run",
+                "id": "1",
                 "type": "end_the_run",
                 "sourceDefinitionId": 88,
                 "sourceTitle": "Mastermind"
@@ -6521,7 +6521,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.cxd.cxd.cxd.cjp.0.subroutine_relative_brain_damage.205",
+          "actionId": "runner.break_subroutine.cxd.cxd.cxd.cjp.0.0.205",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Morphing Tool: Subroutine 1 brechen",
@@ -6564,7 +6564,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.cxd.cxd.cxd.cjp.1.subroutine_end_run.205",
+          "actionId": "runner.break_subroutine.cxd.cxd.cxd.cjp.1.1.205",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Morphing Tool: Subroutine 2 brechen",
@@ -6606,7 +6606,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.subroutine_relative_brain_damage,subroutine_end_run",
+          "actionId": "runner.continue_run.0,1",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -6619,7 +6619,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 2,
-            "encounterSubroutineIds": "subroutine_relative_brain_damage,subroutine_end_run",
+            "encounterSubroutineIds": "0,1",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -8978,7 +8978,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.cxd.cxd.cxd.cjp.0.subroutine_relative_brain_damage.205",
+        "actionId": "runner.break_subroutine.cxd.cxd.cxd.cjp.0.0.205",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Morphing Tool: Subroutine 1 brechen",
@@ -9021,7 +9021,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.cxd.cxd.cxd.cjp.1.subroutine_end_run.205",
+        "actionId": "runner.break_subroutine.cxd.cxd.cxd.cjp.1.1.205",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Morphing Tool: Subroutine 2 brechen",
@@ -9063,7 +9063,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.subroutine_relative_brain_damage,subroutine_end_run",
+        "actionId": "runner.continue_run.0,1",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -9076,7 +9076,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 2,
-          "encounterSubroutineIds": "subroutine_relative_brain_damage,subroutine_end_run",
+          "encounterSubroutineIds": "0,1",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -9127,7 +9127,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 205,
-      "sideSafePlanningFingerprint": "fnv1a:b73eb91c"
+      "sideSafePlanningFingerprint": "fnv1a:d668c370"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",
@@ -16745,7 +16745,7 @@
           "sideSafePlanningFingerprint": "fnv1a:bd771feb"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.subroutine_relative_brain_damage,subroutine_end_run",
+          "actionId": "runner.continue_run.0,1",
           "stateVersion": 205,
           "semanticActionSetFingerprint": "fnv1a:a5067e90",
           "invocationKey": "fnv1a:c293e5bf"
@@ -16759,7 +16759,7 @@
         "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A205",
         "sourceStepId": "plan:runner.convert_run_window:run%3A205:convert",
-        "originalActionId": "runner.continue_run.subroutine_relative_brain_damage,subroutine_end_run",
+        "originalActionId": "runner.continue_run.0,1",
         "selectedAtStateVersion": 205
       }
     }

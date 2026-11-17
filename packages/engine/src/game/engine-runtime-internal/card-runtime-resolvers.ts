@@ -1,3 +1,4 @@
+import type { RandomHqDiscardContext } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { engineCardByDefinitionId } from "@netgrid/cards/engine";
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
@@ -696,7 +697,7 @@ export function createCardRuntimeResolvers(
     const discardedIds = randomCorpHqDiscard(
       state,
       candidate.amount,
-      `hidden_resource.post_meat_damage.${candidate.definitionId}.${choice.choiceId}`,
+      [52, candidate.definitionId, choice.stateVersion],
     );
     delete state.pendingChoice;
     legalAction.payload = {
@@ -715,7 +716,7 @@ export function createCardRuntimeResolvers(
   function randomCorpHqDiscard(
     state: GameState,
     amount: number,
-    purposePrefix: string,
+    purposePrefix: RandomHqDiscardContext,
   ): CardInstanceId[] {
     const discarded: CardInstanceId[] = [];
     const discardCount = Math.min(
@@ -723,7 +724,7 @@ export function createCardRuntimeResolvers(
       state.corp.hq.length,
     );
     for (let index = 0; index < discardCount; index += 1) {
-      const value = nextRandom(state, `${purposePrefix}:selection:${index}`);
+      const value = nextRandom(state, [...purposePrefix, index]);
       const selectedIndex = Math.floor(value * state.corp.hq.length);
       const cardId = mustArrayValue(
         state.corp.hq,
@@ -1254,7 +1255,7 @@ export function createCardRuntimeResolvers(
     } else {
       deps.shuffleRunnerStack(
         state,
-        `runner_event_trash_grip_search:${sourceDefinitionId}:empty_search`,
+        [50, sourceDefinitionId],
       );
     }
     legalAction.payload = {
@@ -1406,6 +1407,7 @@ export function createCardRuntimeResolvers(
       damageType: "core",
       amount,
       source: `runner_event:${sourceDefinitionId}`,
+      randomSource: ["c", sourceDefinitionId],
     });
     const gainedCredits =
       amount * Math.max(0, Math.floor(longtail.creditsPerDamage));
@@ -1492,7 +1494,7 @@ export function createCardRuntimeResolvers(
     const rolls = [0, 1, 2].map((index) =>
       rollDeterministicDie(
         state,
-        `v1921.die.${sourceDefinitionId}.three_dice.${index + 1}`,
+        [23, sourceDefinitionId, index + 1],
       ),
     );
     const gainedCredits = rolls.reduce((sum, roll) => sum + roll, 0);

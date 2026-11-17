@@ -303,7 +303,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -3696,7 +3696,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 51,
-      "sideSafePlanningFingerprint": "fnv1a:d9749f2f"
+      "sideSafePlanningFingerprint": "fnv1a:53bb3df9"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_cybernetics_risk_rig_2026_07_01_1.0.0",

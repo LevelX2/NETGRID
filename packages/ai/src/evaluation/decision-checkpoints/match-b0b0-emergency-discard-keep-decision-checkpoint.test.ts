@@ -9,7 +9,7 @@ describe("match B0B0 runner emergency discard checkpoint", () => {
   it("retains flatline prevention while the defense plan confirms lethal pressure", () => {
     const checkpoint = structuredClone(
       checkpointJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     const result = runAiDecisionCheckpoint(checkpoint);
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);

@@ -250,7 +250,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                    "id": "0",
                     "type": "set_next_encounter_lock",
                     "breakTags": [
                       "stun"
@@ -306,7 +306,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -408,7 +408,7 @@
             "effectiveStrength": 3,
             "subroutines": [
               {
-                "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                "id": "0",
                 "type": "set_next_encounter_lock",
                 "breakTags": [
                   "stun"
@@ -2614,7 +2614,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+          "actionId": "runner.continue_run.0",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen",
@@ -2627,7 +2627,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+            "encounterSubroutineIds": "0",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": false,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -4591,7 +4591,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+        "actionId": "runner.continue_run.0",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen",
@@ -4604,7 +4604,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+          "encounterSubroutineIds": "0",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": false,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -4655,7 +4655,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 86,
-      "sideSafePlanningFingerprint": "fnv1a:dcb8405e"
+      "sideSafePlanningFingerprint": "fnv1a:a901c55f"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "runner",
   "stateVersion": 445,
-  "stateHash": "fnv1a:f4eac286",
+  "stateHash": "fnv1a:f00a475f",
   "input": {
     "matchId": "match_f81e00f89b013612",
     "side": "runner",
@@ -679,7 +679,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                    "id": "0",
                     "type": "set_run_encounter_tax",
                     "amount": 2,
                     "sourceDefinitionId": 434,
@@ -720,7 +720,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions",
+                    "id": "0",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -730,7 +730,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
@@ -809,7 +809,7 @@
                 "encounterStrength": 8,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 6,
                     "traceSuccessEffect": {
@@ -1114,7 +1114,7 @@
                 "encounterStrength": 7,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -1125,7 +1125,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_net.scored_rezzed_ice_mark_modifier.1",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -1136,7 +1136,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_net_a",
+                    "id": "2",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -1147,7 +1147,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_net_a.scored_rezzed_ice_mark_modifier.1",
+                    "id": "3",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -1158,25 +1158,25 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "4",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run.scored_rezzed_ice_mark_modifier.1",
+                    "id": "5",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a",
+                    "id": "6",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a.scored_rezzed_ice_mark_modifier.1",
+                    "id": "7",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
@@ -1308,7 +1308,7 @@
             "encounterStrength": 7,
             "subroutines": [
               {
-                "id": "printed_subroutines_damage_net",
+                "id": "0",
                 "type": "do_damage",
                 "amount": 2,
                 "damageType": "net",
@@ -1319,7 +1319,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_damage_net.scored_rezzed_ice_mark_modifier.1",
+                "id": "1",
                 "type": "do_damage",
                 "amount": 2,
                 "damageType": "net",
@@ -1330,7 +1330,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_damage_net_a",
+                "id": "2",
                 "type": "do_damage",
                 "amount": 2,
                 "damageType": "net",
@@ -1341,7 +1341,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_damage_net_a.scored_rezzed_ice_mark_modifier.1",
+                "id": "3",
                 "type": "do_damage",
                 "amount": 2,
                 "damageType": "net",
@@ -1352,25 +1352,25 @@
                 }
               },
               {
-                "id": "printed_subroutines_end_the_run",
+                "id": "4",
                 "type": "end_the_run",
                 "sourceDefinitionId": 490,
                 "sourceTitle": "Wall of Ice"
               },
               {
-                "id": "printed_subroutines_end_the_run.scored_rezzed_ice_mark_modifier.1",
+                "id": "5",
                 "type": "end_the_run",
                 "sourceDefinitionId": 490,
                 "sourceTitle": "Wall of Ice"
               },
               {
-                "id": "printed_subroutines_end_the_run_a",
+                "id": "6",
                 "type": "end_the_run",
                 "sourceDefinitionId": 490,
                 "sourceTitle": "Wall of Ice"
               },
               {
-                "id": "printed_subroutines_end_the_run_a.scored_rezzed_ice_mark_modifier.1",
+                "id": "7",
                 "type": "end_the_run",
                 "sourceDefinitionId": 490,
                 "sourceTitle": "Wall of Ice"
@@ -14728,7 +14728,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_damage_net,printed_subroutines_damage_net.scored_rezzed_ice_mark_modifier.1,printed_subroutines_damage_net_a,printed_subroutines_damage_net_a.scored_rezzed_ice_mark_modifier.1,printed_subroutines_end_the_run,printed_subroutines_end_the_run.scored_rezzed_ice_mark_modifier.1,printed_subroutines_end_the_run_a,printed_subroutines_end_the_run_a.scored_rezzed_ice_mark_modifier.1",
+          "actionId": "runner.continue_run.0,1,2,3,4,5,6,7",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -14741,7 +14741,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 8,
-            "encounterSubroutineIds": "printed_subroutines_damage_net,printed_subroutines_damage_net.scored_rezzed_ice_mark_modifier.1,printed_subroutines_damage_net_a,printed_subroutines_damage_net_a.scored_rezzed_ice_mark_modifier.1,printed_subroutines_end_the_run,printed_subroutines_end_the_run.scored_rezzed_ice_mark_modifier.1,printed_subroutines_end_the_run_a,printed_subroutines_end_the_run_a.scored_rezzed_ice_mark_modifier.1",
+            "encounterSubroutineIds": "0,1,2,3,4,5,6,7",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -17151,7 +17151,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_damage_net,printed_subroutines_damage_net.scored_rezzed_ice_mark_modifier.1,printed_subroutines_damage_net_a,printed_subroutines_damage_net_a.scored_rezzed_ice_mark_modifier.1,printed_subroutines_end_the_run,printed_subroutines_end_the_run.scored_rezzed_ice_mark_modifier.1,printed_subroutines_end_the_run_a,printed_subroutines_end_the_run_a.scored_rezzed_ice_mark_modifier.1",
+        "actionId": "runner.continue_run.0,1,2,3,4,5,6,7",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -17164,7 +17164,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 8,
-          "encounterSubroutineIds": "printed_subroutines_damage_net,printed_subroutines_damage_net.scored_rezzed_ice_mark_modifier.1,printed_subroutines_damage_net_a,printed_subroutines_damage_net_a.scored_rezzed_ice_mark_modifier.1,printed_subroutines_end_the_run,printed_subroutines_end_the_run.scored_rezzed_ice_mark_modifier.1,printed_subroutines_end_the_run_a,printed_subroutines_end_the_run_a.scored_rezzed_ice_mark_modifier.1",
+          "encounterSubroutineIds": "0,1,2,3,4,5,6,7",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -17215,7 +17215,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 445,
-      "sideSafePlanningFingerprint": "fnv1a:d6c4cc5e"
+      "sideSafePlanningFingerprint": "fnv1a:5797ed7d"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_deep_market_engine_1.0.0",

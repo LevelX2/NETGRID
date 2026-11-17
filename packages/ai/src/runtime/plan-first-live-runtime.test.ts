@@ -5864,7 +5864,7 @@ describe("authoritative plan-first live runtime", () => {
           encounterContinue: true,
           encounterWillEndRun: true,
           unbrokenSubroutineCount: 1,
-          encounterSubroutineIds: "printed_subroutines_end_the_run",
+          encounterSubroutineIds: "0",
         },
       },
     );
@@ -5924,7 +5924,7 @@ describe("authoritative plan-first live runtime", () => {
         effectiveStrength: 4,
         subroutines: [
           {
-            id: "printed_subroutines_end_the_run",
+            id: "0",
             type: "end_the_run",
             sourceDefinitionId: 457,
           },
@@ -6174,7 +6174,7 @@ describe("authoritative plan-first live runtime", () => {
             sourceDefinitionId: 487,
             unbrokenSubroutineCount: 1,
             encounterSubroutineIds:
-              "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+              "0",
           },
         },
       );
@@ -6206,7 +6206,7 @@ describe("authoritative plan-first live runtime", () => {
           effectiveStrength: 5,
           subroutines: [
             {
-              id: "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+              id: "0",
               type: "rewind_run_to_rezzed_ice_by_die",
               sourceDefinitionId: 487,
               sourceTitle: "Vacuum Link",
@@ -6234,7 +6234,7 @@ describe("authoritative plan-first live runtime", () => {
           effectiveStrength: 2,
           subroutines: [
             {
-              id: "printed_subroutines_end_the_run",
+              id: "0",
               type: "end_the_run",
               sourceDefinitionId: 491,
               sourceTitle: "Wall of Static",
@@ -24110,7 +24110,7 @@ describe("authoritative plan-first live runtime", () => {
           encounterContinue: true,
           encounterWillEndRun: true,
           unbrokenSubroutineCount: 1,
-          encounterSubroutineIds: "printed_subroutines_end_the_run",
+          encounterSubroutineIds: "0",
           sourceDefinitionId: 473,
         },
       },
@@ -24148,7 +24148,7 @@ describe("authoritative plan-first live runtime", () => {
             effectiveStrength: 2,
             subroutines: [
               {
-                id: "printed_subroutines_end_the_run",
+                id: "0",
                 type: "end_the_run",
                 sourceDefinitionId: 473,
               },

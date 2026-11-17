@@ -4,7 +4,7 @@
     "provenance": "reconstructed_from_persisted_decision_sources",
     "actor": "runner",
     "stateVersion": 318,
-    "stateHash": "fnv1a:33839cdd",
+    "stateHash": "fnv1a:65d0ea5d",
     "input": {
       "matchId": "match_7abe67737c3278b1",
       "side": "runner",
@@ -606,7 +606,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 456,
                       "sourceTitle": "Filter"
@@ -637,7 +637,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 464,
                       "sourceTitle": "Keeper"
@@ -668,7 +668,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 491,
                       "sourceTitle": "Wall of Static"
@@ -699,7 +699,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 457,
                       "sourceTitle": "Fire Wall"
@@ -730,7 +730,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 491,
                       "sourceTitle": "Wall of Static"
@@ -762,7 +762,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_trace",
+                      "id": "0",
                       "type": "initiate_trace",
                       "traceLimit": 5,
                       "traceSuccessEffect": {
@@ -811,7 +811,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 473,
                       "sourceTitle": "Quandary"
@@ -1157,7 +1157,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 456,
                       "sourceTitle": "Filter"
@@ -1213,7 +1213,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 464,
                       "sourceTitle": "Keeper"
@@ -1244,7 +1244,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 473,
                       "sourceTitle": "Quandary"
@@ -12966,7 +12966,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 318,
-        "sideSafePlanningFingerprint": "fnv1a:e0fa23c7"
+        "sideSafePlanningFingerprint": "fnv1a:b6611f71"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",
@@ -20780,843 +20780,1252 @@
     "randomDrawRecords": [
       {
         "counter": 0,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.9325318902836276
+        "purpose": [
+          1
+        ],
+        "value": 0.5080922314437419
       },
       {
         "counter": 1,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.3994413476153036
+        "purpose": [
+          1
+        ],
+        "value": 0.7703322788010756
       },
       {
         "counter": 2,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.2182604054380326
+        "purpose": [
+          1
+        ],
+        "value": 0.43253745917460273
       },
       {
         "counter": 3,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.4966264053984927
+        "purpose": [
+          1
+        ],
+        "value": 0.060412730158792005
       },
       {
         "counter": 4,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.07246923997381383
+        "purpose": [
+          1
+        ],
+        "value": 0.5399439610279048
       },
       {
         "counter": 5,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.16059273139670738
+        "purpose": [
+          1
+        ],
+        "value": 0.6039994521429084
       },
       {
         "counter": 6,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.10984843124202825
+        "purpose": [
+          1
+        ],
+        "value": 0.30474153561360884
       },
       {
         "counter": 7,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.3851429573383952
+        "purpose": [
+          1
+        ],
+        "value": 0.8014236533277893
       },
       {
         "counter": 8,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.2995298640070304
+        "purpose": [
+          1
+        ],
+        "value": 0.3813141431574508
       },
       {
         "counter": 9,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.28235046919626916
+        "purpose": [
+          1
+        ],
+        "value": 0.07558708820181448
       },
       {
         "counter": 10,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8775205653855658
+        "purpose": [
+          1
+        ],
+        "value": 0.820197934202159
       },
       {
         "counter": 11,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8035541893125091
+        "purpose": [
+          1
+        ],
+        "value": 0.578427507764116
       },
       {
         "counter": 12,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8730255235435667
+        "purpose": [
+          1
+        ],
+        "value": 0.13333760369776437
       },
       {
         "counter": 13,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8283982712390339
+        "purpose": [
+          1
+        ],
+        "value": 0.880337730585958
       },
       {
         "counter": 14,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.824713664664058
+        "purpose": [
+          1
+        ],
+        "value": 0.17046793761408885
       },
       {
         "counter": 15,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.7924186351231008
+        "purpose": [
+          1
+        ],
+        "value": 0.048213212570648145
       },
       {
         "counter": 16,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.4299095788152999
+        "purpose": [
+          1
+        ],
+        "value": 0.2925425764611055
       },
       {
         "counter": 17,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.9272688968535158
+        "purpose": [
+          1
+        ],
+        "value": 0.5827409282318157
       },
       {
         "counter": 18,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.33399259765958833
+        "purpose": [
+          1
+        ],
+        "value": 0.2617196343092838
       },
       {
         "counter": 19,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.31190390708376226
+        "purpose": [
+          1
+        ],
+        "value": 0.9372494714500376
       },
       {
         "counter": 20,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.013915439383688444
+        "purpose": [
+          1
+        ],
+        "value": 0.9836967293641625
       },
       {
         "counter": 21,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.15663727128354787
+        "purpose": [
+          1
+        ],
+        "value": 0.6233940880032431
       },
       {
         "counter": 22,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.6434800215303961
+        "purpose": [
+          1
+        ],
+        "value": 0.48342283909924744
       },
       {
         "counter": 23,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.3878779155471872
+        "purpose": [
+          1
+        ],
+        "value": 0.5835072894529004
       },
       {
         "counter": 24,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.5535303614492165
+        "purpose": [
+          1
+        ],
+        "value": 0.17302975915194596
       },
       {
         "counter": 25,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.21710288163929425
+        "purpose": [
+          1
+        ],
+        "value": 0.9473402912738315
       },
       {
         "counter": 26,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.08767783415095332
+        "purpose": [
+          1
+        ],
+        "value": 0.9392638115753881
       },
       {
         "counter": 27,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.702508108288165
+        "purpose": [
+          1
+        ],
+        "value": 0.004710889763051451
       },
       {
         "counter": 28,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.2692300308258295
+        "purpose": [
+          1
+        ],
+        "value": 0.7796568209937784
       },
       {
         "counter": 29,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.6621842333819681
+        "purpose": [
+          1
+        ],
+        "value": 0.04793870637409736
       },
       {
         "counter": 30,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.18439877559526507
+        "purpose": [
+          1
+        ],
+        "value": 0.4152046362774495
       },
       {
         "counter": 31,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.6325373668574642
+        "purpose": [
+          1
+        ],
+        "value": 0.722553009831736
       },
       {
         "counter": 32,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.9571856935560786
+        "purpose": [
+          1
+        ],
+        "value": 0.314362949850849
       },
       {
         "counter": 33,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.4385786806930657
+        "purpose": [
+          1
+        ],
+        "value": 0.18497852575914975
       },
       {
         "counter": 34,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.21083697659144374
+        "purpose": [
+          1
+        ],
+        "value": 0.34114912126346053
       },
       {
         "counter": 35,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8762981226392914
+        "purpose": [
+          1
+        ],
+        "value": 0.01688055621227058
       },
       {
         "counter": 36,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.6009323741020115
+        "purpose": [
+          1
+        ],
+        "value": 0.983354345019502
       },
       {
         "counter": 37,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.7656795538569682
+        "purpose": [
+          1
+        ],
+        "value": 0.7072871980103457
       },
       {
         "counter": 38,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.07642175969924214
+        "purpose": [
+          1
+        ],
+        "value": 0.11540025716958047
       },
       {
         "counter": 39,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.912743077336319
+        "purpose": [
+          1
+        ],
+        "value": 0.37448176111067477
       },
       {
         "counter": 40,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.14224991215255978
+        "purpose": [
+          1
+        ],
+        "value": 0.7358353002724546
       },
       {
         "counter": 41,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.7893854062564212
+        "purpose": [
+          1
+        ],
+        "value": 0.8255815480397058
       },
       {
         "counter": 42,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.3815094238114798
+        "purpose": [
+          1
+        ],
+        "value": 0.9533365928341875
       },
       {
         "counter": 43,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.9211239557695815
+        "purpose": [
+          1
+        ],
+        "value": 0.9714120244913046
       },
       {
         "counter": 44,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.35817520947368864
+        "purpose": [
+          2
+        ],
+        "value": 0.6840847385365594
       },
       {
         "counter": 45,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7423768357469035
+        "purpose": [
+          2
+        ],
+        "value": 0.633794902308498
       },
       {
         "counter": 46,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.3005808781578181
+        "purpose": [
+          2
+        ],
+        "value": 0.13289398874169445
       },
       {
         "counter": 47,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.6332379054179108
+        "purpose": [
+          2
+        ],
+        "value": 0.5415637910583309
       },
       {
         "counter": 48,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.22287133235553724
+        "purpose": [
+          2
+        ],
+        "value": 0.28561119328633533
       },
       {
         "counter": 49,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.2704719362766862
+        "purpose": [
+          2
+        ],
+        "value": 0.9178280876224748
       },
       {
         "counter": 50,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.9940197498220655
+        "purpose": [
+          2
+        ],
+        "value": 0.30125947773912076
       },
       {
         "counter": 51,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.12136742782520082
+        "purpose": [
+          2
+        ],
+        "value": 0.9332240318864725
       },
       {
         "counter": 52,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.2626188388542089
+        "purpose": [
+          2
+        ],
+        "value": 0.2703631345826012
       },
       {
         "counter": 53,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.18801281880698728
+        "purpose": [
+          2
+        ],
+        "value": 0.11420070676570826
       },
       {
         "counter": 54,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.9583782856448163
+        "purpose": [
+          2
+        ],
+        "value": 0.23216931515433692
       },
       {
         "counter": 55,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.4341596820844088
+        "purpose": [
+          2
+        ],
+        "value": 0.3345376177615711
       },
       {
         "counter": 56,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.48840849505980666
+        "purpose": [
+          2
+        ],
+        "value": 0.6594231072888131
       },
       {
         "counter": 57,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.5875009115369889
+        "purpose": [
+          2
+        ],
+        "value": 0.7722208864267007
       },
       {
         "counter": 58,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.009065960005012141
+        "purpose": [
+          2
+        ],
+        "value": 0.4115686744230931
       },
       {
         "counter": 59,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.19557496667065244
+        "purpose": [
+          2
+        ],
+        "value": 0.6057702353423351
       },
       {
         "counter": 60,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.3878680780474457
+        "purpose": [
+          2
+        ],
+        "value": 0.48193558342450105
       },
       {
         "counter": 61,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7509799612779241
+        "purpose": [
+          2
+        ],
+        "value": 0.0036412833183711024
       },
       {
         "counter": 62,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.342097225618338
+        "purpose": [
+          2
+        ],
+        "value": 0.6441328610285617
       },
       {
         "counter": 63,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.699230206216066
+        "purpose": [
+          2
+        ],
+        "value": 0.3328448531219602
       },
       {
         "counter": 64,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7800777323899615
+        "purpose": [
+          2
+        ],
+        "value": 0.9968047248985741
       },
       {
         "counter": 65,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.00940164027133239
+        "purpose": [
+          2
+        ],
+        "value": 0.2699029323165243
       },
       {
         "counter": 66,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7284754325737414
+        "purpose": [
+          2
+        ],
+        "value": 0.8134842123228372
       },
       {
         "counter": 67,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.906181657298726
+        "purpose": [
+          2
+        ],
+        "value": 0.3965620099489259
       },
       {
         "counter": 68,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.34039457878568424
+        "purpose": [
+          2
+        ],
+        "value": 0.3102480110982032
       },
       {
         "counter": 69,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.4934165705027409
+        "purpose": [
+          2
+        ],
+        "value": 0.6711126256205101
       },
       {
         "counter": 70,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.293816519397642
+        "purpose": [
+          2
+        ],
+        "value": 0.305150355062345
       },
       {
         "counter": 71,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.06443236317226997
+        "purpose": [
+          2
+        ],
+        "value": 0.7321238920882897
       },
       {
         "counter": 72,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.36326566188755427
+        "purpose": [
+          2
+        ],
+        "value": 0.1178527189712767
       },
       {
         "counter": 73,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.8990622244424258
+        "purpose": [
+          2
+        ],
+        "value": 0.028066083607173886
       },
       {
         "counter": 74,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.4502143062524948
+        "purpose": [
+          2
+        ],
+        "value": 0.8952869083408317
       },
       {
         "counter": 75,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.19544272629853054
+        "purpose": [
+          2
+        ],
+        "value": 0.8077569768341726
       },
       {
         "counter": 76,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.22809622378899408
+        "purpose": [
+          2
+        ],
+        "value": 0.861351336562422
       },
       {
         "counter": 77,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7898839648541456
+        "purpose": [
+          2
+        ],
+        "value": 0.7687066087134161
       },
       {
         "counter": 78,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.6956037083864963
+        "purpose": [
+          2
+        ],
+        "value": 0.5345564578243457
       },
       {
         "counter": 79,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.5107101803667518
+        "purpose": [
+          2
+        ],
+        "value": 0.3638890683195327
       },
       {
         "counter": 80,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.8009453755991238
+        "purpose": [
+          2
+        ],
+        "value": 0.782900114618243
       },
       {
         "counter": 81,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.011577742939036018
+        "purpose": [
+          2
+        ],
+        "value": 0.3063751992906951
       },
       {
         "counter": 82,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.1678606599029543
+        "purpose": [
+          2
+        ],
+        "value": 0.05177638659883865
       },
       {
         "counter": 83,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.25160050760976194
+        "purpose": [
+          2
+        ],
+        "value": 0.8940548263766184
       },
       {
         "counter": 84,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.8099049815666313
+        "purpose": [
+          2
+        ],
+        "value": 0.5561530229649746
       },
       {
         "counter": 85,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.1497244170999752
+        "purpose": [
+          2
+        ],
+        "value": 0.37747673091234557
       },
       {
         "counter": 86,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.09580643774319908
+        "purpose": [
+          2
+        ],
+        "value": 0.439649773899605
       },
       {
         "counter": 87,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.12113468192947019
+        "purpose": [
+          2
+        ],
+        "value": 0.10123704555783142
       },
       {
         "counter": 88,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.7106405390638179
+        "purpose": [
+          3
+        ],
+        "value": 0.6704740953370533
       },
       {
         "counter": 89,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.01000742648971431
+        "purpose": [
+          3
+        ],
+        "value": 0.3563490238571009
       },
       {
         "counter": 90,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.5839088013398027
+        "purpose": [
+          3
+        ],
+        "value": 0.45229746205173593
       },
       {
         "counter": 91,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.6426717672945652
+        "purpose": [
+          3
+        ],
+        "value": 0.7107841471844665
       },
       {
         "counter": 92,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.24482887035940437
+        "purpose": [
+          3
+        ],
+        "value": 0.38550975516744457
       },
       {
         "counter": 93,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.012836172835521853
+        "purpose": [
+          4
+        ],
+        "value": 0.8780147072224928
       },
       {
         "counter": 94,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.6209816537808053
+        "purpose": [
+          4
+        ],
+        "value": 0.9579532465021515
       },
       {
         "counter": 95,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.20986723987770906
+        "purpose": [
+          4
+        ],
+        "value": 0.6701965263842378
       },
       {
         "counter": 96,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.0699162770695464
+        "purpose": [
+          4
+        ],
+        "value": 0.11892059497968577
       },
       {
         "counter": 97,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.28741282511881494
+        "purpose": [
+          4
+        ],
+        "value": 0.6873330354826135
       },
       {
         "counter": 98,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.32191015611317675
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.03394978819967265
       },
       {
         "counter": 99,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.4903525925369018
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.24099364202651852
       },
       {
         "counter": 100,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.5964821034144077
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.6281908490652411
       },
       {
         "counter": 101,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.7051413303229984
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.13508964630586373
       },
       {
         "counter": 102,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.7083570934683884
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.5072431909772525
       },
       {
         "counter": 103,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.9957554188384621
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.24346841096765615
       },
       {
         "counter": 104,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.2844238043356089
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.03989191164566375
       },
       {
         "counter": 105,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.32527729768171254
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.7427137118244626
       },
       {
         "counter": 106,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.16639741260946828
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.3551755427363148
       },
       {
         "counter": 107,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.326658628750115
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.43092584302125114
       },
       {
         "counter": 108,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.6627402580659735
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.3387269531443683
       },
       {
         "counter": 109,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.8950046070983606
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.48185886474605766
       },
       {
         "counter": 110,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.3841296062249363
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.12445248043396251
       },
       {
         "counter": 111,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.1757354312602447
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.08950610391987557
       },
       {
         "counter": 112,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.2508900781164163
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.6065892892003548
       },
       {
         "counter": 113,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.9774638350855793
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.9177220637350182
       },
       {
         "counter": 114,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.3338813774732132
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.6667177477989275
       },
       {
         "counter": 115,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.808231615736412
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.7367803167239364
       },
       {
         "counter": 116,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.5935235945319738
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.9737571412006627
       },
       {
         "counter": 117,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.15292224891829587
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.3042461747954506
       },
       {
         "counter": 118,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.6165995017108042
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.7638232960924343
       },
       {
         "counter": 119,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.6938424793103151
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.7694899379429841
       },
       {
         "counter": 120,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.06819115147586252
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.4926851619587007
       },
       {
         "counter": 121,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.7034360631365902
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.3343951005361453
       },
       {
         "counter": 122,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.9591676603177439
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.9374207397516209
       },
       {
         "counter": 123,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.8935652855548795
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.34360034936462336
       },
       {
         "counter": 124,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.6319837209172978
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.2782959989738861
       },
       {
         "counter": 125,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.031931985041438016
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.5312878686288481
       },
       {
         "counter": 126,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.3445434435418758
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.7655420827003594
       },
       {
         "counter": 127,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.22803007358991745
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.3393791327170069
       },
       {
         "counter": 128,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.30668538089772435
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.834953043759933
       },
       {
         "counter": 129,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.9528062414059689
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.040517779559752776
       },
       {
         "counter": 130,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.9860058684408397
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.12893361405099868
       },
       {
         "counter": 131,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_110:shuffle",
-        "value": 0.8031847770639713
+        "purpose": [
+          46,
+          110
+        ],
+        "value": 0.4051770027750403
       },
       {
         "counter": 132,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.5571875630774089
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.35138286225126136
       },
       {
         "counter": 133,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.15911915182968273
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.038546155991087794
       },
       {
         "counter": 134,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.5890298445218538
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.466003575087222
       },
       {
         "counter": 135,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.7401470574670537
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.9311311440247916
       },
       {
         "counter": 136,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.45894365072389465
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.6309177348520154
       },
       {
         "counter": 137,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.2855381547697252
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.20988420710562783
       },
       {
         "counter": 138,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.806753950031451
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.22959280060900134
       },
       {
         "counter": 139,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.7711108127774681
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.8596044838377187
       },
       {
         "counter": 140,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.7026730180078301
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.7302416375013941
       },
       {
         "counter": 141,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.6474347167469846
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.20360117299999048
       },
       {
         "counter": 142,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.676277718542502
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.7677630764698642
       },
       {
         "counter": 143,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.5774375117439352
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.27205036190923904
       },
       {
         "counter": 144,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.10738250171400099
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.6174043600995032
       },
       {
         "counter": 145,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.06071078021585419
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.1819810486065293
       },
       {
         "counter": 146,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.4830006996259728
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.8747576003575085
       },
       {
         "counter": 147,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.20819764361675386
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.345268672766757
       },
       {
         "counter": 148,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.15073530979021754
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.7776096141663023
       },
       {
         "counter": 149,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.9342974890675655
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.014904882896965455
       },
       {
         "counter": 150,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.143107133537954
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.8228788783555133
       },
       {
         "counter": 151,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.7568423227823936
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.324337757855792
       },
       {
         "counter": 152,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.35224970345123274
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.2036819443017326
       },
       {
         "counter": 153,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.3743010838947467
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.948933991702117
       },
       {
         "counter": 154,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.4530794817144024
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.19554452212357898
       },
       {
         "counter": 155,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.2605160858150132
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.6707973957784418
       },
       {
         "counter": 156,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.33547457829462923
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.35836001792749195
       },
       {
         "counter": 157,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.6548705100204784
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.19450181848768666
       },
       {
         "counter": 158,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.8334920249151709
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.5400363250407773
       },
       {
         "counter": 159,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.3344590628600991
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.1944753758046931
       },
       {
         "counter": 160,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.5682291932736755
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.7553713821394181
       },
       {
         "counter": 161,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.2811164996322788
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.23122339970647876
       },
       {
         "counter": 162,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.679021748941506
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.22575071707969585
       },
       {
         "counter": 163,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.25187953205060565
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.166708007082778
       },
       {
         "counter": 164,
-        "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_128:shuffle",
-        "value": 0.3032256417518425
+        "purpose": [
+          46,
+          128
+        ],
+        "value": 0.06990608613828442
       },
       {
         "counter": 165,
-        "purpose": "hq_multiaccess:151:selection:0",
-        "value": 0.19281871293929664
+        "purpose": [
+          10,
+          151,
+          0
+        ],
+        "value": 0.12849134980735533
       },
       {
         "counter": 166,
-        "purpose": "hq_multiaccess:151:selection:1",
-        "value": 0.4636946173786741
+        "purpose": [
+          10,
+          151,
+          1
+        ],
+        "value": 0.6493949202471477
       },
       {
         "counter": 167,
-        "purpose": "hq_multiaccess:189:selection:0",
-        "value": 0.8365152126082165
+        "purpose": [
+          10,
+          189,
+          0
+        ],
+        "value": 0.4841252720694177
       }
     ],
     "aiTurnPlanRandomCounter": 0,
@@ -23458,7 +23867,7 @@
                 "postInstallRezQuoteBaseCredits": 0,
                 "postInstallRezQuoteFinalCredits": 0,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -23540,7 +23949,7 @@
                 "postInstallRezQuoteBaseCredits": 2,
                 "postInstallRezQuoteFinalCredits": 2,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xa\",\"iceDefinitionId\":473,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":473,\"sourceTitle\":\"Quandary\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xa\",\"iceDefinitionId\":473,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":473,\"sourceTitle\":\"Quandary\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -24048,11 +24457,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+              "actionId": "runner.continue_run.0",
               "clientKnownStateVersion": 12
             },
             "legalAction": {
-              "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+              "actionId": "runner.continue_run.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen (Run endet)",
@@ -24068,8 +24477,8 @@
                 "unbrokenSubroutineCount": 1,
                 "encounterWillEndRun": true,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "printed_subroutines_end_the_run",
-                "encounterRemainingSubroutineIds": "printed_subroutines_end_the_run",
+                "encounterSubroutineIds": "0",
+                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access"
@@ -24260,7 +24669,7 @@
                 "postInstallRezQuoteBaseCredits": 0,
                 "postInstallRezQuoteFinalCredits": 0,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2tj\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2tj\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -24616,11 +25025,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+              "actionId": "runner.continue_run.0",
               "clientKnownStateVersion": 21
             },
             "legalAction": {
-              "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+              "actionId": "runner.continue_run.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen (Run endet)",
@@ -24636,8 +25045,8 @@
                 "unbrokenSubroutineCount": 1,
                 "encounterWillEndRun": true,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "printed_subroutines_end_the_run",
-                "encounterRemainingSubroutineIds": "printed_subroutines_end_the_run",
+                "encounterSubroutineIds": "0",
+                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access"
@@ -24837,11 +25246,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+              "actionId": "runner.continue_run.0",
               "clientKnownStateVersion": 24
             },
             "legalAction": {
-              "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+              "actionId": "runner.continue_run.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen (Run endet)",
@@ -24857,8 +25266,8 @@
                 "unbrokenSubroutineCount": 1,
                 "encounterWillEndRun": true,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "printed_subroutines_end_the_run",
-                "encounterRemainingSubroutineIds": "printed_subroutines_end_the_run",
+                "encounterSubroutineIds": "0",
+                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access"
@@ -28772,11 +29181,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xa.0.printed_subroutines_end_the_run.205",
+              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xa.0.0.205",
               "clientKnownStateVersion": 80
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xa.0.printed_subroutines_end_the_run.205",
+              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xa.0.0.205",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Morphing Tool: Subroutine brechen",
@@ -28810,7 +29219,7 @@
                 "breakerId": "cxd",
                 "iceId": "c2xa",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 473,
                 "targetIceTitle": "Quandary",
                 "breakSubroutineBaseCost": 2,
@@ -30005,11 +30414,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xa.0.printed_subroutines_end_the_run.205",
+              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xa.0.0.205",
               "clientKnownStateVersion": 94
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xa.0.printed_subroutines_end_the_run.205",
+              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xa.0.0.205",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Morphing Tool: Subroutine brechen",
@@ -30043,7 +30452,7 @@
                 "breakerId": "cxd",
                 "iceId": "c2xa",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 473,
                 "targetIceTitle": "Quandary",
                 "breakSubroutineBaseCost": 2,
@@ -30534,7 +30943,7 @@
                 "postInstallRezQuoteBaseCredits": 1,
                 "postInstallRezQuoteFinalCredits": 1,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ry\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -30617,7 +31026,7 @@
                 "postInstallRezQuoteBaseCredits": 5,
                 "postInstallRezQuoteFinalCredits": 5,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2tr\",\"iceDefinitionId\":457,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":457,\"sourceTitle\":\"Fire Wall\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2tr\",\"iceDefinitionId\":457,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":457,\"sourceTitle\":\"Fire Wall\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -32110,7 +32519,7 @@
                 "postInstallRezQuoteBaseCredits": 4,
                 "postInstallRezQuoteFinalCredits": 4,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2va\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -32802,7 +33211,7 @@
                 "postInstallRezQuoteBaseCredits": 2,
                 "postInstallRezQuoteFinalCredits": 2,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2x9\",\"iceDefinitionId\":473,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":473,\"sourceTitle\":\"Quandary\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2x9\",\"iceDefinitionId\":473,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":473,\"sourceTitle\":\"Quandary\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -33692,7 +34101,7 @@
                 "postInstallRezQuoteBaseCredits": 2,
                 "postInstallRezQuoteFinalCredits": 2,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xb\",\"iceDefinitionId\":473,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":473,\"sourceTitle\":\"Quandary\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xb\",\"iceDefinitionId\":473,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":473,\"sourceTitle\":\"Quandary\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -33860,11 +34269,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.break_subroutine.cy2.cy2.cy2.c2th.0.printed_subroutines_end_the_run.212",
+              "actionId": "runner.break_subroutine.cy2.cy2.cy2.c2th.0.0.212",
               "clientKnownStateVersion": 151
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.cy2.cy2.cy2.c2th.0.printed_subroutines_end_the_run.212",
+              "actionId": "runner.break_subroutine.cy2.cy2.cy2.c2th.0.0.212",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Skeleton Passkeys: Subroutine brechen",
@@ -33898,7 +34307,7 @@
                 "breakerId": "cy2",
                 "iceId": "c2th",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 456,
                 "targetIceTitle": "Filter",
                 "breakSubroutineBaseCost": 0,
@@ -34685,7 +35094,7 @@
                 "postInstallRezQuoteBaseCredits": 4,
                 "postInstallRezQuoteFinalCredits": 4,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2v9\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2v9\",\"iceDefinitionId\":464,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":464,\"sourceTitle\":\"Keeper\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -35260,7 +35669,7 @@
                 "postInstallRezQuoteBaseCredits": 3,
                 "postInstallRezQuoteFinalCredits": 3,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c319\",\"iceDefinitionId\":491,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":491,\"sourceTitle\":\"Wall of Static\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c319\",\"iceDefinitionId\":491,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":491,\"sourceTitle\":\"Wall of Static\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -35343,7 +35752,7 @@
                 "postInstallRezQuoteBaseCredits": 2,
                 "postInstallRezQuoteFinalCredits": 2,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2um\",\"iceDefinitionId\":461,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":461,\"sourceTitle\":\"Hunter\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2um\",\"iceDefinitionId\":461,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":461,\"sourceTitle\":\"Hunter\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -35842,7 +36251,7 @@
                 "postInstallRezQuoteBaseCredits": 5,
                 "postInstallRezQuoteFinalCredits": 5,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2tq\",\"iceDefinitionId\":457,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":457,\"sourceTitle\":\"Fire Wall\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2tq\",\"iceDefinitionId\":457,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":457,\"sourceTitle\":\"Fire Wall\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -35975,7 +36384,7 @@
                 "postInstallRezQuoteBaseCredits": 3,
                 "postInstallRezQuoteFinalCredits": 3,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c31a\",\"iceDefinitionId\":491,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":491,\"sourceTitle\":\"Wall of Static\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c31a\",\"iceDefinitionId\":491,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":491,\"sourceTitle\":\"Wall of Static\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -36512,11 +36921,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.break_subroutine.cvd.cvd.cvd.c31a.0.printed_subroutines_end_the_run.192",
+              "actionId": "runner.break_subroutine.cvd.cvd.cvd.c31a.0.0.192",
               "clientKnownStateVersion": 192
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.cvd.cvd.cvd.c31a.0.printed_subroutines_end_the_run.192",
+              "actionId": "runner.break_subroutine.cvd.cvd.cvd.c31a.0.0.192",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Corrosion: Subroutine brechen",
@@ -36550,7 +36959,7 @@
                 "breakerId": "cvd",
                 "iceId": "c31a",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 491,
                 "targetIceTitle": "Wall of Static",
                 "breakSubroutineBaseCost": 0,
@@ -37073,11 +37482,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.break_subroutine.cvd.cvd.cvd.c2tq.0.printed_subroutines_end_the_run.192",
+              "actionId": "runner.break_subroutine.cvd.cvd.cvd.c2tq.0.0.192",
               "clientKnownStateVersion": 200
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.cvd.cvd.cvd.c2tq.0.printed_subroutines_end_the_run.192",
+              "actionId": "runner.break_subroutine.cvd.cvd.cvd.c2tq.0.0.192",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Corrosion: Subroutine brechen",
@@ -37111,7 +37520,7 @@
                 "breakerId": "cvd",
                 "iceId": "c2tq",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 457,
                 "targetIceTitle": "Fire Wall",
                 "breakSubroutineBaseCost": 0,
@@ -37484,11 +37893,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.break_subroutine.cvd.cvd.cvd.c319.0.printed_subroutines_end_the_run.192",
+              "actionId": "runner.break_subroutine.cvd.cvd.cvd.c319.0.0.192",
               "clientKnownStateVersion": 206
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.cvd.cvd.cvd.c319.0.printed_subroutines_end_the_run.192",
+              "actionId": "runner.break_subroutine.cvd.cvd.cvd.c319.0.0.192",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Corrosion: Subroutine brechen",
@@ -37522,7 +37931,7 @@
                 "breakerId": "cvd",
                 "iceId": "c319",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 491,
                 "targetIceTitle": "Wall of Static",
                 "breakSubroutineBaseCost": 0,
@@ -37745,11 +38154,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2v9.0.printed_subroutines_end_the_run.205",
+              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2v9.0.0.205",
               "clientKnownStateVersion": 210
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2v9.0.printed_subroutines_end_the_run.205",
+              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2v9.0.0.205",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Morphing Tool: Subroutine brechen",
@@ -37783,7 +38192,7 @@
                 "breakerId": "cxd",
                 "iceId": "c2v9",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 464,
                 "targetIceTitle": "Keeper",
                 "breakSubroutineBaseCost": 2,
@@ -37947,11 +38356,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.break_subroutine.cy2.cy2.cy2.c2th.0.printed_subroutines_end_the_run.212",
+              "actionId": "runner.break_subroutine.cy2.cy2.cy2.c2th.0.0.212",
               "clientKnownStateVersion": 213
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.cy2.cy2.cy2.c2th.0.printed_subroutines_end_the_run.212",
+              "actionId": "runner.break_subroutine.cy2.cy2.cy2.c2th.0.0.212",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Skeleton Passkeys: Subroutine brechen",
@@ -37985,7 +38394,7 @@
                 "breakerId": "cy2",
                 "iceId": "c2th",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 456,
                 "targetIceTitle": "Filter",
                 "breakSubroutineBaseCost": 0,
@@ -41158,7 +41567,7 @@
                 "postInstallRezQuoteBaseCredits": 2,
                 "postInstallRezQuoteFinalCredits": 2,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2un\",\"iceDefinitionId\":461,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":461,\"sourceTitle\":\"Hunter\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2un\",\"iceDefinitionId\":461,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag\",\"amount\":1},\"sourceDefinitionId\":461,\"sourceTitle\":\"Hunter\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -42331,11 +42740,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xb.0.printed_subroutines_end_the_run.205",
+              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xb.0.0.205",
               "clientKnownStateVersion": 283
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xb.0.printed_subroutines_end_the_run.205",
+              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xb.0.0.205",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Morphing Tool: Subroutine brechen",
@@ -42369,7 +42778,7 @@
                 "breakerId": "cxd",
                 "iceId": "c2xb",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 473,
                 "targetIceTitle": "Quandary",
                 "breakSubroutineBaseCost": 2,
@@ -42592,11 +43001,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2va.0.printed_subroutines_end_the_run.205",
+              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2va.0.0.205",
               "clientKnownStateVersion": 287
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2va.0.printed_subroutines_end_the_run.205",
+              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2va.0.0.205",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Morphing Tool: Subroutine brechen",
@@ -42630,7 +43039,7 @@
                 "breakerId": "cxd",
                 "iceId": "c2va",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 464,
                 "targetIceTitle": "Keeper",
                 "breakSubroutineBaseCost": 2,
@@ -43670,11 +44079,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xb.0.printed_subroutines_end_the_run.205",
+              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xb.0.0.205",
               "clientKnownStateVersion": 303
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xb.0.printed_subroutines_end_the_run.205",
+              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2xb.0.0.205",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Morphing Tool: Subroutine brechen",
@@ -43708,7 +44117,7 @@
                 "breakerId": "cxd",
                 "iceId": "c2xb",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 473,
                 "targetIceTitle": "Quandary",
                 "breakSubroutineBaseCost": 2,
@@ -43872,11 +44281,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2va.0.printed_subroutines_end_the_run.205",
+              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2va.0.0.205",
               "clientKnownStateVersion": 306
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2va.0.printed_subroutines_end_the_run.205",
+              "actionId": "runner.break_subroutine.cxd.cxd.cxd.c2va.0.0.205",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Morphing Tool: Subroutine brechen",
@@ -43910,7 +44319,7 @@
                 "breakerId": "cxd",
                 "iceId": "c2va",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 464,
                 "targetIceTitle": "Keeper",
                 "breakSubroutineBaseCost": 2,
@@ -44367,11 +44776,11 @@
             "action": {
               "matchId": "match_7abe67737c3278b1",
               "side": "runner",
-              "actionId": "runner.continue_run.printed_subroutines_trace",
+              "actionId": "runner.continue_run.0",
               "clientKnownStateVersion": 313
             },
             "legalAction": {
-              "actionId": "runner.continue_run.printed_subroutines_trace",
+              "actionId": "runner.continue_run.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen",
@@ -44387,8 +44796,8 @@
                 "unbrokenSubroutineCount": 1,
                 "encounterWillEndRun": false,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "printed_subroutines_trace",
-                "encounterRemainingSubroutineIds": "printed_subroutines_trace",
+                "encounterSubroutineIds": "0",
+                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",

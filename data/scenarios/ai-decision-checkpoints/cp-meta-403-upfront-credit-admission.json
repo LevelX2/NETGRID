@@ -426,7 +426,7 @@
                   "effectiveStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_damage_brain",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "core",
@@ -437,7 +437,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_damage_brain_a",
+                      "id": "1",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "core",
@@ -448,7 +448,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "2",
                       "type": "end_the_run",
                       "sourceDefinitionId": 441,
                       "sourceTitle": "Code Corpse"
@@ -510,7 +510,7 @@
                   "effectiveStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                      "id": "0",
                       "type": "set_run_encounter_tax",
                       "amount": 2,
                       "sourceDefinitionId": 434,
@@ -625,7 +625,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -666,7 +666,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 4,
                     "damageType": "net",
@@ -677,7 +677,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 436,
                     "sourceTitle": "Bolter Cluster",
@@ -778,7 +778,7 @@
                   "effectiveStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 449,
                       "sourceTitle": "Data Wall"
@@ -4719,7 +4719,7 @@
             "postInstallRezQuoteCardId": "c2u5",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 152,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -4756,7 +4756,7 @@
             "postInstallRezQuoteCardId": "c2u5",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 152,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -4793,7 +4793,7 @@
             "postInstallRezQuoteCardId": "c2u5",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 152,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -4829,7 +4829,7 @@
             "postInstallRezQuoteCardId": "c2u5",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 152,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -4866,7 +4866,7 @@
             "postInstallRezQuoteCardId": "c2u5",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 152,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -4989,7 +4989,7 @@
             "postInstallRezQuoteCardId": "c2th",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 152,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -5026,7 +5026,7 @@
             "postInstallRezQuoteCardId": "c2th",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 152,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -5063,7 +5063,7 @@
             "postInstallRezQuoteCardId": "c2th",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 152,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -5099,7 +5099,7 @@
             "postInstallRezQuoteCardId": "c2th",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 152,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -5136,7 +5136,7 @@
             "postInstallRezQuoteCardId": "c2th",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 152,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7263,7 +7263,7 @@
           "postInstallRezQuoteCardId": "c2u5",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 152,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -7300,7 +7300,7 @@
           "postInstallRezQuoteCardId": "c2u5",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 152,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -7337,7 +7337,7 @@
           "postInstallRezQuoteCardId": "c2u5",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 152,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -7373,7 +7373,7 @@
           "postInstallRezQuoteCardId": "c2u5",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 152,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -7410,7 +7410,7 @@
           "postInstallRezQuoteCardId": "c2u5",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_runner_run_lock_actions\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2u5\",\"iceDefinitionId\":459,\"effectiveStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_runner_run_lock_actions\",\"amount\":6,\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":6}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":459,\"sourceTitle\":\"Haunting Inquisition\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 152,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -7533,7 +7533,7 @@
           "postInstallRezQuoteCardId": "c2th",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 152,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -7570,7 +7570,7 @@
           "postInstallRezQuoteCardId": "c2th",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 152,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -7607,7 +7607,7 @@
           "postInstallRezQuoteCardId": "c2th",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 152,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -7643,7 +7643,7 @@
           "postInstallRezQuoteCardId": "c2th",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 152,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -7680,7 +7680,7 @@
           "postInstallRezQuoteCardId": "c2th",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2th\",\"iceDefinitionId\":456,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":456,\"sourceTitle\":\"Filter\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 152,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -7806,7 +7806,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 152,
-      "sideSafePlanningFingerprint": "fnv1a:d86060cf"
+      "sideSafePlanningFingerprint": "fnv1a:cb42e83c"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_mph465dv_1.1.0",

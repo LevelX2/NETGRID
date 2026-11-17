@@ -609,7 +609,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_brain",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -620,7 +620,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_brain_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -631,7 +631,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 492,
                     "sourceTitle": "Zombie"
@@ -681,7 +681,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions",
+                    "id": "0",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -691,7 +691,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
@@ -925,7 +925,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_brain",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -936,7 +936,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_brain_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -947,7 +947,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 492,
                     "sourceTitle": "Zombie"
@@ -8692,7 +8692,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 144,
-      "sideSafePlanningFingerprint": "fnv1a:d5b3c2fb"
+      "sideSafePlanningFingerprint": "fnv1a:9bddb2c3"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_last_call_at_rd_1.0.0",
@@ -15201,7 +15201,7 @@
                     "central_access_novelty_ratio:1",
                     "path_passability:blocked_unbreakable",
                     "runner_visible_lethal_ice_damage_blocks_run_start:r2",
-                    "runner_visible_lethal_ice_damage|source:492|ice:c31i|subroutine:printed_subroutines_damage_brain_a|damage_type:core|subroutine_damage:1|damage:2|cumulative_damage:2|cumulative_core_damage:2|hand:1|required_floor:1|below_required_floor:true|immediate_flatline:true|cleanup_flatline:true|effective_max_hand_after:-1|subroutine_prevention:0|affordable_break:false",
+                    "runner_visible_lethal_ice_damage|source:492|ice:c31i|subroutine:1|damage_type:core|subroutine_damage:1|damage:2|cumulative_damage:2|cumulative_core_damage:2|hand:1|required_floor:1|below_required_floor:true|immediate_flatline:true|cleanup_flatline:true|effective_max_hand_after:-1|subroutine_prevention:0|affordable_break:false",
                     "missing_coverage:ap|sentry",
                     "path_cost:0",
                     "visible_break_cost:0",

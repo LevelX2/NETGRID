@@ -90,7 +90,7 @@ describe("encounter trace payment preserves the quoted access route", () => {
     );
     const decision = chooseAiAction(input);
     expect(decision.actionId).toBe(
-      "runner.continue_run.printed_subroutines_trace",
+      "runner.continue_run.0",
     );
     expect(decision.fallbackUsed).toBe(false);
     expect(

@@ -204,7 +204,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+                    "id": "0",
                     "type": "rewind_run_to_rezzed_ice_by_die",
                     "sourceDefinitionId": 487,
                     "sourceTitle": "Vacuum Link"
@@ -274,7 +274,7 @@
             "encounterStrength": 5,
             "subroutines": [
               {
-                "id": "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+                "id": "0",
                 "type": "rewind_run_to_rezzed_ice_by_die",
                 "sourceDefinitionId": 487,
                 "sourceTitle": "Vacuum Link"
@@ -1130,7 +1130,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 11,
-      "sideSafePlanningFingerprint": "fnv1a:dbae4d1c"
+      "sideSafePlanningFingerprint": "fnv1a:eb7df2d8"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_mit_ansage_der_perfekte_coup_2026_07_09_1.0.0",
@@ -7519,7 +7519,7 @@
       "selectedActionOrigin": {
         "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ahq",
         "executorInstanceId": "plan:runner.pressure_central:central%3Ahq",
-        "selectedActionId": "runner.continue_run.printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+        "selectedActionId": "runner.continue_run.0",
         "selectedAtStateVersion": 10,
         "immediateChoicePolicy": "resolve_runner_vacuum_link_rewind",
         "sourceStepId": "plan:runner.pressure_central:central%3Ahq:pressure:hq",

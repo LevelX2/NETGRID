@@ -61,7 +61,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
   it("does not claim access prevention from Shock.r alone on empty R&D", () => {
     const checkpoint = structuredClone(
       defensiveDrawD9Json,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     checkpoint.expectation = {
       acceptableActions: [{ type: "draw_card" }],
       forbiddenActions: [{ type: "install_card", targetServerId: "rd" }],
@@ -80,7 +80,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
   it("uses last-click liquidity instead of overflowing HQ", () => {
     const checkpoint = structuredClone(
       defensiveDrawD11Json,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     checkpoint.engine.testOnlyGameState.corp.maxHandSize = 4;
     checkpoint.engine.stateHash = hashGameState(
       checkpoint.engine.testOnlyGameState,
@@ -192,7 +192,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  const checkpoint = structuredClone(value) as AiDecisionCheckpointV1;
+  const checkpoint = structuredClone(value) as unknown as AiDecisionCheckpointV1;
   // Current positive control: Shock.r's next-encounter lock cannot protect
   // an empty server. Give this installation test a canonical stopping ICE.
   checkpoint.engine.testOnlyGameState.cardInstances[

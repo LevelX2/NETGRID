@@ -321,7 +321,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -332,7 +332,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 470,
                     "sourceTitle": "Neural Blade",
@@ -378,7 +378,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -488,7 +488,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -520,7 +520,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -531,7 +531,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 470,
                     "sourceTitle": "Neural Blade",
@@ -602,7 +602,7 @@
             "effectiveStrength": 4,
             "subroutines": [
               {
-                "id": "printed_subroutines_damage_net",
+                "id": "0",
                 "type": "do_damage",
                 "amount": 1,
                 "damageType": "net",
@@ -613,7 +613,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_prohibit_break_next_ice",
+                "id": "1",
                 "type": "set_next_encounter_no_break_subroutines",
                 "sourceDefinitionId": 470,
                 "sourceTitle": "Neural Blade",
@@ -4609,7 +4609,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2wm.0.printed_subroutines_damage_net.328",
+          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2wm.0.0.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine 1 brechen",
@@ -4651,7 +4651,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2wm.1.printed_subroutines_prohibit_break_next_ice.328",
+          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2wm.1.1.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine 2 brechen",
@@ -4693,7 +4693,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_damage_net,printed_subroutines_prohibit_break_next_ice",
+          "actionId": "runner.continue_run.0,1",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen",
@@ -4706,7 +4706,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 2,
-            "encounterSubroutineIds": "printed_subroutines_damage_net,printed_subroutines_prohibit_break_next_ice",
+            "encounterSubroutineIds": "0,1",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": false,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -6835,7 +6835,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2wm.0.printed_subroutines_damage_net.328",
+        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2wm.0.0.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine 1 brechen",
@@ -6877,7 +6877,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2wm.1.printed_subroutines_prohibit_break_next_ice.328",
+        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2wm.1.1.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine 2 brechen",
@@ -6919,7 +6919,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_damage_net,printed_subroutines_prohibit_break_next_ice",
+        "actionId": "runner.continue_run.0,1",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen",
@@ -6932,7 +6932,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 2,
-          "encounterSubroutineIds": "printed_subroutines_damage_net,printed_subroutines_prohibit_break_next_ice",
+          "encounterSubroutineIds": "0,1",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": false,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -6983,7 +6983,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 150,
-      "sideSafePlanningFingerprint": "fnv1a:65e17a7c"
+      "sideSafePlanningFingerprint": "fnv1a:994bfa84"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -11887,7 +11887,7 @@
           "sideSafePlanningFingerprint": "fnv1a:80f3f272"
         },
         "currentBinding": {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2wm.0.printed_subroutines_damage_net.328",
+          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2wm.0.0.328",
           "stateVersion": 150,
           "semanticActionSetFingerprint": "fnv1a:67b0142b",
           "invocationKey": "fnv1a:d07fc466"
@@ -11899,7 +11899,7 @@
         "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A146",
         "sourceStepId": "plan:runner.convert_run_window:run%3A146:convert",
-        "originalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2wm.0.printed_subroutines_damage_net.328",
+        "originalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2wm.0.0.328",
         "selectedAtStateVersion": 150
       },
       "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Ar1",

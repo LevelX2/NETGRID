@@ -711,7 +711,7 @@
                   "effectiveStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                      "id": "0",
                       "type": "set_run_encounter_tax",
                       "amount": 2,
                       "sourceDefinitionId": 434,
@@ -770,7 +770,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 435,
                     "sourceTitle": "Banpei",
@@ -779,7 +779,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 435,
                     "sourceTitle": "Banpei"
@@ -818,7 +818,7 @@
                 "effectiveStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions",
+                    "id": "0",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -828,7 +828,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
@@ -875,7 +875,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 445,
                     "sourceTitle": "D'Arc Knight",
@@ -884,7 +884,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 445,
                     "sourceTitle": "D'Arc Knight"
@@ -931,7 +931,7 @@
                   "effectiveStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 457,
                       "sourceTitle": "Fire Wall"
@@ -1205,7 +1205,7 @@
                   "effectiveStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 450,
                       "sourceTitle": "Data Wall 2.0"
@@ -1267,7 +1267,7 @@
                   "effectiveStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 456,
                       "sourceTitle": "Filter"
@@ -6695,7 +6695,7 @@
             "targetIceDefinitionId": 459,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 211,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u6.0.printed_subroutines_runner_run_lock_actions.328",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u6.0.0.328",
             "targets": {
               "targetIceDefinitionId": 459
             },
@@ -6744,7 +6744,7 @@
             "targetIceDefinitionId": 459,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 213,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u6.1.printed_subroutines_end_the_run.328",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u6.1.1.328",
             "targets": {
               "targetIceDefinitionId": 459
             },
@@ -6841,7 +6841,7 @@
             "targetIceDefinitionId": 435,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 217,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.0.printed_subroutines_trash_program.328",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.0.0.328",
             "targets": {
               "targetIceDefinitionId": 435
             },
@@ -6890,7 +6890,7 @@
             "targetIceDefinitionId": 435,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 219,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.1.printed_subroutines_end_the_run.328",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.1.1.328",
             "targets": {
               "targetIceDefinitionId": 435
             },
@@ -7428,7 +7428,7 @@
             "postInstallRezQuoteCardId": "c2p1",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 232,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7465,7 +7465,7 @@
             "postInstallRezQuoteCardId": "c2p1",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 232,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7502,7 +7502,7 @@
             "postInstallRezQuoteCardId": "c2p1",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 232,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7538,7 +7538,7 @@
             "postInstallRezQuoteCardId": "c2p1",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 232,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7575,7 +7575,7 @@
             "postInstallRezQuoteCardId": "c2p1",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 232,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -9050,7 +9050,7 @@
           "targetIceDefinitionId": 459,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 211,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u6.0.printed_subroutines_runner_run_lock_actions.328",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u6.0.0.328",
           "targets": {
             "targetIceDefinitionId": 459
           },
@@ -9099,7 +9099,7 @@
           "targetIceDefinitionId": 459,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 213,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u6.1.printed_subroutines_end_the_run.328",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u6.1.1.328",
           "targets": {
             "targetIceDefinitionId": 459
           },
@@ -9196,7 +9196,7 @@
           "targetIceDefinitionId": 435,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 217,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.0.printed_subroutines_trash_program.328",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.0.0.328",
           "targets": {
             "targetIceDefinitionId": 435
           },
@@ -9245,7 +9245,7 @@
           "targetIceDefinitionId": 435,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 219,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.1.printed_subroutines_end_the_run.328",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.1.1.328",
           "targets": {
             "targetIceDefinitionId": 435
           },
@@ -9783,7 +9783,7 @@
           "postInstallRezQuoteCardId": "c2p1",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 232,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9820,7 +9820,7 @@
           "postInstallRezQuoteCardId": "c2p1",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 232,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9857,7 +9857,7 @@
           "postInstallRezQuoteCardId": "c2p1",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 232,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9893,7 +9893,7 @@
           "postInstallRezQuoteCardId": "c2p1",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 232,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9930,7 +9930,7 @@
           "postInstallRezQuoteCardId": "c2p1",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_prohibit_break_next_ice\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p1\",\"iceDefinitionId\":436,\"effectiveStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":4,\"damageType\":\"net\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"set_next_encounter_no_break_subroutines\",\"sourceDefinitionId\":436,\"sourceTitle\":\"Bolter Cluster\",\"unbrokenRunEffect\":{\"preventsFutureBreaking\":true}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 232,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -10016,7 +10016,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 232,
-      "sideSafePlanningFingerprint": "fnv1a:2f0f2652"
+      "sideSafePlanningFingerprint": "fnv1a:be69c64c"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_mph465dv_1.1.0",

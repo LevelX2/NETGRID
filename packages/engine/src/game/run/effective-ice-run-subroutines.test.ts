@@ -88,13 +88,11 @@ describe("effective ICE run subroutines", () => {
     const subroutines = effectiveIceRunSubroutines(state, targetId, definition);
     const ids = subroutines.map((subroutine) => subroutine.id);
 
-    expect(
-      ids.filter((id) => id.includes("run_duration.tutor_modifier_")),
-    ).toHaveLength(2);
+    expect(ids).toEqual(subroutines.map((_, index) => index.toString(36)));
     expect(
       subroutines
         .filter((subroutine) =>
-          subroutine.id.includes("run_duration.tutor_modifier_"),
+          subroutine.provenance?.[0] === "r",
         )
         .map((subroutine) => dynamicSubroutineAttributionFor(subroutine)),
     ).toEqual([
@@ -102,8 +100,9 @@ describe("effective ICE run subroutines", () => {
       expect.objectContaining({ sourceCardInstanceId: externalSourceId }),
     ]);
     expect(
-      ids.filter((id) =>
-        id.includes("current_encounter_additional_subroutine"),
+      subroutines.filter((subroutine) =>
+        subroutine.provenance?.[0] === "e" ||
+        (subroutine.provenance?.[0] === "m" && subroutine.provenance[1][0] === "e"),
       ),
     ).toHaveLength(2);
     expect(subroutines).toHaveLength(
@@ -172,9 +171,9 @@ describe("effective ICE run subroutines", () => {
         (subroutine) => subroutine.id,
       ),
     ).toEqual([
-      "variable_ice_paid_end_the_run_1",
-      "variable_ice_paid_end_the_run_2",
-      "run_duration.tutor_modifier.end_the_run",
+      "0",
+      "1",
+      "2",
     ]);
   });
 

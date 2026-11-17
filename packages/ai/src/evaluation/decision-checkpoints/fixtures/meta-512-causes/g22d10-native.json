@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "corp",
   "stateVersion": 9,
-  "stateHash": "fnv1a:e71d7451",
+  "stateHash": "fnv1a:a806b043",
   "input": {
     "matchId": "match_f81e00f89b013612",
     "side": "corp",
@@ -216,7 +216,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 449,
                       "sourceTitle": "Data Wall"
@@ -1105,7 +1105,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 9,
-      "sideSafePlanningFingerprint": "fnv1a:781b2bda"
+      "sideSafePlanningFingerprint": "fnv1a:20c72d28"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_siren_fortress_1.1.0",

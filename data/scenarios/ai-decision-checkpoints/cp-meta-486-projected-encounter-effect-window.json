@@ -740,7 +740,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 464,
                     "sourceTitle": "Keeper"
@@ -772,7 +772,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "sourceDefinitionId": 438,
@@ -823,7 +823,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -834,7 +834,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 470,
                     "sourceTitle": "Neural Blade",
@@ -881,7 +881,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -1093,7 +1093,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+                    "id": "0",
                     "type": "rewind_run_to_rezzed_ice_by_die",
                     "sourceDefinitionId": 487,
                     "sourceTitle": "Vacuum Link"
@@ -1184,7 +1184,7 @@
             "encounterStrength": 1,
             "subroutines": [
               {
-                "id": "printed_subroutines_damage_net",
+                "id": "0",
                 "type": "do_damage",
                 "amount": 1,
                 "damageType": "net",
@@ -1195,7 +1195,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_prohibit_break_next_ice",
+                "id": "1",
                 "type": "set_next_encounter_no_break_subroutines",
                 "sourceDefinitionId": 470,
                 "sourceTitle": "Neural Blade",
@@ -8450,7 +8450,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1jv.c1jv.c1jv.c2wn.1.printed_subroutines_prohibit_break_next_ice.328",
+          "actionId": "runner.break_subroutine.c1jv.c1jv.c1jv.c2wn.1.1.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine 2 brechen",
@@ -8492,7 +8492,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_prohibit_break_next_ice",
+          "actionId": "runner.continue_run.1",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen",
@@ -8505,7 +8505,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "printed_subroutines_prohibit_break_next_ice",
+            "encounterSubroutineIds": "1",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": false,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -10732,7 +10732,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1jv.c1jv.c1jv.c2wn.1.printed_subroutines_prohibit_break_next_ice.328",
+        "actionId": "runner.break_subroutine.c1jv.c1jv.c1jv.c2wn.1.1.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine 2 brechen",
@@ -10774,7 +10774,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_prohibit_break_next_ice",
+        "actionId": "runner.continue_run.1",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen",
@@ -10787,7 +10787,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "printed_subroutines_prohibit_break_next_ice",
+          "encounterSubroutineIds": "1",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": false,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -10838,7 +10838,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 261,
-      "sideSafePlanningFingerprint": "fnv1a:76a7deac"
+      "sideSafePlanningFingerprint": "fnv1a:401f1eeb"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_krashkurs_clown_kreditmaschine_2026_07_11_1.0.0",
@@ -17612,7 +17612,7 @@
           "sideSafePlanningFingerprint": "fnv1a:dc97f548"
         },
         "currentBinding": {
-          "actionId": "runner.break_subroutine.c1jv.c1jv.c1jv.c2wn.1.printed_subroutines_prohibit_break_next_ice.328",
+          "actionId": "runner.break_subroutine.c1jv.c1jv.c1jv.c2wn.1.1.328",
           "stateVersion": 261,
           "semanticActionSetFingerprint": "fnv1a:476a84c7",
           "invocationKey": "fnv1a:116f431e"
@@ -17624,7 +17624,7 @@
         "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ahq",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A257",
         "sourceStepId": "plan:runner.convert_run_window:run%3A257:convert",
-        "originalActionId": "runner.break_subroutine.c1jv.c1jv.c1jv.c2wn.1.printed_subroutines_prohibit_break_next_ice.328",
+        "originalActionId": "runner.break_subroutine.c1jv.c1jv.c1jv.c2wn.1.1.328",
         "selectedAtStateVersion": 261
       },
       "rootForegroundInstanceId": "plan:runner.pressure_central:central%3Ahq",

@@ -336,7 +336,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 4,
                     "traceSuccessEffect": {
@@ -394,7 +394,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -486,7 +486,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -1774,7 +1774,7 @@
             "targetIceDefinitionId": 452,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 42,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2sl.0.printed_subroutines_trace.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2sl.0.0.48",
             "targets": {
               "targetIceDefinitionId": 452
             },
@@ -4519,7 +4519,7 @@
           "targetIceDefinitionId": 452,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 42,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2sl.0.printed_subroutines_trace.48",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2sl.0.0.48",
           "targets": {
             "targetIceDefinitionId": 452
           },
@@ -6148,7 +6148,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 81,
-      "sideSafePlanningFingerprint": "fnv1a:e8a2b20c"
+      "sideSafePlanningFingerprint": "fnv1a:b3a07164"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",

@@ -458,7 +458,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -497,7 +497,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 87,
                     "sourceTitle": "Marionette",
@@ -506,7 +506,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 87,
                     "sourceTitle": "Marionette"
@@ -5099,7 +5099,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 73,
-      "sideSafePlanningFingerprint": "fnv1a:93fc3416"
+      "sideSafePlanningFingerprint": "fnv1a:7484b195"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_redline_riot_1.0.0",

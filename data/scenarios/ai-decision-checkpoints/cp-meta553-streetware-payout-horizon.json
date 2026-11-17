@@ -379,7 +379,7 @@
                     "encounterStrength": 4,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 457,
                         "sourceTitle": "Fire Wall"
@@ -429,7 +429,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_runner_run_lock_actions",
+                        "id": "0",
                         "type": "set_runner_run_lock_actions",
                         "amount": 6,
                         "sourceDefinitionId": 459,
@@ -439,7 +439,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 459,
                         "sourceTitle": "Haunting Inquisition"
@@ -7179,7 +7179,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 93,
-          "sideSafePlanningFingerprint": "fnv1a:307b09d9"
+          "sideSafePlanningFingerprint": "fnv1a:2a1f6735"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -15415,7 +15415,7 @@
                     "encounterStrength": 4,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 457,
                         "sourceTitle": "Fire Wall"
@@ -15478,7 +15478,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_runner_run_lock_actions",
+                        "id": "0",
                         "type": "set_runner_run_lock_actions",
                         "amount": 6,
                         "sourceDefinitionId": 459,
@@ -15488,7 +15488,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 459,
                         "sourceTitle": "Haunting Inquisition"
@@ -15764,7 +15764,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 456,
                         "sourceTitle": "Filter"
@@ -25416,7 +25416,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 226,
-          "sideSafePlanningFingerprint": "fnv1a:60bc27df"
+          "sideSafePlanningFingerprint": "fnv1a:00cb9c51"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -43263,7 +43263,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_runner_run_lock_actions",
+                        "id": "0",
                         "type": "set_runner_run_lock_actions",
                         "amount": 6,
                         "sourceDefinitionId": 459,
@@ -43273,7 +43273,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 459,
                         "sourceTitle": "Haunting Inquisition"
@@ -45485,7 +45485,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 33,
-          "sideSafePlanningFingerprint": "fnv1a:a80d1bff"
+          "sideSafePlanningFingerprint": "fnv1a:259b7ac5"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -52573,7 +52573,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_trash_program",
+                        "id": "0",
                         "type": "trash_installed_program",
                         "sourceDefinitionId": 445,
                         "sourceTitle": "D'Arc Knight",
@@ -52582,7 +52582,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 445,
                         "sourceTitle": "D'Arc Knight"
@@ -52626,7 +52626,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 449,
                         "sourceTitle": "Data Wall"
@@ -52726,7 +52726,7 @@
                     "encounterStrength": 1,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 450,
                         "sourceTitle": "Data Wall 2.0"
@@ -58876,7 +58876,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 106,
-          "sideSafePlanningFingerprint": "fnv1a:654bd13f"
+          "sideSafePlanningFingerprint": "fnv1a:76bafa4c"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",

@@ -322,7 +322,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_next_encounter_unless_fully_break_damage_net",
+                    "id": "0",
                     "type": "set_next_encounter_unless_fully_break_damage",
                     "amount": 3,
                     "damageType": "net",
@@ -4251,7 +4251,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 62,
-      "sideSafePlanningFingerprint": "fnv1a:95c29c66"
+      "sideSafePlanningFingerprint": "fnv1a:6656e524"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_prep_economy_pressure_2026_07_01_1.0.0",

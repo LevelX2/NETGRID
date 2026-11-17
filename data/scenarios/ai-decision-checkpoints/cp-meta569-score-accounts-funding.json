@@ -694,7 +694,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -734,7 +734,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -781,13 +781,13 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 451,
                     "sourceTitle": "Endless Corridor"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 451,
                     "sourceTitle": "Endless Corridor"
@@ -827,13 +827,13 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 475,
                     "sourceTitle": "Reinforced Wall"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 475,
                     "sourceTitle": "Reinforced Wall"
@@ -881,7 +881,7 @@
                   "encounterStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 450,
                       "sourceTitle": "Data Wall 2.0"
@@ -1133,7 +1133,7 @@
                   "encounterStrength": 3,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 444,
                       "sourceTitle": "Crystal Wall"
@@ -1188,7 +1188,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -6881,7 +6881,7 @@
             "postInstallRezQuoteCardId": "c311",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6918,7 +6918,7 @@
             "postInstallRezQuoteCardId": "c311",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6955,7 +6955,7 @@
             "postInstallRezQuoteCardId": "c311",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6991,7 +6991,7 @@
             "postInstallRezQuoteCardId": "c311",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7028,7 +7028,7 @@
             "postInstallRezQuoteCardId": "c311",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7060,7 +7060,7 @@
             "postInstallRezQuoteCardId": "c2y6",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7097,7 +7097,7 @@
             "postInstallRezQuoteCardId": "c2y6",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7134,7 +7134,7 @@
             "postInstallRezQuoteCardId": "c2y6",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7170,7 +7170,7 @@
             "postInstallRezQuoteCardId": "c2y6",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7207,7 +7207,7 @@
             "postInstallRezQuoteCardId": "c2y6",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7301,7 +7301,7 @@
             "postInstallRezQuoteCardId": "c2xq",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7338,7 +7338,7 @@
             "postInstallRezQuoteCardId": "c2xq",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7375,7 +7375,7 @@
             "postInstallRezQuoteCardId": "c2xq",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7411,7 +7411,7 @@
             "postInstallRezQuoteCardId": "c2xq",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7448,7 +7448,7 @@
             "postInstallRezQuoteCardId": "c2xq",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 210,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -9720,7 +9720,7 @@
           "postInstallRezQuoteCardId": "c311",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9757,7 +9757,7 @@
           "postInstallRezQuoteCardId": "c311",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9794,7 +9794,7 @@
           "postInstallRezQuoteCardId": "c311",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9830,7 +9830,7 @@
           "postInstallRezQuoteCardId": "c311",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9867,7 +9867,7 @@
           "postInstallRezQuoteCardId": "c311",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"printed_subroutines_damage_net\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_damage_net_a\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c311\",\"iceDefinitionId\":490,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":490,\"sourceTitle\":\"Wall of Ice\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9899,7 +9899,7 @@
           "postInstallRezQuoteCardId": "c2y6",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9936,7 +9936,7 @@
           "postInstallRezQuoteCardId": "c2y6",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9973,7 +9973,7 @@
           "postInstallRezQuoteCardId": "c2y6",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -10009,7 +10009,7 @@
           "postInstallRezQuoteCardId": "c2y6",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -10046,7 +10046,7 @@
           "postInstallRezQuoteCardId": "c2y6",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y6\",\"iceDefinitionId\":477,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -10140,7 +10140,7 @@
           "postInstallRezQuoteCardId": "c2xq",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -10177,7 +10177,7 @@
           "postInstallRezQuoteCardId": "c2xq",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -10214,7 +10214,7 @@
           "postInstallRezQuoteCardId": "c2xq",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -10250,7 +10250,7 @@
           "postInstallRezQuoteCardId": "c2xq",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -10287,7 +10287,7 @@
           "postInstallRezQuoteCardId": "c2xq",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xq\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 210,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -10397,7 +10397,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 210,
-      "sideSafePlanningFingerprint": "fnv1a:a0bc4f8d"
+      "sideSafePlanningFingerprint": "fnv1a:93fb24ac"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_ivory_bastion_1.1.0",
@@ -24220,728 +24220,1069 @@
     "randomDrawRecords": [
       {
         "counter": 0,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.1734875482560868
+        "purpose": [
+          1
+        ],
+        "value": 0.2836363241259686
       },
       {
         "counter": 1,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8871993300520741
+        "purpose": [
+          1
+        ],
+        "value": 0.2854092876513281
       },
       {
         "counter": 2,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8062935958305364
+        "purpose": [
+          1
+        ],
+        "value": 0.3129118797654111
       },
       {
         "counter": 3,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.4369567579020901
+        "purpose": [
+          1
+        ],
+        "value": 0.5896342082070828
       },
       {
         "counter": 4,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.2098561431625312
+        "purpose": [
+          1
+        ],
+        "value": 0.2373993929583793
       },
       {
         "counter": 5,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.6667215130943153
+        "purpose": [
+          1
+        ],
+        "value": 0.8143570074313167
       },
       {
         "counter": 6,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.07451069250270015
+        "purpose": [
+          1
+        ],
+        "value": 0.27023095018005583
       },
       {
         "counter": 7,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.11804977514232373
+        "purpose": [
+          1
+        ],
+        "value": 0.455047641896403
       },
       {
         "counter": 8,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8523732580090928
+        "purpose": [
+          1
+        ],
+        "value": 0.22419466845195513
       },
       {
         "counter": 9,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.18908918983162115
+        "purpose": [
+          1
+        ],
+        "value": 0.4399767866556381
       },
       {
         "counter": 10,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.7687629871033688
+        "purpose": [
+          1
+        ],
+        "value": 0.15817106894576294
       },
       {
         "counter": 11,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.30285760772307146
+        "purpose": [
+          1
+        ],
+        "value": 0.8521632565194647
       },
       {
         "counter": 12,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.1748163562520918
+        "purpose": [
+          1
+        ],
+        "value": 0.21724788633941805
       },
       {
         "counter": 13,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.27777402734813017
+        "purpose": [
+          1
+        ],
+        "value": 0.16965161978167753
       },
       {
         "counter": 14,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.5190203930353366
+        "purpose": [
+          1
+        ],
+        "value": 0.3858922885819185
       },
       {
         "counter": 15,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8190540785280094
+        "purpose": [
+          1
+        ],
+        "value": 0.7200402011171455
       },
       {
         "counter": 16,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.7964763562002355
+        "purpose": [
+          1
+        ],
+        "value": 0.3084503955907567
       },
       {
         "counter": 17,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.5995527979357059
+        "purpose": [
+          1
+        ],
+        "value": 0.6182028788970036
       },
       {
         "counter": 18,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.3952366846853096
+        "purpose": [
+          1
+        ],
+        "value": 0.849190897962829
       },
       {
         "counter": 19,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8556217665246194
+        "purpose": [
+          1
+        ],
+        "value": 0.4543726241761763
       },
       {
         "counter": 20,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.33689503605539683
+        "purpose": [
+          1
+        ],
+        "value": 0.6970187377623417
       },
       {
         "counter": 21,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.07635739809077147
+        "purpose": [
+          1
+        ],
+        "value": 0.05774145028802602
       },
       {
         "counter": 22,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.12481192143189712
+        "purpose": [
+          1
+        ],
+        "value": 0.37482801930971
       },
       {
         "counter": 23,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.7473817073624313
+        "purpose": [
+          1
+        ],
+        "value": 0.7025701811371753
       },
       {
         "counter": 24,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.680394918157689
+        "purpose": [
+          1
+        ],
+        "value": 0.6500046876573611
       },
       {
         "counter": 25,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.7534245905328275
+        "purpose": [
+          1
+        ],
+        "value": 0.5144694818150395
       },
       {
         "counter": 26,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.7510732591274996
+        "purpose": [
+          1
+        ],
+        "value": 0.7431892301976473
       },
       {
         "counter": 27,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.24195855685962164
+        "purpose": [
+          1
+        ],
+        "value": 0.6547483217894796
       },
       {
         "counter": 28,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.23387410359208272
+        "purpose": [
+          1
+        ],
+        "value": 0.9628293002488229
       },
       {
         "counter": 29,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.7966958809078994
+        "purpose": [
+          1
+        ],
+        "value": 0.5701461734212554
       },
       {
         "counter": 30,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.3329920393627853
+        "purpose": [
+          1
+        ],
+        "value": 0.008243393578094782
       },
       {
         "counter": 31,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.20580355898385438
+        "purpose": [
+          1
+        ],
+        "value": 0.8414019758755052
       },
       {
         "counter": 32,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.0725340189502316
+        "purpose": [
+          1
+        ],
+        "value": 0.4761919778036944
       },
       {
         "counter": 33,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.29865363385734733
+        "purpose": [
+          1
+        ],
+        "value": 0.769560019273301
       },
       {
         "counter": 34,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.707583330173975
+        "purpose": [
+          1
+        ],
+        "value": 0.9794835845346248
       },
       {
         "counter": 35,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.5954973172873901
+        "purpose": [
+          1
+        ],
+        "value": 0.45932566022968235
       },
       {
         "counter": 36,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.135973358983279
+        "purpose": [
+          1
+        ],
+        "value": 0.17439926733000055
       },
       {
         "counter": 37,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.22649591213712983
+        "purpose": [
+          1
+        ],
+        "value": 0.9202303310521188
       },
       {
         "counter": 38,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.4245557200897938
+        "purpose": [
+          1
+        ],
+        "value": 0.9841050962959219
       },
       {
         "counter": 39,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.22206476921106866
+        "purpose": [
+          1
+        ],
+        "value": 0.04315125311380108
       },
       {
         "counter": 40,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.19124436783976295
+        "purpose": [
+          1
+        ],
+        "value": 0.43281507116152906
       },
       {
         "counter": 41,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.26868785691176345
+        "purpose": [
+          1
+        ],
+        "value": 0.31781180357638417
       },
       {
         "counter": 42,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.5813516976102605
+        "purpose": [
+          1
+        ],
+        "value": 0.4682327232093545
       },
       {
         "counter": 43,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.9330398150993372
+        "purpose": [
+          1
+        ],
+        "value": 0.2202543540032883
       },
       {
         "counter": 44,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7087939452775465
+        "purpose": [
+          2
+        ],
+        "value": 0.46428650116604686
       },
       {
         "counter": 45,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.39133048354730837
+        "purpose": [
+          2
+        ],
+        "value": 0.67831520336214
       },
       {
         "counter": 46,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.2837247843236367
+        "purpose": [
+          2
+        ],
+        "value": 0.728819579905129
       },
       {
         "counter": 47,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.9232756133705972
+        "purpose": [
+          2
+        ],
+        "value": 0.7901093798891676
       },
       {
         "counter": 48,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.938377124153225
+        "purpose": [
+          2
+        ],
+        "value": 0.8598030430082225
       },
       {
         "counter": 49,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.3525234473737128
+        "purpose": [
+          2
+        ],
+        "value": 0.9286021564275457
       },
       {
         "counter": 50,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.2675951951554232
+        "purpose": [
+          2
+        ],
+        "value": 0.2347330667184988
       },
       {
         "counter": 51,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.09447629001074342
+        "purpose": [
+          2
+        ],
+        "value": 0.5470157269859448
       },
       {
         "counter": 52,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.8272704766042179
+        "purpose": [
+          2
+        ],
+        "value": 0.10849428490986279
       },
       {
         "counter": 53,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.07412600591410878
+        "purpose": [
+          2
+        ],
+        "value": 0.11827755505007853
       },
       {
         "counter": 54,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.9320143701349392
+        "purpose": [
+          2
+        ],
+        "value": 0.7785071538652453
       },
       {
         "counter": 55,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.3081017848402642
+        "purpose": [
+          2
+        ],
+        "value": 0.1985889540843604
       },
       {
         "counter": 56,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.18045882312051154
+        "purpose": [
+          2
+        ],
+        "value": 0.4502332352788906
       },
       {
         "counter": 57,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.5097116161975609
+        "purpose": [
+          2
+        ],
+        "value": 0.6277310241138371
       },
       {
         "counter": 58,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.35844629637092107
+        "purpose": [
+          2
+        ],
+        "value": 0.6383271543494636
       },
       {
         "counter": 59,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7881890805961325
+        "purpose": [
+          2
+        ],
+        "value": 0.7079936577659031
       },
       {
         "counter": 60,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.08155237986709829
+        "purpose": [
+          2
+        ],
+        "value": 0.04890693368072463
       },
       {
         "counter": 61,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.08295529387205036
+        "purpose": [
+          2
+        ],
+        "value": 0.42394089421285974
       },
       {
         "counter": 62,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.029632555940427685
+        "purpose": [
+          2
+        ],
+        "value": 0.699687362911559
       },
       {
         "counter": 63,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.04696278969045653
+        "purpose": [
+          2
+        ],
+        "value": 0.5025340754153907
       },
       {
         "counter": 64,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.36001252087413793
+        "purpose": [
+          2
+        ],
+        "value": 0.7673248414639169
       },
       {
         "counter": 65,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.0007926234080974925
+        "purpose": [
+          2
+        ],
+        "value": 0.36443507914627293
       },
       {
         "counter": 66,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.2345614612414244
+        "purpose": [
+          2
+        ],
+        "value": 0.9163882381069123
       },
       {
         "counter": 67,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.8661165753256815
+        "purpose": [
+          2
+        ],
+        "value": 0.5019657036805913
       },
       {
         "counter": 68,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7139997539627378
+        "purpose": [
+          2
+        ],
+        "value": 0.52252052665392
       },
       {
         "counter": 69,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.09410292432415368
+        "purpose": [
+          2
+        ],
+        "value": 0.1843108350524827
       },
       {
         "counter": 70,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.45114346770903446
+        "purpose": [
+          2
+        ],
+        "value": 0.730044605797571
       },
       {
         "counter": 71,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.9989351399474133
+        "purpose": [
+          2
+        ],
+        "value": 0.40075398459681155
       },
       {
         "counter": 72,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.19452674040547657
+        "purpose": [
+          2
+        ],
+        "value": 0.8929276038651666
       },
       {
         "counter": 73,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.5608941671736744
+        "purpose": [
+          2
+        ],
+        "value": 0.058618744748228924
       },
       {
         "counter": 74,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.4383361468718383
+        "purpose": [
+          2
+        ],
+        "value": 0.6357935993960914
       },
       {
         "counter": 75,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.9672141843638765
+        "purpose": [
+          2
+        ],
+        "value": 0.4147500780597798
       },
       {
         "counter": 76,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.9935198740500495
+        "purpose": [
+          2
+        ],
+        "value": 0.34746137642534347
       },
       {
         "counter": 77,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7484672245481765
+        "purpose": [
+          2
+        ],
+        "value": 0.2842473743612308
       },
       {
         "counter": 78,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.4400197490920389
+        "purpose": [
+          2
+        ],
+        "value": 0.9301642838724274
       },
       {
         "counter": 79,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.9704210827509595
+        "purpose": [
+          2
+        ],
+        "value": 0.8107051357746808
       },
       {
         "counter": 80,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.2143522429936079
+        "purpose": [
+          2
+        ],
+        "value": 0.9650446032178203
       },
       {
         "counter": 81,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.6479301567840151
+        "purpose": [
+          2
+        ],
+        "value": 0.7315565859872947
       },
       {
         "counter": 82,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.9239535276959734
+        "purpose": [
+          2
+        ],
+        "value": 0.3360093762929721
       },
       {
         "counter": 83,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7968908688866698
+        "purpose": [
+          2
+        ],
+        "value": 0.9301789004767582
       },
       {
         "counter": 84,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.6942897522830396
+        "purpose": [
+          2
+        ],
+        "value": 0.6700916268744339
       },
       {
         "counter": 85,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.8521692217500403
+        "purpose": [
+          2
+        ],
+        "value": 0.913864934684543
       },
       {
         "counter": 86,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.5144678832842643
+        "purpose": [
+          2
+        ],
+        "value": 0.9469057553544196
       },
       {
         "counter": 87,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.5978183098035124
+        "purpose": [
+          2
+        ],
+        "value": 0.33391049374449877
       },
       {
         "counter": 88,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.6839112967931531
+        "purpose": [
+          2
+        ],
+        "value": 0.2874792654179501
       },
       {
         "counter": 89,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.17788979927326865
+        "purpose": [
+          2
+        ],
+        "value": 0.6821458749952521
       },
       {
         "counter": 90,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.3751531759737886
+        "purpose": [
+          2
+        ],
+        "value": 0.3211423447988917
       },
       {
         "counter": 91,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.4289486002055136
+        "purpose": [
+          2
+        ],
+        "value": 0.8959901891444564
       },
       {
         "counter": 92,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.04663614320365117
+        "purpose": [
+          2
+        ],
+        "value": 0.11099534626654284
       },
       {
         "counter": 93,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7935100504513972
+        "purpose": [
+          2
+        ],
+        "value": 0.6462441242789819
       },
       {
         "counter": 94,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.3461839069759389
+        "purpose": [
+          2
+        ],
+        "value": 0.4236804188743275
       },
       {
         "counter": 95,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.35358593043206377
+        "purpose": [
+          3
+        ],
+        "value": 0.7712996640753752
       },
       {
         "counter": 96,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.7598953591939787
+        "purpose": [
+          3
+        ],
+        "value": 0.410250934771365
       },
       {
         "counter": 97,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.4825410890695412
+        "purpose": [
+          3
+        ],
+        "value": 0.4452411079618932
       },
       {
         "counter": 98,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.10193784242088721
+        "purpose": [
+          3
+        ],
+        "value": 0.2117785602722696
       },
       {
         "counter": 99,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.13694611985081862
+        "purpose": [
+          3
+        ],
+        "value": 0.3474362223267329
       },
       {
         "counter": 100,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.4224408510319855
+        "purpose": [
+          4
+        ],
+        "value": 0.6416358583729349
       },
       {
         "counter": 101,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.4939981568986179
+        "purpose": [
+          4
+        ],
+        "value": 0.16749847800725792
       },
       {
         "counter": 102,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.708270299111479
+        "purpose": [
+          4
+        ],
+        "value": 0.006652585679242096
       },
       {
         "counter": 103,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.25746840508431423
+        "purpose": [
+          4
+        ],
+        "value": 0.9061523058721515
       },
       {
         "counter": 104,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.9132841608190865
+        "purpose": [
+          4
+        ],
+        "value": 0.3841488690640582
       },
       {
         "counter": 105,
-        "purpose": "hq_multiaccess:41:selection:0",
-        "value": 0.5154237899141241
+        "purpose": [
+          10,
+          41,
+          0
+        ],
+        "value": 0.5677782222755584
       },
       {
         "counter": 106,
-        "purpose": "v1921.die.41.three_dice.1",
-        "value": 0.5334744753742591
+        "purpose": [
+          23,
+          41,
+          1
+        ],
+        "value": 0.7236999334574897
       },
       {
         "counter": 107,
-        "purpose": "v1921.die.41.three_dice.2",
-        "value": 0.8064820587473898
+        "purpose": [
+          23,
+          41,
+          2
+        ],
+        "value": 0.44194601313905113
       },
       {
         "counter": 108,
-        "purpose": "v1921.die.41.three_dice.3",
-        "value": 0.6284306593705574
+        "purpose": [
+          23,
+          41,
+          3
+        ],
+        "value": 0.16185137429338603
       },
       {
         "counter": 109,
-        "purpose": "hq_multiaccess:107:selection:0",
-        "value": 0.9037176884202553
+        "purpose": [
+          10,
+          107,
+          0
+        ],
+        "value": 0.10038048325783633
       },
       {
         "counter": 110,
-        "purpose": "hq_multiaccess:126:selection:0",
-        "value": 0.43272861623255454
+        "purpose": [
+          10,
+          126,
+          0
+        ],
+        "value": 0.17095375382588784
       },
       {
         "counter": 111,
-        "purpose": "v1921.die.41.three_dice.1",
-        "value": 0.08962218717736747
+        "purpose": [
+          23,
+          41,
+          1
+        ],
+        "value": 0.761192064461782
       },
       {
         "counter": 112,
-        "purpose": "v1921.die.41.three_dice.2",
-        "value": 0.7656318918349158
+        "purpose": [
+          23,
+          41,
+          2
+        ],
+        "value": 0.5519152889991169
       },
       {
         "counter": 113,
-        "purpose": "v1921.die.41.three_dice.3",
-        "value": 0.6330682196416634
+        "purpose": [
+          23,
+          41,
+          3
+        ],
+        "value": 0.6951652566148285
       },
       {
         "counter": 114,
-        "purpose": "hq_multiaccess:145:selection:0",
-        "value": 0.14255287430290187
+        "purpose": [
+          10,
+          145,
+          0
+        ],
+        "value": 0.008060203301369362
       },
       {
         "counter": 115,
-        "purpose": "hq_multiaccess:155:selection:0",
-        "value": 0.1516298808619322
+        "purpose": [
+          10,
+          155,
+          0
+        ],
+        "value": 0.5112535598311502
       },
       {
         "counter": 116,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.8360896878587019
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.9582641560647653
       },
       {
         "counter": 117,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.2993699774980886
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.8760550022947442
       },
       {
         "counter": 118,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.48086033925546523
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.7681969585199493
       },
       {
         "counter": 119,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.8955132851068953
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.8252903262247332
       },
       {
         "counter": 120,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.3939898720360926
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.4601162214185226
       },
       {
         "counter": 121,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.08081627027625393
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.8882834975412717
       },
       {
         "counter": 122,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.9867531389736549
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.4404664838075546
       },
       {
         "counter": 123,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.363387474802615
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.14659616210351123
       },
       {
         "counter": 124,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.13516524935379481
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.4890262509376515
       },
       {
         "counter": 125,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.16893315755108496
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.28279270471815154
       },
       {
         "counter": 126,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.4343085415435739
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.5938597916454842
       },
       {
         "counter": 127,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.6234554095160376
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.9446768658321352
       },
       {
         "counter": 128,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.2656496610907656
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.6773310357948596
       },
       {
         "counter": 129,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.04971186509772951
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.986071377910886
       },
       {
         "counter": 130,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.008530357317684478
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.9501619682461631
       },
       {
         "counter": 131,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.09591688930904174
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.6927431405820459
       },
       {
         "counter": 132,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.5238102503819758
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.9822759594827709
       },
       {
         "counter": 133,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.591735162226754
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.2678159141495058
       },
       {
         "counter": 134,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.4752262836690756
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.2867864368959101
       },
       {
         "counter": 135,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.5981730827146412
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.1138446965994373
       },
       {
         "counter": 136,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.6153766697338703
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.017956477701620455
       },
       {
         "counter": 137,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.04545721334644581
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.8379288250657818
       },
       {
         "counter": 138,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.37379327480158087
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.26335794429958326
       },
       {
         "counter": 139,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.770210464011907
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.19978293862022922
       },
       {
         "counter": 140,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.7352833791591654
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.9306982689521727
       },
       {
         "counter": 141,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.9906490924120579
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.27683990306644846
       },
       {
         "counter": 142,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.6340399891236967
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.9237705442011346
       },
       {
         "counter": 143,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.9146215060398586
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.4123743341689404
       },
       {
         "counter": 144,
-        "purpose": "successful_run.reveal_rd_until_agenda.165",
-        "value": 0.2910636556840912
+        "purpose": [
+          35,
+          165
+        ],
+        "value": 0.5385578718716683
       }
     ],
     "aiTurnPlanRandomCounter": 0,
@@ -26876,7 +27217,7 @@
                 "postInstallRezQuoteBaseCredits": 3,
                 "postInstallRezQuoteFinalCredits": 3,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c319\",\"iceDefinitionId\":491,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":491,\"sourceTitle\":\"Wall of Static\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c319\",\"iceDefinitionId\":491,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":491,\"sourceTitle\":\"Wall of Static\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -27626,7 +27967,7 @@
                 "postInstallRezQuoteBaseCredits": 4,
                 "postInstallRezQuoteFinalCredits": 4,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2se\",\"iceDefinitionId\":451,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":451,\"sourceTitle\":\"Endless Corridor\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":451,\"sourceTitle\":\"Endless Corridor\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2se\",\"iceDefinitionId\":451,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":451,\"sourceTitle\":\"Endless Corridor\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":451,\"sourceTitle\":\"Endless Corridor\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -27806,7 +28147,7 @@
                 "postInstallRezQuoteBaseCredits": 5,
                 "postInstallRezQuoteFinalCredits": 5,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2tq\",\"iceDefinitionId\":457,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":457,\"sourceTitle\":\"Fire Wall\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2tq\",\"iceDefinitionId\":457,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":457,\"sourceTitle\":\"Fire Wall\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -28381,7 +28722,7 @@
                 "postInstallRezQuoteBaseCredits": 8,
                 "postInstallRezQuoteFinalCredits": 8,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xp\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"printed_subroutines_end_the_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2xp\",\"iceDefinitionId\":475,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":475,\"sourceTitle\":\"Reinforced Wall\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -28840,11 +29181,11 @@
             "action": {
               "matchId": "match_924e08d864869f87",
               "side": "runner",
-              "actionId": "runner.continue_run.printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+              "actionId": "runner.continue_run.0,1",
               "clientKnownStateVersion": 33
             },
             "legalAction": {
-              "actionId": "runner.continue_run.printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+              "actionId": "runner.continue_run.0,1",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen (Run endet)",
@@ -28860,8 +29201,8 @@
                 "unbrokenSubroutineCount": 2,
                 "encounterWillEndRun": true,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
-                "encounterRemainingSubroutineIds": "printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+                "encounterSubroutineIds": "0,1",
+                "encounterRemainingSubroutineIds": "0,1",
                 "encounterRemainingSubroutineCount": 2,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access"
@@ -29052,7 +29393,7 @@
                 "postInstallRezQuoteBaseCredits": 4,
                 "postInstallRezQuoteFinalCredits": 4,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qt\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qt\",\"iceDefinitionId\":444,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -29185,7 +29526,7 @@
                 "postInstallRezQuoteBaseCredits": 1,
                 "postInstallRezQuoteFinalCredits": 1,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rx\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rx\",\"iceDefinitionId\":449,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":449,\"sourceTitle\":\"Data Wall\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -29545,11 +29886,11 @@
             "action": {
               "matchId": "match_924e08d864869f87",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c7u.c7u.c7u.c2tq.0.printed_subroutines_end_the_run.48",
+              "actionId": "runner.break_subroutine.c7u.c7u.c7u.c2tq.0.0.48",
               "clientKnownStateVersion": 44
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c7u.c7u.c7u.c2tq.0.printed_subroutines_end_the_run.48",
+              "actionId": "runner.break_subroutine.c7u.c7u.c7u.c2tq.0.0.48",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Rent-I-Con: Subroutine brechen",
@@ -29583,7 +29924,7 @@
                 "breakerId": "c7u",
                 "iceId": "c2tq",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 457,
                 "targetIceTitle": "Fire Wall",
                 "breakSubroutineBaseCost": 1,
@@ -31267,11 +31608,11 @@
             "action": {
               "matchId": "match_924e08d864869f87",
               "side": "runner",
-              "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+              "actionId": "runner.continue_run.0",
               "clientKnownStateVersion": 73
             },
             "legalAction": {
-              "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+              "actionId": "runner.continue_run.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen (Run endet)",
@@ -31287,8 +31628,8 @@
                 "unbrokenSubroutineCount": 1,
                 "encounterWillEndRun": true,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "printed_subroutines_end_the_run",
-                "encounterRemainingSubroutineIds": "printed_subroutines_end_the_run",
+                "encounterSubroutineIds": "0",
+                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access"
@@ -33657,11 +33998,11 @@
             "action": {
               "matchId": "match_924e08d864869f87",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.0.40",
               "clientKnownStateVersion": 108
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.0.40",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Early Worm: Subroutine brechen",
@@ -33695,7 +34036,7 @@
                 "breakerId": "c6x",
                 "iceId": "c2tq",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 457,
                 "targetIceTitle": "Fire Wall",
                 "breakSubroutineBaseCost": 1,
@@ -34910,11 +35251,11 @@
             "action": {
               "matchId": "match_924e08d864869f87",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.0.40",
               "clientKnownStateVersion": 127
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.0.40",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Early Worm: Subroutine brechen",
@@ -34948,7 +35289,7 @@
                 "breakerId": "c6x",
                 "iceId": "c2tq",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 457,
                 "targetIceTitle": "Fire Wall",
                 "breakSubroutineBaseCost": 1,
@@ -35171,11 +35512,11 @@
             "action": {
               "matchId": "match_924e08d864869f87",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c319.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c319.0.0.40",
               "clientKnownStateVersion": 131
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c319.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c319.0.0.40",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Early Worm: Subroutine brechen",
@@ -35209,7 +35550,7 @@
                 "breakerId": "c6x",
                 "iceId": "c319",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 491,
                 "targetIceTitle": "Wall of Static",
                 "breakSubroutineBaseCost": 1,
@@ -36193,11 +36534,11 @@
             "action": {
               "matchId": "match_924e08d864869f87",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.0.40",
               "clientKnownStateVersion": 146
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.0.40",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Early Worm: Subroutine brechen",
@@ -36231,7 +36572,7 @@
                 "breakerId": "c6x",
                 "iceId": "c2tq",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 457,
                 "targetIceTitle": "Fire Wall",
                 "breakSubroutineBaseCost": 1,
@@ -36395,11 +36736,11 @@
             "action": {
               "matchId": "match_924e08d864869f87",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c319.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c319.0.0.40",
               "clientKnownStateVersion": 149
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c319.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c319.0.0.40",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Early Worm: Subroutine brechen",
@@ -36433,7 +36774,7 @@
                 "breakerId": "c6x",
                 "iceId": "c319",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 491,
                 "targetIceTitle": "Wall of Static",
                 "breakSubroutineBaseCost": 1,
@@ -36870,11 +37211,11 @@
             "action": {
               "matchId": "match_924e08d864869f87",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.0.40",
               "clientKnownStateVersion": 156
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2tq.0.0.40",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Early Worm: Subroutine brechen",
@@ -36908,7 +37249,7 @@
                 "breakerId": "c6x",
                 "iceId": "c2tq",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 457,
                 "targetIceTitle": "Fire Wall",
                 "breakSubroutineBaseCost": 1,
@@ -37072,11 +37413,11 @@
             "action": {
               "matchId": "match_924e08d864869f87",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c319.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c319.0.0.40",
               "clientKnownStateVersion": 159
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c319.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c319.0.0.40",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Early Worm: Subroutine brechen",
@@ -37110,7 +37451,7 @@
                 "breakerId": "c6x",
                 "iceId": "c319",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 491,
                 "targetIceTitle": "Wall of Static",
                 "breakSubroutineBaseCost": 1,
@@ -37569,11 +37910,11 @@
             "action": {
               "matchId": "match_924e08d864869f87",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2xp.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2xp.0.0.40",
               "clientKnownStateVersion": 166
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2xp.0.printed_subroutines_end_the_run.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2xp.0.0.40",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Early Worm: Subroutine 1 brechen",
@@ -37607,7 +37948,7 @@
                 "breakerId": "c6x",
                 "iceId": "c2xp",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 475,
                 "targetIceTitle": "Reinforced Wall",
                 "breakSubroutineBaseCost": 1,
@@ -37651,11 +37992,11 @@
             "action": {
               "matchId": "match_924e08d864869f87",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2xp.1.printed_subroutines_end_the_run_a.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2xp.1.1.40",
               "clientKnownStateVersion": 167
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2xp.1.printed_subroutines_end_the_run_a.40",
+              "actionId": "runner.break_subroutine.c6x.c6x.c6x.c2xp.1.1.40",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Early Worm: Subroutine 2 brechen",
@@ -37689,7 +38030,7 @@
                 "breakerId": "c6x",
                 "iceId": "c2xp",
                 "subroutineIndex": 1,
-                "subroutineId": "printed_subroutines_end_the_run_a",
+                "subroutineId": "1",
                 "targetIceDefinitionId": 475,
                 "targetIceTitle": "Reinforced Wall",
                 "breakSubroutineBaseCost": 1,
@@ -37989,11 +38330,11 @@
             "action": {
               "matchId": "match_924e08d864869f87",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c7m.c7m.c7m.c2se.0.printed_subroutines_end_the_run.46",
+              "actionId": "runner.break_subroutine.c7m.c7m.c7m.c2se.0.0.46",
               "clientKnownStateVersion": 172
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c7m.c7m.c7m.c2se.0.printed_subroutines_end_the_run.46",
+              "actionId": "runner.break_subroutine.c7m.c7m.c7m.c2se.0.0.46",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Psychic Friend: Subroutine 1 brechen",
@@ -38027,7 +38368,7 @@
                 "breakerId": "c7m",
                 "iceId": "c2se",
                 "subroutineIndex": 0,
-                "subroutineId": "printed_subroutines_end_the_run",
+                "subroutineId": "0",
                 "targetIceDefinitionId": 451,
                 "targetIceTitle": "Endless Corridor",
                 "breakSubroutineBaseCost": 1,
@@ -38071,11 +38412,11 @@
             "action": {
               "matchId": "match_924e08d864869f87",
               "side": "runner",
-              "actionId": "runner.break_subroutine.c7m.c7m.c7m.c2se.1.printed_subroutines_end_the_run_a.46",
+              "actionId": "runner.break_subroutine.c7m.c7m.c7m.c2se.1.1.46",
               "clientKnownStateVersion": 173
             },
             "legalAction": {
-              "actionId": "runner.break_subroutine.c7m.c7m.c7m.c2se.1.printed_subroutines_end_the_run_a.46",
+              "actionId": "runner.break_subroutine.c7m.c7m.c7m.c2se.1.1.46",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Psychic Friend: Subroutine 2 brechen",
@@ -38109,7 +38450,7 @@
                 "breakerId": "c7m",
                 "iceId": "c2se",
                 "subroutineIndex": 1,
-                "subroutineId": "printed_subroutines_end_the_run_a",
+                "subroutineId": "1",
                 "targetIceDefinitionId": 451,
                 "targetIceTitle": "Endless Corridor",
                 "breakSubroutineBaseCost": 1,
@@ -39758,7 +40099,7 @@
                 "postInstallRezQuoteBaseCredits": 2,
                 "postInstallRezQuoteFinalCredits": 2,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s5\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s5\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
                 "effectKind": "install_card"
               }
             }

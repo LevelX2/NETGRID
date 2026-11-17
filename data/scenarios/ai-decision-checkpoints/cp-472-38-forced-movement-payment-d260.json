@@ -734,7 +734,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_brain",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -745,7 +745,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_brain_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -756,7 +756,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_brain_b",
+                    "id": "2",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -767,7 +767,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 466,
                     "sourceTitle": "Liche"
@@ -800,7 +800,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                    "id": "0",
                     "type": "set_next_encounter_lock",
                     "breakTags": [
                       "stun"
@@ -837,7 +837,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -868,7 +868,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                    "id": "0",
                     "type": "set_run_encounter_tax",
                     "amount": 2,
                     "sourceDefinitionId": 434,
@@ -903,7 +903,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                    "id": "0",
                     "type": "set_run_encounter_tax",
                     "amount": 2,
                     "sourceDefinitionId": 434,
@@ -977,7 +977,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -1149,7 +1149,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 3,
                     "traceSuccessEffect": {
@@ -1185,7 +1185,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -7582,7 +7582,7 @@
             "targetIceDefinitionId": 491,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 230,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1ft.c1ft.c1ft.c319.0.printed_subroutines_end_the_run.303",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1ft.c1ft.c1ft.c319.0.0.303",
             "targets": {
               "targetIceDefinitionId": 491
             },
@@ -8198,7 +8198,7 @@
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 251,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1ft.c1ft.c1ft.c2ry.0.printed_subroutines_end_the_run.303",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1ft.c1ft.c1ft.c2ry.0.0.303",
             "targets": {
               "targetIceDefinitionId": 449
             },
@@ -9785,7 +9785,7 @@
           "targetIceDefinitionId": 491,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 230,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1ft.c1ft.c1ft.c319.0.printed_subroutines_end_the_run.303",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1ft.c1ft.c1ft.c319.0.0.303",
           "targets": {
             "targetIceDefinitionId": 491
           },
@@ -10401,7 +10401,7 @@
           "targetIceDefinitionId": 449,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 251,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1ft.c1ft.c1ft.c2ry.0.printed_subroutines_end_the_run.303",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1ft.c1ft.c1ft.c2ry.0.0.303",
           "targets": {
             "targetIceDefinitionId": 449
           },
@@ -10733,7 +10733,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 259,
-      "sideSafePlanningFingerprint": "fnv1a:fac8f4b0"
+      "sideSafePlanningFingerprint": "fnv1a:c516cf47"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",

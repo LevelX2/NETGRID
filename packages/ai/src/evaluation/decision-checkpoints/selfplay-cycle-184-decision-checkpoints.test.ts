@@ -300,7 +300,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
           effectiveStrength: 4,
           subroutines: [
             {
-              id: "printed_subroutines_damage_net",
+              id: "0",
               type: "do_damage",
               damageType: "net",
               amount: 3,
@@ -309,7 +309,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
               unbrokenRunEffect: { causesDamageOrProgramTrash: true },
             },
             {
-              id: "printed_subroutines_prohibit_break_next_ice",
+              id: "1",
               type: "set_next_encounter_no_break_subroutines",
               sourceDefinitionId: 446,
               sourceTitle: "Data Darts",

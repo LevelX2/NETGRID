@@ -432,7 +432,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 473,
                         "sourceTitle": "Quandary"
@@ -465,7 +465,7 @@
                     "encounterStrength": 3,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                        "id": "0",
                         "type": "set_next_encounter_lock",
                         "breakTags": [
                           "stun"
@@ -534,7 +534,7 @@
                     "encounterStrength": 1,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 450,
                         "sourceTitle": "Data Wall 2.0"
@@ -715,7 +715,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 449,
                         "sourceTitle": "Data Wall"
@@ -748,7 +748,7 @@
                     "encounterStrength": 3,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                        "id": "0",
                         "type": "set_next_encounter_lock",
                         "breakTags": [
                           "stun"
@@ -10456,7 +10456,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 207,
-          "sideSafePlanningFingerprint": "fnv1a:3f9ab5c9"
+          "sideSafePlanningFingerprint": "fnv1a:198a463b"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",
@@ -18888,7 +18888,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 449,
                         "sourceTitle": "Data Wall"
@@ -18972,13 +18972,13 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 450,
                         "sourceTitle": "Data Wall 2.0"
                       },
                       {
-                        "id": "printed_subroutines_end_the_run.scored_rezzed_ice_mark_modifier.1",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 450,
                         "sourceTitle": "Data Wall 2.0"
@@ -19011,7 +19011,7 @@
                     "encounterStrength": 3,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                        "id": "0",
                         "type": "set_next_encounter_lock",
                         "breakTags": [
                           "stun"
@@ -33146,7 +33146,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 336,
-          "sideSafePlanningFingerprint": "fnv1a:d3698968"
+          "sideSafePlanningFingerprint": "fnv1a:ed754d2c"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",
@@ -42036,7 +42036,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 473,
                         "sourceTitle": "Quandary"
@@ -42159,7 +42159,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 449,
                         "sourceTitle": "Data Wall"
@@ -42190,7 +42190,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 449,
                         "sourceTitle": "Data Wall"
@@ -42270,7 +42270,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 449,
                         "sourceTitle": "Data Wall"
@@ -57821,7 +57821,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 378,
-          "sideSafePlanningFingerprint": "fnv1a:4fd3b8e6"
+          "sideSafePlanningFingerprint": "fnv1a:3b2083f2"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",
@@ -67160,7 +67160,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_runner_run_lock_actions",
+                        "id": "0",
                         "type": "set_runner_run_lock_actions",
                         "amount": 6,
                         "sourceDefinitionId": 459,
@@ -67170,7 +67170,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 459,
                         "sourceTitle": "Haunting Inquisition"
@@ -67233,7 +67233,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 491,
                         "sourceTitle": "Wall of Static"
@@ -73478,7 +73478,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 106,
-          "sideSafePlanningFingerprint": "fnv1a:cb4dcb57"
+          "sideSafePlanningFingerprint": "fnv1a:c2404a57"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",
@@ -81046,7 +81046,7 @@
                     "encounterStrength": 5,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_damage_net",
+                        "id": "0",
                         "type": "do_damage",
                         "amount": 1,
                         "damageType": "net",
@@ -81057,7 +81057,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_damage_net.scored_rezzed_ice_mark_modifier.1",
+                        "id": "1",
                         "type": "do_damage",
                         "amount": 1,
                         "damageType": "net",
@@ -81068,7 +81068,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_prohibit_break_next_ice",
+                        "id": "2",
                         "type": "set_next_encounter_no_break_subroutines",
                         "sourceDefinitionId": 470,
                         "sourceTitle": "Neural Blade",
@@ -81077,7 +81077,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_prohibit_break_next_ice.scored_rezzed_ice_mark_modifier.1",
+                        "id": "3",
                         "type": "set_next_encounter_no_break_subroutines",
                         "sourceDefinitionId": 470,
                         "sourceTitle": "Neural Blade",
@@ -81111,7 +81111,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 449,
                         "sourceTitle": "Data Wall"
@@ -81155,7 +81155,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 449,
                         "sourceTitle": "Data Wall"
@@ -81192,7 +81192,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 473,
                         "sourceTitle": "Quandary"
@@ -91827,7 +91827,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 228,
-          "sideSafePlanningFingerprint": "fnv1a:c1ec0b5e"
+          "sideSafePlanningFingerprint": "fnv1a:4a95fc72"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",

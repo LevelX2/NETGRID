@@ -602,7 +602,7 @@ export function createEncounterMovementRuntimeHosts(
     const sourceDefinitionId = definitionFor(state, breakerId).id;
     const die = rollDeterministicDie(
       state,
-      `icebreaker.random_break_or_damage.${sourceDefinitionId}.${run.runId}.${encounteredIceId}.${breakerId}.${subroutineIndex}`,
+      [20, sourceDefinitionId, run.runId, encounteredIceId, breakerId, subroutineIndex],
     );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -626,6 +626,7 @@ export function createEncounterMovementRuntimeHosts(
       damageType: "net",
       amount: die,
       source: `ability:${sourceDefinitionId}`,
+      randomSource: ["c", sourceDefinitionId, breakerId],
     });
     setDamagePayload(legalAction, damageSummary);
     legalAction.payload = {

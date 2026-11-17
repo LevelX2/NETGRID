@@ -681,7 +681,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -711,7 +711,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -773,7 +773,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -944,7 +944,7 @@
                 "effectiveStrength": 7,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -955,7 +955,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_net.scored_rezzed_ice_mark_modifier.1",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -966,7 +966,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_net_a",
+                    "id": "2",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -977,7 +977,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_net_a.scored_rezzed_ice_mark_modifier.1",
+                    "id": "3",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -988,25 +988,25 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "4",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run.scored_rezzed_ice_mark_modifier.1",
+                    "id": "5",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a",
+                    "id": "6",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a.scored_rezzed_ice_mark_modifier.1",
+                    "id": "7",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
@@ -10577,7 +10577,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 261,
-      "sideSafePlanningFingerprint": "fnv1a:13a9ec4f"
+      "sideSafePlanningFingerprint": "fnv1a:20ed1a15"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -14982,7 +14982,7 @@
                     "central_access_novelty_ratio:1",
                     "path_passability:blocked_unbreakable",
                     "runner_visible_lethal_ice_damage_blocks_run_start:r1",
-                    "runner_visible_lethal_ice_damage|source:490|ice:c311|subroutine:printed_subroutines_damage_net_a|damage_type:net|subroutine_damage:2|damage:6|cumulative_damage:6|cumulative_core_damage:0|hand:5|required_floor:0|below_required_floor:true|immediate_flatline:true|cleanup_flatline:false|effective_max_hand_after:5|subroutine_prevention:0|affordable_break:false",
+                    "runner_visible_lethal_ice_damage|source:490|ice:c311|subroutine:2|damage_type:net|subroutine_damage:2|damage:6|cumulative_damage:6|cumulative_core_damage:0|hand:5|required_floor:0|below_required_floor:true|immediate_flatline:true|cleanup_flatline:false|effective_max_hand_after:5|subroutine_prevention:0|affordable_break:false",
                     "path_cost:22",
                     "visible_break_cost:22",
                     "route_reachability:no_access",

@@ -107,7 +107,7 @@
   },
   "engine": {
     "stateVersion": 429,
-    "stateHash": "fnv1a:f8d40662",
+    "stateHash": "fnv1a:442cfc2b",
     "testOnlyGameState": {
       "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
       "baseline": {
@@ -128,758 +128,1068 @@
       "randomDrawRecords": [
         {
           "counter": 0,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.46392114603226575
+          "purpose": [
+            1
+          ],
+          "value": 0.2562999072020997
         },
         {
           "counter": 1,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.24581196972728947
+          "purpose": [
+            1
+          ],
+          "value": 0.050311198566312054
         },
         {
           "counter": 2,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.4327342708532774
+          "purpose": [
+            1
+          ],
+          "value": 0.6301553032680742
         },
         {
           "counter": 3,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.6106586898046538
+          "purpose": [
+            1
+          ],
+          "value": 0.5585471038990526
         },
         {
           "counter": 4,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9008660956512428
+          "purpose": [
+            1
+          ],
+          "value": 0.14867897659411966
         },
         {
           "counter": 5,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.11742653399226244
+          "purpose": [
+            1
+          ],
+          "value": 0.8179587830599512
         },
         {
           "counter": 6,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.8582140953668169
+          "purpose": [
+            1
+          ],
+          "value": 0.19354642307654546
         },
         {
           "counter": 7,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.26369742411802044
+          "purpose": [
+            1
+          ],
+          "value": 0.42475374437908997
         },
         {
           "counter": 8,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.7975237895026632
+          "purpose": [
+            1
+          ],
+          "value": 0.3843296358526185
         },
         {
           "counter": 9,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.44176216918985645
+          "purpose": [
+            1
+          ],
+          "value": 0.3415164510711567
         },
         {
           "counter": 10,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.40577222311539773
+          "purpose": [
+            1
+          ],
+          "value": 0.5799761482735518
         },
         {
           "counter": 11,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.931572852782083
+          "purpose": [
+            1
+          ],
+          "value": 0.6383323257610893
         },
         {
           "counter": 12,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9667908256914247
+          "purpose": [
+            1
+          ],
+          "value": 0.6589747669842889
         },
         {
           "counter": 13,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.06386128579903516
+          "purpose": [
+            1
+          ],
+          "value": 0.18653971991359886
         },
         {
           "counter": 14,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.5758504937277628
+          "purpose": [
+            1
+          ],
+          "value": 0.9348785142197528
         },
         {
           "counter": 15,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.02164283219404728
+          "purpose": [
+            1
+          ],
+          "value": 0.2902079125351156
         },
         {
           "counter": 16,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.16922122005211393
+          "purpose": [
+            1
+          ],
+          "value": 0.35912398774415744
         },
         {
           "counter": 17,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.2653347732542619
+          "purpose": [
+            1
+          ],
+          "value": 0.530593071382774
         },
         {
           "counter": 18,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.5074999903498459
+          "purpose": [
+            1
+          ],
+          "value": 0.1532284947366801
         },
         {
           "counter": 19,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9728985139513088
+          "purpose": [
+            1
+          ],
+          "value": 0.6994491541517307
         },
         {
           "counter": 20,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.40886019128689743
+          "purpose": [
+            1
+          ],
+          "value": 0.4914766359250351
         },
         {
           "counter": 21,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.02271548771196208
+          "purpose": [
+            1
+          ],
+          "value": 0.46503406085274845
         },
         {
           "counter": 22,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9742716162534014
+          "purpose": [
+            1
+          ],
+          "value": 0.6006587258182926
         },
         {
           "counter": 23,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9081878661922758
+          "purpose": [
+            1
+          ],
+          "value": 0.42729898102771857
         },
         {
           "counter": 24,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.6051076356951123
+          "purpose": [
+            1
+          ],
+          "value": 0.3044931791249216
         },
         {
           "counter": 25,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.3816888921449393
+          "purpose": [
+            1
+          ],
+          "value": 0.8484035102153857
         },
         {
           "counter": 26,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9454051363505933
+          "purpose": [
+            1
+          ],
+          "value": 0.457341472970769
         },
         {
           "counter": 27,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.8678877681455442
+          "purpose": [
+            1
+          ],
+          "value": 0.24472414288964672
         },
         {
           "counter": 28,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.2246520767778023
+          "purpose": [
+            1
+          ],
+          "value": 0.8059702996649258
         },
         {
           "counter": 29,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.8939748544973198
+          "purpose": [
+            1
+          ],
+          "value": 0.3894594373705752
         },
         {
           "counter": 30,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.08484318971528182
+          "purpose": [
+            1
+          ],
+          "value": 0.289502512134056
         },
         {
           "counter": 31,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.3224878408121745
+          "purpose": [
+            1
+          ],
+          "value": 0.16207434732487214
         },
         {
           "counter": 32,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.262358798601101
+          "purpose": [
+            1
+          ],
+          "value": 0.6510985878757637
         },
         {
           "counter": 33,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.35305703406048006
+          "purpose": [
+            1
+          ],
+          "value": 0.9208163144419244
         },
         {
           "counter": 34,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.92086087354422
+          "purpose": [
+            1
+          ],
+          "value": 0.4934991477855225
         },
         {
           "counter": 35,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.6144848836443016
+          "purpose": [
+            1
+          ],
+          "value": 0.3601520463831632
         },
         {
           "counter": 36,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.44434991932308066
+          "purpose": [
+            1
+          ],
+          "value": 0.5050105636916755
         },
         {
           "counter": 37,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.19967990626153176
+          "purpose": [
+            1
+          ],
+          "value": 0.4340830255644851
         },
         {
           "counter": 38,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.12479851618550297
+          "purpose": [
+            1
+          ],
+          "value": 0.584577580138929
         },
         {
           "counter": 39,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.8940970294165065
+          "purpose": [
+            1
+          ],
+          "value": 0.8782818529151948
         },
         {
           "counter": 40,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.3544380811903469
+          "purpose": [
+            1
+          ],
+          "value": 0.12132477203120129
         },
         {
           "counter": 41,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.2566427359125354
+          "purpose": [
+            1
+          ],
+          "value": 0.9983938489134357
         },
         {
           "counter": 42,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.12909914538085876
+          "purpose": [
+            1
+          ],
+          "value": 0.08352058214563429
         },
         {
           "counter": 43,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.7719462068581658
+          "purpose": [
+            1
+          ],
+          "value": 0.44700290260881015
         },
         {
           "counter": 44,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7012906538233977
+          "purpose": [
+            2
+          ],
+          "value": 0.5307577833982713
         },
         {
           "counter": 45,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7162888894429906
+          "purpose": [
+            2
+          ],
+          "value": 0.05716844505498919
         },
         {
           "counter": 46,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.03099064389996653
+          "purpose": [
+            2
+          ],
+          "value": 0.6464844947418906
         },
         {
           "counter": 47,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.6980899730165094
+          "purpose": [
+            2
+          ],
+          "value": 0.1069264543547257
         },
         {
           "counter": 48,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.4688597682740684
+          "purpose": [
+            2
+          ],
+          "value": 0.2892026920465476
         },
         {
           "counter": 49,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.3591440527409052
+          "purpose": [
+            2
+          ],
+          "value": 0.7466265829364268
         },
         {
           "counter": 50,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.03001968649412201
+          "purpose": [
+            2
+          ],
+          "value": 0.4457633766152347
         },
         {
           "counter": 51,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7331432205641855
+          "purpose": [
+            2
+          ],
+          "value": 0.25187937241130165
         },
         {
           "counter": 52,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7120943435963597
+          "purpose": [
+            2
+          ],
+          "value": 0.7513926483445429
         },
         {
           "counter": 53,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.29027211778611284
+          "purpose": [
+            2
+          ],
+          "value": 0.04477396963725411
         },
         {
           "counter": 54,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.015099555314786017
+          "purpose": [
+            2
+          ],
+          "value": 0.5238014287009722
         },
         {
           "counter": 55,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5483930741646866
+          "purpose": [
+            2
+          ],
+          "value": 0.5479322061730189
         },
         {
           "counter": 56,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.4914605414311529
+          "purpose": [
+            2
+          ],
+          "value": 0.4089109731113779
         },
         {
           "counter": 57,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.9453455612136156
+          "purpose": [
+            2
+          ],
+          "value": 0.12321478172839206
         },
         {
           "counter": 58,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7559702122377513
+          "purpose": [
+            2
+          ],
+          "value": 0.14586361099042233
         },
         {
           "counter": 59,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.8206952799395372
+          "purpose": [
+            2
+          ],
+          "value": 0.24899492833766046
         },
         {
           "counter": 60,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.6936563405611978
+          "purpose": [
+            2
+          ],
+          "value": 0.12185719111221671
         },
         {
           "counter": 61,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7280462373810654
+          "purpose": [
+            2
+          ],
+          "value": 0.22608780680690643
         },
         {
           "counter": 62,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.22327415152116992
+          "purpose": [
+            2
+          ],
+          "value": 0.42805051844764896
         },
         {
           "counter": 63,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.2557705899756514
+          "purpose": [
+            2
+          ],
+          "value": 0.5836290718068818
         },
         {
           "counter": 64,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5473169729873194
+          "purpose": [
+            2
+          ],
+          "value": 0.834751747837856
         },
         {
           "counter": 65,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7735255136641104
+          "purpose": [
+            2
+          ],
+          "value": 0.5378697541926082
         },
         {
           "counter": 66,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.6643907543115457
+          "purpose": [
+            2
+          ],
+          "value": 0.899588152225349
         },
         {
           "counter": 67,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.6059859672720501
+          "purpose": [
+            2
+          ],
+          "value": 0.7809670471341963
         },
         {
           "counter": 68,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.35222383896651177
+          "purpose": [
+            2
+          ],
+          "value": 0.22907543001517583
         },
         {
           "counter": 69,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.9370534899963946
+          "purpose": [
+            2
+          ],
+          "value": 0.5834144299015095
         },
         {
           "counter": 70,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.670599833231951
+          "purpose": [
+            2
+          ],
+          "value": 0.0815637240845899
         },
         {
           "counter": 71,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.9329295608386282
+          "purpose": [
+            2
+          ],
+          "value": 0.058921029996302776
         },
         {
           "counter": 72,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.9833686254602909
+          "purpose": [
+            2
+          ],
+          "value": 0.47557173652182216
         },
         {
           "counter": 73,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.2663582807251055
+          "purpose": [
+            2
+          ],
+          "value": 0.9184344919051102
         },
         {
           "counter": 74,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5791698315525574
+          "purpose": [
+            2
+          ],
+          "value": 0.026129216352295148
         },
         {
           "counter": 75,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.2845855595679989
+          "purpose": [
+            2
+          ],
+          "value": 0.026830602279922733
         },
         {
           "counter": 76,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5847581243959722
+          "purpose": [
+            2
+          ],
+          "value": 0.07765378817116664
         },
         {
           "counter": 77,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.4167510222650116
+          "purpose": [
+            2
+          ],
+          "value": 0.21143271267050023
         },
         {
           "counter": 78,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7181261486325954
+          "purpose": [
+            2
+          ],
+          "value": 0.186579874151382
         },
         {
           "counter": 79,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.6816189089001692
+          "purpose": [
+            2
+          ],
+          "value": 0.8884281210221285
         },
         {
           "counter": 80,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.11807822356408415
+          "purpose": [
+            2
+          ],
+          "value": 0.9381854161374401
         },
         {
           "counter": 81,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7740909486984738
+          "purpose": [
+            2
+          ],
+          "value": 0.6838892141552886
         },
         {
           "counter": 82,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5159877880582922
+          "purpose": [
+            2
+          ],
+          "value": 0.7176189343595496
         },
         {
           "counter": 83,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.6451475685070969
+          "purpose": [
+            2
+          ],
+          "value": 0.8717834394650826
         },
         {
           "counter": 84,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.039917988721853925
+          "purpose": [
+            2
+          ],
+          "value": 0.9796372380126588
         },
         {
           "counter": 85,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.2102934768904
+          "purpose": [
+            2
+          ],
+          "value": 0.877690824517501
         },
         {
           "counter": 86,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.8661073385648899
+          "purpose": [
+            2
+          ],
+          "value": 0.4995410455316589
         },
         {
           "counter": 87,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.43801260563676436
+          "purpose": [
+            2
+          ],
+          "value": 0.2028272590292468
         },
         {
           "counter": 88,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.8021100202386068
+          "purpose": [
+            3
+          ],
+          "value": 0.47503115419210873
         },
         {
           "counter": 89,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.39818721107399035
+          "purpose": [
+            3
+          ],
+          "value": 0.687647455235038
         },
         {
           "counter": 90,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.42771107607568437
+          "purpose": [
+            3
+          ],
+          "value": 0.8351518953849292
         },
         {
           "counter": 91,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.19098312944363982
+          "purpose": [
+            3
+          ],
+          "value": 0.7511560698003649
         },
         {
           "counter": 92,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.5710875283017051
+          "purpose": [
+            3
+          ],
+          "value": 0.43588187439660653
         },
         {
           "counter": 93,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.15562296859809532
+          "purpose": [
+            4
+          ],
+          "value": 0.02916731505254566
         },
         {
           "counter": 94,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.2407878443883581
+          "purpose": [
+            4
+          ],
+          "value": 0.809144749393185
         },
         {
           "counter": 95,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.5062547541841548
+          "purpose": [
+            4
+          ],
+          "value": 0.6459116279188393
         },
         {
           "counter": 96,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.5439439286173015
+          "purpose": [
+            4
+          ],
+          "value": 0.29714371656061833
         },
         {
           "counter": 97,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.545495833813024
+          "purpose": [
+            4
+          ],
+          "value": 0.17714101934454407
         },
         {
           "counter": 98,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.42710616001956203
+          "purpose": [
+            5
+          ],
+          "value": 0.2654080942858694
         },
         {
           "counter": 99,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.3029327425618794
+          "purpose": [
+            5
+          ],
+          "value": 0.3114429075524763
         },
         {
           "counter": 100,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.4655341908748868
+          "purpose": [
+            5
+          ],
+          "value": 0.40263412400440346
         },
         {
           "counter": 101,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.5132730460061621
+          "purpose": [
+            5
+          ],
+          "value": 0.3241399222322703
         },
         {
           "counter": 102,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.7804356205678851
+          "purpose": [
+            5
+          ],
+          "value": 0.2713851956755591
         },
         {
           "counter": 103,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.5048880549238922
+          "purpose": [
+            5
+          ],
+          "value": 0.4323727483600245
         },
         {
           "counter": 104,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.8347650168573522
+          "purpose": [
+            5
+          ],
+          "value": 0.5137316449128156
         },
         {
           "counter": 105,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.6473843675700284
+          "purpose": [
+            5
+          ],
+          "value": 0.6482894962560916
         },
         {
           "counter": 106,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.215763402054995
+          "purpose": [
+            5
+          ],
+          "value": 0.9882101875853587
         },
         {
           "counter": 107,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.085482314725574
+          "purpose": [
+            5
+          ],
+          "value": 0.7956128969647129
         },
         {
           "counter": 108,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.9838049340217853
+          "purpose": [
+            5
+          ],
+          "value": 0.8226527382356521
         },
         {
           "counter": 109,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.5083140993474552
+          "purpose": [
+            5
+          ],
+          "value": 0.8167470525962802
         },
         {
           "counter": 110,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.7482486339915532
+          "purpose": [
+            5
+          ],
+          "value": 0.1416683022829518
         },
         {
           "counter": 111,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.3205731195352963
+          "purpose": [
+            5
+          ],
+          "value": 0.7088413290738377
         },
         {
           "counter": 112,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.9366085675593994
+          "purpose": [
+            5
+          ],
+          "value": 0.18310803595059522
         },
         {
           "counter": 113,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.6987984434991816
+          "purpose": [
+            5
+          ],
+          "value": 0.7706535825282509
         },
         {
           "counter": 114,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.9939854497570747
+          "purpose": [
+            5
+          ],
+          "value": 0.7160669670622601
         },
         {
           "counter": 115,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.4349785110398602
+          "purpose": [
+            5
+          ],
+          "value": 0.10494372933484497
         },
         {
           "counter": 116,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.20350671833070821
+          "purpose": [
+            5
+          ],
+          "value": 0.7967739790426839
         },
         {
           "counter": 117,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.48070915876937237
+          "purpose": [
+            5
+          ],
+          "value": 0.47565814435572373
         },
         {
           "counter": 118,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.22883570263467945
+          "purpose": [
+            5
+          ],
+          "value": 0.9846206736852084
         },
         {
           "counter": 119,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.6602125519699266
+          "purpose": [
+            5
+          ],
+          "value": 0.41859593125592054
         },
         {
           "counter": 120,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.02502438598091694
+          "purpose": [
+            5
+          ],
+          "value": 0.37738213169170076
         },
         {
           "counter": 121,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.4021102116893964
+          "purpose": [
+            5
+          ],
+          "value": 0.7381574158458387
         },
         {
           "counter": 122,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.4268026491156901
+          "purpose": [
+            5
+          ],
+          "value": 0.431830605935959
         },
         {
           "counter": 123,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.7718043797708786
+          "purpose": [
+            5
+          ],
+          "value": 0.958209692236697
         },
         {
           "counter": 124,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.3725308423095359
+          "purpose": [
+            5
+          ],
+          "value": 0.733594126181964
         },
         {
           "counter": 125,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.8732733190218935
+          "purpose": [
+            5
+          ],
+          "value": 0.7221574375027312
         },
         {
           "counter": 126,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.7873749750927822
+          "purpose": [
+            5
+          ],
+          "value": 0.8404190080730508
         },
         {
           "counter": 127,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.31734830424992944
+          "purpose": [
+            5
+          ],
+          "value": 0.5124653287331973
         },
         {
           "counter": 128,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.41741918953439716
+          "purpose": [
+            5
+          ],
+          "value": 0.09868066235952677
         },
         {
           "counter": 129,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.9907758744604541
+          "purpose": [
+            5
+          ],
+          "value": 0.9142450063703466
         },
         {
           "counter": 130,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.49012950262357624
+          "purpose": [
+            5
+          ],
+          "value": 0.05618718226270625
         },
         {
           "counter": 131,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.056721153054657636
+          "purpose": [
+            5
+          ],
+          "value": 0.2938818125759234
         },
         {
           "counter": 132,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.029240039024795772
+          "purpose": [
+            5
+          ],
+          "value": 0.21492517033767378
         },
         {
           "counter": 133,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.021028175267285842
+          "purpose": [
+            5
+          ],
+          "value": 0.41322898847631595
         },
         {
           "counter": 134,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.5423875589163445
+          "purpose": [
+            5
+          ],
+          "value": 0.232562428546781
         },
         {
           "counter": 135,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.39899990747965264
+          "purpose": [
+            5
+          ],
+          "value": 0.08635571913867979
         },
         {
           "counter": 136,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.8172070347525581
+          "purpose": [
+            5
+          ],
+          "value": 0.13310523469249413
         },
         {
           "counter": 137,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.9141353593647547
+          "purpose": [
+            5
+          ],
+          "value": 0.3593039780145415
         },
         {
           "counter": 138,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.5291191595580829
+          "purpose": [
+            5
+          ],
+          "value": 0.8577838904292492
         },
         {
           "counter": 139,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.11362210741745804
+          "purpose": [
+            5
+          ],
+          "value": 0.7157803579587133
         },
         {
           "counter": 140,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.701836811434304
+          "purpose": [
+            5
+          ],
+          "value": 0.3690625494219816
         },
         {
           "counter": 141,
-          "purpose": "setup.shuffle.runner.mulligan",
-          "value": 0.46331973381829206
+          "purpose": [
+            5
+          ],
+          "value": 0.16176203256981547
         },
         {
           "counter": 142,
-          "purpose": "setup.draw.runner.mulligan_hand",
-          "value": 0.36826589547315935
+          "purpose": [
+            7
+          ],
+          "value": 0.2756152197465359
         },
         {
           "counter": 143,
-          "purpose": "setup.draw.runner.mulligan_hand",
-          "value": 0.8479794622118998
+          "purpose": [
+            7
+          ],
+          "value": 0.7097912126100537
         },
         {
           "counter": 144,
-          "purpose": "setup.draw.runner.mulligan_hand",
-          "value": 0.9855290779600637
+          "purpose": [
+            7
+          ],
+          "value": 0.9209233066775361
         },
         {
           "counter": 145,
-          "purpose": "setup.draw.runner.mulligan_hand",
-          "value": 0.6307540218320651
+          "purpose": [
+            7
+          ],
+          "value": 0.8479434349203422
         },
         {
           "counter": 146,
-          "purpose": "setup.draw.runner.mulligan_hand",
-          "value": 0.30844478923392304
+          "purpose": [
+            7
+          ],
+          "value": 0.9123737300409658
         },
         {
           "counter": 147,
-          "purpose": "hq_multiaccess:393:selection:0",
-          "value": 0.8262849932388939
+          "purpose": [
+            10,
+            393,
+            0
+          ],
+          "value": 0.8163042192233172
         },
         {
           "counter": 148,
-          "purpose": "hq_multiaccess:393:selection:1",
-          "value": 0.0547411458348156
+          "purpose": [
+            10,
+            393,
+            1
+          ],
+          "value": 0.19714749701245393
         },
         {
           "counter": 149,
-          "purpose": "hq_multiaccess:393:selection:2",
-          "value": 0.48689700094478217
+          "purpose": [
+            10,
+            393,
+            2
+          ],
+          "value": 0.764220136439279
         },
         {
           "counter": 150,
-          "purpose": "hq_multiaccess:393:selection:3",
-          "value": 0.8223241426261059
+          "purpose": [
+            10,
+            393,
+            3
+          ],
+          "value": 0.022313214596789033
         }
       ],
       "activeSide": "corp",
@@ -4655,12 +4965,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.continue_run.card_implementation.456.printed_subroutine.1.end_the_run",
+                "actionId": "runner.continue_run.0",
                 "clientKnownStateVersion": 35,
                 "idempotencyKey": "ai-sim-35"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.card_implementation.456.printed_subroutine.1.end_the_run",
+                "actionId": "runner.continue_run.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen (Run endet)",
@@ -4675,7 +4985,7 @@
                   "sourceDefinitionId": 456,
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": true,
-                  "encounterSubroutineIds": "card_implementation.456.printed_subroutine.1.end_the_run"
+                  "encounterSubroutineIds": "0"
                 },
                 "resolvedEffects": [
                   {
@@ -7374,12 +7684,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.continue_run.card_implementation.435.printed_subroutine.1.trash_program,card_implementation.435.printed_subroutine.2.end_the_run",
+                "actionId": "runner.continue_run.0,1",
                 "clientKnownStateVersion": 84,
                 "idempotencyKey": "ai-sim-84"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.card_implementation.435.printed_subroutine.1.trash_program,card_implementation.435.printed_subroutine.2.end_the_run",
+                "actionId": "runner.continue_run.0,1",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen (Run endet)",
@@ -7394,7 +7704,7 @@
                   "sourceDefinitionId": 435,
                   "unbrokenSubroutineCount": 2,
                   "encounterWillEndRun": true,
-                  "encounterSubroutineIds": "card_implementation.435.printed_subroutine.1.trash_program,card_implementation.435.printed_subroutine.2.end_the_run",
+                  "encounterSubroutineIds": "0,1",
                   "trashedCardDefinitionId": 139,
                   "trashedCardType": "program",
                   "trashedCount": 1
@@ -11159,12 +11469,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c76.c76.c2ot.0.card_implementation.435.printed_subroutine.1.trash_program",
+                "actionId": "runner.break_subroutine.c76.c76.c2ot.0.0",
                 "clientKnownStateVersion": 140,
                 "idempotencyKey": "ai-sim-140"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c76.c76.c2ot.0.card_implementation.435.printed_subroutine.1.trash_program",
+                "actionId": "runner.break_subroutine.c76.c76.c2ot.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Matador: Subroutine 1 brechen",
@@ -11198,7 +11508,7 @@
                   "breakerId": "c76",
                   "iceId": "c2ot",
                   "subroutineIndex": 0,
-                  "subroutineId": "card_implementation.435.printed_subroutine.1.trash_program",
+                  "subroutineId": "0",
                   "targetIceDefinitionId": 435,
                   "targetIceTitle": "Banpei",
                   "breakSubroutineBaseCost": 1
@@ -11237,12 +11547,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c76.c76.c2ot.1.card_implementation.435.printed_subroutine.2.end_the_run",
+                "actionId": "runner.break_subroutine.c76.c76.c2ot.1.1",
                 "clientKnownStateVersion": 141,
                 "idempotencyKey": "ai-sim-141"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c76.c76.c2ot.1.card_implementation.435.printed_subroutine.2.end_the_run",
+                "actionId": "runner.break_subroutine.c76.c76.c2ot.1.1",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Matador: Subroutine 2 brechen",
@@ -11276,7 +11586,7 @@
                   "breakerId": "c76",
                   "iceId": "c2ot",
                   "subroutineIndex": 1,
-                  "subroutineId": "card_implementation.435.printed_subroutine.2.end_the_run",
+                  "subroutineId": "1",
                   "targetIceDefinitionId": 435,
                   "targetIceTitle": "Banpei",
                   "breakSubroutineBaseCost": 1
@@ -11477,12 +11787,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.continue_run.card_implementation.449.printed_subroutine.1.end_the_run",
+                "actionId": "runner.continue_run.0",
                 "clientKnownStateVersion": 145,
                 "idempotencyKey": "ai-sim-145"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.card_implementation.449.printed_subroutine.1.end_the_run",
+                "actionId": "runner.continue_run.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen (Run endet)",
@@ -11497,7 +11807,7 @@
                   "sourceDefinitionId": 449,
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": true,
-                  "encounterSubroutineIds": "card_implementation.449.printed_subroutine.1.end_the_run"
+                  "encounterSubroutineIds": "0"
                 },
                 "resolvedEffects": [
                   {
@@ -11729,12 +12039,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c7l.c7l.c2th.0.card_implementation.456.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.c7l.c7l.c2th.0.0",
                 "clientKnownStateVersion": 149,
                 "idempotencyKey": "ai-sim-149"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c7l.c7l.c2th.0.card_implementation.456.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.c7l.c7l.c2th.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Psychic Friend: Subroutine brechen",
@@ -11768,7 +12078,7 @@
                   "breakerId": "c7l",
                   "iceId": "c2th",
                   "subroutineIndex": 0,
-                  "subroutineId": "card_implementation.456.printed_subroutine.1.end_the_run",
+                  "subroutineId": "0",
                   "targetIceDefinitionId": 456,
                   "targetIceTitle": "Filter",
                   "breakSubroutineBaseCost": 1
@@ -11969,12 +12279,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.continue_run.card_implementation.464.printed_subroutine.1.end_the_run",
+                "actionId": "runner.continue_run.0",
                 "clientKnownStateVersion": 153,
                 "idempotencyKey": "ai-sim-153"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.card_implementation.464.printed_subroutine.1.end_the_run",
+                "actionId": "runner.continue_run.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen (Run endet)",
@@ -11989,7 +12299,7 @@
                   "sourceDefinitionId": 464,
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": true,
-                  "encounterSubroutineIds": "card_implementation.464.printed_subroutine.1.end_the_run"
+                  "encounterSubroutineIds": "0"
                 },
                 "resolvedEffects": [
                   {
@@ -13148,12 +13458,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c76.c76.c2ou.0.card_implementation.435.printed_subroutine.1.trash_program",
+                "actionId": "runner.break_subroutine.c76.c76.c2ou.0.0",
                 "clientKnownStateVersion": 175,
                 "idempotencyKey": "ai-sim-175"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c76.c76.c2ou.0.card_implementation.435.printed_subroutine.1.trash_program",
+                "actionId": "runner.break_subroutine.c76.c76.c2ou.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Matador: Subroutine 1 brechen",
@@ -13187,7 +13497,7 @@
                   "breakerId": "c76",
                   "iceId": "c2ou",
                   "subroutineIndex": 0,
-                  "subroutineId": "card_implementation.435.printed_subroutine.1.trash_program",
+                  "subroutineId": "0",
                   "targetIceDefinitionId": 435,
                   "targetIceTitle": "Banpei",
                   "breakSubroutineBaseCost": 1
@@ -13226,12 +13536,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c76.c76.c2ou.1.card_implementation.435.printed_subroutine.2.end_the_run",
+                "actionId": "runner.break_subroutine.c76.c76.c2ou.1.1",
                 "clientKnownStateVersion": 176,
                 "idempotencyKey": "ai-sim-176"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c76.c76.c2ou.1.card_implementation.435.printed_subroutine.2.end_the_run",
+                "actionId": "runner.break_subroutine.c76.c76.c2ou.1.1",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Matador: Subroutine 2 brechen",
@@ -13265,7 +13575,7 @@
                   "breakerId": "c76",
                   "iceId": "c2ou",
                   "subroutineIndex": 1,
-                  "subroutineId": "card_implementation.435.printed_subroutine.2.end_the_run",
+                  "subroutineId": "1",
                   "targetIceDefinitionId": 435,
                   "targetIceTitle": "Banpei",
                   "breakSubroutineBaseCost": 1
@@ -17225,12 +17535,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.continue_run.card_implementation.449.printed_subroutine.1.end_the_run",
+                "actionId": "runner.continue_run.0",
                 "clientKnownStateVersion": 243,
                 "idempotencyKey": "ai-sim-243"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.card_implementation.449.printed_subroutine.1.end_the_run",
+                "actionId": "runner.continue_run.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen (Run endet)",
@@ -17245,7 +17555,7 @@
                   "sourceDefinitionId": 449,
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": true,
-                  "encounterSubroutineIds": "card_implementation.449.printed_subroutine.1.end_the_run"
+                  "encounterSubroutineIds": "0"
                 },
                 "resolvedEffects": [
                   {
@@ -20313,12 +20623,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.cuy.cuy.c2ry.0.card_implementation.449.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.cuy.cuy.c2ry.0.0",
                 "clientKnownStateVersion": 292,
                 "idempotencyKey": "ai-sim-292"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.cuy.cuy.c2ry.0.card_implementation.449.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.cuy.cuy.c2ry.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Boring Bit: Subroutine brechen",
@@ -20352,7 +20662,7 @@
                   "breakerId": "cuy",
                   "iceId": "c2ry",
                   "subroutineIndex": 0,
-                  "subroutineId": "card_implementation.449.printed_subroutine.1.end_the_run",
+                  "subroutineId": "0",
                   "targetIceDefinitionId": 449,
                   "targetIceTitle": "Data Wall",
                   "breakSubroutineBaseCost": 2
@@ -22707,12 +23017,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.cuy.cuy.c2ry.0.card_implementation.449.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.cuy.cuy.c2ry.0.0",
                 "clientKnownStateVersion": 331,
                 "idempotencyKey": "ai-sim-331"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.cuy.cuy.c2ry.0.card_implementation.449.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.cuy.cuy.c2ry.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Boring Bit: Subroutine brechen",
@@ -22746,7 +23056,7 @@
                   "breakerId": "cuy",
                   "iceId": "c2ry",
                   "subroutineIndex": 0,
-                  "subroutineId": "card_implementation.449.printed_subroutine.1.end_the_run",
+                  "subroutineId": "0",
                   "targetIceDefinitionId": 449,
                   "targetIceTitle": "Data Wall",
                   "breakSubroutineBaseCost": 2
@@ -22947,12 +23257,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.continue_run.card_implementation.464.printed_subroutine.1.end_the_run",
+                "actionId": "runner.continue_run.0",
                 "clientKnownStateVersion": 335,
                 "idempotencyKey": "ai-sim-335"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.card_implementation.464.printed_subroutine.1.end_the_run",
+                "actionId": "runner.continue_run.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen (Run endet)",
@@ -22967,7 +23277,7 @@
                   "sourceDefinitionId": 464,
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": true,
-                  "encounterSubroutineIds": "card_implementation.464.printed_subroutine.1.end_the_run"
+                  "encounterSubroutineIds": "0"
                 },
                 "resolvedEffects": [
                   {
@@ -25960,12 +26270,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.cuy.cuy.c2ry.0.card_implementation.449.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.cuy.cuy.c2ry.0.0",
                 "clientKnownStateVersion": 379,
                 "idempotencyKey": "ai-sim-379"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.cuy.cuy.c2ry.0.card_implementation.449.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.cuy.cuy.c2ry.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Boring Bit: Subroutine brechen",
@@ -25999,7 +26309,7 @@
                   "breakerId": "cuy",
                   "iceId": "c2ry",
                   "subroutineIndex": 0,
-                  "subroutineId": "card_implementation.449.printed_subroutine.1.end_the_run",
+                  "subroutineId": "0",
                   "targetIceDefinitionId": 449,
                   "targetIceTitle": "Data Wall",
                   "breakSubroutineBaseCost": 2
@@ -26347,12 +26657,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c7l.c7l.c2va.0.card_implementation.464.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.c7l.c7l.c2va.0.0",
                 "clientKnownStateVersion": 385,
                 "idempotencyKey": "ai-sim-385"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c7l.c7l.c2va.0.card_implementation.464.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.c7l.c7l.c2va.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Psychic Friend: Subroutine brechen",
@@ -26386,7 +26696,7 @@
                   "breakerId": "c7l",
                   "iceId": "c2va",
                   "subroutineIndex": 0,
-                  "subroutineId": "card_implementation.464.printed_subroutine.1.end_the_run",
+                  "subroutineId": "0",
                   "targetIceDefinitionId": 464,
                   "targetIceTitle": "Keeper",
                   "breakSubroutineBaseCost": 1
@@ -26575,12 +26885,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.cuy.cuy.c2rz.0.card_implementation.449.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.cuy.cuy.c2rz.0.0",
                 "clientKnownStateVersion": 389,
                 "idempotencyKey": "ai-sim-389"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.cuy.cuy.c2rz.0.card_implementation.449.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.cuy.cuy.c2rz.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Boring Bit: Subroutine brechen",
@@ -26614,7 +26924,7 @@
                   "breakerId": "cuy",
                   "iceId": "c2rz",
                   "subroutineIndex": 0,
-                  "subroutineId": "card_implementation.449.printed_subroutine.1.end_the_run",
+                  "subroutineId": "0",
                   "targetIceDefinitionId": 449,
                   "targetIceTitle": "Data Wall",
                   "breakSubroutineBaseCost": 2
@@ -26882,12 +27192,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c7l.c7l.c2xa.0.card_implementation.473.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.c7l.c7l.c2xa.0.0",
                 "clientKnownStateVersion": 394,
                 "idempotencyKey": "ai-sim-394"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c7l.c7l.c2xa.0.card_implementation.473.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.c7l.c7l.c2xa.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Psychic Friend: Subroutine brechen",
@@ -26921,7 +27231,7 @@
                   "breakerId": "c7l",
                   "iceId": "c2xa",
                   "subroutineIndex": 0,
-                  "subroutineId": "card_implementation.473.printed_subroutine.1.end_the_run",
+                  "subroutineId": "0",
                   "targetIceDefinitionId": 473,
                   "targetIceTitle": "Quandary",
                   "breakSubroutineBaseCost": 1
@@ -27110,12 +27420,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c7l.c7l.c2x9.0.card_implementation.473.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.c7l.c7l.c2x9.0.0",
                 "clientKnownStateVersion": 398,
                 "idempotencyKey": "ai-sim-398"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c7l.c7l.c2x9.0.card_implementation.473.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.c7l.c7l.c2x9.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Psychic Friend: Subroutine brechen",
@@ -27149,7 +27459,7 @@
                   "breakerId": "c7l",
                   "iceId": "c2x9",
                   "subroutineIndex": 0,
-                  "subroutineId": "card_implementation.473.printed_subroutine.1.end_the_run",
+                  "subroutineId": "0",
                   "targetIceDefinitionId": 473,
                   "targetIceTitle": "Quandary",
                   "breakSubroutineBaseCost": 1
@@ -27365,12 +27675,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c7l.c7l.c2th.0.card_implementation.456.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.c7l.c7l.c2th.0.0",
                 "clientKnownStateVersion": 403,
                 "idempotencyKey": "ai-sim-403"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c7l.c7l.c2th.0.card_implementation.456.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.c7l.c7l.c2th.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Psychic Friend: Subroutine brechen",
@@ -27404,7 +27714,7 @@
                   "breakerId": "c7l",
                   "iceId": "c2th",
                   "subroutineIndex": 0,
-                  "subroutineId": "card_implementation.456.printed_subroutine.1.end_the_run",
+                  "subroutineId": "0",
                   "targetIceDefinitionId": 456,
                   "targetIceTitle": "Filter",
                   "breakSubroutineBaseCost": 1
@@ -27539,12 +27849,12 @@
               "action": {
                 "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c7l.c7l.c2v9.0.card_implementation.464.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.c7l.c7l.c2v9.0.0",
                 "clientKnownStateVersion": 406,
                 "idempotencyKey": "ai-sim-406"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c7l.c7l.c2v9.0.card_implementation.464.printed_subroutine.1.end_the_run",
+                "actionId": "runner.break_subroutine.c7l.c7l.c2v9.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Psychic Friend: Subroutine brechen",
@@ -27578,7 +27888,7 @@
                   "breakerId": "c7l",
                   "iceId": "c2v9",
                   "subroutineIndex": 0,
-                  "subroutineId": "card_implementation.464.printed_subroutine.1.end_the_run",
+                  "subroutineId": "0",
                   "targetIceDefinitionId": 464,
                   "targetIceTitle": "Keeper",
                   "breakSubroutineBaseCost": 1
@@ -29033,7 +29343,9 @@
         "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
         "pdcaUsedSourceIdsThisTurn": []
       },
-      "turnSerial": 64
+      "turnSerial": 64,
+      "aiTurnPlanRandomCounter": 0,
+      "aiTurnPlanRandomDrawRecords": []
     },
     "eventPrefix": [
       {

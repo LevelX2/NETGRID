@@ -79,7 +79,11 @@ function mutableCompatibilityDefinition(
     mechanics: [...mechanics],
     ...(subroutines === undefined
       ? {}
-      : { subroutines: subroutines.map(mutableSubroutineDefinition) }),
+      : {
+          subroutines: subroutines.map((subroutine, index) =>
+            mutableSubroutineDefinition(subroutine, index),
+          ),
+        }),
   };
 }
 
@@ -89,9 +93,10 @@ function mutableSubroutineDefinition(
       typeof cardSpecPlanningCards
     >[number]["definition"]["subroutines"]
   >[number],
+  index: number,
 ): SubroutineDefinition {
   return {
-    id: subroutine.id,
+    id: index.toString(36),
     type: subroutine.type,
     ...(subroutine.amount === undefined ? {} : { amount: subroutine.amount }),
     ...(subroutine.damageType === undefined

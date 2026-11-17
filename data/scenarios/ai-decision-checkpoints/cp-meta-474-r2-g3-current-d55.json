@@ -258,7 +258,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 478,
                     "sourceTitle": "Scramble"
@@ -3872,7 +3872,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 54,
-      "sideSafePlanningFingerprint": "fnv1a:5b30a22f"
+      "sideSafePlanningFingerprint": "fnv1a:e308c2dd"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_redline_riot_1.0.0",

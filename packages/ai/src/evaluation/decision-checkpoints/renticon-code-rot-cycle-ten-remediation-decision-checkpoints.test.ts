@@ -39,7 +39,7 @@ describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
       expectedPriorityClass,
     ) => {
       const result = runAiDecisionCheckpoint(
-        structuredClone(json) as AiDecisionCheckpointV1,
+        structuredClone(json) as unknown as AiDecisionCheckpointV1,
       );
 
       expect(result.ok, `${result.code}: ${result.message}`).toBe(true);

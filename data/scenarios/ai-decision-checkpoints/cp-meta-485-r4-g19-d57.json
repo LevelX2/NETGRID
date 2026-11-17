@@ -302,13 +302,13 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 475,
                     "sourceTitle": "Reinforced Wall"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 475,
                     "sourceTitle": "Reinforced Wall"
@@ -4044,7 +4044,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 56,
-      "sideSafePlanningFingerprint": "fnv1a:5c045ca9"
+      "sideSafePlanningFingerprint": "fnv1a:e58df3ae"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_mp48400s_1.0.0",

@@ -56,7 +56,7 @@ describe("match D153 card hint consumer contract", () => {
 
   it("binds every visible Broker instance before selecting its matching payout", () => {
     const checkpoint = bindHistoricalRunEventCadence(
-      structuredClone(checkpointJson) as AiDecisionCheckpointV1,
+      structuredClone(checkpointJson) as unknown as AiDecisionCheckpointV1,
     );
     checkpoint.expectation.planExecution!.requiredAssessmentEvidence = [
       "runner_credit_bank_complete_known_run_after_cashout",

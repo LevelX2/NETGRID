@@ -767,7 +767,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_cannot_jack_out",
+                    "id": "0",
                     "type": "set_run_jack_out_lock",
                     "sourceDefinitionId": 463,
                     "sourceTitle": "Jack Attack",
@@ -776,7 +776,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "1",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -826,7 +826,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -1308,7 +1308,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -13447,7 +13447,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 304,
-      "sideSafePlanningFingerprint": "fnv1a:8991a279"
+      "sideSafePlanningFingerprint": "fnv1a:3cfe61a2"
     },
     "observedTurnPlanAction": {
       "matchId": "match_8a0328738fccdc37",

@@ -664,7 +664,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -701,7 +701,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 444,
                     "sourceTitle": "Crystal Wall"
@@ -764,7 +764,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -1117,7 +1117,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -1154,13 +1154,13 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 475,
                     "sourceTitle": "Reinforced Wall"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 475,
                     "sourceTitle": "Reinforced Wall"
@@ -1239,13 +1239,13 @@
             "effectiveStrength": 4,
             "subroutines": [
               {
-                "id": "printed_subroutines_end_the_run",
+                "id": "0",
                 "type": "end_the_run",
                 "sourceDefinitionId": 475,
                 "sourceTitle": "Reinforced Wall"
               },
               {
-                "id": "printed_subroutines_end_the_run_a",
+                "id": "1",
                 "type": "end_the_run",
                 "sourceDefinitionId": 475,
                 "sourceTitle": "Reinforced Wall"
@@ -12219,7 +12219,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1ju.c1ju.c1ju.c2xq.1.printed_subroutines_end_the_run_a.328",
+          "actionId": "runner.break_subroutine.c1ju.c1ju.c1ju.c2xq.1.1.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine 2 brechen",
@@ -12261,7 +12261,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run_a",
+          "actionId": "runner.continue_run.1",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -12274,7 +12274,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "printed_subroutines_end_the_run_a",
+            "encounterSubroutineIds": "1",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -14344,7 +14344,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1ju.c1ju.c1ju.c2xq.1.printed_subroutines_end_the_run_a.328",
+        "actionId": "runner.break_subroutine.c1ju.c1ju.c1ju.c2xq.1.1.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine 2 brechen",
@@ -14386,7 +14386,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_end_the_run_a",
+        "actionId": "runner.continue_run.1",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -14399,7 +14399,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "printed_subroutines_end_the_run_a",
+          "encounterSubroutineIds": "1",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -14450,7 +14450,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 401,
-      "sideSafePlanningFingerprint": "fnv1a:fbedeb20"
+      "sideSafePlanningFingerprint": "fnv1a:9b908dbb"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -19545,7 +19545,7 @@
           "sideSafePlanningFingerprint": "fnv1a:040b5271"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run_a",
+          "actionId": "runner.continue_run.1",
           "stateVersion": 401,
           "semanticActionSetFingerprint": "fnv1a:cba33a0a",
           "invocationKey": "fnv1a:e63866fe"
@@ -19557,7 +19557,7 @@
         "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar2",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A395",
         "sourceStepId": "plan:runner.convert_run_window:run%3A395:convert",
-        "originalActionId": "runner.continue_run.printed_subroutines_end_the_run_a",
+        "originalActionId": "runner.continue_run.1",
         "selectedAtStateVersion": 401
       },
       "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Ar2",

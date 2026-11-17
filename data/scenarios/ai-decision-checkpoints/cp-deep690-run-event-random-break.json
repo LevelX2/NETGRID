@@ -376,7 +376,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 482,
                     "sourceTitle": "Sleeper"
@@ -441,7 +441,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_run_and_runner_forgoes_next_action",
+                    "id": "0",
                     "type": "end_the_run_and_runner_forgoes_next_action",
                     "breakTags": [
                       "knockout"
@@ -615,7 +615,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 4,
                     "traceSuccessEffect": {
@@ -654,7 +654,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 464,
                     "sourceTitle": "Keeper"
@@ -6820,7 +6820,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 114,
-      "sideSafePlanningFingerprint": "fnv1a:8f85a456"
+      "sideSafePlanningFingerprint": "fnv1a:b8703cdc"
     },
     "observedTurnPlanAction": {
       "matchId": "match_037fffd5bf53c0f9",

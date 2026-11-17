@@ -320,7 +320,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_trace",
+                        "id": "0",
                         "type": "initiate_trace",
                         "traceLimit": 6,
                         "traceSuccessEffect": {
@@ -382,7 +382,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 449,
                         "sourceTitle": "Data Wall"
@@ -438,7 +438,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 491,
                         "sourceTitle": "Wall of Static"
@@ -5762,7 +5762,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 87,
-          "sideSafePlanningFingerprint": "fnv1a:3352d6b8"
+          "sideSafePlanningFingerprint": "fnv1a:b660f818"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",
@@ -13570,7 +13570,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_trace",
+                        "id": "0",
                         "type": "initiate_trace",
                         "traceLimit": 6,
                         "traceSuccessEffect": {
@@ -13632,7 +13632,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 449,
                         "sourceTitle": "Data Wall"
@@ -13688,7 +13688,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 491,
                         "sourceTitle": "Wall of Static"
@@ -13748,7 +13748,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 6,
                     "traceSuccessEffect": {
@@ -18566,7 +18566,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 91,
-          "sideSafePlanningFingerprint": "fnv1a:e0234621"
+          "sideSafePlanningFingerprint": "fnv1a:c3b5e36d"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",

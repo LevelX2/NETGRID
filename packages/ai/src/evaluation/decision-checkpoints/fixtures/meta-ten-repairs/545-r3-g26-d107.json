@@ -437,7 +437,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -484,7 +484,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -533,7 +533,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_trace",
+                      "id": "0",
                       "type": "initiate_trace",
                       "traceLimit": 4,
                       "traceSuccessEffect": {
@@ -679,7 +679,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -735,7 +735,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_trash_program",
+                      "id": "0",
                       "type": "trash_installed_program",
                       "sourceDefinitionId": 435,
                       "sourceTitle": "Banpei",
@@ -744,7 +744,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 435,
                       "sourceTitle": "Banpei"
@@ -814,7 +814,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 449,
                       "sourceTitle": "Data Wall"
@@ -3838,7 +3838,7 @@
             "postInstallRezQuoteCardId": "c2p9",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r4",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 106,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3875,7 +3875,7 @@
             "postInstallRezQuoteCardId": "c2p9",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 106,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3912,7 +3912,7 @@
             "postInstallRezQuoteCardId": "c2p9",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 106,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3948,7 +3948,7 @@
             "postInstallRezQuoteCardId": "c2p9",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 106,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3985,7 +3985,7 @@
             "postInstallRezQuoteCardId": "c2p9",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 106,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -4022,7 +4022,7 @@
             "postInstallRezQuoteCardId": "c2p9",
             "postInstallRezQuoteTargetServerId": "r2",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 106,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -4059,7 +4059,7 @@
             "postInstallRezQuoteCardId": "c2p9",
             "postInstallRezQuoteTargetServerId": "r3",
             "postInstallRezQuoteProjectedServerId": "r3",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 106,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6210,7 +6210,7 @@
           "postInstallRezQuoteCardId": "c2p9",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r4",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 106,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6247,7 +6247,7 @@
           "postInstallRezQuoteCardId": "c2p9",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 106,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6284,7 +6284,7 @@
           "postInstallRezQuoteCardId": "c2p9",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 106,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6320,7 +6320,7 @@
           "postInstallRezQuoteCardId": "c2p9",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 106,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6357,7 +6357,7 @@
           "postInstallRezQuoteCardId": "c2p9",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 106,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6394,7 +6394,7 @@
           "postInstallRezQuoteCardId": "c2p9",
           "postInstallRezQuoteTargetServerId": "r2",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 106,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6431,7 +6431,7 @@
           "postInstallRezQuoteCardId": "c2p9",
           "postInstallRezQuoteTargetServerId": "r3",
           "postInstallRezQuoteProjectedServerId": "r3",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_ice_strength\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2p9\",\"iceDefinitionId\":437,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_future_strength_bonus\",\"amount\":2,\"sourceDefinitionId\":437,\"sourceTitle\":\"Canis Major\",\"unbrokenRunEffect\":{\"increasesFutureIceStrength\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 106,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6497,7 +6497,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 106,
-      "sideSafePlanningFingerprint": "fnv1a:c735104b"
+      "sideSafePlanningFingerprint": "fnv1a:a8b73c69"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_cheap_bag_tricks_1.0.0",

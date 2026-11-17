@@ -10,7 +10,7 @@ describe("corp ineffective virus purge checkpoints", () => {
     ["repeated inactive-counter purge", purgeLoopJson],
   ])("rejects the %s", (_label, checkpointJson) => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(checkpointJson) as AiDecisionCheckpointV1,
+      structuredClone(checkpointJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result).toMatchObject({ ok: true });

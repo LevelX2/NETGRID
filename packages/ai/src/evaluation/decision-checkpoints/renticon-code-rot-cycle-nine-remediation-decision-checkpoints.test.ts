@@ -8,7 +8,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("Rent-I-Con versus CODE ROT cycle-nine remediation checkpoint", () => {
   it("uses the last click for liquidity instead of over-layering HQ", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(affordableHqIceJson) as AiDecisionCheckpointV1,
+      structuredClone(affordableHqIceJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);

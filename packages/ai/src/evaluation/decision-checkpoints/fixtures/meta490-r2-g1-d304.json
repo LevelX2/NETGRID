@@ -590,7 +590,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions",
+                    "id": "0",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -600,7 +600,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
@@ -638,25 +638,25 @@
                 "encounterStrength": 7,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_a",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 99,
                     "sourceTitle": "Toughonium™ Wall"
                   },
                   {
-                    "id": "subroutine_end_run_b",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 99,
                     "sourceTitle": "Toughonium™ Wall"
                   },
                   {
-                    "id": "subroutine_end_run_c",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 99,
                     "sourceTitle": "Toughonium™ Wall"
                   },
                   {
-                    "id": "subroutine_end_run_d",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 99,
                     "sourceTitle": "Toughonium™ Wall"
@@ -732,7 +732,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 87,
                     "sourceTitle": "Marionette",
@@ -741,7 +741,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 87,
                     "sourceTitle": "Marionette"
@@ -772,7 +772,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -805,7 +805,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                    "id": "0",
                     "type": "set_next_encounter_lock",
                     "breakTags": [
                       "stun"
@@ -842,7 +842,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -873,7 +873,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -904,7 +904,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 76,
                     "sourceTitle": "Datacomb"
@@ -11863,7 +11863,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 303,
-      "sideSafePlanningFingerprint": "fnv1a:58afccdd"
+      "sideSafePlanningFingerprint": "fnv1a:2a2fb07b"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_redline_riot_1.0.0",
@@ -18350,7 +18350,7 @@
           "sideSafePlanningFingerprint": "fnv1a:f05823ae"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0",
           "stateVersion": 302,
           "semanticActionSetFingerprint": "fnv1a:158eff58",
           "invocationKey": "fnv1a:06683edd"
@@ -18362,7 +18362,7 @@
         "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A291",
         "sourceStepId": "plan:runner.convert_run_window:run%3A291:convert",
-        "originalActionId": "runner.continue_run.printed_subroutines_end_the_run",
+        "originalActionId": "runner.continue_run.0",
         "selectedAtStateVersion": 302
       },
       "rootForegroundInstanceId": "plan:runner.pressure_central:central%3Ard",

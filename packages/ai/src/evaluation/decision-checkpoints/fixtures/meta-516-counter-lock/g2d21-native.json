@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "corp",
   "stateVersion": 20,
-  "stateHash": "fnv1a:5b4c875c",
+  "stateHash": "fnv1a:338a2ea8",
   "input": {
     "matchId": "match_f3b4b5385e9d8610",
     "side": "corp",
@@ -331,7 +331,7 @@
                   "encounterStrength": 3,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_run_duration_cannot_jack_out",
+                      "id": "0",
                       "type": "set_run_jack_out_lock",
                       "sourceDefinitionId": 463,
                       "sourceTitle": "Jack Attack",
@@ -340,7 +340,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_trace",
+                      "id": "1",
                       "type": "initiate_trace",
                       "traceLimit": 5,
                       "traceSuccessEffect": {
@@ -1194,7 +1194,7 @@
             "postInstallRezQuoteCardId": "c2rr",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 20,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -1231,7 +1231,7 @@
             "postInstallRezQuoteCardId": "c2rr",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 20,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -1267,7 +1267,7 @@
             "postInstallRezQuoteCardId": "c2rr",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 20,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -1303,7 +1303,7 @@
             "postInstallRezQuoteCardId": "c2rr",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 20,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -2058,7 +2058,7 @@
           "postInstallRezQuoteCardId": "c2rr",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 20,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -2095,7 +2095,7 @@
           "postInstallRezQuoteCardId": "c2rr",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 20,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -2131,7 +2131,7 @@
           "postInstallRezQuoteCardId": "c2rr",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 20,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -2167,7 +2167,7 @@
           "postInstallRezQuoteCardId": "c2rr",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 20,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -2233,7 +2233,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 20,
-      "sideSafePlanningFingerprint": "fnv1a:99cbb317"
+      "sideSafePlanningFingerprint": "fnv1a:a5a248b2"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_neon_guillotine_1.1.0",

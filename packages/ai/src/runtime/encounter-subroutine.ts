@@ -109,7 +109,6 @@ function isPermanentDamageSubroutine(
   subroutine: VisibleEncounterSubroutine,
 ): boolean {
   const type = subroutine.type.toLowerCase();
-  const id = subroutine.id.toLowerCase();
   const damageTypeValue = (subroutine as { damageType?: unknown }).damageType;
   const damageType =
     typeof damageTypeValue === "string"
@@ -118,8 +117,6 @@ function isPermanentDamageSubroutine(
   return (
     type.includes("brain_damage") ||
     type.includes("core_damage") ||
-    id.includes("brain_damage") ||
-    id.includes("core_damage") ||
     damageType === "brain" ||
     damageType === "core"
   );

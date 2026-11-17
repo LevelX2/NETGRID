@@ -380,7 +380,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -391,7 +391,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 465,
                     "sourceTitle": "Laser Wire"
@@ -421,7 +421,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -432,7 +432,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 465,
                     "sourceTitle": "Laser Wire"
@@ -472,7 +472,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_brain_damage_one",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -732,7 +732,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -743,7 +743,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 465,
                     "sourceTitle": "Laser Wire"
@@ -775,7 +775,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_next_encounter_unless_fully_break_damage_net",
+                    "id": "0",
                     "type": "set_next_encounter_unless_fully_break_damage",
                     "amount": 3,
                     "damageType": "net",
@@ -842,7 +842,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_next_encounter_unless_fully_break_damage_net",
+                    "id": "0",
                     "type": "set_next_encounter_unless_fully_break_damage",
                     "amount": 3,
                     "damageType": "net",
@@ -13652,7 +13652,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 387,
-      "sideSafePlanningFingerprint": "fnv1a:2af7cba9"
+      "sideSafePlanningFingerprint": "fnv1a:64967902"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_redline_riot_1.0.0",
@@ -19465,7 +19465,7 @@
                     "central_access_novelty_ratio:1",
                     "path_passability:blocked_by_visible_damage_hand_buffer",
                     "runner_visible_lethal_ice_damage_blocks_run_start:r1",
-                    "runner_visible_ice_damage_below_required_hand_floor|source:465|ice:c2vj|subroutine:printed_subroutines_damage_net|damage_type:net|subroutine_damage:1|damage:1|cumulative_damage:1|cumulative_core_damage:0|hand:3|required_floor:4|below_required_floor:true|immediate_flatline:false|cleanup_flatline:false|effective_max_hand_after:4|subroutine_prevention:0|affordable_break:false",
+                    "runner_visible_ice_damage_below_required_hand_floor|source:465|ice:c2vj|subroutine:0|damage_type:net|subroutine_damage:1|damage:1|cumulative_damage:1|cumulative_core_damage:0|hand:3|required_floor:4|below_required_floor:true|immediate_flatline:false|cleanup_flatline:false|effective_max_hand_after:4|subroutine_prevention:0|affordable_break:false",
                     "path_cost:10",
                     "visible_break_cost:10",
                     "route_reachability:no_access",
@@ -19601,7 +19601,7 @@
                     "central_access_novelty_ratio:1",
                     "path_passability:blocked_by_visible_damage_hand_buffer",
                     "runner_visible_lethal_ice_damage_blocks_run_start:r1",
-                    "runner_visible_ice_damage_below_required_hand_floor|source:465|ice:c2vj|subroutine:printed_subroutines_damage_net|damage_type:net|subroutine_damage:1|damage:1|cumulative_damage:1|cumulative_core_damage:0|hand:4|required_floor:4|below_required_floor:true|immediate_flatline:false|cleanup_flatline:false|effective_max_hand_after:4|subroutine_prevention:0|affordable_break:false",
+                    "runner_visible_ice_damage_below_required_hand_floor|source:465|ice:c2vj|subroutine:0|damage_type:net|subroutine_damage:1|damage:1|cumulative_damage:1|cumulative_core_damage:0|hand:4|required_floor:4|below_required_floor:true|immediate_flatline:false|cleanup_flatline:false|effective_max_hand_after:4|subroutine_prevention:0|affordable_break:false",
                     "path_cost:10",
                     "visible_break_cost:10",
                     "route_reachability:no_access",

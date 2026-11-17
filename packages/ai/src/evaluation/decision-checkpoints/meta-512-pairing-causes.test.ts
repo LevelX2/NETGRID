@@ -201,7 +201,7 @@ it("values same-ICE paid rez lifetime and actually preserves it over three Engin
     state = take(
       state,
       "runner",
-      "runner.continue_run.printed_subroutines_end_the_run",
+      "runner.continue_run.0",
     );
     expect(state.run).toBeUndefined();
   }
@@ -231,7 +231,7 @@ it("preserves the same generic paid lifetime for the three currently funded Quan
     state = take(
       state,
       "runner",
-      "runner.continue_run.printed_subroutines_end_the_run",
+      "runner.continue_run.0",
     );
     expect(state.run).toBeUndefined();
   }

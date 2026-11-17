@@ -35,8 +35,8 @@ describe("current and future encounter share their break budget", () => {
     const decision = chooseAiAction(input);
     expect(decision.actionId).toContain(
       credits === 6
-        ? "printed_subroutines_prohibit_break_next_ice"
-        : "printed_subroutines_damage_net",
+        ? "1"
+        : "0",
     );
     expect(decision.fallbackUsed).toBe(false);
     expect(

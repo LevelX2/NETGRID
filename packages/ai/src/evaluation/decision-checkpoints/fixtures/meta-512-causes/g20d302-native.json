@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "runner",
   "stateVersion": 301,
-  "stateHash": "fnv1a:e2072e4e",
+  "stateHash": "fnv1a:e50bc704",
   "input": {
     "matchId": "match_b0e1d40478c4e805",
     "side": "runner",
@@ -368,7 +368,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 6,
                     "traceSuccessEffect": {
@@ -417,7 +417,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -653,7 +653,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -664,7 +664,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_net_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -675,13 +675,13 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
@@ -861,7 +861,7 @@
             "encounterStrength": 6,
             "subroutines": [
               {
-                "id": "printed_subroutines_damage_net",
+                "id": "0",
                 "type": "do_damage",
                 "amount": 2,
                 "damageType": "net",
@@ -872,7 +872,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_damage_net_a",
+                "id": "1",
                 "type": "do_damage",
                 "amount": 2,
                 "damageType": "net",
@@ -883,13 +883,13 @@
                 }
               },
               {
-                "id": "printed_subroutines_end_the_run",
+                "id": "2",
                 "type": "end_the_run",
                 "sourceDefinitionId": 490,
                 "sourceTitle": "Wall of Ice"
               },
               {
-                "id": "printed_subroutines_end_the_run_a",
+                "id": "3",
                 "type": "end_the_run",
                 "sourceDefinitionId": 490,
                 "sourceTitle": "Wall of Ice"
@@ -9563,7 +9563,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_damage_net,printed_subroutines_damage_net_a,printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+          "actionId": "runner.continue_run.0,1,2,3",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -9576,7 +9576,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 4,
-            "encounterSubroutineIds": "printed_subroutines_damage_net,printed_subroutines_damage_net_a,printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+            "encounterSubroutineIds": "0,1,2,3",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -12123,7 +12123,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_damage_net,printed_subroutines_damage_net_a,printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+        "actionId": "runner.continue_run.0,1,2,3",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -12136,7 +12136,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 4,
-          "encounterSubroutineIds": "printed_subroutines_damage_net,printed_subroutines_damage_net_a,printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+          "encounterSubroutineIds": "0,1,2,3",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -12304,7 +12304,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 301,
-      "sideSafePlanningFingerprint": "fnv1a:61b847f7"
+      "sideSafePlanningFingerprint": "fnv1a:a8836579"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_deep_market_engine_1.0.0",

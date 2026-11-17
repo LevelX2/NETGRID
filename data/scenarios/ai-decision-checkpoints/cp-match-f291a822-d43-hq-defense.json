@@ -416,7 +416,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -514,7 +514,7 @@
                   "effectiveStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 457,
                       "sourceTitle": "Fire Wall"
@@ -7071,7 +7071,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 84,
-      "sideSafePlanningFingerprint": "fnv1a:b1753d3d"
+      "sideSafePlanningFingerprint": "fnv1a:467feee1"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_counter_shell_1.3.0",

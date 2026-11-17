@@ -278,7 +278,7 @@
                                                                                           "effectiveStrength": 1,
                                                                                           "subroutines": [
                                                                                                     {
-                                                                                                              "id": "printed_subroutines_end_the_run",
+                                                                                                              "id": "0",
                                                                                                               "type": "end_the_run",
                                                                                                               "sourceDefinitionId": 450,
                                                                                                               "sourceTitle": "Data Wall 2.0"
@@ -333,7 +333,7 @@
                                                                                           "effectiveStrength": 1,
                                                                                           "subroutines": [
                                                                                                     {
-                                                                                                              "id": "printed_subroutines_end_the_run",
+                                                                                                              "id": "0",
                                                                                                               "type": "end_the_run",
                                                                                                               "sourceDefinitionId": 450,
                                                                                                               "sourceTitle": "Data Wall 2.0"
@@ -4443,7 +4443,7 @@
                               },
                               "planningStateIdentity": {
                                         "stateVersion": 63,
-                                        "sideSafePlanningFingerprint": "fnv1a:60c76256"
+                                        "sideSafePlanningFingerprint": "fnv1a:459ad4f2"
                               },
                               "ownDeckSnapshot": {
                                         "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -10095,7 +10095,7 @@
                                                                                           "effectiveStrength": 1,
                                                                                           "subroutines": [
                                                                                                     {
-                                                                                                              "id": "printed_subroutines_end_the_run",
+                                                                                                              "id": "0",
                                                                                                               "type": "end_the_run",
                                                                                                               "sourceDefinitionId": 450,
                                                                                                               "sourceTitle": "Data Wall 2.0"
@@ -10150,7 +10150,7 @@
                                                                                           "effectiveStrength": 1,
                                                                                           "subroutines": [
                                                                                                     {
-                                                                                                              "id": "printed_subroutines_end_the_run",
+                                                                                                              "id": "0",
                                                                                                               "type": "end_the_run",
                                                                                                               "sourceDefinitionId": 450,
                                                                                                               "sourceTitle": "Data Wall 2.0"
@@ -14222,7 +14222,7 @@
                               },
                               "planningStateIdentity": {
                                         "stateVersion": 64,
-                                        "sideSafePlanningFingerprint": "fnv1a:7dd7169a"
+                                        "sideSafePlanningFingerprint": "fnv1a:a76c4856"
                               },
                               "ownDeckSnapshot": {
                                         "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -17959,7 +17959,7 @@
                                                                                           "effectiveStrength": 1,
                                                                                           "subroutines": [
                                                                                                     {
-                                                                                                              "id": "printed_subroutines_end_the_run",
+                                                                                                              "id": "0",
                                                                                                               "type": "end_the_run",
                                                                                                               "sourceDefinitionId": 450,
                                                                                                               "sourceTitle": "Data Wall 2.0"
@@ -18014,7 +18014,7 @@
                                                                                           "effectiveStrength": 1,
                                                                                           "subroutines": [
                                                                                                     {
-                                                                                                              "id": "printed_subroutines_end_the_run",
+                                                                                                              "id": "0",
                                                                                                               "type": "end_the_run",
                                                                                                               "sourceDefinitionId": 450,
                                                                                                               "sourceTitle": "Data Wall 2.0"
@@ -22186,7 +22186,7 @@
                               },
                               "planningStateIdentity": {
                                         "stateVersion": 65,
-                                        "sideSafePlanningFingerprint": "fnv1a:c34dd65e"
+                                        "sideSafePlanningFingerprint": "fnv1a:d606d89a"
                               },
                               "ownDeckSnapshot": {
                                         "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -25923,7 +25923,7 @@
                                                                                           "effectiveStrength": 1,
                                                                                           "subroutines": [
                                                                                                     {
-                                                                                                              "id": "printed_subroutines_end_the_run",
+                                                                                                              "id": "0",
                                                                                                               "type": "end_the_run",
                                                                                                               "sourceDefinitionId": 450,
                                                                                                               "sourceTitle": "Data Wall 2.0"
@@ -25978,7 +25978,7 @@
                                                                                           "effectiveStrength": 1,
                                                                                           "subroutines": [
                                                                                                     {
-                                                                                                              "id": "printed_subroutines_end_the_run",
+                                                                                                              "id": "0",
                                                                                                               "type": "end_the_run",
                                                                                                               "sourceDefinitionId": 450,
                                                                                                               "sourceTitle": "Data Wall 2.0"
@@ -26060,7 +26060,7 @@
                                                                       "effectiveStrength": 1,
                                                                       "subroutines": [
                                                                                 {
-                                                                                          "id": "printed_subroutines_end_the_run",
+                                                                                          "id": "0",
                                                                                           "type": "end_the_run",
                                                                                           "sourceDefinitionId": 450,
                                                                                           "sourceTitle": "Data Wall 2.0"
@@ -27910,7 +27910,7 @@
                                                             }
                                                   },
                                                   {
-                                                            "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+                                                            "actionId": "runner.continue_run.0",
                                                             "side": "runner",
                                                             "type": "continue_run",
                                                             "label": "Subroutinen auslösen (Run endet)",
@@ -27923,7 +27923,7 @@
                                                             "payload": {
                                                                       "encounterContinue": true,
                                                                       "unbrokenSubroutineCount": 1,
-                                                                      "encounterSubroutineIds": "printed_subroutines_end_the_run",
+                                                                      "encounterSubroutineIds": "0",
                                                                       "encounterFullBreakDamage": 0,
                                                                       "encounterWillEndRun": true,
                                                                       "encounterSourceWillTrashAtEndOfTurn": false,
@@ -29748,7 +29748,7 @@
                                                   }
                                         },
                                         {
-                                                  "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+                                                  "actionId": "runner.continue_run.0",
                                                   "side": "runner",
                                                   "type": "continue_run",
                                                   "label": "Subroutinen auslösen (Run endet)",
@@ -29761,7 +29761,7 @@
                                                   "payload": {
                                                             "encounterContinue": true,
                                                             "unbrokenSubroutineCount": 1,
-                                                            "encounterSubroutineIds": "printed_subroutines_end_the_run",
+                                                            "encounterSubroutineIds": "0",
                                                             "encounterFullBreakDamage": 0,
                                                             "encounterWillEndRun": true,
                                                             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -29812,7 +29812,7 @@
                               },
                               "planningStateIdentity": {
                                         "stateVersion": 66,
-                                        "sideSafePlanningFingerprint": "fnv1a:1660f30a"
+                                        "sideSafePlanningFingerprint": "fnv1a:7076cb02"
                               },
                               "ownDeckSnapshot": {
                                         "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -33548,7 +33548,7 @@
                                                                                           "effectiveStrength": 1,
                                                                                           "subroutines": [
                                                                                                     {
-                                                                                                              "id": "printed_subroutines_end_the_run",
+                                                                                                              "id": "0",
                                                                                                               "type": "end_the_run",
                                                                                                               "sourceDefinitionId": 450,
                                                                                                               "sourceTitle": "Data Wall 2.0"
@@ -33603,7 +33603,7 @@
                                                                                           "effectiveStrength": 1,
                                                                                           "subroutines": [
                                                                                                     {
-                                                                                                              "id": "printed_subroutines_end_the_run",
+                                                                                                              "id": "0",
                                                                                                               "type": "end_the_run",
                                                                                                               "sourceDefinitionId": 450,
                                                                                                               "sourceTitle": "Data Wall 2.0"
@@ -33685,7 +33685,7 @@
                                                                       "effectiveStrength": 1,
                                                                       "subroutines": [
                                                                                 {
-                                                                                          "id": "printed_subroutines_end_the_run",
+                                                                                          "id": "0",
                                                                                           "type": "end_the_run",
                                                                                           "sourceDefinitionId": 450,
                                                                                           "sourceTitle": "Data Wall 2.0"
@@ -35554,7 +35554,7 @@
                                                             }
                                                   },
                                                   {
-                                                            "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.printed_subroutines_end_the_run.328",
+                                                            "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.0.328",
                                                             "side": "runner",
                                                             "type": "break_subroutine",
                                                             "label": "Krash: Subroutine brechen",
@@ -35596,7 +35596,7 @@
                                                             }
                                                   },
                                                   {
-                                                            "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+                                                            "actionId": "runner.continue_run.0",
                                                             "side": "runner",
                                                             "type": "continue_run",
                                                             "label": "Subroutinen auslösen (Run endet)",
@@ -35609,7 +35609,7 @@
                                                             "payload": {
                                                                       "encounterContinue": true,
                                                                       "unbrokenSubroutineCount": 1,
-                                                                      "encounterSubroutineIds": "printed_subroutines_end_the_run",
+                                                                      "encounterSubroutineIds": "0",
                                                                       "encounterFullBreakDamage": 0,
                                                                       "encounterWillEndRun": true,
                                                                       "encounterSourceWillTrashAtEndOfTurn": false,
@@ -37453,7 +37453,7 @@
                                                   }
                                         },
                                         {
-                                                  "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.printed_subroutines_end_the_run.328",
+                                                  "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.0.328",
                                                   "side": "runner",
                                                   "type": "break_subroutine",
                                                   "label": "Krash: Subroutine brechen",
@@ -37495,7 +37495,7 @@
                                                   }
                                         },
                                         {
-                                                  "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+                                                  "actionId": "runner.continue_run.0",
                                                   "side": "runner",
                                                   "type": "continue_run",
                                                   "label": "Subroutinen auslösen (Run endet)",
@@ -37508,7 +37508,7 @@
                                                   "payload": {
                                                             "encounterContinue": true,
                                                             "unbrokenSubroutineCount": 1,
-                                                            "encounterSubroutineIds": "printed_subroutines_end_the_run",
+                                                            "encounterSubroutineIds": "0",
                                                             "encounterFullBreakDamage": 0,
                                                             "encounterWillEndRun": true,
                                                             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -37559,7 +37559,7 @@
                               },
                               "planningStateIdentity": {
                                         "stateVersion": 67,
-                                        "sideSafePlanningFingerprint": "fnv1a:34dbee64"
+                                        "sideSafePlanningFingerprint": "fnv1a:bf7e8cb4"
                               },
                               "ownDeckSnapshot": {
                                         "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -41295,7 +41295,7 @@
                                                                                           "effectiveStrength": 1,
                                                                                           "subroutines": [
                                                                                                     {
-                                                                                                              "id": "printed_subroutines_end_the_run",
+                                                                                                              "id": "0",
                                                                                                               "type": "end_the_run",
                                                                                                               "sourceDefinitionId": 450,
                                                                                                               "sourceTitle": "Data Wall 2.0"
@@ -41350,7 +41350,7 @@
                                                                                           "effectiveStrength": 1,
                                                                                           "subroutines": [
                                                                                                     {
-                                                                                                              "id": "printed_subroutines_end_the_run",
+                                                                                                              "id": "0",
                                                                                                               "type": "end_the_run",
                                                                                                               "sourceDefinitionId": 450,
                                                                                                               "sourceTitle": "Data Wall 2.0"
@@ -41432,7 +41432,7 @@
                                                                       "effectiveStrength": 1,
                                                                       "subroutines": [
                                                                                 {
-                                                                                          "id": "printed_subroutines_end_the_run",
+                                                                                          "id": "0",
                                                                                           "type": "end_the_run",
                                                                                           "sourceDefinitionId": 450,
                                                                                           "sourceTitle": "Data Wall 2.0"
@@ -45186,7 +45186,7 @@
                               },
                               "planningStateIdentity": {
                                         "stateVersion": 68,
-                                        "sideSafePlanningFingerprint": "fnv1a:0e74464f"
+                                        "sideSafePlanningFingerprint": "fnv1a:23901b65"
                               },
                               "ownDeckSnapshot": {
                                         "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -48921,7 +48921,7 @@
                                                                                           "effectiveStrength": 1,
                                                                                           "subroutines": [
                                                                                                     {
-                                                                                                              "id": "printed_subroutines_end_the_run",
+                                                                                                              "id": "0",
                                                                                                               "type": "end_the_run",
                                                                                                               "sourceDefinitionId": 450,
                                                                                                               "sourceTitle": "Data Wall 2.0"
@@ -48976,7 +48976,7 @@
                                                                                           "effectiveStrength": 1,
                                                                                           "subroutines": [
                                                                                                     {
-                                                                                                              "id": "printed_subroutines_end_the_run",
+                                                                                                              "id": "0",
                                                                                                               "type": "end_the_run",
                                                                                                               "sourceDefinitionId": 450,
                                                                                                               "sourceTitle": "Data Wall 2.0"
@@ -52901,7 +52901,7 @@
                               },
                               "planningStateIdentity": {
                                         "stateVersion": 69,
-                                        "sideSafePlanningFingerprint": "fnv1a:6faf72c8"
+                                        "sideSafePlanningFingerprint": "fnv1a:67283ab4"
                               },
                               "ownDeckSnapshot": {
                                         "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

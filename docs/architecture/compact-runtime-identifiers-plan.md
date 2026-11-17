@@ -31,7 +31,7 @@ Runs, Spiel-Traces, Zahlungs-, Änderungs- und Ersatzfenster sowie
 laufende Ziehvorgänge erhalten beim Öffnen die StateVersion des
 Übergangs. Die Herkunft eines Traces wird gesondert gebunden.
 Öffentliche Effekte tragen ihre Position im Ereignis, beginnend bei null.
-Kartenexemplare verwenden einen kurzen Base36-Schlüssel. SQLite-Schema 9 speichert
+Kartenexemplare verwenden einen kurzen Base36-Schlüssel. SQLite-Schema 10 speichert
 Kartenlisten als Positionen in der Instanztabelle. Verdeckte Slots und
 adressierbare verdeckte Ressourcen haben jeweils einen eigenen kurzen
 Schlüsseltyp. Remotes werden als `r1`, `r2` und entsprechend ihrer
@@ -43,16 +43,27 @@ sowie die StateVersion für geöffnete Choices. Die Engine bindet diese Nummern
 an das Angebot einer Seite. Der Server prüft zusätzlich die MatchVersion.
 
 Die integrierte Abnahme umfasst die KI-Regressionen mit aktualisierten
-Testaufzeichnungen. In SQLite speichert eine Zufallsaufzeichnung die
-Position ihres Zwecks in einer gemeinsamen Liste. Typisierte Zufallszwecke
-im Engine-Vertrag und encounterlokale Subroutinenreferenzen stehen noch aus.
+Testaufzeichnungen. Die Engine vergibt Unterroutinenreferenzen nach
+Aufbau der vollständigen ICE-Sequenz als nullbasierte Base36-Position.
+Gedruckte Herkunft, hinzugefügte Beiträge, Mark-Wiederholungen und
+Run-Kopien haben eigene typisierte Herkunftstupel. Kopien binden diese
+Herkunft auch dann weiter, wenn sich die endgültige Position verschiebt.
+Aktionsangebot, Quote und Engine-Auflösung verwenden dieselbe Folge.
+[Encounter-Folge](../../packages/engine/src/game/run/effective-ice-run-subroutines.ts)
 
-Gedruckte Unterroutinen verwenden derzeit denselben Schlüssel für die
-CardSpec-Regelbindung, das Aktionsangebot und teilweise den Zufallszweck
-bei Schaden. Die kompakte Referenz sollte die Engine nach Aufbau der
-endgültigen Encounter-Folge vergeben. Regelherkunft, Bindung kopierter
-Unterroutinen und RNG-Eingabe benötigen dabei jeweils eine eigene
-Bindung. [Encounter-Folge](../../packages/engine/src/game/run/effective-ice-run-subroutines.ts) · [Schadensauflösung](../../packages/engine/src/game/damage/damage-event-resolution.ts)
+Ein Zufallszweck ist ein Tupel aus festem numerischem Code und
+typisierten Argumenten. Spielzufall und KI-Auswahl besitzen getrennte,
+explizit initialisierte Zähler. Die kanonische Seed-Eingabe enthält den
+Seed, das Tupel und den jeweiligen Zähler. Jede Aufzeichnung hält eine
+eigene Kopie des Tupels. Öffentliche Ereignisse geben nur den Zweckcode
+weiter. SQLite-Schema 10 speichert die Tupel unmittelbar in den
+Zufallszeilen.
+[Zweckvertrag](../../packages/shared/src/random-purpose.ts) · [Zufallsvergabe](../../packages/engine/src/game/state/draw-random.ts)
+
+Die neue Serialisierung definiert die Zufallsfolge für aktuelle Spiele.
+Die aktiv genutzten Replay-Szenarien mit fest vorausgesetzten
+Kartenanordnungen deklarieren ihre Startanordnung ausdrücklich und
+prüfen die anschließenden Übergänge mit dem aktuellen Engine-Vertrag.
 
 ## Umfang und Vergabe der Schlüssel
 
@@ -66,8 +77,8 @@ Bindung. [Encounter-Folge](../../packages/engine/src/game/run/effective-ice-run-
 | `ChoiceId`, `ChoiceOptionId`                | Nummer der geöffneten Choice innerhalb der Partie und Nummer einer Option innerhalb dieser Choice. Reihenfolge und fachlicher Wert der Option sind eigene Eigenschaften.                             |
 | Server, Run, Trace und Fenster              | Remotes heißen `rN`. Run, Spiel-Trace sowie Zahlungs-, Änderungs- und Ersatzfenster verwenden die Eröffnungs-StateVersion. „Neuer Remote“ ist ein eigenes Installationsziel.                                    |
 | Ereignis, Snapshot, KI-Trace                | Nummern in der jeweiligen Match-Tabelle. Historienreferenzen enthalten den Matchkontext. Eine Diagnosekennung für einen fehlgeschlagenen KI-Versuch bleibt eine Fehlerreferenz.                      |
-| Aufgelöster Effekt, Subroutine              | Effektposition innerhalb des Ereignisses. Subroutinen werden innerhalb des konkreten Encounters adressiert; gedruckte Herkunft, zusätzliche Beiträge und Ausführungsreihenfolge haben eigene Felder. |
-| Zufallszweck und wiederholte Speicherfelder | Numerischer Zweckcode mit typisierten Argumenten. In SQLite verwenden die Karteninstanzliste und die Zufallsprotokolle kompakte, fest definierte Zeilen.                                             |
+| Aufgelöster Effekt, Subroutine              | Effektposition innerhalb des Ereignisses. Unterroutinen tragen die Base36-Position in der endgültigen ICE-Sequenz. Typisierte Herkunftstupel binden gedruckte, hinzugefügte und kopierte Beiträge. |
+| Zufallszweck und wiederholte Speicherfelder | Festes Tupel aus numerischem Zweckcode und typisierten Argumenten. SQLite speichert Karteninstanzlisten und Zufallsaufzeichnungen als schemafeste Zeilen.                                             |
 
 Die internen KI-Plan- und Kampagnenschlüssel enthalten heute Modul- und
 Deduplizierungsmerkmale und binden wiederkehrende Vorschläge an residente

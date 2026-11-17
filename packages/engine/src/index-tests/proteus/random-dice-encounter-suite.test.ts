@@ -584,7 +584,8 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       (subroutine) => subroutine.id === action.payload?.subroutineId,
     );
     expect(originalIndex).toBeGreaterThanOrEqual(0);
-    expect(subroutines[originalIndex + 1]?.id).toContain("copied_subroutine");
+    expect(subroutines[originalIndex + 1]?.id).toBe((originalIndex + 1).toString(36));
+    expect(subroutines[originalIndex + 1]?.dynamicSourceKind).toBe("additional_subroutine");
 
     let emptyHq = baseState("pro016-lisa-empty");
     addCorpRoot(emptyHq, LISA_BLIGHT, "lisa_empty", "r1", true);
@@ -634,7 +635,7 @@ describe("Proteus PRO016 random dice encounter suite", () => {
         candidate.payload?.targetCardId === tagIce &&
         candidate.payload?.subroutineIndex === 0,
     );
-    expect(action.payload?.subroutineId).toBe("simple_tag_ice_tag");
+    expect(action.payload?.subroutineId).toBe("0");
     state = applyLegal(state, "corp", action.actionId);
     expect(state.activeSide).toBe("corp");
     state = passCorpRunWindows(state);
@@ -661,6 +662,66 @@ describe("Proteus PRO016 random dice encounter suite", () => {
     expect(
       String(continueAction.payload?.encounterSubroutineIds).split(","),
     ).toEqual(effectiveSubroutines.map((subroutine) => subroutine.id));
+  });
+
+  it("keeps copy targets bound when earlier copies shift their final slots", () => {
+    let state = baseState("lisa-slot-provenance");
+    const firstLisa = addCorpRoot(state, LISA_BLIGHT, "lisa_slot_first", "r1", true);
+    const secondLisa = addCorpRoot(state, LISA_BLIGHT, "lisa_slot_second", "r1", true);
+    const iceId = addCorpIce(state, SIMPLE_TAG_ICE, "lisa_slot_ice", "r1", true);
+    addCorpHq(state, SCORCHED_EARTH, "lisa_slot_hq_first");
+    addCorpHq(state, SCORCHED_EARTH, "lisa_slot_hq_second");
+    state = encounterIce(state, "r1", iceId);
+    state.timingPoint = "run.jack_out_window";
+    const oldSecondTarget = mustAction(state, "corp", (action) =>
+      action.source === secondLisa && action.payload?.targetCardId === iceId &&
+      action.payload?.subroutineIndex === 1,
+    );
+    expect(oldSecondTarget.payload?.subroutineId).toBe("1");
+    const firstTarget = mustAction(state, "corp", (action) =>
+      action.source === firstLisa && action.payload?.targetCardId === iceId &&
+      action.payload?.subroutineIndex === 0,
+    );
+    const before = structuredClone(state);
+    state = applyLegal(state, "corp", firstTarget.actionId);
+    const shiftedTarget = mustAction(state, "corp", (action) =>
+      action.source === secondLisa && action.payload?.targetCardId === iceId &&
+      action.payload?.subroutineIndex === 2,
+    );
+    expect(shiftedTarget.payload?.subroutineId).toBe("2");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: oldSecondTarget.actionId,
+      clientKnownStateVersion: before.stateVersion,
+    });
+    expect(stale.ok).toBe(false);
+    state = applyLegal(state, "corp", shiftedTarget.actionId);
+    expect(state.run!.encounterAdditionalSubroutines!.map(
+      (record) => record.originalSubroutineProvenance,
+    )).toEqual([["p", SIMPLE_TAG_ICE, 0], ["p", SIMPLE_TAG_ICE, 1]]);
+    expectReplayStable(before, state);
+    state = passCorpRunWindows(state);
+    state.run!.phase = "encounter_ice";
+    state.run!.encounteredIceId = iceId;
+    state.timingPoint = "run.encounter_ice";
+    const quote = () => getPlayerView(state, "runner").servers
+      .find((server) => server.id === "r1")!.ice
+      .find((card) => card.instanceId === iceId)!.effectiveRunQuote!.subroutines;
+    expect(quote().map((routine) => routine.id)).toEqual(["0", "1", "2", "3"]);
+    expect(quote().map((routine) => routine.type)).toEqual([
+      "give_runner_tag", "give_runner_tag", "end_the_run", "end_the_run",
+    ]);
+    expect(quote()).toEqual(quote());
+    expect(JSON.stringify(quote())).not.toContain("provenance");
+    // The first tag has already resolved in this authored encounter continuation.
+    state.run!.resolvedSubroutineIndexes = [0];
+    const continuation = mustAction(state, "runner", (action) => action.type === "continue_run");
+    expect(continuation.payload?.encounterRemainingSubroutineIds).toBe("1,2,3");
+    const tagsBefore = state.runner.tags;
+    state = applyLegal(state, "runner", continuation.actionId);
+    expect(state.runner.tags).toBe(tagsBefore + 1);
+    expect(state.run).toBeUndefined();
   });
 
   it("keeps Lisa Blight subroutine copies run-scoped and rejects stale duplicate targets", () => {
@@ -700,10 +761,11 @@ describe("Proteus PRO016 random dice encounter suite", () => {
         sourceDefinitionId: LISA_BLIGHT,
         sourceTitle: "Lisa Blight",
         targetIceId: wall,
-        originalSubroutineId: String(firstAction.payload?.subroutineId ?? ""),
+        originalSubroutineProvenance: ["p", WALL, 0],
         subroutineKind: "end_the_run",
         copiedSubroutine: {
           id: String(firstAction.payload?.subroutineId ?? ""),
+          provenance: ["p", WALL, 0],
           type: "end_the_run",
         },
       },

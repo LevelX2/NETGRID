@@ -409,7 +409,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 471,
                     "sourceTitle": "π in the 'Face"
@@ -627,7 +627,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 485,
                     "sourceTitle": "Triggerman",
@@ -636,7 +636,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 485,
                     "sourceTitle": "Triggerman"
@@ -855,7 +855,7 @@
             "encounterStrength": 3,
             "subroutines": [
               {
-                "id": "printed_subroutines_trash_program",
+                "id": "0",
                 "type": "trash_installed_program",
                 "sourceDefinitionId": 485,
                 "sourceTitle": "Triggerman",
@@ -864,7 +864,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_end_the_run",
+                "id": "1",
                 "type": "end_the_run",
                 "sourceDefinitionId": 485,
                 "sourceTitle": "Triggerman"
@@ -878,7 +878,7 @@
       "pendingChoice": {
         "choiceId": "trash_installed_program_104",
         "side": "corp",
-        "source": "card_implementation.trash_installed_program:102:c2zx:0:485:printed_subroutines_trash_program:trash_installed_program:encounter",
+        "source": "card_implementation.trash_installed_program:102:c2zx:0:485:0:trash_installed_program:encounter",
         "prompt": "Triggerman: installiertes Programm zum Trashing wählen.",
         "presentationKey": "trash_installed_program",
         "kind": "select_cards",
@@ -5878,7 +5878,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 104,
-      "sideSafePlanningFingerprint": "fnv1a:6cf47bf6"
+      "sideSafePlanningFingerprint": "fnv1a:384f89f0"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_mp1ddh7c_1.1.0",
@@ -13408,7 +13408,7 @@
                 "choiceResolution": {
                   "kind": "program_trash",
                   "choiceId": "trash_installed_program_104",
-                  "choiceSource": "card_implementation.trash_installed_program:102:c2zx:0:485:printed_subroutines_trash_program:trash_installed_program:encounter",
+                  "choiceSource": "card_implementation.trash_installed_program:102:c2zx:0:485:0:trash_installed_program:encounter",
                   "sourceStateVersion": 104,
                   "origin": {
                     "kind": "encounter",

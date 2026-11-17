@@ -483,7 +483,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -567,7 +567,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 6,
                     "traceSuccessEffect": {
@@ -671,7 +671,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_run_and_runner_forgoes_next_action",
+                    "id": "0",
                     "type": "end_the_run_and_runner_forgoes_next_action",
                     "breakTags": [
                       "knockout"
@@ -2335,7 +2335,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -2419,7 +2419,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 6,
                     "traceSuccessEffect": {
@@ -2523,7 +2523,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_run_and_runner_forgoes_next_action",
+                    "id": "0",
                     "type": "end_the_run_and_runner_forgoes_next_action",
                     "breakTags": [
                       "knockout"
@@ -2608,7 +2608,7 @@
             "encounterStrength": 6,
             "subroutines": [
               {
-                "id": "printed_subroutines_trace",
+                "id": "0",
                 "type": "initiate_trace",
                 "traceLimit": 6,
                 "traceSuccessEffect": {

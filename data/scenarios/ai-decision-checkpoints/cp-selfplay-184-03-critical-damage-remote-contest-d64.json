@@ -295,7 +295,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -306,7 +306,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 469,
                     "sourceTitle": "Nerve Labyrinth"
@@ -4364,7 +4364,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 63,
-      "sideSafePlanningFingerprint": "fnv1a:cf0c32f2"
+      "sideSafePlanningFingerprint": "fnv1a:ed53e471"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_prep_economy_pressure_2026_07_01_1.0.0",

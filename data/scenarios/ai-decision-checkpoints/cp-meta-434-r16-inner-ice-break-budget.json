@@ -594,7 +594,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -624,7 +624,7 @@
                 "effectiveStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions",
+                    "id": "0",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -634,7 +634,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
@@ -678,7 +678,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -771,7 +771,7 @@
                 "effectiveStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -782,7 +782,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_net_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -793,13 +793,13 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 490,
                     "sourceTitle": "Wall of Ice"
@@ -859,7 +859,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -914,7 +914,7 @@
             "effectiveStrength": 6,
             "subroutines": [
               {
-                "id": "printed_subroutines_damage_net",
+                "id": "0",
                 "type": "do_damage",
                 "amount": 2,
                 "damageType": "net",
@@ -925,7 +925,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_damage_net_a",
+                "id": "1",
                 "type": "do_damage",
                 "amount": 2,
                 "damageType": "net",
@@ -936,13 +936,13 @@
                 }
               },
               {
-                "id": "printed_subroutines_end_the_run",
+                "id": "2",
                 "type": "end_the_run",
                 "sourceDefinitionId": 490,
                 "sourceTitle": "Wall of Ice"
               },
               {
-                "id": "printed_subroutines_end_the_run_a",
+                "id": "3",
                 "type": "end_the_run",
                 "sourceDefinitionId": 490,
                 "sourceTitle": "Wall of Ice"
@@ -7448,7 +7448,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.1.printed_subroutines_damage_net_a.328",
+          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.1.1.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine 2 brechen",
@@ -7490,7 +7490,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.2.printed_subroutines_end_the_run.328",
+          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.2.2.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine 3 brechen",
@@ -7532,7 +7532,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.3.printed_subroutines_end_the_run_a.328",
+          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.3.3.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine 4 brechen",
@@ -7574,7 +7574,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_damage_net_a,printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+          "actionId": "runner.continue_run.1,2,3",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -7587,7 +7587,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 3,
-            "encounterSubroutineIds": "printed_subroutines_damage_net_a,printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+            "encounterSubroutineIds": "1,2,3",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -9587,7 +9587,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.1.printed_subroutines_damage_net_a.328",
+        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.1.1.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine 2 brechen",
@@ -9629,7 +9629,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.2.printed_subroutines_end_the_run.328",
+        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.2.2.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine 3 brechen",
@@ -9671,7 +9671,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.3.printed_subroutines_end_the_run_a.328",
+        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.3.3.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine 4 brechen",
@@ -9713,7 +9713,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_damage_net_a,printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+        "actionId": "runner.continue_run.1,2,3",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -9726,7 +9726,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 3,
-          "encounterSubroutineIds": "printed_subroutines_damage_net_a,printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+          "encounterSubroutineIds": "1,2,3",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -9777,7 +9777,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 254,
-      "sideSafePlanningFingerprint": "fnv1a:7f5f082d"
+      "sideSafePlanningFingerprint": "fnv1a:573a37d1"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -14873,7 +14873,7 @@
           "sideSafePlanningFingerprint": "fnv1a:ee8fe19b"
         },
         "currentBinding": {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.1.printed_subroutines_damage_net_a.328",
+          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.1.1.328",
           "stateVersion": 254,
           "semanticActionSetFingerprint": "fnv1a:97a08211",
           "invocationKey": "fnv1a:7eff28bd"
@@ -14885,7 +14885,7 @@
         "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A243",
         "sourceStepId": "plan:runner.convert_run_window:run%3A243:convert",
-        "originalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.1.printed_subroutines_damage_net_a.328",
+        "originalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c311.1.1.328",
         "selectedAtStateVersion": 254
       },
       "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Ar1",

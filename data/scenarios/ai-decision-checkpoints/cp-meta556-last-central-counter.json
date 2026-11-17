@@ -211,7 +211,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+                    "id": "0",
                     "type": "rewind_run_to_rezzed_ice_by_die",
                     "sourceDefinitionId": 487,
                     "sourceTitle": "Vacuum Link"
@@ -2653,7 +2653,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 31,
-      "sideSafePlanningFingerprint": "fnv1a:b1996af1"
+      "sideSafePlanningFingerprint": "fnv1a:c2f17508"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_purge_window_1.0.0",

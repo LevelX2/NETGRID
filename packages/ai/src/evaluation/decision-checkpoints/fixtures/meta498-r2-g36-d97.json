@@ -532,7 +532,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 3,
                     "traceSuccessEffect": {
@@ -697,7 +697,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -5750,7 +5750,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 96,
-      "sideSafePlanningFingerprint": "fnv1a:500f9a1f"
+      "sideSafePlanningFingerprint": "fnv1a:6f119e97"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_code_rot_bitte_eintreten_2026_07_16_1.1.0",

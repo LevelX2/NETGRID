@@ -18,6 +18,7 @@ import {
 } from "./card-implementation-runtime-activated-validation";
 import { activatedAbilityBindingForPersistedIdentity } from "./card-capability-binding";
 import { markCardImplementationAbilityLimitUsed } from "./card-implementation-ability-limits";
+import { requireSubroutineProvenance } from "./subroutine-provenance";
 
 /**
  * Revalidates and resolves one activated CardImplementation ability.
@@ -362,7 +363,7 @@ export function resolveActivatedCardImplementationAbility(
             sourceDefinitionId: match.definition.id,
             sourceTitle: match.definition.title,
             targetIceId: target.iceId,
-            originalSubroutineId: target.subroutineId,
+            originalSubroutineProvenance: requireSubroutineProvenance(target.subroutine),
             subroutineKind: target.subroutine.type,
             copiedSubroutine: copiedSubroutineSnapshot(target.subroutine),
           },

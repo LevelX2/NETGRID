@@ -176,7 +176,7 @@
         "provenance": "reconstructed_from_persisted_decision_sources",
         "actor": "runner",
         "stateVersion": 133,
-        "stateHash": "fnv1a:eef07bc2",
+        "stateHash": "fnv1a:c89dbc42",
         "input": {
           "matchId": "match_6877980a267719f7",
           "side": "runner",
@@ -612,7 +612,7 @@
                       "encounterStrength": 5,
                       "subroutines": [
                         {
-                          "id": "printed_subroutines_end_the_run",
+                          "id": "0",
                           "type": "end_the_run",
                           "sourceDefinitionId": 457,
                           "sourceTitle": "Fire Wall"
@@ -657,7 +657,7 @@
                       "encounterStrength": 2,
                       "subroutines": [
                         {
-                          "id": "printed_subroutines_end_the_run",
+                          "id": "0",
                           "type": "end_the_run",
                           "sourceDefinitionId": 450,
                           "sourceTitle": "Data Wall 2.0"
@@ -795,7 +795,7 @@
                       "encounterStrength": 0,
                       "subroutines": [
                         {
-                          "id": "printed_subroutines_end_the_run",
+                          "id": "0",
                           "type": "end_the_run",
                           "sourceDefinitionId": 456,
                           "sourceTitle": "Filter"
@@ -858,7 +858,7 @@
                       "encounterStrength": 2,
                       "subroutines": [
                         {
-                          "id": "printed_subroutines_trash_program",
+                          "id": "0",
                           "type": "trash_installed_program",
                           "sourceDefinitionId": 445,
                           "sourceTitle": "D'Arc Knight",
@@ -867,7 +867,7 @@
                           }
                         },
                         {
-                          "id": "printed_subroutines_end_the_run",
+                          "id": "1",
                           "type": "end_the_run",
                           "sourceDefinitionId": 445,
                           "sourceTitle": "D'Arc Knight"
@@ -8058,7 +8058,7 @@
           },
           "planningStateIdentity": {
             "stateVersion": 133,
-            "sideSafePlanningFingerprint": "fnv1a:670348be"
+            "sideSafePlanningFingerprint": "fnv1a:5be5f16b"
           },
           "ownDeckSnapshot": {
             "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -16624,7 +16624,7 @@
         },
         {
           "side": "runner",
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0",
           "actionType": "continue_run"
         },
         {
@@ -16689,7 +16689,7 @@
         },
         {
           "side": "runner",
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0",
           "actionType": "continue_run"
         },
         {
@@ -16981,7 +16981,7 @@
         },
         {
           "side": "runner",
-          "actionId": "runner.continue_run.printed_subroutines_trash_program,printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0,1",
           "actionType": "continue_run"
         },
         {
@@ -16997,7 +16997,7 @@
         },
         {
           "side": "runner",
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.1",
           "actionType": "continue_run"
         },
         {
@@ -17017,7 +17017,7 @@
         },
         {
           "side": "runner",
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run,card_implementation.532.additional_subroutine.1.end_the_run",
+          "actionId": "runner.continue_run.0,1",
           "actionType": "continue_run"
         },
         {
@@ -17220,7 +17220,7 @@
         },
         {
           "side": "runner",
-          "actionId": "runner.break_subroutine.c1ft.c1ft.c1ft.c2s5.0.printed_subroutines_end_the_run.303",
+          "actionId": "runner.break_subroutine.c1ft.c1ft.c1ft.c2s5.0.0.303",
           "actionType": "break_subroutine"
         },
         {
@@ -17284,7 +17284,112 @@
           "actionId": "corp.end_turn",
           "actionType": "end_turn"
         }
-      ]
+      ],
+      "setupArrangement": {
+        "runnerGrip": [
+          "c121",
+          "cvl",
+          "c1a9",
+          "c116",
+          "c169"
+        ],
+        "runnerStack": [
+          "c13t",
+          "c17d",
+          "cyi",
+          "cwy",
+          "c10y",
+          "c10a",
+          "c101",
+          "c15t",
+          "c1ft",
+          "c115",
+          "c11t",
+          "cwx",
+          "cvm",
+          "c1e9",
+          "c10h",
+          "cyh",
+          "c10x",
+          "c1z5",
+          "c10i",
+          "c18h",
+          "cxt",
+          "cyx",
+          "czl",
+          "cxu",
+          "c14p",
+          "c109",
+          "cwp",
+          "cyy",
+          "cwq",
+          "c1jt",
+          "c15l",
+          "c12y",
+          "c149",
+          "cyq",
+          "c15d",
+          "cyp",
+          "c19l",
+          "c16h",
+          "czt",
+          "c12x",
+          "c175"
+        ],
+        "corpHq": [
+          "c2s5",
+          "c2tp",
+          "c31r",
+          "c345",
+          "c33p"
+        ],
+        "corpRd": [
+          "c2p1",
+          "c39x",
+          "c2th",
+          "c3m5",
+          "c2yd",
+          "c2r1",
+          "c3ad",
+          "c2nx",
+          "c33q",
+          "c2u5",
+          "c339",
+          "c3hp",
+          "c2ti",
+          "c371",
+          "c2jp",
+          "c2lq",
+          "c38l",
+          "c2on",
+          "c2om",
+          "c33x",
+          "c2vh",
+          "c2i5",
+          "c3it",
+          "c2ye",
+          "c2q5",
+          "c2i6",
+          "c31q",
+          "c37x",
+          "c3bp",
+          "c2m5",
+          "c2k6",
+          "c2ol",
+          "c2jq",
+          "c2ot",
+          "c3k5",
+          "c2rx",
+          "c2u6",
+          "c2lp",
+          "c31p",
+          "c2k5"
+        ]
+      },
+      "provenance": {
+        "kind": "authored_post_setup_permutation",
+        "scenario": "g15"
+      }
     },
     "g10": {
       "native": {
@@ -17292,7 +17397,7 @@
         "provenance": "reconstructed_from_persisted_decision_sources",
         "actor": "runner",
         "stateVersion": 127,
-        "stateHash": "fnv1a:ea639cf6",
+        "stateHash": "fnv1a:feffa34e",
         "input": {
           "matchId": "match_eb83bbb0a3324e5a",
           "side": "runner",
@@ -17697,7 +17802,7 @@
                       "encounterStrength": 4,
                       "subroutines": [
                         {
-                          "id": "printed_subroutines_damage_net",
+                          "id": "0",
                           "type": "do_damage",
                           "amount": 4,
                           "damageType": "net",
@@ -17708,7 +17813,7 @@
                           }
                         },
                         {
-                          "id": "printed_subroutines_prohibit_break_next_ice",
+                          "id": "1",
                           "type": "set_next_encounter_no_break_subroutines",
                           "sourceDefinitionId": 436,
                           "sourceTitle": "Bolter Cluster",
@@ -17761,7 +17866,7 @@
                       "encounterStrength": 3,
                       "subroutines": [
                         {
-                          "id": "printed_subroutines_end_the_run",
+                          "id": "0",
                           "type": "end_the_run",
                           "sourceDefinitionId": 478,
                           "sourceTitle": "Scramble"
@@ -17910,7 +18015,7 @@
                       "encounterStrength": 1,
                       "subroutines": [
                         {
-                          "id": "printed_subroutines_end_the_run",
+                          "id": "0",
                           "type": "end_the_run",
                           "sourceDefinitionId": 450,
                           "sourceTitle": "Data Wall 2.0"
@@ -24335,7 +24440,7 @@
           },
           "planningStateIdentity": {
             "stateVersion": 127,
-            "sideSafePlanningFingerprint": "fnv1a:78b6edb4"
+            "sideSafePlanningFingerprint": "fnv1a:4e2f5819"
           },
           "ownDeckSnapshot": {
             "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -32429,7 +32534,7 @@
         },
         {
           "side": "runner",
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0",
           "actionType": "continue_run"
         },
         {
@@ -32504,7 +32609,7 @@
         },
         {
           "side": "runner",
-          "actionId": "runner.continue_run.printed_subroutines_damage_net,printed_subroutines_prohibit_break_next_ice",
+          "actionId": "runner.continue_run.0,1",
           "actionType": "continue_run"
         },
         {
@@ -32755,7 +32860,7 @@
         },
         {
           "side": "runner",
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0",
           "actionType": "continue_run"
         },
         {
@@ -33029,7 +33134,112 @@
             ]
           }
         }
-      ]
+      ],
+      "setupArrangement": {
+        "runnerGrip": [
+          "c1z5",
+          "c121",
+          "c15d",
+          "c13t",
+          "cwx"
+        ],
+        "runnerStack": [
+          "cwp",
+          "c169",
+          "c109",
+          "cvl",
+          "c19l",
+          "cyi",
+          "c101",
+          "czl",
+          "c10y",
+          "cyq",
+          "c175",
+          "c15l",
+          "c15t",
+          "c16h",
+          "cyp",
+          "c11t",
+          "cyx",
+          "c10x",
+          "c12y",
+          "cwy",
+          "cyh",
+          "c10h",
+          "c18h",
+          "c1e9",
+          "cvm",
+          "c1ft",
+          "c10a",
+          "c115",
+          "c10i",
+          "c1a9",
+          "c1jt",
+          "cxt",
+          "c116",
+          "cwq",
+          "c14p",
+          "cxu",
+          "c17d",
+          "c12x",
+          "czt",
+          "c149",
+          "cyy"
+        ],
+        "corpHq": [
+          "c371",
+          "c2jp",
+          "c339",
+          "c2yd",
+          "c33p"
+        ],
+        "corpRd": [
+          "c2p1",
+          "c2m5",
+          "c3hp",
+          "c31p",
+          "c2ot",
+          "c345",
+          "c2jq",
+          "c37x",
+          "c2on",
+          "c3bp",
+          "c2s5",
+          "c2k5",
+          "c3ad",
+          "c2ye",
+          "c2vh",
+          "c31r",
+          "c2u6",
+          "c2nx",
+          "c2k6",
+          "c2i6",
+          "c38l",
+          "c2ol",
+          "c2r1",
+          "c2tp",
+          "c2ti",
+          "c39x",
+          "c3it",
+          "c2om",
+          "c33q",
+          "c3m5",
+          "c33x",
+          "c31q",
+          "c2u5",
+          "c2q5",
+          "c2lp",
+          "c2rx",
+          "c2th",
+          "c2i5",
+          "c3k5",
+          "c2lq"
+        ]
+      },
+      "provenance": {
+        "kind": "authored_post_setup_permutation",
+        "scenario": "g10"
+      }
     }
   }
 }

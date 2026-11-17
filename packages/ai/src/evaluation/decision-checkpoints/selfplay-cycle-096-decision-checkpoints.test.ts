@@ -27,7 +27,7 @@ describe("selfplay cycle 096 decision checkpoints", () => {
       (action) => action.payload?.encounterContinue === true,
     )!;
     continuation.payload!.encounterSubroutineIds =
-      "printed_subroutines_end_the_run,card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays";
+      "0,1";
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
     resetResidentPlanPortfolioMemory();

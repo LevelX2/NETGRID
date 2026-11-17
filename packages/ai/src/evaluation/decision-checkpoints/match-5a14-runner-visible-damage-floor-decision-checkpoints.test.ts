@@ -8,7 +8,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match 5a14 runner visible damage hand floor checkpoints", () => {
   it("does not start the optional remote run below the confirmed damage floor", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(runStartJson) as AiDecisionCheckpointV1,
+      structuredClone(runStartJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
@@ -22,7 +22,7 @@ describe("match 5a14 runner visible damage hand floor checkpoints", () => {
 
   it("jacks out under the existing run executor if the unsafe route was entered", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(jackOutJson) as AiDecisionCheckpointV1,
+      structuredClone(jackOutJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);

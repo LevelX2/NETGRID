@@ -586,7 +586,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -619,7 +619,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -630,7 +630,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 79,
                     "sourceTitle": "Dog Pile"
@@ -667,7 +667,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -711,7 +711,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -742,7 +742,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 464,
                     "sourceTitle": "Keeper"
@@ -773,7 +773,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 464,
                     "sourceTitle": "Keeper"
@@ -1155,7 +1155,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -1186,7 +1186,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -1217,7 +1217,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -1228,7 +1228,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 474,
                     "sourceTitle": "Razor Wire"
@@ -15294,7 +15294,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 421,
-      "sideSafePlanningFingerprint": "fnv1a:92df3969"
+      "sideSafePlanningFingerprint": "fnv1a:bf82feea"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",
@@ -22295,7 +22295,7 @@
                     "central_access_novelty_ratio:1",
                     "path_passability:blocked_by_visible_damage_hand_buffer",
                     "runner_visible_lethal_ice_damage_blocks_run_start:r1",
-                    "runner_visible_ice_damage_below_required_hand_floor|source:474|ice:c2xh|subroutine:printed_subroutines_damage_net|damage_type:net|subroutine_damage:2|damage:2|cumulative_damage:2|cumulative_core_damage:0|hand:4|required_floor:4|below_required_floor:true|immediate_flatline:false|cleanup_flatline:false|effective_max_hand_after:5|subroutine_prevention:0|affordable_break:false",
+                    "runner_visible_ice_damage_below_required_hand_floor|source:474|ice:c2xh|subroutine:0|damage_type:net|subroutine_damage:2|damage:2|cumulative_damage:2|cumulative_core_damage:0|hand:4|required_floor:4|below_required_floor:true|immediate_flatline:false|cleanup_flatline:false|effective_max_hand_after:5|subroutine_prevention:0|affordable_break:false",
                     "path_cost:6",
                     "visible_break_cost:6",
                     "route_reachability:no_access",

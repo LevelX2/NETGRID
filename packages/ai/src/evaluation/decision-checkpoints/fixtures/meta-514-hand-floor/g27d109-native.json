@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "runner",
   "stateVersion": 108,
-  "stateHash": "fnv1a:e8b85f4f",
+  "stateHash": "fnv1a:c63b4306",
   "input": {
     "matchId": "match_afbf2c7643732007",
     "side": "runner",
@@ -445,7 +445,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -456,7 +456,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 469,
                     "sourceTitle": "Nerve Labyrinth"
@@ -6202,7 +6202,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 108,
-      "sideSafePlanningFingerprint": "fnv1a:b695c6a6"
+      "sideSafePlanningFingerprint": "fnv1a:ff6369d5"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_krashkurs_clown_kreditmaschine_2026_07_11_1.0.0",

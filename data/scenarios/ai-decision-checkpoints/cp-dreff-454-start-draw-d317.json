@@ -1145,7 +1145,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -1191,7 +1191,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 76,
                     "sourceTitle": "Datacomb"
@@ -1245,7 +1245,7 @@
                   "effectiveStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 450,
                       "sourceTitle": "Data Wall 2.0"
@@ -1314,25 +1314,25 @@
                   "effectiveStrength": 7,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_a",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 99,
                       "sourceTitle": "Toughonium™ Wall"
                     },
                     {
-                      "id": "subroutine_end_run_b",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 99,
                       "sourceTitle": "Toughonium™ Wall"
                     },
                     {
-                      "id": "subroutine_end_run_c",
+                      "id": "2",
                       "type": "end_the_run",
                       "sourceDefinitionId": 99,
                       "sourceTitle": "Toughonium™ Wall"
                     },
                     {
-                      "id": "subroutine_end_run_d",
+                      "id": "3",
                       "type": "end_the_run",
                       "sourceDefinitionId": 99,
                       "sourceTitle": "Toughonium™ Wall"
@@ -1452,7 +1452,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -1500,7 +1500,7 @@
                   "effectiveStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_damage_brain",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "core",
@@ -1511,7 +1511,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_damage_brain_a",
+                      "id": "1",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "core",
@@ -1522,7 +1522,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "2",
                       "type": "end_the_run",
                       "sourceDefinitionId": 492,
                       "sourceTitle": "Zombie"
@@ -1980,7 +1980,7 @@
                   "effectiveStrength": 6,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_runner_run_lock_actions",
+                      "id": "0",
                       "type": "set_runner_run_lock_actions",
                       "amount": 6,
                       "sourceDefinitionId": 459,
@@ -1990,7 +1990,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 459,
                       "sourceTitle": "Haunting Inquisition"
@@ -2052,7 +2052,7 @@
                   "effectiveStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 491,
                       "sourceTitle": "Wall of Static"
@@ -12724,7 +12724,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 316,
-      "sideSafePlanningFingerprint": "fnv1a:08ffffc0"
+      "sideSafePlanningFingerprint": "fnv1a:f65ff77d"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_dr_dreffs_letzte_visite_1.3.0",

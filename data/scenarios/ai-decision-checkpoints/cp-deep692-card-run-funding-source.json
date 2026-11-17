@@ -442,7 +442,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 450,
                       "sourceTitle": "Data Wall 2.0"
@@ -514,7 +514,7 @@
                   "encounterStrength": 3,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 444,
                       "sourceTitle": "Crystal Wall"
@@ -7121,7 +7121,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 116,
-        "sideSafePlanningFingerprint": "fnv1a:96eb78bd"
+        "sideSafePlanningFingerprint": "fnv1a:6d3dc379"
       },
       "observedTurnPlanAction": {
         "matchId": "match_81893d1a4a838fb0",

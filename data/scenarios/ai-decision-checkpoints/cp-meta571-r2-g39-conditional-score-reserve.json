@@ -872,7 +872,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 90,
@@ -913,7 +913,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -961,7 +961,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 457,
                       "sourceTitle": "Fire Wall"
@@ -1023,7 +1023,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 97,
                     "sourceTitle": "Sphinx 2006"
@@ -1063,7 +1063,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -1103,7 +1103,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 75,
                     "sourceTitle": "Credit Blocks"
@@ -1143,7 +1143,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 90,
@@ -1192,7 +1192,7 @@
                   "encounterStrength": 1,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_unless_runner_pays_one",
+                      "id": "0",
                       "type": "end_the_run_unless_runner_pays",
                       "amount": 1,
                       "sourceDefinitionId": 90,
@@ -1261,7 +1261,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_unless_runner_pays_one",
+                      "id": "0",
                       "type": "end_the_run_unless_runner_pays",
                       "amount": 1,
                       "sourceDefinitionId": 96,
@@ -1618,7 +1618,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -11201,7 +11201,7 @@
             "postInstallRezQuoteCardId": "clj",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_end_run_unless_runner_pays_one\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 361,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11238,7 +11238,7 @@
             "postInstallRezQuoteCardId": "clj",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_end_run_unless_runner_pays_one\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 361,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11275,7 +11275,7 @@
             "postInstallRezQuoteCardId": "clj",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_end_run_unless_runner_pays_one\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 361,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11311,7 +11311,7 @@
             "postInstallRezQuoteCardId": "clj",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_end_run_unless_runner_pays_one\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 361,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11348,7 +11348,7 @@
             "postInstallRezQuoteCardId": "clj",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_end_run_unless_runner_pays_one\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 361,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -13721,7 +13721,7 @@
           "postInstallRezQuoteCardId": "clj",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_end_run_unless_runner_pays_one\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 361,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13758,7 +13758,7 @@
           "postInstallRezQuoteCardId": "clj",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_end_run_unless_runner_pays_one\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 361,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13795,7 +13795,7 @@
           "postInstallRezQuoteCardId": "clj",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_end_run_unless_runner_pays_one\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 361,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13831,7 +13831,7 @@
           "postInstallRezQuoteCardId": "clj",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_end_run_unless_runner_pays_one\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 361,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -13868,7 +13868,7 @@
           "postInstallRezQuoteCardId": "clj",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_end_run_unless_runner_pays_one\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"clj\",\"iceDefinitionId\":96,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":96,\"sourceTitle\":\"Snowbank\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 361,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -14162,7 +14162,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 361,
-      "sideSafePlanningFingerprint": "fnv1a:6636ef68"
+      "sideSafePlanningFingerprint": "fnv1a:0f763c0b"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_lucidrine_lockdown_1.5.0",

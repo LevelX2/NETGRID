@@ -1,9 +1,11 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import {
   type CardDefinition,
   type CardInstanceId,
   type ChoiceRequest,
   type CounterType,
   type DamageType,
+  type DamageRandomSource,
   type GameState,
   type ImminentEvent,
   type LegalAction,
@@ -22,6 +24,7 @@ import {
   appendResolvedSubroutineEffect,
   type DamageSummary,
 } from "./encounter-resolution";
+import { requireSubroutineProvenance } from "../../ability-engine/subroutine-provenance";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type CurrentTrace = NonNullable<GameState["trace"]>;
@@ -47,6 +50,7 @@ export type EncounterPrintedEffectHost = {
       damageType: DamageType;
       amount: number;
       source: string;
+      randomSource: DamageRandomSource;
     }) => ImminentEvent;
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     ensureRunnerTurnFlags: () => NonNullable<GameState["runnerTurnFlags"]>;
@@ -87,7 +91,7 @@ export type EncounterPrintedEffectHost = {
       trace: CurrentTrace,
       legalAction: LegalAction,
     ) => { suspended: boolean };
-    rollDie?: (purpose: string) => number;
+    rollDie?: (purpose: RandomPurpose) => number;
     setDamagePayload: (summary: DamageSummary) => void;
     supportsTraceSuccessEffect: (effect: TraceSuccessEffect) => boolean;
     traceBidChoice: (
@@ -222,6 +226,7 @@ export function resolvePrintedDamageSubroutine(
     damageType,
     amount: damageAmount,
     source: `subroutine:${definition.id}:${subroutine.id}`,
+    randomSource: ["s", run.runId, run.encounteredIceId!, requireSubroutineProvenance(subroutine)],
   });
   if (microtechApNetReduction && legalAction) {
     legalAction.payload = {
@@ -304,7 +309,7 @@ export function resolvePrintedRandomDamageSubroutine(
     throw new Error("Gedruckter Zufallsschaden unterstützt nur W6.");
   const dieRoll = rollDie(
     host,
-    `printed_random_damage.${run.runId}.${run.encounteredIceId}.${subroutineIndex}`,
+    [16, run.runId, run.encounteredIceId!, subroutineIndex],
   );
   const damageOnResults = subroutine.damageOnResults ?? [1];
   const damageApplies = damageOnResults.includes(dieRoll);
@@ -351,6 +356,7 @@ export function resolvePrintedRandomDamageSubroutine(
     damageType,
     amount: damageAmount,
     source: `subroutine:${definition.id}:${subroutine.id}:random_damage`,
+    randomSource: ["s", run.runId, run.encounteredIceId!, requireSubroutineProvenance(subroutine)],
   });
   if (
     legalAction &&
@@ -653,6 +659,7 @@ export function applyPrintedTraceSuccessFollowups(
       damageType: "net",
       amount: damageAmount,
       source: `trace:${trace.sourceDefinitionId}:${trace.traceId}`,
+      randomSource: ["c", trace.sourceDefinitionId, trace.sourceCardInstanceId],
     });
     if (options.deletePendingChoice) delete state.pendingChoice;
     temporaryTraceCreditReturnPayload =
@@ -937,7 +944,7 @@ function mustRun(state: GameState): ActiveRun {
   return state.run;
 }
 
-function rollDie(host: EncounterPrintedEffectHost, purpose: string): number {
+function rollDie(host: EncounterPrintedEffectHost, purpose: RandomPurpose): number {
   const die = host.callbacks.rollDie?.(purpose) ?? 1;
   if (!Number.isInteger(die) || die < 1 || die > 6)
     throw new Error("Gedruckter Zufallsschaden hat einen ungültigen W6-Wurf.");

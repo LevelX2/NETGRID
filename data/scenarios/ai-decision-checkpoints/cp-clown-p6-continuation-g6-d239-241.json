@@ -783,7 +783,7 @@
                     "encounterStrength": 4,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_damage_brain",
+                        "id": "0",
                         "type": "do_damage",
                         "amount": 1,
                         "damageType": "core",
@@ -794,7 +794,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_damage_brain_a",
+                        "id": "1",
                         "type": "do_damage",
                         "amount": 1,
                         "damageType": "core",
@@ -805,7 +805,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "2",
                         "type": "end_the_run",
                         "sourceDefinitionId": 492,
                         "sourceTitle": "Zombie"
@@ -843,7 +843,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_runner_run_lock_actions",
+                        "id": "0",
                         "type": "set_runner_run_lock_actions",
                         "amount": 6,
                         "sourceDefinitionId": 459,
@@ -853,7 +853,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 459,
                         "sourceTitle": "Haunting Inquisition"
@@ -897,7 +897,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 491,
                         "sourceTitle": "Wall of Static"
@@ -978,7 +978,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 491,
                         "sourceTitle": "Wall of Static"
@@ -10235,7 +10235,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 238,
-          "sideSafePlanningFingerprint": "fnv1a:790db97e"
+          "sideSafePlanningFingerprint": "fnv1a:2273a02b"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_krashkurs_clown_kreditmaschine_2026_07_11_1.0.0",
@@ -18323,7 +18323,7 @@
                     "encounterStrength": 4,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_damage_brain",
+                        "id": "0",
                         "type": "do_damage",
                         "amount": 1,
                         "damageType": "core",
@@ -18334,7 +18334,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_damage_brain_a",
+                        "id": "1",
                         "type": "do_damage",
                         "amount": 1,
                         "damageType": "core",
@@ -18345,7 +18345,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "2",
                         "type": "end_the_run",
                         "sourceDefinitionId": 492,
                         "sourceTitle": "Zombie"
@@ -18383,7 +18383,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_runner_run_lock_actions",
+                        "id": "0",
                         "type": "set_runner_run_lock_actions",
                         "amount": 6,
                         "sourceDefinitionId": 459,
@@ -18393,7 +18393,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 459,
                         "sourceTitle": "Haunting Inquisition"
@@ -18437,7 +18437,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 491,
                         "sourceTitle": "Wall of Static"
@@ -18518,7 +18518,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 491,
                         "sourceTitle": "Wall of Static"
@@ -27878,7 +27878,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 239,
-          "sideSafePlanningFingerprint": "fnv1a:b164d61d"
+          "sideSafePlanningFingerprint": "fnv1a:0a4e32d0"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_krashkurs_clown_kreditmaschine_2026_07_11_1.0.0",
@@ -33609,7 +33609,7 @@
                     "encounterStrength": 4,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_damage_brain",
+                        "id": "0",
                         "type": "do_damage",
                         "amount": 1,
                         "damageType": "core",
@@ -33620,7 +33620,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_damage_brain_a",
+                        "id": "1",
                         "type": "do_damage",
                         "amount": 1,
                         "damageType": "core",
@@ -33631,7 +33631,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "2",
                         "type": "end_the_run",
                         "sourceDefinitionId": 492,
                         "sourceTitle": "Zombie"
@@ -33669,7 +33669,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_runner_run_lock_actions",
+                        "id": "0",
                         "type": "set_runner_run_lock_actions",
                         "amount": 6,
                         "sourceDefinitionId": 459,
@@ -33679,7 +33679,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 459,
                         "sourceTitle": "Haunting Inquisition"
@@ -33723,7 +33723,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 491,
                         "sourceTitle": "Wall of Static"
@@ -33804,7 +33804,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 491,
                         "sourceTitle": "Wall of Static"
@@ -43197,7 +43197,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 240,
-          "sideSafePlanningFingerprint": "fnv1a:ec6f4016"
+          "sideSafePlanningFingerprint": "fnv1a:def38103"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_krashkurs_clown_kreditmaschine_2026_07_11_1.0.0",

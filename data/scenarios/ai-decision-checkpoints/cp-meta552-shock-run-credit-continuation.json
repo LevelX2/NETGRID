@@ -895,7 +895,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 473,
                         "sourceTitle": "Quandary"
@@ -939,7 +939,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_damage_net",
+                        "id": "0",
                         "type": "do_damage",
                         "amount": 2,
                         "damageType": "net",
@@ -950,7 +950,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_damage_net_a",
+                        "id": "1",
                         "type": "do_damage",
                         "amount": 2,
                         "damageType": "net",
@@ -961,13 +961,13 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "2",
                         "type": "end_the_run",
                         "sourceDefinitionId": 490,
                         "sourceTitle": "Wall of Ice"
                       },
                       {
-                        "id": "printed_subroutines_end_the_run_a",
+                        "id": "3",
                         "type": "end_the_run",
                         "sourceDefinitionId": 490,
                         "sourceTitle": "Wall of Ice"
@@ -998,7 +998,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 473,
                         "sourceTitle": "Quandary"
@@ -1031,7 +1031,7 @@
                     "encounterStrength": 3,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                        "id": "0",
                         "type": "set_next_encounter_lock",
                         "breakTags": [
                           "stun"
@@ -1336,7 +1336,7 @@
                     "encounterStrength": 1,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 450,
                         "sourceTitle": "Data Wall 2.0"
@@ -1369,7 +1369,7 @@
                     "encounterStrength": 3,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                        "id": "0",
                         "type": "set_next_encounter_lock",
                         "breakTags": [
                           "stun"
@@ -1447,7 +1447,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_trace",
+                        "id": "0",
                         "type": "initiate_trace",
                         "traceLimit": 6,
                         "traceSuccessEffect": {
@@ -1483,7 +1483,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 449,
                         "sourceTitle": "Data Wall"
@@ -1634,7 +1634,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                    "id": "0",
                     "type": "set_next_encounter_lock",
                     "breakTags": [
                       "stun"
@@ -15056,7 +15056,7 @@
               }
             },
             {
-              "actionId": "runner.break_subroutine.c1bl.c1bl.c1bl.c2yt.0.printed_subroutines_prohibit_break_and_jack_out_next_ice.276",
+              "actionId": "runner.break_subroutine.c1bl.c1bl.c1bl.c2yt.0.0.276",
               "side": "runner",
               "type": "break_subroutine",
               "label": "AI Boon: Subroutine brechen",
@@ -15098,7 +15098,7 @@
               }
             },
             {
-              "actionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+              "actionId": "runner.continue_run.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen",
@@ -15111,7 +15111,7 @@
               "payload": {
                 "encounterContinue": true,
                 "unbrokenSubroutineCount": 1,
-                "encounterSubroutineIds": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                "encounterSubroutineIds": "0",
                 "encounterFullBreakDamage": 0,
                 "encounterWillEndRun": false,
                 "encounterSourceWillTrashAtEndOfTurn": false,
@@ -17414,7 +17414,7 @@
             }
           },
           {
-            "actionId": "runner.break_subroutine.c1bl.c1bl.c1bl.c2yt.0.printed_subroutines_prohibit_break_and_jack_out_next_ice.276",
+            "actionId": "runner.break_subroutine.c1bl.c1bl.c1bl.c2yt.0.0.276",
             "side": "runner",
             "type": "break_subroutine",
             "label": "AI Boon: Subroutine brechen",
@@ -17456,7 +17456,7 @@
             }
           },
           {
-            "actionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+            "actionId": "runner.continue_run.0",
             "side": "runner",
             "type": "continue_run",
             "label": "Subroutinen auslösen",
@@ -17469,7 +17469,7 @@
             "payload": {
               "encounterContinue": true,
               "unbrokenSubroutineCount": 1,
-              "encounterSubroutineIds": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+              "encounterSubroutineIds": "0",
               "encounterFullBreakDamage": 0,
               "encounterWillEndRun": false,
               "encounterSourceWillTrashAtEndOfTurn": false,
@@ -17637,7 +17637,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 459,
-          "sideSafePlanningFingerprint": "fnv1a:4dc39efc"
+          "sideSafePlanningFingerprint": "fnv1a:72caadb4"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",
@@ -24896,7 +24896,7 @@
               "sideSafePlanningFingerprint": "fnv1a:0cd0c405"
             },
             "currentBinding": {
-              "actionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+              "actionId": "runner.continue_run.0",
               "stateVersion": 459,
               "semanticActionSetFingerprint": "fnv1a:212b5ffb",
               "invocationKey": "fnv1a:ad22332e"
@@ -24910,7 +24910,7 @@
             "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
             "executorInstanceId": "plan:runner.convert_run_window:run%3A459",
             "sourceStepId": "plan:runner.convert_run_window:run%3A459:convert",
-            "originalActionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+            "originalActionId": "runner.continue_run.0",
             "selectedAtStateVersion": 459
           }
         }
@@ -25821,7 +25821,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 473,
                         "sourceTitle": "Quandary"
@@ -25865,7 +25865,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_damage_net",
+                        "id": "0",
                         "type": "do_damage",
                         "amount": 2,
                         "damageType": "net",
@@ -25876,7 +25876,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_damage_net_a",
+                        "id": "1",
                         "type": "do_damage",
                         "amount": 2,
                         "damageType": "net",
@@ -25887,13 +25887,13 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "2",
                         "type": "end_the_run",
                         "sourceDefinitionId": 490,
                         "sourceTitle": "Wall of Ice"
                       },
                       {
-                        "id": "printed_subroutines_end_the_run_a",
+                        "id": "3",
                         "type": "end_the_run",
                         "sourceDefinitionId": 490,
                         "sourceTitle": "Wall of Ice"
@@ -25924,7 +25924,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 473,
                         "sourceTitle": "Quandary"
@@ -25957,7 +25957,7 @@
                     "encounterStrength": 3,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                        "id": "0",
                         "type": "set_next_encounter_lock",
                         "breakTags": [
                           "stun"
@@ -26262,7 +26262,7 @@
                     "encounterStrength": 1,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 450,
                         "sourceTitle": "Data Wall 2.0"
@@ -26295,7 +26295,7 @@
                     "encounterStrength": 3,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                        "id": "0",
                         "type": "set_next_encounter_lock",
                         "breakTags": [
                           "stun"
@@ -26373,7 +26373,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_trace",
+                        "id": "0",
                         "type": "initiate_trace",
                         "traceLimit": 6,
                         "traceSuccessEffect": {
@@ -26409,7 +26409,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 449,
                         "sourceTitle": "Data Wall"
@@ -26560,7 +26560,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                    "id": "0",
                     "type": "set_next_encounter_lock",
                     "breakTags": [
                       "stun"
@@ -40150,7 +40150,7 @@
               }
             },
             {
-              "actionId": "runner.break_subroutine.c1bl.c1bl.c1bl.c2yt.0.printed_subroutines_prohibit_break_and_jack_out_next_ice.276",
+              "actionId": "runner.break_subroutine.c1bl.c1bl.c1bl.c2yt.0.0.276",
               "side": "runner",
               "type": "break_subroutine",
               "label": "AI Boon: Subroutine brechen",
@@ -40192,7 +40192,7 @@
               }
             },
             {
-              "actionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+              "actionId": "runner.continue_run.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen",
@@ -40205,7 +40205,7 @@
               "payload": {
                 "encounterContinue": true,
                 "unbrokenSubroutineCount": 1,
-                "encounterSubroutineIds": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                "encounterSubroutineIds": "0",
                 "encounterFullBreakDamage": 0,
                 "encounterWillEndRun": false,
                 "encounterSourceWillTrashAtEndOfTurn": false,
@@ -42549,7 +42549,7 @@
             }
           },
           {
-            "actionId": "runner.break_subroutine.c1bl.c1bl.c1bl.c2yt.0.printed_subroutines_prohibit_break_and_jack_out_next_ice.276",
+            "actionId": "runner.break_subroutine.c1bl.c1bl.c1bl.c2yt.0.0.276",
             "side": "runner",
             "type": "break_subroutine",
             "label": "AI Boon: Subroutine brechen",
@@ -42591,7 +42591,7 @@
             }
           },
           {
-            "actionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+            "actionId": "runner.continue_run.0",
             "side": "runner",
             "type": "continue_run",
             "label": "Subroutinen auslösen",
@@ -42604,7 +42604,7 @@
             "payload": {
               "encounterContinue": true,
               "unbrokenSubroutineCount": 1,
-              "encounterSubroutineIds": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+              "encounterSubroutineIds": "0",
               "encounterFullBreakDamage": 0,
               "encounterWillEndRun": false,
               "encounterSourceWillTrashAtEndOfTurn": false,
@@ -42772,7 +42772,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 464,
-          "sideSafePlanningFingerprint": "fnv1a:18eb0b5d"
+          "sideSafePlanningFingerprint": "fnv1a:885fa9f9"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",
@@ -49920,7 +49920,7 @@
               "sideSafePlanningFingerprint": "fnv1a:913861d6"
             },
             "currentBinding": {
-              "actionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+              "actionId": "runner.continue_run.0",
               "stateVersion": 464,
               "semanticActionSetFingerprint": "fnv1a:212b5ffb",
               "invocationKey": "fnv1a:4eaf8f01"
@@ -49932,7 +49932,7 @@
             "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
             "executorInstanceId": "plan:runner.convert_run_window:run%3A463",
             "sourceStepId": "plan:runner.convert_run_window:run%3A463:convert",
-            "originalActionId": "runner.continue_run.printed_subroutines_prohibit_break_and_jack_out_next_ice",
+            "originalActionId": "runner.continue_run.0",
             "selectedAtStateVersion": 464
           },
           "rootForegroundInstanceId": "plan:runner.pressure_central:central%3Ard",

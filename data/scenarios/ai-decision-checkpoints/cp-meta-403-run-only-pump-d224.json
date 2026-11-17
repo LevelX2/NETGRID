@@ -519,7 +519,7 @@
                 "effectiveStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                    "id": "0",
                     "type": "set_run_encounter_tax",
                     "amount": 2,
                     "sourceDefinitionId": 434,
@@ -554,7 +554,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 478,
                     "sourceTitle": "Scramble"
@@ -592,7 +592,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -623,7 +623,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 435,
                     "sourceTitle": "Banpei",
@@ -632,7 +632,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 435,
                     "sourceTitle": "Banpei"
@@ -811,7 +811,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -844,7 +844,7 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_brain",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -855,7 +855,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_brain_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -866,7 +866,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 441,
                     "sourceTitle": "Code Corpse"
@@ -916,7 +916,7 @@
             "effectiveStrength": 4,
             "subroutines": [
               {
-                "id": "printed_subroutines_end_the_run",
+                "id": "0",
                 "type": "end_the_run",
                 "sourceDefinitionId": 478,
                 "sourceTitle": "Scramble"
@@ -6765,7 +6765,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -6778,7 +6778,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "printed_subroutines_end_the_run",
+            "encounterSubroutineIds": "0",
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
             "abilityFamily": "run-access",
@@ -8882,7 +8882,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+        "actionId": "runner.continue_run.0",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -8895,7 +8895,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "printed_subroutines_end_the_run",
+          "encounterSubroutineIds": "0",
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
           "abilityFamily": "run-access",
@@ -8945,7 +8945,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 223,
-      "sideSafePlanningFingerprint": "fnv1a:a99a570e"
+      "sideSafePlanningFingerprint": "fnv1a:77732b33"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -15066,7 +15066,7 @@
           "sideSafePlanningFingerprint": "fnv1a:ee3e2d1b"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0",
           "stateVersion": 223,
           "semanticActionSetFingerprint": "fnv1a:3be76010",
           "invocationKey": "fnv1a:276f3f28"

@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   type CardDefinitionId,
@@ -559,7 +560,7 @@ export function createTurnRunnerStartRuntimeResolvers(
         sourceId,
       );
       if (implementation?.kind !== "start_turn_random_effect_table") continue;
-      const randomPurpose = `start_turn_random_effect_table.${sourceDefinitionId}.runner_start.${state.stateVersion}.${sourceId}`;
+      const randomPurpose: RandomPurpose = [27, sourceDefinitionId, state.stateVersion, sourceId];
       const dieRoll = rollDeterministicDie(state, randomPurpose);
       const outcome =
         implementation.outcomes.find(
@@ -597,6 +598,7 @@ export function createTurnRunnerStartRuntimeResolvers(
           damageType: outcome.damageType,
           amount: outcome.amount,
           source: `runner_start:${sourceDefinitionId}`,
+          randomSource: ["c", sourceDefinitionId, sourceId],
         });
       }
       effects?.push({
@@ -620,7 +622,7 @@ export function createTurnRunnerStartRuntimeResolvers(
           : dealsDamage
             ? `${outcome.damageType}_damage`
             : "no_effect",
-        randomPurpose,
+        randomPurpose: randomPurpose[0],
         randomCounterAfter: state.randomCounter,
         ...(grantsAction
           ? {
@@ -668,6 +670,7 @@ export function createTurnRunnerStartRuntimeResolvers(
           damageType: "core",
           amount: 1,
           source: `runner_start:${definition.id}`,
+          randomSource: ["c", definition.id, sourceId],
         });
         effects?.push({
           effectId: `runner.start.drip.${sourceId}`,
@@ -713,7 +716,7 @@ export function createTurnRunnerStartRuntimeResolvers(
         definition.id,
       )?.uniqueDirectLongtail;
       if (longtail?.kind !== "runner_start_turn_forced_random_action") continue;
-      const randomPurpose = `action_economy.${definition.id}.runner_start.${state.stateVersion}.${sourceId}`;
+      const randomPurpose: RandomPurpose = [28, 0, definition.id, state.stateVersion, sourceId];
       const dieRoll = rollDeterministicDie(state, randomPurpose);
       const grant = runnerForcedActionGrantForRoll(
         state,
@@ -729,7 +732,7 @@ export function createTurnRunnerStartRuntimeResolvers(
         restriction: grant.restriction,
         forced: true,
         dieRoll,
-        randomPurpose,
+        randomPurpose: randomPurpose[0],
         ...(grant.targetServerId
           ? { targetServerId: grant.targetServerId }
           : {}),
@@ -748,7 +751,7 @@ export function createTurnRunnerStartRuntimeResolvers(
         sourceDefinitionId: definition.id,
         sourceTitle: definition.title,
         dieRoll,
-        randomPurpose,
+        randomPurpose: randomPurpose[0],
         randomCounterAfter: state.randomCounter,
         restrictedActionFamily: grant.restriction,
         ...(grant.targetServerId ? { serverId: grant.targetServerId } : {}),
@@ -818,7 +821,7 @@ export function createTurnRunnerStartRuntimeResolvers(
       );
     const target = randomRunnerGripCardId(
       state,
-      "runner_forced_action.random_grip",
+      [54],
     );
     if (!target) return undefined;
     return {
@@ -830,10 +833,10 @@ export function createTurnRunnerStartRuntimeResolvers(
 
   function randomRunnerGripCardId(
     state: GameState,
-    purpose: string,
+    purpose: readonly [54],
   ): CardInstanceId | undefined {
     if (state.runner.grip.length === 0) return undefined;
-    const value = nextRandom(state, `${purpose}.${state.stateVersion}`);
+    const value = nextRandom(state, [54, state.stateVersion]);
     return state.runner.grip[Math.floor(value * state.runner.grip.length)];
   }
 
@@ -914,7 +917,7 @@ export function createTurnRunnerStartRuntimeResolvers(
       const selected = randomCorpHqCardsWithoutReplacement(
         state,
         Math.min(boardwalk.amount, state.corp.hq.length),
-        `p3_49.random.boardwalk.hq_reveal.${state.stateVersion}`,
+        [55, state.stateVersion],
       );
       return startRunnerPrivateLookAtSpecificCorpCards(
         state,
@@ -956,13 +959,13 @@ export function createTurnRunnerStartRuntimeResolvers(
   function randomCorpHqCardsWithoutReplacement(
     state: GameState,
     count: number,
-    purpose: string,
+    purpose: readonly [55, stateVersion: number],
   ): CardInstanceId[] {
     const pool = state.corp.hq.slice();
     const selected: CardInstanceId[] = [];
     const limit = Math.min(Math.max(0, Math.floor(count)), pool.length);
     for (let index = 0; index < limit; index += 1) {
-      const value = nextRandom(state, `${purpose}.${index}`);
+      const value = nextRandom(state, [...purpose, index]);
       const selectedIndex = Math.floor(value * pool.length);
       const [cardId] = pool.splice(selectedIndex, 1);
       if (cardId) selected.push(cardId);
@@ -1023,7 +1026,7 @@ export function createTurnRunnerStartRuntimeResolvers(
       for (let index = 0; index < counterTotal; index += 1) {
         const die = rollDeterministicDie(
           state,
-          `virus_counter.${sourceDefinitionId}.start_of_turn.roll.${state.stateVersion}.${index}`,
+          [25, sourceDefinitionId, state.stateVersion, index],
         );
         if (die === 6) pending += 1;
       }

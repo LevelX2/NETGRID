@@ -7,7 +7,7 @@
       "provenance": "reconstructed_from_persisted_decision_sources",
       "actor": "runner",
       "stateVersion": 21,
-      "stateHash": "fnv1a:3876ef97",
+      "stateHash": "fnv1a:63145634",
       "input": {
         "matchId": "match_2c32303f362fd8de",
         "side": "runner",
@@ -213,7 +213,7 @@
                     "encounterStrength": 3,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 478,
                         "sourceTitle": "Scramble"
@@ -1972,7 +1972,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 21,
-          "sideSafePlanningFingerprint": "fnv1a:3b7bae45"
+          "sideSafePlanningFingerprint": "fnv1a:77c363b7"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -9621,7 +9621,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_trash_program",
+                        "id": "0",
                         "type": "trash_installed_program",
                         "sourceDefinitionId": 435,
                         "sourceTitle": "Banpei",
@@ -9630,7 +9630,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 435,
                         "sourceTitle": "Banpei"
@@ -9662,7 +9662,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_trash_program",
+                        "id": "0",
                         "type": "trash_installed_program",
                         "sourceDefinitionId": 445,
                         "sourceTitle": "D'Arc Knight",
@@ -9671,7 +9671,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 445,
                         "sourceTitle": "D'Arc Knight"
@@ -9733,7 +9733,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 456,
                         "sourceTitle": "Filter"
@@ -9776,7 +9776,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_runner_run_lock_actions",
+                        "id": "0",
                         "type": "set_runner_run_lock_actions",
                         "amount": 6,
                         "sourceDefinitionId": 459,
@@ -9786,7 +9786,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 459,
                         "sourceTitle": "Haunting Inquisition"
@@ -9989,7 +9989,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 456,
                         "sourceTitle": "Filter"
@@ -10020,7 +10020,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_damage_net",
+                        "id": "0",
                         "type": "do_damage",
                         "amount": 1,
                         "damageType": "net",
@@ -10031,7 +10031,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 465,
                         "sourceTitle": "Laser Wire"
@@ -10088,7 +10088,7 @@
                     "encounterStrength": 1,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 450,
                         "sourceTitle": "Data Wall 2.0"
@@ -11625,7 +11625,7 @@
                 "targetIceDefinitionId": 456,
                 "runnerCostPenaltySupportWindowOpened": true,
                 "runnerCostPenaltySupportWindowId": 57,
-                "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2th.0.printed_subroutines_end_the_run.328",
+                "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2th.0.0.328",
                 "targets": {
                   "targetIceDefinitionId": 456
                 },
@@ -20076,7 +20076,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 270,
-          "sideSafePlanningFingerprint": "fnv1a:a2100507"
+          "sideSafePlanningFingerprint": "fnv1a:0d019e9c"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -26605,7 +26605,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_trash_program",
+                        "id": "0",
                         "type": "trash_installed_program",
                         "sourceDefinitionId": 435,
                         "sourceTitle": "Banpei",
@@ -26614,7 +26614,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 435,
                         "sourceTitle": "Banpei"
@@ -26646,7 +26646,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_trash_program",
+                        "id": "0",
                         "type": "trash_installed_program",
                         "sourceDefinitionId": 445,
                         "sourceTitle": "D'Arc Knight",
@@ -26655,7 +26655,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 445,
                         "sourceTitle": "D'Arc Knight"
@@ -26729,7 +26729,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 456,
                         "sourceTitle": "Filter"
@@ -26772,7 +26772,7 @@
                     "encounterStrength": 6,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_runner_run_lock_actions",
+                        "id": "0",
                         "type": "set_runner_run_lock_actions",
                         "amount": 6,
                         "sourceDefinitionId": 459,
@@ -26782,7 +26782,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 459,
                         "sourceTitle": "Haunting Inquisition"
@@ -26985,7 +26985,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 456,
                         "sourceTitle": "Filter"
@@ -27016,7 +27016,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_damage_net",
+                        "id": "0",
                         "type": "do_damage",
                         "amount": 1,
                         "damageType": "net",
@@ -27027,7 +27027,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 465,
                         "sourceTitle": "Laser Wire"
@@ -27106,7 +27106,7 @@
                     "encounterStrength": 1,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 450,
                         "sourceTitle": "Data Wall 2.0"
@@ -28692,7 +28692,7 @@
                 "targetIceDefinitionId": 456,
                 "runnerCostPenaltySupportWindowOpened": true,
                 "runnerCostPenaltySupportWindowId": 57,
-                "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2th.0.printed_subroutines_end_the_run.328",
+                "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2th.0.0.328",
                 "targets": {
                   "targetIceDefinitionId": 456
                 },
@@ -38515,7 +38515,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 316,
-          "sideSafePlanningFingerprint": "fnv1a:4b800243"
+          "sideSafePlanningFingerprint": "fnv1a:099e6524"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -45079,7 +45079,7 @@
                     "encounterStrength": 3,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 478,
                         "sourceTitle": "Scramble"
@@ -45135,7 +45135,7 @@
                     "encounterStrength": 1,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 450,
                         "sourceTitle": "Data Wall 2.0"
@@ -45167,7 +45167,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_trash_program",
+                        "id": "0",
                         "type": "trash_installed_program",
                         "sourceDefinitionId": 445,
                         "sourceTitle": "D'Arc Knight",
@@ -45176,7 +45176,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 445,
                         "sourceTitle": "D'Arc Knight"
@@ -48684,7 +48684,7 @@
                 "targetIceDefinitionId": 445,
                 "runnerCostPenaltySupportWindowOpened": true,
                 "runnerCostPenaltySupportWindowId": 124,
-                "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2r1.0.printed_subroutines_trash_program.328",
+                "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2r1.0.0.328",
                 "targets": {
                   "targetIceDefinitionId": 445
                 },
@@ -54103,7 +54103,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 221,
-          "sideSafePlanningFingerprint": "fnv1a:a2ec370a"
+          "sideSafePlanningFingerprint": "fnv1a:b36c1897"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -61958,7 +61958,7 @@
                     "encounterStrength": 5,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_damage_net",
+                        "id": "0",
                         "type": "do_damage",
                         "amount": 1,
                         "damageType": "net",
@@ -61969,7 +61969,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_damage_net.scored_rezzed_ice_mark_modifier.1",
+                        "id": "1",
                         "type": "do_damage",
                         "amount": 1,
                         "damageType": "net",
@@ -61980,7 +61980,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_prohibit_break_next_ice",
+                        "id": "2",
                         "type": "set_next_encounter_no_break_subroutines",
                         "sourceDefinitionId": 470,
                         "sourceTitle": "Neural Blade",
@@ -61989,7 +61989,7 @@
                         }
                       },
                       {
-                        "id": "printed_subroutines_prohibit_break_next_ice.scored_rezzed_ice_mark_modifier.1",
+                        "id": "3",
                         "type": "set_next_encounter_no_break_subroutines",
                         "sourceDefinitionId": 470,
                         "sourceTitle": "Neural Blade",
@@ -62023,7 +62023,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 449,
                         "sourceTitle": "Data Wall"
@@ -62054,7 +62054,7 @@
                     "encounterStrength": 5,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                        "id": "0",
                         "type": "set_run_encounter_tax",
                         "amount": 2,
                         "sourceDefinitionId": 434,
@@ -62108,7 +62108,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 491,
                         "sourceTitle": "Wall of Static"
@@ -62139,7 +62139,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 491,
                         "sourceTitle": "Wall of Static"
@@ -62176,7 +62176,7 @@
                     "encounterStrength": 2,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 473,
                         "sourceTitle": "Quandary"
@@ -62301,7 +62301,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 449,
                         "sourceTitle": "Data Wall"
@@ -62334,7 +62334,7 @@
                     "encounterStrength": 3,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                        "id": "0",
                         "type": "set_next_encounter_lock",
                         "breakTags": [
                           "stun"
@@ -77312,7 +77312,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 385,
-          "sideSafePlanningFingerprint": "fnv1a:d309733f"
+          "sideSafePlanningFingerprint": "fnv1a:88a715fd"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",
@@ -87841,7 +87841,7 @@
       },
       {
         "side": "runner",
-        "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+        "actionId": "runner.continue_run.0",
         "actionType": "continue_run"
       },
       {
@@ -87893,9 +87893,114 @@
       },
       {
         "side": "runner",
-        "actionId": "runner.continue_run.printed_subroutines_damage_net,printed_subroutines_prohibit_break_next_ice",
+        "actionId": "runner.continue_run.0,1",
         "actionType": "continue_run"
       }
-    ]
+    ],
+    "setupArrangement": {
+      "runnerGrip": [
+        "czt",
+        "c1jt",
+        "c169",
+        "c116",
+        "cwq"
+      ],
+      "runnerStack": [
+        "c10a",
+        "c121",
+        "czl",
+        "cxt",
+        "cvl",
+        "cyi",
+        "cyq",
+        "cyp",
+        "c10i",
+        "c10h",
+        "cyy",
+        "c15t",
+        "cyh",
+        "c11t",
+        "c101",
+        "c10y",
+        "c17d",
+        "c149",
+        "c12x",
+        "c175",
+        "c13t",
+        "c1ft",
+        "c109",
+        "c115",
+        "cxu",
+        "c12y",
+        "c1z5",
+        "c16h",
+        "c15d",
+        "cwx",
+        "c14p",
+        "c19l",
+        "cwp",
+        "c1e9",
+        "cyx",
+        "c15l",
+        "cvm",
+        "c1a9",
+        "c10x",
+        "cwy",
+        "c18h"
+      ],
+      "corpHq": [
+        "c2lq",
+        "c2nx",
+        "c2p1",
+        "c31p",
+        "c2yd"
+      ],
+      "corpRd": [
+        "c33q",
+        "c39x",
+        "c2on",
+        "c3bp",
+        "c2ot",
+        "c31q",
+        "c2u5",
+        "c2i6",
+        "c2rx",
+        "c37x",
+        "c2u6",
+        "c2th",
+        "c2vh",
+        "c2m5",
+        "c345",
+        "c2jp",
+        "c2om",
+        "c2jq",
+        "c2ye",
+        "c2tp",
+        "c2k6",
+        "c2lp",
+        "c371",
+        "c3k5",
+        "c3it",
+        "c38l",
+        "c33p",
+        "c2q5",
+        "c339",
+        "c2ti",
+        "c33x",
+        "c31r",
+        "c2ol",
+        "c3hp",
+        "c3ad",
+        "c3m5",
+        "c2r1",
+        "c2i5",
+        "c2k5",
+        "c2s5"
+      ]
+    },
+    "provenance": {
+      "kind": "authored_post_setup_permutation",
+      "scenario": "game4"
+    }
   }
 }

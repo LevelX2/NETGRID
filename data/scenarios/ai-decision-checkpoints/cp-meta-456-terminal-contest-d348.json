@@ -570,7 +570,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -608,7 +608,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -647,7 +647,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_brain",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -658,7 +658,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_brain_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -669,7 +669,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 492,
                     "sourceTitle": "Zombie"
@@ -732,7 +732,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -976,7 +976,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -1007,7 +1007,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 76,
                     "sourceTitle": "Datacomb"
@@ -1046,7 +1046,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_brain",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -1057,7 +1057,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_brain_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -1068,7 +1068,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 492,
                     "sourceTitle": "Zombie"
@@ -1100,7 +1100,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 87,
                     "sourceTitle": "Marionette",
@@ -1109,7 +1109,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 87,
                     "sourceTitle": "Marionette"
@@ -1190,7 +1190,7 @@
             "encounterStrength": 0,
             "subroutines": [
               {
-                "id": "subroutine_trash_program",
+                "id": "0",
                 "type": "trash_installed_program",
                 "sourceDefinitionId": 87,
                 "sourceTitle": "Marionette",
@@ -1199,7 +1199,7 @@
                 }
               },
               {
-                "id": "subroutine_end_run",
+                "id": "1",
                 "type": "end_the_run",
                 "sourceDefinitionId": 87,
                 "sourceTitle": "Marionette"
@@ -10642,7 +10642,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1jv.c1jv.c1jv.cji.1.subroutine_end_run.328",
+          "actionId": "runner.break_subroutine.c1jv.c1jv.c1jv.cji.1.1.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine 2 brechen",
@@ -10684,7 +10684,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.subroutine_end_run",
+          "actionId": "runner.continue_run.1",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -10697,7 +10697,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "subroutine_end_run",
+            "encounterSubroutineIds": "1",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -12927,7 +12927,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1jv.c1jv.c1jv.cji.1.subroutine_end_run.328",
+        "actionId": "runner.break_subroutine.c1jv.c1jv.c1jv.cji.1.1.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine 2 brechen",
@@ -12969,7 +12969,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.subroutine_end_run",
+        "actionId": "runner.continue_run.1",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -12982,7 +12982,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "subroutine_end_run",
+          "encounterSubroutineIds": "1",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -13033,7 +13033,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 347,
-      "sideSafePlanningFingerprint": "fnv1a:9ed102cb"
+      "sideSafePlanningFingerprint": "fnv1a:ff73b47a"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_krashkurs_clown_kreditmaschine_2026_07_11_1.0.0",
@@ -19368,7 +19368,7 @@
           "sideSafePlanningFingerprint": "fnv1a:0f088226"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.subroutine_end_run",
+          "actionId": "runner.continue_run.1",
           "stateVersion": 347,
           "semanticActionSetFingerprint": "fnv1a:470659f8",
           "invocationKey": "fnv1a:7620fa27"
@@ -19380,7 +19380,7 @@
         "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar2",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A346",
         "sourceStepId": "plan:runner.convert_run_window:run%3A346:convert",
-        "originalActionId": "runner.continue_run.subroutine_end_run",
+        "originalActionId": "runner.continue_run.1",
         "selectedAtStateVersion": 347
       },
       "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Ar2",

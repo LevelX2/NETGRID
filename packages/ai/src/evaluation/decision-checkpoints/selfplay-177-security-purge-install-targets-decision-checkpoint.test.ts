@@ -8,7 +8,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 describe("selfplay 177 Security Purge install targets decision checkpoint", () => {
   it("binds the choice to the current central-defense allocation", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(securityPurgeJson) as AiDecisionCheckpointV1,
+      structuredClone(securityPurgeJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
@@ -48,7 +48,7 @@ describe("selfplay 177 Security Purge install targets decision checkpoint", () =
     expect(iceId).toBe("cfq");
     const checkpoint = structuredClone(
       securityPurgeJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     const initial = checkpoint.engine.testOnlyGameState;
     initial.eventLog = checkpoint.engine.eventPrefix;
     const applied = applyAction(initial, {

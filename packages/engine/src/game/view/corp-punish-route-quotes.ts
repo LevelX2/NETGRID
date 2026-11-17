@@ -1901,6 +1901,7 @@ function quoteOneShotDamagePrevention(
                   damageType: effect.damageType,
                   amount: effect.amount,
                   source: step.quote.sourceCardInstanceId,
+                  randomSource: ["c", step.quote.sourceCardDefinitionId, step.quote.sourceCardInstanceId],
                 }),
               },
             ]

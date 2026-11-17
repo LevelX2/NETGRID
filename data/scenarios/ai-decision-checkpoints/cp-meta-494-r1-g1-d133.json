@@ -478,7 +478,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 6,
                     "traceSuccessEffect": {
@@ -489,7 +489,7 @@
                     "sourceTitle": "Pocket Virtual Reality"
                   },
                   {
-                    "id": "printed_subroutines_trace_a",
+                    "id": "1",
                     "type": "initiate_trace",
                     "traceLimit": 6,
                     "traceSuccessEffect": {
@@ -534,7 +534,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -6809,7 +6809,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 132,
-      "sideSafePlanningFingerprint": "fnv1a:a24f04c2"
+      "sideSafePlanningFingerprint": "fnv1a:b38d64a5"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_prep_economy_pressure_2026_07_01_1.0.0",

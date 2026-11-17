@@ -10,10 +10,15 @@ import {
   copiedRunSubroutinesForIceAfterOriginal,
   currentEncounterAdditionalSubroutinesForIce,
   dynamicSubroutineAttributionFor,
+  type DynamicSubroutineDefinition,
 } from "../../ability-engine/additional-subroutine-modifiers";
 import { printedSubroutinesForCardImplementation } from "../../ability-engine/printed-subroutine-implementations";
 import { cardCounter } from "../state/turn-flags-counters";
 import { publicIceRunSubroutineDerivation } from "./public-ice-run-derivation";
+import {
+  requireSubroutineProvenance,
+  subroutineProvenanceKey,
+} from "../../ability-engine/subroutine-provenance";
 
 /**
  * Derives the exact public subroutine sequence currently belonging to an ICE.
@@ -40,8 +45,11 @@ export function effectiveIceRunSubroutines(
   // before external modifiers. Run-duration "after all other" contributions
   // are deliberately last; run-scoped copies remain adjacent to their source.
   const orderedBaseSubroutines = [
-    ...publicDerivation.printedSubroutines.flatMap((subroutine) =>
-      repeatSelfProvidedSubroutine(subroutine, transmutationCopies),
+    ...publicDerivation.printedSubroutines.flatMap((subroutine, index) =>
+      repeatSelfProvidedSubroutine(
+        { ...subroutine, provenance: ["p", definition.id, index] },
+        transmutationCopies,
+      ),
     ),
     ...publicDerivation.appendedSubroutines
       .filter((subroutine) => subroutine.type === "end_the_run")
@@ -65,9 +73,14 @@ export function effectiveIceRunSubroutines(
     ),
     ...runDurationAdditionalSubroutinesForIce(state, iceId),
   ];
-  return orderedBaseSubroutines.flatMap((subroutine) =>
-    subroutineWithRunScopedCopies(state, iceId, subroutine, new Set()),
-  );
+  return orderedBaseSubroutines
+    .flatMap((subroutine) =>
+      subroutineWithRunScopedCopies(state, iceId, subroutine, new Set()),
+    )
+    .map((subroutine, index) => ({
+      ...subroutine,
+      id: index.toString(36),
+    }));
 }
 
 function repeatSelfProvidedSubroutine(
@@ -78,7 +91,12 @@ function repeatSelfProvidedSubroutine(
     subroutine,
     ...Array.from({ length: copies }, (_, index) => ({
       ...subroutine,
-      id: `${subroutine.id}.scored_rezzed_ice_mark_modifier.${index + 1}`,
+      id: `m${index.toString(36)}`,
+      provenance: [
+        "m",
+        requireSubroutineProvenance(subroutine),
+        index,
+      ] as const,
     })),
   ];
 }
@@ -89,16 +107,18 @@ function subroutineWithRunScopedCopies(
   subroutine: SubroutineDefinition,
   ancestorIds: ReadonlySet<string>,
 ): SubroutineDefinition[] {
-  if (ancestorIds.has(subroutine.id))
+  const provenance = requireSubroutineProvenance(subroutine);
+  const originKey = subroutineProvenanceKey(provenance);
+  if (ancestorIds.has(originKey))
     throw new Error("runtime_copied_subroutine_cycle");
   const nextAncestors = new Set(ancestorIds);
-  nextAncestors.add(subroutine.id);
+  nextAncestors.add(originKey);
   return [
     subroutine,
     ...copiedRunSubroutinesForIceAfterOriginal(
       state,
       iceId,
-      subroutine.id,
+      provenance,
     ).flatMap((copy) =>
       subroutineWithRunScopedCopies(state, iceId, copy, nextAncestors),
     ),
@@ -112,18 +132,24 @@ function runDurationAdditionalSubroutinesForIce(
   const modifiers = state.run?.runDurationAdditionalSubroutineModifiers ?? [];
   if (modifiers.length === 0) return [];
   if (!iceIsOnCurrentRunServer(state, iceId)) return [];
-  return modifiers
-    .filter((modifier) => modifier.sourceCardInstanceId !== iceId)
-    .map((modifier) => {
-      const sourceTitle =
-        CARD_DEFINITIONS_BY_ID[modifier.sourceDefinitionId]?.title ??
-        modifier.sourceDefinitionId;
-      return {
-        id: `run_duration.${modifier.modifierId}.end_the_run`,
+  return modifiers.flatMap((modifier, index) => {
+    if (modifier.sourceCardInstanceId === iceId) return [];
+    const sourceDefinition =
+      CARD_DEFINITIONS_BY_ID[modifier.sourceDefinitionId];
+    if (!sourceDefinition)
+      throw new Error("runtime_run_subroutine_source_missing");
+    const sourceTitle = sourceDefinition.title;
+    return [
+      {
+        id: `r${index.toString(36)}`,
+        provenance: [
+          "r",
+          modifier.sourceDefinitionId,
+          modifier.sourceCardInstanceId,
+          index,
+        ],
         type: "end_the_run",
         dynamicSubroutine: {
-          internalId: `run_duration.${modifier.modifierId}.additional_subroutine`,
-          publicId: `run_duration.${modifier.sourceDefinitionId}.additional_subroutine`,
           sourceCardInstanceId: modifier.sourceCardInstanceId,
           sourceDefinitionId: modifier.sourceDefinitionId,
           sourceTitle,
@@ -131,8 +157,9 @@ function runDurationAdditionalSubroutinesForIce(
           runDuration: true,
           subroutineKind: "end_the_run",
         },
-      } as SubroutineDefinition;
-    });
+      } satisfies DynamicSubroutineDefinition,
+    ];
+  });
 }
 
 function iceIsOnCurrentRunServer(

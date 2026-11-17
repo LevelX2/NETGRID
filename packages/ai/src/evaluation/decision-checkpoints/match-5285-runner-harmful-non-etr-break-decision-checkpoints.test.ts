@@ -14,7 +14,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
   it("keeps terminal remote contest ownership with a payable full-break continuation", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(harmfulNonEtrBreakJson) as AiDecisionCheckpointV1,
+      structuredClone(harmfulNonEtrBreakJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
@@ -30,7 +30,7 @@ describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
   it("executes the quoted ten-credit route and preserves the hand and run owner through access", () => {
     const checkpoint = structuredClone(
       harmfulNonEtrBreakJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     const start = runAiDecisionCheckpoint(checkpoint);
     expect(start.ok, start.message).toBe(true);
     let state = checkpoint.engine.testOnlyGameState;
@@ -127,7 +127,7 @@ describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
   ])("revalidates the complete live continuation: %s", (kind) => {
     const checkpoint = structuredClone(
       harmfulNonEtrBreakJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     const start = runAiDecisionCheckpoint(checkpoint);
     const state = applyDecision(
       checkpoint.engine.testOnlyGameState,

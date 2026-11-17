@@ -792,6 +792,7 @@ export function createDamageTraceRuntimeHosts(
           damageType,
           amount: counterEffect.runStart.amountPerCounter,
           source: `counter:${counterEffect.sourceDefinitionId}`,
+          randomSource: ["c", counterEffect.sourceDefinitionId],
         });
         legalAction.payload = {
           ...(legalAction.payload ?? {}),

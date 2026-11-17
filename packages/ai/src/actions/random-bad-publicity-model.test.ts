@@ -8,7 +8,7 @@ describe("projectRandomBadPublicityModel", () => {
     const model = projectRandomBadPublicityModel(
       candidate(),
       action({
-        randomDrawRecordPurpose: "proteus_dice",
+        randomDrawRecordPurpose: 23,
         randomCounterAfter: 12,
       }),
     );
@@ -16,7 +16,7 @@ describe("projectRandomBadPublicityModel", () => {
     expect(model?.randomOutcome).toEqual({
       schemaVersion: "random-outcome-model-v1",
       outcomeStatus: "not_drawn",
-      purpose: "proteus_dice",
+      purpose: 23,
       randomCounterAfter: 12,
       source: "engine_random_draw_records_only",
       futureOutcomeAccess: "forbidden",
@@ -25,7 +25,7 @@ describe("projectRandomBadPublicityModel", () => {
         "random_outcome:not_drawn",
         "random_source:engine_random_draw_records_only",
         "future_random_outcome_access:forbidden",
-        "random_purpose:proteus_dice",
+        "random_purpose:23",
         "random_counter_after:12",
       ],
     });
@@ -33,7 +33,7 @@ describe("projectRandomBadPublicityModel", () => {
   });
 
   it("is deterministic for the same side-safe action projection", () => {
-    const input = action({ randomPurpose: "proteus_coin", rollDice: true });
+    const input = action({ randomPurpose: 23, rollDice: true });
     expect(projectRandomBadPublicityModel(candidate(), input)).toEqual(
       projectRandomBadPublicityModel(candidate(), input),
     );

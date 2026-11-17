@@ -1188,14 +1188,14 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program_unless_runner_pays_one",
+                    "id": "0",
                     "type": "trash_installed_program_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 103,
                     "sourceTitle": "Washed-Up Solo Construct"
                   },
                   {
-                    "id": "card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
+                    "id": "1",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 582,
@@ -1239,7 +1239,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -1250,13 +1250,13 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 79,
                     "sourceTitle": "Dog Pile"
                   },
                   {
-                    "id": "card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
+                    "id": "2",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 582,
@@ -1299,14 +1299,14 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program_unless_runner_pays_one",
+                    "id": "0",
                     "type": "trash_installed_program_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 103,
                     "sourceTitle": "Washed-Up Solo Construct"
                   },
                   {
-                    "id": "card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
+                    "id": "1",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 582,
@@ -1356,14 +1356,14 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_unless_runner_pays_one",
+                      "id": "0",
                       "type": "end_the_run_unless_runner_pays",
                       "amount": 1,
                       "sourceDefinitionId": 96,
                       "sourceTitle": "Snowbank"
                     },
                     {
-                      "id": "card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
+                      "id": "1",
                       "type": "end_the_run_unless_runner_pays",
                       "amount": 1,
                       "sourceDefinitionId": 582,
@@ -1436,7 +1436,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "subroutine_relative_brain_damage",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 0,
                       "damageType": "core",
@@ -1447,13 +1447,13 @@
                       }
                     },
                     {
-                      "id": "subroutine_end_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 88,
                       "sourceTitle": "Mastermind"
                     },
                     {
-                      "id": "card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
+                      "id": "2",
                       "type": "end_the_run_unless_runner_pays",
                       "amount": 1,
                       "sourceDefinitionId": 582,
@@ -1550,7 +1550,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 96,
@@ -1593,7 +1593,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 4,
                     "damageType": "net",
@@ -1604,7 +1604,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 79,
                     "sourceTitle": "Dog Pile"
@@ -1644,7 +1644,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 90,
@@ -1686,7 +1686,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program_unless_runner_pays_one",
+                    "id": "0",
                     "type": "trash_installed_program_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 103,
@@ -1728,7 +1728,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "runFutureStrengthCancelPaymentAmount": 2,
@@ -1773,7 +1773,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 90,
@@ -2112,7 +2112,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_brain_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -2123,7 +2123,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 88,
                     "sourceTitle": "Mastermind"
@@ -2164,7 +2164,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "runFutureStrengthCancelPaymentAmount": 2,
@@ -17075,7 +17075,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 391,
-      "sideSafePlanningFingerprint": "fnv1a:721bf2b0"
+      "sideSafePlanningFingerprint": "fnv1a:7bd0a458"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_salazar_toll_road_1.1.0",

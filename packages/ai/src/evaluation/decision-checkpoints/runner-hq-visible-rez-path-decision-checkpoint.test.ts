@@ -7,7 +7,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("Runner HQ visible rez path decision checkpoint", () => {
   it("does not start an HQ run that a visible during-run rez makes unaffordable", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(checkpointJson) as AiDecisionCheckpointV1,
+      structuredClone(checkpointJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);

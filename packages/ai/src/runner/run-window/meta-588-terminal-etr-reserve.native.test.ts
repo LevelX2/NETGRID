@@ -7,6 +7,7 @@ import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-port
 import { runnerRunRiskContractReassessment } from "./run-window-assessment";
 import { pureEndRunEncounterPayment } from "./run-window-pure-etr-economics";
 import type { RunnerRunOrigin } from "../../plans/runner-run-origin-contract";
+import type { LegalAction } from "@netgrid/shared";
 function native(fixture = "cp-meta588-terminal-etr-reserve.json") {
   const cp = JSON.parse(
     readFileSync(
@@ -26,9 +27,12 @@ function native(fixture = "cp-meta588-terminal-etr-reserve.json") {
     accessCommitment: signal.accessCommitment,
   } as RunnerRunOrigin;
   const action = input.legalActions.find(
-    (a: { type: string; actionId: string }) =>
+    (a: LegalAction) =>
       a.type === "break_subroutine" &&
-      a.actionId.includes("printed_subroutines_end_the_run"),
+      typeof a.payload?.subroutineIndex === "number" &&
+      input.playerView.run.encounteredIce.effectiveRunQuote.subroutines[
+        a.payload.subroutineIndex
+      ]?.type === "end_the_run",
   );
   return { cp, input, origin, action };
 }

@@ -357,7 +357,7 @@
                   "encounterStrength": 6,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_trace",
+                      "id": "0",
                       "type": "initiate_trace",
                       "traceLimit": 6,
                       "traceSuccessEffect": {
@@ -4760,7 +4760,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 61,
-        "sideSafePlanningFingerprint": "fnv1a:3d5113c6"
+        "sideSafePlanningFingerprint": "fnv1a:4bd4dafe"
       },
       "observedTurnPlanAction": {
         "matchId": "match_b2ac0e3aae9ab170",

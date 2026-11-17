@@ -640,7 +640,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -689,7 +689,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+                      "id": "0",
                       "type": "rewind_run_to_rezzed_ice_by_die",
                       "sourceDefinitionId": 487,
                       "sourceTitle": "Vacuum Link"
@@ -751,7 +751,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 444,
                     "sourceTitle": "Crystal Wall"
@@ -792,7 +792,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 2,
                     "sourceDefinitionId": 437,
@@ -1029,7 +1029,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -1040,7 +1040,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 470,
                     "sourceTitle": "Neural Blade",
@@ -1083,7 +1083,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_break_subroutine_cost",
+                    "id": "0",
                     "type": "set_run_break_subroutine_cost_modifier",
                     "amount": 1,
                     "sourceDefinitionId": 489,
@@ -2646,7 +2646,7 @@
             "targetIceDefinitionId": 444,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 53,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qv.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qv.0.0.48",
             "targets": {
               "targetIceDefinitionId": 444
             },
@@ -5132,7 +5132,7 @@
             "targetIceDefinitionId": 444,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 151,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qv.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qv.0.0.48",
             "targets": {
               "targetIceDefinitionId": 444
             },
@@ -6299,7 +6299,7 @@
             "postInstallRezQuoteCardId": "c2ut",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 183,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6336,7 +6336,7 @@
             "postInstallRezQuoteCardId": "c2ut",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 183,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6373,7 +6373,7 @@
             "postInstallRezQuoteCardId": "c2ut",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 183,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6409,7 +6409,7 @@
             "postInstallRezQuoteCardId": "c2ut",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 183,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6446,7 +6446,7 @@
             "postInstallRezQuoteCardId": "c2ut",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 183,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7706,7 +7706,7 @@
           "targetIceDefinitionId": 444,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 151,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qv.0.printed_subroutines_end_the_run.48",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2qv.0.0.48",
           "targets": {
             "targetIceDefinitionId": 444
           },
@@ -8873,7 +8873,7 @@
           "postInstallRezQuoteCardId": "c2ut",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 183,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8910,7 +8910,7 @@
           "postInstallRezQuoteCardId": "c2ut",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 183,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8947,7 +8947,7 @@
           "postInstallRezQuoteCardId": "c2ut",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 183,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8983,7 +8983,7 @@
           "postInstallRezQuoteCardId": "c2ut",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 183,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9020,7 +9020,7 @@
           "postInstallRezQuoteCardId": "c2ut",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ut\",\"iceDefinitionId\":462,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":462,\"sourceTitle\":\"Ice Pick Willie\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 183,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9132,7 +9132,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 183,
-      "sideSafePlanningFingerprint": "fnv1a:c7a1720b"
+      "sideSafePlanningFingerprint": "fnv1a:a4d91125"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_original_speed_v10_1.0.0",

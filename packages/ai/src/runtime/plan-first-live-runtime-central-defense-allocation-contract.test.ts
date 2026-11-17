@@ -800,7 +800,7 @@ function iceInstall(source: VisibleCard, serverId: "hq" | "rd"): LegalAction {
           effectiveStrength: 0,
           subroutines: [
             {
-              id: "printed_subroutines_end_the_run",
+              id: "0",
               type: "end_the_run",
               sourceDefinitionId: DATA_WALL_DEFINITION_ID,
               sourceTitle: "Data Wall",

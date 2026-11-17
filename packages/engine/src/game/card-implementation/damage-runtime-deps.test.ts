@@ -169,6 +169,7 @@ describe("damage card implementation runtime deps", () => {
       damageType: "net",
       amount: 2,
       source: "operation:2523707740",
+      randomSource: ["c", 2523707740] as const,
     });
     expect(result).toEqual({
       resolved: true,
@@ -237,6 +238,7 @@ describe("damage card implementation runtime deps", () => {
           damageType: "core",
           amount: 1,
           source: "unpreventable:2523707740",
+          randomSource: ["c", 2523707740] as const,
         },
       },
     ]);

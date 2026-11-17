@@ -20,7 +20,7 @@ const FIXTURES = [
 describe("Rent-I-Con vs. CODE ROT cycle-three remediation checkpoints", () => {
   it.each(FIXTURES)("%s", (_label, checkpoint) => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(checkpoint) as AiDecisionCheckpointV1,
+      structuredClone(checkpoint) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);

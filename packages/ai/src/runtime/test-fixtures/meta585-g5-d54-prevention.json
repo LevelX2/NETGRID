@@ -202,7 +202,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_cannot_jack_out",
+                    "id": "0",
                     "type": "set_run_jack_out_lock",
                     "sourceDefinitionId": 463,
                     "sourceTitle": "Jack Attack",
@@ -211,7 +211,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "1",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -3619,7 +3619,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 53,
-      "sideSafePlanningFingerprint": "fnv1a:17e53b7f"
+      "sideSafePlanningFingerprint": "fnv1a:bec6d3e0"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_blink_pressure_rig_1.0.0",

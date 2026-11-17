@@ -4,7 +4,7 @@
     "provenance": "reconstructed_from_persisted_decision_sources",
     "actor": "runner",
     "stateVersion": 96,
-    "stateHash": "fnv1a:b58e9009",
+    "stateHash": "fnv1a:9457b8c2",
     "input": {
       "matchId": "match_f6b94b039fa384ba",
       "side": "runner",
@@ -323,7 +323,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 457,
                       "sourceTitle": "Fire Wall"
@@ -367,7 +367,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 491,
                       "sourceTitle": "Wall of Static"
@@ -521,7 +521,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_trace",
+                      "id": "0",
                       "type": "initiate_trace",
                       "traceLimit": 5,
                       "traceSuccessEffect": {
@@ -6199,7 +6199,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 96,
-        "sideSafePlanningFingerprint": "fnv1a:32e1bd45"
+        "sideSafePlanningFingerprint": "fnv1a:80b693c9"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",
@@ -14529,493 +14529,689 @@
     "randomDrawRecords": [
       {
         "counter": 0,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8561107481799164
+        "purpose": [
+          1
+        ],
+        "value": 0.2279781349188229
       },
       {
         "counter": 1,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.9619150745882113
+        "purpose": [
+          1
+        ],
+        "value": 0.9260135518090267
       },
       {
         "counter": 2,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.2852409474153983
+        "purpose": [
+          1
+        ],
+        "value": 0.08764127766188157
       },
       {
         "counter": 3,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.5334689408742496
+        "purpose": [
+          1
+        ],
+        "value": 0.691278645973653
       },
       {
         "counter": 4,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.6514231227623435
+        "purpose": [
+          1
+        ],
+        "value": 0.7031327937814829
       },
       {
         "counter": 5,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.07218689641616971
+        "purpose": [
+          1
+        ],
+        "value": 0.68319252907959
       },
       {
         "counter": 6,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.49444307623269934
+        "purpose": [
+          1
+        ],
+        "value": 0.8943357543640734
       },
       {
         "counter": 7,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.4108695984384878
+        "purpose": [
+          1
+        ],
+        "value": 0.2524648172863021
       },
       {
         "counter": 8,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.1527772457234774
+        "purpose": [
+          1
+        ],
+        "value": 0.38414187448002757
       },
       {
         "counter": 9,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.15550781227962562
+        "purpose": [
+          1
+        ],
+        "value": 0.5909497562783347
       },
       {
         "counter": 10,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.674641063119675
+        "purpose": [
+          1
+        ],
+        "value": 0.8736209382875946
       },
       {
         "counter": 11,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.4462529683079609
+        "purpose": [
+          1
+        ],
+        "value": 0.7442027843906628
       },
       {
         "counter": 12,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.7699884692968348
+        "purpose": [
+          1
+        ],
+        "value": 0.07944042077744162
       },
       {
         "counter": 13,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.44745737014149345
+        "purpose": [
+          1
+        ],
+        "value": 0.9825477852997078
       },
       {
         "counter": 14,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8260694584290651
+        "purpose": [
+          1
+        ],
+        "value": 0.871494367873406
       },
       {
         "counter": 15,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.1669948142313038
+        "purpose": [
+          1
+        ],
+        "value": 0.09029342878326452
       },
       {
         "counter": 16,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8241217505351265
+        "purpose": [
+          1
+        ],
+        "value": 0.7866707963354235
       },
       {
         "counter": 17,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8562122010036098
+        "purpose": [
+          1
+        ],
+        "value": 0.2988993607462854
       },
       {
         "counter": 18,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.515710872718099
+        "purpose": [
+          1
+        ],
+        "value": 0.6282547613494708
       },
       {
         "counter": 19,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.09836622615440904
+        "purpose": [
+          1
+        ],
+        "value": 0.6592464214004182
       },
       {
         "counter": 20,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.9936697048453134
+        "purpose": [
+          1
+        ],
+        "value": 0.883342642620731
       },
       {
         "counter": 21,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.47125744595195806
+        "purpose": [
+          1
+        ],
+        "value": 0.956172402351728
       },
       {
         "counter": 22,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.2419781718848738
+        "purpose": [
+          1
+        ],
+        "value": 0.5146834255825976
       },
       {
         "counter": 23,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.1363685925782382
+        "purpose": [
+          1
+        ],
+        "value": 0.4125993955259373
       },
       {
         "counter": 24,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.9391810488870493
+        "purpose": [
+          1
+        ],
+        "value": 0.35198083410299275
       },
       {
         "counter": 25,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.7500136833800156
+        "purpose": [
+          1
+        ],
+        "value": 0.7783350323111066
       },
       {
         "counter": 26,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.3331992533459386
+        "purpose": [
+          1
+        ],
+        "value": 0.3819222411483153
       },
       {
         "counter": 27,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.37790913386702174
+        "purpose": [
+          1
+        ],
+        "value": 0.5868520323525931
       },
       {
         "counter": 28,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.5332678455868899
+        "purpose": [
+          1
+        ],
+        "value": 0.7996459652507247
       },
       {
         "counter": 29,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.22480404963648304
+        "purpose": [
+          1
+        ],
+        "value": 0.9151102233293489
       },
       {
         "counter": 30,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.7718119157082555
+        "purpose": [
+          1
+        ],
+        "value": 0.9299203387560323
       },
       {
         "counter": 31,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.6567795863041046
+        "purpose": [
+          1
+        ],
+        "value": 0.4862048323952771
       },
       {
         "counter": 32,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.3386145995202986
+        "purpose": [
+          1
+        ],
+        "value": 0.411781035641011
       },
       {
         "counter": 33,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.6222329777913468
+        "purpose": [
+          1
+        ],
+        "value": 0.8741232612313299
       },
       {
         "counter": 34,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8476669116900734
+        "purpose": [
+          1
+        ],
+        "value": 0.5102528266673977
       },
       {
         "counter": 35,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.05060120057240847
+        "purpose": [
+          1
+        ],
+        "value": 0.06346752115954479
       },
       {
         "counter": 36,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.5174845223939276
+        "purpose": [
+          1
+        ],
+        "value": 0.17977291348431346
       },
       {
         "counter": 37,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.11635231157878645
+        "purpose": [
+          1
+        ],
+        "value": 0.031663215187312854
       },
       {
         "counter": 38,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.5269516839660121
+        "purpose": [
+          1
+        ],
+        "value": 0.863785249147051
       },
       {
         "counter": 39,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.34817987743452594
+        "purpose": [
+          1
+        ],
+        "value": 0.5520925095044461
       },
       {
         "counter": 40,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.24018338219507473
+        "purpose": [
+          1
+        ],
+        "value": 0.30405506121287273
       },
       {
         "counter": 41,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.8278322579091051
+        "purpose": [
+          1
+        ],
+        "value": 0.25693075442687885
       },
       {
         "counter": 42,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.470418945345768
+        "purpose": [
+          1
+        ],
+        "value": 0.7680444137669835
       },
       {
         "counter": 43,
-        "purpose": "setup.shuffle.runner.start_stack",
-        "value": 0.3223819769590003
+        "purpose": [
+          1
+        ],
+        "value": 0.016788695334049475
       },
       {
         "counter": 44,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.3955033674346061
+        "purpose": [
+          2
+        ],
+        "value": 0.7868884244776853
       },
       {
         "counter": 45,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.5695646751624243
+        "purpose": [
+          2
+        ],
+        "value": 0.8752222346183727
       },
       {
         "counter": 46,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.1968147412350768
+        "purpose": [
+          2
+        ],
+        "value": 0.8698518866144224
       },
       {
         "counter": 47,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.37649117262839515
+        "purpose": [
+          2
+        ],
+        "value": 0.09376032037288373
       },
       {
         "counter": 48,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.8268047939747403
+        "purpose": [
+          2
+        ],
+        "value": 0.5563748316310053
       },
       {
         "counter": 49,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.9586543039162612
+        "purpose": [
+          2
+        ],
+        "value": 0.5492627951116388
       },
       {
         "counter": 50,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.32149288080195304
+        "purpose": [
+          2
+        ],
+        "value": 0.7253685307207011
       },
       {
         "counter": 51,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.9735184450329742
+        "purpose": [
+          2
+        ],
+        "value": 0.1688613453698542
       },
       {
         "counter": 52,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.2611772727261218
+        "purpose": [
+          2
+        ],
+        "value": 0.36134869378892376
       },
       {
         "counter": 53,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.5834255496185897
+        "purpose": [
+          2
+        ],
+        "value": 0.35889601140789296
       },
       {
         "counter": 54,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.8207944748006861
+        "purpose": [
+          2
+        ],
+        "value": 0.8069084826696674
       },
       {
         "counter": 55,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.8575061199000246
+        "purpose": [
+          2
+        ],
+        "value": 0.7212216439199476
       },
       {
         "counter": 56,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.440084575163575
+        "purpose": [
+          2
+        ],
+        "value": 0.0721939307706887
       },
       {
         "counter": 57,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.44575252967993795
+        "purpose": [
+          2
+        ],
+        "value": 0.570912386972083
       },
       {
         "counter": 58,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.6625981874134649
+        "purpose": [
+          2
+        ],
+        "value": 0.39132672652794587
       },
       {
         "counter": 59,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.27897342048514484
+        "purpose": [
+          2
+        ],
+        "value": 0.8119391293395524
       },
       {
         "counter": 60,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.48107789995642103
+        "purpose": [
+          2
+        ],
+        "value": 0.7977997437194645
       },
       {
         "counter": 61,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.6559806085395316
+        "purpose": [
+          2
+        ],
+        "value": 0.568632876829368
       },
       {
         "counter": 62,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.6702228514387099
+        "purpose": [
+          2
+        ],
+        "value": 0.8855528942786478
       },
       {
         "counter": 63,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.3255175549897251
+        "purpose": [
+          2
+        ],
+        "value": 0.8973130591835332
       },
       {
         "counter": 64,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.3192179139922098
+        "purpose": [
+          2
+        ],
+        "value": 0.9348517070969832
       },
       {
         "counter": 65,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.6532863870297342
+        "purpose": [
+          2
+        ],
+        "value": 0.25623551179664283
       },
       {
         "counter": 66,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.803290838957373
+        "purpose": [
+          2
+        ],
+        "value": 0.7048307385137802
       },
       {
         "counter": 67,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7338395838860792
+        "purpose": [
+          2
+        ],
+        "value": 0.6053929479965439
       },
       {
         "counter": 68,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.8588156704989672
+        "purpose": [
+          2
+        ],
+        "value": 0.4937423227921084
       },
       {
         "counter": 69,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.5119814453859501
+        "purpose": [
+          2
+        ],
+        "value": 0.1314300468904377
       },
       {
         "counter": 70,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.29798510210684037
+        "purpose": [
+          2
+        ],
+        "value": 0.4459697707887321
       },
       {
         "counter": 71,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.13720663030844404
+        "purpose": [
+          2
+        ],
+        "value": 0.8511835380642916
       },
       {
         "counter": 72,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.4252770231575774
+        "purpose": [
+          2
+        ],
+        "value": 0.9159134932921957
       },
       {
         "counter": 73,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.9891631699697891
+        "purpose": [
+          2
+        ],
+        "value": 0.5265348636750623
       },
       {
         "counter": 74,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.36241928203099594
+        "purpose": [
+          2
+        ],
+        "value": 0.9493392605410887
       },
       {
         "counter": 75,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.328162101524888
+        "purpose": [
+          2
+        ],
+        "value": 0.632206855129122
       },
       {
         "counter": 76,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.14423331343017287
+        "purpose": [
+          2
+        ],
+        "value": 0.20749951161806313
       },
       {
         "counter": 77,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7784631971466127
+        "purpose": [
+          2
+        ],
+        "value": 0.09174921421130589
       },
       {
         "counter": 78,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.5688929619699397
+        "purpose": [
+          2
+        ],
+        "value": 0.8756388461880179
       },
       {
         "counter": 79,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7125287133332755
+        "purpose": [
+          2
+        ],
+        "value": 0.8838262491675489
       },
       {
         "counter": 80,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.13603015335943958
+        "purpose": [
+          2
+        ],
+        "value": 0.5168546485535918
       },
       {
         "counter": 81,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.8916551808779364
+        "purpose": [
+          2
+        ],
+        "value": 0.41328822322780956
       },
       {
         "counter": 82,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.14085421262067876
+        "purpose": [
+          2
+        ],
+        "value": 0.3794432210816513
       },
       {
         "counter": 83,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7813004692786093
+        "purpose": [
+          2
+        ],
+        "value": 0.891840067750482
       },
       {
         "counter": 84,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.8649285401147121
+        "purpose": [
+          2
+        ],
+        "value": 0.3358494368749111
       },
       {
         "counter": 85,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.07196144059850418
+        "purpose": [
+          2
+        ],
+        "value": 0.38879387043970315
       },
       {
         "counter": 86,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.8913375036345621
+        "purpose": [
+          2
+        ],
+        "value": 0.07139260288037641
       },
       {
         "counter": 87,
-        "purpose": "setup.shuffle.corp.start_rnd",
-        "value": 0.7586991097412903
+        "purpose": [
+          2
+        ],
+        "value": 0.14512627420076774
       },
       {
         "counter": 88,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.9211387524753402
+        "purpose": [
+          3
+        ],
+        "value": 0.07365340212166238
       },
       {
         "counter": 89,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.06225016192812938
+        "purpose": [
+          3
+        ],
+        "value": 0.2549297864699035
       },
       {
         "counter": 90,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.4425719628255259
+        "purpose": [
+          3
+        ],
+        "value": 0.6402910681789715
       },
       {
         "counter": 91,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.9430038096178099
+        "purpose": [
+          3
+        ],
+        "value": 0.005288597172508291
       },
       {
         "counter": 92,
-        "purpose": "setup.draw.runner.initial_hand",
-        "value": 0.738854197872988
+        "purpose": [
+          3
+        ],
+        "value": 0.5623085831796429
       },
       {
         "counter": 93,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.556462941404375
+        "purpose": [
+          4
+        ],
+        "value": 0.8487861789563252
       },
       {
         "counter": 94,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.272011565958705
+        "purpose": [
+          4
+        ],
+        "value": 0.3360363235173164
       },
       {
         "counter": 95,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.9088128501515725
+        "purpose": [
+          4
+        ],
+        "value": 0.1826911060450268
       },
       {
         "counter": 96,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.7075960902936541
+        "purpose": [
+          4
+        ],
+        "value": 0.9510590077426571
       },
       {
         "counter": 97,
-        "purpose": "setup.draw.corp.initial_hand",
-        "value": 0.665140997369216
+        "purpose": [
+          4
+        ],
+        "value": 0.2380349845015789
       }
     ],
     "aiTurnPlanRandomCounter": 0,
@@ -16839,7 +17035,7 @@
                 "postInstallRezQuoteBaseCredits": 3,
                 "postInstallRezQuoteFinalCredits": 3,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c31a\",\"iceDefinitionId\":491,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":491,\"sourceTitle\":\"Wall of Static\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c31a\",\"iceDefinitionId\":491,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":491,\"sourceTitle\":\"Wall of Static\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -16921,7 +17117,7 @@
                 "postInstallRezQuoteBaseCredits": 5,
                 "postInstallRezQuoteFinalCredits": 5,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2tq\",\"iceDefinitionId\":457,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":457,\"sourceTitle\":\"Fire Wall\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2tq\",\"iceDefinitionId\":457,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":457,\"sourceTitle\":\"Fire Wall\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -17241,11 +17437,11 @@
             "action": {
               "matchId": "match_f6b94b039fa384ba",
               "side": "runner",
-              "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+              "actionId": "runner.continue_run.0",
               "clientKnownStateVersion": 9
             },
             "legalAction": {
-              "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+              "actionId": "runner.continue_run.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen (Run endet)",
@@ -17261,8 +17457,8 @@
                 "unbrokenSubroutineCount": 1,
                 "encounterWillEndRun": true,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "printed_subroutines_end_the_run",
-                "encounterRemainingSubroutineIds": "printed_subroutines_end_the_run",
+                "encounterSubroutineIds": "0",
+                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access"
@@ -17462,11 +17658,11 @@
             "action": {
               "matchId": "match_f6b94b039fa384ba",
               "side": "runner",
-              "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+              "actionId": "runner.continue_run.0",
               "clientKnownStateVersion": 12
             },
             "legalAction": {
-              "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+              "actionId": "runner.continue_run.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen (Run endet)",
@@ -17482,8 +17678,8 @@
                 "unbrokenSubroutineCount": 1,
                 "encounterWillEndRun": true,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "printed_subroutines_end_the_run",
-                "encounterRemainingSubroutineIds": "printed_subroutines_end_the_run",
+                "encounterSubroutineIds": "0",
+                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access"
@@ -18685,7 +18881,7 @@
                 "postInstallRezQuoteBaseCredits": 5,
                 "postInstallRezQuoteFinalCredits": 5,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2rr\",\"iceDefinitionId\":448,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_tag_and_counter\",\"tagAmount\":1,\"counterType\":\"trace_tag_counter\",\"amount\":1},\"sourceDefinitionId\":448,\"sourceTitle\":\"Data Raven\"}]}",
                 "effectKind": "install_card"
               }
             }
@@ -19156,11 +19352,11 @@
             "action": {
               "matchId": "match_f6b94b039fa384ba",
               "side": "runner",
-              "actionId": "runner.continue_run.printed_subroutines_trace",
+              "actionId": "runner.continue_run.0",
               "clientKnownStateVersion": 34
             },
             "legalAction": {
-              "actionId": "runner.continue_run.printed_subroutines_trace",
+              "actionId": "runner.continue_run.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen",
@@ -19176,8 +19372,8 @@
                 "unbrokenSubroutineCount": 1,
                 "encounterWillEndRun": false,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "printed_subroutines_trace",
-                "encounterRemainingSubroutineIds": "printed_subroutines_trace",
+                "encounterSubroutineIds": "0",
+                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
@@ -22346,7 +22542,7 @@
                 "postInstallRezQuoteBaseCredits": 3,
                 "postInstallRezQuoteFinalCredits": 3,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c319\",\"iceDefinitionId\":491,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":491,\"sourceTitle\":\"Wall of Static\"}]}",
+                "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c319\",\"iceDefinitionId\":491,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":491,\"sourceTitle\":\"Wall of Static\"}]}",
                 "effectKind": "install_card"
               }
             }

@@ -271,7 +271,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
   it("keeps the defense module's selected current head bound through commitment and lease", () => {
     const checkpoint = structuredClone(
       fundedRdLayerJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     checkpoint.source.kind = "synthetic_companion";
     checkpoint.engine.testOnlyGameState.corp.credits = 20;
     checkpoint.engine.stateHash = hashGameState(

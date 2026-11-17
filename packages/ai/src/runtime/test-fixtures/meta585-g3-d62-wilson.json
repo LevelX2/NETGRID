@@ -266,7 +266,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -4453,7 +4453,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 61,
-      "sideSafePlanningFingerprint": "fnv1a:abc80e12"
+      "sideSafePlanningFingerprint": "fnv1a:0f8d4a52"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_blink_pressure_rig_1.0.0",

@@ -444,7 +444,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 3,
                     "traceSuccessEffect": {
@@ -486,7 +486,7 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -549,7 +549,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 6,
                     "traceSuccessEffect": {
@@ -560,7 +560,7 @@
                     "sourceTitle": "Pocket Virtual Reality"
                   },
                   {
-                    "id": "printed_subroutines_trace_a",
+                    "id": "1",
                     "type": "initiate_trace",
                     "traceLimit": 6,
                     "traceSuccessEffect": {
@@ -622,7 +622,7 @@
             "effectiveStrength": 4,
             "subroutines": [
               {
-                "id": "printed_subroutines_trace",
+                "id": "0",
                 "type": "initiate_trace",
                 "traceLimit": 6,
                 "traceSuccessEffect": {
@@ -633,7 +633,7 @@
                 "sourceTitle": "Pocket Virtual Reality"
               },
               {
-                "id": "printed_subroutines_trace_a",
+                "id": "1",
                 "type": "initiate_trace",
                 "traceLimit": 6,
                 "traceSuccessEffect": {
@@ -4742,7 +4742,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_trace",
+          "actionId": "runner.continue_run.0",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen",
@@ -4755,7 +4755,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 2,
-            "encounterSubroutineIds": "printed_subroutines_trace,printed_subroutines_trace_a",
+            "encounterSubroutineIds": "0,1",
             "encounterWillEndRun": false,
             "encounterSourceWillTrashAtEndOfTurn": false,
             "abilityFamily": "run-access",
@@ -7018,7 +7018,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_trace",
+        "actionId": "runner.continue_run.0",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen",
@@ -7031,7 +7031,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 2,
-          "encounterSubroutineIds": "printed_subroutines_trace,printed_subroutines_trace_a",
+          "encounterSubroutineIds": "0,1",
           "encounterWillEndRun": false,
           "encounterSourceWillTrashAtEndOfTurn": false,
           "abilityFamily": "run-access",
@@ -7081,7 +7081,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 149,
-      "sideSafePlanningFingerprint": "fnv1a:9c9936aa"
+      "sideSafePlanningFingerprint": "fnv1a:f02670c7"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_deep_market_engine_1.0.0",
@@ -13387,7 +13387,7 @@
           "sideSafePlanningFingerprint": "fnv1a:2455ce37"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.printed_subroutines_trace",
+          "actionId": "runner.continue_run.0",
           "stateVersion": 149,
           "semanticActionSetFingerprint": "fnv1a:81c1f9e8",
           "invocationKey": "fnv1a:4b4572d1"

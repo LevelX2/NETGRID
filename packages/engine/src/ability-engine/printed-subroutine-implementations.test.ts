@@ -40,7 +40,8 @@ describe("printed subroutine implementations", () => {
         0,
       ),
     ).toEqual({
-      id: "card_implementation.3474921859.printed_subroutine.1.end_the_run_unless_runner_pays",
+      id: "0",
+      provenance: ["p", 3474921859, 0],
       type: "end_the_run_unless_runner_pays",
       amount: 2,
     });

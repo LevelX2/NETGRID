@@ -1333,7 +1333,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 444,
                     "sourceTitle": "Crystal Wall"
@@ -1374,7 +1374,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 2,
                     "sourceDefinitionId": 437,
@@ -1419,7 +1419,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "sourceDefinitionId": 438,
@@ -1463,7 +1463,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 464,
                     "sourceTitle": "Keeper"
@@ -1513,7 +1513,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_damage_net",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "net",
@@ -1524,7 +1524,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_prohibit_break_next_ice",
+                      "id": "1",
                       "type": "set_next_encounter_no_break_subroutines",
                       "sourceDefinitionId": 470,
                       "sourceTitle": "Neural Blade",
@@ -1589,7 +1589,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -1629,7 +1629,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -1679,7 +1679,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_damage_net",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "net",
@@ -1690,7 +1690,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_prohibit_break_next_ice",
+                      "id": "1",
                       "type": "set_next_encounter_no_break_subroutines",
                       "sourceDefinitionId": 470,
                       "sourceTitle": "Neural Blade",
@@ -2219,7 +2219,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 444,
                     "sourceTitle": "Crystal Wall"
@@ -2260,7 +2260,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "sourceDefinitionId": 438,
@@ -2304,7 +2304,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_break_subroutine_cost",
+                    "id": "0",
                     "type": "set_run_break_subroutine_cost_modifier",
                     "amount": 1,
                     "sourceDefinitionId": 489,
@@ -2348,7 +2348,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 444,
                     "sourceTitle": "Crystal Wall"
@@ -2396,7 +2396,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+                    "id": "0",
                     "type": "rewind_run_to_rezzed_ice_by_die",
                     "sourceDefinitionId": 487,
                     "sourceTitle": "Vacuum Link"
@@ -2437,7 +2437,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+                    "id": "0",
                     "type": "rewind_run_to_rezzed_ice_by_die",
                     "sourceDefinitionId": 487,
                     "sourceTitle": "Vacuum Link"
@@ -12927,7 +12927,7 @@
             "targetIceDefinitionId": 470,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 383,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2wl.0.printed_subroutines_damage_net.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2wl.0.0.48",
             "targets": {
               "targetIceDefinitionId": 470
             },
@@ -12976,7 +12976,7 @@
             "targetIceDefinitionId": 470,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 385,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2wl.1.printed_subroutines_prohibit_break_next_ice.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2wl.1.1.48",
             "targets": {
               "targetIceDefinitionId": 470
             },
@@ -13115,7 +13115,7 @@
             "targetIceDefinitionId": 473,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 391,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2x9.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2x9.0.0.48",
             "targets": {
               "targetIceDefinitionId": 473
             },
@@ -13254,7 +13254,7 @@
             "targetIceDefinitionId": 473,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 397,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2xa.0.printed_subroutines_end_the_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2xa.0.0.48",
             "targets": {
               "targetIceDefinitionId": 473
             },
@@ -14052,7 +14052,7 @@
             "targetIceDefinitionId": 470,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 425,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2wl.0.printed_subroutines_damage_net.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2wl.0.0.48",
             "targets": {
               "targetIceDefinitionId": 470
             },
@@ -14101,7 +14101,7 @@
             "targetIceDefinitionId": 470,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 427,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2wl.1.printed_subroutines_prohibit_break_next_ice.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2wl.1.1.48",
             "targets": {
               "targetIceDefinitionId": 470
             },
@@ -22102,7 +22102,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 594,
-      "sideSafePlanningFingerprint": "fnv1a:d4a33293"
+      "sideSafePlanningFingerprint": "fnv1a:124463f2"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_original_speed_v10_1.0.0",

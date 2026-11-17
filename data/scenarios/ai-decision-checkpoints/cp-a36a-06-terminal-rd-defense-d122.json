@@ -92,7 +92,7 @@
   },
   "engine": {
     "stateVersion": 279,
-    "stateHash": "fnv1a:b9bb13fd",
+    "stateHash": "fnv1a:e7e340bf",
     "testOnlyGameState": {
       "matchId": "match_a36a9664458303fc",
       "baseline": {
@@ -113,988 +113,1517 @@
       "randomDrawRecords": [
         {
           "counter": 0,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.6475755247960413
+          "purpose": [
+            1
+          ],
+          "value": 0.4677831343101927
         },
         {
           "counter": 1,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.261149907670713
+          "purpose": [
+            1
+          ],
+          "value": 0.1941513949483562
         },
         {
           "counter": 2,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.054461849897446846
+          "purpose": [
+            1
+          ],
+          "value": 0.752841071322431
         },
         {
           "counter": 3,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.2666811967731434
+          "purpose": [
+            1
+          ],
+          "value": 0.8302894306061291
         },
         {
           "counter": 4,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.7949089382987775
+          "purpose": [
+            1
+          ],
+          "value": 0.8979731431074545
         },
         {
           "counter": 5,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.7816661096283182
+          "purpose": [
+            1
+          ],
+          "value": 0.2697772217851844
         },
         {
           "counter": 6,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.3605339540271555
+          "purpose": [
+            1
+          ],
+          "value": 0.597631367383018
         },
         {
           "counter": 7,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.6217675760633535
+          "purpose": [
+            1
+          ],
+          "value": 0.25476785306560334
         },
         {
           "counter": 8,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.6765156077595316
+          "purpose": [
+            1
+          ],
+          "value": 0.03973945502238818
         },
         {
           "counter": 9,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9398690370557892
+          "purpose": [
+            1
+          ],
+          "value": 0.19449221424732832
         },
         {
           "counter": 10,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.07260498027471651
+          "purpose": [
+            1
+          ],
+          "value": 0.7099225887931202
         },
         {
           "counter": 11,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.154291164238341
+          "purpose": [
+            1
+          ],
+          "value": 0.7239845715305172
         },
         {
           "counter": 12,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.8405972612512449
+          "purpose": [
+            1
+          ],
+          "value": 0.3179910089432626
         },
         {
           "counter": 13,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.28333559525614005
+          "purpose": [
+            1
+          ],
+          "value": 0.6755241007077342
         },
         {
           "counter": 14,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.07343260845257416
+          "purpose": [
+            1
+          ],
+          "value": 0.1344362281864545
         },
         {
           "counter": 15,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.8917873287017709
+          "purpose": [
+            1
+          ],
+          "value": 0.18127161877702958
         },
         {
           "counter": 16,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.32476277035115786
+          "purpose": [
+            1
+          ],
+          "value": 0.2763691552279801
         },
         {
           "counter": 17,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.8947452276115592
+          "purpose": [
+            1
+          ],
+          "value": 0.5449971378246644
         },
         {
           "counter": 18,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.14737228099499222
+          "purpose": [
+            1
+          ],
+          "value": 0.4432794907349983
         },
         {
           "counter": 19,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.10157052396633748
+          "purpose": [
+            1
+          ],
+          "value": 0.13477205210860155
         },
         {
           "counter": 20,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.4890063450723572
+          "purpose": [
+            1
+          ],
+          "value": 0.8265018962126206
         },
         {
           "counter": 21,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.2922396696544717
+          "purpose": [
+            1
+          ],
+          "value": 0.7595781239203472
         },
         {
           "counter": 22,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.7783043991024348
+          "purpose": [
+            1
+          ],
+          "value": 0.8327113923181088
         },
         {
           "counter": 23,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.20817543517405723
+          "purpose": [
+            1
+          ],
+          "value": 0.9806221229148002
         },
         {
           "counter": 24,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.6436198236247653
+          "purpose": [
+            1
+          ],
+          "value": 0.3620122485097256
         },
         {
           "counter": 25,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.34597910142188903
+          "purpose": [
+            1
+          ],
+          "value": 0.9526267326326637
         },
         {
           "counter": 26,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9670854801515887
+          "purpose": [
+            1
+          ],
+          "value": 0.3934413471699414
         },
         {
           "counter": 27,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.7302822717870683
+          "purpose": [
+            1
+          ],
+          "value": 0.03084175278181378
         },
         {
           "counter": 28,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.957876181260885
+          "purpose": [
+            1
+          ],
+          "value": 0.9152874723093417
         },
         {
           "counter": 29,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.7830442246683408
+          "purpose": [
+            1
+          ],
+          "value": 0.439012432114147
         },
         {
           "counter": 30,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.307951205750033
+          "purpose": [
+            1
+          ],
+          "value": 0.8946258328188116
         },
         {
           "counter": 31,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.38904568100844295
+          "purpose": [
+            1
+          ],
+          "value": 0.8994787830020152
         },
         {
           "counter": 32,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.578964786669603
+          "purpose": [
+            1
+          ],
+          "value": 0.2723440739015255
         },
         {
           "counter": 33,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.8910281537017866
+          "purpose": [
+            1
+          ],
+          "value": 0.08085674009013555
         },
         {
           "counter": 34,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9146841795591889
+          "purpose": [
+            1
+          ],
+          "value": 0.5799151695190368
         },
         {
           "counter": 35,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.45505962486958107
+          "purpose": [
+            1
+          ],
+          "value": 0.9098734073435595
         },
         {
           "counter": 36,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.0345510413795721
+          "purpose": [
+            1
+          ],
+          "value": 0.9169537624723054
         },
         {
           "counter": 37,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.44994378587331174
+          "purpose": [
+            1
+          ],
+          "value": 0.5212929541201252
         },
         {
           "counter": 38,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.004101326047613707
+          "purpose": [
+            1
+          ],
+          "value": 0.5976527810641588
         },
         {
           "counter": 39,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9957417770150541
+          "purpose": [
+            1
+          ],
+          "value": 0.11184746659771161
         },
         {
           "counter": 40,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.8485313696780918
+          "purpose": [
+            1
+          ],
+          "value": 0.33325434627541917
         },
         {
           "counter": 41,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.16014125594607476
+          "purpose": [
+            1
+          ],
+          "value": 0.76532335142732
         },
         {
           "counter": 42,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9679651405461857
+          "purpose": [
+            1
+          ],
+          "value": 0.2485606364056595
         },
         {
           "counter": 43,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.24171459911449955
+          "purpose": [
+            1
+          ],
+          "value": 0.2462153195558331
         },
         {
           "counter": 44,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.3065954457694806
+          "purpose": [
+            2
+          ],
+          "value": 0.5000001711557991
         },
         {
           "counter": 45,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.6212033045513244
+          "purpose": [
+            2
+          ],
+          "value": 0.5000559104778745
         },
         {
           "counter": 46,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.4944970704638044
+          "purpose": [
+            2
+          ],
+          "value": 0.8304189885415473
         },
         {
           "counter": 47,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.20240888522216816
+          "purpose": [
+            2
+          ],
+          "value": 0.638322213832796
         },
         {
           "counter": 48,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.020546269493838087
+          "purpose": [
+            2
+          ],
+          "value": 0.07860751971761026
         },
         {
           "counter": 49,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.06322941032766594
+          "purpose": [
+            2
+          ],
+          "value": 0.4483189026493667
         },
         {
           "counter": 50,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.3421165137010752
+          "purpose": [
+            2
+          ],
+          "value": 0.12391668983444681
         },
         {
           "counter": 51,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5967510357883985
+          "purpose": [
+            2
+          ],
+          "value": 0.15976361736249467
         },
         {
           "counter": 52,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.6825008988735044
+          "purpose": [
+            2
+          ],
+          "value": 0.5977377882927526
         },
         {
           "counter": 53,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.8387459805403393
+          "purpose": [
+            2
+          ],
+          "value": 0.00941755929809407
         },
         {
           "counter": 54,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.17337605975617343
+          "purpose": [
+            2
+          ],
+          "value": 0.6333086305228446
         },
         {
           "counter": 55,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7491296141203843
+          "purpose": [
+            2
+          ],
+          "value": 0.6675697927007436
         },
         {
           "counter": 56,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.35147984783496156
+          "purpose": [
+            2
+          ],
+          "value": 0.9061021921538519
         },
         {
           "counter": 57,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.9934515693760383
+          "purpose": [
+            2
+          ],
+          "value": 0.26041853341158705
         },
         {
           "counter": 58,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.8075894645373475
+          "purpose": [
+            2
+          ],
+          "value": 0.3652086530673605
         },
         {
           "counter": 59,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.22396608089361825
+          "purpose": [
+            2
+          ],
+          "value": 0.4583209119272863
         },
         {
           "counter": 60,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.37106751042468444
+          "purpose": [
+            2
+          ],
+          "value": 0.49891607402157523
         },
         {
           "counter": 61,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5794118112513965
+          "purpose": [
+            2
+          ],
+          "value": 0.27537662076840486
         },
         {
           "counter": 62,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.02285902029365927
+          "purpose": [
+            2
+          ],
+          "value": 0.8310561931401468
         },
         {
           "counter": 63,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7411515546992746
+          "purpose": [
+            2
+          ],
+          "value": 0.24800068946060905
         },
         {
           "counter": 64,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.3201130179084569
+          "purpose": [
+            2
+          ],
+          "value": 0.6536843311315145
         },
         {
           "counter": 65,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.2663077443335352
+          "purpose": [
+            2
+          ],
+          "value": 0.7653015020621393
         },
         {
           "counter": 66,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5665653183272065
+          "purpose": [
+            2
+          ],
+          "value": 0.0473444800349756
         },
         {
           "counter": 67,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.18055889106096412
+          "purpose": [
+            2
+          ],
+          "value": 0.11711153365505378
         },
         {
           "counter": 68,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.3915326994591507
+          "purpose": [
+            2
+          ],
+          "value": 0.47626817924032405
         },
         {
           "counter": 69,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7969083212049732
+          "purpose": [
+            2
+          ],
+          "value": 0.12923791835783294
         },
         {
           "counter": 70,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.05258143358958178
+          "purpose": [
+            2
+          ],
+          "value": 0.06804230540295764
         },
         {
           "counter": 71,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.8446741118213735
+          "purpose": [
+            2
+          ],
+          "value": 0.699533912253196
         },
         {
           "counter": 72,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.9033450290389998
+          "purpose": [
+            2
+          ],
+          "value": 0.14130806358120251
         },
         {
           "counter": 73,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.9802112273795066
+          "purpose": [
+            2
+          ],
+          "value": 0.7705862019104543
         },
         {
           "counter": 74,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5508256200976227
+          "purpose": [
+            2
+          ],
+          "value": 0.0416508426690001
         },
         {
           "counter": 75,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.9759240577620925
+          "purpose": [
+            2
+          ],
+          "value": 0.18345793389599296
         },
         {
           "counter": 76,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.1553214808650406
+          "purpose": [
+            2
+          ],
+          "value": 0.19952254992376095
         },
         {
           "counter": 77,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.20914763739052178
+          "purpose": [
+            2
+          ],
+          "value": 0.008237125693564606
         },
         {
           "counter": 78,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.025701574911031422
+          "purpose": [
+            2
+          ],
+          "value": 0.6351912930550206
         },
         {
           "counter": 79,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5833738644741184
+          "purpose": [
+            2
+          ],
+          "value": 0.3796721591024278
         },
         {
           "counter": 80,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.07420111709816557
+          "purpose": [
+            2
+          ],
+          "value": 0.11765212400453229
         },
         {
           "counter": 81,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7632168536796221
+          "purpose": [
+            2
+          ],
+          "value": 0.2132941928123926
         },
         {
           "counter": 82,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5258338548284273
+          "purpose": [
+            2
+          ],
+          "value": 0.3874033324140457
         },
         {
           "counter": 83,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.21904636785060672
+          "purpose": [
+            2
+          ],
+          "value": 0.21060233304329712
         },
         {
           "counter": 84,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.8238941965420414
+          "purpose": [
+            2
+          ],
+          "value": 0.28821506720152024
         },
         {
           "counter": 85,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.6990845862492734
+          "purpose": [
+            2
+          ],
+          "value": 0.520042323529075
         },
         {
           "counter": 86,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.38160451970983045
+          "purpose": [
+            2
+          ],
+          "value": 0.6489560379521581
         },
         {
           "counter": 87,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.441605237408242
+          "purpose": [
+            2
+          ],
+          "value": 0.8086964453310913
         },
         {
           "counter": 88,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.7818786325786978
+          "purpose": [
+            3
+          ],
+          "value": 0.14495354536424188
         },
         {
           "counter": 89,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.7439710849615884
+          "purpose": [
+            3
+          ],
+          "value": 0.09839292920613474
         },
         {
           "counter": 90,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.5847466050258382
+          "purpose": [
+            3
+          ],
+          "value": 0.5687675668332718
         },
         {
           "counter": 91,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.25328933377475116
+          "purpose": [
+            3
+          ],
+          "value": 0.5950526304829566
         },
         {
           "counter": 92,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.2551025558805584
+          "purpose": [
+            3
+          ],
+          "value": 0.003409782647112558
         },
         {
           "counter": 93,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.6887658481599298
+          "purpose": [
+            4
+          ],
+          "value": 0.8831850118098997
         },
         {
           "counter": 94,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.7216644215535573
+          "purpose": [
+            4
+          ],
+          "value": 0.718366714407788
         },
         {
           "counter": 95,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.20217731347627999
+          "purpose": [
+            4
+          ],
+          "value": 0.13123635249688625
         },
         {
           "counter": 96,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.7593225050752901
+          "purpose": [
+            4
+          ],
+          "value": 0.13065033416889604
         },
         {
           "counter": 97,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.4229289160221985
+          "purpose": [
+            4
+          ],
+          "value": 0.006141045963607428
         },
         {
           "counter": 98,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.8203089019904402
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.9996512374421401
         },
         {
           "counter": 99,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.4631452765333186
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.5266103641649628
         },
         {
           "counter": 100,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.9024510810373189
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.6115489847504045
         },
         {
           "counter": 101,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.5783989556702464
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.6325186596829305
         },
         {
           "counter": 102,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.6461686647369126
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.2611570200747564
         },
         {
           "counter": 103,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.8047876181815109
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.07812956116649594
         },
         {
           "counter": 104,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.10815518756318965
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.7636847005548872
         },
         {
           "counter": 105,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.26799873230256277
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.7359325126647485
         },
         {
           "counter": 106,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.13230528430938893
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.6767371185375128
         },
         {
           "counter": 107,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.4161052721477182
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.4214290249670687
         },
         {
           "counter": 108,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.34965971828831444
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.8599109934441411
         },
         {
           "counter": 109,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.36977691311276584
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.887412976979513
         },
         {
           "counter": 110,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.7907951182461556
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.21053147925204518
         },
         {
           "counter": 111,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.45446614599844326
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.054741087235231634
         },
         {
           "counter": 112,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.8397186360385585
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.6126404476719413
         },
         {
           "counter": 113,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.5204114027306815
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.7881691131891572
         },
         {
           "counter": 114,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.5219716281591051
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.7582814998513139
         },
         {
           "counter": 115,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.31572739522663607
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.8599741016513243
         },
         {
           "counter": 116,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.28889376083743856
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.1535244732112947
         },
         {
           "counter": 117,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.26685748311631996
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.7841415578773758
         },
         {
           "counter": 118,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.6277712305410709
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.49017438299043303
         },
         {
           "counter": 119,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.19818477562123415
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.8954943823841551
         },
         {
           "counter": 120,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.3292916581876596
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.9528713173132332
         },
         {
           "counter": 121,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.04106927754681855
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.23027432110930912
         },
         {
           "counter": 122,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.7200829936211384
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.9439846784143903
         },
         {
           "counter": 123,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.36137476581509764
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.019452687872414276
         },
         {
           "counter": 124,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.6471052419740948
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.270594944413301
         },
         {
           "counter": 125,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.8923577640091005
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.4033454996852287
         },
         {
           "counter": 126,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.042624850347193766
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.8588882606301267
         },
         {
           "counter": 127,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.5832053868305744
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.08549880197142734
         },
         {
           "counter": 128,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.898389456549439
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.6183062182073439
         },
         {
           "counter": 129,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.7065402894400514
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.629756282918428
         },
         {
           "counter": 130,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.8737998882869327
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.7906395866257555
         },
         {
           "counter": 131,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.513225431643381
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.7183643362371321
         },
         {
           "counter": 132,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.4519055783361513
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.9469613372604522
         },
         {
           "counter": 133,
-          "purpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "value": 0.35123312674543916
+          "purpose": [
+            33,
+            "c2id",
+            37
+          ],
+          "value": 0.943518738478907
         },
         {
           "counter": 134,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.692630591559022
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.35076704280333904
         },
         {
           "counter": 135,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.23413950635816372
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.469429646119779
         },
         {
           "counter": 136,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.7758308938547404
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.15761224721782863
         },
         {
           "counter": 137,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.254371831205484
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.04294048163018327
         },
         {
           "counter": 138,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.7171919571850717
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.8238533488527302
         },
         {
           "counter": 139,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.28157955454519
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.4362387925499829
         },
         {
           "counter": 140,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.8098590983190537
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.32889586979086893
         },
         {
           "counter": 141,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.8531228651972881
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.11664245478600477
         },
         {
           "counter": 142,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.605539404441585
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.8210532998017538
         },
         {
           "counter": 143,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.6603591746920574
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.454787248584719
         },
         {
           "counter": 144,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.3082974655034193
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.08354700609129628
         },
         {
           "counter": 145,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.29770911735917505
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.2736617897725925
         },
         {
           "counter": 146,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.5511401450208945
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.19116642771038672
         },
         {
           "counter": 147,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.17274842891917763
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.6431869405285398
         },
         {
           "counter": 148,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.48765572537363977
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.013310271270191243
         },
         {
           "counter": 149,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.21945961050168017
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.7927846485438554
         },
         {
           "counter": 150,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.7763319779358825
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.3755001879668398
         },
         {
           "counter": 151,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.042106768775088343
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.8642013111365462
         },
         {
           "counter": 152,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.6563175650963857
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.9225428878962939
         },
         {
           "counter": 153,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.8015452719617713
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.6619829016150114
         },
         {
           "counter": 154,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.709183738663801
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.9720112434514198
         },
         {
           "counter": 155,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.7222885062004188
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.942116301143276
         },
         {
           "counter": 156,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.6799167796651722
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.8942959677940923
         },
         {
           "counter": 157,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.6972334554375023
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.9950444827798782
         },
         {
           "counter": 158,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.8386884689041847
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.5060897008915227
         },
         {
           "counter": 159,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.04811675002774751
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.0424042271232028
         },
         {
           "counter": 160,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.2290205394074073
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.2993493204874783
         },
         {
           "counter": 161,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.23862477427144735
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.7503654019882837
         },
         {
           "counter": 162,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.9436942969033784
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.6706337331704619
         },
         {
           "counter": 163,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.22061358266185038
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.9310847606786529
         },
         {
           "counter": 164,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.49009408388826936
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.9887189526992461
         },
         {
           "counter": 165,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.503566376971428
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.02623735948017858
         },
         {
           "counter": 166,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_71:shuffle",
-          "value": 0.8188368254079155
+          "purpose": [
+            46,
+            71
+          ],
+          "value": 0.40795550935198
         },
         {
           "counter": 167,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.5190943023514542
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.23323538035543256
         },
         {
           "counter": 168,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.18588820582202492
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.547616419757469
         },
         {
           "counter": 169,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.3116009947870634
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.25364572266292684
         },
         {
           "counter": 170,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.2673919141724924
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.40884494118461545
         },
         {
           "counter": 171,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.6742210874792036
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.6378323096481391
         },
         {
           "counter": 172,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.044470052526449866
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.35894150491966104
         },
         {
           "counter": 173,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.49862501162115314
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.02965357911292532
         },
         {
           "counter": 174,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.8733416767669987
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.07625440216643575
         },
         {
           "counter": 175,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.07461445291001145
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.3448338459892102
         },
         {
           "counter": 176,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.3621951911953374
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.44752384906328857
         },
         {
           "counter": 177,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.8092618396657731
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.28790200385914333
         },
         {
           "counter": 178,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.4468521170661317
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.6423627992668577
         },
         {
           "counter": 179,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.14065186857278433
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.3749177281826841
         },
         {
           "counter": 180,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.5624658454725302
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.6552567253324402
         },
         {
           "counter": 181,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.7170951518863999
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.8086175803943265
         },
         {
           "counter": 182,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.8269149441168712
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.20703499677739368
         },
         {
           "counter": 183,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.48767935939629636
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.5297026265170738
         },
         {
           "counter": 184,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.12739112495001692
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.4204323381025816
         },
         {
           "counter": 185,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.24315196936940875
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.34312457561178433
         },
         {
           "counter": 186,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.39633572070866196
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.6890421237077443
         },
         {
           "counter": 187,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.2859991030062087
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.3198809497319355
         },
         {
           "counter": 188,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.38144598698245036
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.40984984506713495
         },
         {
           "counter": 189,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.8416244302479602
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.8055253446991847
         },
         {
           "counter": 190,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.6011384025197551
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.6281887095359958
         },
         {
           "counter": 191,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.5429997881958263
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.7326389679798186
         },
         {
           "counter": 192,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.4862959404821876
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.23413568270423424
         },
         {
           "counter": 193,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.940105162286302
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.2505404895405352
         },
         {
           "counter": 194,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.32369315022354783
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.921427319865013
         },
         {
           "counter": 195,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.8245768728203332
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.36397465659216766
         },
         {
           "counter": 196,
-          "purpose": "p3_37_search_stack_to_grip:p3_37_search_stack_to_grip_155:shuffle",
-          "value": 0.08928646397579054
+          "purpose": [
+            46,
+            155
+          ],
+          "value": 0.3944425052690037
         }
       ],
       "aiTurnPlanRandomCounter": 0,
@@ -3788,7 +4317,7 @@
           "shownCount": 1,
           "shuffledIntoRndCount": 1,
           "combinedAgendaPoints": 2,
-          "randomDrawRecordPurpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
+          "randomDrawRecordPurpose": 33,
           "shownCardDefinitionIds": "406",
           "revealKind": "reveal",
           "abilityFamily": "hidden-zone",

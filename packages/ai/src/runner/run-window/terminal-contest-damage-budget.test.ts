@@ -48,7 +48,18 @@ it.each([
     expect(action?.payload?.subroutineIndex).toBe(2);
     const core =
       input.playerView.run!.encounteredIce!.effectiveRunQuote!.subroutines[0]!;
+    expect(core.damageType).toBe("core");
     expect(isAcceptableNonlethalDamageSubroutine(input, core)).toBe(false);
+    expect(
+      isAcceptableNonlethalDamageSubroutine(input, { ...core, id: "z" }),
+    ).toBe(false);
+    expect(
+      isAcceptableNonlethalDamageSubroutine(input, {
+        ...core,
+        id: "core_damage",
+        damageType: "net",
+      }),
+    ).toBe(true);
     expect(isAcceptableNonlethalDamageSubroutine(input, core, 0)).toBe(true);
     input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.slice(0, 1);
     expect(isAcceptableNonlethalDamageSubroutine(input, core, 0)).toBe(false);

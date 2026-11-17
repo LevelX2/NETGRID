@@ -571,7 +571,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 456,
                       "sourceTitle": "Filter"
@@ -603,7 +603,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+                      "id": "0",
                       "type": "rewind_run_to_rezzed_ice_by_die",
                       "sourceDefinitionId": 487,
                       "sourceTitle": "Vacuum Link"
@@ -634,7 +634,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 457,
                       "sourceTitle": "Fire Wall"
@@ -678,7 +678,7 @@
                   "encounterStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 450,
                       "sourceTitle": "Data Wall 2.0"
@@ -779,7 +779,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+                      "id": "0",
                       "type": "rewind_run_to_rezzed_ice_by_die",
                       "sourceDefinitionId": 487,
                       "sourceTitle": "Vacuum Link"
@@ -812,7 +812,7 @@
                   "encounterStrength": 3,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                      "id": "0",
                       "type": "set_next_encounter_lock",
                       "breakTags": [
                         "stun"
@@ -8612,7 +8612,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 190,
-        "sideSafePlanningFingerprint": "fnv1a:70f32cdd"
+        "sideSafePlanningFingerprint": "fnv1a:47e317d4"
       },
       "observedTurnPlanAction": {
         "matchId": "match_1a755f23187c89c2",

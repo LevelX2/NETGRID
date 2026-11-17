@@ -7,7 +7,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match 2c49 runner fully broken future effect decision checkpoint", () => {
   it("ignores the fully broken future effect while the visible damage floor still aborts the route", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(fullyBrokenFutureEffectJson) as AiDecisionCheckpointV1,
+      structuredClone(fullyBrokenFutureEffectJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);

@@ -218,7 +218,7 @@ it("uses the paid-for break to preserve the bound hand floor despite an unafford
   const action = input.legalActions.find(
     (a) =>
       a.type === "break_subroutine" &&
-      a.actionId.includes("printed_subroutines_damage_net"),
+      a.payload?.subroutineIndex === 0,
   )!;
   expect(action).toBeDefined();
   expect(chooseAiAction(input)).toMatchObject({

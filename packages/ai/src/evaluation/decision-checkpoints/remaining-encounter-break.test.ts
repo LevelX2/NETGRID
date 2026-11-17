@@ -47,11 +47,12 @@ it("rejects a missing authoritative remainder instead of counting printed subrou
 it("does not pretend a genuinely open second ETR was already broken", () => {
   const input = fixture();
   const continuation = input.legalActions.find((action) => action.type === "continue_run")!;
-  continuation.payload!.encounterSubroutineIds = "printed_subroutines_end_the_run,printed_subroutines_end_the_run_a";
+  continuation.payload!.encounterSubroutineIds = "0,1";
   continuation.payload!.unbrokenSubroutineCount = 2;
   const otherBreak = structuredClone(input.legalActions.find((action) => action.type === "break_subroutine")!);
-  otherBreak.actionId = otherBreak.actionId.replace(".1.printed_subroutines_end_the_run_a.", ".0.printed_subroutines_end_the_run.");
+  otherBreak.actionId = otherBreak.actionId.replace(".1.1.", ".0.0.");
   otherBreak.payload!.subroutineIndex = 0;
+  otherBreak.payload!.subroutineId = "0";
   input.legalActions.push(otherBreak);
   expect(currentEncounterUnbrokenSubroutineIndexes(input)).toEqual(new Set([0, 1]));
   expect(chooseAiAction(input).actionId).toBe(continuation.actionId);

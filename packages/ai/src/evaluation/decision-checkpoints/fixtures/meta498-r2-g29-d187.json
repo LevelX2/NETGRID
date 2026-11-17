@@ -676,7 +676,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 435,
                     "sourceTitle": "Banpei",
@@ -685,7 +685,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 435,
                     "sourceTitle": "Banpei"
@@ -725,7 +725,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 464,
                     "sourceTitle": "Keeper"
@@ -790,7 +790,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -831,7 +831,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_cannot_jack_out",
+                    "id": "0",
                     "type": "set_run_jack_out_lock",
                     "sourceDefinitionId": 463,
                     "sourceTitle": "Jack Attack",
@@ -840,7 +840,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "1",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -1116,7 +1116,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -8582,7 +8582,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 186,
-      "sideSafePlanningFingerprint": "fnv1a:aed4feb6"
+      "sideSafePlanningFingerprint": "fnv1a:c7b0605e"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_code_rot_bitte_eintreten_2026_07_16_1.1.0",

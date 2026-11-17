@@ -534,7 +534,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -607,7 +607,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -751,7 +751,7 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_brain",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -762,7 +762,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_brain_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -773,7 +773,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 441,
                     "sourceTitle": "Code Corpse"
@@ -8218,7 +8218,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 194,
-      "sideSafePlanningFingerprint": "fnv1a:e7ce011a"
+      "sideSafePlanningFingerprint": "fnv1a:bb3cc09d"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -13786,7 +13786,7 @@
                     "central_access_novelty_ratio:1",
                     "path_passability:blocked_by_visible_damage_hand_buffer",
                     "runner_visible_lethal_ice_damage_blocks_run_start:r1",
-                    "runner_visible_ice_damage_below_required_hand_floor|source:441|ice:c2q5|subroutine:printed_subroutines_damage_brain_a|damage_type:core|subroutine_damage:1|damage:2|cumulative_damage:2|cumulative_core_damage:2|hand:2|required_floor:3|below_required_floor:true|immediate_flatline:false|cleanup_flatline:false|effective_max_hand_after:1|subroutine_prevention:0|affordable_break:false",
+                    "runner_visible_ice_damage_below_required_hand_floor|source:441|ice:c2q5|subroutine:1|damage_type:core|subroutine_damage:1|damage:2|cumulative_damage:2|cumulative_core_damage:2|hand:2|required_floor:3|below_required_floor:true|immediate_flatline:false|cleanup_flatline:false|effective_max_hand_after:1|subroutine_prevention:0|affordable_break:false",
                     "missing_coverage:ap|sentry",
                     "path_cost:0",
                     "visible_break_cost:0",
@@ -13920,7 +13920,7 @@
                     "central_access_novelty_ratio:1",
                     "path_passability:blocked_by_visible_damage_hand_buffer",
                     "runner_visible_lethal_ice_damage_blocks_run_start:r1",
-                    "runner_visible_ice_damage_below_required_hand_floor|source:441|ice:c2q5|subroutine:printed_subroutines_damage_brain_a|damage_type:core|subroutine_damage:1|damage:2|cumulative_damage:2|cumulative_core_damage:2|hand:3|required_floor:3|below_required_floor:true|immediate_flatline:false|cleanup_flatline:false|effective_max_hand_after:1|subroutine_prevention:0|affordable_break:false",
+                    "runner_visible_ice_damage_below_required_hand_floor|source:441|ice:c2q5|subroutine:1|damage_type:core|subroutine_damage:1|damage:2|cumulative_damage:2|cumulative_core_damage:2|hand:3|required_floor:3|below_required_floor:true|immediate_flatline:false|cleanup_flatline:false|effective_max_hand_after:1|subroutine_prevention:0|affordable_break:false",
                     "missing_coverage:ap|sentry",
                     "path_cost:0",
                     "visible_break_cost:0",

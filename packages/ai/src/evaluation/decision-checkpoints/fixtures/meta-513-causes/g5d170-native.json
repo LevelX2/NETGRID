@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "runner",
   "stateVersion": 169,
-  "stateHash": "fnv1a:71819ff2",
+  "stateHash": "fnv1a:c109bd5d",
   "input": {
     "matchId": "match_7a44391ed65ca88d",
     "side": "runner",
@@ -535,7 +535,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 457,
                     "sourceTitle": "Fire Wall"
@@ -585,7 +585,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 482,
                     "sourceTitle": "Sleeper"
@@ -731,13 +731,13 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 475,
                     "sourceTitle": "Reinforced Wall"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 475,
                     "sourceTitle": "Reinforced Wall"
@@ -769,7 +769,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 471,
                     "sourceTitle": "π in the 'Face"
@@ -8367,7 +8367,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 169,
-      "sideSafePlanningFingerprint": "fnv1a:0f045f3a"
+      "sideSafePlanningFingerprint": "fnv1a:60075695"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",

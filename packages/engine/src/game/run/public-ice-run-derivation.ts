@@ -68,7 +68,8 @@ export function publicIceRunSubroutineDerivation(
     );
     for (let index = 0; index < subroutineCount; index += 1) {
       appendedSubroutines.push({
-        id: `variable_ice_paid_end_the_run_${index + 1}`,
+        id: `v${index.toString(36)}`,
+        provenance: ["v", instance!.definitionId, index],
         type: "end_the_run",
       });
     }
@@ -76,7 +77,8 @@ export function publicIceRunSubroutineDerivation(
   if (relativeIce?.dynamicTraceSubroutines?.visibility === "public") {
     for (let index = 0; index < rezzedIceOutsideThisIce; index += 1) {
       appendedSubroutines.push({
-        id: `relative_ice_outside_${instance?.definitionId}.trace.${index + 1}`,
+        id: `t${index.toString(36)}`,
+        provenance: ["t", instance!.definitionId, index],
         type: "initiate_trace",
         traceLimit: relativeIce.dynamicTraceSubroutines.traceLimit,
         traceSuccessEffect:

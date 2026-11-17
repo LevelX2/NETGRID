@@ -534,7 +534,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -680,7 +680,7 @@
                 "effectiveStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions",
+                    "id": "0",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -690,7 +690,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
@@ -780,7 +780,7 @@
             "effectiveStrength": 6,
             "subroutines": [
               {
-                "id": "printed_subroutines_runner_run_lock_actions",
+                "id": "0",
                 "type": "set_runner_run_lock_actions",
                 "amount": 6,
                 "sourceDefinitionId": 459,
@@ -790,7 +790,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_end_the_run",
+                "id": "1",
                 "type": "end_the_run",
                 "sourceDefinitionId": 459,
                 "sourceTitle": "Haunting Inquisition"
@@ -5269,7 +5269,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1eq.c1eq.c1eq.c2u6.1.printed_subroutines_end_the_run.294",
+          "actionId": "runner.break_subroutine.c1eq.c1eq.c1eq.c2u6.1.1.294",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Cyfermaster™: Subroutine 2 brechen",
@@ -5311,7 +5311,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.1",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -5324,7 +5324,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "printed_subroutines_end_the_run",
+            "encounterSubroutineIds": "1",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -7522,7 +7522,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1eq.c1eq.c1eq.c2u6.1.printed_subroutines_end_the_run.294",
+        "actionId": "runner.break_subroutine.c1eq.c1eq.c1eq.c2u6.1.1.294",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Cyfermaster™: Subroutine 2 brechen",
@@ -7564,7 +7564,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+        "actionId": "runner.continue_run.1",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -7577,7 +7577,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "printed_subroutines_end_the_run",
+          "encounterSubroutineIds": "1",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -7628,7 +7628,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 162,
-      "sideSafePlanningFingerprint": "fnv1a:6a6c94d4"
+      "sideSafePlanningFingerprint": "fnv1a:b7030665"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_redline_riot_1.0.0",
@@ -14513,7 +14513,7 @@
           "sideSafePlanningFingerprint": "fnv1a:73775c3a"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.1",
           "stateVersion": 162,
           "semanticActionSetFingerprint": "fnv1a:271db005",
           "invocationKey": "fnv1a:95c4eb37"
@@ -14525,7 +14525,7 @@
         "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A159",
         "sourceStepId": "plan:runner.convert_run_window:run%3A159:convert",
-        "originalActionId": "runner.continue_run.printed_subroutines_end_the_run",
+        "originalActionId": "runner.continue_run.1",
         "selectedAtStateVersion": 162
       },
       "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Ar1",

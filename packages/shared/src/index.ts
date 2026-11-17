@@ -1,3 +1,6 @@
+import type { DamageRandomSource } from "./damage-random-source";
+export * from "./random-purpose";
+import type { RandomDrawRecord, RandomPurposeCode } from "./random-purpose";
 export {
   CORP_RESTRICTED_CREDIT_ROUTE_QUOTE_VERSION,
   type CorpRestrictedCreditConsumer,
@@ -340,8 +343,16 @@ export type SubroutineType =
   | "deflect_run"
   | "rewind_run_to_rezzed_ice_by_die";
 
+export type SubroutineProvenance =
+  | readonly ["p" | "v" | "t", CardDefinitionId, number]
+  | readonly ["a", CardDefinitionId, CardInstanceId, number, number?]
+  | readonly ["e" | "c" | "r", CardDefinitionId, CardInstanceId, number]
+  | readonly ["m", SubroutineProvenance, number];
+
 export type SubroutineDefinition = {
   id: string;
+  /** Stable internal origin, independent of its current encounter slot. */
+  provenance?: SubroutineProvenance;
   type: SubroutineType;
   amount?: number;
   derivedAmount?: {
@@ -441,7 +452,7 @@ export type TurnBoundExtraActionOffer = {
   restriction: RestrictedActionFamily;
   optional: boolean;
   dieRoll?: number;
-  randomPurpose?: string;
+  randomPurpose?: RandomPurposeCode;
   createdAtStateVersion: number;
   createdDuringTurnSerial?: number;
 };
@@ -560,7 +571,7 @@ export type ResolvedGameEffect<Id extends string | number = string> = {
   dieRoll?: number;
   dieSize?: number;
   dieRolls?: string;
-  randomPurpose?: string;
+  randomPurpose?: RandomPurposeCode;
   randomCounterAfter?: number;
   randomDamageApplied?: boolean;
   randomEffectOutcome?: string;
@@ -950,6 +961,7 @@ export type EffectCommand =
       damageType: DamageType;
       amount: number;
       source?: string;
+      randomSource: DamageRandomSource;
     }
   | { type: "remove_tag"; amount: number }
   | {
@@ -1770,7 +1782,7 @@ export type RunState = {
     sourceDefinitionId: CardDefinitionId;
     sourceTitle: string;
     targetIceId?: CardInstanceId;
-    originalSubroutineId?: string;
+    originalSubroutineProvenance?: SubroutineProvenance;
     subroutineKind: SubroutineType;
     amount?: number;
     copiedSubroutine?: SubroutineDefinition;
@@ -2065,12 +2077,6 @@ export type TraceState = {
     usableFor: "unrestricted_during_current_trace";
     returnUnusedAtTraceEnd: true;
   };
-};
-
-export type RandomDrawRecord = {
-  counter: number;
-  purpose: string;
-  value: number;
 };
 
 export type MatchEventId = number;
@@ -7259,3 +7265,4 @@ export {
   type ServerBuildInfo,
 } from "./product-version";
 export type { CorpScoreRecoveryQuote } from "./corp-score-recovery-quote";
+export { isDamageRandomSource, isSubroutineProvenance, type DamageRandomSource } from "./damage-random-source";

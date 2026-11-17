@@ -595,7 +595,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -638,7 +638,7 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_brain",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -649,7 +649,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_damage_brain_a",
+                    "id": "1",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -660,7 +660,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 492,
                     "sourceTitle": "Zombie"
@@ -768,7 +768,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -824,7 +824,7 @@
             "effectiveStrength": 4,
             "subroutines": [
               {
-                "id": "printed_subroutines_damage_brain",
+                "id": "0",
                 "type": "do_damage",
                 "amount": 1,
                 "damageType": "core",
@@ -835,7 +835,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_damage_brain_a",
+                "id": "1",
                 "type": "do_damage",
                 "amount": 1,
                 "damageType": "core",
@@ -846,7 +846,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_end_the_run",
+                "id": "2",
                 "type": "end_the_run",
                 "sourceDefinitionId": 492,
                 "sourceTitle": "Zombie"
@@ -4944,7 +4944,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_damage_brain,printed_subroutines_damage_brain_a,printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0,1,2",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -4957,7 +4957,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 3,
-            "encounterSubroutineIds": "printed_subroutines_damage_brain,printed_subroutines_damage_brain_a,printed_subroutines_end_the_run",
+            "encounterSubroutineIds": "0,1,2",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -7184,7 +7184,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_damage_brain,printed_subroutines_damage_brain_a,printed_subroutines_end_the_run",
+        "actionId": "runner.continue_run.0,1,2",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -7197,7 +7197,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 3,
-          "encounterSubroutineIds": "printed_subroutines_damage_brain,printed_subroutines_damage_brain_a,printed_subroutines_end_the_run",
+          "encounterSubroutineIds": "0,1,2",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -7248,7 +7248,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 142,
-      "sideSafePlanningFingerprint": "fnv1a:813f1942"
+      "sideSafePlanningFingerprint": "fnv1a:61ce526d"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_redline_riot_1.0.0",
@@ -13549,7 +13549,7 @@
           "sideSafePlanningFingerprint": "fnv1a:e6c3c576"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.printed_subroutines_damage_brain,printed_subroutines_damage_brain_a,printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0,1,2",
           "stateVersion": 142,
           "semanticActionSetFingerprint": "fnv1a:bc1e308a",
           "invocationKey": "fnv1a:cd52d047"
@@ -13563,7 +13563,7 @@
         "rootPlanInstanceId": "plan:runner.convert_run_window:run%3A139%3Arunner.start_run.rd.bonus_run.288",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A140",
         "sourceStepId": "plan:runner.convert_run_window:run%3A140:convert",
-        "originalActionId": "runner.continue_run.printed_subroutines_damage_brain,printed_subroutines_damage_brain_a,printed_subroutines_end_the_run",
+        "originalActionId": "runner.continue_run.0,1,2",
         "selectedAtStateVersion": 142
       }
     }

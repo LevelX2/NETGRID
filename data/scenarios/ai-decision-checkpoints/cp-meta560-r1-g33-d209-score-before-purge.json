@@ -1011,7 +1011,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 76,
                     "sourceTitle": "Datacomb"
@@ -1083,7 +1083,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -1131,7 +1131,7 @@
                   "encounterStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 450,
                       "sourceTitle": "Data Wall 2.0"
@@ -1383,13 +1383,13 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_a",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 15,
                     "sourceTitle": "Glacier"
                   },
                   {
-                    "id": "subroutine_end_run_b",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 15,
                     "sourceTitle": "Glacier"
@@ -1431,7 +1431,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_prohibit_break_and_jack_out_next_ice",
+                    "id": "0",
                     "type": "set_next_encounter_lock",
                     "breakTags": [
                       "stun"
@@ -1477,25 +1477,25 @@
                 "encounterStrength": 7,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_a",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 99,
                     "sourceTitle": "Toughonium™ Wall"
                   },
                   {
-                    "id": "subroutine_end_run_b",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 99,
                     "sourceTitle": "Toughonium™ Wall"
                   },
                   {
-                    "id": "subroutine_end_run_c",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 99,
                     "sourceTitle": "Toughonium™ Wall"
                   },
                   {
-                    "id": "subroutine_end_run_d",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 99,
                     "sourceTitle": "Toughonium™ Wall"
@@ -8207,7 +8207,7 @@
             "postInstallRezQuoteCardId": "c2s6",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 208,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8244,7 +8244,7 @@
             "postInstallRezQuoteCardId": "c2s6",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}],\"breakSubroutineAdditionalCostPerSubroutine\":1,\"breakSubroutineCostSourceDefinitionIds\":[567],\"breakSubroutineCostSourceTitles\":[\"Crystal Palace Station Grid\"]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}],\"breakSubroutineAdditionalCostPerSubroutine\":1,\"breakSubroutineCostSourceDefinitionIds\":[567],\"breakSubroutineCostSourceTitles\":[\"Crystal Palace Station Grid\"]}",
             "postInstallRezQuoteExpiresAtStateVersion": 208,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8280,7 +8280,7 @@
             "postInstallRezQuoteCardId": "c2s6",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 208,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8312,7 +8312,7 @@
             "postInstallRezQuoteCardId": "cgd",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cgd\",\"iceDefinitionId\":73,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"subroutine_trash_program_a\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_b\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_c\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cgd\",\"iceDefinitionId\":73,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"},{\"id\":\"4\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 208,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8349,7 +8349,7 @@
             "postInstallRezQuoteCardId": "cgd",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cgd\",\"iceDefinitionId\":73,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"subroutine_trash_program_a\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_b\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_c\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"}],\"breakSubroutineAdditionalCostPerSubroutine\":1,\"breakSubroutineCostSourceDefinitionIds\":[567],\"breakSubroutineCostSourceTitles\":[\"Crystal Palace Station Grid\"]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cgd\",\"iceDefinitionId\":73,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"},{\"id\":\"4\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"}],\"breakSubroutineAdditionalCostPerSubroutine\":1,\"breakSubroutineCostSourceDefinitionIds\":[567],\"breakSubroutineCostSourceTitles\":[\"Crystal Palace Station Grid\"]}",
             "postInstallRezQuoteExpiresAtStateVersion": 208,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8385,7 +8385,7 @@
             "postInstallRezQuoteCardId": "cgd",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cgd\",\"iceDefinitionId\":73,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"subroutine_trash_program_a\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_b\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_c\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cgd\",\"iceDefinitionId\":73,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"},{\"id\":\"4\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 208,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11149,7 +11149,7 @@
           "postInstallRezQuoteCardId": "c2s6",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 208,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11186,7 +11186,7 @@
           "postInstallRezQuoteCardId": "c2s6",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}],\"breakSubroutineAdditionalCostPerSubroutine\":1,\"breakSubroutineCostSourceDefinitionIds\":[567],\"breakSubroutineCostSourceTitles\":[\"Crystal Palace Station Grid\"]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}],\"breakSubroutineAdditionalCostPerSubroutine\":1,\"breakSubroutineCostSourceDefinitionIds\":[567],\"breakSubroutineCostSourceTitles\":[\"Crystal Palace Station Grid\"]}",
           "postInstallRezQuoteExpiresAtStateVersion": 208,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11222,7 +11222,7 @@
           "postInstallRezQuoteCardId": "c2s6",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":1,\"encounterStrength\":1,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 208,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11254,7 +11254,7 @@
           "postInstallRezQuoteCardId": "cgd",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cgd\",\"iceDefinitionId\":73,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"subroutine_trash_program_a\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_b\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_c\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cgd\",\"iceDefinitionId\":73,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"},{\"id\":\"4\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 208,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11291,7 +11291,7 @@
           "postInstallRezQuoteCardId": "cgd",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cgd\",\"iceDefinitionId\":73,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"subroutine_trash_program_a\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_b\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_c\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"}],\"breakSubroutineAdditionalCostPerSubroutine\":1,\"breakSubroutineCostSourceDefinitionIds\":[567],\"breakSubroutineCostSourceTitles\":[\"Crystal Palace Station Grid\"]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cgd\",\"iceDefinitionId\":73,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"},{\"id\":\"4\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"}],\"breakSubroutineAdditionalCostPerSubroutine\":1,\"breakSubroutineCostSourceDefinitionIds\":[567],\"breakSubroutineCostSourceTitles\":[\"Crystal Palace Station Grid\"]}",
           "postInstallRezQuoteExpiresAtStateVersion": 208,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11327,7 +11327,7 @@
           "postInstallRezQuoteCardId": "cgd",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cgd\",\"iceDefinitionId\":73,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"subroutine_trash_program_a\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_b\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trash_program_c\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cgd\",\"iceDefinitionId\":73,\"effectiveStrength\":6,\"encounterStrength\":6,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"2\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"3\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"},{\"id\":\"4\",\"type\":\"end_the_run\",\"sourceDefinitionId\":73,\"sourceTitle\":\"Colonel Failure\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 208,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11471,7 +11471,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 208,
-      "sideSafePlanningFingerprint": "fnv1a:7c42c226"
+      "sideSafePlanningFingerprint": "fnv1a:d66f2de1"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_dr_dreffs_letzte_visite_1.3.0",

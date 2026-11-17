@@ -9,7 +9,7 @@ import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfol
 describe("match 978d Corp remediation checkpoints", () => {
   it("rezzes exact persistent ICE before a visible matchpoint agenda despite an unfavorable first-run exchange", () => {
     const result = runAiDecisionCheckpoint(
-      matchpointWallRezJson as AiDecisionCheckpointV1,
+      matchpointWallRezJson as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
@@ -24,7 +24,7 @@ describe("match 978d Corp remediation checkpoints", () => {
   it("defers qualitative score protection on the last click and develops liquidity", () => {
     const checkpoint = structuredClone(
       noLastClickDefenseDrawJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     checkpoint.expectation.planExecution = {
       acceptablePlanKinds: ["corp.economy"],
       acceptableCapabilities: ["develop_or_convert_corp_economy"],

@@ -277,7 +277,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 90,
@@ -322,7 +322,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
@@ -396,7 +396,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 473,
                     "sourceTitle": "Quandary"
@@ -4247,7 +4247,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 52,
-      "sideSafePlanningFingerprint": "fnv1a:4c11cf60"
+      "sideSafePlanningFingerprint": "fnv1a:aaeb9949"
     },
     "observedTurnPlanAction": {
       "matchId": "match_0c0deeea8d0e4683",

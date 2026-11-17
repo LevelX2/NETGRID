@@ -6,7 +6,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("corp Highlighter R&D defense checkpoint", () => {
   it("purges a critical visible R&D multiaccess threat", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(checkpointJson) as AiDecisionCheckpointV1,
+      structuredClone(checkpointJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, result.message).toBe(true);

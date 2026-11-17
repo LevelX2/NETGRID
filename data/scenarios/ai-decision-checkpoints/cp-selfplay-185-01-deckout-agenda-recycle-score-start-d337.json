@@ -1112,7 +1112,7 @@
                   "effectiveStrength": 4,
                   "subroutines": [
                     {
-                      "id": "card_implementation.89.additional_subroutine.1.repeat.1.end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 89,
                       "sourceTitle": "Minotaur",
@@ -1168,7 +1168,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "runFutureStrengthCancelPaymentAmount": 2,
@@ -1216,7 +1216,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_brain_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -1227,7 +1227,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 88,
                     "sourceTitle": "Mastermind"
@@ -1266,7 +1266,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 90,
@@ -1365,7 +1365,7 @@
                   "effectiveStrength": 0,
                   "subroutines": [
                     {
-                      "id": "subroutine_relative_net_damage",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 0,
                       "damageType": "net",
@@ -1376,7 +1376,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_end_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 79,
                       "sourceTitle": "Dog Pile"
@@ -1514,7 +1514,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_brain_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -1525,7 +1525,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 88,
                     "sourceTitle": "Mastermind"
@@ -1565,7 +1565,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "runFutureStrengthCancelPaymentAmount": 2,
@@ -2125,7 +2125,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "net",
@@ -2136,7 +2136,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 79,
                     "sourceTitle": "Dog Pile"
@@ -14429,7 +14429,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 336,
-      "sideSafePlanningFingerprint": "fnv1a:9e485292"
+      "sideSafePlanningFingerprint": "fnv1a:0ea7c9ad"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_salazar_toll_road_1.1.0",

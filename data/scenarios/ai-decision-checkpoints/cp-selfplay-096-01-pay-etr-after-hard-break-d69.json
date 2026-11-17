@@ -276,13 +276,13 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 491,
                     "sourceTitle": "Wall of Static"
                   },
                   {
-                    "id": "card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
+                    "id": "1",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 582,
@@ -337,7 +337,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -2279,7 +2279,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.cuz.cuz.cuz.c31a.0.printed_subroutines_end_the_run.188",
+          "actionId": "runner.break_subroutine.cuz.cuz.cuz.c31a.0.0.188",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Boring Bit: Subroutine 1 brechen",
@@ -2321,7 +2321,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.cuz.cuz.cuz.c31a.1.card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays.188",
+          "actionId": "runner.break_subroutine.cuz.cuz.cuz.c31a.1.1.188",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Boring Bit: Subroutine 2 brechen",
@@ -2363,7 +2363,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run,card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
+          "actionId": "runner.continue_run.0,1",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -4183,7 +4183,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.cuz.cuz.cuz.c31a.0.printed_subroutines_end_the_run.188",
+        "actionId": "runner.break_subroutine.cuz.cuz.cuz.c31a.0.0.188",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Boring Bit: Subroutine 1 brechen",
@@ -4225,7 +4225,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.cuz.cuz.cuz.c31a.1.card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays.188",
+        "actionId": "runner.break_subroutine.cuz.cuz.cuz.c31a.1.1.188",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Boring Bit: Subroutine 2 brechen",
@@ -4267,7 +4267,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_end_the_run,card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
+        "actionId": "runner.continue_run.0,1",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -4329,7 +4329,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 68,
-      "sideSafePlanningFingerprint": "fnv1a:8729cf3b"
+      "sideSafePlanningFingerprint": "fnv1a:fe04af96"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_mit_ansage_der_perfekte_coup_2026_07_09_1.0.0",
@@ -10266,7 +10266,7 @@
           "sideSafePlanningFingerprint": "fnv1a:ede3ab50"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.printed_subroutines_end_the_run,card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
+          "actionId": "runner.continue_run.0,1",
           "stateVersion": 68,
           "semanticActionSetFingerprint": "fnv1a:7b881fa2",
           "invocationKey": "fnv1a:ba52e748"

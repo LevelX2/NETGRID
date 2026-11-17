@@ -226,7 +226,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -277,7 +277,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 435,
                     "sourceTitle": "Banpei",
@@ -286,7 +286,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 435,
                     "sourceTitle": "Banpei"
@@ -342,7 +342,7 @@
             "effectiveStrength": 0,
             "subroutines": [
               {
-                "id": "printed_subroutines_trash_program",
+                "id": "0",
                 "type": "trash_installed_program",
                 "sourceDefinitionId": 435,
                 "sourceTitle": "Banpei",
@@ -351,7 +351,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_end_the_run",
+                "id": "1",
                 "type": "end_the_run",
                 "sourceDefinitionId": 435,
                 "sourceTitle": "Banpei"
@@ -1270,7 +1270,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.0.printed_subroutines_trash_program.328",
+          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.0.0.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine 1 brechen",
@@ -1312,7 +1312,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.1.printed_subroutines_end_the_run.328",
+          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.1.1.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine 2 brechen",
@@ -1354,7 +1354,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_trash_program,printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0,1",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -1367,7 +1367,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 2,
-            "encounterSubroutineIds": "printed_subroutines_trash_program,printed_subroutines_end_the_run",
+            "encounterSubroutineIds": "0,1",
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
             "abilityFamily": "run-access",
@@ -2260,7 +2260,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.0.printed_subroutines_trash_program.328",
+        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.0.0.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine 1 brechen",
@@ -2302,7 +2302,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.1.printed_subroutines_end_the_run.328",
+        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ot.1.1.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine 2 brechen",
@@ -2344,7 +2344,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_trash_program,printed_subroutines_end_the_run",
+        "actionId": "runner.continue_run.0,1",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -2357,7 +2357,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 2,
-          "encounterSubroutineIds": "printed_subroutines_trash_program,printed_subroutines_end_the_run",
+          "encounterSubroutineIds": "0,1",
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
           "abilityFamily": "run-access",
@@ -2407,7 +2407,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 31,
-      "sideSafePlanningFingerprint": "fnv1a:8dfc0033"
+      "sideSafePlanningFingerprint": "fnv1a:58720216"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -8599,7 +8599,7 @@
           "sideSafePlanningFingerprint": "fnv1a:747482ab"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.printed_subroutines_trash_program,printed_subroutines_end_the_run",
+          "actionId": "runner.continue_run.0,1",
           "stateVersion": 31,
           "semanticActionSetFingerprint": "fnv1a:fb647a0f",
           "invocationKey": "fnv1a:d01d3102"
@@ -8613,7 +8613,7 @@
         "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A29",
         "sourceStepId": "plan:runner.convert_run_window:run%3A29:convert",
-        "originalActionId": "runner.continue_run.printed_subroutines_trash_program,printed_subroutines_end_the_run",
+        "originalActionId": "runner.continue_run.0,1",
         "selectedAtStateVersion": 31
       }
     }

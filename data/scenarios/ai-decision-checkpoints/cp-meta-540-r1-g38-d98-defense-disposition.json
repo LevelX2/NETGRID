@@ -457,7 +457,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 3,
                     "damageType": "net",
@@ -468,7 +468,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 446,
                     "sourceTitle": "Data Darts",
@@ -517,7 +517,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_damage_net",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 3,
                     "damageType": "net",
@@ -528,7 +528,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 446,
                     "sourceTitle": "Data Darts",
@@ -6187,7 +6187,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 97,
-      "sideSafePlanningFingerprint": "fnv1a:6fd30754"
+      "sideSafePlanningFingerprint": "fnv1a:57766e8a"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_prep_economy_pressure_2026_07_01_1.0.0",

@@ -552,14 +552,14 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 96,
                     "sourceTitle": "Snowbank"
                   },
                   {
-                    "id": "card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
+                    "id": "1",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 582,
@@ -604,7 +604,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_brain_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "core",
@@ -615,13 +615,13 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 88,
                     "sourceTitle": "Mastermind"
                   },
                   {
-                    "id": "card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays",
+                    "id": "2",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 582,
@@ -687,7 +687,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "net",
@@ -698,7 +698,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 79,
                     "sourceTitle": "Dog Pile"
@@ -845,7 +845,7 @@
                   "encounterStrength": 1,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_unless_runner_pays_one",
+                      "id": "0",
                       "type": "end_the_run_unless_runner_pays",
                       "amount": 1,
                       "sourceDefinitionId": 90,
@@ -915,7 +915,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "subroutine_relative_net_damage",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 0,
                       "damageType": "net",
@@ -926,7 +926,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_end_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 79,
                       "sourceTitle": "Dog Pile"
@@ -4466,7 +4466,7 @@
             "postInstallRezQuoteCardId": "cjx",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cjx\",\"iceDefinitionId\":89,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":582,\"sourceTitle\":\"Tesseract Fort Construction\",\"dynamicSourceKind\":\"additional_subroutine\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cjx\",\"iceDefinitionId\":89,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":582,\"sourceTitle\":\"Tesseract Fort Construction\",\"dynamicSourceKind\":\"additional_subroutine\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 111,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -4820,7 +4820,7 @@
             "postInstallRezQuoteCardId": "cn1",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_trash_program_unless_runner_pays_one\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 111,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -4857,7 +4857,7 @@
             "postInstallRezQuoteCardId": "cn1",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_trash_program_unless_runner_pays_one\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"},{\"id\":\"card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":582,\"sourceTitle\":\"Tesseract Fort Construction\",\"dynamicSourceKind\":\"additional_subroutine\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"},{\"id\":\"1\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":582,\"sourceTitle\":\"Tesseract Fort Construction\",\"dynamicSourceKind\":\"additional_subroutine\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 111,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -4894,7 +4894,7 @@
             "postInstallRezQuoteCardId": "cn1",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_trash_program_unless_runner_pays_one\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 111,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -4930,7 +4930,7 @@
             "postInstallRezQuoteCardId": "cn1",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_trash_program_unless_runner_pays_one\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 111,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -4967,7 +4967,7 @@
             "postInstallRezQuoteCardId": "cn1",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_trash_program_unless_runner_pays_one\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 111,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -7552,7 +7552,7 @@
           "postInstallRezQuoteCardId": "cjx",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cjx\",\"iceDefinitionId\":89,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":582,\"sourceTitle\":\"Tesseract Fort Construction\",\"dynamicSourceKind\":\"additional_subroutine\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cjx\",\"iceDefinitionId\":89,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":582,\"sourceTitle\":\"Tesseract Fort Construction\",\"dynamicSourceKind\":\"additional_subroutine\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 111,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -7906,7 +7906,7 @@
           "postInstallRezQuoteCardId": "cn1",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_trash_program_unless_runner_pays_one\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 111,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -7943,7 +7943,7 @@
           "postInstallRezQuoteCardId": "cn1",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_trash_program_unless_runner_pays_one\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"},{\"id\":\"card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":582,\"sourceTitle\":\"Tesseract Fort Construction\",\"dynamicSourceKind\":\"additional_subroutine\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"},{\"id\":\"1\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":582,\"sourceTitle\":\"Tesseract Fort Construction\",\"dynamicSourceKind\":\"additional_subroutine\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 111,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -7980,7 +7980,7 @@
           "postInstallRezQuoteCardId": "cn1",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_trash_program_unless_runner_pays_one\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 111,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8016,7 +8016,7 @@
           "postInstallRezQuoteCardId": "cn1",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_trash_program_unless_runner_pays_one\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 111,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8053,7 +8053,7 @@
           "postInstallRezQuoteCardId": "cn1",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"subroutine_trash_program_unless_runner_pays_one\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cn1\",\"iceDefinitionId\":103,\"effectiveStrength\":0,\"encounterStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":103,\"sourceTitle\":\"Washed-Up Solo Construct\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 111,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8175,7 +8175,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 111,
-      "sideSafePlanningFingerprint": "fnv1a:da6174fb"
+      "sideSafePlanningFingerprint": "fnv1a:cbb88f33"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_salazar_toll_road_1.1.0",

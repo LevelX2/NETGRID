@@ -126,6 +126,7 @@ export function createTurnEndRuntimeResolvers(
         damageType: effect.damageType,
         amount: effect.amount,
         source: `runner_end:${effect.sourceDefinitionId}:${effect.sourceCardInstanceId}`,
+        randomSource: ["c", effect.sourceDefinitionId, effect.sourceCardInstanceId],
       }),
     }));
     const totalDamage = damageSummaries.reduce(

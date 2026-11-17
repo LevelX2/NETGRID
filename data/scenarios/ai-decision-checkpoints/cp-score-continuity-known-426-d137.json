@@ -557,13 +557,13 @@
                 "effectiveStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 475,
                     "sourceTitle": "Reinforced Wall"
                   },
                   {
-                    "id": "printed_subroutines_end_the_run_a",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 475,
                     "sourceTitle": "Reinforced Wall"
@@ -610,13 +610,13 @@
                   "effectiveStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 451,
                       "sourceTitle": "Endless Corridor"
                     },
                     {
-                      "id": "printed_subroutines_end_the_run_a",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 451,
                       "sourceTitle": "Endless Corridor"
@@ -677,7 +677,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
@@ -861,7 +861,7 @@
                   "effectiveStrength": 6,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_damage_net",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 2,
                       "damageType": "net",
@@ -872,7 +872,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_damage_net_a",
+                      "id": "1",
                       "type": "do_damage",
                       "amount": 2,
                       "damageType": "net",
@@ -883,13 +883,13 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "2",
                       "type": "end_the_run",
                       "sourceDefinitionId": 490,
                       "sourceTitle": "Wall of Ice"
                     },
                     {
-                      "id": "printed_subroutines_end_the_run_a",
+                      "id": "3",
                       "type": "end_the_run",
                       "sourceDefinitionId": 490,
                       "sourceTitle": "Wall of Ice"
@@ -950,7 +950,7 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 477,
                     "sourceTitle": "Rock Is Strong"
@@ -7804,7 +7804,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 136,
-      "sideSafePlanningFingerprint": "fnv1a:786f1d97"
+      "sideSafePlanningFingerprint": "fnv1a:7fff2a1b"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_ivory_bastion_1.1.0",

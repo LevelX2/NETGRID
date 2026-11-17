@@ -115,7 +115,7 @@ describe("match e8047b3e Runner remediation checkpoints", () => {
     expect(snowballPump).toBeDefined();
 
     expect(decision).toMatchObject({
-      actionId: "runner.continue_run.printed_subroutines_trace",
+      actionId: "runner.continue_run.0",
       fallbackUsed: false,
       decisionDebug: {
         planKind: "runner.convert_run_window",

@@ -409,7 +409,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 449,
                       "sourceTitle": "Data Wall"
@@ -481,7 +481,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_run_and_runner_forgoes_next_action",
+                      "id": "0",
                       "type": "end_the_run_and_runner_forgoes_next_action",
                       "breakTags": [
                         "knockout"
@@ -550,7 +550,7 @@
                   "encounterStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 482,
                       "sourceTitle": "Sleeper"
@@ -669,7 +669,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -3182,7 +3182,7 @@
             "postInstallRezQuoteCardId": "c2r1",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 82,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3219,7 +3219,7 @@
             "postInstallRezQuoteCardId": "c2r1",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 82,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3256,7 +3256,7 @@
             "postInstallRezQuoteCardId": "c2r1",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 82,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3292,7 +3292,7 @@
             "postInstallRezQuoteCardId": "c2r1",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 82,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3329,7 +3329,7 @@
             "postInstallRezQuoteCardId": "c2r1",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 82,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -5805,7 +5805,7 @@
           "postInstallRezQuoteCardId": "c2r1",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 82,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -5842,7 +5842,7 @@
           "postInstallRezQuoteCardId": "c2r1",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 82,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -5879,7 +5879,7 @@
           "postInstallRezQuoteCardId": "c2r1",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 82,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -5915,7 +5915,7 @@
           "postInstallRezQuoteCardId": "c2r1",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 82,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -5952,7 +5952,7 @@
           "postInstallRezQuoteCardId": "c2r1",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_trash_program\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2r1\",\"iceDefinitionId\":445,\"effectiveStrength\":2,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"trash_installed_program\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":445,\"sourceTitle\":\"D'Arc Knight\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 82,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -6135,7 +6135,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 82,
-      "sideSafePlanningFingerprint": "fnv1a:be50097c"
+      "sideSafePlanningFingerprint": "fnv1a:6cb5b051"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_cheap_bag_tricks_1.0.0",

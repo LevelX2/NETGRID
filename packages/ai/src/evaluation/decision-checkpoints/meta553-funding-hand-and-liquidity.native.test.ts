@@ -1,3 +1,4 @@
+import { applyPostSetupDeckOrder, type PostSetupDeckOrder } from "./post-setup-deck-order.test-support";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -51,6 +52,7 @@ function fixture() {
       runnerDeckSnapshot: DeckSnapshot;
       corpDeckSnapshot: DeckSnapshot;
       prefixActions: RecordedAction[];
+      setupArrangement: PostSetupDeckOrder;
       originalContinuation: RecordedAction[];
     };
   };
@@ -179,7 +181,7 @@ describe("native equivalent funding and independent finite liquidity", () => {
     expect(negative.routeActionIds).toEqual([]);
     expect(negative.routeAssessment.status).toBe("uncovered");
   });
-  it("uses the exact native engine prefix and survives the same subsequently revealed Net4", () => {
+  it("replays the authored scene and survives the subsequently revealed Net4", () => {
     const f = fixture(),
       g = f.game4,
       n = capture("cruising"),
@@ -213,7 +215,10 @@ describe("native equivalent funding and independent finite liquidity", () => {
       runnerDeckMetadata: g.runnerDeckSnapshot.publicMetadata!,
       corpDeckMetadata: g.corpDeckSnapshot.publicMetadata!,
     });
-    for (const a of g.prefixActions) state = advance(state, a);
+    for (const [index, action] of g.prefixActions.entries()) {
+      state = advance(state, action);
+      if (index === 1) applyPostSetupDeckOrder(state, g.setupArrangement);
+    }
     expect(hashState(state)).toBe(n.stateHash);
     const original = structuredClone(state),
       { action } = decide(n);

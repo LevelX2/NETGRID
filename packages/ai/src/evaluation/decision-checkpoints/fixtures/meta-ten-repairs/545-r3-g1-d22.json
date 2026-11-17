@@ -230,7 +230,7 @@
                   "encounterStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 450,
                       "sourceTitle": "Data Wall 2.0"
@@ -301,7 +301,7 @@
                   "encounterStrength": 3,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_trace",
+                      "id": "0",
                       "type": "initiate_trace",
                       "traceLimit": 3,
                       "traceSuccessEffect": {
@@ -1174,7 +1174,7 @@
             "postInstallRezQuoteCardId": "c2ol",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 21,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -1211,7 +1211,7 @@
             "postInstallRezQuoteCardId": "c2ol",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 21,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -1248,7 +1248,7 @@
             "postInstallRezQuoteCardId": "c2ol",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 21,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -1284,7 +1284,7 @@
             "postInstallRezQuoteCardId": "c2ol",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 21,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -2064,7 +2064,7 @@
           "postInstallRezQuoteCardId": "c2ol",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 21,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -2101,7 +2101,7 @@
           "postInstallRezQuoteCardId": "c2ol",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 21,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -2138,7 +2138,7 @@
           "postInstallRezQuoteCardId": "c2ol",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 21,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -2174,7 +2174,7 @@
           "postInstallRezQuoteCardId": "c2ol",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_run_duration_encounter_cost_or_end_run\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2ol\",\"iceDefinitionId\":434,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"set_run_encounter_tax\",\"amount\":2,\"sourceDefinitionId\":434,\"sourceTitle\":\"Ball and Chain\",\"unbrokenRunEffect\":{\"addsFutureEncounterCost\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 21,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -2240,7 +2240,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 21,
-      "sideSafePlanningFingerprint": "fnv1a:b7d39ce5"
+      "sideSafePlanningFingerprint": "fnv1a:82f997e9"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_cheap_bag_tricks_1.0.0",

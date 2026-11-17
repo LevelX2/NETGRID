@@ -8,7 +8,7 @@ describe("All-Nighter restricted run-window plan-first coverage", () => {
   it("keeps the captured Engine window bound to its exact profitable bonus-run target", () => {
     const checkpoint = structuredClone(
       allNighterJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
 
     expect(checkpoint.expectation).toMatchObject({
       acceptableActions: [

@@ -15,7 +15,7 @@ import { creditBankFundsKnownUrgentRun } from "./credit-bank-known-run-funding";
 import { runnerCreditBankRunFundingClickCapacity } from "./credit-bank-basic-run-funding";
 
 function params() {
-  const fixture = structuredClone(cp) as AiDecisionCheckpointV1;
+  const fixture = structuredClone(cp) as unknown as AiDecisionCheckpointV1;
   const state = fixture.engine.testOnlyGameState;
   state.eventLog = structuredClone(fixture.engine.eventPrefix);
   const input = buildAiDecisionInput(state, "runner", {

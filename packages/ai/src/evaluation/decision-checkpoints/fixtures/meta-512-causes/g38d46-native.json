@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "corp",
   "stateVersion": 45,
-  "stateHash": "fnv1a:1ce10ac2",
+  "stateHash": "fnv1a:47962bdd",
   "input": {
     "matchId": "match_768706f9c0e7770f",
     "side": "corp",
@@ -324,7 +324,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 473,
                       "sourceTitle": "Quandary"
@@ -3016,7 +3016,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 45,
-      "sideSafePlanningFingerprint": "fnv1a:c8429737"
+      "sideSafePlanningFingerprint": "fnv1a:346c52f9"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_siren_fortress_1.1.0",

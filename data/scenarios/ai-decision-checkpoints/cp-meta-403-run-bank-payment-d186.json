@@ -448,7 +448,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 478,
                     "sourceTitle": "Scramble"
@@ -498,7 +498,7 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                    "id": "0",
                     "type": "set_run_encounter_tax",
                     "amount": 2,
                     "sourceDefinitionId": 434,
@@ -532,7 +532,7 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                    "id": "0",
                     "type": "set_run_encounter_tax",
                     "amount": 2,
                     "sourceDefinitionId": 434,
@@ -623,7 +623,7 @@
                 "effectiveStrength": 1,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 450,
                     "sourceTitle": "Data Wall 2.0"
@@ -653,7 +653,7 @@
                 "effectiveStrength": 6,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_runner_run_lock_actions",
+                    "id": "0",
                     "type": "set_runner_run_lock_actions",
                     "amount": 6,
                     "sourceDefinitionId": 459,
@@ -663,7 +663,7 @@
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 459,
                     "sourceTitle": "Haunting Inquisition"
@@ -729,7 +729,7 @@
             "effectiveStrength": 6,
             "subroutines": [
               {
-                "id": "printed_subroutines_runner_run_lock_actions",
+                "id": "0",
                 "type": "set_runner_run_lock_actions",
                 "amount": 6,
                 "sourceDefinitionId": 459,
@@ -739,7 +739,7 @@
                 }
               },
               {
-                "id": "printed_subroutines_end_the_run",
+                "id": "1",
                 "type": "end_the_run",
                 "sourceDefinitionId": 459,
                 "sourceTitle": "Haunting Inquisition"
@@ -5510,7 +5510,7 @@
             "targetIceDefinitionId": 459,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 183,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.1.printed_subroutines_end_the_run.328",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.1.1.328",
             "targets": {
               "targetIceDefinitionId": 459
             },
@@ -5559,7 +5559,7 @@
             "targetIceDefinitionId": 459,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 185,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.printed_subroutines_runner_run_lock_actions.328",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.0.328",
             "targets": {
               "targetIceDefinitionId": 459
             },
@@ -5591,7 +5591,7 @@
           "expiresAtStateVersion": 185,
           "payload": {
             "costPenaltySupportWindowId": 185,
-            "costPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.printed_subroutines_runner_run_lock_actions.328",
+            "costPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.0.328",
             "effectKind": "gain_credits",
             "cardImplementationTrashSourceCost": true,
             "cardId": "c16h",
@@ -5602,7 +5602,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.printed_subroutines_runner_run_lock_actions.328",
+          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.0.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Ohne weiteren Bank-Support fortfahren: Krash: Subroutine 1 brechen",
@@ -7626,7 +7626,7 @@
           "targetIceDefinitionId": 459,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 183,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.1.printed_subroutines_end_the_run.328",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.1.1.328",
           "targets": {
             "targetIceDefinitionId": 459
           },
@@ -7675,7 +7675,7 @@
           "targetIceDefinitionId": 459,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 185,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.printed_subroutines_runner_run_lock_actions.328",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.0.328",
           "targets": {
             "targetIceDefinitionId": 459
           },
@@ -7707,7 +7707,7 @@
         "expiresAtStateVersion": 185,
         "payload": {
           "costPenaltySupportWindowId": 185,
-          "costPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.printed_subroutines_runner_run_lock_actions.328",
+          "costPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.0.328",
           "effectKind": "gain_credits",
           "cardImplementationTrashSourceCost": true,
           "cardId": "c16h",
@@ -7718,7 +7718,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.printed_subroutines_runner_run_lock_actions.328",
+        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.0.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Ohne weiteren Bank-Support fortfahren: Krash: Subroutine 1 brechen",
@@ -7804,7 +7804,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 185,
-      "sideSafePlanningFingerprint": "fnv1a:eaa8baed"
+      "sideSafePlanningFingerprint": "fnv1a:d313adb4"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -13957,7 +13957,7 @@
           "sideSafePlanningFingerprint": "fnv1a:61b357fd"
         },
         "currentBinding": {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.printed_subroutines_runner_run_lock_actions.328",
+          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.0.328",
           "stateVersion": 184,
           "semanticActionSetFingerprint": "fnv1a:e99411f7",
           "invocationKey": "fnv1a:4361b270"
@@ -13969,7 +13969,7 @@
         "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A168",
         "sourceStepId": "plan:runner.convert_run_window:run%3A168:convert",
-        "originalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.printed_subroutines_runner_run_lock_actions.328",
+        "originalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2u5.0.0.328",
         "selectedAtStateVersion": 184
       },
       "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Ar1",

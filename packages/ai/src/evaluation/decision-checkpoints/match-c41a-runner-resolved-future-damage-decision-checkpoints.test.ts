@@ -7,7 +7,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match c41a runner resolved future damage decision checkpoint", () => {
   it("jacks out under the existing remote contest plan after the source resolves", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(resolvedFutureDamageJson) as AiDecisionCheckpointV1,
+      structuredClone(resolvedFutureDamageJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);

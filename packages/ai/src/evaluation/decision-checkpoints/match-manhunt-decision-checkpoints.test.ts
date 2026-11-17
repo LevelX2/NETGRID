@@ -226,7 +226,7 @@ const KILL_LINE_DEFINITION_IDS = new Set([
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
   const checkpoint = bindHistoricalRunEventCadence(
-    structuredClone(value) as AiDecisionCheckpointV1,
+    structuredClone(value) as unknown as AiDecisionCheckpointV1,
   );
   if (value === cp05Json)
     checkpoint.expectation = campaignDevelopmentExpectation();
@@ -235,7 +235,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
 
 function campaignDevelopmentExpectation(): AiDecisionCheckpointV1["expectation"] {
   return {
-    ...(structuredClone(cp05Json) as AiDecisionCheckpointV1).expectation,
+    ...(structuredClone(cp05Json) as unknown as AiDecisionCheckpointV1).expectation,
     acceptableActions: [
       {
         actionId:

@@ -122,9 +122,9 @@ describe("meta 403 round 5 exact owner regressions", () => {
         (a) => a.type === "continue_run",
       )!;
       continuation.actionId =
-        "runner.continue_run.printed_subroutines_end_the_run";
+        "runner.continue_run.1";
       Object.assign(continuation.payload!, {
-        encounterSubroutineIds: "printed_subroutines_end_the_run",
+        encounterSubroutineIds: "1",
         unbrokenSubroutineCount: 1,
       });
       capture.input.playerView.legalActions = structuredClone(

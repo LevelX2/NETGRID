@@ -55,6 +55,7 @@ describe("damage core", () => {
       damageType: "net",
       amount: 1,
       source: "test",
+      randomSource: ["g", 0] as const,
     });
 
     expect(summary).toEqual({
@@ -99,21 +100,21 @@ describe("damage core", () => {
       actionFor("corp", "play_operation"),
       "net",
       1,
-      "source_def",
+      syntheticCardDefinitionId("source_def"),
     );
     resolveDamageOperation(
       right,
       actionFor("corp", "play_operation"),
       "net",
       1,
-      "source_def",
+      syntheticCardDefinitionId("source_def"),
     );
 
     expect(left.runner.heap).toEqual(right.runner.heap);
     expect(left.randomDrawRecords).toEqual(right.randomDrawRecords);
-    expect(left.randomDrawRecords.at(-1)?.purpose).toBe(
-      "damage:damage.1.source_def:net:operation:source_def:1:selection:0",
-    );
+    expect(left.randomDrawRecords.at(-1)?.purpose).toEqual([
+      11, 0, ["c", syntheticCardDefinitionId("source_def")], 1, 0,
+    ]);
   });
 
   it("binds resolved damage to the runner action that created its event", () => {
@@ -135,6 +136,7 @@ describe("damage core", () => {
       damageType: "net",
       amount: 1,
       source: "test",
+      randomSource: ["g", 0] as const,
     });
 
     delete state.runnerTurnFlags.currentRunnerActionOrdinal;
@@ -164,6 +166,7 @@ describe("damage core", () => {
       damageType: "net",
       amount: 1,
       source: "test",
+      randomSource: ["g", 0] as const,
     });
 
     expect(state.runnerTurnFlags.lastDamageRunnerActionOrdinal).toBeUndefined();
@@ -192,6 +195,7 @@ describe("damage core", () => {
       damageType: "net",
       amount: 1,
       source: "test",
+      randomSource: ["g", 0] as const,
     });
 
     expect(state.runnerTurnFlags.lastDamageRunnerActionOrdinal).toBe(7);
@@ -209,6 +213,7 @@ describe("damage core", () => {
       damageType: "net",
       amount: 1,
       source: "test",
+      randomSource: ["g", 0] as const,
     });
 
     resolveDamageImminentEvent(state, {
@@ -229,6 +234,7 @@ describe("damage core", () => {
       damageType: "meat",
       amount: 1,
       source: "test",
+      randomSource: ["g", 0] as const,
     });
 
     expect(summary).toMatchObject({
@@ -260,7 +266,7 @@ describe("damage core", () => {
       configureDamageCoreHost(testHost());
       const action = actionFor("corp", "play_operation");
 
-      resolveDamageOperation(state, action, damageType, 5, "terminal_source");
+      resolveDamageOperation(state, action, damageType, 5, syntheticCardDefinitionId("terminal_source"));
 
       expect(state.winner).toBe("corp");
       expect(state.gameEndReason).toBe("flatline");
@@ -291,7 +297,7 @@ describe("damage core", () => {
     configureDamageCoreHost(testHost());
     const action = actionFor("corp", "play_operation");
 
-    resolveDamageOperation(state, action, "net", 1, "damage_source");
+    resolveDamageOperation(state, action, "net", 1, syntheticCardDefinitionId("damage_source"));
 
     expect(state.pendingChoice).toMatchObject({
       source: "v120.event_modification.prevent",
@@ -352,6 +358,7 @@ describe("damage core", () => {
         damageType: "meat",
         amount: 1,
         source: "test",
+        randomSource: ["g", 0] as const,
       }).payload,
     ).toMatchObject({
       baseDamageAmount: 1,
@@ -479,7 +486,7 @@ describe("damage core", () => {
     configureDamageCoreHost(testHost());
     const action = actionFor("corp", "play_operation");
 
-    resolveDamageOperation(state, action, "net", 3, "weefle_damage");
+    resolveDamageOperation(state, action, "net", 3, syntheticCardDefinitionId("weefle_damage"));
 
     const preventionOptions = state.pendingChoice?.options.filter((option) =>
       option.id.includes("run_damage_prevent_"),
@@ -760,7 +767,7 @@ describe("damage core", () => {
     configureDamageCoreHost(testHost());
     const action = actionFor("corp", "play_operation");
 
-    resolveDamageOperation(state, action, "net", 1, "damage_source");
+    resolveDamageOperation(state, action, "net", 1, syntheticCardDefinitionId("damage_source"));
 
     expect(state.pendingChoice).toMatchObject({
       source: "v121.replacement.damage",

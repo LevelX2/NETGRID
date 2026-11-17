@@ -476,7 +476,7 @@
                     "encounterStrength": 4,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 457,
                         "sourceTitle": "Fire Wall"
@@ -695,7 +695,7 @@
                     "encounterStrength": 4,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 457,
                         "sourceTitle": "Fire Wall"
@@ -6793,7 +6793,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 97,
-          "sideSafePlanningFingerprint": "fnv1a:211c6bc1"
+          "sideSafePlanningFingerprint": "fnv1a:ce0794ed"
         },
         "observedTurnPlanAction": {
           "matchId": "match_cd60c2d20ba4346d",
@@ -14991,7 +14991,7 @@
                     "encounterStrength": 4,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 457,
                         "sourceTitle": "Fire Wall"
@@ -15210,7 +15210,7 @@
                     "encounterStrength": 4,
                     "subroutines": [
                       {
-                        "id": "printed_subroutines_end_the_run",
+                        "id": "0",
                         "type": "end_the_run",
                         "sourceDefinitionId": 457,
                         "sourceTitle": "Fire Wall"
@@ -21238,7 +21238,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 99,
-          "sideSafePlanningFingerprint": "fnv1a:f9d60d53"
+          "sideSafePlanningFingerprint": "fnv1a:d74e42a7"
         },
         "observedTurnPlanAction": {
           "matchId": "match_cd60c2d20ba4346d",

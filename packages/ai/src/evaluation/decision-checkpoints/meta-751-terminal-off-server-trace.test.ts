@@ -79,7 +79,7 @@ it("protects the terminal HQ access at the publicly reachable Archives entrance 
     rezFundingGap: 0,
     projection: {
       actionId: archivesInstall,
-      certifiedZeroBidTraceStopId: "printed_subroutines_trace",
+      certifiedZeroBidTraceStopId: "0",
       installCredits: 0,
       installClicks: 1,
       creditsAfterDefense: 11,

@@ -544,7 +544,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 456,
                     "sourceTitle": "Filter"
@@ -592,7 +592,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_run_duration_encounter_cost_or_end_run",
+                      "id": "0",
                       "type": "set_run_encounter_tax",
                       "amount": 2,
                       "sourceDefinitionId": 434,
@@ -659,7 +659,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 473,
                       "sourceTitle": "Quandary"
@@ -722,7 +722,7 @@
                   "encounterStrength": 3,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 478,
                       "sourceTitle": "Scramble"
@@ -816,7 +816,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trace",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 6,
                     "traceSuccessEffect": {
@@ -827,7 +827,7 @@
                     "sourceTitle": "Pocket Virtual Reality"
                   },
                   {
-                    "id": "printed_subroutines_trace_a",
+                    "id": "1",
                     "type": "initiate_trace",
                     "traceLimit": 6,
                     "traceSuccessEffect": {
@@ -881,7 +881,7 @@
                   "encounterStrength": 1,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 450,
                       "sourceTitle": "Data Wall 2.0"
@@ -944,7 +944,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_end_the_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 464,
                       "sourceTitle": "Keeper"
@@ -1130,7 +1130,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_next_encounter_unless_fully_break_damage_net",
+                      "id": "0",
                       "type": "set_next_encounter_unless_fully_break_damage",
                       "amount": 3,
                       "damageType": "net",
@@ -1254,7 +1254,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_damage_net",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 1,
                       "damageType": "net",
@@ -1265,7 +1265,7 @@
                       }
                     },
                     {
-                      "id": "printed_subroutines_prohibit_break_next_ice",
+                      "id": "1",
                       "type": "set_next_encounter_no_break_subroutines",
                       "sourceDefinitionId": 470,
                       "sourceTitle": "Neural Blade",
@@ -1380,7 +1380,7 @@
                   "encounterStrength": 3,
                   "subroutines": [
                     {
-                      "id": "printed_subroutines_trace",
+                      "id": "0",
                       "type": "initiate_trace",
                       "traceLimit": 3,
                       "traceSuccessEffect": {
@@ -6171,7 +6171,7 @@
             "postInstallRezQuoteCardId": "c2sm",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r5",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 170,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6208,7 +6208,7 @@
             "postInstallRezQuoteCardId": "c2sm",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 170,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6245,7 +6245,7 @@
             "postInstallRezQuoteCardId": "c2sm",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 170,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6281,7 +6281,7 @@
             "postInstallRezQuoteCardId": "c2sm",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 170,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6318,7 +6318,7 @@
             "postInstallRezQuoteCardId": "c2sm",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 170,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6355,7 +6355,7 @@
             "postInstallRezQuoteCardId": "c2sm",
             "postInstallRezQuoteTargetServerId": "r2",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 170,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6392,7 +6392,7 @@
             "postInstallRezQuoteCardId": "c2sm",
             "postInstallRezQuoteTargetServerId": "r4",
             "postInstallRezQuoteProjectedServerId": "r4",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 170,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8835,7 +8835,7 @@
           "postInstallRezQuoteCardId": "c2sm",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r5",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 170,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8872,7 +8872,7 @@
           "postInstallRezQuoteCardId": "c2sm",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 170,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8909,7 +8909,7 @@
           "postInstallRezQuoteCardId": "c2sm",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 170,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8945,7 +8945,7 @@
           "postInstallRezQuoteCardId": "c2sm",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 170,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -8982,7 +8982,7 @@
           "postInstallRezQuoteCardId": "c2sm",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 170,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9019,7 +9019,7 @@
           "postInstallRezQuoteCardId": "c2sm",
           "postInstallRezQuoteTargetServerId": "r2",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 170,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9056,7 +9056,7 @@
           "postInstallRezQuoteCardId": "c2sm",
           "postInstallRezQuoteTargetServerId": "r4",
           "postInstallRezQuoteProjectedServerId": "r4",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"printed_subroutines_trace\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2sm\",\"iceDefinitionId\":452,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"initiate_trace\",\"traceLimit\":4,\"traceSuccessEffect\":{\"type\":\"end_run_and_run_lock\",\"amount\":2},\"sourceDefinitionId\":452,\"sourceTitle\":\"Fang\",\"unbrokenRunEffect\":{\"createsRunLockOrActionTax\":2}}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 170,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9205,7 +9205,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 170,
-      "sideSafePlanningFingerprint": "fnv1a:5b7ea1e4"
+      "sideSafePlanningFingerprint": "fnv1a:11233875"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_cheap_bag_tricks_1.0.0",

@@ -683,6 +683,7 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
       damageType: "meat",
       amount: 1,
       source: "test:runner_window",
+      randomSource: ["g", 0] as const,
     });
     const legalAction = {
       actionId: "test.damage",

@@ -19,7 +19,7 @@ const FIXTURES = [
 
 describe("Rent-I-Con versus CODE ROT cycle-seven remediation checkpoints", () => {
   it.each(FIXTURES)("%s", (_label, checkpoint) => {
-    const current = structuredClone(checkpoint) as AiDecisionCheckpointV1;
+    const current = structuredClone(checkpoint) as unknown as AiDecisionCheckpointV1;
     if (checkpoint === noNeedSearchJson)
       current.expectation = {
         acceptableActions: [
@@ -44,7 +44,7 @@ describe("Rent-I-Con versus CODE ROT cycle-seven remediation checkpoints", () =>
   it("retains the original setup funding when the free recurring source is unavailable", () => {
     const checkpoint = structuredClone(
       noNeedSearchJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     const state = checkpoint.engine.testOnlyGameState;
     const id = "c1ix";
     state.runner.grip = state.runner.grip.filter((cardId) => cardId !== id);
