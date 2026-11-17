@@ -371,19 +371,24 @@ export function isRandomHistory(
   records: unknown,
   domain: RandomDomain,
 ): records is RandomDrawRecord[] {
-  return (
-    typeof counter === "number" &&
-    Number.isSafeInteger(counter) &&
-    counter >= 0 &&
-    counter < Number.MAX_SAFE_INTEGER &&
-    Array.isArray(records) &&
-    records.length === counter &&
-    records.every(
-      (record, index) =>
-        isRandomDrawRecord(record, domain) &&
-        record.counter === index &&
-        (domain === "engine" ||
-          ("domain" in record && record.domain === "ai_turn_plan_selection")),
+  if (
+    typeof counter !== "number" ||
+    !Number.isSafeInteger(counter) ||
+    counter < 0 ||
+    counter >= Number.MAX_SAFE_INTEGER ||
+    !Array.isArray(records) ||
+    records.length !== counter
+  )
+    return false;
+  for (let index = 0; index < records.length; index += 1) {
+    const record: unknown = records[index];
+    if (
+      !isRandomDrawRecord(record, domain) ||
+      record.counter !== index ||
+      (domain === "ai_turn_plan_selection" &&
+        (!("domain" in record) || record.domain !== "ai_turn_plan_selection"))
     )
-  );
+      return false;
+  }
+  return true;
 }

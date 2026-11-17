@@ -1,6 +1,6 @@
 import {
   isRandomPurpose,
-  isRandomDrawRecord,
+  isRandomHistory,
   type RandomPurpose,
   type RandomDrawRecord,
   type RandomDomain,
@@ -267,19 +267,8 @@ function assertRandomCursor(
     records.length !== counter
   )
     throw new Error("Der Zufallszustand ist nicht replay-konsistent.");
-  records.forEach((record, index) => {
-    if (
-      !record ||
-      typeof record !== "object" ||
-      record.counter !== index ||
-      !Number.isSafeInteger(record.counter) ||
-      !isRandomDrawRecord(record, "engine") ||
-      !Number.isFinite(record.value) ||
-      record.value < 0 ||
-      record.value >= 1
-    )
-      throw new Error("Der Zufallsverlauf ist nicht replay-konsistent.");
-  });
+  if (!isRandomHistory(counter, records, "engine"))
+    throw new Error("Der Zufallsverlauf ist nicht replay-konsistent.");
 }
 
 export function recordStateRandomMarkers(

@@ -130,4 +130,25 @@ describe("draw-random", () => {
     );
     expect(malformed).toEqual(before);
   });
+  it.each(["draw", "shuffle", "markers"] as const)(
+    "rejects a missing history record before %s mutates the state",
+    (operation) => {
+      const current = state();
+      nextRandom(current, [RandomPurposeCode.HqAccess]);
+      delete current.randomDrawRecords[0];
+      const before = structuredClone(current);
+      const apply = () => {
+        if (operation === "draw")
+          nextRandom(current, [RandomPurposeCode.HqAccess]);
+        else if (operation === "shuffle")
+          shuffleStateIds(current, [HQ_A, HQ_B], [RandomPurposeCode.SetupRunnerShuffle]);
+        else
+          recordStateRandomMarkers(current, [RandomPurposeCode.SetupRunnerDraw], 1);
+      };
+
+      expect(apply).toThrow("nicht replay-konsistent");
+      expect(current).toEqual(before);
+    },
+  );
+
 });

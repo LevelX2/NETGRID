@@ -1,7 +1,7 @@
 import {
   randomContextFingerprint,
   serializeRandomPurpose,
-  isRandomDrawRecord,
+  isRandomHistory,
   type RandomPurpose,
 } from "@netgrid/shared";
 import {
@@ -139,17 +139,10 @@ export function quoteRandomizedTraceBidSelection(
           candidate.weight !== 1 ||
           candidate.utility !== 1,
       ) ||
-      !Number.isSafeInteger(state.aiTurnPlanRandomCounter) ||
-      state.aiTurnPlanRandomCounter! < 0 ||
-      state.aiTurnPlanRandomCounter! >= Number.MAX_SAFE_INTEGER ||
-      !Array.isArray(state.aiTurnPlanRandomDrawRecords) ||
-      state.aiTurnPlanRandomCounter !==
-        state.aiTurnPlanRandomDrawRecords.length ||
-      state.aiTurnPlanRandomDrawRecords.some(
-        (record, index) =>
-          record.counter !== index ||
-          record.domain !== "ai_turn_plan_selection" ||
-          !isRandomDrawRecord(record, "ai_turn_plan_selection"),
+      !isRandomHistory(
+        state.aiTurnPlanRandomCounter,
+        state.aiTurnPlanRandomDrawRecords,
+        "ai_turn_plan_selection",
       )
     )
       return fail(

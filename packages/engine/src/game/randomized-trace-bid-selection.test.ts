@@ -128,6 +128,74 @@ describe("Engine-randomized Blind Trace bid selection", () => {
       expect(result.state.randomDrawRecords).toEqual(before.randomDrawRecords);
     }
   });
+
+  it.each(["missing counter", "missing history", "missing record"] as const)(
+    "rejects a secret guess with %s before consuming randomness",
+    (corruption) => {
+      const initial = blindTraceBidState("secret-guess-invalid-rng");
+      const sourceCardId = initial.runner.identity;
+      delete initial.trace;
+      initial.runner.credits = 4;
+      initial.secretSpendGuessRunSecret = { sourceCardId, hiddenAmount: 2 };
+      initial.pendingChoice = {
+        ...initial.pendingChoice!,
+        source: `hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:${sourceCardId}:${initial.stateVersion}`,
+        options: [2, 3, 4].map((bid) => ({
+          id: `guess_${bid}`,
+          label: String(bid),
+          value: bid,
+        })),
+      };
+      const action = getLegalActions(initial, "corp").find(
+        (candidate) => candidate.type === "resolve_choice",
+      );
+      expect(action).toBeDefined();
+      const quoted = quoteRandomizedTraceBidSelection(initial, {
+        schemaVersion: ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION,
+        matchId: initial.matchId,
+        side: "corp",
+        stateVersion: initial.stateVersion,
+        timingPoint: initial.timingPoint,
+        actionId: action!.actionId,
+        choiceId: initial.pendingChoice.choiceId,
+        planStepId: "corp.resolve_secret_guess",
+        assessment: {
+          kind: "secret_guess",
+          policy: "uniform_access_denial_v1",
+          minimumGuess: 2,
+          maximumGuess: 4,
+        },
+        candidates: [2, 3, 4].map((bid) => ({
+          optionId: `guess_${bid}`,
+          bid,
+          weight: 1,
+          utility: 1,
+        })),
+      });
+      expect(quoted.ok).toBe(true);
+      if (!quoted.ok) return;
+
+      const corrupted = structuredClone(initial);
+      if (corruption === "missing counter")
+        delete corrupted.aiTurnPlanRandomCounter;
+      else if (corruption === "missing history")
+        delete corrupted.aiTurnPlanRandomDrawRecords;
+      else {
+        corrupted.aiTurnPlanRandomCounter = 1;
+        corrupted.aiTurnPlanRandomDrawRecords = new Array(1);
+      }
+      const before = structuredClone(corrupted);
+      const applied = applyRandomizedTraceBidSelection(corrupted, {
+        kind: "engine_randomized_trace_bid_selection",
+        quote: quoted.quote,
+      });
+
+      expect(applied.ok).toBe(false);
+      if (!applied.ok) expect(applied.error.code).toBe("ERR_INVALID_TARGET");
+      expect(applied.state).toBe(corrupted);
+      expect(corrupted).toEqual(before);
+    },
+  );
 });
 
 function selectBid(

@@ -18,7 +18,7 @@ import type { DeckSnapshot } from "@netgrid/decks";
 import { hashState } from "@netgrid/engine";
 import {
   isCardDefinitionId,
-  isRandomDrawRecord,
+  isRandomHistory,
   type RandomPurpose,
   type RandomDomain,
   type RandomDrawRecord,
@@ -5215,14 +5215,7 @@ function assertStoredRandomDraws(
   cursor: unknown,
   domain: RandomDomain,
 ): asserts records is RandomDrawRecord[] {
-  if (
-    !Array.isArray(records) ||
-    !Number.isSafeInteger(cursor) ||
-    cursor !== records.length ||
-    !records.every(
-      (draw, index) => isRandomDrawRecord(draw, domain) && draw.counter === index,
-    )
-  )
+  if (!isRandomHistory(cursor, records, domain))
     throw invalidStoredGameState("Das SQLite-Zufallsprotokoll ist ungültig.");
 }
 
@@ -5283,7 +5276,12 @@ export function decodeStoredGameState(json: string): GameState {
           "Eine Zeile im SQLite-Zufallsprotokoll ist ungültig.",
         );
       const [counter, purpose, value] = row;
-      return { counter, purpose, value };
+      return {
+        counter,
+        purpose,
+        value,
+        ...(domain === "ai_turn_plan_selection" ? { domain } : {}),
+      };
     });
     assertStoredRandomDraws(draws, cursor, domain);
     return draws;

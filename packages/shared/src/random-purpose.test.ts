@@ -82,6 +82,23 @@ describe("compact random purposes", () => {
       ).toBe(false);
   });
 
+  it.each(
+    (["engine", "ai_turn_plan_selection"] as const).flatMap((domain) =>
+      [0, 1, 2].map((missingIndex) => ({ domain, missingIndex })),
+    ),
+  )("rejects a missing $domain record at index $missingIndex", ({ domain, missingIndex }) => {
+    const purpose: RandomPurpose = domain === "engine" ? [9] : [60, 0, 0, 0];
+    const records = Array.from({ length: 3 }, (_, counter) => ({
+      counter,
+      purpose,
+      value: 0.5,
+      ...(domain === "ai_turn_plan_selection" ? { domain } : {}),
+    }));
+    expect(isRandomHistory(3, records, domain)).toBe(true);
+    delete records[missingIndex];
+    expect(isRandomHistory(3, records, domain)).toBe(false);
+  });
+
   it("binds private quote contexts with an unambiguous fixed-width fingerprint", () => {
     expect(randomContextFingerprint(["a:b", "c"])).not.toBe(
       randomContextFingerprint(["a", "b:c"]),

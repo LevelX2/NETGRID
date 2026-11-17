@@ -212,7 +212,13 @@ describe("SQLite game state codec", () => {
         state.randomDrawRecords,
       );
 
+      const sparseEngineState = structuredClone(state);
+      delete sparseEngineState.randomDrawRecords[0];
+      const sparseAiState = structuredClone(state);
+      delete sparseAiState.aiTurnPlanRandomDrawRecords![0];
       const invalidStates = [
+        sparseEngineState,
+        sparseAiState,
         { ...state, randomCounter: state.randomCounter + 1 },
         {
           ...state,
@@ -222,10 +228,16 @@ describe("SQLite game state codec", () => {
         },
       ];
       for (const gameState of invalidStates) {
-        await expect(storage.save({ ...record, gameState })).rejects.toMatchObject({
-          code: "stored_match_invalid",
-        });
-        expect((await storage.load(created.matchId))?.gameState).toEqual(state);
+        await expect(
+          storage.save({
+            ...record,
+            match: { ...record.match, matchVersion: record.match.matchVersion + 1 },
+            gameState,
+          }),
+        ).rejects.toMatchObject({ code: "stored_match_invalid" });
+        const afterRejectedSave = await storage.load(created.matchId);
+        expect(afterRejectedSave?.match.matchVersion).toBe(record.match.matchVersion);
+        expect(afterRejectedSave?.gameState).toEqual(state);
       }
 
       db.prepare(
