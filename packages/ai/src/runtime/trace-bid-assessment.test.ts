@@ -17,6 +17,7 @@ import {
   visibleTraceSuccessEffect,
 } from "./trace-bid-assessment";
 import { latestTraceContext } from "./trace-context";
+import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 
 describe("Blind Trace bid assessment", () => {
   it("binds a lethal Runner safety floor to quoted Link strength rather than the credit payment", () => {
@@ -245,13 +246,7 @@ describe("Blind Trace bid assessment", () => {
       bidMax: 5,
     });
     const tag = assess(tagInput);
-    const punishInput = decisionInput({
-      profile: "classic_blind",
-      side: "corp",
-      sourceDefinitionId: 448 as CardDefinitionId,
-      printedTrace: 5,
-      bidMax: 5,
-    });
+    const punishInput = structuredClone(tagInput);
     punishInput.playerView.own.gripOrHq.push({
       instanceId: "visible_punish",
       definitionId: 514,
@@ -606,6 +601,8 @@ function traceState(input: {
     setupMode: "completed",
     traceRulesProfile: input.profile,
   });
+  if (input.side === "corp")
+    RealEngineFixtureBuilder.forState(state).withCorpHqSize(0);
   const effectiveTraceLimit = input.effectiveTraceLimit ?? input.printedTrace;
   state.activeSide = input.side;
   if (input.side === "corp") {
