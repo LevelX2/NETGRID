@@ -446,6 +446,53 @@ describe("Runner contest recovery", () => {
     });
   });
 
+  it.each([16, 18])(
+    "prices unknown ICE before admitting a conditional HQ chance at %s credits",
+    (credits) => {
+      const input = capturedInput(terminalSpendReplay);
+      const view = input.playerView;
+      view.own.credits = credits;
+      const hqServer = view.servers.find((server) => server.id === "hq")!;
+      const remoteServer = view.servers.find(
+        (server) => server.id === "remote_1",
+      )!;
+      const hiddenIce = remoteServer.ice.find((card) => !card.known)!;
+      hqServer.ice.push({ ...hiddenIce, instanceId: "review_hidden_hq_ice" });
+      const additionalDefense = remoteServer.ice.find(
+        (card) => card.title === "Cinderella",
+      )!;
+      for (const copy of [1, 2]) {
+        const iceInstanceId = additionalDefense.instanceId + "_review_" + copy;
+        remoteServer.ice.unshift({
+          ...additionalDefense,
+          instanceId: iceInstanceId,
+          effectiveRunQuote: {
+            ...additionalDefense.effectiveRunQuote!,
+            iceInstanceId,
+          },
+        });
+      }
+
+      const { hq, routes } = centralAndRemoteRoutes(input);
+      const hasReserve = credits === 18;
+      expect(hq.routeQuote).toMatchObject({
+        reachability: "conditional_access",
+        conditionalReasons: ["unknown_ice_on_route"],
+      });
+      expect(hq.prerunReserveQuote?.status).toBe(
+        hasReserve ? "satisfied" : "blocked",
+      );
+      expect(
+        runnerFinalClickCentralAccessBeforeTerminalScore(input, hq, routes, 3),
+      ).toBe(hasReserve);
+      const decision = chooseAiAction(input);
+      expect(decision.actionId).toBe(
+        hasReserve ? hq.actionId : "runner.start_run.rd",
+      );
+      expect(decision.fallbackUsed).toBe(false);
+    },
+  );
+
   it("revalues the same legal accesses when Corp draws the known R&D top", () => {
     function decide(corpAction: "gain_credit" | "mandatory_draw") {
       resetResidentPlanPortfolioMemory();
