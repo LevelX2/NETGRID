@@ -28,73 +28,72 @@ export function createRunnerEconomyModule(): PlanModule {
   return {
     moduleId: "runner.economy",
     side: "runner",
-    discover: (context) => [
-      ...runnerPlanDomain<{
-        fundingNeeds: RunnerFundingNeedSignal[];
-        installedCardLiquidationChoices?: RunnerInstalledCardLiquidationChoiceSignal[];
-      }>(context)
-        .fundingNeeds.filter((need) => need.gap > 0)
-        .map((need) => {
-          const validSupportContract = validRunnerFundingNeedContract(
-            need,
-            context.input.playerView.stateVersion,
-          );
-          const assignedToBank =
-            need.kind === "parent_plan_support" &&
-            need.providerModuleId === "runner.credit_bank";
-          const routeExists =
-            !assignedToBank && economyCandidates(context, need).length > 0;
-          return proposal({
-            moduleId: "runner.economy",
-            dedupeKey: need.needId,
-            moduleState: { kind: "economy", need } satisfies EconomyState,
-            priorityClass: need.priorityClass,
-            target: { kind: "capability", id: need.needId },
-            routeExists: validSupportContract && routeExists,
-            blockerCode: validSupportContract
-              ? "no_compatible_credit_route"
-              : need.kind === "develop_liquidity"
-                ? "invalid_turn_liquidity_revalidation"
-                : need.kind === "parent_plan_support"
-                  ? "orphaned_funding_need"
-                  : "invalid_funding_need_revalidation",
-            evidenceCode: need.evidenceCode,
-            ...(need.kind === "parent_plan_support" && !assignedToBank
-              ? {
-                  parentInstanceId: need.parentPlanInstanceId,
-                  parentNeedId: need.needId,
-                }
-              : {}),
-          });
-        }),
-      ...(
+    discover: (context) => {
+      const { fundingNeeds, installedCardLiquidationChoices = [] } =
         runnerPlanDomain<{
           fundingNeeds: RunnerFundingNeedSignal[];
           installedCardLiquidationChoices?: RunnerInstalledCardLiquidationChoiceSignal[];
-        }>(context).installedCardLiquidationChoices ?? []
-      ).map((signal) =>
-        proposal({
-          moduleId: "runner.economy",
-          dedupeKey: signal.conversionId,
-          moduleState: {
-            kind: "installed_card_liquidation_choice",
-            signal,
-          } satisfies EconomyState,
-          priorityClass: signal.priorityClass,
-          target: {
-            kind: "card",
-            id: signal.sourceResourceDefinitionId,
-          },
-          routeExists:
-            installedCardLiquidationChoiceCandidates(context, signal).length >
-            0,
-          blockerCode: "installed_card_liquidation_choice_unavailable",
-          evidenceCode:
-            signal.evidenceCodes[0] ??
-            "runner_installed_card_liquidation_choice_owned_by_economy",
-        }),
-      ),
-    ],
+        }>(context);
+      return [
+        ...fundingNeeds
+          .filter((need) => need.gap > 0)
+          .map((need) => {
+            const validSupportContract = validRunnerFundingNeedContract(
+              need,
+              context.input.playerView.stateVersion,
+            );
+            const assignedToBank =
+              need.kind === "parent_plan_support" &&
+              need.providerModuleId === "runner.credit_bank";
+            const routeExists =
+              !assignedToBank && economyCandidates(context, need).length > 0;
+            return proposal({
+              moduleId: "runner.economy",
+              dedupeKey: need.needId,
+              moduleState: { kind: "economy", need } satisfies EconomyState,
+              priorityClass: need.priorityClass,
+              target: { kind: "capability", id: need.needId },
+              routeExists: validSupportContract && routeExists,
+              blockerCode: validSupportContract
+                ? "no_compatible_credit_route"
+                : need.kind === "develop_liquidity"
+                  ? "invalid_turn_liquidity_revalidation"
+                  : need.kind === "parent_plan_support"
+                    ? "orphaned_funding_need"
+                    : "invalid_funding_need_revalidation",
+              evidenceCode: need.evidenceCode,
+              ...(need.kind === "parent_plan_support" && !assignedToBank
+                ? {
+                    parentInstanceId: need.parentPlanInstanceId,
+                    parentNeedId: need.needId,
+                  }
+                : {}),
+            });
+          }),
+        ...installedCardLiquidationChoices.map((signal) =>
+          proposal({
+            moduleId: "runner.economy",
+            dedupeKey: signal.conversionId,
+            moduleState: {
+              kind: "installed_card_liquidation_choice",
+              signal,
+            } satisfies EconomyState,
+            priorityClass: signal.priorityClass,
+            target: {
+              kind: "card",
+              id: signal.sourceResourceDefinitionId,
+            },
+            routeExists:
+              installedCardLiquidationChoiceCandidates(context, signal).length >
+              0,
+            blockerCode: "installed_card_liquidation_choice_unavailable",
+            evidenceCode:
+              signal.evidenceCodes[0] ??
+              "runner_installed_card_liquidation_choice_owned_by_economy",
+          }),
+        ),
+      ];
+    },
     assess: (instance, context, portfolio) => {
       const economyState = instance.moduleState as EconomyState;
       if (economyState.kind === "installed_card_liquidation_choice") {
@@ -297,34 +296,41 @@ function economyCandidates(
       candidate,
       heapPreparation,
     );
-  return context.actionCandidates
-    .filter(
-      (candidate) =>
-        !context.actionDispositions?.some(
-          (entry) => entry.actionId === candidate.actionId,
-        ) &&
-        routeActionIds.has(candidate.actionId) &&
-        (need.kind === "develop_liquidity"
-          ? runnerTurnLiquidityCandidateIsMaterializable(candidate)
-          : runnerFundingRouteCandidateIsMaterializable(candidate) ||
-            isPaymentInstall(candidate) ||
-            isHandPreparation(candidate) ||
-            isHeapPreparation(candidate)),
-    )
-    .map((candidate) => {
-      const netLiquidCreditGain = isHeapPreparation(candidate)
-        ? heapPreparation!.projectedRunCredits -
-          context.input.playerView.own.credits
-        : isHandPreparation(candidate)
-          ? handPreparation!.projectedEndCredits -
-            context.input.playerView.own.credits
-          : isPaymentInstall(candidate)
-            ? paymentInstall!.netPaymentGain - paymentInstall!.installCreditCost
-            : candidate.economyProjection!.netLiquidCreditGain!;
-      const fundingGapProgress = Math.min(need.gap, netLiquidCreditGain);
-      return {
-        candidate,
-        stepValue: fundingGapProgress * 100 + netLiquidCreditGain,
-      };
-    });
+  return context.actionCandidates.flatMap((candidate) => {
+    if (
+      !routeActionIds.has(candidate.actionId) ||
+      context.actionDispositions?.some(
+        (entry) => entry.actionId === candidate.actionId,
+      )
+    ) {
+      return [];
+    }
+    const currentCredits = context.input.playerView.own.credits;
+    let netLiquidCreditGain: number;
+    if (
+      need.kind === "develop_liquidity" &&
+      runnerTurnLiquidityCandidateIsMaterializable(candidate)
+    ) {
+      netLiquidCreditGain = candidate.economyProjection!.netLiquidCreditGain!;
+    } else if (need.kind === "develop_liquidity") {
+      return [];
+    } else if (heapPreparation && isHeapPreparation(candidate)) {
+      netLiquidCreditGain =
+        heapPreparation.projectedRunCredits - currentCredits;
+    } else if (handPreparation && isHandPreparation(candidate)) {
+      netLiquidCreditGain =
+        handPreparation.projectedEndCredits - currentCredits;
+    } else if (paymentInstall && isPaymentInstall(candidate)) {
+      netLiquidCreditGain =
+        paymentInstall.netPaymentGain - paymentInstall.installCreditCost;
+    } else if (runnerFundingRouteCandidateIsMaterializable(candidate)) {
+      netLiquidCreditGain = candidate.economyProjection!.netLiquidCreditGain!;
+    } else {
+      return [];
+    }
+    const fundingGapProgress = Math.min(need.gap, netLiquidCreditGain);
+    return [
+      { candidate, stepValue: fundingGapProgress * 100 + netLiquidCreditGain },
+    ];
+  });
 }

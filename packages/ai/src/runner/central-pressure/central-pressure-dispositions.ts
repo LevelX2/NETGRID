@@ -22,7 +22,9 @@ export function runnerCentralRunDispositions(params: {
     forgoUnsafeRunCapacity,
     independentlyOwnedActionIds,
   } = params;
-  const dispositions = [...params.existingDispositions];
+  const disposedActionIds = new Set(
+    params.existingDispositions.map(({ actionId }) => actionId),
+  );
   const result: PlanActionDisposition[] = [];
   const add = (
     actionId: string,
@@ -36,12 +38,12 @@ export function runnerCentralRunDispositions(params: {
       disposition: "explicitly_nonproductive",
     };
     result.push(disposition);
-    dispositions.push(disposition);
+    disposedActionIds.add(actionId);
   };
   for (const evaluation of runTargets) {
     if (
       forgoUnsafeRunCapacity ||
-      dispositions.some((entry) => entry.actionId === evaluation.actionId) ||
+      disposedActionIds.has(evaluation.actionId) ||
       independentlyOwnedActionIds.has(evaluation.actionId)
     ) {
       continue;
@@ -62,6 +64,13 @@ export function runnerCentralRunDispositions(params: {
           signal.runActionIds?.includes(evaluation.actionId) === true,
       );
       if (executableRoute) continue;
+      const exactExclusion = matchingSignals
+        .map((signal) => signal.runActionExclusions?.[evaluation.actionId]?.[0])
+        .find((evidence) => evidence !== undefined);
+      if (exactExclusion !== undefined) {
+        add(evaluation.actionId, "runner.pressure_central", exactExclusion);
+        continue;
+      }
       const boundSignal = matchingSignals.find(
         (signal) =>
           signal.runActionIds?.includes(evaluation.actionId) === true ||
@@ -87,10 +96,9 @@ export function runnerCentralRunDispositions(params: {
       add(
         evaluation.actionId,
         "runner.pressure_central",
-        boundSignal.runActionExclusions?.[evaluation.actionId]?.[0] ??
-          ((boundSignal.preparationActionIds?.length ?? 0) > 0
-            ? `runner_central_run_deferred_to_bound_preparation:${evaluation.targetServerId}`
-            : boundSignal.evidenceCode),
+        (boundSignal.preparationActionIds?.length ?? 0) > 0
+          ? `runner_central_run_deferred_to_bound_preparation:${evaluation.targetServerId}`
+          : boundSignal.evidenceCode,
       );
       continue;
     }

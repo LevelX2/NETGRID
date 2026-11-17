@@ -28,30 +28,27 @@ export function summarizeActionCapacityBaselineMetrics(
       metrics.actionCapacityUses += 1;
       if (entry.actionCapacityPlanConversionUsed)
         metrics.actionCapacityPlanConversions += 1;
-      const sameTurn = [] as AiSimulationSummary["actionSequence"];
-      for (const candidate of summary.actionSequence.slice(index + 1)) {
-        if (
-          candidate.side !== entry.side ||
-          candidate.turnNumber !== entry.turnNumber
-        ) {
+      let followupConverted = entry.actionCapacityInlineConversionUsed === true;
+      for (
+        let nextIndex = index + 1;
+        nextIndex < summary.actionSequence.length;
+        nextIndex++
+      ) {
+        const candidate = summary.actionSequence[nextIndex]!;
+        if (candidate.turnNumber !== entry.turnNumber) break;
+        if (candidate.side !== entry.side) continue;
+        if (candidate.actionType === "end_turn") {
+          if ((candidate.actionsRemainingBefore ?? 0) > 0)
+            metrics.actionCapacityExpiredUses += 1;
           break;
         }
-        sameTurn.push(candidate);
+        if (
+          candidate.actionCapacitySourceUsed !== true &&
+          candidate.timingPoint === entry.side + "_action.main"
+        )
+          followupConverted = true;
       }
-      const followupConverted =
-        entry.actionCapacityInlineConversionUsed === true ||
-        sameTurn.some(
-          (candidate) =>
-            candidate.actionCapacitySourceUsed !== true &&
-            candidate.actionType !== "end_turn" &&
-            candidate.timingPoint === `${entry.side}_action.main`,
-        );
       if (followupConverted) metrics.actionCapacityFollowupConversions += 1;
-      const endTurn = sameTurn.find(
-        (candidate) => candidate.actionType === "end_turn",
-      );
-      if ((endTurn?.actionsRemainingBefore ?? 0) > 0)
-        metrics.actionCapacityExpiredUses += 1;
       if (!followupConverted) metrics.actionCapacityMisconversions += 1;
     }
   }

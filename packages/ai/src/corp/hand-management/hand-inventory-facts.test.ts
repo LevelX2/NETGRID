@@ -105,6 +105,27 @@ describe("Corp hand inventory facts", () => {
     ).toContain("net_credits=4:net_hand=-1");
   });
 
+  it("does not count a conditional hand release as an exact capacity route", () => {
+    const input = corpInput([card("operation-1", "operation", "operation")]);
+    const uncertain = economyCandidate(
+      "play-conditional",
+      "operation-1",
+      "operation",
+      4,
+    );
+    uncertain.economyProjection!.reliability = "conditional";
+
+    const facts = buildCorpHandInventoryFacts({
+      input,
+      candidates: [uncertain],
+      domainClaims: [],
+      actionDispositions: [],
+    });
+
+    expect(facts?.pressure.exactCapacityReleaseActions).toBe(0);
+    expect(facts?.records[0]?.actionHandDeltas).toEqual([]);
+  });
+
   it("classifies funding, hold, redundant, unsafe and unsupported records conservatively", () => {
     const input = corpInput([
       card("funding", "funding-card", "operation"),

@@ -97,28 +97,27 @@ it("uses the actual draw -> Networking -> credit prefix for 11 credits and the s
       route: { actionId: action.actionId, stateVersion: state.stateVersion },
     });
     if (index === 0) {
-      const needs = residentPlanPortfolioSnapshot(input)!
-        .instances.filter((entry) => entry.moduleId === "runner.economy")
-        .map(
-          (entry) =>
-            (
-              entry.moduleState as {
-                need?: {
-                  kind: string;
-                  targetCredits: number;
-                  routeAssessment: { status: string };
-                };
-              }
-            ).need,
-        );
-      expect(
-        needs.some(
-          (need) =>
-            need?.kind === "parent_plan_support" &&
-            need.targetCredits === 15 &&
-            need.routeAssessment.status === "uncovered",
-        ),
-      ).toBe(true);
+      const currentReserve = residentPlanPortfolioSnapshot(
+        input,
+      )!.instances.find(
+        (entry) =>
+          entry.instanceId ===
+          "plan:runner.economy:runner-portfolio-credit-reserve",
+      );
+      expect(currentReserve?.moduleState).toMatchObject({
+        need: {
+          kind: "portfolio_reserve",
+          routeAssessment: {
+            firstStepActionId: action.actionId,
+            handPreparation: {
+              drawCount: 1,
+              projectedEndCredits: 11,
+              projectedEndHand: 3,
+              requiredHandBuffer: 3,
+            },
+          },
+        },
+      });
     }
     const applied = applyAction(state, {
       matchId: state.matchId,

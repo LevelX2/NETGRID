@@ -5,6 +5,7 @@ import {
   assessCorpRemoteMaturity,
   assessCorpRemoteMaturityFromVisibleServer,
   quoteCorpRemotePath,
+  remotePathMeetsProtectionTarget,
   requiredGeneralCreditTax,
 } from "./corp-remote-maturity-assessment";
 
@@ -14,6 +15,28 @@ describe("Corp remote maturity policy", () => {
     expect(requiredGeneralCreditTax("taxing", 20)).toBe(10);
     expect(requiredGeneralCreditTax("glacier", 20)).toBe(13);
     expect(requiredGeneralCreditTax("glacier", 4)).toBe(4);
+  });
+
+  it("does not certify an open remote just because the Runner has no credits", () => {
+    const openRemote = quoteCorpRemotePath({
+      assessment: path({
+        assessedKnownIceCount: 0,
+        creditsAfterPath: 0,
+        creditBudgetAfterPath: { credits: 0 },
+      }),
+      expectedKnownIceCount: 0,
+      runnerCreditBudgetBefore: { credits: 0 },
+    });
+
+    expect(remotePathMeetsProtectionTarget(openRemote, "none")).toBe(true);
+    for (const band of [
+      "light",
+      "score_window",
+      "taxing",
+      "glacier",
+    ] as const) {
+      expect(remotePathMeetsProtectionTarget(openRemote, band)).toBe(false);
+    }
   });
 
   it("keeps general and restricted Runner credits separate", () => {

@@ -994,10 +994,11 @@ describe("Runner core plan modules", () => {
     expect(runnerCoveragePlanHandDisposition(input, provider)).toBe(
       "support_for_need",
     );
-    input.playerView.own.gripOrHq.push({
-      ...provider,
-      instanceId: "second-provider",
-    });
+    const otherProvider = { ...provider, instanceId: "second-provider" };
+    expect(
+      runnerCoveragePlanHandDisposition(input, otherProvider),
+    ).toBeUndefined();
+    input.playerView.own.gripOrHq.push(otherProvider);
     expect(runnerCoveragePlanHandDisposition(input, provider)).toBeUndefined();
   });
 
@@ -2717,6 +2718,28 @@ function context(
     input: {
       side: "runner",
       legalActions: actionCandidates.map((value) => {
+        const boundPreparation = domain.shellTradersPipelines?.find((signal) =>
+          signal.actionIds.includes(value.actionId),
+        );
+        if (boundPreparation) {
+          const target = value.targetContext?.selectedTargets[0];
+          return {
+            actionId: value.actionId,
+            type: "trigger_ability",
+            side: "runner",
+            source: value.sourceCardInstanceId,
+            timingPoint: "runner_action.main",
+            expiresAtStateVersion: 10,
+            label: "Set aside the chosen program",
+            costs: [{ clicks: 1 }],
+            targetRequirements: [],
+            visibility: "private_to_actor",
+            payload: {
+              targetCardId: target?.targetId,
+              targetCardDefinitionId: target?.targetDefinitionId,
+            },
+          };
+        }
         const boundScore = domain.installedAgendaScores?.find((signal) =>
           signal.actionIds.includes(value.actionId),
         );

@@ -9,6 +9,7 @@ import {
 } from "../../plans/runner-funding-contracts";
 import type { EconomyState } from "../economy/economy-types";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { RunnerCreditBankSignal } from "./credit-bank-types";
 
 /** A prefilled, otherwise inert source may fund the existing P6 need.
@@ -117,7 +118,7 @@ export function finiteBankTurnLiquiditySupport(params: {
         (a) =>
           a.actionId === c.actionId &&
           a.source === params.bankId &&
-          a.expiresAtStateVersion === input.playerView.stateVersion,
+          actionMatchesCurrentDecision(input, a),
       )
     );
   });

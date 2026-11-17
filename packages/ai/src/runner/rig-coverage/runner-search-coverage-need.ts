@@ -41,16 +41,26 @@ export function runnerVisibleSearchCoverageNeed(
       (ice) => ice.known && ice.rezzed === true,
     );
     if (!hasKnownRezzedIce) continue;
+    const excludeStealthCredits =
+      server.statuses?.some(
+        (status) =>
+          status.kind === "run_payment_restriction" &&
+          status.restriction === "runner_stealth_bit_payment_sources",
+      ) === true;
     const assessment = assessKnownRezzedIcePath(
       server.ice ?? [],
       playerView.own.rig ?? [],
       runnerRunPathCreditBudgetWithVisiblePools(
         playerView.own.credits,
         playerView.own.rig ?? [],
+        { excludeStealthCredits },
       ),
       server.root ?? [],
       input.playerView.opponent.credits,
-      visibleRunnerPathTraceContext(input),
+      {
+        ...visibleRunnerPathTraceContext(input),
+        excludeStealthTraceCredits: excludeStealthCredits,
+      },
     );
     if (!runnerKnownPathAssessmentIsUnbreakableNoAccess(assessment)) continue;
     const requiredCoverage = missingBreakerCoverageKind(

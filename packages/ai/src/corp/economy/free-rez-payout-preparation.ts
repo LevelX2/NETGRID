@@ -1,10 +1,13 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import { corpRezHostedCreditPayoutProfile } from "../../runtime/corp-canonical-card-facts";
+import {
+  corpImmediateEconomyGainFromHint,
+  corpRezHostedCreditPayoutProfile,
+} from "../../runtime/corp-canonical-card-facts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
-import { corpImmediateEconomyGainFromHint } from "../../runtime/corp-canonical-card-facts";
 import type {
   CorpEconomyParentFundingSignal,
   CorpEconomyDevelopmentSignal,
@@ -72,15 +75,17 @@ export function corpFreeRezPayoutPreparation(
     basic.economyProjection?.netLiquidCreditGain !== 1
   )
     return undefined;
+  const canCompareInstallFunding =
+    (scoreFunding || defenseSetupFunding) &&
+    clicks >= 2 &&
+    !hasUncomparedCurrentFunding(input, candidates);
   const preparations = candidates.flatMap((candidate) => {
     const install = candidate.actionType === "install_card";
     const setupClicks = install ? (1 as const) : (0 as const);
     if (
       (install
-        ? (!scoreFunding && !defenseSetupFunding) ||
-          clicks < 2 ||
-          candidate.semanticActionType !== "install.card" ||
-          hasUncomparedCurrentFunding(input, candidates)
+        ? !canCompareInstallFunding ||
+          candidate.semanticActionType !== "install.card"
         : candidate.semanticActionType !== "corp_window.rez") ||
       !candidate.sourceCardInstanceId ||
       !candidate.sourceDefinitionId ||
@@ -95,7 +100,8 @@ export function corpFreeRezPayoutPreparation(
       !legal ||
       legal.type !== (install ? "install_card" : "rez_card") ||
       (install && legal.payload?.serverId !== "new_remote") ||
-      legal.expiresAtStateVersion !== input.playerView.stateVersion ||
+      legal.source !== candidate.sourceCardInstanceId ||
+      !actionMatchesCurrentDecision(input, legal) ||
       !legal.costs.every((cost) =>
         Object.entries(cost).every(
           ([key, value]) =>

@@ -109,9 +109,11 @@ export function projectRunAccessDecisionModel(
   };
 }
 
+type SemanticSignalTerms = readonly ReadonlySet<string>[];
+
 function runModifiers(
   action: LegalAction,
-  signals: ReadonlySet<string>,
+  signals: SemanticSignalTerms,
 ): RunAccessModifierKind[] {
   const modifiers: RunAccessModifierKind[] = [];
   if (action.payload?.bypassFirstIce === true || hasTerm(signals, "bypass")) {
@@ -136,7 +138,7 @@ function runModifiers(
   return unique(modifiers);
 }
 
-function accessRiskKinds(signals: ReadonlySet<string>): RunAccessRiskKind[] {
+function accessRiskKinds(signals: SemanticSignalTerms): RunAccessRiskKind[] {
   const risks: RunAccessRiskKind[] = [];
   if (hasTerm(signals, "ambush")) risks.push("ambush");
   if (
@@ -165,7 +167,7 @@ function accessRiskKinds(signals: ReadonlySet<string>): RunAccessRiskKind[] {
 }
 
 function accessPayoffKinds(
-  signals: ReadonlySet<string>,
+  signals: SemanticSignalTerms,
 ): RunAccessPayoffKind[] {
   const payoffs: RunAccessPayoffKind[] = [];
   if (
@@ -184,27 +186,23 @@ function accessPayoffKinds(
 
 function semanticSignals(
   candidate: ActionSemanticCandidate,
-): ReadonlySet<string> {
-  return new Set(
-    [
-      ...candidate.cardContextSignals,
-      ...candidate.actionTacticSignals,
-      ...candidate.conditions.map((condition) => condition.kind),
-      ...candidate.risks.map((risk) => risk.kind),
-      ...candidate.constraints.map((constraint) => constraint.kind),
-    ].map((signal) => signal.toLowerCase()),
-  );
+): SemanticSignalTerms {
+  const signals = new Set([
+    ...candidate.cardContextSignals,
+    ...candidate.actionTacticSignals,
+    ...candidate.conditions.map((condition) => condition.kind),
+    ...candidate.risks.map((risk) => risk.kind),
+    ...candidate.constraints.map((constraint) => constraint.kind),
+  ]);
+  return Array.from(signals, semanticTerms);
 }
 
-function hasTerm(signals: ReadonlySet<string>, term: string): boolean {
-  return [...signals].some((signal) => semanticTerms(signal).has(term));
+function hasTerm(signals: SemanticSignalTerms, term: string): boolean {
+  return signals.some((tokens) => tokens.has(term));
 }
 
-function hasTerms(signals: ReadonlySet<string>, ...terms: string[]): boolean {
-  return [...signals].some((signal) => {
-    const tokens = semanticTerms(signal);
-    return terms.every((term) => tokens.has(term));
-  });
+function hasTerms(signals: SemanticSignalTerms, ...terms: string[]): boolean {
+  return signals.some((tokens) => terms.every((term) => tokens.has(term)));
 }
 
 function semanticTerms(value: string): Set<string> {
@@ -233,6 +231,7 @@ function isSuccessfulRunCounterAccessReplacement(
   candidate: ActionSemanticCandidate,
   action: LegalAction,
 ): boolean {
+  const counterDelta = action.payload?.counterDelta;
   return (
     action.side === "runner" &&
     action.type === "trigger_ability" &&
@@ -242,7 +241,9 @@ function isSuccessfulRunCounterAccessReplacement(
     action.payload?.serverId === "rd" &&
     action.payload?.counterSide === "corp" &&
     typeof action.payload?.counterType === "string" &&
-    Number(action.payload?.counterDelta) > 0 &&
+    typeof counterDelta === "number" &&
+    Number.isSafeInteger(counterDelta) &&
+    counterDelta > 0 &&
     action.payload?.cardId === action.source
   );
 }

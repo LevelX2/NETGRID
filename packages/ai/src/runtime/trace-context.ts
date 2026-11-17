@@ -68,6 +68,9 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
   }
   return {
     ...latestTraceContextFromEventTail(input, visibleRunnerLink),
+    ...(input.playerView.traceRulesProfile
+      ? { traceRulesProfile: input.playerView.traceRulesProfile }
+      : {}),
     runnerMaximumPreRevealStrength:
       visibleRunnerEstimate.maximumPreRevealStrength,
   };
@@ -80,12 +83,14 @@ function latestTraceContextFromEventTail(
 ): LatestTraceContext {
   for (const event of input.eventTail.slice().reverse()) {
     if (
-      requiredTraceId !== undefined &&
-      (event.publicPayload.traceId !== requiredTraceId ||
-        event.stateVersionAfter > input.playerView.stateVersion)
+      event.stateVersionAfter > input.playerView.stateVersion ||
+      (requiredTraceId !== undefined &&
+        event.publicPayload.traceId !== requiredTraceId)
     )
       continue;
     const traceLimit = event.publicPayload.traceLimit;
+    const effectiveTraceLimit = event.publicPayload.effectiveTraceLimit;
+    const profile = event.publicPayload.traceRulesProfile;
     const traceValue = event.publicPayload.traceValue;
     const runnerLink = event.publicPayload.runnerLink;
     const corpBid = event.publicPayload.corpBid;
@@ -95,6 +100,7 @@ function latestTraceContextFromEventTail(
     const sourceDefinitionId = event.publicPayload.sourceDefinitionId;
     if (
       typeof traceLimit === "number" ||
+      typeof effectiveTraceLimit === "number" ||
       typeof traceValue === "number" ||
       typeof runnerLink === "number" ||
       typeof corpBid === "number" ||
@@ -108,6 +114,14 @@ function latestTraceContextFromEventTail(
           ? { sourceDefinitionId }
           : {}),
         ...(typeof traceLimit === "number" ? { traceLimit } : {}),
+        ...(typeof effectiveTraceLimit === "number"
+          ? { effectiveTraceLimit }
+          : {}),
+        ...(profile === "modern_open" ||
+        profile === "classic_blind" ||
+        profile === "classic_blind_corp_ties"
+          ? { traceRulesProfile: profile }
+          : {}),
         ...(typeof traceValue === "number" ? { traceValue } : {}),
         ...(typeof runnerLink === "number"
           ? { runnerLink }
@@ -150,11 +164,11 @@ export function visibleRunnerTraceEstimateAtCorpBid(
   const paymentCapacity = Math.max(
     0,
     Math.floor(
-      input.playerView.trace?.visibleOpponentBidCapacity ??
-        (input.side === "runner"
-          ? runnerCredits +
-            (input.playerView.own.runnerTraceSupportQuote?.traceCreditPool ?? 0)
-          : runnerCredits),
+      input.side === "corp"
+        ? (input.playerView.trace?.visibleOpponentBidCapacity ?? runnerCredits)
+        : runnerCredits +
+            (input.playerView.own.runnerTraceSupportQuote?.traceCreditPool ??
+              0),
     ),
   );
 

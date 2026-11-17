@@ -2,6 +2,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import { readExactCurrentInstalledCorpIceRezQuote } from "../../runtime/corp-exact-ice-rez-route";
 import { assessCorpScoreProtection } from "../../runtime/corp-score-protection-assessment";
 import { scoreContinuationClaims } from "./corp-defense-score-reserve";
@@ -59,7 +60,6 @@ export function currentCorpRezOrTrashChoice(
   const choice = input.playerView.pendingChoice;
   const iceId =
     choice && forcedIceRezChoiceIceId(choice.source, choice.stateVersion);
-  const requirement = action.choiceRequirements?.[0];
   if (
     !Number.isSafeInteger(input.playerView.own.credits) ||
     input.playerView.own.credits < 0 ||
@@ -71,23 +71,11 @@ export function currentCorpRezOrTrashChoice(
     choice.side !== "corp" ||
     choice.kind !== "select_option" ||
     choice.visibility !== "public" ||
-    choice.stateVersion !== input.playerView.stateVersion ||
     choice.minSelections !== 1 ||
     choice.maxSelections !== 1 ||
-    action.side !== "corp" ||
-    action.type !== "resolve_choice" ||
-    action.source !== "game_rule" ||
-    action.timingPoint !== input.playerView.timingPoint ||
-    action.expiresAtStateVersion !== choice.stateVersion ||
-    action.choiceRequirements?.length !== 1 ||
-    requirement?.choiceId !== choice.choiceId ||
-    requirement.minSelections !== 1 ||
-    requirement.maxSelections !== 1 ||
-    requirement.optionIds.length !== choice.options.length ||
-    new Set(requirement.optionIds).size !== requirement.optionIds.length ||
+    exactCurrentChoiceAction(input, choice) !== action ||
     choice.options.some(
       (option) =>
-        !requirement.optionIds.includes(option.id) ||
         option.selectable === false ||
         option.value !== option.id ||
         (option.id !== "trash_ice" &&

@@ -6,6 +6,7 @@ import { latestTraceContext } from "./trace-context";
 describe("latestTraceContext", () => {
   it("reads the public trace limit without inventing a starting value", () => {
     const input = traceInput();
+    input.playerView.stateVersion = 2;
     input.eventTail = [
       {
         eventId: "trace-started",
@@ -13,15 +14,42 @@ describe("latestTraceContext", () => {
         stateVersionBefore: 1,
         stateVersionAfter: 2,
         stateHashAfter: "hash",
-        publicPayload: { traceLimit: 5 },
+        publicPayload: {
+          traceLimit: 5,
+          effectiveTraceLimit: 3,
+          traceRulesProfile: "classic_blind",
+        },
       },
     ];
 
     expect(latestTraceContext(input)).toMatchObject({
       traceLimit: 5,
+      effectiveTraceLimit: 3,
+      traceRulesProfile: "classic_blind",
       runnerLink: 0,
     });
     expect(latestTraceContext(input).traceValue).toBeUndefined();
+  });
+
+  it("uses the Runner's own payment capacity in its view", () => {
+    const input = traceInput();
+    input.side = "runner";
+    input.playerView.side = "runner";
+    input.playerView.own.credits = 2;
+    input.playerView.trace = {
+      traceId: "open-trace",
+      sourceDefinitionId: "onr_v1_249_hunter",
+      profile: "modern_open",
+      phase: "runner_bid",
+      printedTrace: 5,
+      effectiveTraceLimit: 5,
+      bidsRevealed: true,
+      corpBidCommitted: true,
+      runnerBidCommitted: false,
+      visibleOpponentBidCapacity: 9,
+    };
+
+    expect(latestTraceContext(input).runnerMaximumPreRevealStrength).toBe(2);
   });
 
   it("includes visible static Runner link before the Runner bid", () => {
