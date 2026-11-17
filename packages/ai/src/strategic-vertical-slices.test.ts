@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { afterEach, describe, expect, it } from "vitest";
 import { bindSyntheticAgendaStealQuotes } from "./agenda-steal-quotes.test-support";
 
@@ -15,6 +16,7 @@ import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfoli
 import type { AiDecisionInputWithDeckCapabilities } from "./runtime/ai-decision-input";
 import type {
   AiDecisionInput,
+  CardDefinitionId,
   LegalAction,
   PlayerView,
   PublicGameEvent,
@@ -211,7 +213,7 @@ describe("Deck strategy runtime vertical slices", () => {
     const score = legalAction("score-agenda", "corp", "score_agenda", "Score", {
       source: scoringAgenda.instanceId,
       payload: {
-        serverId: "remote_1",
+        serverId: "r1",
         cardId: scoringAgenda.instanceId,
         sourceCardId: scoringAgenda.instanceId,
       },
@@ -226,7 +228,7 @@ describe("Deck strategy runtime vertical slices", () => {
         server("hq"),
         server("rd"),
         server("archives"),
-        server("remote_1", [], [scoringAgenda]),
+        server("r1", [], [scoringAgenda]),
       ],
       targetVector: {
         kind: "scoreline",
@@ -248,7 +250,7 @@ describe("Deck strategy runtime vertical slices", () => {
       {
         source: exposedAgenda.instanceId,
         payload: {
-          serverId: "remote_1",
+          serverId: "r1",
           sourceCardId: exposedAgenda.instanceId,
         },
       },
@@ -268,7 +270,7 @@ describe("Deck strategy runtime vertical slices", () => {
         server("hq"),
         server("rd"),
         server("archives"),
-        server("remote_1", [], [exposedAgenda]),
+        server("r1", [], [exposedAgenda]),
       ],
       targetVector: {
         kind: "scoreline",
@@ -295,7 +297,7 @@ describe("Deck strategy runtime vertical slices", () => {
     expect(contestableDecision.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:corp.score_agenda",
-        "plan_assessment_evidence:corp_exposed_agenda_progress_preserves_conversion_clock:remote_1",
+        "plan_assessment_evidence:corp_exposed_agenda_progress_preserves_conversion_clock:r1",
       ]),
     );
   });
@@ -362,14 +364,14 @@ describe("Deck strategy runtime vertical slices", () => {
           cardId: expensiveIce.instanceId,
           sourceDefinitionId: 449,
           placement: "ice",
-          serverId: "remote_1",
+          serverId: "r1",
           iceInstallBaseCost: 0,
           iceInstallAdditionalCost: 0,
           iceInstallReduction: 0,
           iceInstallTotalCost: 0,
           postInstallRezQuoteCardId: expensiveIce.instanceId,
-          postInstallRezQuoteTargetServerId: "remote_1",
-          postInstallRezQuoteProjectedServerId: "remote_1",
+          postInstallRezQuoteTargetServerId: "r1",
+          postInstallRezQuoteProjectedServerId: "r1",
           postInstallRezQuoteExpiresAtStateVersion: 1,
           postInstallRezQuoteComplete: true,
           postInstallRezQuoteCostKind: "fixed",
@@ -396,7 +398,7 @@ describe("Deck strategy runtime vertical slices", () => {
         server("hq"),
         server("rd"),
         server("archives"),
-        server("remote_1"),
+        server("r1"),
       ],
       targetVector: {
         kind: "coverage",
@@ -428,7 +430,7 @@ describe("Deck strategy runtime vertical slices", () => {
       "runner",
       "start_run",
       "Run remote",
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const draw = legalAction("draw", "runner", "draw_card", "Draw");
     const remoteInput = strategicInput({
@@ -441,7 +443,7 @@ describe("Deck strategy runtime vertical slices", () => {
         server("rd"),
         server("archives"),
         server(
-          "remote_1",
+          "r1",
           [],
           [
             visibleCard("agenda", "corp", "agenda", {
@@ -453,7 +455,7 @@ describe("Deck strategy runtime vertical slices", () => {
       ],
       targetVector: {
         kind: "remote",
-        targetId: "remote_1",
+        targetId: "r1",
         evidence: ["dsr08:runner_remote_contest"],
       },
       strategyId: "runner.remote_contest",
@@ -471,12 +473,12 @@ describe("Deck strategy runtime vertical slices", () => {
       gripOrHq: [],
       servers: [server("hq"), server("rd"), server("archives")],
       publicEvents: [
-        publicEvent("damage-seen", "net_damage", 12, {
+        publicEvent("net_damage", 12, {
           actor: "corp",
           actionType: "net_damage",
           damageType: "net",
           sourceTitle: "Dedicated Response Team",
-          sourceDefinitionId: "onr_v1_076_dedicated-response-team",
+          sourceDefinitionId: syntheticCardDefinitionId("onr_v1_076_dedicated-response-team"),
         }),
       ],
       targetVector: {
@@ -486,7 +488,7 @@ describe("Deck strategy runtime vertical slices", () => {
       strategyId: "runner.remote_contest",
     });
 
-    bindSyntheticAgendaStealQuotes(remoteInput, "remote_1", 0, { agenda: 0 });
+    bindSyntheticAgendaStealQuotes(remoteInput, "r1", 0, { agenda: 0 });
     const remoteDecision = chooseRunnerAction(remoteInput, {
       runnerTurnPlannerMode: "legacy_compare",
     });
@@ -703,7 +705,7 @@ function visibleCard(
   const { type: _ignoredType, ...safeOverrides } = overrides;
   return {
     instanceId,
-    definitionId: overrides.definitionId ?? instanceId,
+    definitionId: overrides.definitionId ?? syntheticCardDefinitionId(instanceId),
     title: overrides.title ?? instanceId,
     owner,
     controller: owner,
@@ -716,7 +718,7 @@ function visibleCard(
 function visibleIdentity(side: Side): PlayerView["own"]["identity"] {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: syntheticCardDefinitionId(`${side}-identity`),
     title: `${side} identity`,
     owner: side,
     controller: side,
@@ -726,11 +728,11 @@ function visibleIdentity(side: Side): PlayerView["own"]["identity"] {
 }
 
 function publicEvent(
-  eventId: string,
   type: PublicGameEvent["type"],
   stateVersionAfter: number,
   publicPayload: PublicGameEvent["publicPayload"],
 ): PublicGameEvent {
+  const eventId = stateVersionAfter + 1;
   return {
     eventId,
     type,
@@ -745,7 +747,7 @@ function publicEvent(
 function snapshot(
   deckSnapshotId: string,
   side: Side,
-  cards: Array<[cardId: string, quantity: number]>,
+  cards: Array<[cardId: CardDefinitionId, quantity: number]>,
 ): AiDeckStrategyDeckSnapshot {
   return {
     deckSnapshotId,
@@ -758,6 +760,8 @@ function productiveStrategyProfile(
   snapshot: AiDeckStrategyDeckSnapshot,
   strategyId: string,
 ): AiDeckStrategyProfile {
+  const [anchor] = snapshot.cards;
+  if (!anchor) throw new Error("Strategy fixture requires a deck anchor");
   const cardCount = snapshot.cards.reduce(
     (sum, card) => sum + Math.max(0, card.quantity),
     0,
@@ -781,7 +785,7 @@ function productiveStrategyProfile(
         runtimeBlockers: [],
         anchorEvidence: [
           {
-            cardId: snapshot.cards[0]?.cardId ?? "dsr08-anchor",
+            cardId: anchor.cardId,
             quantity: 1,
             source: "derivedStrategyAnchor",
             strategyId,

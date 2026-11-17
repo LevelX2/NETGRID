@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
+import type { CardDefinitionId } from "@netgrid/shared";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import standardDeckCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import { buildRunnerDeckEngineDoctrine } from "./runner-deck-engine-doctrine";
@@ -14,7 +16,7 @@ vi.mock(import("./ai-hints"), async (importOriginal) => {
   };
 });
 
-const AI_HINTS_BY_CARD = mockedHints as Map<string, AiCardHint>;
+const AI_HINTS_BY_CARD = mockedHints as Map<CardDefinitionId, AiCardHint>;
 
 describe("runner deck engine doctrine", () => {
   it("derives the Shell-game engine generically from providers and dependencies", () => {
@@ -160,10 +162,10 @@ describe("runner deck engine doctrine", () => {
   });
 
   it("binds recovery and compatible recurring economy only from structured facts", () => {
-    const recoveryId = "test-structured-top-trash-recovery";
-    const breakerCreditId = "test-structured-non-noisy-breaker-credit";
-    const killerCreditId = "test-structured-killer-credit";
-    const legacyOnlyId = "test-legacy-runner-support-signals";
+    const recoveryId = syntheticCardDefinitionId("test-structured-top-trash-recovery");
+    const breakerCreditId = syntheticCardDefinitionId("test-structured-non-noisy-breaker-credit");
+    const killerCreditId = syntheticCardDefinitionId("test-structured-killer-credit");
+    const legacyOnlyId = syntheticCardDefinitionId("test-legacy-runner-support-signals");
     const doctrine = withAiHints(
       [
         structuredHint(recoveryId, "resource", {
@@ -297,7 +299,7 @@ function standardDeck(standardDeckId: string): AiDeckStrategyDeckSnapshot {
 }
 
 function structuredHint(
-  cardId: string,
+  cardId: CardDefinitionId,
   cardType: string,
   effect?: NonNullable<AiCardHint["effects"]>[number],
 ): AiCardHint {
@@ -330,7 +332,7 @@ function withAiHints<T>(hints: readonly AiCardHint[], run: () => T): T {
 
 function removeCards(
   snapshot: AiDeckStrategyDeckSnapshot,
-  cardIds: string[],
+  cardIds: CardDefinitionId[],
 ): AiDeckStrategyDeckSnapshot {
   return {
     ...snapshot,

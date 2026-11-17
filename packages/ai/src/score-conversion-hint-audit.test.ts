@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { CardDefinitionId } from "@netgrid/shared";
 import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
 
 type ActiveHint = (typeof generatedArtifact.cards)[number]["hint"];
@@ -132,7 +133,7 @@ describe("Corp score-conversion hint audit", () => {
   });
 });
 
-function requiredHint(cardId: string): ActiveHint {
+function requiredHint(cardId: CardDefinitionId): ActiveHint {
   const hint = hintsByCard.get(cardId);
   expect(hint, `missing active AI hint for ${cardId}`).toBeDefined();
   return hint!;

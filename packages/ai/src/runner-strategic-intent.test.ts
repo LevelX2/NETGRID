@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { CardDefinitionId } from "@netgrid/shared";
 
 import benchmarkSnapshotsData from "../../../data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json";
 import standardDeckCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
@@ -6,12 +7,6 @@ import { buildDeckCapabilityProfile } from "./deck-capabilities";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 import { buildRunnerStrategicIntentProfile } from "./runner-strategic-intent";
-
-const benchmarkSnapshots = benchmarkSnapshotsData.snapshots as Array<{
-  deckSnapshotId: string;
-  side: "runner" | "corp";
-  cards: Array<{ cardId: string; quantity: number }>;
-}>;
 
 describe("Runner StrategicIntentProjection", () => {
   it("projects King of the Road through its explicit conditional access line", () => {
@@ -406,7 +401,7 @@ function runnerStrategicIntentForSnapshot(
 
 function syntheticSnapshot(
   deckSnapshotId: string,
-  cards: Array<[cardId: string, quantity: number]>,
+  cards: Array<[cardId: CardDefinitionId, quantity: number]>,
 ): AiDeckStrategyDeckSnapshot {
   return {
     deckSnapshotId,
@@ -416,10 +411,11 @@ function syntheticSnapshot(
 }
 
 function benchmarkSnapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
-  const snapshot = benchmarkSnapshots.find(
+  const snapshot = benchmarkSnapshotsData.snapshots.find(
     (candidate) => candidate.deckSnapshotId === snapshotId,
   );
-  if (!snapshot) throw new Error(`Missing benchmark snapshot ${snapshotId}`);
+  if (!snapshot || (snapshot.side !== "runner" && snapshot.side !== "corp"))
+    throw new Error(`Invalid benchmark snapshot ${snapshotId}`);
   return {
     deckSnapshotId: snapshot.deckSnapshotId,
     side: snapshot.side,
