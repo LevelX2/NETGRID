@@ -179,7 +179,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       rezzed: false,
     });
     state.eventLog.push({
-      eventId: "fixture-known-hq-agenda",
+      eventId: (state.stateVersion) + 1,
       type: "access_card",
       turnSerial: 2,
       stateVersionBefore: state.stateVersion - 1,
@@ -431,7 +431,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
         snapshot.input.legalActions.some(
           (action) =>
             action.type === "play_operation" &&
-            String(action.source).includes(508),
+            String(action.source).includes("508"),
         ) ||
         snapshot.input.playerView.pendingChoice?.source.startsWith(
           "v1922.corp_archives_to_hq:",
@@ -447,7 +447,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       actionSequence.some(
         (entry) =>
           entry.actionType === "play_operation" &&
-          entry.selectedActionId?.includes(508),
+          entry.selectedActionId?.includes("508"),
       ),
     ).toBe(false);
     expect(
@@ -456,7 +456,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
           .find(
             (entry) => entry.stateVersionBefore === capture.state.stateVersion,
           )
-          ?.selectedActionId?.includes(508),
+          ?.selectedActionId?.includes("508"),
       ),
     ).toBeUndefined();
     expect(
@@ -478,7 +478,7 @@ type StandardDeck = {
   name: string;
   side: "runner" | "corp";
   identityCardId: number;
-  cards: Array<{ cardId: string; quantity: number }>;
+  cards: Array<{ cardId: number; quantity: number }>;
   cardPoolSnapshotId: string;
   cardPoolVersion: string;
   formatProfileId: string;
