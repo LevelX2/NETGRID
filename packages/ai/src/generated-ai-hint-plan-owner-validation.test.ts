@@ -15,14 +15,14 @@ describe("generated AI-hint plan-owner validation", () => {
       route: "cash_out",
     });
     expect(() => validateGeneratedArtifact(duplicate)).toThrow(
-      "invalid_card_spec_ai_hint_artifact_hint:onr_v1_154_broker",
+      "invalid_card_spec_ai_hint_artifact_hint:366",
     );
 
     const forged = artifactWithBrokerBindings();
     brokerHint(forged).actionPlanOwnerBindings[0]!.owner = "corp.score_agenda";
     delete brokerHint(forged).actionPlanOwnerBindings[0]!.route;
     expect(() => validateGeneratedArtifact(forged)).toThrow(
-      "invalid_card_spec_ai_hint_artifact_hint:onr_v1_154_broker",
+      "invalid_card_spec_ai_hint_artifact_hint:366",
     );
   });
 

@@ -121,7 +121,7 @@ function fixture(payouts: number, killer = true): GameState {
     getLegalActions(state, "runner").find(
       (a) =>
         a.type === "install_card" &&
-        a.source.includes("top-runners-conference"),
+        state.cardInstances[a.source]?.definitionId === CONFERENCE,
     )!,
   );
   for (let n = 0; n < payouts; n++) {

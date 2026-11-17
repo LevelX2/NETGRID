@@ -72,7 +72,7 @@ it("binds the native reactive grip replacement to the existing defense owner", (
   expect(decision.selectedChoices).toEqual({
     choiceId: input.playerView.pendingChoice.choiceId,
     selectedOptionIds: [
-      "grip_meat_damage_replacement_runner_170_1",
+      "grip_meat_damage_replacement_c11t",
     ],
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
@@ -146,7 +146,7 @@ it.each([1, 7])(
     expect(state.runner.grip).toHaveLength(handSize);
     const operation = getLegalActions(state, "corp").find(
       (a) =>
-        a.type === "play_operation" && a.source?.includes("scorched-earth"),
+        a.type === "play_operation" && state.cardInstances[a.source]?.definitionId === 514,
     )!;
     const damage = applyAction(state, {
       matchId: state.matchId,
@@ -165,7 +165,7 @@ it.each([1, 7])(
       (option) => option.metadata?.optionKind === "play_identity_donor",
     )?.metadata?.sourceCardInstanceId;
     expect(replacementSource).toBe(
-      damage.state.runner.grip.find((id) => id.includes("identity-donor")),
+      damage.state.runner.grip.find((id) => damage.state.cardInstances[id]?.definitionId === 170),
     );
     const decision = chooseAiAction(input);
     const action = {
@@ -188,9 +188,7 @@ it.each([1, 7])(
     expect(resolved.state.winner).toBeNull();
     expect(resolved.state.runner.grip).toHaveLength(handSize - 1);
     expect(resolved.state.corp.badPublicity).toBe(2);
-    expect(
-      resolved.state.runner.heap.some((id) => id.includes("identity-donor")),
-    ).toBe(true);
+    expect(resolved.state.runner.heap).toContain(replacementSource);
     const replay = applyAction(damage.state, action);
     if (!replay.ok) throw Error(replay.error.message);
     expect(hashGameState(replay.state)).toBe(hashGameState(resolved.state));

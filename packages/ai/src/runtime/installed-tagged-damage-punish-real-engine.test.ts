@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import { readFileSync } from "node:fs";
 import {
   applyAction,
@@ -20,7 +21,7 @@ import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfol
 import { buildAiDecisionInput } from "./ai-decision-input";
 
 const SQUAD = 554;
-const CAPABILITY = `${SQUAD}:abilities_activated_corp_main_damage`;
+const CAPABILITY = canonicalCapabilityId(SQUAD, capabilityKey("abilities_activated_corp_main_damage"));
 const entry = catalog.decks.find(
   (d) => d.standardDeckId === "standard_corp_neon_guillotine",
 )!;

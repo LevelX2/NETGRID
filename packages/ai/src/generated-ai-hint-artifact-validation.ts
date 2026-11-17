@@ -1,4 +1,3 @@
-import { isCardDefinitionId } from "@netgrid/shared";
 import { cardSupportAiSupportedData } from "@netgrid/runtime-data/card-support";
 import {
   CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION,
@@ -34,7 +33,7 @@ export function validateGeneratedArtifact(
       "fnv1a64x2:card-spec-ai-hint-evidence-v2:",
     ) ||
     !Array.isArray(artifact.cardIds) ||
-    artifact.cardIds.some((cardId) => !isCardDefinitionId(cardId)) ||
+    artifact.cardIds.some((cardId) => typeof cardId !== "number") ||
     !Array.isArray(artifact.cards) ||
     supportedCardIds.size === 0 ||
     artifact.cardIds.length !== supportedCardIds.size ||
@@ -45,7 +44,7 @@ export function validateGeneratedArtifact(
     artifact.cards.some(
       (record: unknown) =>
         !isRecord(record) ||
-        !isCardDefinitionId(record.cardId) ||
+        !supportedCardIds.has(record.cardId as number) ||
         typeof record.cardRulesFingerprint !== "string" ||
         typeof record.planningAnnotationsFingerprint !== "string" ||
         !isRecord(record.hint),
