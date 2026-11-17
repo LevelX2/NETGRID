@@ -1366,13 +1366,13 @@ function validTraceHardwareTrashResolution(value: unknown): boolean {
     r.kind === "trace_hardware_trash" &&
     knownNonNegativeInteger(r.sourceStateVersion) &&
     knownNonNegativeInteger(r.subroutineIndex) &&
+    isCardDefinitionId(r.sourceDefinitionId) &&
     [
       r.choiceId,
       r.choiceSource,
       r.traceId,
       r.runId,
       r.sourceIceInstanceId,
-      r.sourceDefinitionId,
       r.selectedOptionId,
       r.targetCardInstanceId,
     ].every(nonEmptyString) &&
