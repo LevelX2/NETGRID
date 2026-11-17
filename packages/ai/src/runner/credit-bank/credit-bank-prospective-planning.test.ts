@@ -207,6 +207,7 @@ describe("runner credit-bank prospective planning", () => {
       rematerializedRunnerCreditBankBuildCandidate(plan, [
         sibling,
         cashOut,
+        { ...exact, actorSide: "corp" },
         exact,
       ]),
     ).toBe(exact);
@@ -244,6 +245,7 @@ function candidate(params: {
   route: "build" | "cash_out";
 }): ActionSemanticCandidate {
   return {
+    actorSide: "runner",
     actionId: params.actionId,
     sourceDefinitionId: "onr_v1_154_broker",
     sourceCardInstanceId: params.sourceCardInstanceId,

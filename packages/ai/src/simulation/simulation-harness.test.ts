@@ -190,6 +190,7 @@ describe("AI simulation harness", () => {
         side: "runner",
         stateVersionBefore: 2,
         actionType: "start_run",
+        runnerRunStarted: true,
         reasonCode: "runner.plan.pressure_rnd",
         explanation: "metric fixture",
         confidence: 0.7,
@@ -203,7 +204,8 @@ describe("AI simulation harness", () => {
       {
         side: "runner",
         stateVersionBefore: 3,
-        actionType: "start_run",
+        actionType: "play_event",
+        runnerRunStarted: true,
         reasonCode: "runner.plan.pressure_rnd",
         explanation: "metric fixture",
         confidence: 0.7,

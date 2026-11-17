@@ -60,6 +60,9 @@ export function buildCandidatePathBinding(
       `candidate_path_binding_state_version_invalid:${input.stateVersion}`,
     );
   }
+  if (input.side !== "runner" && input.side !== "corp") {
+    throw new RangeError("candidate_path_binding_side_invalid");
+  }
   const hardGates = [...(input.hardGates ?? [])].sort();
   const blockers = bindingBlockers(input, hardGates);
   const hardGateSummary =
@@ -108,28 +111,38 @@ export function buildCandidatePathBinding(
     ],
   };
   if (!candidatePathBindingIsRedactionSafe(binding)) {
-    const { actionId: _actionId, ...redactedBinding } = binding;
     return {
-      ...redactedBinding,
+      schemaVersion: "candidate-path-binding-v1",
+      bindingKey: `blocked:hidden-info:${input.side}:${input.stateVersion}`,
+      signatureKey: "hidden_blocked",
       redactedActionRef: "redacted:hidden-info-blocked",
+      stateVersion: input.stateVersion,
+      actionType: "hidden_blocked",
+      side: input.side,
       targetIdentity: "hidden_blocked",
       costClass: "hidden_blocked",
       timingClass: "hidden_blocked",
+      hardGateSummary: "blocked:hidden_info_marker_detected",
+      riskGateSummary: "hidden_blocked",
+      intentContractId: "hidden_blocked",
       proofStatus: "blocked",
-      blockers: [
-        ...new Set([...binding.blockers, "hidden_info_marker_detected"]),
-      ],
-      evidence: [
-        ...binding.evidence,
-        "binding_redacted_after_hidden_marker_scan",
-      ],
+      blockers: ["hidden_info_marker_detected"],
+      evidence: ["binding_redacted_after_hidden_marker_scan"],
     };
   }
   return binding;
 }
 
 export function candidatePathBindingIsRedactionSafe(value: unknown): boolean {
-  return !candidatePathBindingContainsHiddenInfoMarker(JSON.stringify(value));
+  try {
+    const serialized = JSON.stringify(value);
+    return (
+      typeof serialized === "string" &&
+      !candidatePathBindingContainsHiddenInfoMarker(serialized)
+    );
+  } catch {
+    return false;
+  }
 }
 
 function bindingBlockers(

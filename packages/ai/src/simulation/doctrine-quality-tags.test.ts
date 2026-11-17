@@ -197,7 +197,7 @@ function decision(): AiDecision {
 function centralRun(reasonCode: string) {
   return {
     side: "runner",
-    actionType: "start_run",
+    runnerRunStarted: true as const,
     targetServerId: "rd",
     reasonCode,
   } as const;

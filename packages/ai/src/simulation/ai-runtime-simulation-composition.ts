@@ -23,23 +23,14 @@ type RunnerSemanticSupportOutputs = ReturnType<
 type RuntimeRunnerSupportDependencyKeys =
   | keyof RunnerSemanticSupportOutputs
   | "badPublicityOrTraceTechCard"
-  | "bankHasConcreteFundingNeed"
-  | "bankInvestmentCommitmentEvidence"
-  | "bankInvestmentCommitmentScoreComponents"
   | "randomBreakOrDamageRiskEvidenceForAction"
   | "cardAddressesVisibleBreakerNeed"
   | "evaluationForAction"
-  | "handFundingTarget"
   | "loanLiabilityAssessment"
   | "multiRunEventScoreComponent"
   | "muPressureActionEvidence"
   | "muPressureFundingScoreComponent"
   | "muPressureInstallScoreComponent"
-  | "noRunEconomyCommitmentEvidence"
-  | "noRunEconomyCommitmentScoreComponents"
-  | "persistentInstallEvidenceForAction"
-  | "persistentInstallFitScoreComponent"
-  | "planMemoryActionExclusion"
   | "programInstallDisplacementPenalty"
   | "programInstallTrashAssessmentForAction"
   | "riskAssessment"
@@ -63,7 +54,7 @@ export type AiRuntimeSimulationCompositionDependencies =
   AiLiveRuntimeCompositionDependencies &
     Omit<
       RunnerSemanticSupportCompositionDependencies,
-      RuntimeContextDiagnosticsDependencyKeys | "previousPlan"
+      RuntimeContextDiagnosticsDependencyKeys
     > &
     Omit<
       AiSimulationCompositionDependencies,
@@ -102,10 +93,9 @@ export function createAiRuntimeSimulationComposition(
 ) {
   const contextDiagnostics =
     createAiContextDiagnosticsComposition(dependencies);
-  const runnerSupport = createRunnerSemanticSupportComposition({
-    ...createRuntimeComposedDependencies(dependencies, contextDiagnostics),
-    previousPlan: () => undefined,
-  });
+  const runnerSupport = createRunnerSemanticSupportComposition(
+    createRuntimeComposedDependencies(dependencies, contextDiagnostics),
+  );
   const { tagPunishWindowDiagnosticsForSimulationAction } =
     createCorpTagPunishWindowComposition(
       createRuntimeComposedDependencies(dependencies, contextDiagnostics),

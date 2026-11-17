@@ -54,6 +54,40 @@ describe("runner run funding admission", () => {
       targetDirectlyConvertible: false,
     });
   });
+  it("does not use a credit route to cover a missing hand buffer", () => {
+    const target = runTarget("run-remote", "remote_1", {
+      pathPassability: "reachable",
+      creditsAfterRun: 1,
+      score: 500,
+      scoreThreat: true,
+      routeQuote: routeQuote(2),
+    });
+    target.prerunReserveQuote = {
+      ...target.prerunReserveQuote!,
+      status: "information_probe_only",
+      handBufferGap: 1,
+    };
+
+    expect(
+      assessRunnerRunFundingAdmission({
+        input: admissionInput(),
+        target,
+        runTargets: [target],
+        economy: { minimumCreditFloor: 3 },
+      }),
+    ).toMatchObject({
+      admitted: false,
+      reasonCode: "target_not_credit_convertible",
+    });
+    target.routeQuote = routeQuote(0);
+    expect(
+      runnerRunTargetIsDirectlyConvertible({
+        target,
+        economy: { minimumCreditFloor: 0 },
+      }),
+    ).toBe(false);
+  });
+
   it("rejects funding when the target already converts while preserving the floor", () => {
     const target = runTarget("run-remote", "remote_1", {
       pathPassability: "reachable",

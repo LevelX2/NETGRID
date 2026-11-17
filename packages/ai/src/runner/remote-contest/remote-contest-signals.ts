@@ -319,7 +319,6 @@ function runnerSameTurnAccessRemotePreparationSignals(
       exactRoute.candidate.actionId,
       target,
       {
-        economy,
         candidates,
         minimumHandBuffer: runnerDefenseHandBufferFacts(
           input,

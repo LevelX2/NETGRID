@@ -4,9 +4,6 @@ import { classifyTagSourceFromOntology } from "../tag-punish-ontology-consumer";
 export type ServerFeatures = {
   iceCount: number;
   rootCount: number;
-  knownRootCount: number;
-  unrezzedRootCount: number;
-  rezzedRootCount: number;
 };
 
 export function buildServerFeatures(
@@ -18,11 +15,6 @@ export function buildServerFeatures(
       {
         iceCount: server.ice.length,
         rootCount: server.root.length,
-        knownRootCount: server.root.filter((card) => card.known).length,
-        unrezzedRootCount: server.root.filter((card) => card.rezzed !== true)
-          .length,
-        rezzedRootCount: server.root.filter((card) => card.rezzed === true)
-          .length,
       },
     ]),
   );

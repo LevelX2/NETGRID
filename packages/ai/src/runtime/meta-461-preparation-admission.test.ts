@@ -62,7 +62,6 @@ describe("real preparation admission in meta 461", () => {
         preparation.actionId,
         target,
         {
-          economy: buildRunnerEconomyPosture({ input: input }),
           candidates: preparationCandidates(input),
           minimumHandBuffer: 0,
         },
@@ -79,7 +78,6 @@ describe("real preparation admission in meta 461", () => {
         preparation.actionId,
         fundedTarget,
         {
-          economy: buildRunnerEconomyPosture({ input: funded }),
           candidates: preparationCandidates(funded),
           minimumHandBuffer: 0,
         },
@@ -91,7 +89,6 @@ describe("real preparation admission in meta 461", () => {
         preparation.actionId,
         { ...fundedTarget, accessPayoff: "unknown" },
         {
-          economy: buildRunnerEconomyPosture({ input: funded }),
           candidates: preparationCandidates(funded),
           minimumHandBuffer: funded.playerView.own.gripOrHq.length - 1,
         },
@@ -103,7 +100,6 @@ describe("real preparation admission in meta 461", () => {
         preparation.actionId,
         { ...fundedTarget, accessPayoff: "unknown" },
         {
-          economy: buildRunnerEconomyPosture({ input: funded }),
           candidates: preparationCandidates(funded),
           minimumHandBuffer: funded.playerView.own.gripOrHq.length,
         },
@@ -116,7 +112,6 @@ describe("real preparation admission in meta 461", () => {
         preparation.actionId,
         fundedTarget,
         {
-          economy: buildRunnerEconomyPosture({ input: funded }),
           candidates: preparationCandidates(funded),
           minimumHandBuffer: 0,
         },
@@ -131,7 +126,6 @@ describe("real preparation admission in meta 461", () => {
         preparation.actionId,
         information,
         {
-          economy: buildRunnerEconomyPosture({ input: input }),
           candidates: preparationCandidates(input),
           minimumHandBuffer: 0,
         },
@@ -151,7 +145,6 @@ describe("real preparation admission in meta 461", () => {
         preparation.actionId,
         replacingEvent,
         {
-          economy: buildRunnerEconomyPosture({ input: funded }),
           candidates: preparationCandidates(funded),
           minimumHandBuffer: 0,
         },

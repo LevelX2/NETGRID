@@ -82,7 +82,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
       secondDamagePreventionJson,
     ],
   ])("uses Force Shield at %s", (_label, json) => {
-    expectCheckpointToPass(fixture(json));
+    expectCheckpointToPass(currentDamagePreventionFixture(json));
   });
 
   it("retains the unique path tools at the historical D93 discard", () => {
@@ -202,6 +202,36 @@ function mutateFixture(
   mutation(result);
   result.engine.stateHash = hashGameState(result.engine.testOnlyGameState);
   return result;
+}
+
+function currentDamagePreventionFixture(value: unknown): AiDecisionCheckpointV1 {
+  return mutateFixture(value, (checkpoint) => {
+    const { imminentEvent, eventModificationWindow, pendingChoice } =
+      checkpoint.engine.testOnlyGameState;
+    if (
+      imminentEvent?.eventType !== "damage" ||
+      eventModificationWindow?.kind !== "prevent" ||
+      eventModificationWindow.side !== "runner" ||
+      pendingChoice?.source !== "v120.event_modification.prevent" ||
+      pendingChoice.side !== "runner"
+    ) {
+      throw new Error("Missing captured Runner damage prevention window");
+    }
+    for (const option of pendingChoice.options) {
+      if (option.id === "pass") continue;
+      const candidate = eventModificationWindow.candidates.find(
+        ({ candidateId, eventId }) =>
+          candidateId === option.id && eventId === imminentEvent.eventId,
+      );
+      const amount = candidate?.preventAmount;
+      if (typeof amount !== "number" || !Number.isSafeInteger(amount) || amount <= 0) {
+        throw new Error("Missing captured damage prevention amount");
+      }
+      option.metadata = { optionKind: "prevent_damage", amount };
+    }
+    checkpoint.source.kind = "synthetic_companion";
+    checkpoint.source.findingId += "-CURRENT-CHOICE-METADATA";
+  });
 }
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {

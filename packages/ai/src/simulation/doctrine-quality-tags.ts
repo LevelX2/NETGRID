@@ -1,3 +1,4 @@
+import { actionHasImmediateCreditGain } from "../actions/action-effect-classification";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
   type AiDecision,
@@ -31,7 +32,7 @@ const DOCTRINE_CASE_HIDDEN_INFO_MARKERS = FORBIDDEN_AI_INPUT_FIELDS.map(
 
 type CentralRunActionSequenceEntry = {
   side?: string;
-  actionType?: string;
+  runnerRunStarted?: true;
   targetServerId?: string;
   reasonCode: string;
 };
@@ -125,7 +126,7 @@ export function qualityTagsForActionWithDependencies(
     );
   const lowCredits = input.playerView.own.credits <= 1;
   const economyAction =
-    action.type === "gain_credit" ||
+    actionHasImmediateCreditGain(action) ||
     ((action.type === "play_event" || action.type === "play_operation") &&
       roleListHasEconomyOrTempo(dependencies.rolesForAction(input, action)));
   const economyStallExempt = isEconomyStallExemptAction(
@@ -267,26 +268,32 @@ export function isAgendaFloodExposureExemptAction(
 export function repeatedLowValueCentralRunTags(
   actionSequence: readonly CentralRunActionSequenceEntry[],
 ): string[] {
-  const tags: string[] = [];
+  return repeatedLowValueCentralRunIndexes(actionSequence).map(
+    () => "repeated_low_value_central_run",
+  );
+}
+
+function repeatedLowValueCentralRunIndexes(
+  actionSequence: readonly CentralRunActionSequenceEntry[],
+): number[] {
+  const indexes: number[] = [];
   const lastCentralRunByServer = new Map<string, number>();
   for (const [index, entry] of actionSequence.entries()) {
     if (
       entry.side !== "runner" ||
-      entry.actionType !== "start_run" ||
+      entry.runnerRunStarted !== true ||
       !entry.targetServerId ||
       !["rd", "hq", "archives"].includes(entry.targetServerId)
-    )
-      continue;
+    ) continue;
     const previous = lastCentralRunByServer.get(entry.targetServerId);
     if (
       previous !== undefined &&
       index - previous <= 4 &&
       !reasonCodeMatchesAny(entry.reasonCode, ["contest", "trash"])
-    )
-      tags.push("repeated_low_value_central_run");
+    ) indexes.push(index);
     lastCentralRunByServer.set(entry.targetServerId, index);
   }
-  return tags;
+  return indexes;
 }
 
 export function doctrineMetricsFor(tags: string[]): AiDoctrineQualityMetrics {
@@ -356,27 +363,14 @@ export function collectRepeatedLowValueCentralRunExamples(
   maxExamplesPerMetric: number,
 ): void {
   const metric: AiDoctrineQualityMetricName = "repeatedLowValueCentralRun";
-  const lastCentralRunByServer = new Map<string, number>();
-  for (const [actionIndex, entry] of summary.actionSequence.entries()) {
-    if (
-      entry.side !== "runner" ||
-      entry.actionType !== "start_run" ||
-      !entry.targetServerId ||
-      !["rd", "hq", "archives"].includes(entry.targetServerId)
-    )
-      continue;
-    const previous = lastCentralRunByServer.get(entry.targetServerId);
-    if (
-      previous !== undefined &&
-      actionIndex - previous <= 4 &&
-      !reasonCodeMatchesAny(entry.reasonCode, ["contest", "trash"]) &&
-      examples[metric].length < maxExamplesPerMetric
-    ) {
-      examples[metric].push(
-        doctrineCaseExample(summary.seed, actionIndex, entry, metric),
-      );
-    }
-    lastCentralRunByServer.set(entry.targetServerId, actionIndex);
+  const available = maxExamplesPerMetric - examples[metric].length;
+  if (available <= 0) return;
+  for (const actionIndex of repeatedLowValueCentralRunIndexes(
+    summary.actionSequence,
+  ).slice(0, available)) {
+    examples[metric].push(
+      doctrineCaseExample(summary.seed, actionIndex, summary.actionSequence[actionIndex]!, metric),
+    );
   }
 }
 

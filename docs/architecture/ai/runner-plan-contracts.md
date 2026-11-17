@@ -4671,10 +4671,9 @@ Die gebundene generische Ausführung bleibt zuständig. CardSpec-Installchoices
 mit `requires_engine_quote` behalten ihre bisherige Projektionsgrenze; daraus
 folgt keine neue Choice-Unterstützung durch das Verschieben der Dateien.
 
-Der vorhandene `runtime/runner-bank-investment-context.ts` gehört zur separat
-verdrahteten Economy-Commitment-/Score-Oberfläche und ist nicht der Produzent
-der hier beschriebenen Plan-first-Bankphasen. Seine Composition-Pass-throughs
-werden durch diesen Schnitt weder zur Autorität erhoben noch bereinigt.
+Die Bankphasen und ihre Finanzierungssignale liegen im Credit-Bank-Owner.
+Die Simulation übernimmt dieselben Plan-first-Entscheidungen für ihre
+Auswertung.
 
 ### Bewertung und Anwendung auf weitere Owner
 

@@ -5,6 +5,7 @@ import type {
   VisibleCorpTraceIceRezQuote,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import {
   assessCorpScoreProtection,
   compareExactProbabilities,
@@ -89,6 +90,7 @@ export function readExactCurrentInstalledCorpIceRezQuote(params: {
 }): CorpExactInstalledIceRezQuoteRead | undefined {
   const { input, sourceCard, targetServerId } = params;
   if (
+    input.side !== "corp" ||
     sourceCard.known !== true ||
     sourceCard.type !== "ice" ||
     !sourceCard.definitionId ||
@@ -248,39 +250,17 @@ export function projectExactCorpIceRezRoute(params: {
     )
       ? requestedBluff
       : undefined;
-  let continuationRezCredits = 0;
+  const bypassContinuation = currentInnerBypassContinuation({
+    input,
+    server,
+    outerIceInstanceId: sourceCard.instanceId,
+    outerRezCredits: totalRezCredits,
+  });
+  const continuationRezCredits = bypassContinuation?.rezCredits ?? 0;
   const serverIce = server.ice.map((originalIce) => {
-    const continuation = originalIce.effectivePostRezRunQuote;
-    const binding =
-      continuation?.complete === true
-        ? continuation.bypassContinuation
-        : undefined;
-    const cost = originalIce.effectiveRezCostQuote;
     const ice =
-      firstEncounterBypassed &&
-      continuation?.complete === true &&
-      binding !== undefined &&
-      binding.runId === input.playerView.run?.runId &&
-      binding.outerIceId === sourceCard.instanceId &&
-      continuation.cardId === originalIce.instanceId &&
-      continuation.iceDefinitionId === originalIce.definitionId &&
-      continuation.targetServerId === targetServerId &&
-      continuation.projectedServerId === targetServerId &&
-      continuation.expiresAtStateVersion === input.playerView.stateVersion &&
-      cost?.complete === true &&
-      cost.context === "installed" &&
-      cost.cardId === originalIce.instanceId &&
-      cost.targetServerId === targetServerId &&
-      cost.expiresAtStateVersion === input.playerView.stateVersion &&
-      cost.finalCredits === binding.rezCredits &&
-      cost.finalCredits + totalRezCredits <= input.playerView.own.credits &&
-      cost.mandatoryAdditionalCosts.agendaPoints === 0
-        ? ((continuationRezCredits += cost.finalCredits),
-          {
-            ...originalIce,
-            rezzed: true,
-            effectiveRunQuote: continuation.effectiveRunQuote,
-          })
+      originalIce.instanceId === bypassContinuation?.ice.instanceId
+        ? bypassContinuation.ice
         : originalIce;
     return {
       instanceId: ice.instanceId,
@@ -488,6 +468,60 @@ export function projectExactCorpIceRezRoute(params: {
         : "progress",
     totalRezCredits,
     ...(bluffDefenseNeed ? { bluffDefenseNeed } : {}),
+  };
+}
+
+/** The Engine quotes just the inner layer immediately behind the bypassed outer ICE. */
+function currentInnerBypassContinuation(params: {
+  input: AiDecisionInput;
+  server: AiDecisionInput["playerView"]["servers"][number];
+  outerIceInstanceId: string;
+  outerRezCredits: number;
+}): { ice: VisibleCard; rezCredits: number } | undefined {
+  const { input, server, outerIceInstanceId, outerRezCredits } = params;
+  const { run, stateVersion } = input.playerView;
+  const innerIce = server.ice[0];
+  if (
+    !run?.bypassFirstIceRemaining ||
+    !run.runId ||
+    run.phase !== "approach_ice" ||
+    run.attackedServerId !== server.id ||
+    run.position?.kind !== "ice" ||
+    run.position.serverId !== server.id ||
+    run.position.iceIndex !== 1 ||
+    server.ice[1]?.instanceId !== outerIceInstanceId ||
+    !innerIce ||
+    innerIce.rezzed !== false
+  ) return undefined;
+
+  const continuation = innerIce.effectivePostRezRunQuote;
+  const binding = continuation?.complete === true
+    ? continuation.bypassContinuation
+    : undefined;
+  const cost = readExactCurrentInstalledCorpIceRezQuote({
+    input,
+    sourceCard: innerIce,
+    targetServerId: server.id,
+  })?.quote;
+  if (
+    continuation?.complete !== true ||
+    continuation.context !== "installed_post_rez" ||
+    continuation.cardId !== innerIce.instanceId ||
+    continuation.iceDefinitionId !== innerIce.definitionId ||
+    continuation.targetServerId !== server.id ||
+    continuation.projectedServerId !== server.id ||
+    continuation.expiresAtStateVersion !== stateVersion ||
+    binding?.runId !== run.runId ||
+    binding.outerIceId !== outerIceInstanceId ||
+    cost?.costKind !== "fixed" ||
+    cost.finalCredits !== binding.rezCredits ||
+    cost.finalCredits + outerRezCredits > input.playerView.own.credits ||
+    cost.mandatoryAdditionalCosts.agendaPoints !== 0
+  ) return undefined;
+
+  return {
+    ice: { ...innerIce, rezzed: true, effectiveRunQuote: continuation.effectiveRunQuote },
+    rezCredits: cost.finalCredits,
   };
 }
 
@@ -1069,6 +1103,7 @@ export function readExactInstalledCorpIceRezQuote(params: {
     sourceCard.type !== "ice" ||
     !sourceCard.definitionId ||
     sourceCard.rezzed !== false ||
+    candidate.actorSide !== "corp" ||
     candidate.semanticActionType !== "corp_window.rez" ||
     candidate.sourceCardInstanceId !== sourceCard.instanceId ||
     candidate.sourceDefinitionId !== sourceCard.definitionId
@@ -1081,14 +1116,14 @@ export function readExactInstalledCorpIceRezQuote(params: {
     targetServerId,
   });
   if (!quoteRead) return undefined;
-  const action = input.legalActions.find(
+  const actions = input.legalActions.filter(
     (candidateAction) => candidateAction.actionId === candidate.actionId,
   );
+  const [action] = actions;
   if (
-    !action ||
-    action.side !== "corp" ||
+    actions.length !== 1 ||
+    !actionMatchesCurrentDecision(input, action) ||
     action.type !== "rez_ice" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
     action.source !== sourceCard.instanceId ||
     action.payload?.cardId !== sourceCard.instanceId ||
     (action.payload.serverId !== undefined &&

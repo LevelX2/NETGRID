@@ -568,6 +568,7 @@ export function createAiGameSimulator(
         timeoutUsed: decision.timeoutUsed ?? false,
         ...(targetServerId ? { targetServerId } : {}),
         ...(corpNewRemoteCreated ? { corpNewRemoteCreated } : {}),
+        ...(runnerRunStarted ? { runnerRunStarted } : {}),
         ...(advancementCountersAdded > 0 ? { advancementCountersAdded } : {}),
         ...(scoreActionsAvailable > 0 ? { scoreActionsAvailable } : {}),
         ...(targetCardType ? { targetCardType } : {}),

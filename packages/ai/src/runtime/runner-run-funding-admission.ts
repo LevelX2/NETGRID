@@ -159,12 +159,16 @@ export function runnerRunTargetIsDirectlyConvertible(params: {
     params.target.pathPassability === "reachable" &&
     params.target.accessPayoffContestable !== false &&
     params.target.prerunReserveQuote?.status !== "blocked" &&
+    params.target.prerunReserveQuote?.status !== "information_probe_only" &&
+    (params.target.prerunReserveQuote?.creditGap ?? 0) === 0 &&
+    (params.target.prerunReserveQuote?.handBufferGap ?? 0) === 0 &&
     params.target.score > 0 &&
     (params.target.recommendation !== "gain_credits_first" ||
       params.allowCreditFloorOverride === true) &&
     params.target.knownAccessState !== "known_no_current_payoff" &&
     routeFundingGap === 0 &&
-    finiteNumber(params.target.creditsAfterRun) >= requiredPostRunCredits
+    Number.isFinite(params.target.creditsAfterRun) &&
+    params.target.creditsAfterRun >= requiredPostRunCredits
   );
 }
 
@@ -217,6 +221,7 @@ function runnerRunTargetPathIsCreditConvertible(
 ): boolean {
   return (
     (target.score > 0 || urgentScoreThreat) &&
+    (target.prerunReserveQuote?.handBufferGap ?? 0) === 0 &&
     target.knownAccessState !== "known_no_current_payoff" &&
     (target.pathPassability === "reachable" ||
       target.pathPassability === "blocked_unpayable")

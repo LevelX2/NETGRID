@@ -39,6 +39,16 @@ describe("current simulation quality gate", () => {
     });
   });
 
+  it("rejects even one excess timeout in a long benchmark", () => {
+    const baseline = simulationRun({ games: 10_000 });
+    const candidate = simulationRun({ games: 10_000, timeouts: 1 });
+    expect(evaluateSimulationQualityGate(candidate, baseline)).toMatchObject({
+      accepted: false,
+      reason: "holdout_regression_on_safety_or_replay",
+      holdoutDelta: { timeoutRate: 0.0001 },
+    });
+  });
+
   it("reports zero actions at the action limit and fingerprints different limits", () => {
     const seeds = ["current-simulation-zero-action-limit"];
     const zero = runSimulationLeague({ seeds, maxActions: 0 }).profiles[0]!;

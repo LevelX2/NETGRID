@@ -100,6 +100,25 @@ describe("candidate path bindings", () => {
     expect(binding.blockers).toContain("hidden_target_identity_blocked");
   });
 
+  it("clears copied identity keys and evidence when the binding is unsafe", () => {
+    const binding = buildCandidatePathBinding({
+      signature: buildSemanticActionSignature({
+        actionType: "start_run",
+        targetIdentity: "server:hq",
+      }),
+      actionId: "privatePayload.private-record",
+      stateVersion: 4,
+      side: "runner",
+      intentContractId: "test.run",
+      blockedReason: "deckTop.private-record",
+      evidence: ["reconnectToken.private-record"],
+    });
+    expect(binding.proofStatus).toBe("blocked");
+    expect(binding.blockers).toEqual(["hidden_info_marker_detected"]);
+    expect(candidatePathBindingIsRedactionSafe(binding)).toBe(true);
+    expect(JSON.stringify(binding)).not.toContain("private-record");
+  });
+
   it("bounds hidden-info marker detection to exact tokens", () => {
     const binding = buildCandidatePathBinding({
       signature: buildSemanticActionSignature({

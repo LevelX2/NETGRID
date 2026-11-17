@@ -489,7 +489,7 @@ function runnerSameTurnAccessCentralPreparationSignals(
       input,
       exactRoute.candidate.actionId,
       target,
-      { economy, candidates, minimumHandBuffer },
+      { candidates, minimumHandBuffer },
     )
   )
     return [];

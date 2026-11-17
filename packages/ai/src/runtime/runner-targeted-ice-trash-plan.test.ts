@@ -1,3 +1,4 @@
+import type { RunnerRunTargetEvaluation } from "../run-analysis/runner-run-target-types";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -9,7 +10,8 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
-import { aiInput } from "../semantic-ai-runtime-cutover.test-support";
+import { aiInput, legalAction, safeRuntimeRunTarget } from "../semantic-ai-runtime-cutover.test-support";
+import { runnerRezOrTrashPreparationBeatsImmediateRun } from "../run-analysis/runner-run-preparation";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import {
   rememberResidentPlanPortfolio,
@@ -373,6 +375,43 @@ describe("Runner targeted ICE disruption plan", () => {
         choiceInput.playerView.pendingChoice!.options,
       ),
     ).toBe("ice_3");
+  });
+
+  it("only compares preparation against an actually executable alternative run", () => {
+    const action = legalAction("run-other", "runner", "start_run", "Run HQ", { credits: 0, clicks: 1 });
+    const input = aiInput("runner", [action]);
+    input.playerView.opponent.credits = 8;
+    const target = safeRuntimeRunTarget(action.actionId, "hq") as unknown as RunnerRunTargetEvaluation;
+    const compare = (overrides: Partial<RunnerRunTargetEvaluation>) =>
+      runnerRezOrTrashPreparationBeatsImmediateRun({
+        input,
+        targetIceState: "rez_or_trash",
+        serverId: "rd",
+        payoffValue: 500,
+        runTargets: [{ ...target, score: 800, ...overrides }],
+      });
+    expect(compare({ pathPassability: "blocked_unpayable", recommendation: "gain_credits_first" })).toBe(true);
+    expect(compare({ pathPassability: "reachable", recommendation: "run_now" })).toBe(false);
+    expect(compare({ actionId: "stale-run", pathPassability: "reachable", recommendation: "run_now" })).toBe(true);
+  });
+
+  it("requires the current Trace profile before quoting removal that leaves a Trace ICE", () => {
+    const ice = withEffectiveRunQuote(blockingIce("trace-wall", "wall", 1), {
+      effectiveStrength: 3,
+      subroutines: [{
+        id: "trace",
+        type: "initiate_trace",
+        sourceDefinitionId: "onr_v1_232_crystal-wall",
+        sourceTitle: "Trace wall",
+        traceLimit: 2,
+        traceSuccessEffect: { type: "add_tag", amount: 1 },
+      }],
+    });
+    const input = planningInput({ ice: [ice, unrezzedIce("hidden")] });
+    expect(() => runnerUnrezzedIceTrashRouteOpeningPayoff(input, "rd"))
+      .toThrowError("invalid_player_view_card_projection");
+    input.playerView.traceRulesProfile = "modern_open";
+    expect(() => runnerUnrezzedIceTrashRouteOpeningPayoff(input, "rd")).not.toThrow();
   });
 
   it("recognizes the canonical unrezzed-ICE capability and values the route it opens", () => {

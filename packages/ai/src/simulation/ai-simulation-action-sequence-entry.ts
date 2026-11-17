@@ -188,6 +188,7 @@ export type AiSimulationActionSequenceEntry = {
   runnerEconomyTakenToReachRunReserve?: boolean;
   runnerEconomyTakenButStillBelowReserve?: boolean;
   runnerEconomySkippedThenUnaffordableRun?: boolean;
+  runnerRunStarted?: true;
   runnerRunStartedBelowKnownPathCost?: boolean;
   runnerRunStartedAfterSkippingEconomy?: boolean;
   runnerEconomyChosenOverFreshCentralPressure?: boolean;

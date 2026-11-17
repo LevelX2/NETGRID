@@ -1016,7 +1016,7 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
-  it("keeps plan continuity and plan-memory exclusions behind their owners", () => {
+  it("keeps plan continuity behind its owner", () => {
     const allowedFilesBySymbol = new Map<string, Set<string>>([
       [
         "progressTacticalPlans",
@@ -1026,23 +1026,6 @@ describe("AI module boundaries", () => {
       [
         "planCanMapToCurrentAction",
         new Set(["plans/tactical-plan-progression.ts"]),
-      ],
-      [
-        "createSemanticRuntimePlanMemoryExclusionContext",
-        new Set([
-          "runtime/semantic-runtime-plan-memory-exclusion.ts",
-          "runtime/runner-economy-commitment-composition.ts",
-        ]),
-      ],
-      [
-        "semanticRuntimePlanMemoryActionExclusion",
-        new Set([
-          "runtime/semantic-runtime-plan-memory-exclusion.ts",
-          "runtime/runner-economy-commitment-composition.ts",
-          "runtime/runner-development-support-composition.ts",
-          "runtime/ai-live-runtime-composition.ts",
-          "simulation/ai-runtime-simulation-composition.ts",
-        ]),
       ],
     ]);
     const violations = collectSourceFiles(srcDir)
@@ -1056,7 +1039,7 @@ describe("AI module boundaries", () => {
               return [];
             }
             return [
-              `${relative} references ${symbol} outside plan continuity or plan-memory ownership`,
+              `${relative} references ${symbol} outside plan continuity ownership`,
             ];
           },
         );

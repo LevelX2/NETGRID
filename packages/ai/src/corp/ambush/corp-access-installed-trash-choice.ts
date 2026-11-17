@@ -2,6 +2,8 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
+import { selectableChoiceOptions } from "../../runtime/choice-option";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import { projectKnownCorpCardAccessEffect } from "../../runtime/known-corp-card-access-effect-projection";
 export function accessInstalledTrashChoiceSignal(
   input: AiDecisionInput,
@@ -23,6 +25,7 @@ export function accessInstalledTrashChoiceSignal(
   ) {
     return undefined;
   }
+  const run = input.playerView.run;
   const sourceInstanceId = choice.sourceCardInstanceId;
   const sourceDefinitionId = choice.sourceCardDefinitionId;
   const server = input.playerView.servers.find((s) =>
@@ -39,10 +42,10 @@ export function accessInstalledTrashChoiceSignal(
     card.owner !== "corp" ||
     card.controller !== "corp" ||
     input.playerView.timingPoint !== "access.resolve_card" ||
-    input.playerView.run?.accessedCard?.instanceId !== sourceInstanceId ||
-    input.playerView.run.attackedServerId !== server.id ||
-    input.playerView.run.position?.kind !== "server" ||
-    input.playerView.run.position.serverId !== server.id
+    run?.accessedCard?.instanceId !== sourceInstanceId ||
+    (run.accessServerOverride ?? run.attackedServerId) !== server.id ||
+    run.position?.kind !== "server" ||
+    run.position.serverId !== run.attackedServerId
   )
     return undefined;
   const hint = AI_HINTS_BY_CARD.get(sourceDefinitionId);
@@ -83,35 +86,17 @@ export function accessInstalledTrashChoiceSignal(
   const location = { card, serverId: server.id };
   const resolveCandidates = candidates.filter(
     (candidate) =>
+      candidate.actorSide === "corp" &&
       candidate.semanticActionType === "choice.resolve" &&
       candidate.actionType === "resolve_choice",
   );
   if (resolveCandidates.length !== 1) return undefined;
   const resolveCandidate = resolveCandidates[0]!;
-  const resolveAction = input.legalActions.find(
-    (action) => action.actionId === resolveCandidate.actionId,
-  );
-  const requirement = resolveAction?.choiceRequirements?.[0];
-  const selectableOptions = choice.options.filter(
-    (option) => option.selectable !== false,
-  );
-  const optionIds = selectableOptions.map((option) => option.id);
-  if (
-    !resolveAction ||
-    resolveAction.side !== "corp" ||
-    resolveAction.type !== "resolve_choice" ||
-    resolveAction.source !== "game_rule" ||
-    resolveAction.timingPoint !== input.playerView.timingPoint ||
-    resolveAction.expiresAtStateVersion !== input.playerView.stateVersion ||
-    resolveAction.choiceRequirements?.length !== 1 ||
-    requirement?.choiceId !== choice.choiceId ||
-    requirement.minSelections !== choice.minSelections ||
-    requirement.maxSelections !== choice.maxSelections ||
-    requirement.optionIds.length !== optionIds.length ||
-    !optionIds.every((optionId) => requirement.optionIds.includes(optionId))
-  ) {
+  const resolveAction = exactCurrentChoiceAction(input, choice);
+  if (!resolveAction || resolveAction.actionId !== resolveCandidate.actionId)
     return undefined;
-  }
+  const selectableOptions = selectableChoiceOptions(choice.options);
+  if (selectableOptions.length < choice.minSelections) return undefined;
   const visibleTargets = new Map(
     (input.playerView.opponent.rig ?? [])
       .filter(

@@ -67,10 +67,9 @@ export function evaluateSimulationQualityGate(
       (candidate.winRates.runner ?? 0) - (baseline.winRates.runner ?? 0),
     ),
     fallbackRate: round(candidate.fallbackRate - baseline.fallbackRate),
-    timeoutRate: round(
+    timeoutRate:
       candidate.timeouts / Math.max(candidate.games, 1) -
-        baseline.timeouts / Math.max(baseline.games, 1),
-    ),
+      baseline.timeouts / Math.max(baseline.games, 1),
     runtimeFailureRate: runtimeFailureRateDelta,
     illegalActions: candidate.illegalActions - baseline.illegalActions,
     replayFailures: candidate.replayFailures - baseline.replayFailures,
