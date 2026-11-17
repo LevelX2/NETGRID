@@ -219,6 +219,18 @@ function runnerCentralPressurePriorityOrder(
           : 4;
 }
 
+function centralRunSpendsBelowCreditFloor(
+  input: AiDecisionInput,
+  economy: RunnerEconomyPosture,
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  return (
+    evaluation.fundingNeed.reason === "post_run_floor_gap" &&
+    evaluation.creditsAfterRun < input.playerView.own.credits &&
+    evaluation.creditsAfterRun < economy.minimumCreditFloor
+  );
+}
+
 function runnerTargetedIceTrashCentralPreparationSignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -1282,6 +1294,14 @@ export function buildRunnerCentralPressureSignals({
             evaluation,
             candidates,
           );
+          // Funding may yield to a different direct run without making this
+          // ordinary route's liquid-credit shortfall disappear.
+          const routeCreditFloorBlocked =
+            !concreteRunSetupAvailable &&
+            !terminalRemoteUnreachableCentralLastChance &&
+            !lastClickFundedCentralAccess &&
+            !directRunCanConvertNow &&
+            centralRunSpendsBelowCreditFloor(input, economy, evaluation);
           const knownAgendaFundingAvailable =
             evaluation.accessPayoff === "agenda" &&
             evaluation.accessFacts.knownTargetDefinitionIds.length > 0 &&
@@ -1298,6 +1318,7 @@ export function buildRunnerCentralPressureSignals({
                 terminalRemoteUnreachableCentralLastChance) &&
               (!costlyInformationRunBelowHandBuffer ||
                 terminalRemoteUnreachableCentralLastChance) &&
+              !routeCreditFloorBlocked &&
               fundingSupport === undefined &&
               coverageSupport === undefined &&
               evaluation.pathPassability === "reachable" &&
@@ -1597,8 +1618,21 @@ export function buildRunnerCentralPressureSignals({
                   candidate.knownAccessState === "known_no_current_payoff" ||
                   (candidate.accessServerId === "archives" &&
                     archivesIsKnownWithoutAgenda(input));
+                const candidateCreditFloorBlocked =
+                  !opensConcreteSetupWindow &&
+                  !terminalRemoteUnreachableCentralLastChance &&
+                  centralRunSpendsBelowCreditFloor(input, economy, candidate) &&
+                  !(candidate.actionId === evaluation.actionId
+                    ? directRunCanConvertNow
+                    : runnerRunTargetCanConvertNow(
+                        input,
+                        economy,
+                        candidate,
+                        candidates,
+                      ));
                 const candidateRouteAdmissible =
                   !forgoUnsafeRunCapacity &&
+                  !candidateCreditFloorBlocked &&
                   (!candidateHasNoPayoff || opensConcreteSetupWindow) &&
                   pressureCadence.routeAvailable &&
                   (materialMarginalValue ||
@@ -1628,6 +1662,9 @@ export function buildRunnerCentralPressureSignals({
                       `run_route_excluded:path:${candidate.pathPassability}`,
                       `run_route_excluded:recommendation:${candidate.recommendation}`,
                       `run_route_excluded:score:${candidate.score}`,
+                      ...(candidateCreditFloorBlocked
+                        ? ["run_route_excluded:post_run_credit_floor"]
+                        : []),
                       ...(lacksDifferentialPayoff
                         ? [
                             "run_route_excluded:no_visible_differential_payoff_over_basic_run",

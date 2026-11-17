@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
@@ -182,7 +183,7 @@ function card(
 ): VisibleCard {
   return {
     instanceId,
-    definitionId: instanceId,
+    definitionId: syntheticCardDefinitionId(instanceId),
     title: instanceId,
     type,
     owner: side,
@@ -234,7 +235,7 @@ function publicEvent(
   publicPayload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
-    eventId: `event-${stateVersionAfter}`,
+    eventId: stateVersionAfter + 1,
     type: String(publicPayload.actionType ?? "resolve_choice"),
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,

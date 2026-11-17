@@ -8,6 +8,7 @@ import {
 } from "@netgrid/engine";
 import {
   ORIGINALSET_DEFAULT_DECKS,
+  type CardDefinitionId,
   type GameState,
   type LegalAction,
 } from "@netgrid/shared";
@@ -33,14 +34,14 @@ const runnerDeck = {
     { id: 320, quantity: 3 },
   ],
 };
-function fixture() {
+function fixture(iceDefinitionId: CardDefinitionId = 450) {
   const state = createGameAfterSetup({
     seed: "sp350-preparation",
     runnerDeck,
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
-        { id: 450, quantity: 3 },
+        { id: iceDefinitionId, quantity: 3 },
         { id: 400, quantity: 6 },
       ],
     },
@@ -50,13 +51,13 @@ function fixture() {
   state.timingPoint = "runner_action.main";
   state.runner.credits = 14;
   state.runner.clicks = 4;
-  const find = (suffix: string) =>
-    Object.values(state.cardInstances).find((c) =>
-      c.definitionId.endsWith(suffix),
+  const find = (definitionId: CardDefinitionId) =>
+    Object.values(state.cardInstances).find(
+      (card) => card.definitionId === definitionId,
     )!;
-  const startup = find("_startup-immolator"),
-    krash = find("_krash"),
-    ice = find("_data-wall-2-0");
+  const startup = find(280),
+    krash = find(251),
+    ice = find(iceDefinitionId);
   for (const card of [startup, krash, ice])
     removeEverywhere(state, card.instanceId);
   krash.zone = { side: "runner", zone: "rig" };
@@ -201,7 +202,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     );
     const preparation = chooseAiAction(first.input);
     expect(preparation.actionId).toContain(
-      "runner.install_card.runner_280_2",
+      "runner.install_card.c1qa",
     );
     for (const cp of checkpoints.slice(1)) {
       const decision = chooseAiAction(cp.input);
@@ -232,7 +233,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       expect(owner.moduleState).toMatchObject({
         signal: {
           postBreakTrashCommitment: {
-            sourceCardInstanceId: "runner_280_2",
+            sourceCardInstanceId: "c1qa",
             serverId: "rd",
           },
         },
@@ -263,14 +264,14 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       serverId: "hq",
       sources: [
         {
-          sourceCardInstanceId: "runner_280_1",
+          sourceCardInstanceId: "c1q9",
           sourceDefinitionId: 280,
           installed: false,
         },
       ],
       targets: [
         {
-          targetIceInstanceId: "corp_450_2",
+          targetIceInstanceId: "c2s6",
           targetDefinitionId: 450,
           trashCredits: 2,
         },
@@ -285,7 +286,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     );
     const decision = chooseAiAction(input);
     expect(decision.actionId).toContain(
-      "runner.install_card.runner_280_1",
+      "runner.install_card.c1q9",
     );
     expect(decision.reasonCode).toBe("plan_first.runner.pressure_central");
     expect(decision.fallbackUsed).toBe(false);
@@ -396,7 +397,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     "multiple_ice",
     "deflector",
   ])("does not promise an unsupported route: %s", (condition) => {
-    const { state, ice } = fixture();
+    const { state, ice } = fixture(condition === "deflector" ? 14 : 450);
     if (condition === "insufficient_credits") state.runner.credits = 5;
     if (condition === "last_click") state.runner.clicks = 1;
     if (condition === "hidden_ice") {
@@ -423,8 +424,6 @@ describe("SP-350 current Engine post-break trash preparation", () => {
         .find((server) => server.id === "hq")!
         .ice.push(second.instanceId);
     }
-    if (condition === "deflector")
-      ice.definitionId = 14;
     expect(signals(state)).toEqual([]);
   });
   it.each(["stale_state", "wrong_action", "invalid_json"])(

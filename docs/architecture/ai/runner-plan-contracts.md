@@ -312,6 +312,11 @@ Exakt null Schaden verursacht keine zusätzlichen Schutzkosten. Der bestehende,
 Nicht-Flatline-Schadenszulassung, ohne unabhängige ETR-Sperren zu beseitigen.
 Die nativen Checkpoints aus Paarung 515 sichern gewöhnliche Finanzierung,
 finanzierten Gegenfall, Nullschaden und tatsächliche AI→Engine-Fortsetzung ab.
+Auch wenn ein kostenloser Archives-Zugriff den Finanzierungsbedarf eines
+anderen Zentralruns zurückstellt, prüft der Zentraldruck-Owner für jede
+gewöhnliche Runaktion weiter den liquiden Mindestbestand nach Pfadkosten.
+Die bestehenden Ausnahmen für exakt gebundene dringliche Zugriffe und
+Vorbereitungen folgen weiterhin ihren eigenen Quotes.
 
 Der aktuelle Payoff wird pro Runaktion am tatsächlichen `accessServerId`
 bewertet. Ein Zugang über Archives mit anschließendem HQ-Zugriff übernimmt
