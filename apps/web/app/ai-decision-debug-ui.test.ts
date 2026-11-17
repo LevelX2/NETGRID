@@ -113,7 +113,7 @@ describe("aiDecisionDebugHqHandRows", () => {
       candidateGroups: [
         {
           category: "hidden_root_install",
-          serverId: "remote_1",
+          serverId: "r1",
           ambiguousCount: 1,
           unknownCandidateCount: 0,
           departureCount: 1,

@@ -27,7 +27,7 @@ describe("SpectatorProjectionV1 leakscan harness", () => {
     expect(projection.kind).toBe("private_spectator_live_v1");
     expect(projection.cursor).toEqual({ eventCursor: 2, stateVersion: 2 });
     expect(
-      projection.board.servers.find((server) => server.id === "remote_1")
+      projection.board.servers.find((server) => server.id === "r1")
         ?.rootSlots,
     ).toEqual([{ slot: 0, visibility: "hidden" }]);
     expect(leakFindings(projection, secrets)).toEqual([]);
@@ -45,10 +45,10 @@ describe("SpectatorProjectionV1 leakscan harness", () => {
       eventCursor: 3,
     });
 
-    expect(JSON.stringify(delayed)).not.toContain("remote_2");
+    expect(JSON.stringify(delayed)).not.toContain("r2");
     expect(JSON.stringify(delayed)).not.toContain("future_public_marker");
     expect(
-      current.board.servers.some((server) => server.id === "remote_2"),
+      current.board.servers.some((server) => server.id === "r2"),
     ).toBe(true);
     expect(
       current.events.some((event) => event.type === "future_public_marker"),
@@ -106,7 +106,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
   hiddenState.stateVersion = 2;
   const hiddenAgendaId = putCorpRootInRemote(
     hiddenState,
-    "remote_1",
+    "r1",
     588,
   );
   hiddenState.pendingChoice = {
@@ -130,7 +130,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
 
   const futureState = structuredClone(hiddenState);
   futureState.stateVersion = 3;
-  putCorpRootInRemote(futureState, "remote_2", 594);
+  putCorpRootInRemote(futureState, "r2", 594);
   futureState.runner.credits += 1;
 
   const eventLog: EventRecord[] = [
@@ -181,7 +181,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
           actionType: "future_public_marker",
           title: "Simple Economy Asset",
           cardDefinitionId: 594,
-          serverId: "remote_2",
+          serverId: "r2",
         },
       },
       false,
@@ -311,7 +311,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
 
 function putCorpRootInRemote(
   state: GameState,
-  serverId: "remote_1" | "remote_2",
+  serverId: "r1" | "r2",
   definitionId: CardDefinitionId,
 ): CardInstanceId {
   const cardId = findCard(state, definitionId);

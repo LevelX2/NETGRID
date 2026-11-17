@@ -1,6 +1,7 @@
 import { cardDefinitionIdValue, cardDefinitionIdsFromCsv } from "./card-definition-id";
 import {
   isCardDefinitionId,
+  isRemoteServerId,
   type CardDefinitionId,
   type MatchEventId,
   type PublicGameEvent,
@@ -349,6 +350,8 @@ function semanticServerLabel(
   if (/^(r&d|rd)$/i.test(value)) return "R&D";
   if (/^hq$/i.test(value)) return "HQ";
   if (value === "new_remote") return translate("server.newRemote");
+  if (isRemoteServerId(value))
+    return `${translate("server.remote")} ${value.slice(1)}`;
   return value.replace(/^Remote[_ ]?/i, `${translate("server.remote")} `);
 }
 
@@ -9316,8 +9319,7 @@ function displayServerLabel(label: string | undefined): string | undefined {
   if (label === "rd" || label === "R&D") return "R&D";
   if (label === "archives" || label === "Archives") return "Archive";
   if (label === "new_remote") return "neuem Remote";
-  const remote = /^remote_(\d+)$/.exec(label);
-  if (remote?.[1]) return `Remote ${remote[1]}`;
+  if (isRemoteServerId(label)) return `Remote ${label.slice(1)}`;
   return label;
 }
 

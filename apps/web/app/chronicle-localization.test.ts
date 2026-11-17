@@ -1289,7 +1289,7 @@ describe("semantic chronicle localization", () => {
       actor: "corp",
       aiReasonCode: "install_ice",
       redactedKind: "installed_card",
-      serverId: "remote_2",
+      serverId: "r2",
       installPlacement: "ice",
       cardDefinitionId: 11014,
     });

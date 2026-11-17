@@ -305,7 +305,7 @@ describe("deriveOpponentActionCues", () => {
           redactedKind: "installed_card",
           cardDefinitionId: 588,
           title: "Simple Agenda",
-          serverId: "remote_1",
+          serverId: "r1",
           serverLabel: "Remote 1",
           zoneLabel: "Root",
         }),
@@ -319,7 +319,7 @@ describe("deriveOpponentActionCues", () => {
     );
     expect(cues[0]?.highlight).toEqual({
       kind: "server",
-      serverId: "remote_1",
+      serverId: "r1",
       serverLabel: "Remote 1",
       lane: "root",
     });
@@ -1103,7 +1103,7 @@ describe("deriveOpponentActionCues", () => {
     const playerView = view("runner", {
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [innerIce, visibleIce],
           root: [],
@@ -1689,7 +1689,7 @@ describe("deriveOpponentActionCues", () => {
           actionCostClicks: 1,
           turnActionOrdinalStart: 3,
           turnActionOrdinalEnd: 3,
-          serverId: "remote_1",
+          serverId: "r1",
           serverLabel: "Remote 1",
           zoneLabel: "Root",
         }),

@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { isCardDefinitionId } from "@netgrid/shared";
 import {
   AlertTriangle,
@@ -3268,7 +3269,7 @@ function aiDecisionDebugPlanServerTargetLabel(
   if (id === "hq") return "HQ";
   if (id === "rd") return "R&D";
   if (id === "archives") return "Archive";
-  if (id.startsWith("remote_")) return `Remote ${id.slice("remote_".length)}`;
+  if (isRemoteServerId(id)) return `Remote ${id.slice(1)}`;
   return id;
 }
 
@@ -3911,8 +3912,8 @@ function aiDecisionDebugServerLabel(value: string): string {
   if (value === "hq") return "HQ";
   if (value === "rd") return "R&D";
   if (value === "archives") return "Archive";
-  if (value.startsWith("remote_"))
-    return `Remote ${value.slice("remote_".length)}`;
+  if (isRemoteServerId(value))
+    return `Remote ${value.slice(1)}`;
   return value;
 }
 
@@ -3983,7 +3984,7 @@ function aiDecisionDebugNormalizePositionCardList(
         const zone = typeof entry.zone === "string" ? entry.zone : "";
         const positionKey =
           typeof entry.positionKey === "string" ? entry.positionKey : "";
-        return zone.startsWith("remote_") && positionKey !== "installed";
+        return isRemoteServerId(zone) && positionKey !== "installed";
       })
       .map(
         (entry) => `${String(entry.zone)}:${aiDecisionDebugCardLabel(entry)}`,
@@ -3996,7 +3997,7 @@ function aiDecisionDebugNormalizePositionCardList(
       typeof entry.positionKey === "string" ? entry.positionKey : "";
     const label = aiDecisionDebugCardLabel(entry);
     if (
-      zone.startsWith("remote_") &&
+      isRemoteServerId(zone) &&
       positionKey === "installed" &&
       preciseRemoteCards.has(`${zone}:${label}`)
     ) {

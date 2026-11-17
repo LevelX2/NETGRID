@@ -127,7 +127,7 @@ describe("program-trash chronicle", () => {
     (locale) => {
       const events = [
         event(0, "start_run", {
-          serverId: "remote_1",
+          serverId: "r1",
           serverLabel: "Remote 1",
         }),
       ];

@@ -1069,7 +1069,7 @@
         "classicDeflector": true,
         "sourceDefinitionId": 14,
         "deflectedRun": true,
-        "selectedServerId": "remote_1",
+        "selectedServerId": "r1",
         "selectedServerLabel": "Remote 1",
         "redirectedToRezzedIce": true,
         "paidCredits": 2,
@@ -1104,7 +1104,7 @@
         "classicDeflector": true,
         "sourceDefinitionId": 14,
         "deflectedRun": true,
-        "selectedServerId": "remote_1",
+        "selectedServerId": "r1",
         "selectedServerLabel": "Remote 1",
         "redirectedToRezzedIce": true,
         "paidCredits": 2,
@@ -1167,7 +1167,7 @@
         "classicDeflector": true,
         "sourceDefinitionId": 18,
         "deflectedRun": true,
-        "selectedServerId": "remote_1",
+        "selectedServerId": "r1",
         "selectedServerLabel": "Remote 1",
         "redirectedToRezzedIce": true,
         "paidCredits": 0,
@@ -1234,7 +1234,7 @@
         "classicDeflector": true,
         "sourceDefinitionId": 14,
         "deflectedRun": true,
-        "selectedServerId": "remote_1",
+        "selectedServerId": "r1",
         "selectedServerLabel": "Remote 1",
         "redirectedToRezzedIce": false,
         "paidCredits": 2,
@@ -1598,7 +1598,7 @@
         "hostedCreditsAfter": 9,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_209_political-coup.effect.0.take_hosted_credits",
+            "effectId": "421.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -1784,7 +1784,7 @@
         "title": "Simple Upgrade",
         "sourceDefinitionId": 270,
         "sourceTitle": "SeeYa",
-        "exposedServerId": "remote_1",
+        "exposedServerId": "r1",
         "exposedServerLabel": "Remote 1",
         "exposedArea": "root",
         "exposedIndex": 0
@@ -1808,7 +1808,7 @@
         "title": "Simple Upgrade",
         "sourceDefinitionId": 270,
         "sourceTitle": "SeeYa",
-        "exposedServerId": "remote_2",
+        "exposedServerId": "r2",
         "exposedServerLabel": "Remote 2",
         "exposedArea": "root",
         "exposedIndex": 1
@@ -1832,7 +1832,7 @@
         "title": "Simple Barrier ICE",
         "sourceDefinitionId": 270,
         "sourceTitle": "SeeYa",
-        "exposedServerId": "remote_1",
+        "exposedServerId": "r1",
         "exposedServerLabel": "Remote 1",
         "exposedArea": "ice",
         "exposedIndex": 1
@@ -1856,7 +1856,7 @@
         "title": "Bioweapons Engineering",
         "sourceDefinitionId": 254,
         "sourceTitle": "Mouse",
-        "exposedServerId": "remote_1",
+        "exposedServerId": "r1",
         "exposedServerLabel": "Remote 1",
         "exposedArea": "root",
         "exposedIndex": 0
@@ -1888,7 +1888,7 @@
         "title": "Bioweapons Engineering",
         "sourceDefinitionId": 254,
         "sourceTitle": "Mouse",
-        "exposedServerId": "remote_1",
+        "exposedServerId": "r1",
         "exposedServerLabel": "Remote 1",
         "exposedArea": "root",
         "exposedIndex": 0
@@ -1920,7 +1920,7 @@
         "title": "Bioweapons Engineering",
         "sourceDefinitionId": 254,
         "sourceTitle": "Mouse",
-        "exposedServerId": "remote_1",
+        "exposedServerId": "r1",
         "exposedServerLabel": "Remote 1",
         "exposedArea": "root",
         "exposedIndex": 0
@@ -1970,7 +1970,7 @@
         "actionType": "continue_run",
         "effectSide": "runner",
         "serverLabel": "HQ",
-        "breachId": "run_1.breach",
+        "breachId": "1.breach",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "schematics_search_engine_expose_installed_cards_review",
         "publicRevealKind": "expose",
@@ -1994,7 +1994,7 @@
         "actionType": "decline_rez",
         "effectSide": "runner",
         "serverLabel": "HQ",
-        "breachId": "run_1.breach",
+        "breachId": "1.breach",
         "hiddenZoneBarrier": true,
         "hiddenZoneAction": "schematics_search_engine_expose_installed_cards_review",
         "publicRevealKind": "expose",
@@ -3857,7 +3857,7 @@
         "actionType": "access_card",
         "resolvedEffects": [
           {
-            "effectId": "run_1.cockroach.successful_run.cockroach",
+            "effectId": "1.cockroach.successful_run.cockroach",
             "kind": "counter_change",
             "visibility": "public",
             "side": "corp",
@@ -4010,7 +4010,7 @@
         "actionType": "install_card",
         "title": "Restrictive Net Zoning",
         "zoneLabel": "Resource",
-        "selectedServerId": "remote_1",
+        "selectedServerId": "r1",
         "selectedServerLabel": "Remote 1"
       },
       "context": {
@@ -4028,7 +4028,7 @@
         "actionType": "score_agenda",
         "title": "Security Net Optimization",
         "cardDefinitionId": 427,
-        "selectedServerId": "remote_1",
+        "selectedServerId": "r1",
         "selectedServerLabel": "Remote 1"
       },
       "context": {
@@ -4594,7 +4594,7 @@
         "runnerCreditsAfter": 0,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_285_closed-accounts.effect.0.lose_credits",
+            "effectId": "497.effect.0.lose_credits",
             "kind": "lose_credits",
             "visibility": "public",
             "side": "runner",
@@ -4624,7 +4624,7 @@
         "runnerCreditsAfter": 0,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_285_closed-accounts.effect.0.lose_credits",
+            "effectId": "497.effect.0.lose_credits",
             "kind": "lose_credits",
             "visibility": "public",
             "side": "runner",
@@ -4652,7 +4652,7 @@
         "runnerTagsAfter": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_287_datapool-by-zetatech.effect.0.add_tags",
+            "effectId": "499.effect.0.add_tags",
             "kind": "add_tags",
             "visibility": "public",
             "side": "runner",
@@ -4683,7 +4683,7 @@
         "runnerTagsAfter": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_287_datapool-by-zetatech.effect.0.add_tags",
+            "effectId": "499.effect.0.add_tags",
             "kind": "add_tags",
             "visibility": "public",
             "side": "runner",
@@ -4714,7 +4714,7 @@
         "corpCreditsAfter": 6,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_293_netwatch-credit-voucher.effect.0.add_tags",
+            "effectId": "505.effect.0.add_tags",
             "kind": "add_tags",
             "visibility": "public",
             "side": "runner",
@@ -4725,7 +4725,7 @@
             "reason": "card_resolver"
           },
           {
-            "effectId": "onr_v1_293_netwatch-credit-voucher.effect.1.gain_credits",
+            "effectId": "505.effect.1.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
@@ -4757,7 +4757,7 @@
         "corpCreditsAfter": 6,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_293_netwatch-credit-voucher.effect.0.add_tags",
+            "effectId": "505.effect.0.add_tags",
             "kind": "add_tags",
             "visibility": "public",
             "side": "runner",
@@ -4768,7 +4768,7 @@
             "reason": "card_resolver"
           },
           {
-            "effectId": "onr_v1_293_netwatch-credit-voucher.effect.1.gain_credits",
+            "effectId": "505.effect.1.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
@@ -4798,7 +4798,7 @@
         "cardsTrashed": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_301_punitive-counterstrike.effect.0.damage",
+            "effectId": "513.effect.0.damage",
             "kind": "damage",
             "visibility": "public",
             "side": "runner",
@@ -4832,7 +4832,7 @@
         "cardsTrashed": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_301_punitive-counterstrike.effect.0.damage",
+            "effectId": "513.effect.0.damage",
             "kind": "damage",
             "visibility": "public",
             "side": "runner",
@@ -4864,7 +4864,7 @@
         "cardsTrashed": 4,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_302_scorched-earth.effect.0.damage",
+            "effectId": "514.effect.0.damage",
             "kind": "damage",
             "visibility": "public",
             "side": "runner",
@@ -4898,7 +4898,7 @@
         "cardsTrashed": 4,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_302_scorched-earth.effect.0.damage",
+            "effectId": "514.effect.0.damage",
             "kind": "damage",
             "visibility": "public",
             "side": "runner",
@@ -4930,7 +4930,7 @@
         "cardsTrashed": 5,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_307_urban-renewal.effect.0.damage",
+            "effectId": "519.effect.0.damage",
             "kind": "damage",
             "visibility": "public",
             "side": "runner",
@@ -4964,7 +4964,7 @@
         "cardsTrashed": 5,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_307_urban-renewal.effect.0.damage",
+            "effectId": "519.effect.0.damage",
             "kind": "damage",
             "visibility": "public",
             "side": "runner",
@@ -4997,7 +4997,7 @@
         "cardsTrashed": 1,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_342_solo-squad.effect.0.damage",
+            "effectId": "554.effect.0.damage",
             "kind": "damage",
             "visibility": "public",
             "side": "runner",
@@ -5032,7 +5032,7 @@
         "cardsTrashed": 1,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_342_solo-squad.effect.0.damage",
+            "effectId": "554.effect.0.damage",
             "kind": "damage",
             "visibility": "public",
             "side": "runner",
@@ -5065,7 +5065,7 @@
         "cardsTrashed": 1,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_208_on-call-solo-team.effect.0.damage",
+            "effectId": "420.effect.0.damage",
             "kind": "damage",
             "visibility": "public",
             "side": "runner",
@@ -5100,7 +5100,7 @@
         "cardsTrashed": 1,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_208_on-call-solo-team.effect.0.damage",
+            "effectId": "420.effect.0.damage",
             "kind": "damage",
             "visibility": "public",
             "side": "runner",
@@ -5133,7 +5133,7 @@
         "cardsTrashed": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_217_strike-force-kali.effect.0.damage",
+            "effectId": "429.effect.0.damage",
             "kind": "damage",
             "visibility": "public",
             "side": "runner",
@@ -5168,7 +5168,7 @@
         "cardsTrashed": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_217_strike-force-kali.effect.0.damage",
+            "effectId": "429.effect.0.damage",
             "kind": "damage",
             "visibility": "public",
             "side": "runner",
@@ -5198,7 +5198,7 @@
         "gainedCredits": 1,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_288_day-shift.effect.0.draw_cards",
+            "effectId": "500.effect.0.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "corp",
@@ -5208,7 +5208,7 @@
             "reason": "card_resolver"
           },
           {
-            "effectId": "onr_v1_288_day-shift.effect.1.gain_credits",
+            "effectId": "500.effect.1.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
@@ -5236,7 +5236,7 @@
         "gainedCredits": 1,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_288_day-shift.effect.0.draw_cards",
+            "effectId": "500.effect.0.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "corp",
@@ -5246,7 +5246,7 @@
             "reason": "card_resolver"
           },
           {
-            "effectId": "onr_v1_288_day-shift.effect.1.gain_credits",
+            "effectId": "500.effect.1.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
@@ -5274,7 +5274,7 @@
         "gainedActions": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_297_overtime-incentives.effect.0.gain_actions",
+            "effectId": "509.effect.0.gain_actions",
             "kind": "gain_actions",
             "visibility": "public",
             "side": "corp",
@@ -5302,7 +5302,7 @@
         "gainedActions": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_297_overtime-incentives.effect.0.gain_actions",
+            "effectId": "509.effect.0.gain_actions",
             "kind": "gain_actions",
             "visibility": "public",
             "side": "corp",
@@ -5330,7 +5330,7 @@
         "drawnCards": 1,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_295_night-shift.effect.0.gain_credits",
+            "effectId": "507.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
@@ -5340,7 +5340,7 @@
             "reason": "card_resolver"
           },
           {
-            "effectId": "onr_v1_295_night-shift.effect.1.draw_cards",
+            "effectId": "507.effect.1.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "corp",
@@ -5368,7 +5368,7 @@
         "drawnCards": 1,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_295_night-shift.effect.0.gain_credits",
+            "effectId": "507.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
@@ -5378,7 +5378,7 @@
             "reason": "card_resolver"
           },
           {
-            "effectId": "onr_v1_295_night-shift.effect.1.draw_cards",
+            "effectId": "507.effect.1.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "corp",
@@ -5404,7 +5404,7 @@
         "drawnCount": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_095_jack-n-joe.effect.0.draw_cards",
+            "effectId": "307.effect.0.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "runner",
@@ -5430,7 +5430,7 @@
         "drawnCount": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_095_jack-n-joe.effect.0.draw_cards",
+            "effectId": "307.effect.0.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "runner",
@@ -5462,7 +5462,7 @@
         "runnerTagsAfter": 1,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_095_jack-n-joe.effect.0.draw_cards",
+            "effectId": "307.effect.0.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "runner",
@@ -5494,7 +5494,7 @@
         "runnerTagsAfter": 1,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_095_jack-n-joe.effect.0.draw_cards",
+            "effectId": "307.effect.0.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "runner",
@@ -5527,7 +5527,7 @@
         "runnerTagsAfter": 0,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+            "effectId": "291.effect.0.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "runner",
@@ -5558,7 +5558,7 @@
         "drawTaxTagsAdded": 0,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+            "effectId": "291.effect.0.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "runner",
@@ -5589,7 +5589,7 @@
         "drawTaxTagsAdded": 0,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+            "effectId": "291.effect.0.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "runner",
@@ -5731,7 +5731,7 @@
         "gameEndReason": "flatline",
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_302_scorched-earth.effect.0.damage",
+            "effectId": "514.effect.0.damage",
             "kind": "damage",
             "visibility": "public",
             "side": "runner",
@@ -5767,7 +5767,7 @@
         "gameEndReason": "flatline",
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_302_scorched-earth.effect.0.damage",
+            "effectId": "514.effect.0.damage",
             "kind": "damage",
             "visibility": "public",
             "side": "runner",
@@ -5798,7 +5798,7 @@
         "runnerCreditsAfter": 7,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_045_newsgroup-filter.effect.0.gain_credits",
+            "effectId": "257.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "runner",
@@ -5827,7 +5827,7 @@
         "runnerCreditsAfter": 7,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_045_newsgroup-filter.effect.0.gain_credits",
+            "effectId": "257.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "runner",
@@ -5855,7 +5855,7 @@
         "drawnCards": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_321_esa-contract.effect.0.draw_cards",
+            "effectId": "533.effect.0.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "corp",
@@ -5883,7 +5883,7 @@
         "drawnCards": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_321_esa-contract.effect.0.draw_cards",
+            "effectId": "533.effect.0.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "corp",
@@ -5982,7 +5982,7 @@
         "drawnCards": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_199_employee-empowerment.effect.0.draw_cards",
+            "effectId": "411.effect.0.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "corp",
@@ -6011,7 +6011,7 @@
         "corpCreditsAfter": 13,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_206_marine-arcology.effect.0.gain_credits",
+            "effectId": "418.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
@@ -6042,7 +6042,7 @@
         "corpCreditsAfter": 13,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_206_marine-arcology.effect.0.gain_credits",
+            "effectId": "418.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
@@ -6071,7 +6071,7 @@
         "corpCreditsAfter": 13,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_210_political-overthrow.effect.0.gain_credits",
+            "effectId": "422.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
@@ -6102,7 +6102,7 @@
         "corpCreditsAfter": 13,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_210_political-overthrow.effect.0.gain_credits",
+            "effectId": "422.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
@@ -6131,7 +6131,7 @@
         "corpCreditsAfter": 16,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_343_south-african-mining-corp.effect.0.gain_credits",
+            "effectId": "555.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
@@ -6162,7 +6162,7 @@
         "corpCreditsAfter": 16,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_343_south-african-mining-corp.effect.0.gain_credits",
+            "effectId": "555.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
@@ -6212,7 +6212,7 @@
         "runnerGripAfter": 5,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_179_silicon-saloon-franchise.effect.0.gain_credits",
+            "effectId": "391.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "runner",
@@ -6222,7 +6222,7 @@
             "reason": "card_resolver"
           },
           {
-            "effectId": "onr_v1_179_silicon-saloon-franchise.effect.1.draw_cards",
+            "effectId": "391.effect.1.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "runner",
@@ -6255,7 +6255,7 @@
         "runnerGripAfter": 5,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_179_silicon-saloon-franchise.effect.0.gain_credits",
+            "effectId": "391.effect.0.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "runner",
@@ -6265,7 +6265,7 @@
             "reason": "card_resolver"
           },
           {
-            "effectId": "onr_v1_179_silicon-saloon-franchise.effect.1.draw_cards",
+            "effectId": "391.effect.1.draw_cards",
             "kind": "draw_cards",
             "visibility": "public",
             "side": "runner",
@@ -6293,7 +6293,7 @@
         "hostedCreditsAfter": 16,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_309_bbs-whispering-campaign.lifecycle.add_hosted_credits",
+            "effectId": "521.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6324,7 +6324,7 @@
         "hostedCreditsAfter": 16,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_309_bbs-whispering-campaign.lifecycle.add_hosted_credits",
+            "effectId": "521.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6353,7 +6353,7 @@
         "hostedCreditsAfter": 15,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_337_rockerboy-promotion.lifecycle.add_hosted_credits",
+            "effectId": "549.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6384,7 +6384,7 @@
         "hostedCreditsAfter": 15,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_337_rockerboy-promotion.lifecycle.add_hosted_credits",
+            "effectId": "549.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6413,7 +6413,7 @@
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_178_short-term-contract.lifecycle.add_hosted_credits",
+            "effectId": "390.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -6444,7 +6444,7 @@
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_178_short-term-contract.lifecycle.add_hosted_credits",
+            "effectId": "390.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -6473,7 +6473,7 @@
         "hostedCreditsAfter": 15,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_193_corporate-coup.lifecycle.add_hosted_credits",
+            "effectId": "405.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6504,7 +6504,7 @@
         "hostedCreditsAfter": 15,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_193_corporate-coup.lifecycle.add_hosted_credits",
+            "effectId": "405.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6533,7 +6533,7 @@
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_209_political-coup.lifecycle.add_hosted_credits",
+            "effectId": "421.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6564,7 +6564,7 @@
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_209_political-coup.lifecycle.add_hosted_credits",
+            "effectId": "421.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6593,7 +6593,7 @@
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_311_braindance-campaign.lifecycle.add_hosted_credits",
+            "effectId": "523.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6624,7 +6624,7 @@
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_311_braindance-campaign.lifecycle.add_hosted_credits",
+            "effectId": "523.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6653,7 +6653,7 @@
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_326_holovid-campaign.lifecycle.add_hosted_credits",
+            "effectId": "538.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6684,7 +6684,7 @@
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_326_holovid-campaign.lifecycle.add_hosted_credits",
+            "effectId": "538.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6713,7 +6713,7 @@
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_198_detroit-police-contract.lifecycle.add_hosted_credits",
+            "effectId": "410.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6744,7 +6744,7 @@
         "hostedCreditsAfter": 12,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_198_detroit-police-contract.lifecycle.add_hosted_credits",
+            "effectId": "410.lifecycle.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6772,7 +6772,7 @@
         "rezCostPaid": 5,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_335_remote-facility.on_rez.gain_actions",
+            "effectId": "547.on_rez.gain_actions",
             "kind": "gain_actions",
             "visibility": "public",
             "side": "corp",
@@ -6801,7 +6801,7 @@
         "rezCostPaid": 5,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_335_remote-facility.on_rez.gain_actions",
+            "effectId": "547.on_rez.gain_actions",
             "kind": "gain_actions",
             "visibility": "public",
             "side": "corp",
@@ -6884,7 +6884,7 @@
         "cardDefinitionId": 415,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_203_hostile-takeover.score.gain_credits",
+            "effectId": "415.score.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
@@ -6912,7 +6912,7 @@
         "cardDefinitionId": 415,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_203_hostile-takeover.score.gain_credits",
+            "effectId": "415.score.gain_credits",
             "kind": "gain_credits",
             "visibility": "public",
             "side": "corp",
@@ -6942,7 +6942,7 @@
         "gainedCredits": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_309_bbs-whispering-campaign.effect.0.take_hosted_credits",
+            "effectId": "521.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -6975,7 +6975,7 @@
         "gainedCredits": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_309_bbs-whispering-campaign.effect.0.take_hosted_credits",
+            "effectId": "521.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -7006,7 +7006,7 @@
         "gainedCredits": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_337_rockerboy-promotion.effect.0.take_hosted_credits",
+            "effectId": "549.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -7039,7 +7039,7 @@
         "gainedCredits": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_337_rockerboy-promotion.effect.0.take_hosted_credits",
+            "effectId": "549.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -7070,7 +7070,7 @@
         "gainedCredits": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
+            "effectId": "390.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -7103,7 +7103,7 @@
         "gainedCredits": 2,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
+            "effectId": "390.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -7134,7 +7134,7 @@
         "gainedCredits": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_193_corporate-coup.effect.0.take_hosted_credits",
+            "effectId": "405.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -7167,7 +7167,7 @@
         "gainedCredits": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_193_corporate-coup.effect.0.take_hosted_credits",
+            "effectId": "405.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -7198,7 +7198,7 @@
         "gainedCredits": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_209_political-coup.effect.0.take_hosted_credits",
+            "effectId": "421.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -7231,7 +7231,7 @@
         "gainedCredits": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_209_political-coup.effect.0.take_hosted_credits",
+            "effectId": "421.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -7262,7 +7262,7 @@
         "gainedCredits": 6,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_154_broker.effect.0.take_hosted_credits",
+            "effectId": "366.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -7295,7 +7295,7 @@
         "gainedCredits": 6,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_154_broker.effect.0.take_hosted_credits",
+            "effectId": "366.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -7326,7 +7326,7 @@
         "gainedCredits": 6,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_318_department-of-truth-enhancement.effect.0.take_hosted_credits",
+            "effectId": "530.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -7359,7 +7359,7 @@
         "gainedCredits": 6,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_318_department-of-truth-enhancement.effect.0.take_hosted_credits",
+            "effectId": "530.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -7449,7 +7449,7 @@
         "hostedCreditsAfter": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_344_spinn-public-relations.effect.0.add_hosted_credits",
+            "effectId": "556.effect.0.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -7481,7 +7481,7 @@
         "hostedCreditsAfter": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_344_spinn-public-relations.effect.0.add_hosted_credits",
+            "effectId": "556.effect.0.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -7511,7 +7511,7 @@
         "hostedCreditsAfter": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_154_broker.effect.0.add_hosted_credits",
+            "effectId": "366.effect.0.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -7543,7 +7543,7 @@
         "hostedCreditsAfter": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_154_broker.effect.0.add_hosted_credits",
+            "effectId": "366.effect.0.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -7573,7 +7573,7 @@
         "hostedCreditsAfter": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_318_department-of-truth-enhancement.effect.0.add_hosted_credits",
+            "effectId": "530.effect.0.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -7605,7 +7605,7 @@
         "hostedCreditsAfter": 3,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_318_department-of-truth-enhancement.effect.0.add_hosted_credits",
+            "effectId": "530.effect.0.add_hosted_credits",
             "kind": "add_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -7637,7 +7637,7 @@
         "sourceTrashed": true,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
+            "effectId": "390.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -7648,7 +7648,7 @@
             "reason": "card_resolver"
           },
           {
-            "effectId": "onr_v1_178_short-term-contract.effect.1.trash_source_when_empty",
+            "effectId": "390.effect.1.trash_source_when_empty",
             "kind": "trash_source_when_empty",
             "visibility": "public",
             "side": "runner",
@@ -7681,7 +7681,7 @@
         "sourceTrashed": true,
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
+            "effectId": "390.effect.0.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "runner",
@@ -7692,7 +7692,7 @@
             "reason": "card_resolver"
           },
           {
-            "effectId": "onr_v1_178_short-term-contract.effect.1.trash_source_when_empty",
+            "effectId": "390.effect.1.trash_source_when_empty",
             "kind": "trash_source_when_empty",
             "visibility": "public",
             "side": "runner",
@@ -9525,7 +9525,7 @@
         "actionType": "end_turn",
         "resolvedEffects": [
           {
-            "effectId": "runner.start.shell_traders.shell_1.simple_fracter_1",
+            "effectId": "runner.start.shell_traders.shell_1.597_1",
             "kind": "counter_change",
             "visibility": "public",
             "side": "runner",
@@ -9618,7 +9618,7 @@
         "actionType": "end_turn",
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_198_detroit-police-contract.start.take_hosted_credits",
+            "effectId": "410.start.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "corp",
@@ -9645,7 +9645,7 @@
         "actionType": "end_turn",
         "resolvedEffects": [
           {
-            "effectId": "onr_v1_344_spinn-public-relations.start.take_hosted_credits",
+            "effectId": "556.start.take_hosted_credits",
             "kind": "take_hosted_credits",
             "visibility": "public",
             "side": "corp",

@@ -117,7 +117,7 @@ describe("multiplayer side payload projection", () => {
       zone: { side: "corp", zone: "scoreArea" },
     };
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [iceId],
@@ -130,12 +130,12 @@ describe("multiplayer side payload projection", () => {
       controller: "corp",
       faceup: false,
       rezzed: false,
-      zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverIce", serverId: "r1" },
     };
     state.hqInstallRezSequence = {
       sourceAgendaId,
       sourceDefinitionId: 409,
-      serverId: "remote_1",
+      serverId: "r1",
       selectedCardIds: [iceId],
       nextCardIndex: 1,
       temporaryCreditsProvided: 10,
@@ -183,7 +183,7 @@ describe("multiplayer side payload projection", () => {
       choiceId: "choice_data_fort_optional_rez_12",
       cardId: iceId,
       cardDefinitionId: 589,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       installedZone: "serverIce",
       stateVersion: 12,
       complete: true,
@@ -213,7 +213,7 @@ describe("multiplayer side payload projection", () => {
     );
     const spgId = "payload-spg" as CardInstanceId;
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
@@ -224,7 +224,7 @@ describe("multiplayer side payload projection", () => {
       definitionId: 29,
       owner: "corp",
       controller: "corp",
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
       faceup: true,
       rezzed: true,
       advancementCounters: 0,

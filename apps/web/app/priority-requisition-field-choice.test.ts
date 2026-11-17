@@ -162,7 +162,7 @@ function view(hqIce: VisibleCard[], remoteIce: VisibleCard[]): PlayerView {
     servers: [
       { id: "hq", label: "HQ", ice: hqIce, root: [] },
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: remoteIce,
         root: [],
