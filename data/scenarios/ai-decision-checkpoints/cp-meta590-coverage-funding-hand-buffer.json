@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "runner",
   "stateVersion": 67,
-  "stateHash": "fnv1a:3e839f28",
+  "stateHash": "fnv1a:9bbdc8bd",
   "input": {
     "matchId": "match_98bad4e6b142eb74",
     "side": "runner",
@@ -16612,7 +16612,7 @@
                 "addedAdvancementCounters": 3,
                 "targetCount": 1,
                 "advancementCounterTargetCardIds": "ceu",
-                "targetCardDefinitionIds": 66,
+                "targetCardDefinitionIds": "66",
                 "advancementCounterDistribution": "ceu:3",
                 "targetCardId": "ceu",
                 "targetCardDefinitionId": 66,

@@ -1,8 +1,10 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { applyAction, hashState } from "@netgrid/engine";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
+import { buildPlanningStateIdentity } from "../../plans/turn-planning-contracts";
 import { restoreAiRuntimeCheckpoint } from "../../evaluation/decision-checkpoints/runtime-checkpoint";
 import {
   resetResidentPlanPortfolioMemory,
@@ -35,6 +37,7 @@ it("resolves the actual failed attempt through Coverage search and retains the s
   expect(Object.values(cp.validation).every(Boolean)).toBe(true);
   expect(hashState(cp.engineState)).toBe(cp.stateHash);
   const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
   const before = JSON.stringify(input);
   restoreAiRuntimeCheckpoint(
     input,
@@ -47,7 +50,7 @@ it("resolves the actual failed attempt through Coverage search and retains the s
     (a: { actionId: string }) => a.actionId === decision.actionId,
   )!;
   expect(action.type).toBe("activated_card_ability");
-  expect(action.actionId).toContain("the-short-circuit");
+  expect(referencesDefaultDeckCard(action.actionId, 389)).toBe(true);
   const root = "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate";
   const debug = decision.decisionDebug!.planFirstDecision!;
   expect(debug).toMatchObject({
@@ -131,7 +134,7 @@ it.each([false, true])(
         buildActionCardSemanticProfilesByDefinitionId(),
     });
     const score = input.legalActions.find(
-      (a) => a.type === "play_event" && a.actionId.includes("108_score"),
+      (a) => a.type === "play_event" && state.cardInstances[a.source]?.definitionId === 320,
     )!;
     expect(score).toBeDefined();
     const services = {

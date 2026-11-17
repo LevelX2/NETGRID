@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -162,8 +163,7 @@ describe("ActionCardSemanticProfiles", () => {
 
   it("joins Blood Cat trace semantics from its canonical capability", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
-    const abilityId =
-      "522:abilities_activated_corp_main_trace";
+    const abilityId = canonicalCapabilityId(522, capabilityKey("abilities_activated_corp_main_trace"));
     const action = {
       actionId: "blood-cat-trace",
       side: "corp",

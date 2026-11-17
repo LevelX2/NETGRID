@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
+import type { LegalAction } from "@netgrid/shared";
 import { buildAiDecisionInputDto } from "../input-dto";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { actionEconomyProjectionFor } from "../actions/action-economy-projection";
@@ -21,8 +22,9 @@ afterEach(resetResidentPlanPortfolioMemory);
 // in Engine tests and against the original repeated D132 Engine result (hand5).
 function source() {
   const raw = structuredClone(cp.input),
-    action = raw.legalActions.find((a: { actionId: string }) =>
-      a.actionId.includes("shuffle_grip_trash_and_stack_then_draw"),
+    action = raw.legalActions.find((a: LegalAction) =>
+      typeof a.payload?.cardImplementationAbilityKey === "string" &&
+      a.payload.cardImplementationAbilityKey.endsWith("_shuffle_grip_trash_and_stack_then_draw"),
     );
   Object.assign(action.payload, {
     runnerRecycleDrawProjectionSchemaVersion:

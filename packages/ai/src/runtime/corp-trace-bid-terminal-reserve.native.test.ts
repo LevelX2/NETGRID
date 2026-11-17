@@ -63,7 +63,7 @@ function setup() {
   state.corp.credits = 2;
   state.runner.clicks = 1;
   state.runner.credits = 5;
-  const runId = "terminal-fang-run";
+  const runId = 1;
   const traceId = "terminal-fang-trace";
   state.run = {
     runId,

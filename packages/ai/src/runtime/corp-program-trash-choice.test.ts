@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -47,7 +48,7 @@ describe("rankCorpProgramTrashChoiceOptionIds", () => {
         choice,
         choice.options,
         (definitionId) =>
-          definitionId === "breaker_program"
+          definitionId === syntheticCardDefinitionId("breaker_program")
             ? ["icebreaker", "universal_breaker"]
             : ["icebreaker_support"],
       ),
@@ -78,14 +79,14 @@ describe("rankCorpProgramTrashChoiceOptionIds", () => {
     [
       "wrong run",
       (input: AiDecisionInput) => {
-        input.playerView.run!.runId = "other_run";
+        input.playerView.run!.runId = 2;
       },
     ],
     [
       "partial option set",
       (input: AiDecisionInput) => {
         input.playerView.opponent.rig!.push(
-          program("unbound_program", "utility"),
+          program("unbound_program", syntheticCardDefinitionId("utility")),
         );
       },
     ],
@@ -119,10 +120,10 @@ function fixture(): {
 } {
   const source = [
     "card_implementation.trash_installed_program",
-    "run_1",
+    "1",
     "colonel_1",
     "0",
-    "onr_proteus_029_colonel-failure",
+    "73",
     "trash_program",
     "trash_installed_program",
     "encounter",
@@ -140,8 +141,8 @@ function fixture(): {
       opponent: {
         credits: 5,
         rig: [
-          program("breaker_1", "breaker_program", 2, 1),
-          program("utility_1", "utility_program", 8, 2),
+          program("breaker_1", syntheticCardDefinitionId("breaker_program"), 2, 1),
+          program("utility_1", syntheticCardDefinitionId("utility_program"), 8, 2),
         ],
       },
       servers: [
@@ -152,11 +153,11 @@ function fixture(): {
           ice: [
             {
               instanceId: "colonel_1",
-              definitionId: "onr_proteus_029_colonel-failure",
+              definitionId: 73,
               known: true,
               effectiveRunQuote: {
                 iceInstanceId: "colonel_1",
-                iceDefinitionId: "onr_proteus_029_colonel-failure",
+                iceDefinitionId: 73,
                 effectiveStrength: 4,
                 subroutines: [
                   { id: "trash_program", type: "trash_installed_program" },
@@ -167,17 +168,17 @@ function fixture(): {
         },
       ],
       run: {
-        runId: "run_1",
+        runId: 1,
         attackedServerId: "rd",
         phase: "encounter_ice",
         position: { kind: "ice", serverId: "rd", iceIndex: 0 },
         encounteredIce: {
           instanceId: "colonel_1",
-          definitionId: "onr_proteus_029_colonel-failure",
+          definitionId: 73,
           known: true,
           effectiveRunQuote: {
             iceInstanceId: "colonel_1",
-            iceDefinitionId: "onr_proteus_029_colonel-failure",
+            iceDefinitionId: 73,
             effectiveStrength: 4,
             subroutines: [
               { id: "trash_program", type: "trash_installed_program" },

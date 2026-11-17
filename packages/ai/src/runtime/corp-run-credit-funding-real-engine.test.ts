@@ -97,9 +97,7 @@ function assessment(current: ReturnType<typeof input>) {
   const action = current.legalActions.find(
     (a) =>
       a.type === "activated_card_ability" &&
-      a.abilityRef?.sourceAbilityId.endsWith(
-        ":during_run_discard_for_two_run_credits",
-      ),
+      a.payload?.cardImplementationAbilityKey === "during_run_discard_for_two_run_credits",
   )!;
   const candidate = buildActionSemanticCandidates(current).find(
     (c) => c.actionId === action.actionId,

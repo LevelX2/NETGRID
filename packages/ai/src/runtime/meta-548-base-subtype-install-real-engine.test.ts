@@ -19,7 +19,7 @@ function apply(state: GameState, action: LegalAction): GameState {
   if (!r.ok) throw Error(JSON.stringify(r.error));
   return r.state;
 }
-function fixture(card: string, credits: number) {
+function fixture(card: number, credits: number) {
   let s = createGameAfterSetup({ seed: "meta548-base-subtype", corpDeck, runnerDeck });
   s = apply(s, getLegalActions(s, "corp").find((a) => a.type === "mandatory_draw")!);
   while (s.corp.clicks > 1) s = apply(s, getLegalActions(s, "corp").find((a) => a.type === "gain_credit")!);
@@ -41,7 +41,7 @@ it.each([
   const decision = chooseAiAction(i), pf = decision.decisionDebug!.planFirstDecision!;
   const install = i.legalActions.find((a) => a.actionId === decision.actionId)!;
   expect(install.type).toBe("install_card");
-  expect(install.source).toContain(card);
+  expect(s.cardInstances[install.source]?.definitionId).toBe(card);
   expect(["hq", "rd"]).toContain(install.payload?.serverId);
   const predicted = JSON.parse(install.payload!.postInstallEffectiveRunQuoteJson as string);
   expect(predicted.subroutines).toContainEqual(expect.objectContaining({ type: "end_the_run" }));
@@ -66,7 +66,7 @@ it.each([
 
 it.each([83])("does not invent an unbound variable projection for %s", (card) => {
   const s = fixture(card, 20), before = hashState(s), i = input(s);
-  const installs = i.legalActions.filter((a) => a.type === "install_card" && a.source.includes(card));
+  const installs = i.legalActions.filter((a) => a.type === "install_card" && s.cardInstances[a.source]?.definitionId === card);
   expect(installs.length).toBeGreaterThan(0);
   for (const a of installs) expect(a.payload?.postInstallEffectiveRunQuoteJson).toBeUndefined();
   expect(hashState(s)).toBe(before);

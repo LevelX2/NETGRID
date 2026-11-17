@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import type { PublicGameEvent, VisibleCard } from "@netgrid/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -338,7 +339,7 @@ function decide(params: {
         cardId: "broker-2",
         sourceDefinitionId: BROKER,
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-        cardImplementationAbilityId: `${BROKER}:withdraw_credits`,
+        cardImplementationAbilityId: canonicalCapabilityId(BROKER, capabilityKey("withdraw_credits")),
         cardImplementationAbilityKey: "withdraw_credits",
         cardImplementationTakesHostedCredits: true,
         hostedCreditTakeMode: "all",
@@ -440,7 +441,7 @@ function bankBuildAction(instanceId: string) {
         cardId: instanceId,
         sourceDefinitionId: BROKER,
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-        cardImplementationAbilityId: `${BROKER}:store_credits`,
+        cardImplementationAbilityId: canonicalCapabilityId(BROKER, capabilityKey("store_credits")),
         cardImplementationAbilityKey: "store_credits",
         cardImplementationAddsHostedCredits: true,
         hostedCreditAddAmount: 3,
@@ -458,7 +459,7 @@ function bankLoadEvent(
   turnSerial = 1,
 ): PublicGameEvent {
   return {
-    eventId: `bank-load:${sourceCardInstanceId ?? "unbound"}`,
+    eventId: 2,
     type: "activated_card_ability",
     stateVersionBefore: 0,
     stateVersionAfter: 1,

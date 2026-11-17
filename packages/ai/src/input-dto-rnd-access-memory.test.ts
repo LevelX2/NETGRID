@@ -32,14 +32,14 @@ describe("native R&D access/removal binding through the AI input DTO", () => {
     const input = inputFor(cp.input);
     for (const events of [input.playerView.publicEvents, input.eventTail]) {
       expect(
-        events.find((e) => e.eventId === "evt_12")?.publicPayload,
+        events.find((e) => e.eventId === 13)?.publicPayload,
       ).toMatchObject({
         accessIndex: 0,
         effectiveAccessCount: 1,
         baseAccessCount: 1,
       });
       expect(
-        events.find((e) => e.eventId === "evt_13")?.publicPayload,
+        events.find((e) => e.eventId === 14)?.publicPayload,
       ).toHaveProperty("accessIndex", 0);
     }
     const belief = reconstructBeliefState(input);
@@ -79,15 +79,15 @@ describe("native R&D access/removal binding through the AI input DTO", () => {
     });
     expect(
       JSON.stringify(decision.decisionDebug!.planFirstDecision),
-    ).not.toContain("rnd_known_top_definition:onr_proteus_004_fetal-ai");
+    ).not.toContain("rnd_known_top_definition:62");
   });
   it("retains the observed agenda when no removal has happened", () => {
     const cp = checkpoint();
     cp.input.playerView.publicEvents = cp.input.playerView.publicEvents.filter(
-      (e) => e.eventId !== "evt_13",
+      (e) => e.eventId !== 14,
     );
     cp.input.eventTail = cp.input.eventTail.filter(
-      (e) => e.eventId !== "evt_13",
+      (e) => e.eventId !== 14,
     );
     const input = inputFor(cp.input);
     expect(
@@ -104,16 +104,16 @@ describe("native R&D access/removal binding through the AI input DTO", () => {
       cp.input.playerView.publicEvents,
       cp.input.eventTail,
     ]) {
-      const payload = events.find((e) => e.eventId === "evt_12")!.publicPayload;
+      const payload = events.find((e) => e.eventId === 13)!.publicPayload;
       payload.hiddenBreachQueue = ["hidden-next-card"];
       payload.unapprovedAccessAlias = 0;
     }
     const input = inputFor(cp.input);
     expect(
-      input.eventTail.find((e) => e.eventId === "evt_12")?.publicPayload,
+      input.eventTail.find((e) => e.eventId === 13)?.publicPayload,
     ).not.toHaveProperty("hiddenBreachQueue");
     expect(
-      input.eventTail.find((e) => e.eventId === "evt_12")?.publicPayload,
+      input.eventTail.find((e) => e.eventId === 13)?.publicPayload,
     ).not.toHaveProperty("unapprovedAccessAlias");
   });
 });

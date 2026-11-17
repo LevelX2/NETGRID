@@ -108,7 +108,7 @@ function fixture(definitionId: number, credits = 20, worm = false) {
   state = apply(
     state,
     getLegalActions(state, "runner").find(
-      (a) => a.type === "play_event" && a.source.includes(FAO),
+      (a) => a.type === "play_event" && state.cardInstances[a.source]?.definitionId === FAO,
     )!,
   );
   const target = state.corp.servers
@@ -166,7 +166,7 @@ describe("native mandatory variable ICE rez", () => {
       expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
       expect(
         JSON.stringify(state.eventLog.slice(start).map((e) => e.publicPayload)),
-      ).not.toContain(definitionId);
+      ).not.toMatch(new RegExp('"[^"]*definitionId":' + definitionId + "(?=[,}])", "i"));
       expect(
         JSON.stringify(state.eventLog.slice(start).map((e) => e.publicPayload)),
       ).not.toContain("forcedIceRezQuote");
@@ -246,11 +246,11 @@ describe("native mandatory variable ICE rez", () => {
     const projects = [
       {
         projectId: "score-floor",
-        serverId: "remote_1",
+        serverId: "r1",
         agendaPoints: 1,
         terminalScore: false,
         continuationReserve: {
-          serverId: "remote_1",
+          serverId: "r1",
           requiredCreditsBeforeNextCorpTurn: 2,
           remainingAdvancementCounters: 1,
         },

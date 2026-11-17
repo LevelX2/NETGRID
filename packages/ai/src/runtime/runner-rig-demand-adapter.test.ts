@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import type { DeckCapabilityProfile } from "../deck-capabilities";
@@ -30,7 +31,7 @@ describe("runner rig-demand coverage adapter", () => {
         memoryLimitBonus: capacity,
       });
       const decoder = visibleCard("decoder", {
-        definitionId: "test-decoder",
+        definitionId: syntheticCardDefinitionId("test-decoder"),
         type: "program",
         memoryCost: 2,
       });
@@ -79,7 +80,7 @@ describe("runner rig-demand coverage adapter", () => {
       memoryLimitBonus: 2,
     });
     const decoder = visibleCard("decoder", {
-      definitionId: "test-decoder",
+      definitionId: syntheticCardDefinitionId("test-decoder"),
       title: "Decoder",
       type: "program",
       memoryCost: 2,
@@ -176,7 +177,7 @@ describe("runner rig-demand coverage adapter", () => {
         memoryChip,
         ...[1, 2, 3, 4].map((index) =>
           visibleCard(`filler-${index}`, {
-            definitionId: `filler-${index}`,
+            definitionId: syntheticCardDefinitionId("filler-" + index),
             type: "event",
           }),
         ),
@@ -224,14 +225,14 @@ describe("runner rig-demand coverage adapter", () => {
       memoryLimitBonus: 2,
     });
     const decoder = visibleCard("decoder", {
-      definitionId: "test-decoder",
+      definitionId: syntheticCardDefinitionId("test-decoder"),
       title: "Decoder",
       type: "program",
       memoryCost: 2,
     });
     const fillers = [1, 2, 3].map((index) =>
       visibleCard(`filler-${index}`, {
-        definitionId: `filler-${index}`,
+        definitionId: syntheticCardDefinitionId("filler-" + index),
         type: "event",
       }),
     );
@@ -281,7 +282,7 @@ describe("runner rig-demand coverage adapter", () => {
       memoryLimitBonus: 2,
     });
     const decoder = visibleCard("decoder", {
-      definitionId: "test-decoder",
+      definitionId: syntheticCardDefinitionId("test-decoder"),
       title: "Decoder",
       type: "program",
       memoryCost: 2,
@@ -361,7 +362,7 @@ describe("runner rig-demand coverage adapter", () => {
       type: "hardware",
     });
     const killer = visibleCard("killer", {
-      definitionId: "test-killer",
+      definitionId: syntheticCardDefinitionId("test-killer"),
       title: "Killer",
       type: "program",
       subtypes: ["icebreaker", "killer"],
@@ -377,7 +378,7 @@ describe("runner rig-demand coverage adapter", () => {
       input: killerInput,
       strategicIntent: strategicIntent(),
       deckCapabilities: deckCapabilities({
-        cardId: "test-killer",
+        cardId: syntheticCardDefinitionId("test-killer"),
         coverage: "sentry",
         memoryCost: 1,
       }),
@@ -407,7 +408,7 @@ describe("runner rig-demand coverage adapter", () => {
         input: killerInput,
         strategicIntent: strategicIntent(),
         deckCapabilities: deckCapabilities({
-          cardId: "test-killer",
+          cardId: syntheticCardDefinitionId("test-killer"),
           coverage: "sentry",
           memoryCost: 1,
         }),
@@ -462,7 +463,7 @@ describe("runner rig-demand coverage adapter", () => {
         type: "hardware",
       });
       const decoder = visibleCard("decoder", {
-        definitionId: "test-decoder",
+        definitionId: syntheticCardDefinitionId("test-decoder"),
         type: "program",
         subtypes: ["icebreaker", "decoder", ...(noisy ? ["noisy"] : [])],
         memoryCost: 2,
@@ -478,7 +479,7 @@ describe("runner rig-demand coverage adapter", () => {
           input,
           strategicIntent: strategicIntent(),
           deckCapabilities: deckCapabilities({
-            cardId: "test-decoder",
+            cardId: syntheticCardDefinitionId("test-decoder"),
             coverage: "code_gate",
             memoryCost: 2,
             noisy,
@@ -506,7 +507,7 @@ describe("runner rig-demand coverage adapter", () => {
               input,
               strategicIntent: strategicIntent(),
               deckCapabilities: deckCapabilities({
-                cardId: "test-decoder",
+                cardId: syntheticCardDefinitionId("test-decoder"),
                 coverage: "code_gate",
                 memoryCost: 2,
                 noisy,
@@ -530,7 +531,7 @@ describe("runner rig-demand coverage adapter", () => {
       memoryCost: 1,
     });
     const decoder = visibleCard("decoder", {
-      definitionId: "test-decoder",
+      definitionId: syntheticCardDefinitionId("test-decoder"),
       title: "Decoder",
       type: "program",
       subtypes: ["icebreaker", "decoder"],
@@ -565,7 +566,7 @@ describe("runner rig-demand coverage adapter", () => {
       input,
       strategicIntent: strategicIntent(),
       deckCapabilities: deckCapabilities({
-        cardId: "test-decoder",
+        cardId: syntheticCardDefinitionId("test-decoder"),
         coverage: "code_gate",
         memoryCost: 2,
         noisy: true,
@@ -603,7 +604,7 @@ describe("runner rig-demand coverage adapter", () => {
       memoryLimit: 4,
     });
     const capabilities = deckCapabilities({
-      cardId: "test-decoder",
+      cardId: syntheticCardDefinitionId("test-decoder"),
       coverage: "code_gate",
       memoryCost: 2,
       location: "in_deck",
@@ -660,7 +661,7 @@ describe("runner rig-demand coverage adapter", () => {
       memoryLimit: 4,
     });
     const capabilities = deckCapabilities({
-      cardId: "test-decoder",
+      cardId: syntheticCardDefinitionId("test-decoder"),
       coverage: "code_gate",
       memoryCost: 2,
       location: "in_deck",
@@ -756,7 +757,7 @@ function deckCapabilities(
     noisy?: boolean;
     location?: "in_hand" | "in_deck";
   } = {
-    cardId: "test-decoder",
+    cardId: syntheticCardDefinitionId("test-decoder"),
     coverage: "code_gate",
     memoryCost: 2,
   },
@@ -841,7 +842,7 @@ function roles(definitionId: number): readonly string[] {
   if (definitionId === 358) {
     return ["memory", "memory_support"];
   }
-  if (definitionId === "test-decoder") return ["breaker_code_gate"];
-  if (definitionId === "test-killer") return ["breaker_killer"];
+  if (definitionId === syntheticCardDefinitionId("test-decoder")) return ["breaker_code_gate"];
+  if (definitionId === syntheticCardDefinitionId("test-killer")) return ["breaker_killer"];
   return [];
 }

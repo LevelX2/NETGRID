@@ -144,7 +144,7 @@ describe("Runner Golden Deck strategy and debug", () => {
       credits: 6,
       servers: [
         server("rd"),
-        server("remote_2", {
+        server("r2", {
           ice: [wallOfStatic("remote-ice-rd-choice")],
           root: [
             visibleCard("remote-root-2", {
@@ -156,7 +156,7 @@ describe("Runner Golden Deck strategy and debug", () => {
       ],
       legalActions: [
         runAction("run-rd", "rd"),
-        runAction("run-remote-2", "remote_2"),
+        runAction("run-remote-2", "r2"),
       ],
       grip: [
         visibleCard("safe-grip-1", { type: "event" }),
@@ -230,7 +230,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     );
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_step_capability:develop_onr_v1_129_hq-interface",
+        "plan_step_capability:develop_341",
         "plan_priority_class:P5",
       ]),
     );
@@ -253,7 +253,7 @@ describe("Runner Golden Deck strategy and debug", () => {
       ],
       eventTail: [
         {
-          eventId: "golden-rd-low-value-run",
+          eventId: 2,
           type: "start_run",
           stateVersionBefore: 0,
           stateVersionAfter: 1,
@@ -301,7 +301,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     const input = goldenInput({
       credits: 6,
       servers: [
-        server("remote_2", {
+        server("r2", {
           ice: [wallOfStatic("remote-ice-coverage")],
           root: [
             visibleCard("remote-root-2", {
@@ -311,7 +311,7 @@ describe("Runner Golden Deck strategy and debug", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-2", "remote_2")],
+      legalActions: [runAction("run-remote-2", "r2")],
     });
 
     const evaluations = evaluateRunnerRunTargets({
@@ -332,7 +332,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     });
 
     expect(evaluations[0]).toMatchObject({
-      targetServerId: "remote_2",
+      targetServerId: "r2",
       scoreThreat: true,
       pathPassability: "blocked_missing_coverage",
       recommendation: "find_breaker_first",
@@ -341,7 +341,7 @@ describe("Runner Golden Deck strategy and debug", () => {
       expect.arrayContaining([
         expect.objectContaining({
           goalId: "runner.contest_remote_if_score_threat",
-          targetServerId: "remote_2",
+          targetServerId: "r2",
         }),
       ]),
     );
@@ -351,7 +351,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     const input = goldenInput({
       credits: 6,
       servers: [
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("remote-root-1", {
               definitionId: 493,
@@ -361,7 +361,7 @@ describe("Runner Golden Deck strategy and debug", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({
@@ -371,7 +371,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       knownAccessState: "known_no_current_payoff",
       recommendation: "known_no_current_payoff",
     });

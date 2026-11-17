@@ -19,7 +19,7 @@ describe("target identity resolver", () => {
     expect(
       resolveCandidateTargetIdentity({
         actionType: "rez_ice",
-        targetIdentity: "ice:remote_1:0:public_ice",
+        targetIdentity: "ice:r1:0:public_ice",
       }).status,
     ).toBe("complete");
     expect(
@@ -73,12 +73,12 @@ describe("target identity resolver", () => {
       resolveCandidateTargetIdentity({
         actionType: "install_card",
         targetIdentity: "unknown_target",
-        sourceDefinitionId: "Wall of Static",
+        sourceDefinitionId: 491,
       }),
     ).toMatchObject({
       status: "complete",
       kind: "installedOwnCard",
-      identity: "installedOwnCard:actorKnownRef:wall_of_static",
+      identity: "installedOwnCard:actorKnownRef:491",
       sideSafe: true,
       snapshotStable: true,
     });
@@ -104,13 +104,13 @@ describe("target identity resolver", () => {
       resolveCandidateTargetIdentity({
         actionType: "trigger_ability",
         targetIdentity: "unknown_target",
-        sourceDefinitionId: "Self-Modifying Code",
+        sourceDefinitionId: 363,
         abilityId: "search_install",
       }),
     ).toMatchObject({
       status: "complete",
       kind: "ability",
-      identity: "ability:self_modifying_code:search_install",
+      identity: "ability:363:search_install",
     });
   });
 });

@@ -247,7 +247,7 @@ describe("canonical passive strength investment", () => {
       (a) => a.actionId === decision.actionId,
     )!;
     expect(action.type).toBe("install_card");
-    expect(action.source).toBe("runner_224_3");
+    expect(action.source).toBe("c1dv");
     expect(decision.fallbackUsed).toBe(false);
     const pf = decision.decisionDebug!.planFirstDecision!;
     expect(pf.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
@@ -272,7 +272,7 @@ describe("canonical passive strength investment", () => {
       (a) => a.actionId === decision.actionId,
     )!;
     expect(action.type).toBe("install_card");
-    expect(action.source).toBe("runner_224_3");
+    expect(action.source).toBe("c1dv");
     expect(decision.fallbackUsed).toBe(false);
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
@@ -685,7 +685,7 @@ describe("canonical passive strength investment", () => {
           expect.arrayContaining([
             expect.objectContaining({
               moduleId: "runner.develop_board_and_hand",
-              target: { kind: "card", id: clownId },
+              target: { kind: "card", id: String(clownId) },
               viability: "ready",
             }),
           ]),
@@ -711,12 +711,12 @@ describe("canonical passive strength investment", () => {
     [283, "runner.recurring_economy"],
     [192, "runner.recurring_economy"],
     [208, "runner.credit_bank"],
-  ])("binds canonical core card %s to its existing owner", (cardId, owner) => {
+  ] as const)("binds canonical core card %s to its existing owner", (cardId, owner) => {
     const state = fixture();
     const f = RealEngineFixtureBuilder.forState(state)
       .withRunnerGripSize(0)
       .withRunnerCardInGrip(cardId!);
-    if (cardId!.includes("spin-chip") || cardId === krashId) {
+    if (cardId === 197 || cardId === krashId) {
       f.withRunnerCardInGrip(krashId);
       state.runner.memoryUsed = 0;
     }
@@ -750,7 +750,7 @@ describe("canonical passive strength investment", () => {
           ? input.playerView.own.gripOrHq.find(
               (c) => c.definitionId === cardId,
             )!.instanceId
-          : cardId;
+          : String(cardId);
       expect(ownPlans).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
