@@ -230,7 +230,7 @@ describe("conditional counter development and its memory milestone", () => {
     if (condition === "short_horizon") s.corp.rd = s.corp.rd.slice(0, 2);
     if (condition === "urgent_remote")
       RealEngineFixtureBuilder.forState(s).withCorpRemoteRoot(
-        "remote_1",
+        "r1",
         432,
         3,
       );
@@ -301,7 +301,7 @@ describe("conditional counter development and its memory milestone", () => {
       plans.some(
         (p) =>
           p.moduleId === "runner.develop_board_and_hand" &&
-          p.dedupeKey?.includes("zetatech-mem-chip") &&
+          p.target?.id === String(memoryId) &&
           p.viability === "ready",
       ),
     ).toBe(true);

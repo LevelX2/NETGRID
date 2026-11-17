@@ -2,7 +2,7 @@ import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { corpIceRezSupportEmptyTargetDispositionEvidence } from "./corp-defense-rez-support-facts";
 import { corpArchivesAgendaRelocationSignal } from "./archives-agenda-relocation";
 import { assessCorpTerminalAgendaDefense } from "./corp-terminal-agenda-defense";
-import type { AiDecisionInput } from "@netgrid/shared";
+import { isRemoteServerId, type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
   assessment,
@@ -1740,6 +1740,8 @@ function compareGenericExactInstallRoutes(
     knownExactInstallRouteCreditCost(right.projection);
   return (
     costComparison ||
+    Number(isRemoteServerId(left.signal.serverId)) -
+      Number(isRemoteServerId(right.signal.serverId)) ||
     technicalCompare(left.candidate.actionId, right.candidate.actionId)
   );
 }

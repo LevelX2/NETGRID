@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import {
   applyAction,
   createGameAfterSetup,
@@ -86,7 +87,7 @@ it("selects the actual scored trace head for an affordable lethal payoff", () =>
     type: "activated_card_ability",
     payload: {
       cardImplementationAbilityId:
-        NETWATCH + ":abilities_activated_corp_main_trace",
+        canonicalCapabilityId(NETWATCH, capabilityKey("abilities_activated_corp_main_trace")),
     },
   });
   expect(decision.fallbackUsed).toBe(false);

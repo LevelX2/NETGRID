@@ -114,7 +114,7 @@ describe("Paarung 529 native owner regressions", () => {
     )!;
     expect(action.payload?.delayedInstallAbility).toBe("remove_shell_counter");
     expect(action.payload?.targetCardId).toBe(
-      "runner_35_2",
+      "c7u",
     );
     expect(
       chosen.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
@@ -125,9 +125,9 @@ describe("Paarung 529 native owner regressions", () => {
     const state = take(before, "runner", chosen.actionId!);
     expect([state.runner.credits, state.runner.clicks]).toEqual([2, 1]);
     expect(state.runner.rig.programs).toContain(
-      "runner_35_2",
+      "c7u",
     );
-    expect(state.runner.grip).toContain("runner_35_1");
+    expect(state.runner.grip).toContain("c7t");
   });
   it("validates the entire finite original Shell alternative through access, Corp turn and the real later score click", () => {
     const { state: initial, steps } = original("shell-substitution");
@@ -162,8 +162,8 @@ describe("Paarung 529 native owner regressions", () => {
     expect(pending).toMatchObject({
       originalActionId: "runner.resolve_choice",
       selectedAtStateVersion: 204,
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      executorInstanceId: "plan:runner.convert_run_window:run%3Arun_200",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      executorInstanceId: "plan:runner.convert_run_window:run%3A200",
     });
     let state = take(before, "runner", bid.actionId!, bid.selectedChoices);
     expect(state.runner.credits).toBe(6);
@@ -188,7 +188,7 @@ describe("Paarung 529 native owner regressions", () => {
     state = take(state, "runner", support.actionId!, support.selectedChoices);
     expect(state.runner.credits).toBe(9);
     expect(state.runner.heap).toContain(
-      "runner_210_1",
+      "c1ap",
     );
     const continuedInput = buildAiDecisionInput(state, "runner", {
       difficulty: "hard",

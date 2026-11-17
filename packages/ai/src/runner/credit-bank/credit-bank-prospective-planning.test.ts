@@ -1,3 +1,5 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
+import { parseCanonicalCapabilityId } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -131,7 +133,7 @@ describe("runner credit-bank prospective planning", () => {
         projection: "feasible_in_projection",
         resolution: "requires_engine_quote",
         capabilityKey: "store_credits",
-        canonicalCapabilityId: "366:store_credits",
+        canonicalCapabilityId: canonicalCapabilityId(366, capabilityKey("store_credits")),
         actionCost: 1,
         hostedCreditsAdded: 3,
         sharedLimit: {
@@ -143,7 +145,7 @@ describe("runner credit-bank prospective planning", () => {
           sourceCardInstanceId: "broker-1",
           sourceAbilityBinding: {
             kind: "card_spec_capability_key",
-            sourceAbilityId: "366:store_credits",
+            sourceAbilityId: 440,
           },
         },
       },
@@ -187,19 +189,19 @@ describe("runner credit-bank prospective planning", () => {
     const exact = candidate({
       actionId: "broker-1-build-current",
       sourceCardInstanceId: "broker-1",
-      abilityId: "366:store_credits",
+      abilityId: canonicalCapabilityId(366, capabilityKey("store_credits")),
       route: "build",
     });
     const sibling = candidate({
       actionId: "broker-2-build-current",
       sourceCardInstanceId: "broker-2",
-      abilityId: "366:store_credits",
+      abilityId: canonicalCapabilityId(366, capabilityKey("store_credits")),
       route: "build",
     });
     const cashOut = candidate({
       actionId: "broker-1-cash-current",
       sourceCardInstanceId: "broker-1",
-      abilityId: "366:withdraw_credits",
+      abilityId: canonicalCapabilityId(366, capabilityKey("withdraw_credits")),
       route: "cash_out",
     });
 
@@ -241,7 +243,7 @@ describe("runner credit-bank prospective planning", () => {
 function candidate(params: {
   actionId: string;
   sourceCardInstanceId: string;
-  abilityId: string;
+  abilityId: number;
   route: "build" | "cash_out";
 }): ActionSemanticCandidate {
   return {
@@ -252,7 +254,7 @@ function candidate(params: {
     abilityId: params.abilityId,
     abilityBindingMethod: "canonical_capability_id",
     planOwnerBinding: {
-      capabilityKey: params.abilityId.split(":")[1]!,
+      capabilityKey: parseCanonicalCapabilityId(params.abilityId).capabilityKey,
       owner: "runner.credit_bank",
       route: params.route,
     },

@@ -36,7 +36,8 @@ it.each([
       (action: { actionId: string }) => action.actionId === decision.actionId,
     );
     expect(selected).toMatchObject({ type: "install_card" });
-    expect(decision.actionId).toContain(definitionId);
+    const source = input.playerView.own.gripOrHq.find((card: { instanceId: string }) => card.instanceId === selected.source);
+    expect(source?.definitionId).toBe(definitionId);
     expect(selected.expiresAtStateVersion).toBe(decisionNumber - 1);
     const root = `plan:runner.rig_and_coverage:coverage%3A${role}`;
     expect(decision.decisionDebug!.planFirstDecision!).toMatchObject({

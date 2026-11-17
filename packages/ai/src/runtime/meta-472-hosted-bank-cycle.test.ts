@@ -163,11 +163,9 @@ describe("SP-456 actual Engine bank cycle through the normal Corp chooser", () =
             (signal): signal is CorpEconomyParentFundingSignal =>
               signal.kind === "parent_funding",
           );
-        const short = funding.find(
-          (signal) =>
-            signal.parentNeedId?.endsWith("hostile-takeover_2:remote_1") ===
-            true,
-        )!;
+        const source = step.input.playerView.own.gripOrHq.find((card) => card.definitionId === 415);
+        expect(source).toBeDefined();
+        const short = funding.find((signal) => signal.parentNeedId?.endsWith(source!.instanceId + ":r1"))!;
         const cycle = funding.find(
           (signal) => signal.parentPlanInstanceId === plan?.rootPlanInstanceId,
         )!;

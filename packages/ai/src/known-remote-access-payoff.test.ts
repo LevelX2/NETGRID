@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { AiDecisionInput, PlayerView, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { BeliefState } from "./belief-state";
@@ -5,13 +6,13 @@ import { evaluateKnownRemoteAccessPayoff } from "./known-remote-access-payoff";
 
 describe("evaluateKnownRemoteAccessPayoff", () => {
   it("treats a visible empty remote as known to have no current payoff", () => {
-    const input = inputWithUnidentifiedKnownRoot("remote_1");
+    const input = inputWithUnidentifiedKnownRoot("r1");
     input.playerView.servers[0]!.root = [];
 
     expect(
       evaluateKnownRemoteAccessPayoff(
         input,
-        "remote_1",
+        "r1",
         beliefWithInvalidations([]),
       ),
     ).toMatchObject({
@@ -25,32 +26,32 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
   });
 
   it("ignores remembered root positions outside the current server", () => {
-    const input = inputWithUnidentifiedKnownRoot("remote_1");
+    const input = inputWithUnidentifiedKnownRoot("r1");
     input.playerView.servers[0]!.root[0]!.known = false;
     const belief = beliefWithKnownRemoteRoot(
-      "remote_1",
+      "r1",
       "root:4",
       422,
       "old-access",
     );
     expect(
-      evaluateKnownRemoteAccessPayoff(input, "remote_1", belief).payoff,
+      evaluateKnownRemoteAccessPayoff(input, "r1", belief).payoff,
     ).toBe("unknown");
   });
 
   it("matches remote invalidation entries by bounded server id", () => {
     expect(
       evaluateKnownRemoteAccessPayoff(
-        inputWithUnidentifiedKnownRoot("remote_1"),
-        "remote_1",
-        beliefWithInvalidations(["server:remote_1:root_changed"]),
+        inputWithUnidentifiedKnownRoot("r1"),
+        "r1",
+        beliefWithInvalidations(["server:r1:root_changed"]),
       ).payoff,
     ).toBe("changed");
     expect(
       evaluateKnownRemoteAccessPayoff(
-        inputWithUnidentifiedKnownRoot("remote_1"),
-        "remote_1",
-        beliefWithInvalidations(["server:remote_10:root_changed"]),
+        inputWithUnidentifiedKnownRoot("r1"),
+        "r1",
+        beliefWithInvalidations(["server:r10:root_changed"]),
       ).payoff,
     ).toBe("unknown");
   });
@@ -58,7 +59,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
   it("keeps a declined free-trash target free of trash-only projection fields", () => {
     const payoff = evaluateKnownRemoteAccessPayoff(
       inputWithDepletedFreeTrashTarget(),
-      "remote_1",
+      "r1",
       beliefWithInvalidations([]),
     );
 
@@ -99,16 +100,16 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
       }),
     ];
     input.playerView.run = {
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "movement",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
       successful: false,
     };
 
     expect(
       evaluateKnownRemoteAccessPayoff(
         input,
-        "remote_1",
+        "r1",
         beliefWithInvalidations([]),
       ),
     ).toMatchObject({
@@ -123,7 +124,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     input.playerView.stateVersion = 12;
     input.playerView.own.credits = 1;
     input.playerView.own.gripOrHq = [
-      visibleCard("only-grip-card", { definitionId: "runner-card" }),
+      visibleCard("only-grip-card", { definitionId: syntheticCardDefinitionId("runner-card") }),
     ];
     input.playerView.servers[0]!.root = [
       visibleCard("known-damage-agenda", {
@@ -134,7 +135,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     ];
     input.eventTail = input.playerView.publicEvents = [
       {
-        eventId: "evt-access",
+        eventId: 12,
         type: "access_card",
         stateVersionBefore: 10,
         stateVersionAfter: 11,
@@ -142,7 +143,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
         publicPayload: {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
+          serverId: "r1",
           cardDefinitionId: 62,
           accessedCardPositionKey: "root:0",
           damageResolved: true,
@@ -151,7 +152,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
         },
       },
       {
-        eventId: "evt-decline",
+        eventId: 13,
         type: "decline_trash",
         stateVersionBefore: 11,
         stateVersionAfter: 12,
@@ -159,27 +160,27 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
         publicPayload: {
           actor: "runner",
           actionType: "decline_trash",
-          serverId: "remote_1",
+          serverId: "r1",
           stealCost: 2,
           stealBlockedByCost: true,
         },
       },
     ];
     const belief = beliefWithKnownRemoteRoot(
-      "remote_1",
+      "r1",
       "root:0",
       62,
-      "evt-access",
+      12,
     );
     input.playerView.servers[0]!.root[0]!.effectiveStealCostQuote = {
       stateVersion: 12,
-      serverId: "remote_1",
+      serverId: "r1",
       agendaInstanceId: "known-damage-agenda",
       creditCost: 2,
       complete: true,
     };
 
-    const unsafe = evaluateKnownRemoteAccessPayoff(input, "remote_1", belief);
+    const unsafe = evaluateKnownRemoteAccessPayoff(input, "r1", belief);
     expect(unsafe).toMatchObject({
       payoff: "agenda",
       accessDecision: "defer_until_safe",
@@ -196,11 +197,11 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
 
     input.playerView.own.credits = 2;
     input.playerView.own.gripOrHq.push(
-      visibleCard("second-grip-card", { definitionId: "runner-card-2" }),
-      visibleCard("third-grip-card", { definitionId: "runner-card-3" }),
+      visibleCard("second-grip-card", { definitionId: syntheticCardDefinitionId("runner-card-2") }),
+      visibleCard("third-grip-card", { definitionId: syntheticCardDefinitionId("runner-card-3") }),
     );
     expect(
-      evaluateKnownRemoteAccessPayoff(input, "remote_1", belief),
+      evaluateKnownRemoteAccessPayoff(input, "r1", belief),
     ).toMatchObject({
       payoff: "agenda",
       accessDecision: "steal",
@@ -225,12 +226,12 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     ];
     const payoff = evaluateKnownRemoteAccessPayoff(
       input,
-      "remote_1",
+      "r1",
       beliefWithKnownRemoteRoot(
-        "remote_1",
+        "r1",
         "root:0",
         557,
-        "evt-expose-trap",
+        10,
       ),
     );
 
@@ -252,7 +253,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     });
     expect(payoff.evidence).toEqual(
       expect.arrayContaining([
-        "known_access_effect_source:onr_v1_345_trap",
+        "known_access_effect_source:557",
         "known_access_effect_damage:net:3",
         "remote_run_deferred_for_known_access_damage:true",
       ]),
@@ -267,12 +268,12 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     ];
     const payoff = evaluateKnownRemoteAccessPayoff(
       input,
-      "remote_1",
+      "r1",
       beliefWithKnownRemoteRoot(
-        "remote_1",
+        "r1",
         "root:0",
         557,
-        "evt-expose-trap",
+        10,
       ),
     );
     expect(payoff.contestable).toBe(true);
@@ -293,7 +294,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     ];
     const payoff = evaluateKnownRemoteAccessPayoff(
       input,
-      "remote_1",
+      "r1",
       beliefWithInvalidations([]),
     );
     expect(payoff.payoff).toBe("unknown");
@@ -312,12 +313,12 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     ];
     const payoff = evaluateKnownRemoteAccessPayoff(
       input,
-      "remote_1",
+      "r1",
       beliefWithKnownRemoteRoot(
-        "remote_1",
+        "r1",
         "root:0",
         535,
-        "evt-expose-experimental-ai",
+        10,
       ),
     );
     expect(payoff.knownAccessThreatProjection).toMatchObject({
@@ -343,7 +344,7 @@ function inputWithDepletedFreeTrashTarget(): AiDecisionInput {
     timingPoint: "runner_action.main",
     own: {
       identity: visibleCard("runner-identity", {
-        definitionId: "runner-identity",
+        definitionId: syntheticCardDefinitionId("runner-identity"),
         type: "identity",
       }),
       credits: 10,
@@ -365,7 +366,7 @@ function inputWithDepletedFreeTrashTarget(): AiDecisionInput {
     },
     opponent: {
       identity: visibleCard("corp-identity", {
-        definitionId: "corp-identity",
+        definitionId: syntheticCardDefinitionId("corp-identity"),
         type: "identity",
       }),
       credits: 5,
@@ -380,7 +381,7 @@ function inputWithDepletedFreeTrashTarget(): AiDecisionInput {
     },
     servers: [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [],
         root: [root],
@@ -432,7 +433,7 @@ function beliefWithKnownRemoteRoot(
   zone: string,
   positionKey: string,
   definitionId: number,
-  sourceEventId: string,
+  sourceEventId: number,
 ): BeliefState {
   return {
     invalidationLog: [],

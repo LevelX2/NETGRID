@@ -58,12 +58,12 @@ function fixture(firstAgendaExposed: boolean): GameState {
     .withCorpCardInHq(secondAgenda)
     .withCorpCardInHq(424)
     .withCorpCardInHq(429)
-    .withCorpRemoteRoot("remote_1", 420)
-    .withRezzedCorpIceOnServer("remote_1", 457)
+    .withCorpRemoteRoot("r1", 420)
+    .withRezzedCorpIceOnServer("r1", 457)
     .withCorpCredits(19)
     .withRunnerCredits(firstAgendaExposed ? 24 : 5)
     .withRunnerProgramInstalled(251);
-  if (firstAgendaExposed) builder.withCorpRemoteRoot("remote_2", firstAgenda);
+  if (firstAgendaExposed) builder.withCorpRemoteRoot("r2", firstAgenda);
   else builder.withCorpCardInHq(firstAgenda);
 
   for (const definitionId of [
@@ -95,11 +95,11 @@ function fixture(firstAgendaExposed: boolean): GameState {
   return state;
 }
 
-function secondAgendaOffer(action: LegalAction): boolean {
+function secondAgendaOffer(state: GameState, action: LegalAction): boolean {
   return (
     action.type === "install_card" &&
     action.payload?.serverId === "new_remote" &&
-    action.source.includes(secondAgenda)
+    state.cardInstances[action.source]?.definitionId === secondAgenda
   );
 }
 
@@ -113,14 +113,14 @@ function projectSecondAgenda(state: GameState): CorpScoreProjectSignal {
     },
   });
   expect(input.playerView.opponent.agendaPoints).toBe(4);
-  expect(input.legalActions.some(secondAgendaOffer)).toBe(true);
+  const offer = input.legalActions.find((action) => secondAgendaOffer(state, action));
+  expect(offer).toBeDefined();
   const decision = chooseAiAction(input);
   expect(decision.fallbackUsed).toBe(false);
   const plan = residentPlanPortfolioSnapshot(input)?.instances.find(
     (instance) =>
       instance.moduleId === "corp.score_agenda" &&
-      instance.dedupeKey.includes(secondAgenda) &&
-      instance.dedupeKey.endsWith(":new_remote"),
+      instance.dedupeKey.endsWith(":" + offer?.source + ":new_remote"),
   );
   expect(plan).toBeDefined();
   return (plan!.moduleState as { signal: CorpScoreProjectSignal }).signal;
@@ -136,9 +136,9 @@ describe("agenda flood exposure across open remotes", () => {
       routeAssessment: "corp_score_protection_required",
     });
 
-    let exposed = step(state, "corp", secondAgendaOffer);
+    let exposed = step(state, "corp", (action) => secondAgendaOffer(state, action));
     exposed = step(exposed, "corp", (action) => action.type === "end_turn");
-    for (const serverId of ["remote_2", "remote_3"]) {
+    for (const serverId of ["r2", "r3"]) {
       exposed = step(
         exposed,
         "runner",

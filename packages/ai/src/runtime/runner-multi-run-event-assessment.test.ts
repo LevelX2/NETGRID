@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -24,7 +25,7 @@ function action(
 
 const input = { side: "runner" } as AiDecisionInput;
 const dependencies = {
-  sourceDefinitionIdForAction: () => "capability_source",
+  sourceDefinitionIdForAction: () => syntheticCardDefinitionId("capability_source"),
   targetServerId: () => "rd",
   targetEvaluation: () => undefined,
   payoffClass: () => "unknown_probe",
@@ -45,7 +46,7 @@ describe("generic multi-run event assessment", () => {
     );
 
     expect(assessment).toMatchObject({
-      sourceDefinitionId: "capability_source",
+      sourceDefinitionId: syntheticCardDefinitionId("capability_source"),
       targetServerId: "rd",
       phase: "first_run",
       canTakeRun: true,

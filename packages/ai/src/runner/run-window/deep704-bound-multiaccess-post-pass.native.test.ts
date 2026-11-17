@@ -123,7 +123,7 @@ it("chooses the exact continuation under the original central parent and run exe
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
-    leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_111",
+    leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A111",
     route: { actionId: "runner.continue_run", stateVersion: 113 },
   });
   expect(JSON.stringify(input)).toBe(before);
@@ -149,7 +149,7 @@ it.each([
     if (variant === "unknown_now") {
       const remaining = input.playerView.servers
         .find((s) => s.id === "rd")!
-        .ice.find((c) => c.instanceId.includes("filter"))!;
+        .ice.find((c) => c.definitionId === 456)!;
       remaining.known = false;
       remaining.rezzed = false;
     }
