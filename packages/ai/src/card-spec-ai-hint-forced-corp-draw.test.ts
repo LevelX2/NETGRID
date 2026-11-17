@@ -87,7 +87,11 @@ describe("canonical forced Corp draw reaches Runner development", () => {
     const { state, input } = nativeInput(),
       before = JSON.stringify(input);
     const d = chooseAiAction(input);
-    expect(d.actionId).toContain("install_card.runner_onr_v1_064_skivviss");
+    const install = input.legalActions.find((action) => action.actionId === d.actionId);
+    expect(install?.type).toBe("install_card");
+    expect(input.playerView.own.gripOrHq.find((card) =>
+      card.instanceId === install?.source,
+    )?.definitionId).toBe(276);
     expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
       "runner.pressure_central",
     );

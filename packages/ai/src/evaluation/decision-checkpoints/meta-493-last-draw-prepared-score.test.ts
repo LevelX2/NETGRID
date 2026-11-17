@@ -69,12 +69,14 @@ it("funds the already certified terminal continuation instead of opening an unpr
   expect(plan.priority?.effectiveClass).toBe("P2");
   expect(plan.leafExecutorInstanceId).toBe(plan.selectedPlan?.instanceId);
   expect(plan.selectedStep?.planInstanceId).toBe(plan.leafExecutorInstanceId);
+  expect(plan.portfolio).toBeDefined();
   expect(
-    plan.portfolio?.find((p) =>
+    plan.portfolio?.some((p) =>
       referencesDefaultDeckCard(p.dedupeKey, 424, 1) &&
-      p.dedupeKey.endsWith(":new_remote"),
-    )?.evidenceCodes,
-  ).not.toContain("corp_last_viable_deckout_matchpoint_install:new_remote");
+      p.dedupeKey.endsWith(":new_remote") &&
+      p.evidenceCodes.includes("corp_last_viable_deckout_matchpoint_install:new_remote"),
+    ),
+  ).toBe(false);
 });
 it.each(["stale", "incomplete", "nonterminal", "unfundable"] as const)(
   "does not replace a %s installed continuation with an unfunded emergency install",

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -241,9 +242,9 @@ describe("Corp hand inventory facts", () => {
     expect(facts.records).toHaveLength(1);
     expect(facts.records[0]).toMatchObject({
       sourceInstanceId: "unknown-own-card",
-      sourceDefinitionId: "unknown-own-card",
       planningDisposition: "assessment_unknown",
     });
+    expect(facts.records[0]).not.toHaveProperty("sourceDefinitionId");
     expect(facts.cleanupProjection).toMatchObject({
       dispositionCoverageComplete: true,
       assessmentUnknownInstanceIds: ["unknown-own-card"],
