@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { describe, expect, it } from "vitest";
 import {
@@ -248,7 +249,7 @@ describe("plan route binding", () => {
           capability: {
             capabilityId: "rez_response",
             semanticActionTypes: ["corp_window.rez"],
-            requiredSourceDefinitionIds: ["corp-ice-definition"],
+            requiredSourceDefinitionIds: [syntheticCardDefinitionId("corp-ice-definition")],
           },
           target: { kind: "ice", id: "outer-ice" },
           purpose: "Rez the exact ICE owned by this defense response.",
@@ -414,8 +415,11 @@ function candidate(
   actionId: string,
   actionType = "gain_credit",
   semanticActionType = "economy.gain_credit",
-  sourceDefinitionId?: number,
+  sourceDefinition?: number | string,
 ): ActionSemanticCandidate {
+  const sourceDefinitionId = typeof sourceDefinition === "string"
+    ? syntheticCardDefinitionId(sourceDefinition)
+    : sourceDefinition;
   return {
     actionId,
     actionType,

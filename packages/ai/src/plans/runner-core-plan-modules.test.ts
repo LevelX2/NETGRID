@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { type RunnerCorePlanDomain } from "./runner-core-plan-contracts";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
@@ -38,7 +39,7 @@ describe("Runner core plan modules", () => {
     const actionId = "runner.resolve_choice";
     const choiceId = "runner_liquidation_42";
     const sourceResourceInstanceId = "liquidation-source";
-    const sourceResourceDefinitionId = "generic-liquidation-resource";
+    const sourceResourceDefinitionId = syntheticCardDefinitionId("generic-liquidation-resource");
     const targetInstanceId = "installed-target";
     const input = {
       side: "runner",
@@ -93,7 +94,7 @@ describe("Runner core plan modules", () => {
             },
             {
               instanceId: targetInstanceId,
-              definitionId: "generic-installed-target",
+              definitionId: syntheticCardDefinitionId("generic-installed-target"),
               known: true,
               type: "hardware",
             },
@@ -130,7 +131,7 @@ describe("Runner core plan modules", () => {
 
   it("liquidates only a doctrine-proven redundant duplicate with positive value", () => {
     const input = installedCardLiquidationInput({
-      targetDefinitionId: "generic-redundant-target",
+      targetDefinitionId: syntheticCardDefinitionId("generic-redundant-target"),
       targetType: "hardware",
       duplicateTarget: true,
       doctrineAdditivity: "redundant_by_default",
@@ -201,7 +202,7 @@ describe("Runner core plan modules", () => {
           targetId: "dwarf-1",
           targetKind: "program",
           targetSide: "runner",
-          targetDefinitionId: "onr_v1_107_dwarf",
+          targetDefinitionId: syntheticCardDefinitionId("onr_v1_107_dwarf"),
           visibilityScope: "runner_private",
           evidence: ["legal_action_payload:targetCardId"],
         },
@@ -222,7 +223,7 @@ describe("Runner core plan modules", () => {
           sourceCardInstanceId: "shell-traders-1",
           sourceDefinitionId: 388,
           targetCardInstanceId: "dwarf-1",
-          targetDefinitionId: "onr_v1_107_dwarf",
+          targetDefinitionId: syntheticCardDefinitionId("onr_v1_107_dwarf"),
           targetCardType: "program",
           actionIds: [prepare.actionId],
           priorityClass: "P2",
@@ -300,7 +301,7 @@ describe("Runner core plan modules", () => {
           targetId: "elf-1",
           targetKind: "program",
           targetSide: "runner",
-          targetDefinitionId: "onr_v1_999_elf",
+          targetDefinitionId: syntheticCardDefinitionId("onr_v1_999_elf"),
           visibilityScope: "runner_private",
           evidence: ["legal_action_payload:targetCardId"],
         },
@@ -321,7 +322,7 @@ describe("Runner core plan modules", () => {
           sourceCardInstanceId: "shell-traders-1",
           sourceDefinitionId: 388,
           targetCardInstanceId: "dwarf-1",
-          targetDefinitionId: "onr_v1_107_dwarf",
+          targetDefinitionId: syntheticCardDefinitionId("onr_v1_107_dwarf"),
           targetCardType: "program",
           actionIds: [prepare.actionId],
           priorityClass: "P2",
@@ -455,7 +456,7 @@ describe("Runner core plan modules", () => {
     const runnerContext = context([leavePlay], {
       resourceLifecycle: [
         {
-          lifecycleId: 380,
+          lifecycleId: "380:loan-1",
           sourceCardInstanceId: "loan-1",
           definitionId: 380,
           phase: "leave_play",
@@ -554,9 +555,9 @@ describe("Runner core plan modules", () => {
     const lifecycle = coreModule("runner.resource_lifecycle");
     const economy = coreModule("runner.economy");
     const parentOne =
-      "plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1";
+      "plan:runner.resource_lifecycle:380%3Aloan-1";
     const parentTwo =
-      "plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-2";
+      "plan:runner.resource_lifecycle:380%3Aloan-2";
     const credit = candidate("credit");
     const runnerContext = context([credit], {
       resourceLifecycle: [
@@ -747,7 +748,7 @@ describe("Runner core plan modules", () => {
     const runnerContext = context([genericEndTurn], {
       resourceLifecycle: [
         {
-          lifecycleId: 380,
+          lifecycleId: "380:loan-1",
           sourceCardInstanceId: "loan-1",
           definitionId: 380,
           phase: "leave_play",
@@ -831,7 +832,7 @@ describe("Runner core plan modules", () => {
       "runner_resource",
     );
     const module = coreModule("runner.rig_and_coverage", (definitionId) =>
-      definitionId.includes("psychic")
+      definitionId === 34
         ? ["breaker_code_gate"]
         : ["runner_resource"],
     );
@@ -957,7 +958,7 @@ describe("Runner core plan modules", () => {
   it("holds the sole reachable provider for a single-definition coverage dependency", () => {
     const provider = {
       instanceId: "sole-provider",
-      definitionId: "universal-breaker",
+      definitionId: syntheticCardDefinitionId("universal-breaker"),
       title: "Universal Breaker",
       type: "program" as const,
       known: true,
@@ -976,7 +977,7 @@ describe("Runner core plan modules", () => {
           providers: [
             {
               providerId: "provider:universal-breaker",
-              cardId: "universal-breaker",
+              cardId: provider.definitionId,
               capabilities: ["runner.coverage.breaker"],
             },
           ],
@@ -2773,8 +2774,11 @@ function candidate(
   actionId: string,
   actionType = "gain_credit",
   semanticActionType = "economy.gain_credit",
-  sourceDefinitionId?: number,
+  sourceDefinition?: number | string,
 ): ActionSemanticCandidate {
+  const sourceDefinitionId = typeof sourceDefinition === "string"
+    ? syntheticCardDefinitionId(sourceDefinition)
+    : sourceDefinition;
   return {
     actionId,
     actionType,

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { CorpCorePlanDomain } from "./corp-core-plan-contracts";
 import { corpSpecialDevelopmentAdmission } from "./corp-tactical-module-support";
 import {
@@ -117,7 +118,7 @@ describe("Corp tactical plan modules", () => {
     );
     const signal = {
       ...punishSignal("prepare"),
-      sourceDefinitionIds: ["paris-city-grid"],
+      sourceDefinitionIds: [syntheticCardDefinitionId("paris-city-grid")],
       actionIds: [hq.actionId],
       initiatingSemanticActionType: "install.card",
     };
@@ -258,7 +259,7 @@ describe("Corp tactical plan modules", () => {
             {
               commitmentVersion: "corp_ambush_commitment_v1",
               ambushId: "ambush",
-              sourceDefinitionId: "ambush",
+              sourceDefinitionId: syntheticCardDefinitionId("ambush"),
               sourceInstanceId: "ambush-instance",
               actionIds: ["install"],
               serverId: "remote_1",
@@ -336,7 +337,7 @@ describe("Corp tactical plan modules", () => {
           recycleRoute: {
             actionId: "recycle-trap",
             recyclerSourceInstanceId: "recycler-instance",
-            recyclerSourceDefinitionId: "recycler-definition",
+            recyclerSourceDefinitionId: syntheticCardDefinitionId("recycler-definition"),
             targetCardInstanceId: "ambush-instance",
           },
         },
@@ -352,7 +353,7 @@ describe("Corp tactical plan modules", () => {
     expect(materialization.step).toMatchObject({
       capability: {
         semanticActionTypes: ["corp_board.return_installed_card_to_hq"],
-        requiredSourceDefinitionIds: ["recycler-definition"],
+        requiredSourceDefinitionIds: [syntheticCardDefinitionId("recycler-definition")],
       },
       target: { kind: "card", id: "ambush-instance" },
     });
@@ -552,7 +553,7 @@ describe("Corp tactical plan modules", () => {
             handPlanId: "partial-card-support",
             parentPlanInstanceId: "plan:corp.score_agenda:agenda",
             phase: "develop_card",
-            sourceDefinitionIds: ["score-support"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("score-support")],
             actionIds: [develop.actionId],
             agendaCount: 1,
             handSize: 2,
@@ -566,7 +567,7 @@ describe("Corp tactical plan modules", () => {
             parentPlanInstanceId: "plan:corp.score_agenda:agenda",
             parentNeedId: "score-setup:agenda:score-support",
             phase: "develop_card",
-            sourceDefinitionIds: ["score-support"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("score-support")],
             actionIds: [develop.actionId],
             agendaCount: 1,
             handSize: 2,
@@ -637,7 +638,7 @@ function punishSignal(phase: "prepare" | "trace" | "tag" | "damage" | "kill") {
   return {
     campaignId: "campaign",
     phase,
-    sourceDefinitionIds: ["punish-card"],
+    sourceDefinitionIds: [syntheticCardDefinitionId("punish-card")],
     feasible: true,
     guarantee: "visible_state_forced" as const,
     visibleTerminalProjection: false,
@@ -694,7 +695,7 @@ function ambushSignal(
   return {
     commitmentVersion: "corp_ambush_commitment_v1" as const,
     ambushId: `ambush:${sourceInstanceId}`,
-    sourceDefinitionId: "ambush",
+    sourceDefinitionId: syntheticCardDefinitionId("ambush"),
     sourceInstanceId,
     actionIds: [actionId],
     serverId: "remote_1",
@@ -770,8 +771,11 @@ function emptyPortfolio(): ResidentPlanPortfolio {
 function cardAction(
   actionId: string,
   semanticActionType: string,
-  sourceDefinitionId: number,
+  definition: number | string,
 ): ActionSemanticCandidate {
+  const sourceDefinitionId = typeof definition === "string"
+    ? syntheticCardDefinitionId(definition)
+    : definition;
   return {
     ...candidate(actionId, actionId, semanticActionType),
     sourceKind: "card",

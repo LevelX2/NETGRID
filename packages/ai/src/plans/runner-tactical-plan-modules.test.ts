@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { RunnerCorePlanDomain } from "./runner-core-plan-contracts";
 import {
   type RunnerPlanDomain,
@@ -604,7 +605,7 @@ describe("Runner tactical plan modules", () => {
       actionType: "play_event",
       semanticActionType: "play.runner_event",
       sourceKind: "card" as const,
-      sourceDefinitionId: "trace-link-run-event",
+      sourceDefinitionId: syntheticCardDefinitionId("trace-link-run-event"),
       costProfile: {
         clickCost: 1,
         creditCost: 2,
@@ -665,13 +666,13 @@ describe("Runner tactical plan modules", () => {
         rezzed: true,
         effectiveRunQuote: {
           iceInstanceId: "known-trace-ice",
-          iceDefinitionId: "trace-ice",
+          iceDefinitionId: syntheticCardDefinitionId("trace-ice"),
           effectiveStrength: 2,
           subroutines: [
             {
               id: "trace-subroutine",
               type: "initiate_trace",
-              sourceDefinitionId: "trace-ice",
+              sourceDefinitionId: syntheticCardDefinitionId("trace-ice"),
               sourceTitle: "Trace ICE",
               traceLimit: 3,
               traceSuccessEffect: { type: "add_tag", amount: 1 },
@@ -937,7 +938,7 @@ describe("Runner tactical plan modules", () => {
           developments: [
             {
               developmentId: "special",
-              definitionId: "special",
+              definitionId: syntheticCardDefinitionId("special"),
               phase: "execute",
               assignedDomainPlanIds: [],
               duplicateAlreadyInstalled: false,
@@ -961,7 +962,7 @@ describe("Runner tactical plan modules", () => {
         developments: [
           {
             developmentId: "card:breaker",
-            definitionId: "breaker",
+            definitionId: syntheticCardDefinitionId("breaker"),
             phase: "fund",
             purposeCode: "breaker_or_rig_piece:setup",
             assignedDomainPlanIds: [],
@@ -980,7 +981,7 @@ describe("Runner tactical plan modules", () => {
 
     expect(proposal).toMatchObject({
       initialViability: "blocked",
-      target: { kind: "card", id: "breaker" },
+      target: { kind: "card", id: String(syntheticCardDefinitionId("breaker")) },
       blockers: [
         {
           code: "development_funding_route_unavailable_this_turn",
@@ -1032,7 +1033,7 @@ describe("Runner tactical plan modules", () => {
       developments: [
         {
           developmentId: "card:breaker",
-          definitionId: "breaker",
+          definitionId: syntheticCardDefinitionId("breaker"),
           phase: "fund",
           purposeCode: "breaker_or_rig_piece:useful_now",
           assignedDomainPlanIds: [],
@@ -1058,8 +1059,8 @@ describe("Runner tactical plan modules", () => {
     );
 
     expect(materialized.step).toMatchObject({
-      capability: { capabilityId: "fund_breaker" },
-      purpose: "Fund the resident breaker development plan.",
+      capability: { capabilityId: `fund_${syntheticCardDefinitionId("breaker")}` },
+      purpose: `Fund the resident ${syntheticCardDefinitionId("breaker")} development plan.`,
     });
     expect(materialized.step.target).toBeUndefined();
     expect(
@@ -1495,7 +1496,7 @@ describe("Runner tactical plan modules", () => {
       developments: [
         {
           developmentId: "generic:draw-options",
-          definitionId: "runner_option_development",
+          definitionId: syntheticCardDefinitionId("runner_option_development"),
           targetKind: "capability",
           phase: "execute",
           purposeCode: "increase_hand_option_density",

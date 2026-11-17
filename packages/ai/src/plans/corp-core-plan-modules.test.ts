@@ -384,7 +384,7 @@ describe("Corp core plan modules", () => {
           side: "corp",
           kind: "select_option",
           visibility: "public",
-          source: `card_implementation.classic_deflector:run_8:${sourceIceId}:0:${sourceDefinitionId}:${subroutineId}:any_data_fort:2:0`,
+          source: `card_implementation.classic_deflector:8:${sourceIceId}:0:${sourceDefinitionId}:${subroutineId}:any_data_fort:2:0`,
           stateVersion: 11,
           minSelections: 1,
           maxSelections: 1,
@@ -400,7 +400,7 @@ describe("Corp core plan modules", () => {
           rig: [],
         },
         run: {
-          runId: "run_8",
+          runId: 8,
           attackedServerId: "rd",
           phase: "encounter_ice",
           badPublicityCredits: 0,
@@ -504,7 +504,7 @@ describe("Corp core plan modules", () => {
     const mandatoryOptions = options.filter(
       (option) => option.id !== "decline",
     );
-    input.playerView.pendingChoice!.source = `card_implementation.classic_deflector:run_8:${sourceIceId}:0:${sourceDefinitionId}:${subroutineId}:any_data_fort:0:0`;
+    input.playerView.pendingChoice!.source = `card_implementation.classic_deflector:8:${sourceIceId}:0:${sourceDefinitionId}:${subroutineId}:any_data_fort:0:0`;
     input.playerView.pendingChoice!.options = mandatoryOptions;
     input.legalActions[0]!.choiceRequirements![0]!.optionIds =
       mandatoryOptions.map((option) => option.id);
