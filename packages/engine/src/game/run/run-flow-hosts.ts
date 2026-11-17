@@ -803,7 +803,6 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       finishRun: (successful, legalAction) =>
         host.callbacks.finishRun(state, successful, legalAction),
-      quoteIceRezCost: (iceId) => host.payment.rezCostForCard(state, iceId),
       resetBreakerStrength: () => host.ice.resetBreakerStrength(state),
       rollDie: (purpose) => host.rng.rollDie(state, purpose),
       spendCredits: (side, amount) =>

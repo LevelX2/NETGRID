@@ -1270,6 +1270,25 @@ export function rezCostReductionSourceDefinitionIdsFor(
 }
 
 /**
+ * Printed ICE cost for effects that reference the card's rez cost.
+ */
+export function printedIceRezCost(
+  state: GameState,
+  cardId: CardInstanceId,
+): number {
+  const { type, rezCost } = definitionFor(state, cardId);
+  if (
+    type !== "ice" ||
+    rezCost === undefined ||
+    !Number.isSafeInteger(rezCost) ||
+    rezCost < 0
+  ) {
+    throw new Error("printed_ice_rez_cost_invalid");
+  }
+  return rezCost;
+}
+
+/**
  * Calculates current effective rez cost for a card without paying it.
  */
 export function rezCostForCard(
