@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import {
   RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION,
@@ -5,6 +6,7 @@ import {
   type LegalAction,
   type PlayerView,
   type PublicGameEvent,
+  type MatchEventId,
   type VisibleCard,
 } from "@netgrid/shared";
 import { buildAiDecisionInputDto } from "./input-dto";
@@ -423,7 +425,7 @@ describe("AI input DTO score-conversion contract", () => {
     ];
     view.servers = [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [],
         root: [
@@ -657,7 +659,7 @@ describe("AI input DTO score-conversion contract", () => {
     ];
     view.servers = [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [
           {
@@ -764,7 +766,7 @@ describe("AI input DTO score-conversion contract", () => {
     const view = playerView(action, "runner");
     view.publicEvents = [
       {
-        eventId: "turn-start-effects",
+        eventId: 3,
         type: "automatic_effects_resolved",
         stateVersionBefore: 1,
         stateVersionAfter: 2,
@@ -788,7 +790,7 @@ describe("AI input DTO score-conversion contract", () => {
               visibility: "private_to_side",
               side: "corp",
               amount: 1,
-              cardDefinitionId: "must-not-cross-dto",
+              cardDefinitionId: syntheticCardDefinitionId("must-not-cross-dto"),
               cardTitle: "Must not cross DTO",
             },
           ],
@@ -1278,7 +1280,7 @@ describe("AI input DTO score-conversion contract", () => {
   it("preserves public remote-root structure without exposing card identities", () => {
     const action = runnerSemanticAction();
     const events: PublicGameEvent[] = [
-      publicEvent("install", {
+      publicEvent(2, {
         actor: "corp",
         actionType: "install_card",
         serverLabel: "Remote 1",
@@ -1287,11 +1289,11 @@ describe("AI input DTO score-conversion contract", () => {
         replacedRootCardType: "asset",
         replacedRootCardId: "must-not-cross-dto",
       }),
-      publicEvent("score", {
+      publicEvent(3, {
         actor: "corp",
         actionType: "score_agenda",
         targets: {
-          scoredFromServerId: "remote-1",
+          scoredFromServerId: "r1",
           scoredCardId: "must-not-cross-dto",
         },
       }),
@@ -1316,13 +1318,13 @@ describe("AI input DTO score-conversion contract", () => {
       "replacedRootCardId",
     );
     expect(input.eventTail[1]?.publicPayload.targets).toEqual({
-      scoredFromServerId: "remote-1",
+      scoredFromServerId: "r1",
     });
   });
 
   it("sanitizes aliased public history only once", () => {
     const action = conversionAction();
-    const events = [publicEvent("shared", { actionType: "gain_credit" })];
+    const events = [publicEvent(2, { actionType: "gain_credit" })];
     events[0]!.turnSerial = 7;
     const view = playerView(action);
     view.publicEvents = events;
@@ -1348,9 +1350,9 @@ describe("AI input DTO score-conversion contract", () => {
   it("reuses sanitized event objects for a public-history suffix", () => {
     const action = conversionAction();
     const events = [
-      publicEvent("one", { actionType: "gain_credit" }),
-      publicEvent("two", { actionType: "click_credit" }),
-      publicEvent("three", { actionType: "end_turn" }),
+      publicEvent(2, { actionType: "gain_credit" }),
+      publicEvent(3, { actionType: "click_credit" }),
+      publicEvent(4, { actionType: "end_turn" }),
     ];
     const view = playerView(action);
     view.publicEvents = events;
@@ -1378,10 +1380,10 @@ describe("AI input DTO score-conversion contract", () => {
       ...action.payload,
       cardImplementationAdvancementCounterCost: 1,
     };
-    const payoutEvent = publicEvent("counter-payout", {
+    const payoutEvent = publicEvent(2, {
       actor: "corp",
       actionType: "activated_card_ability",
-      sourceDefinitionId: "corp-counter-economy",
+      sourceDefinitionId: syntheticCardDefinitionId("corp-counter-economy"),
       cardImplementationAdvancementCounterCost: 1,
       gainedCredits: 1,
       privateProbe: "must-not-cross-dto",
@@ -1405,7 +1407,7 @@ describe("AI input DTO score-conversion contract", () => {
       cardImplementationAdvancementCounterCost: 1,
     });
     expect(input.eventTail[0]?.publicPayload).toMatchObject({
-      sourceDefinitionId: "corp-counter-economy",
+      sourceDefinitionId: syntheticCardDefinitionId("corp-counter-economy"),
       cardImplementationAdvancementCounterCost: 1,
       gainedCredits: 1,
     });
@@ -1555,7 +1557,7 @@ describe("AI input DTO score-conversion contract", () => {
             rezzed: true,
             effectiveRunQuote: {
               iceInstanceId: "hidden-ice",
-              iceDefinitionId: "must-not-cross-dto",
+              iceDefinitionId: syntheticCardDefinitionId("must-not-cross-dto"),
               effectiveStrength: 5,
               subroutines: [],
               privateQuoteProbe: "must-not-cross-dto",
@@ -1716,14 +1718,14 @@ describe("AI input DTO score-conversion contract", () => {
 });
 
 function publicEvent(
-  eventId: string,
+  eventId: MatchEventId,
   publicPayload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
     eventId,
     type: String(publicPayload.actionType ?? "game_event"),
-    stateVersionBefore: 0,
-    stateVersionAfter: 1,
+    stateVersionBefore: eventId - 2,
+    stateVersionAfter: eventId - 1,
     stateHashAfter: `hash-${eventId}`,
     publicPayload,
   };

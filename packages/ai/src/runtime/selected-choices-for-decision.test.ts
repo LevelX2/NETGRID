@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   applyAction,
   createGameAfterSetup,
@@ -6,6 +7,7 @@ import {
 } from "@netgrid/engine";
 import type {
   AiDecisionInput,
+  CardDefinitionId,
   CorpOptionalRezChoiceQuote,
   GameState,
   LegalAction,
@@ -35,13 +37,13 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("orders two identical AI Boon run-start strength sources without changing the action", () => {
-    const firstId = "runner_214_1";
-    const secondId = "runner_214_2";
+    const firstId = "c1bl";
+    const secondId = "c1bm";
     const input = inputWithChoice(
       {
         choiceId: "runner_run_start_order_7",
         kind: "select_cards",
-        source: "runner_run_start.order:run_7",
+        source: "runner_run_start.order:7",
         minSelections: 1,
         maxSelections: 1,
         options: [secondId, firstId].map((instanceId) => ({
@@ -74,8 +76,8 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("orders two identical Employee Empowerment sources without deciding the later draws", () => {
-    const firstId = "corp_411_1";
-    const secondId = "corp_411_2";
+    const firstId = "c2jh";
+    const secondId = "c2ji";
     const input = inputWithChoice(
       {
         choiceId: "corp_start_order_7",
@@ -356,7 +358,7 @@ describe("selectedChoicesForDecision", () => {
         rig: [
           {
             instanceId: retainedProgramId,
-            definitionId: "runner-program-definition",
+            definitionId: syntheticCardDefinitionId("runner-program-definition"),
             known: true,
             type: "program",
             controller: "runner",
@@ -391,7 +393,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("materializes delegated hidden-search memory only for the exact parent need", () => {
-    const rootId = "plan:runner.contest_remote:remote%3Aremote_2";
+    const rootId = "plan:runner.contest_remote:remote%3Ar2";
     const executorId =
       "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate";
     const needId = "coverage:breaker_code_gate";
@@ -587,7 +589,7 @@ describe("selectedChoicesForDecision", () => {
       inputWithChoice(
         {
           kind: "select_option",
-          source: "successful_run.credit_loss_spend:run_85:85",
+          source: "successful_run.credit_loss_spend:85:85",
           minSelections: 1,
           maxSelections: 1,
           options: Array.from({ length: 8 }, (_, amount) => ({
@@ -612,7 +614,7 @@ describe("selectedChoicesForDecision", () => {
       inputWithChoice(
         {
           kind: "select_option",
-          source: "successful_run.credit_loss_spend:run_129:129",
+          source: "successful_run.credit_loss_spend:129:129",
           minSelections: 1,
           maxSelections: 1,
           options: Array.from({ length: 18 }, (_, amount) => ({
@@ -869,7 +871,7 @@ describe("selectedChoicesForDecision", () => {
     };
     input.eventTail = [
       {
-        eventId: "access-payment-without-quote",
+        eventId: 13,
         type: "action_applied",
         stateVersionBefore: 11,
         stateVersionAfter: 12,
@@ -920,7 +922,7 @@ describe("selectedChoicesForDecision", () => {
     };
     input.eventTail = [
       {
-        eventId: "access-payment-unsafe-effect-index",
+        eventId: 13,
         type: "action_applied",
         stateVersionBefore: 11,
         stateVersionAfter: 12,
@@ -1108,7 +1110,7 @@ describe("selectedChoicesForDecision", () => {
   it("does not treat legacy prevention roles as a structured prevention fact", () => {
     const oneShot = {
       instanceId: "runner_one_shot_1",
-      definitionId: "runner_one_shot",
+      definitionId: syntheticCardDefinitionId("runner_one_shot"),
       known: true,
       type: "program",
     } as AiDecisionInput["playerView"]["own"]["gripOrHq"][number];
@@ -1164,10 +1166,10 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("completes only the Classic Deflector option bound by corp.defend_servers", () => {
+    const sourceDefinitionId = syntheticCardDefinitionId("generic_deflector");
     const input = inputWithChoice({
       kind: "select_option",
-      source:
-        "card_implementation.classic_deflector:run_8:deflector_ice:0:generic_deflector:generic_deflector.subroutine.1.deflect_run:any_data_fort:2:0",
+      source: `card_implementation.classic_deflector:8:deflector_ice:0:${sourceDefinitionId}:generic_deflector.subroutine.1.deflect_run:any_data_fort:2:0`,
       minSelections: 1,
       maxSelections: 1,
       options: [
@@ -1178,7 +1180,7 @@ describe("selectedChoicesForDecision", () => {
       ],
     });
     input.playerView.pendingChoice!.visibility = "public";
-    rememberClassicDeflectorDefenseChoice(input, {
+    rememberClassicDeflectorDefenseChoice(input, sourceDefinitionId, {
       selectedOptionId: "server_archives",
       selectedServerId: "archives",
       disposition: "redirect",
@@ -1198,7 +1200,9 @@ describe("selectedChoicesForDecision", () => {
 
   it("materializes the exact positively quoted installed-card liquidation", () => {
     const sourceResourceInstanceId = "liquidation-source";
-    const sourceResourceDefinitionId = "generic-liquidation-resource";
+    const sourceResourceDefinitionId = syntheticCardDefinitionId(
+      "generic-liquidation-resource",
+    );
     const targetInstanceId = "installed-target";
     const input = inputWithChoice(
       {
@@ -1226,7 +1230,7 @@ describe("selectedChoicesForDecision", () => {
           },
           {
             instanceId: targetInstanceId,
-            definitionId: "generic-installed-target",
+            definitionId: syntheticCardDefinitionId("generic-installed-target"),
             known: true,
             type: "hardware",
           },
@@ -1613,7 +1617,7 @@ describe("selectedChoicesForDecision", () => {
         scoreArea: [visibleCard(sourceAgendaId, "agenda")],
         servers: [
           {
-            id: "remote_1",
+            id: "r1",
             label: "Remote 1",
             ice: [
               { ...visibleCard("code-gate-1", "ice"), rezzed: false },
@@ -1780,7 +1784,7 @@ describe("selectedChoicesForDecision", () => {
             root: [],
           },
           {
-            id: "remote_1",
+            id: "r1",
             label: "Remote 1",
             ice: [
               {
@@ -2216,14 +2220,16 @@ describe("selectedChoicesForDecision", () => {
       "duplicate modifier ids",
       {
         ...optionalRezQuote(),
-        reductionSourceDefinitionIds: ["modifier-a", "modifier-a"],
+        reductionSourceDefinitionIds: [syntheticCardDefinitionId("modifier-a"), syntheticCardDefinitionId("modifier-a")],
       },
     ],
     [
       "non-canonical modifier ids",
       {
         ...optionalRezQuote(),
-        reductionSourceDefinitionIds: ["modifier-b", "modifier-a"],
+        reductionSourceDefinitionIds: [
+          ...optionalRezQuote().reductionSourceDefinitionIds,
+        ].reverse(),
       },
     ],
   ])("fails closed for an optional rez with %s", (_label, quote) => {
@@ -2242,7 +2248,7 @@ describe("selectedChoicesForDecision", () => {
   it.each([
     ["option value", { optionValue: "different-card" }],
     ["visible card id", { optionCardId: "different-card" }],
-    ["visible definition", { optionDefinitionId: "different-definition" }],
+    ["visible definition", { optionDefinitionId: syntheticCardDefinitionId("different-definition") }],
   ])(
     "fails closed for an optional rez with mismatched %s",
     (_label, options) => {
@@ -2294,7 +2300,7 @@ describe("selectedChoicesForDecision", () => {
       value: "unquoted-card",
       card: {
         instanceId: "unquoted-card",
-        definitionId: "unquoted-definition",
+        definitionId: syntheticCardDefinitionId("unquoted-definition"),
         known: true,
         type: "ice",
         rezzed: false,
@@ -2354,7 +2360,7 @@ describe("selectedChoicesForDecision", () => {
       {
         servers: [
           {
-            id: "remote_1",
+            id: "r1",
             label: "Remote 1",
             ice: [],
             root: [
@@ -2680,11 +2686,11 @@ describe("selectedChoicesForDecision", () => {
         gripOrHq: [
           {
             ...visibleCard("runner_low", "asset"),
-            definitionId: "low",
+            definitionId: syntheticCardDefinitionId("low"),
           },
           {
             ...visibleCard("runner_high", "asset"),
-            definitionId: "high",
+            definitionId: syntheticCardDefinitionId("high"),
           },
         ],
       },
@@ -2716,7 +2722,7 @@ describe("selectedChoicesForDecision", () => {
       {
         side: "runner",
         gripOrHq: [
-          { ...visibleCard("runner_low", "asset"), definitionId: "low" },
+          { ...visibleCard("runner_low", "asset"), definitionId: syntheticCardDefinitionId("low") },
         ],
       },
     );
@@ -2858,7 +2864,7 @@ function satelliteMonitorsChoiceInput(): AiDecisionInput {
       side: "corp",
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [],
           root: [
@@ -3028,6 +3034,7 @@ function rememberAgendaPurgeDefenseChoice(
 
 function rememberClassicDeflectorDefenseChoice(
   input: AiDecisionInput,
+  sourceDefinitionId: CardDefinitionId,
   selection:
     | {
         selectedOptionId: string;
@@ -3059,9 +3066,9 @@ function rememberClassicDeflectorDefenseChoice(
                 kind: "classic_deflector_redirect",
                 choiceId: "choice_multi",
                 sourceStateVersion: input.playerView.stateVersion,
-                runId: "run_8",
+                runId: 8,
                 sourceIceInstanceId: "deflector_ice",
-                sourceDefinitionId: "generic_deflector",
+                sourceDefinitionId,
                 subroutineIndex: 0,
                 subroutineId: "generic_deflector.subroutine.1.deflect_run",
                 targetProfile: "any_data_fort",
@@ -3150,8 +3157,8 @@ function corpDiscardChoiceInput(): AiDecisionInput {
     {
       side: "corp",
       gripOrHq: [
-        { ...visibleCard("corp_low", "asset"), definitionId: "low" },
-        { ...visibleCard("corp_high", "agenda"), definitionId: "high" },
+        { ...visibleCard("corp_low", "asset"), definitionId: syntheticCardDefinitionId("low") },
+        { ...visibleCard("corp_high", "agenda"), definitionId: syntheticCardDefinitionId("high") },
       ],
     },
   );
@@ -3172,8 +3179,8 @@ function corpStrategicPlanningGroupChoiceInput(): AiDecisionInput {
     {
       side: "corp",
       gripOrHq: [
-        { ...visibleCard("corp_low", "asset"), definitionId: "low" },
-        { ...visibleCard("corp_high", "agenda"), definitionId: "high" },
+        { ...visibleCard("corp_low", "asset"), definitionId: syntheticCardDefinitionId("low") },
+        { ...visibleCard("corp_high", "agenda"), definitionId: syntheticCardDefinitionId("high") },
       ],
     },
   );
@@ -3194,8 +3201,8 @@ function corpCorporateShuffleChoiceInput(): AiDecisionInput {
     {
       side: "corp",
       gripOrHq: [
-        { ...visibleCard("corp_low", "asset"), definitionId: "low" },
-        { ...visibleCard("corp_high", "agenda"), definitionId: "high" },
+        { ...visibleCard("corp_low", "asset"), definitionId: syntheticCardDefinitionId("low") },
+        { ...visibleCard("corp_high", "agenda"), definitionId: syntheticCardDefinitionId("high") },
       ],
     },
   );
@@ -3366,8 +3373,8 @@ function optionalRezQuote(): Extract<
     optionId: "rez_option",
     sourceAgendaId: "data-fort-agenda",
     cardId: "engine-certified-card",
-    cardDefinitionId: "engine-certified-definition",
-    targetServerId: "remote_1",
+    cardDefinitionId: syntheticCardDefinitionId("engine-certified-definition"),
+    targetServerId: "r1",
     installedZone: "serverIce",
     sequencePosition: 1,
     stateVersion: 7,
@@ -3376,7 +3383,10 @@ function optionalRezQuote(): Extract<
     baseCredits: 8,
     finalCredits: 8,
     mandatoryAdditionalCosts: { agendaPoints: 0 },
-    reductionSourceDefinitionIds: ["modifier-a", "modifier-b"],
+    reductionSourceDefinitionIds: [
+      syntheticCardDefinitionId("modifier-a"),
+      syntheticCardDefinitionId("modifier-b"),
+    ].sort((left, right) => left - right),
     temporaryCreditsAvailable: 5,
     temporaryCreditsApplied: 5,
     regularCreditsAvailable: 5,
@@ -3434,7 +3444,8 @@ function optionalRezInput(
           card: {
             instanceId: options.optionCardId ?? "engine-certified-card",
             definitionId:
-              options.optionDefinitionId ?? "engine-certified-definition",
+              options.optionDefinitionId ??
+              syntheticCardDefinitionId("engine-certified-definition"),
             known: true,
             type: "ice",
             rezzed: false,
@@ -3448,12 +3459,12 @@ function optionalRezInput(
       scoreArea: [visibleCard("data-fort-agenda", "agenda")],
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [
             {
               instanceId: "engine-certified-card",
-              definitionId: "engine-certified-definition",
+              definitionId: syntheticCardDefinitionId("engine-certified-definition"),
               known: true,
               type: "ice",
               rezzed: false,
