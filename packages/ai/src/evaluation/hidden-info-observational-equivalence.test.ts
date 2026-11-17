@@ -299,7 +299,7 @@ function ownedDefinitionsOfType(
   state: GameState,
   side: Side,
   type: "agenda" | "asset" | "ice" | "resource",
-): string[] {
+ ): number[] {
   return [
     ...new Set(
       Object.values(state.cardInstances).flatMap((card) =>
@@ -353,7 +353,7 @@ function required<T>(value: T | undefined, label: string): T {
 function withCards(
   base: DeckDefinition,
   id: string,
-  additions: string[],
+  additions: number[],
 ): DeckDefinition {
   return {
     ...base,

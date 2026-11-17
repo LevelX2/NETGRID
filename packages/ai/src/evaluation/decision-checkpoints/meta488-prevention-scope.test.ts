@@ -43,7 +43,7 @@ function preventionInput(
   definitionId: number,
   damageType: "net" | "meat" | "core",
 ) {
-  const meatOnly = definitionId.endsWith("_armored-fridge");
+  const meatOnly = definitionId === 333;
   const card = visibleCard("prevention", {
     definitionId,
     type: meatOnly ? "hardware" : "program",
@@ -84,7 +84,7 @@ function preventionInput(
         ? 69
         : 79;
   const event: PublicGameEvent = {
-    eventId: "actual-damage-kind",
+    eventId: 2,
     type: "damage_resolved",
     stateVersionBefore: 0,
     stateVersionAfter: 1,
@@ -169,7 +169,7 @@ describe("type-bound prevention development", () => {
     const { input } = capture();
     const version = input.playerView.stateVersion;
     const meat: PublicGameEvent = {
-      eventId: "controlled-public-meat",
+      eventId: version - 1 + 1,
       type: "damage_resolved",
       stateVersionBefore: version - 2,
       stateVersionAfter: version - 1,

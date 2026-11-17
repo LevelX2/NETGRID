@@ -64,7 +64,7 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
       const development = residentPlanPortfolioSnapshot(input)!.instances.find(
         (i) =>
           i.moduleId === "runner.develop_board_and_hand" &&
-          i.target?.id === 233,
+          i.target?.id === "233",
       )!;
       expect(development.moduleState).toMatchObject({
         signal: {

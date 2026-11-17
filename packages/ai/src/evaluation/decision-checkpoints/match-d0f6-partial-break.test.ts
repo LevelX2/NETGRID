@@ -278,7 +278,7 @@ describe("match d0f6 partial-break mitigation", () => {
       expect(state.runner.grip).toEqual(grip);
       expect(state.runner.coreDamage).toBe(initial.runner.coreDamage);
       expect(state.runner.rig.programs).toHaveLength(
-        iceDefinitionId.includes("colonel") ? 2 : 3,
+        iceDefinitionId === 73 ? 2 : 3,
       );
       const replay = replayEvents(initial, state.eventLog.slice(eventStart));
       expect(replay.ok).toBe(true);
@@ -350,7 +350,7 @@ describe("match d0f6 partial-break mitigation", () => {
       expect(state.runner.credits).toBe(0);
       expect(state.runner.coreDamage).toBe(initial.runner.coreDamage);
       expect(state.runner.rig.programs).toHaveLength(
-        iceDefinitionId.includes("colonel") ? 2 : 3,
+        iceDefinitionId === 73 ? 2 : 3,
       );
       const replay = replayEvents(initial, state.eventLog.slice(eventStart));
       expect(replay.ok).toBe(true);

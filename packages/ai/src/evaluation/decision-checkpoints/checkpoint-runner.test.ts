@@ -1,16 +1,14 @@
 import {
+  applyAction,
   createGameAfterSetup,
   DEMO_DECKS,
+  getLegalActions,
   hashGameState,
 } from "@netgrid/engine";
-import type { GameState } from "@netgrid/shared";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import type { AiDeckStrategyDeckSnapshot } from "../../deck-strategy-snapshot";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
-import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 import {
   AI_DECISION_CHECKPOINT_SCHEMA_VERSION,
   type AiDecisionCheckpointV1,
@@ -92,9 +90,7 @@ describe("AI decision checkpoints", () => {
   });
 
   it("matches plan-first executor and capability contracts without reviving action scores", () => {
-    const current = capturedFixture(
-      "cp-20eb-07-no-upgrade-only-matchpoint-run-d92.json",
-    );
+    const current = corpMainFixture();
     const baseline = runAiDecisionCheckpoint(current);
     const planId = baseline.decision?.decisionDebug?.planId;
     const planKind = baseline.decision?.decisionDebug?.planKind;
@@ -163,7 +159,7 @@ describe("AI decision checkpoints", () => {
     const current = fixture();
     current.engine.eventPrefix = [
       {
-        eventId: "unsafe",
+        eventId: 1,
         type: "unsafe",
         stateVersionBefore: 0,
         stateVersionAfter: 0,
@@ -230,23 +226,27 @@ function fixture(): AiDecisionCheckpointV1 {
   };
 }
 
-function buildInput(state: GameState) {
-  return buildAiDecisionInput(state, "corp", {
-    profileId: PROFILE,
-    decisionId: `${state.matchId}:${state.stateVersion}:corp`,
-    ownDeckSnapshot: DECK,
+function corpMainFixture(): AiDecisionCheckpointV1 {
+  const current = fixture();
+  const state = current.engine.testOnlyGameState;
+  const draw = getLegalActions(state, "corp").find(
+    (action) => action.type === "mandatory_draw",
+  );
+  if (!draw) throw new Error("Missing mandatory draw in checkpoint fixture");
+  const applied = applyAction(state, {
+    matchId: state.matchId,
+    side: "corp",
+    actionId: draw.actionId,
+    clientKnownStateVersion: state.stateVersion,
   });
-}
-
-function capturedFixture(fileName: string): AiDecisionCheckpointV1 {
-  return JSON.parse(
-    readFileSync(
-      resolve(
-        import.meta.dirname,
-        "../../../../../data/scenarios/ai-decision-checkpoints",
-        fileName,
-      ),
-      "utf8",
-    ),
-  ) as AiDecisionCheckpointV1;
+  if (!applied.ok) throw new Error(applied.error.message);
+  current.source.stateVersion = applied.state.stateVersion;
+  current.engine = {
+    stateVersion: applied.state.stateVersion,
+    stateHash: hashGameState(applied.state),
+    testOnlyGameState: applied.state,
+    eventPrefix: [],
+  };
+  current.expectation = { forbiddenActions: [{ type: "mandatory_draw" }] };
+  return current;
 }

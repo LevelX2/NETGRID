@@ -153,7 +153,7 @@ describe("e553 human-pattern historical evidence", () => {
       (action) =>
         action.payload?.delayedInstallAbility === "remove_shell_counter" &&
         [228, 235].includes(
-          String(action.payload.targetCardDefinitionId),
+          action.payload.targetCardDefinitionId as number,
         ),
     );
     expect(paid).toHaveLength(2);

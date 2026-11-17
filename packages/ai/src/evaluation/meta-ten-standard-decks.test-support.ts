@@ -15,6 +15,6 @@ export const metaTenStandardDecks = JSON.parse(
     name: string;
     side: "runner" | "corp";
     identityCardId: number;
-    cards: Array<{ cardId: string; quantity: number }>;
+    cards: Array<{ cardId: number; quantity: number }>;
   }>;
 };

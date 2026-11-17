@@ -94,13 +94,13 @@ it("funds the financeable terminal last-draw parent before installation instead 
   const projects = currentProjects(cp.input);
   expect(
     projects
-      .filter((p) => p.agendaDefinitionId?.includes("corporate-coup"))
+      .filter((p) => p.agendaDefinitionId === 405)
       .every((p) => p.lastDrawScoreSurvival !== true),
   ).toBe(true);
   expect(
     projects.some(
       (p) =>
-        p.agendaDefinitionId?.includes("project-babylon") &&
+        p.agendaDefinitionId === 426 &&
         p.lastDrawScoreSurvival === true,
     ),
   ).toBe(true);
@@ -122,7 +122,7 @@ it("retains the five-advance terminal admission once its whole credit reserve is
   expect(
     currentProjects(cp.input).some(
       (p) =>
-        p.agendaDefinitionId?.includes("corporate-coup") &&
+        p.agendaDefinitionId === 405 &&
         p.lastDrawScoreSurvival === true,
     ),
   ).toBe(true);

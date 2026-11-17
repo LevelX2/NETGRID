@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { applyAction, getLegalActions, hashGameState } from "@netgrid/engine";
@@ -116,7 +117,7 @@ it.each([
   if (kind === "trace_phase") trace.phase = "runner_bid";
   if (kind === "trace_id") trace.traceId += "_wrong";
   if (kind === "trace_source") trace.sourceCardInstanceId += "_wrong";
-  if (kind === "trace_definition") trace.sourceDefinitionId += "_wrong";
+  if (kind === "trace_definition") trace.sourceDefinitionId = syntheticCardDefinitionId("wrong-trace-source");
   if (kind === "choice_origin")
     choice.source = choice.source.replace(/:trace_success$/, ":encounter");
   if (kind === "source_quote") delete source.effectiveRunQuote;

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { afterEach, expect, it } from "vitest";
 import g9 from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta518-g9d132.json";
 import g12 from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta518-g12d384.json";
@@ -32,7 +33,7 @@ function withObservedHqAgenda(input: AiDecisionInputWithDeckCapabilities) {
   // Companion with current public knowledge. The captured game has a later
   // hidden installation that may have removed the previously accessed agenda.
   input.eventTail = [{
-    eventId: "companion-current-hq-access",
+    eventId: input.playerView.stateVersion + 1,
     type: "access_card",
     stateVersionBefore: input.playerView.stateVersion - 1,
     stateVersionAfter: input.playerView.stateVersion,
@@ -143,7 +144,7 @@ it("combines current public server costs and canonical known agenda costs withou
   expect(runnerAgendaStealCreditRequirement(input, "hq")).toBe(5);
   expect(runnerAgendaStealCreditRequirement(input, "hq", [])).toBeUndefined();
   expect(
-    runnerAgendaStealCreditRequirement(input, "hq", ["missing"]),
+    runnerAgendaStealCreditRequirement(input, "hq", [syntheticCardDefinitionId("missing-agenda")]),
   ).toBeUndefined();
   expect(
     runnerAgendaStealCreditRequirement(input, "hq", [251]),

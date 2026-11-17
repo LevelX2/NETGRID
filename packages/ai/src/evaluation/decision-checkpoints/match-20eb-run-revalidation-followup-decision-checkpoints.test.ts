@@ -22,7 +22,7 @@ describe("match 20EB run revalidation follow-up checkpoints", () => {
       upgradeOnlyRemoteJson,
       (checkpoint) => {
         const replacedEvent = checkpoint.engine.eventPrefix.find(
-          (event) => event.eventId === "evt_183",
+          (event) => event.eventId === 183,
         );
         if (!replacedEvent) throw new Error("Expected evt_183 in event prefix");
         replacedEvent.type = "install_card";

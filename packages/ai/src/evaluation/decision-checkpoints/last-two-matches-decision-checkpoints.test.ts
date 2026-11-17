@@ -81,9 +81,10 @@ describe("last two matches exact decision checkpoints", () => {
   it("does not force the kill bid when no visible tag payoff remains in HQ", () => {
     const noVisiblePayoff = mutateFixture(cp04Json, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
-      const payoffCardIds = state.corp.hq.filter((cardId) =>
-        TRACE_PAYOFFS.has(state.cardInstances[cardId]?.definitionId ?? ""),
-      );
+      const payoffCardIds = state.corp.hq.filter((cardId) => {
+        const definitionId = state.cardInstances[cardId]?.definitionId;
+        return definitionId !== undefined && TRACE_PAYOFFS.has(definitionId);
+      });
       if (payoffCardIds.length === 0) {
         throw new Error("Missing Corp tag payoff for trace counterprobe");
       }

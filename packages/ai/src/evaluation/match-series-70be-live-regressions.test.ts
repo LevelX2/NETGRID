@@ -370,7 +370,7 @@ function applyByPredicate(
 function deck(
   base: DeckDefinition,
   id: string,
-  additions: string[],
+  additions: number[],
 ): DeckDefinition {
   return {
     ...base,

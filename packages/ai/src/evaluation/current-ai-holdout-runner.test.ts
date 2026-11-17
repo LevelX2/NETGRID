@@ -30,9 +30,6 @@ describe("CurrentAiHoldoutRunner", () => {
         status: "reconstruction_error",
         caseKey: currentAiHoldoutCaseKey({
           matchId: "match-3",
-          traceId: "trace-3",
-          eventId: "event-3",
-          stateVersion: 3,
           decisionIndex: 3,
         }),
         side: "runner",
@@ -124,9 +121,6 @@ function evaluated(input: {
     status: "evaluated",
     caseKey: currentAiHoldoutCaseKey({
       matchId: `match-${input.historicalType}`,
-      traceId: `trace-${input.historicalType}`,
-      eventId: `event-${input.historicalType}`,
-      stateVersion: 1,
       decisionIndex: 1,
     }),
     side: "runner",

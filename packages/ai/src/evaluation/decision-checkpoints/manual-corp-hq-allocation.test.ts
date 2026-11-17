@@ -85,7 +85,7 @@ it.each([
 it("keeps the score parent if HQ has no repeat access", () => {
   const input = capturedInput(firstRemoteFixture);
   const isEarlierAccess = (event: (typeof input.eventTail)[number]) =>
-    event.eventId === "evt_37";
+    event.eventId === 37;
   input.playerView.publicEvents = input.playerView.publicEvents.filter(
     (event) => !isEarlierAccess(event),
   );

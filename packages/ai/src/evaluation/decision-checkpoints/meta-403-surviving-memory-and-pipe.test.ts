@@ -95,7 +95,7 @@ describe("meta 403 surviving observations and persistent action denial", () => {
     const input = buildAiDecisionInputDto(capture(memoryJson).input);
     const history = input.eventTail;
     expect(
-      history.find((e) => e.eventId === "evt_378")?.publicPayload
+      history.find((e) => e.eventId === 378)?.publicPayload
         .installedPositionKey,
     ).toBe("installed-position-v1:c9dbfb7b");
     expect(
@@ -108,7 +108,7 @@ describe("meta 403 surviving observations and persistent action denial", () => {
       expect.objectContaining({
         positionKey: "root:0",
         definitionId: 565,
-        sourceEventId: "evt_375",
+        sourceEventId: 375,
       }),
     ]);
     expect(
@@ -122,9 +122,9 @@ describe("meta 403 surviving observations and persistent action denial", () => {
   it("shifts the surviving observation when a lower root position is removed", () => {
     const { input } = capture(memoryJson);
     for (const e of [...input.eventTail, ...input.playerView.publicEvents]) {
-      if (e.eventId === "evt_375")
+      if (e.eventId === 375)
         e.publicPayload.accessedCardPositionKey = "root:1";
-      if (e.eventId === "evt_377")
+      if (e.eventId === 377)
         e.publicPayload.accessedCardPositionKey = "root:0";
     }
     expect(

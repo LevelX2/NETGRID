@@ -1,4 +1,4 @@
-import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
+import type { AiDecisionInput, MatchEventId, PublicGameEvent } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import runnerCheckpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-known-trap-unsafe-remote-run.json";
 import corpCheckpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-exposed-trap-cowboy-recycle.json";
@@ -124,7 +124,7 @@ describe("known exposed Corp card decision checkpoints", () => {
 });
 
 function exposeEvent(
-  eventId: string,
+  eventId: MatchEventId,
   serverId: string,
   definitionId: number,
 ): PublicGameEvent {

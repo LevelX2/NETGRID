@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { applyAction, createGame, getLegalActions } from "@netgrid/engine";
-import type { DeckDefinition, GameState } from "@netgrid/shared";
+import { ORIGINALSET_DEFAULT_DECKS, type DeckDefinition, type GameState } from "@netgrid/shared";
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { allocateCorpCentralDefenseFromAiFacts } from "../../corp/defense/corp-central-defense-facts-adapter";
@@ -106,7 +106,7 @@ describe("native cleanup choice", () => {
         known: true,
       }));
       const retained = input.playerView.own.gripOrHq.filter((card) =>
-        [TROJAN, SCORCHED].includes(card.definitionId ?? ""),
+        card.definitionId === TROJAN || card.definitionId === SCORCHED,
       );
       expect(prepareCorpPunishHandRetention(input)(retained).damage).toBe(
         damage,
@@ -272,12 +272,12 @@ function resolveCleanup(
 }
 
 function cleanup(options: {
-  hand: string[];
-  archives?: string[];
-  deckExtras?: string[];
+  hand: number[];
+  archives?: number[];
+  deckExtras?: number[];
   credits: number;
   agendaPointsToWin?: number;
-  scored?: string[];
+  scored?: number[];
   fallGuy?: boolean;
   grip?: number;
 }) {
@@ -286,11 +286,11 @@ function cleanup(options: {
     ...(options.archives ?? []),
     ...(options.deckExtras ?? []),
     ...(options.scored ?? []),
-    ...Array<string>(6).fill(FILLER),
+    ...Array<number>(6).fill(FILLER),
   ]);
   const runnerDeck = deck("runner", [
     FALL_GUY,
-    ...Array<string>(7).fill(251),
+    ...Array<number>(7).fill(251),
   ]);
   const state = createGame({
     seed: "manual-corp-discard-groups",
@@ -351,14 +351,14 @@ function cleanup(options: {
   };
 }
 
-function deck(side: "corp" | "runner", definitions: string[]): DeckDefinition {
-  const counts = new Map<string, number>();
+function deck(side: "corp" | "runner", definitions: number[]): DeckDefinition {
+  const counts = new Map<number, number>();
   for (const id of definitions) counts.set(id, (counts.get(id) ?? 0) + 1);
   return {
     id: `discard-groups-${side}`,
     name: `Discard groups ${side}`,
     side,
-    identity: `${side}_identity_001`,
+    identity: ORIGINALSET_DEFAULT_DECKS[side].identity,
     cards: [...counts].map(([id, quantity]) => ({ id, quantity })),
   };
 }

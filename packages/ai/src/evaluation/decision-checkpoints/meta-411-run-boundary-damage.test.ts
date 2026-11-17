@@ -71,7 +71,7 @@ describe("meta 411 future damage belongs to the creating run", () => {
         ),
     )!;
     const current = structuredClone(original);
-    current.eventId = "current-run-source";
+    current.eventId = 167;
     current.stateVersionBefore = 165;
     current.stateVersionAfter = 166;
     input.playerView.stateVersion = 166;

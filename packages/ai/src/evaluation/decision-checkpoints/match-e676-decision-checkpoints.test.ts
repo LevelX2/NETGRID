@@ -99,11 +99,10 @@ describe("match e676 exact decision checkpoints", () => {
   it("does not force Chester Mix without a same-fort ICE opportunity", () => {
     const noHqIce = mutateFixture(chesterBeforeHqIceJson, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
-      const movedIce = state.corp.hq.filter((cardId) =>
-        HQ_ICE_DEFINITION_IDS.has(
-          state.cardInstances[cardId]?.definitionId ?? "",
-        ),
-      );
+      const movedIce = state.corp.hq.filter((cardId) => {
+        const definitionId = state.cardInstances[cardId]?.definitionId;
+        return definitionId !== undefined && HQ_ICE_DEFINITION_IDS.has(definitionId);
+      });
       if (movedIce.length === 0) {
         throw new Error("Missing HQ ICE counterprobe cards");
       }

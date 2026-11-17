@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -260,7 +261,7 @@ describe("SP-473: a Trace completed after the Runner's link window", () => {
       const input = checkpoint(nativeCheckpoint);
       const event = input.eventTail.at(-1)!;
       if (kind === "trace") event.publicPayload.traceId = "different-trace";
-      if (kind === "source") event.publicPayload.sourceDefinitionId = "different-ice";
+      if (kind === "source") event.publicPayload.sourceDefinitionId = syntheticCardDefinitionId("different-ice");
       if (kind === "version") event.stateVersionAfter--;
       if (kind === "outcome") event.publicPayload.traceSuccessful = false;
       expect(() => chooseAiAction(input)).toThrow(PlanResolutionFailure);

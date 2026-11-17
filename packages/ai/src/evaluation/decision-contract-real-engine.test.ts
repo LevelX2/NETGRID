@@ -655,7 +655,7 @@ function putCorpCardOnTopOfRd(state: GameState, definitionId: number): string {
 function deck(
   base: DeckDefinition,
   id: string,
-  additions: string[],
+  additions: number[],
 ): DeckDefinition {
   return {
     ...base,

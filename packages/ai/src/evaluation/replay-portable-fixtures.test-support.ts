@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -175,7 +176,7 @@ function playerView(legalActions: LegalAction[]): PlayerView {
 function identityCard(side: Side): VisibleCard {
   return {
     instanceId: `portable.${side}.identity`,
-    definitionId: `portable.${side}.identity`,
+    definitionId: syntheticCardDefinitionId(`portable.${side}.identity`),
     title: `${side} identity`,
     owner: side,
     controller: side,
@@ -195,7 +196,7 @@ function visibleCard(
   const owner = overrides.owner ?? "runner";
   return {
     instanceId,
-    definitionId: instanceId,
+    definitionId: syntheticCardDefinitionId(instanceId),
     title: instanceId,
     owner,
     controller: overrides.controller ?? owner,

@@ -73,7 +73,7 @@ it.each(["guaranteed_access", "known_agenda", "new_installation"])(
     if (condition === "new_installation")
       input.eventTail.push({
         ...input.eventTail.at(-1)!,
-        eventId: "new-tools",
+        eventId: 64,
         stateVersionAfter: 63,
         publicPayload: { actor: "runner", actionType: "install_card" },
       });

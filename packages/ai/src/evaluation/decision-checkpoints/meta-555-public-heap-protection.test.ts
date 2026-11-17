@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { corpFundedScoreProtectionNeed } from "../../corp/score/score-protection-needs";
 import { readFileSync } from "node:fs";
 import { buildAiDecisionInputDto } from "../../input-dto";
@@ -291,7 +292,7 @@ it("does not admit the Corporation discard zone into a Runner input", () => {
   cp.input.playerView.opponent.discardCards = [
     {
       instanceId: "injected-private-corp-discard",
-      definitionId: "private-corp-card",
+      definitionId: syntheticCardDefinitionId("private-corp-card"),
       owner: "corp",
       known: false,
     },

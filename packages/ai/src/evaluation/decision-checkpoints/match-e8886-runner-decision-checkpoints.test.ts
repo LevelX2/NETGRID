@@ -48,7 +48,7 @@ describe("match E8886 runner decision checkpoints", () => {
       result.input.legalActions.some(
         (action) =>
           action.type === "play_event" &&
-          action.actionId.includes(306) &&
+          action.actionId.includes(".runner_306_") &&
           action.payload?.serverId === "rd",
       ),
     ).toBe(true);

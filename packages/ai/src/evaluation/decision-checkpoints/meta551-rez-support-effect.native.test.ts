@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -171,7 +172,7 @@ describe("rez-support empty-effect proof boundary", () => {
     if (key === "missing") delete ice.effectivePostRezRunQuote;
     if (key === "stale") post.expiresAtStateVersion--;
     if (key === "source") post.cardId = "other";
-    if (key === "definition") post.iceDefinitionId = "other";
+    if (key === "definition") post.iceDefinitionId = syntheticCardDefinitionId("other");
     if (key === "server") post.targetServerId = "rd";
     if (key === "inner_source" && post.complete)
       post.effectiveRunQuote.iceInstanceId = "other";

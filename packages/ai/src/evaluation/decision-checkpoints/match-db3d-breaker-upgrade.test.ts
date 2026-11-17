@@ -233,7 +233,7 @@ it("revalidates the installed cheaper breaker and starts the remote only with th
   for (const id of corpCards.slice(0, 3)) {
     const card =
       state.cardInstances[putCorpIceOnServer(state, "remote_1", id)]!;
-    card.rezzed = !id.includes("colonel");
+    card.rezzed = id !== 73;
     card.faceup = card.rezzed;
   }
   state.runner.credits = 14;

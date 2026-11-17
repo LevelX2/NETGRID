@@ -42,7 +42,7 @@ it("keeps installed R&D ICE knowledge when only the hidden deck is shuffled", ()
   const last = input.eventTail.at(-1)!;
   input.eventTail.push({
     ...last,
-    eventId: "test_rd_deck_shuffle",
+    eventId: input.playerView.stateVersion + 1,
     type: "resolve_choice",
     stateVersionBefore: input.playerView.stateVersion - 1,
     stateVersionAfter: input.playerView.stateVersion,
@@ -70,7 +70,7 @@ it("invalidates R&D installed identity after an actual public board reorder", ()
   const last = input.eventTail.at(-1)!;
   input.eventTail.push({
     ...last,
-    eventId: "test_public_board_reorder",
+    eventId: input.playerView.stateVersion + 1,
     type: "resolve_choice",
     stateVersionBefore: input.playerView.stateVersion - 1,
     stateVersionAfter: input.playerView.stateVersion,

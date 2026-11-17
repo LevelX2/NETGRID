@@ -1,4 +1,4 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, CardDefinitionId } from "@netgrid/shared";
 import { quoteAgendaDefinitionSelfStealCreditCost } from "@netgrid/engine";
 import { expect } from "vitest";
 
@@ -8,7 +8,7 @@ import { expect } from "vitest";
  * Never use this setup to repair productive inputs or active-run snapshots. */
 export function bindExplicitZeroPublicStealQuotes(
   input: AiDecisionInput,
-  expectedRezzedInstalledDefinitions: readonly string[],
+  expectedRezzedInstalledDefinitions: readonly CardDefinitionId[],
 ): void {
   expect(input.playerView.run).toBeUndefined();
   const rezzed = input.playerView.servers
@@ -16,8 +16,8 @@ export function bindExplicitZeroPublicStealQuotes(
     .flatMap((s) =>
       s.root.filter((c) => c.known && c.rezzed).map((c) => c.definitionId),
     );
-  expect(rezzed.slice().sort()).toEqual(
-    expectedRezzedInstalledDefinitions.slice().sort(),
+  expect(rezzed.slice().sort((a, b) => a! - b!)).toEqual(
+    expectedRezzedInstalledDefinitions.slice().sort((a, b) => a - b),
   );
   // The callers explicitly pin either no installed source or Olivia Salazar,
   // Chester Mix or BBS; their canonical effects discount installation/rez or

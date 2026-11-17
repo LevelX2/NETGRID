@@ -11,7 +11,7 @@ function capture(
     engine: {
       eventPrefix: events.map((event, index) => ({
         ...event,
-        eventId: `evt_${index}`,
+        eventId: index + 2,
         stateVersionBefore: index,
         stateVersionAfter: index + 1,
         stateHashAfter: "fnv1a:00000000",

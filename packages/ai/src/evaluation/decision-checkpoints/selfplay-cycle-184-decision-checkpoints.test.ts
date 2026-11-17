@@ -199,7 +199,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
       },
     ];
     const observedAccess: PublicGameEvent = {
-      eventId: "known-access-before-terminal-contest",
+      eventId: input.playerView.stateVersion - 1 + 1,
       type: "access_card",
       stateVersionBefore: input.playerView.stateVersion - 2,
       stateVersionAfter: input.playerView.stateVersion - 1,
@@ -218,7 +218,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     };
     const confirmedDamage: PublicGameEvent = {
       ...observedAccess,
-      eventId: "confirmed-damage-before-terminal-contest",
+      eventId: observedAccess.eventId + 1,
       type: "play_operation",
       publicPayload: {
         actor: "corp",
@@ -439,7 +439,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     expect(turnSerial).toBeDefined();
     const failedRunEvents: NonNullable<AiDecisionInput["eventTail"]> = [
       {
-        eventId: "evt_selfplay_184_terminal_run_started",
+        eventId: capture.input.playerView.stateVersion + 1 + 1,
         type: "start_run",
         stateVersionBefore: capture.input.playerView.stateVersion,
         stateVersionAfter: capture.input.playerView.stateVersion + 1,
@@ -453,7 +453,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         },
       },
       {
-        eventId: "evt_selfplay_184_terminal_run_ended",
+        eventId: capture.input.playerView.stateVersion + 2 + 1,
         type: "continue_run",
         stateVersionBefore: capture.input.playerView.stateVersion + 1,
         stateVersionAfter: capture.input.playerView.stateVersion + 2,

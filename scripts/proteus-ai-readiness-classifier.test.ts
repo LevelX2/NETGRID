@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
+import { RUNTIME_CARDS } from "../packages/ai/src/ai-hints";
 import generatedArtifact from "../data/ai/card-spec-ai-hints-generated.json";
 import readinessInventory from "../data/ai/proteus-ai-readiness-inventory-v1.json";
 import { classifyProteusAiReadiness } from "./lib/proteus-ai-readiness-classifier.mjs";
@@ -16,7 +17,7 @@ describe("Proteus AI readiness typed classifier", () => {
     expect(readinessInventory.cards).toHaveLength(154);
     const classified = readinessInventory.cards.map((record) => {
       const hint = generatedHintsById.get(record.cardId);
-      expect(hint, record.cardId).toBeDefined();
+      expect(hint, String(record.cardId)).toBeDefined();
       return {
         cardId: record.cardId,
         ...classifyProteusAiReadiness(hint!),
@@ -43,7 +44,7 @@ describe("Proteus AI readiness typed classifier", () => {
             "X cost random ambush delayed access run_pressure virus bad publicity",
           ],
         }),
-        record.cardId,
+        String(record.cardId),
       ).toEqual(expected);
     }
 
@@ -58,25 +59,25 @@ describe("Proteus AI readiness typed classifier", () => {
 
   it("binds the nine formerly note-dependent cards to typed semantics", () => {
     const expected = new Map([
-      ["onr_proteus_021_dog-pile", "temporary_action"],
-      ["onr_proteus_027_iceberg", "x_cost"],
-      ["onr_proteus_034_riddler", "x_cost"],
-      ["onr_proteus_035_roadblock", "random_outcome"],
-      ["onr_proteus_046_corporate-guard-r-temps", "x_cost"],
-      ["onr_proteus_049_emergency-rig", "target_choice"],
-      ["onr_proteus_058_executive-boot-camp", "random_outcome"],
-      ["onr_proteus_062_lesley-major", "access_ambush"],
-      ["onr_proteus_063_lisa-blight", "random_outcome"],
+      [79, "temporary_action"],
+      [85, "x_cost"],
+      [92, "x_cost"],
+      [93, "random_outcome"],
+      [104, "x_cost"],
+      [107, "target_choice"],
+      [116, "random_outcome"],
+      [120, "access_ambush"],
+      [121, "random_outcome"],
     ]);
 
     for (const [cardId, family] of expected) {
       const hint = generatedHintsById.get(cardId)!;
-      expect(classifyProteusAiReadiness(hint), cardId).toMatchObject({
+      expect(classifyProteusAiReadiness(hint), String(cardId)).toMatchObject({
         family,
       });
     }
     expect(
-      generatedHintsById.get("onr_proteus_049_emergency-rig")?.targetProfiles,
+      generatedHintsById.get(107)?.targetProfiles,
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -89,7 +90,7 @@ describe("Proteus AI readiness typed classifier", () => {
 
   it("leaves Proteus action capacity exclusively with the CardSpec compiler", () => {
     const profiles = generatedArtifact.cards
-      .filter((record) => record.cardId.startsWith("onr_proteus_"))
+      .filter((record) => RUNTIME_CARDS[record.cardId]?.setId === "proteus")
       .flatMap((record) => record.hint.actionCapacityProfiles ?? []);
     expect(profiles).toHaveLength(16);
   });

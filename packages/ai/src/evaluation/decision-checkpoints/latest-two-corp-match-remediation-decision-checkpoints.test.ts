@@ -69,9 +69,10 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
   it("does not force central support or a blind draw when no agenda can use the remote", () => {
     const checkpoint = mutateFixture(keepScoreRemoteOpenJson, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
-      const agendas = state.corp.hq.filter((cardId) =>
-        A759_AGENDAS.has(state.cardInstances[cardId]?.definitionId ?? ""),
-      );
+      const agendas = state.corp.hq.filter((cardId) => {
+        const definitionId = state.cardInstances[cardId]?.definitionId;
+        return definitionId !== undefined && A759_AGENDAS.has(definitionId);
+      });
       state.corp.hq = state.corp.hq.filter(
         (cardId) => !agendas.includes(cardId),
       );

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import type {
@@ -152,7 +153,7 @@ describe("common economy action score", () => {
 
   it("classifies a finite source pool from action semantics instead of card id", () => {
     const finite = candidate("generic-finite-pool", 2, {
-      sourceDefinitionId: "unseen-future-card",
+      sourceDefinitionId: syntheticCardDefinitionId("unseen-future-card"),
       sourcePool: "finite",
     });
     const ordinary = candidate("ordinary-payout", 2, {

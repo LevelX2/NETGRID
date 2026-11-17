@@ -239,19 +239,10 @@ ${report.conclusions.map((entry) => `- ${entry}`).join("\n")}
 
 export function currentAiHoldoutCaseKey(parts: {
   matchId: string;
-  traceId: string;
-  eventId: string;
-  stateVersion: number;
   decisionIndex: number;
 }): string {
   return `holdout-${digest(
-    [
-      parts.matchId,
-      parts.traceId,
-      parts.eventId,
-      parts.stateVersion,
-      parts.decisionIndex,
-    ].join(":"),
+    `${parts.matchId}:${parts.decisionIndex}`,
   ).slice(0, 16)}`;
 }
 

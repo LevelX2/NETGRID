@@ -98,7 +98,7 @@ it.each(["paid_defense", "next_turn", "new_installation"])(
     if (condition === "new_installation")
       input.eventTail.push({
         ...input.eventTail.at(-1),
-        eventId: "new-rig-install",
+        eventId: 97,
         stateVersionBefore: 95,
         stateVersionAfter: 96,
         publicPayload: { actor: "runner", actionType: "install_card" },

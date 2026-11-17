@@ -47,7 +47,7 @@ it("preserves the native Engine tag-clear quantity in both actor projections", (
 it("clears both native G26 tags instead of stranding one before Scorched Earth", () => {
   const input = currentInput();
   expect(input.playerView.own).toMatchObject({ credits: 2, clicks: 3, tags: 2 });
-  expect(input.playerView.servers.flatMap(s => s.root).some(c => /city-surveillance/.test(c.definitionId ?? ""))).toBe(false);
+  expect(input.playerView.servers.flatMap(s => s.root).some(c => c.definitionId === 525)).toBe(false);
   const runtime = native.precedingCheckpoint.runtime as unknown as AiRuntimeCheckpointV1;
   restoreResidentPlanPortfolioMemorySnapshot(input, runtime.residentPlanPortfolio);
   const action = input.legalActions.find(a => a.payload?.cardImplementationEffectKind === "remove_tags")!;

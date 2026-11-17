@@ -115,7 +115,7 @@ describe("pairing 557 current preparation and post-install income", () => {
       const development = pf?.portfolio.find(
         (p) =>
           p.moduleId === "runner.develop_board_and_hand" &&
-          p.target?.id === 257,
+          p.target?.id === "257",
       );
       expect(development).toMatchObject({
         viability: "ready",

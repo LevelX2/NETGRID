@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -120,7 +121,7 @@ describe("native trace eligibility of run-only money", () => {
     spendBreakerCredits(b, {
       cost: 11,
       breakerInstanceId: "b",
-      breakerDefinitionId: "b",
+      breakerDefinitionId: syntheticCardDefinitionId("b"),
       breakerSubtypes: ["icebreaker"],
       endingStrength: 1,
       carriesStrengthAcrossIce: false,
@@ -189,7 +190,7 @@ describe("native trace eligibility of run-only money", () => {
           traceCreditSources: [
             {
               sourceCardInstanceId: "trace-source",
-              sourceDefinitionId: "trace-source",
+              sourceDefinitionId: syntheticCardDefinitionId("trace-source"),
               amount: 6,
               isStealth: false,
             },

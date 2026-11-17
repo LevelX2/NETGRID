@@ -22,14 +22,14 @@ describe("Proteus AI readiness inventory", () => {
     const effectiveProteusIds = Object.values(RUNTIME_CARDS)
       .filter((card) => card.setId === "proteus")
       .map((card) => card.catalogCardId)
-      .sort();
+      .sort((a, b) => a - b);
 
     expect(inventoryData.schemaVersion).toBe(
       "netgrid.proteus-ai-readiness-inventory.v1",
     );
     expect(inventoryIds).toHaveLength(154);
     expect(new Set(inventoryIds).size).toBe(154);
-    expect([...inventoryIds].sort()).toEqual(effectiveProteusIds);
+    expect([...inventoryIds].sort((a, b) => a - b)).toEqual(effectiveProteusIds);
     expect(
       inventoryData.cards.every((entry) =>
         allowedFamilies.has(entry.primaryFamily),

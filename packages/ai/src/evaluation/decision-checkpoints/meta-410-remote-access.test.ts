@@ -47,14 +47,14 @@ describe("meta 410 current remote identity and access purpose", () => {
     (knownPrefix) => {
       const { input } = capture(replacementJson);
       const asset = structuredClone(
-        input.eventTail.find((e) => e.eventId === "evt_334")!,
+        input.eventTail.find((e) => e.eventId === 334)!,
       );
       const replacement = structuredClone(
-        input.eventTail.find((e) => e.eventId === "evt_339")!,
+        input.eventTail.find((e) => e.eventId === 339)!,
       );
       const upgrade = {
         ...structuredClone(asset),
-        eventId: "test-upgrade-observation",
+        eventId: 336,
         stateVersionAfter: 335,
         publicPayload: {
           ...asset.publicPayload,

@@ -93,7 +93,7 @@ it.each(["unknown top", "unfunded follow-up", "no observed payoff"] as const)(
     );
     if (condition === "unknown top") {
       changeHistory(input, (events) =>
-        events.filter((event) => event.eventId !== "evt_210"),
+        events.filter((event) => event.eventId !== 210),
       );
     } else if (condition === "unfunded follow-up") {
       input.playerView.opponent.credits = 4;
@@ -118,7 +118,7 @@ it("respects the installed tag shield when the observed backup trace has no trig
     observedPayoffFixture,
   );
   changeHistory(input, (events) =>
-    events.filter((event) => event.eventId !== "evt_61"),
+    events.filter((event) => event.eventId !== 61),
   );
   expect(
     runnerNextCorpTurnThreat(input)?.observedPayoffMeatDamage,
@@ -168,7 +168,7 @@ it("prepares the fifth Grip card at manual D61 when the payoff is known but the 
   afterDraw.decisionId = `${input.matchId}:${view.stateVersion}:runner`;
   const drawEvent: PublicGameEvent = {
     ...afterDraw.eventTail.at(-1)!,
-    eventId: "test-basis-draw",
+    eventId: view.stateVersion + 1,
     type: "draw_card",
     stateVersionBefore: view.stateVersion - 1,
     stateVersionAfter: view.stateVersion,
@@ -265,7 +265,7 @@ it.each([
       ...events,
       {
         ...events.at(-1)!,
-        eventId: "observed-audit-played",
+        eventId: events.at(-1)!.stateVersionAfter + 2,
         type: "play_operation",
         publicPayload: {
           actionType: "play_operation",
@@ -504,10 +504,10 @@ it("expires the next-turn payoff when the observed finisher is no longer in HQ",
   changeHistory(input, (events) =>
     events
       .map((event) =>
-        event.eventId === "synthetic-hq-observation-0"
+        event.publicPayload.actionType === "access_card" && event.publicPayload.cardDefinitionId === URBAN
           ? {
               ...event,
-              eventId: "evt_22_urban_access",
+              eventId: 22,
               stateVersionBefore: 20,
               stateVersionAfter: 21,
             }
@@ -515,7 +515,7 @@ it("expires the next-turn payoff when the observed finisher is no longer in HQ",
       )
       .concat({
         ...events.at(-1)!,
-        eventId: "observed-urban-played",
+        eventId: events.at(-1)!.stateVersionAfter + 2,
         type: "play_operation",
         publicPayload: {
           actor: "corp",
@@ -923,7 +923,7 @@ function capacityFixture() {
 
 function visibleRetaliationEvents(
   input: AiDecisionInputWithDeckCapabilities,
-  definitions: readonly string[],
+  definitions: readonly number[],
   stoleAgenda = false,
 ): PublicGameEvent[] {
   const view = input.playerView;
@@ -946,7 +946,7 @@ function visibleRetaliationEvents(
   return [
     ...runAttempts.map((event, index) => ({
       ...event,
-      eventId: `test-run-attempt-${index}`,
+      eventId: view.stateVersion + index + 1,
       turnSerial,
       stateVersionBefore: before,
       stateVersionAfter: view.stateVersion,
@@ -954,7 +954,7 @@ function visibleRetaliationEvents(
     ...definitions.map<PublicGameEvent>((id, index) => ({
       ...observation,
       type: "access_card",
-      eventId: `test-hq-observation-${index}`,
+      eventId: view.stateVersion + index + 101,
       publicPayload: {
         actionType: "access_card",
         actor: "runner",
@@ -966,7 +966,7 @@ function visibleRetaliationEvents(
       ? [
           {
             ...observation,
-            eventId: "test-agenda-stolen",
+            eventId: view.stateVersion + 201,
             type: "steal_agenda",
             publicPayload: {
               actionType: "steal_agenda",
@@ -1007,7 +1007,7 @@ function changeHistory(
   input.playerView.publicEvents = input.eventTail;
 }
 
-function withKnownDamage(definitions: readonly string[], keepFallGuy = false) {
+function withKnownDamage(definitions: readonly number[], keepFallGuy = false) {
   const { input } = capture();
   if (!keepFallGuy) {
     const install = fallGuyInstall(input)!;
@@ -1027,7 +1027,7 @@ function withKnownDamage(definitions: readonly string[], keepFallGuy = false) {
       ...events,
       ...definitions.map((id, index) => ({
         ...access,
-        eventId: `synthetic-hq-observation-${index}`,
+        eventId: access.stateVersionAfter + index + 1,
         publicPayload: { ...access.publicPayload, cardDefinitionId: id },
       })),
     ];

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import type { VisibleCard } from "@netgrid/shared";
@@ -178,7 +179,7 @@ it("preserves the payment purpose and source ledger after the refill", () => {
   const breaker: BreakAssessment = {
     cost: 1,
     breakerInstanceId: "rent",
-    breakerDefinitionId: "rent",
+    breakerDefinitionId: syntheticCardDefinitionId("rent"),
     breakerSubtypes: ["icebreaker"],
     endingStrength: 2,
     carriesStrengthAcrossIce: false,
@@ -230,7 +231,7 @@ it.each([undefined, -1, 1.5, Number.NaN])(
 it("does not buy a public delayed breaker with restricted run credits", () => {
   const input = fixture(276).input;
   const rent = input.playerView.opponent.rig!.find((c) =>
-    c.definitionId?.includes("rent-i-con"),
+    c.definitionId === 35,
   )!;
   // Purpose-isolation counterfactual: six published restricted credits, no cash.
   const restricted = pool(6);

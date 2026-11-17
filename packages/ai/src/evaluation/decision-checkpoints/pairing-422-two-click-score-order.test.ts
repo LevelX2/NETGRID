@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { expect, it } from "vitest";
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-422-two-click-score-order-d157.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -110,7 +111,7 @@ it.each([
     otherRoot.advancementCounters = 2;
   }
   if (variant === "unknown_card")
-    otherRoot.definitionId = "unmapped-test-definition";
+    otherRoot.definitionId = syntheticCardDefinitionId("unmapped-test-definition");
   if (variant === "live_run")
     input.playerView.run = {
       runId: "live",

@@ -14,7 +14,6 @@ describe("ReplayDecisionCaseExtraction", () => {
       [
         traceRow({
           matchId: "match_00ff5d28ba6a855e",
-          traceId: "trace-1",
           side: "runner",
           selectedActionType: "start_run",
           planKind: "runner.contest_remote",
@@ -86,7 +85,6 @@ describe("ReplayDecisionCaseExtraction", () => {
         }),
         traceRow({
           matchId: "match_6812fb0eff800ba2",
-          traceId: "trace-2",
           side: "corp",
           selectedActionType: "gain_credit",
           planKind: "recover_economy",
@@ -142,8 +140,8 @@ describe("ReplayDecisionCaseExtraction", () => {
   it("counts source labels that match built-in object keys", () => {
     const report = buildReplayDecisionCaseExtractionReport([
       traceRow({ status: "constructor" }),
-      traceRow({ status: "constructor", traceId: "trace-2" }),
-      traceRow({ status: "__proto__", traceId: "trace-3" }),
+      traceRow({ status: "constructor", decisionIndex: 2 }),
+      traceRow({ status: "__proto__", decisionIndex: 3 }),
     ]);
 
     expect(report.aggregate.byStatus).toEqual({
@@ -168,8 +166,7 @@ function traceRow(
 ): ReplayDecisionTraceInput {
   return {
     matchId: "match_00ff5d28ba6a855e",
-    traceId: "trace-1",
-    eventId: "event-1",
+    eventId: 1,
     mode: "human_corp_vs_runner_ai",
     status: "finished",
     createdAt: "2026-06-23T00:00:00.000Z",

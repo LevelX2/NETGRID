@@ -313,9 +313,9 @@ it("uses the existing Defense owner and real heap recovery when the last draw ca
     pf = d.decisionDebug!.planFirstDecision!;
   expect(d.fallbackUsed).toBe(false);
   expect(d.timeoutUsed).not.toBe(true);
-  expect(d.actionId).toContain("junkyard-bbs");
   expect(pf.selectedPlan?.moduleId).toBe("runner.defense_and_recovery");
   const action = input.legalActions.find((a) => a.actionId === d.actionId)!;
   expect(action.expiresAtStateVersion).toBe(state.stateVersion);
+  expect(state.cardInstances[action.source!]?.definitionId).toBe(junkyard);
   expect(act(state, action).runner.grip.length).toBe(2);
 });

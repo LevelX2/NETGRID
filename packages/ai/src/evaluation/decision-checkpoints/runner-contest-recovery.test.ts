@@ -380,7 +380,7 @@ describe("Runner contest recovery", () => {
     });
     const events: PublicGameEvent[] = [
       {
-        eventId: "evt_review_replacement",
+        eventId: 179,
         type: "install_card",
         stateVersionBefore: 177,
         stateVersionAfter: 178,
@@ -397,7 +397,7 @@ describe("Runner contest recovery", () => {
         },
       },
       {
-        eventId: "evt_review_score",
+        eventId: 180,
         type: "score_agenda",
         stateVersionBefore: 178,
         stateVersionAfter: 179,
@@ -515,7 +515,7 @@ describe("Runner contest recovery", () => {
       )!;
       const events: PublicGameEvent[] = [
         {
-          eventId: "evt_observed_rd_top",
+          eventId: before + 1 + 1,
           type: "access_card",
           stateVersionBefore: before,
           stateVersionAfter: before + 1,
@@ -534,7 +534,7 @@ describe("Runner contest recovery", () => {
           },
         },
         {
-          eventId: "evt_corp_after_rd_access",
+          eventId: view.stateVersion + 1,
           type: corpAction,
           stateVersionBefore: before + 1,
           stateVersionAfter: view.stateVersion,

@@ -6,7 +6,7 @@ import {
   hashState,
   visibleCorpMandatoryDrawCount,
 } from "@netgrid/engine";
-import type { DeckDefinition, GameState, LegalAction } from "@netgrid/shared";
+import { ORIGINALSET_DEFAULT_DECKS, type DeckDefinition, type GameState, type LegalAction } from "@netgrid/shared";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import {
@@ -219,7 +219,7 @@ it.each([
   { variant: "no finishing damage in R&D", extras: [PUNITIVE, PUNITIVE] },
   {
     variant: "too few hits",
-    extras: [SCORCHED, ...Array<string>(6).fill(FILLER)],
+    extras: [SCORCHED, ...Array<number>(6).fill(FILLER)],
   },
   { variant: "tag plus both damage cards cannot be paid", credits: 3 },
   { variant: "the tag response stops the combo", fallGuy: true },
@@ -271,10 +271,10 @@ function apply(state: GameState, action: LegalAction) {
 
 function fixture(
   options: {
-    hand?: string[];
-    extras?: string[];
-    scored?: string;
-    top?: string;
+    hand?: number[];
+    extras?: number[];
+    scored?: number;
+    top?: number;
     score?: boolean;
     defense?: boolean;
     fallGuy?: boolean;
@@ -290,12 +290,12 @@ function fixture(
     ...(options.score ? [WALL, POLITICAL] : []),
     ...(options.defense ? [POLITICAL, ON_CALL] : []),
     ...(options.scored ? [options.scored] : []),
-    ...Array<string>(6).fill(FILLER),
+    ...Array<number>(6).fill(FILLER),
   ]);
   const fallGuy = 373;
   const runnerDeck = deck("runner", [
     fallGuy,
-    ...Array<string>(7).fill(251),
+    ...Array<number>(7).fill(251),
   ]);
   const state = createGame({
     seed: "punish-component-draw",
@@ -368,14 +368,14 @@ function fixture(
   return { state, input, buildInput };
 }
 
-function deck(side: "corp" | "runner", definitions: string[]): DeckDefinition {
-  const counts = new Map<string, number>();
+function deck(side: "corp" | "runner", definitions: number[]): DeckDefinition {
+  const counts = new Map<number, number>();
   for (const id of definitions) counts.set(id, (counts.get(id) ?? 0) + 1);
   return {
     id: `punish-draw-${side}`,
     name: `Punish draw ${side}`,
     side,
-    identity: `${side}_identity_001`,
+    identity: ORIGINALSET_DEFAULT_DECKS[side].identity,
     cards: [...counts].map(([id, quantity]) => ({ id, quantity })),
   };
 }

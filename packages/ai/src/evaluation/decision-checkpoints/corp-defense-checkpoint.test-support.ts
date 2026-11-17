@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import type { CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import type { AiDecisionInput } from "@netgrid/shared";
@@ -26,7 +27,7 @@ export function checkpointDefenseCandidate(
     },
     stateVersion: 60,
     sourceKind: "card",
-    sourceDefinitionId: `generic-defense-${sourceCardInstanceId}`,
+    sourceDefinitionId: syntheticCardDefinitionId(`generic-defense-${sourceCardInstanceId}`),
     sourceCardInstanceId,
     abilityBindingMethod: "unresolved",
     semanticActionType: "install.card",

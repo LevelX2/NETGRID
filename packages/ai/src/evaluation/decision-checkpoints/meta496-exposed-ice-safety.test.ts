@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -121,7 +122,7 @@ describe("exposed ICE safety in the selected Run window (SP-520)", () => {
       if (boundary === "missing") delete ice.effectivePostRezRunQuote;
       if (boundary === "stale") quote.expiresAtStateVersion--;
       if (boundary === "target") quote.targetServerId = "hq";
-      if (boundary === "definition") quote.iceDefinitionId = "different_ice";
+      if (boundary === "definition") quote.iceDefinitionId = syntheticCardDefinitionId("different_ice");
       if (boundary === "incomplete")
         ice.effectivePostRezRunQuote = {
           ...quote,
