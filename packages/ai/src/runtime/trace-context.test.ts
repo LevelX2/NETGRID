@@ -41,6 +41,7 @@ describe("latestTraceContext", () => {
 
   it("merges the public Corp bid when the visible trace omits resolved strength", () => {
     const input = traceInput();
+    input.playerView.stateVersion = 4;
     input.playerView.trace = {
       traceId: "hunter-trace",
       sourceDefinitionId: "onr_v1_249_hunter",
@@ -62,9 +63,23 @@ describe("latestTraceContext", () => {
         stateHashAfter: "hash",
         publicPayload: {
           sourceDefinitionId: "onr_v1_249_hunter",
+          traceId: "hunter-trace",
           traceValue: 2,
           corpBid: 2,
           runnerLink: 0,
+        },
+      },
+      {
+        eventId: "other-trace",
+        type: "resolve_choice",
+        stateVersionBefore: 3,
+        stateVersionAfter: 4,
+        stateHashAfter: "hash-other",
+        publicPayload: {
+          traceId: "other-trace",
+          sourceDefinitionId: "onr_v1_249_hunter",
+          traceValue: 5,
+          corpBid: 5,
         },
       },
     ];

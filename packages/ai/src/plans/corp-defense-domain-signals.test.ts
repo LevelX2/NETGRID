@@ -371,6 +371,7 @@ function qualitativeCentralRouteFixture(): {
     actionId: "install-neural-blade-hq",
     side: "corp",
     type: "install_card",
+    timingPoint: "corp_action.main",
     source: source.instanceId,
     costs: [{ clicks: 1, credits: 1 }],
     targetRequirements: [],
@@ -395,9 +396,11 @@ function qualitativeCentralRouteFixture(): {
   return {
     action,
     input: {
+      side: "corp",
       legalActions: [action],
       playerView: {
         stateVersion,
+        timingPoint: "corp_action.main",
         turnSerial: 1,
         own: {
           credits: 5,
@@ -485,6 +488,7 @@ function layeredRemoteFixture(
     actionId: "install-candidate-ice",
     side: "corp",
     type: "install_card",
+    timingPoint: "corp_action.main",
     source: source.instanceId,
     costs: [{ clicks: 1, credits: 1 }],
     targetRequirements: [],
@@ -508,9 +512,13 @@ function layeredRemoteFixture(
     },
   } as unknown as LegalAction;
   const input = {
+    side: "corp",
     legalActions: [action],
     playerView: {
       stateVersion,
+      timingPoint: "corp_action.main",
+      agendaPointsToWin: 7,
+      opponent: { agendaPoints: 0, credits: 5, rig: [] },
       own: {
         credits: corpCredits,
         clicks: 3,

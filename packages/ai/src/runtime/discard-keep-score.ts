@@ -9,7 +9,10 @@ import { discardCurrentPlanKind } from "./discard-plan";
 import { sortedUnique } from "./collection";
 import { matchingBreakerRoleNeedles } from "./breaker-role-match";
 import { rolesMatch } from "../role-match";
-import { createAiHintsByCard } from "../ai-hints";
+import {
+  AI_HINTS_BY_CARD,
+  type AiCardHint,
+} from "../catalog-ai-hint-authority";
 import {
   runnerHintProvidesExposeInformation,
   runnerHintProvidesNonNoisyBreakerCredits,
@@ -35,8 +38,6 @@ import {
   corpTaggedDamagePayoffProfile,
   corpTaggedMeatDamageOperationProfile,
 } from "./corp-canonical-card-facts";
-
-const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type DiscardCandidateScore = {
   total: number;
@@ -681,9 +682,10 @@ function corpHasReachableCardMatching(
   if (input.side !== "corp") return false;
   const activeVisibleCards = [
     ...input.playerView.own.gripOrHq,
-    ...input.playerView.servers
-      .filter((server) => server.id !== "archives")
-      .flatMap((server) => [...server.ice, ...server.root]),
+    ...input.playerView.servers.flatMap((server) => [
+      ...server.ice,
+      ...server.root,
+    ]),
   ];
   if (
     activeVisibleCards.some(
@@ -697,6 +699,7 @@ function corpHasReachableCardMatching(
     ...activeVisibleCards,
     ...input.playerView.own.heapOrArchives,
     ...input.playerView.own.scoreArea,
+    ...input.playerView.opponent.scoreArea,
   ];
   const visibleCountByDefinitionId = new Map<string, number>();
   for (const card of allVisibleCards) {
@@ -717,42 +720,8 @@ function corpHasReachableCardWithAnySignal(
   input: AiDecisionInput,
   signals: readonly string[],
 ): boolean {
-  const semanticInput = input as AiDecisionInputWithDeckCapabilities;
-  const snapshot = semanticInput.ownDeckSnapshot;
-  if (input.side !== "corp") return false;
-  const activeVisibleCards = [
-    ...input.playerView.own.gripOrHq,
-    ...input.playerView.servers
-      .filter((server) => server.id !== "archives")
-      .flatMap((server) => [...server.ice, ...server.root]),
-  ];
-  if (
-    activeVisibleCards.some(
-      (card) =>
-        card.definitionId &&
-        cardHasAnySemanticSignal(card.definitionId, signals),
-    )
-  ) {
-    return true;
-  }
-  if (!snapshot) return false;
-  const allVisibleCards = [
-    ...activeVisibleCards,
-    ...input.playerView.own.heapOrArchives,
-    ...input.playerView.own.scoreArea,
-  ];
-  const visibleCountByDefinitionId = new Map<string, number>();
-  for (const card of allVisibleCards) {
-    if (!card.definitionId) continue;
-    visibleCountByDefinitionId.set(
-      card.definitionId,
-      (visibleCountByDefinitionId.get(card.definitionId) ?? 0) + 1,
-    );
-  }
-  return snapshot.cards.some(
-    (entry) =>
-      cardHasAnySemanticSignal(entry.cardId, signals) &&
-      entry.quantity > (visibleCountByDefinitionId.get(entry.cardId) ?? 0),
+  return corpHasReachableCardMatching(input, (definitionId) =>
+    cardHasAnySemanticSignal(definitionId, signals),
   );
 }
 
@@ -765,18 +734,13 @@ function cardHasAnySemanticSignal(
   return signals.some((signal) => cardSignals.has(signal));
 }
 
-function cardSemanticSignals(hint: unknown): ReadonlySet<string> {
-  const structured = hint as
-    | {
-        tacticSignals?: readonly string[];
-        actionTacticSignals?: readonly string[];
-        functionSignals?: readonly string[];
-      }
-    | undefined;
+function cardSemanticSignals(
+  hint: AiCardHint | undefined,
+): ReadonlySet<string> {
   return new Set([
-    ...(structured?.tacticSignals ?? []),
-    ...(structured?.actionTacticSignals ?? []),
-    ...(structured?.functionSignals ?? []),
+    ...(hint?.tacticSignals ?? []),
+    ...(hint?.actionTacticSignals ?? []),
+    ...(hint?.functionSignals ?? []),
   ]);
 }
 

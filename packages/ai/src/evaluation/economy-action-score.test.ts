@@ -178,6 +178,23 @@ describe("common economy action score", () => {
     });
   });
 
+  it("does not use conditional receipts to fund an immediate demand or dominate another route", () => {
+    const demandEntry = demand("acute", "acute_hard_plan_blocker", 3);
+    const uncertain = candidate("conditional", 3, {
+      reliability: "conditional",
+    });
+
+    expect(
+      scoreEconomyAction(uncertain, [demandEntry]).demandId,
+    ).toBeUndefined();
+    expect(
+      compareEconomyActionDominance(
+        uncertain,
+        candidate("other-conditional", 2, { reliability: "conditional" }),
+      ),
+    ).toBeUndefined();
+  });
+
   it("does not claim dominance when net hand effects differ", () => {
     const pure = candidate("pure", 2);
     const consuming = candidate("consuming", 3, {

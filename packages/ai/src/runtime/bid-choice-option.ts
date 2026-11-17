@@ -1,16 +1,12 @@
 import type { RunnerRunPlan } from "./runner-run-plan-snapshot";
-import { traceSuccessEffectCardImplementationQuotesForDefinition } from "@netgrid/engine";
-import { type AiDecisionInput, type CardDefinitionId } from "@netgrid/shared";
+import type { AiDecisionInput } from "@netgrid/shared";
 
 import { selectEfficientTraceBidOption } from "../trace-bid-efficiency";
 import { ACCESS_PRESERVING_SECRET_COMPARE_BID } from "../run-analysis/visible-subroutine-semantics";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
 import { assessCorpTraceBid } from "./corp-trace-bid-assessment";
-import {
-  currentEncounteredIceCard,
-  currentRunRemainingIce,
-} from "./current-encounter";
+import { currentRunRemainingIce } from "./current-encounter";
 import { getRunnerRunPlanMemorySnapshot } from "./runner-run-plan-memory";
 import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
 import type { RunnerRunIceEncounterQuote } from "./runner-run-plan-types";
@@ -42,6 +38,7 @@ export function selectedBidChoiceOptionId(
     )?.id;
   }
   const bidOptions: RunnerTraceBidOption[] = choice.options
+    .filter((option) => option.selectable !== false)
     .map((option) => {
       const amount =
         typeof option.value === "number" ? option.value : Number.NaN;
@@ -53,9 +50,9 @@ export function selectedBidChoiceOptionId(
     })
     .filter(
       (option) =>
-        Number.isInteger(option.amount) &&
+        Number.isSafeInteger(option.amount) &&
         option.amount >= 0 &&
-        Number.isInteger(option.linkDelta) &&
+        Number.isSafeInteger(option.linkDelta) &&
         option.linkDelta >= 0,
     )
     .sort((left, right) => left.amount - right.amount);
@@ -157,7 +154,8 @@ function runnerRunBudgetPreservingBidOption(
   ) {
     return undefined;
   }
-  const tagAmount = currentTraceTagAmount(input, traceContext);
+  const effect = visibleTraceSuccessEffect(input, traceContext);
+  const tagAmount = effect?.type === "add_tag" ? effect.amount : 0;
   if (
     tagAmount <= 0 ||
     input.playerView.own.tags > 0 ||
@@ -198,37 +196,6 @@ function runnerRunBudgetPreservingBidOption(
     return undefined;
   }
   return minimumLosingBid;
-}
-
-function currentTraceTagAmount(
-  input: AiDecisionInput,
-  traceContext: LatestTraceContext,
-): number {
-  const tagAmounts =
-    currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines.flatMap(
-      (subroutine) =>
-        subroutine.traceSuccessEffect?.type === "add_tag"
-          ? [Math.max(0, subroutine.traceSuccessEffect.amount)]
-          : [],
-    ) ?? [];
-  if (tagAmounts.length === 1) return tagAmounts[0] ?? 0;
-  const sourceDefinitionId = traceContext.sourceDefinitionId;
-  if (!sourceDefinitionId) return 0;
-  const implementationQuotes =
-    traceSuccessEffectCardImplementationQuotesForDefinition(
-      sourceDefinitionId as CardDefinitionId,
-    ).filter(
-      (quote) =>
-        traceContext.traceLimit === undefined ||
-        quote.traceLimit === traceContext.traceLimit,
-    );
-  const implementationTagAmounts = implementationQuotes.flatMap((quote) =>
-    quote.traceSuccessEffect.type === "add_tag"
-      ? [Math.max(0, quote.traceSuccessEffect.amount)]
-      : [],
-  );
-  const uniqueTagAmounts = new Set(implementationTagAmounts);
-  return uniqueTagAmounts.size === 1 ? (implementationTagAmounts[0] ?? 0) : 0;
 }
 
 function runnerFacesVisibleTagPunish(input: AiDecisionInput): boolean {

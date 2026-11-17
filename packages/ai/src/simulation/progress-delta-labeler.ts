@@ -90,7 +90,11 @@ export function labelProgressDeltaAction(
     return resultFor(action, offset, direct, true, rationaleForDirect(direct));
   }
 
-  if (isEconomyAction(action) && hasFutureProgress(window, offset, 20)) {
+  if (
+    action.side &&
+    isEconomyAction(action) &&
+    hasFutureProgress(window, offset, 20, action.side)
+  ) {
     return resultFor(
       action,
       offset,
@@ -149,8 +153,10 @@ function directProgressLabel(
 }
 
 function isCoverageInstall(action: ProgressDeltaAction): boolean {
-  if (action.runnerCoverageImproved) return true;
   if (action.side !== "runner") return false;
+  if (action.runnerCoverageImproved !== undefined) {
+    return action.runnerCoverageImproved;
+  }
   if (
     !["install_card", "play_event", "activated_card_ability"].includes(
       action.actionType,
@@ -195,6 +201,7 @@ function hasFutureProgress(
   window: readonly ProgressDeltaAction[],
   offset: number,
   lookahead: number,
+  side: string,
 ): boolean {
   for (
     let index = offset + 1;
@@ -202,7 +209,7 @@ function hasFutureProgress(
     index += 1
   ) {
     const action = window[index];
-    if (!action) continue;
+    if (action?.side !== side) continue;
     const label = directProgressLabel(action);
     if (label && isDirectProgressLabel(label)) return true;
   }

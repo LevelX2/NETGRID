@@ -29,6 +29,14 @@ describe("selectedBidChoiceOptionId", () => {
     ).toBe("bid_0");
   });
 
+  it("does not select a disabled bid option", () => {
+    const choice = bidChoice("trace:corp", [0, 1, 2, 3]);
+    choice.options[0]!.selectable = false;
+    expect(selectedBidChoiceOptionId(input("corp", "hard"), choice, {})).toBe(
+      "bid_1",
+    );
+  });
+
   it("uses the minimum guaranteed bid for the historical visible punish window", () => {
     expect(
       selectedBidChoiceOptionId(

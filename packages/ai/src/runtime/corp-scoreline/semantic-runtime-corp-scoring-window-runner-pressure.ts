@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../../ai-hints";
@@ -123,10 +124,7 @@ function scoringWindowAccessAssessmentForMode(
     ).reduce((sum, amount) => sum + amount, 0);
   const visibleRunnerIcebreakerCount =
     baseRunnerPathCandidate.visibleIcebreakerCount;
-  const traceContext =
-    input.playerView.traceRulesProfile === undefined
-      ? {}
-      : { traceRulesProfile: input.playerView.traceRulesProfile };
+  const traceContext = visibleIcePathTraceContext(input);
   const postRezProjection =
     mode === "engine_post_rez" && server
       ? financedScoringProtectionPostRezIce(

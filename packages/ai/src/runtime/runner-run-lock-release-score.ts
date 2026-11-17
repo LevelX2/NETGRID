@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -229,6 +230,7 @@ function plausibleFollowUpRun(
         server.root,
         input.playerView.opponent.credits,
         {
+          ...visibleRunnerPathTraceContext(input),
           visibleRemoteServerCount: input.playerView.servers.filter((entry) =>
             entry.id.startsWith("remote_"),
           ).length,

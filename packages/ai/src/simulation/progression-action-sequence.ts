@@ -13,7 +13,7 @@ export function progressionEntriesWithRunTargets(
     "jack_out",
   ]);
   return actionSequence.map((entry) => {
-    if (entry.side === "runner" && entry.actionType === "start_run") {
+    if (entry.side === "runner" && entry.runnerRunStarted === true) {
       currentRunTarget = entry.targetServerId;
       return entry;
     }
@@ -112,7 +112,7 @@ export function countPressureTargetSwitches(
   let previousTarget: string | undefined;
   let switches = 0;
   for (const entry of sequence) {
-    if (entry.side !== "runner" || entry.actionType !== "start_run") continue;
+    if (entry.side !== "runner" || entry.runnerRunStarted !== true) continue;
     const target = entry.targetServerId ?? "unknown";
     if (previousTarget !== undefined && previousTarget !== target) switches++;
     previousTarget = target;

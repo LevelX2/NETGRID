@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
@@ -148,15 +149,7 @@ export function assessShellTradersAccess(
       {
         targetServerId,
         availableRunnerClicks: input.playerView.own.clicks,
-        ...(input.playerView.traceRulesProfile
-          ? { traceRulesProfile: input.playerView.traceRulesProfile }
-          : {}),
-        ...(input.playerView.own.runnerTraceSupportQuote
-          ? {
-              runnerTraceSupportQuote:
-                input.playerView.own.runnerTraceSupportQuote,
-            }
-          : {}),
+        ...visibleRunnerPathTraceContext(input),
       },
     );
     if (

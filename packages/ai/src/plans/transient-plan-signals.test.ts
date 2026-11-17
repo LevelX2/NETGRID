@@ -102,6 +102,22 @@ describe("transient plan goal/threat signals", () => {
     ).toThrow(PlanResolutionFailure);
   });
 
+  it.each([{ planModuleId: "runner." }, { target: null }])(
+    "rejects a malformed owner or target",
+    (overrides) => {
+      const malformed = {
+        ...signal(),
+        ...overrides,
+      } as unknown as TransientPlanSignal;
+      expect(() =>
+        requireCurrentTransientPlanSignals([malformed], {
+          side: "runner",
+          stateVersion: 17,
+        }),
+      ).toThrow(PlanResolutionFailure);
+    },
+  );
+
   it("rejects an undeclared action-authority field instead of ignoring it", () => {
     const authorityBearingSignal = {
       ...signal(),

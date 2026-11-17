@@ -115,10 +115,6 @@ const intentionalEvaluationRoots = [
     "current_action_semantics_safety_contract",
   ],
   [
-    "evaluation/proteus-random-model-readiness.ts",
-    "current_proteus_random_readiness_evaluation",
-  ],
-  [
     "evaluation/replay-portable-fixtures.ts",
     "current_plan_first_replay_contract",
   ],

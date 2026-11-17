@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -150,6 +151,7 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
       [...server.root],
       visibleCorpCredits,
       {
+        ...visibleIcePathTraceContext(input),
         targetServerId: server.id,
         visibleCorpCredits,
         visibleRemoteServerCount: input.playerView.servers.filter(
@@ -273,6 +275,7 @@ export function corpArchivesHasCertifiedPaidAccess(
     [],
     view.own.credits,
     {
+      ...visibleIcePathTraceContext(input),
       targetServerId: server.id,
       visibleCorpCredits: view.own.credits,
       visibleRemoteServerCount: view.servers.filter(

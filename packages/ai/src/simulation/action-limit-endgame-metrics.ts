@@ -26,7 +26,10 @@ import {
 } from "./runner-endgame-closeout";
 
 export function summarizeActionLimitEndgameMetrics(
-  summaries: AiSimulationSummary[],
+  summaries: readonly Pick<
+    AiSimulationSummary,
+    "terminationKind" | "actionSequence" | "finalAgendaPoints"
+  >[],
   isMeaningfulBoardProgress: (
     entry: AiSimulationActionSequenceEntry,
   ) => boolean,
@@ -113,7 +116,8 @@ export function summarizeActionLimitEndgameMetrics(
     if (summary.terminationKind !== "action_limit") continue;
     actionLimitRootCauseByMatch += 1;
     const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-    const strategicWindow = sequence.filter(isStrategicPlanDecision).slice(-30);
+    const { strategicWindow, nonStrategicActions } =
+      finalStrategicWindow(sequence);
     const windowNoProgress = strategicWindow.filter(
       (entry) => !isMeaningfulBoardProgress(entry),
     );
@@ -243,8 +247,7 @@ export function summarizeActionLimitEndgameMetrics(
     const likelyMetricArtifact =
       strategicWindow.length === 0 ||
       (windowNoProgress.length <= 2 &&
-        sequence.filter((entry) => !isStrategicPlanDecision(entry)).length >
-          strategicWindow.length);
+        nonStrategicActions > strategicWindow.length);
     const likelyDeckPressureIssue =
       pressureActions.length <= 1 &&
       runnerCloseoutOpportunities === 0 &&
@@ -314,4 +317,21 @@ export function summarizeActionLimitEndgameMetrics(
     actionLimitLikelyStrategyIssue,
     actionLimitLikelyMetricArtifact,
   };
+}
+
+function finalStrategicWindow(
+  sequence: readonly AiSimulationActionSequenceEntry[],
+) {
+  const strategicWindow: AiSimulationActionSequenceEntry[] = [];
+  let nonStrategicActions = 0;
+  for (
+    let index = sequence.length - 1;
+    index >= 0 && strategicWindow.length < 30;
+    index -= 1
+  ) {
+    const entry = sequence[index]!;
+    if (isStrategicPlanDecision(entry)) strategicWindow.push(entry);
+    else nonStrategicActions += 1;
+  }
+  return { strategicWindow: strategicWindow.reverse(), nonStrategicActions };
 }

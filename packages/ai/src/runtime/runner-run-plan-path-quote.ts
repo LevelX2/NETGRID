@@ -1,3 +1,7 @@
+import {
+  requireVisibleTraceRulesProfile,
+  visibleRunnerPathTraceContext,
+} from "../run-analysis/trace-rules-profile-planning";
 import type { RunnerRunPlan } from "./runner-run-plan-snapshot";
 import { visibleRunnerRunOnlyCredits } from "../run-analysis/visible-run-credit-budget";
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
@@ -495,7 +499,11 @@ function cheapestKnownIceSequence(params: {
   if (!ice.known || ice.rezzed === false || !ice.definitionId) return undefined;
   const requiredSubroutineIndexes = knownRequiredSubroutineIndexes(input, ice);
   if (requiredSubroutineIndexes.size <= 0) {
-    if (!ice.effectiveRunQuote?.subroutines.some(isVisibleSecretSpendCompareSubroutine))
+    if (
+      !ice.effectiveRunQuote?.subroutines.some(
+        isVisibleSecretSpendCompareSubroutine,
+      )
+    )
       return undefined;
     return sequenceForActions({
       actions: [],
@@ -586,8 +594,7 @@ function cheapestTraceAccessSequence(params: {
   let remainingGeneralCredits = params.input.playerView.own.credits;
   let guaranteedTraceCost = 0;
   const acceptedEffectTypes: string[] = [];
-  const traceRulesProfile =
-    params.input.playerView.traceRulesProfile ?? "modern_open";
+  const traceRulesProfile = requireVisibleTraceRulesProfile(params.input);
   for (const { subroutine } of requiredSubroutines) {
     const effect = traceSuccessEffectForVisibleSubroutine(subroutine);
     if (!traceEffectRequiresAccessGuarantee(params.input, effect)) {
@@ -1445,12 +1452,12 @@ function knownRequiredSubroutineIndexes(
 
 function visibleDeflectorContextForInput(input: AiDecisionInput) {
   return {
+    ...visibleRunnerPathTraceContext(input),
     ...currentRunPathContext(input),
     visibleRemoteServerCount: input.playerView.servers.filter((candidate) =>
       candidate.id.startsWith("remote_"),
     ).length,
     visibleCorpCredits: input.playerView.opponent.credits,
-    traceRulesProfile: input.playerView.traceRulesProfile ?? "modern_open",
     netOrCoreDamagePreventionRemaining: Math.max(
       0,
       input.playerView.own.freeNetOrCoreDamagePreventionRemaining ?? 0,
@@ -1461,11 +1468,6 @@ function visibleDeflectorContextForInput(input: AiDecisionInput) {
     ),
     prohibitNoisyIcebreakers:
       input.playerView.run?.prohibitNoisyIcebreakers === true,
-    ...(input.playerView.own.runnerTraceSupportQuote
-      ? {
-          runnerTraceSupportQuote: input.playerView.own.runnerTraceSupportQuote,
-        }
-      : {}),
     ...(input.playerView.servers
       .find(
         (candidate) => candidate.id === input.playerView.run?.attackedServerId,
@@ -1476,9 +1478,6 @@ function visibleDeflectorContextForInput(input: AiDecisionInput) {
           status.restriction === "runner_stealth_bit_payment_sources",
       )
       ? { excludeStealthTraceCredits: true }
-      : {}),
-    ...(input.playerView.run?.runTraceLinkBonus !== undefined
-      ? { runTraceLinkBonus: input.playerView.run.runTraceLinkBonus }
       : {}),
   };
 }

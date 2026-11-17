@@ -291,13 +291,10 @@ export function buildLocalDefaultPilotDryRunReport(
   const wouldOverrideScenarios = scopedScenarios.filter(
     (scenario) => scenario.pilotEligibility.wouldOverride,
   );
-  const blockedReasons = countStrings(
+  const blockedReasons = sumCounts(
     report.scenarios.flatMap((scenario) =>
-      Object.entries(scenario.pilotEligibility.blockedByReason).flatMap(
-        ([reason, count]) =>
-          reason.startsWith(scope)
-            ? Array.from({ length: count }, () => reason)
-            : [],
+      Object.entries(scenario.pilotEligibility.blockedByReason).filter(
+        ([reason]) => reason.startsWith(scope),
       ),
     ),
   );
@@ -570,11 +567,9 @@ function buildLeagueMetrics(
     scopeAllowedCount,
     pilotWouldOverrideCount,
     pilotActualOverrideCount,
-    blockedByReason: countStrings(
+    blockedByReason: sumCounts(
       scenarios.flatMap((scenario) =>
-        Object.entries(scenario.pilotEligibility.blockedByReason).flatMap(
-          ([reason, count]) => Array.from({ length: count }, () => reason),
-        ),
+        Object.entries(scenario.pilotEligibility.blockedByReason),
       ),
     ),
     averageScoreGap:
@@ -613,12 +608,8 @@ function buildLeagueMetrics(
         : null,
     topScoreMin: topScores.length > 0 ? Math.min(...topScores) : null,
     topScoreMax: topScores.length > 0 ? Math.max(...topScores) : null,
-    blockersByKind: countStrings(
-      scenarios.flatMap((scenario) =>
-        Object.entries(scenario.blockers).flatMap(([blocker, count]) =>
-          Array.from({ length: count }, () => blocker),
-        ),
-      ),
+    blockersByKind: sumCounts(
+      scenarios.flatMap((scenario) => Object.entries(scenario.blockers)),
     ),
     pilotCutoverReadiness: pilotCutoverReadinessMatrix(scenarios),
     doctrineGoalActionFit: {
@@ -1112,10 +1103,15 @@ function countMistakes(
 }
 
 function countStrings(values: readonly string[]): Record<string, number> {
+  return sumCounts(values.map((value) => [safe(value), 1]));
+}
+
+function sumCounts(
+  entries: readonly (readonly [string, number])[],
+): Record<string, number> {
   const counts = new Map<string, number>();
-  for (const value of values) {
-    const safeValue = safe(value);
-    counts.set(safeValue, (counts.get(safeValue) ?? 0) + 1);
+  for (const [key, count] of entries) {
+    counts.set(key, (counts.get(key) ?? 0) + count);
   }
   return Object.fromEntries(
     [...counts.entries()].sort(([left], [right]) => left.localeCompare(right)),

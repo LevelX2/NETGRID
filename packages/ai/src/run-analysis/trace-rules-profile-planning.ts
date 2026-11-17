@@ -65,19 +65,25 @@ export function visibleIcePathTraceContext(
 > {
   const { traceRulesProfile } = input.playerView;
   if (traceRulesProfile !== undefined) return { traceRulesProfile };
-  return {
-    onMissingTraceRulesProfile: () => {
-      throw new PlanResolutionFailure("invalid_player_view_card_projection", {
-        side: input.side,
-        stateVersion: input.playerView.stateVersion,
-        timingPoint: input.playerView.timingPoint,
-        legalActionTypes: input.legalActions.map(({ type }) => type),
-        owner: "rules_contract",
-        removalCondition:
-          "A visible ICE Trace path quote requires the current Engine trace rules profile.",
-      });
-    },
-  };
+  return { onMissingTraceRulesProfile: () => missingTraceRulesProfile(input) };
+}
+
+export function requireVisibleTraceRulesProfile(
+  input: TraceDecisionContext,
+): TraceRulesProfile {
+  return input.playerView.traceRulesProfile ?? missingTraceRulesProfile(input);
+}
+
+function missingTraceRulesProfile(input: TraceDecisionContext): never {
+  throw new PlanResolutionFailure("invalid_player_view_card_projection", {
+    side: input.side,
+    stateVersion: input.playerView.stateVersion,
+    timingPoint: input.playerView.timingPoint,
+    legalActionTypes: input.legalActions.map(({ type }) => type),
+    owner: "rules_contract",
+    removalCondition:
+      "A visible ICE Trace path quote requires the current Engine trace rules profile.",
+  });
 }
 
 export function visibleRunnerPathTraceContext(

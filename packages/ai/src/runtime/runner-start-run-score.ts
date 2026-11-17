@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { createAiHintsByCard } from "../ai-hints";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
@@ -54,9 +55,7 @@ export function runnerHqSuccessWindowSetupAssessment(
     input.playerView.own.credits,
     hqServer.root,
     input.playerView.opponent.credits,
-    input.playerView.traceRulesProfile === undefined
-      ? {}
-      : { traceRulesProfile: input.playerView.traceRulesProfile },
+    visibleRunnerPathTraceContext(input),
   );
   if (!hqPath.canReachAccess || hqPath.visibleTraceTagHazardUnavoidable) {
     return undefined;

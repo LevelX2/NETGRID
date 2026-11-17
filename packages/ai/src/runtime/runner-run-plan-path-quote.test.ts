@@ -811,6 +811,7 @@ function runnerEncounterInput(params: {
     side: "runner",
     playerView: {
       stateVersion: 86,
+      traceRulesProfile: "modern_open",
       side: "runner",
       activeSide: "runner",
       timingPoint: "run.encounter",

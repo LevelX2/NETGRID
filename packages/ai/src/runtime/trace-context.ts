@@ -29,13 +29,14 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
   const visibleRunnerEstimate = visibleRunnerTraceEstimateAtCorpBid(input);
   const visibleRunnerLink = visibleRunnerEstimate.runnerLink;
   const visibleTrace = input.playerView.trace;
-  const eventTrace = latestTraceContextFromEventTail(input, visibleRunnerLink);
   if (visibleTrace) {
-    const matchingEventTrace =
-      eventTrace.sourceDefinitionId === undefined ||
-      eventTrace.sourceDefinitionId === visibleTrace.sourceDefinitionId
-        ? eventTrace
-        : {};
+    const matchingEventTrace = visibleTrace.bidsRevealed
+      ? latestTraceContextFromEventTail(
+          input,
+          visibleRunnerLink,
+          visibleTrace.traceId,
+        )
+      : {};
     const corpBid = visibleTrace.corpBid ?? matchingEventTrace.corpBid;
     const traceValue =
       visibleTrace.corpStrength ?? matchingEventTrace.traceValue ?? corpBid;
@@ -66,7 +67,7 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
     };
   }
   return {
-    ...eventTrace,
+    ...latestTraceContextFromEventTail(input, visibleRunnerLink),
     runnerMaximumPreRevealStrength:
       visibleRunnerEstimate.maximumPreRevealStrength,
   };
@@ -75,8 +76,15 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
 function latestTraceContextFromEventTail(
   input: AiDecisionInput,
   visibleRunnerLink: number,
+  requiredTraceId?: string,
 ): LatestTraceContext {
   for (const event of input.eventTail.slice().reverse()) {
+    if (
+      requiredTraceId !== undefined &&
+      (event.publicPayload.traceId !== requiredTraceId ||
+        event.stateVersionAfter > input.playerView.stateVersion)
+    )
+      continue;
     const traceLimit = event.publicPayload.traceLimit;
     const traceValue = event.publicPayload.traceValue;
     const runnerLink = event.publicPayload.runnerLink;

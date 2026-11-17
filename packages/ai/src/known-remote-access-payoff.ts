@@ -1,3 +1,5 @@
+import { visibleRunnerPathTraceContext } from "./run-analysis/trace-rules-profile-planning";
+import { currentRunPathContext } from "./run-analysis/current-run-path-context";
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
 import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
@@ -18,10 +20,7 @@ import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 import { currentRunRemainingIce } from "./runtime/current-encounter";
 import { runnerAgendaStealCreditRequirement } from "./run-analysis/runner-agenda-steal-cost";
 import type { AccessReserveEconomyPosture } from "./access/access-reserve-adapter";
-import {
-  mergedPublicHistory,
-  serverIdFromEvent,
-} from "./public-event-history";
+import { mergedPublicHistory, serverIdFromEvent } from "./public-event-history";
 import {
   projectKnownCorpCardAccessEffect,
   projectKnownCorpCardProspectiveAccessEffect,
@@ -702,9 +701,9 @@ function knownRemotePathCost(
     input.playerView.own.credits,
     server.root,
     input.playerView.opponent.credits,
-    input.playerView.traceRulesProfile === undefined
-      ? {}
-      : { traceRulesProfile: input.playerView.traceRulesProfile },
+    input.playerView.run?.attackedServerId === serverId
+      ? currentRunPathContext(input)
+      : visibleRunnerPathTraceContext(input),
   );
   const visibleBreakCost = assessment.visibleBreakCost ?? 0;
   return {

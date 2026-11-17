@@ -1,3 +1,5 @@
+import { costProfileForAction } from "../../actions/action-cost-timing";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
@@ -16,26 +18,34 @@ export function scoreMilestoneBoundary(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): BoundaryActionAssessment | undefined {
+  if (input.side !== "corp") return undefined;
+  const installing = candidate.semanticActionType === "install.card";
+  if (!installing && candidate.semanticActionType !== "score.advance_card")
+    return undefined;
+  const action = input.legalActions.find(
+    ({ actionId }) => actionId === candidate.actionId,
+  );
   if (
-    candidate.semanticActionType !== "install.card" &&
-    candidate.semanticActionType !== "score.advance_card"
+    !actionMatchesCurrentDecision(input, action) ||
+    action.type !== (installing ? "install_card" : "advance_card") ||
+    action.source !== candidate.sourceCardInstanceId
   )
     return undefined;
-  const agenda = [
-    ...input.playerView.own.gripOrHq,
-    ...input.playerView.servers.flatMap((server) => server.root),
-  ].find((card) => card.instanceId === candidate.sourceCardInstanceId);
+  const zone = installing
+    ? input.playerView.own.gripOrHq
+    : input.playerView.servers.flatMap((server) => server.root);
+  const agenda = zone.find((card) => card.instanceId === action.source);
   if (agenda?.type !== "agenda") return undefined;
-  const remaining = Math.max(
-    0,
-    input.playerView.own.clicks - (candidate.costProfile.clickCost ?? 0),
-  );
+  const { clickCost } = costProfileForAction(action);
+  if (clickCost === undefined || clickCost > input.playerView.own.clicks)
+    return undefined;
+  const remaining = input.playerView.own.clicks - clickCost;
   return assessTurnObservationBoundary({
     boundaryKind: "projection_not_supported",
     remainingActionCapacity: { minimum: remaining, maximum: remaining },
     residualTurnValueBasis: "remaining_capacity",
     immediateOutcomeCodes: [
-      candidate.semanticActionType === "install.card"
+      installing
         ? "score_agenda_installed_requires_current_advance_route"
         : "score_agenda_advanced_requires_current_conversion_route",
     ],

@@ -93,6 +93,13 @@ describe("Department rest-turn funding with a new Remote protection need", () =>
       expect(
         corpOrderedRemoteInstallPathAssessment(input, [], source, missing),
       ).toMatchObject({ knowledge: "unknown" });
+      const stale = structuredClone(action);
+      stale.expiresAtStateVersion -= 1;
+      stale.payload!.postInstallRezQuoteExpiresAtStateVersion =
+        stale.expiresAtStateVersion;
+      expect(
+        corpOrderedRemoteInstallPathAssessment(input, [], source, stale),
+      ).toMatchObject({ knowledge: "unknown" });
     }
   });
   it("binds the whole Engine-quoted cycle and rejects a mismatched admitted milestone", () => {

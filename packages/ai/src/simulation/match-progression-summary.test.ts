@@ -32,13 +32,17 @@ describe("summarizeMatchProgressionMetrics", () => {
     };
     const metrics = summarizeMatchProgressionMetrics([
       summary([
-        action("start_run", "hq"),
-        action("start_run", "rd"),
+        { ...action("start_run", "hq"), runnerRunStarted: true },
+        { ...action("play_event", "rd"), runnerRunStarted: true },
         belowReserve,
         belowReserve,
         { ...ice, corpFutureRunIceInstalledAsDeadEffect: true },
       ]),
-      summary([action("start_run", "archives"), belowReserve, ice]),
+      summary([
+        { ...action("start_run", "archives"), runnerRunStarted: true },
+        belowReserve,
+        ice,
+      ]),
     ]);
     expect(metrics.pressureTargetSwitches).toBe(1);
     expect(metrics.runnerTurnsBelowContestReserve).toBe(2);
@@ -65,7 +69,7 @@ describe("summarizeMatchProgressionMetrics", () => {
   it("counts successful remote access action types exactly", () => {
     const metrics = summarizeMatchProgressionMetrics([
       summary([
-        action("start_run", "remote_1"),
+        { ...action("play_event", "remote_1"), runnerRunStarted: true },
         action("access_card"),
         action("access_card_noise"),
       ]),

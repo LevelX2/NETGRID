@@ -7,6 +7,7 @@ import { rolesMatch } from "../role-match";
 export type PlanConversionDecisionEntry = {
   side?: string;
   actionType?: string;
+  runnerRunStarted?: true;
   targetCardType?: string;
   installPlacement?: string;
   targetServerId?: string;
@@ -77,6 +78,7 @@ export function isStrategicPlanDecision(
   if (NON_STRATEGIC_ACTION_TYPES.includes(entry.actionType ?? "")) return false;
   if (entry.actionType === "resolve_choice")
     return (
+      entry.runnerRunStarted === true ||
       entry.advancementCountersAdded !== undefined ||
       entry.runnerRelevantRemoteTrashTaken === true ||
       entry.runnerHandUseActionTaken === true

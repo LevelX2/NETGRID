@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import {
   assessKnownRezzedIcePath,
@@ -12,7 +13,6 @@ export function programTrashCoverageLosses(
   input: AiDecisionInput,
   targets: readonly VisibleCard[],
 ): Map<string, CoverageLoss> {
-  const { traceRulesProfile } = input.playerView;
   const rig = input.playerView.opponent.rig ?? [];
   const losses = new Map(
     targets.map((card) => [
@@ -52,7 +52,7 @@ export function programTrashCoverageLosses(
           input.playerView.own.credits,
           {
             targetServerId: server.id,
-            ...(traceRulesProfile !== undefined ? { traceRulesProfile } : {}),
+            ...visibleIcePathTraceContext(input),
           },
         );
       const before = assess(rig);

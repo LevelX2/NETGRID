@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "./run-analysis/trace-rules-profile-planning";
 import {
   hasRiskyUniversalPressure,
   runnerCreditReservePhase,
@@ -596,9 +597,7 @@ function evaluateRunnerRunTarget(
       server?.root ?? [],
       params.input.playerView.opponent.credits,
       {
-        ...(params.input.playerView.traceRulesProfile
-          ? { traceRulesProfile: params.input.playerView.traceRulesProfile }
-          : {}),
+        ...visibleRunnerPathTraceContext(params.input),
         quoteNextEncounterDamageForHandBudget: true,
         requireCoreDamageProtection:
           targetKind !== "remote" ||
@@ -623,12 +622,6 @@ function evaluateRunnerRunTarget(
           0,
           params.input.playerView.own.clicks - actionClickCost,
         ),
-        ...(params.input.playerView.own.runnerTraceSupportQuote
-          ? {
-              runnerTraceSupportQuote:
-                params.input.playerView.own.runnerTraceSupportQuote,
-            }
-          : {}),
         ...(stealthCreditsBlocked ? { excludeStealthTraceCredits: true } : {}),
         ...(projection.runTraceLinkBonus !== undefined
           ? { runTraceLinkBonus: projection.runTraceLinkBonus }

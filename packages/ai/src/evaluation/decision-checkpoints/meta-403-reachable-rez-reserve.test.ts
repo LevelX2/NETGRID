@@ -16,12 +16,12 @@ import { corpGlobalDefenseInstallRouteAssessment } from "../../corp/defense/corp
 
 describe("meta 403 reachable central rez reserve", () => {
   it.each([
-    [5, true],
-    [3, true],
-    [7, false],
+    [5, "hq"],
+    [3, "rd"],
+    [7, undefined],
   ] as const)(
     "protects only funding windows destroyed by staging at %i credits",
-    (credits, protects) => {
+    (credits, threatenedServer) => {
       const input = structuredClone(
         checkpointJson.input,
       ) as unknown as AiDecisionInputWithDeckCapabilities;
@@ -67,12 +67,37 @@ describe("meta 403 reachable central rez reserve", () => {
           archivesHasVisibleKnownAgenda: () => false,
         },
       );
-      expect(
-        assessment.knowledge === "known" &&
-          assessment.disposition === "effect_missing" &&
-          assessment.evidenceCode ===
-            "corp_additional_ice_install_consumes_known_central_rez_reserve:hq",
-      ).toBe(protects);
+      const reserveEvidence =
+        "corp_additional_ice_install_consumes_known_central_rez_reserve:";
+      if (threatenedServer === undefined) {
+        expect(assessment).not.toMatchObject({
+          evidenceCode: expect.stringContaining(reserveEvidence),
+        });
+      } else {
+        expect(assessment).toMatchObject({
+          knowledge: "known",
+          disposition: "effect_missing",
+          evidenceCode: reserveEvidence + threatenedServer,
+        });
+      }
+      if (credits === 3) {
+        expect(
+          corpGlobalDefenseInstallRouteAssessment(
+            input,
+            candidate,
+            "hq",
+            undefined,
+            {
+              hasExactNonNegativeCostProfile: () => true,
+              archivesHasVisibleKnownAgenda: () => false,
+            },
+          ),
+        ).toMatchObject({
+          knowledge: "known",
+          disposition: "effect_missing",
+          evidenceCode: reserveEvidence + "rd",
+        });
+      }
     },
   );
   it("rejects staging which destroys an existing central stopper's reachable funding window", () => {

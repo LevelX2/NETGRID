@@ -1,3 +1,4 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type {
   PlanModule,
@@ -195,9 +196,14 @@ function shellTradersCandidateMatchesExactBinding(
   const legalAction = context.input.legalActions.find(
     (action) => action.actionId === candidate.actionId,
   );
-  const payloadTargetCardId = legalAction?.payload?.targetCardId;
-  const payloadTargetDefinitionId =
-    legalAction?.payload?.targetCardDefinitionId;
+  if (
+    !actionMatchesCurrentDecision(context.input, legalAction) ||
+    legalAction.source !== signal.sourceCardInstanceId ||
+    legalAction.type !== "trigger_ability"
+  )
+    return false;
+  const payloadTargetCardId = legalAction.payload?.targetCardId;
+  const payloadTargetDefinitionId = legalAction.payload?.targetCardDefinitionId;
   if (typeof payloadTargetCardId === "string") {
     return (
       payloadTargetCardId === signal.targetCardInstanceId &&
