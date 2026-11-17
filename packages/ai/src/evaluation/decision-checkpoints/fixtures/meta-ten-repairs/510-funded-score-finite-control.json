@@ -3,26 +3,26 @@
     {
       "side": "corp",
       "actionId": "corp.advance_card.c2km.c2km",
-      "beforeHash": "fnv1a:5cdd65c7",
-      "afterHash": "fnv1a:73e1460e"
+      "beforeHash": "fnv1a:d29630c5",
+      "afterHash": "fnv1a:8932a960"
     },
     {
       "side": "corp",
       "actionId": "corp.advance_card.c2km.c2km",
-      "beforeHash": "fnv1a:73e1460e",
-      "afterHash": "fnv1a:a8deda1e"
+      "beforeHash": "fnv1a:8932a960",
+      "afterHash": "fnv1a:61952e88"
     },
     {
       "side": "corp",
       "actionId": "corp.advance_card.c2km.c2km",
-      "beforeHash": "fnv1a:a8deda1e",
-      "afterHash": "fnv1a:07119f42"
+      "beforeHash": "fnv1a:61952e88",
+      "afterHash": "fnv1a:be8e60b0"
     },
     {
       "side": "corp",
       "actionId": "corp.score_agenda.c2km.c2km",
-      "beforeHash": "fnv1a:07119f42",
-      "afterHash": "fnv1a:a445c280"
+      "beforeHash": "fnv1a:be8e60b0",
+      "afterHash": "fnv1a:0a9dc93e"
     },
     {
       "side": "corp",
@@ -33,14 +33,14 @@
           "card_c2u5"
         ]
       },
-      "beforeHash": "fnv1a:a445c280",
-      "afterHash": "fnv1a:4bd5cd71"
+      "beforeHash": "fnv1a:0a9dc93e",
+      "afterHash": "fnv1a:1ccb33fb"
     },
     {
       "side": "corp",
       "actionId": "corp.end_turn",
-      "beforeHash": "fnv1a:4bd5cd71",
-      "afterHash": "fnv1a:35d6a668"
+      "beforeHash": "fnv1a:1ccb33fb",
+      "afterHash": "fnv1a:1aae3742"
     }
   ],
   "scorePoints": 6,
