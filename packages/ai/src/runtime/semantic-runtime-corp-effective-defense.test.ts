@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
@@ -308,7 +309,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     expect(context?.evidence).toEqual(
       expect.arrayContaining([
         "effective_defense_source_visible_ice:true",
-        "effective_defense_source_definition:onr_v1_261_quandary",
+        "effective_defense_source_definition:473",
         "effective_defense_source_stop:true",
       ]),
     );
@@ -740,7 +741,7 @@ function killerBreaker(): NonNullable<
 >[number] {
   return {
     instanceId: "loony-goon",
-    definitionId: "loony-goon",
+    definitionId: syntheticCardDefinitionId("loony-goon"),
     title: "Loony Goon",
     known: true,
     type: "program",

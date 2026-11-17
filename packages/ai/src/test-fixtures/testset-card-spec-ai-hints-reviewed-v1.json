@@ -407,7 +407,7 @@
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "592_on_play",
+            "capabilityKey": "simple_draw_event_on_play",
             "effects": [
               {
                 "kind": "draw",
@@ -494,7 +494,7 @@
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "593_on_play",
+            "capabilityKey": "simple_draw_operation_on_play",
             "effects": [
               {
                 "kind": "draw",
@@ -647,7 +647,7 @@
         },
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "595_on_play",
+            "capabilityKey": "simple_economy_event_on_play",
             "effects": [
               {
                 "kind": "economy",
@@ -733,7 +733,7 @@
         },
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "596_on_play",
+            "capabilityKey": "simple_economy_operation_on_play",
             "effects": [
               {
                 "kind": "economy",
@@ -990,7 +990,7 @@
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "600_on_play",
+            "capabilityKey": "simple_run_event_on_play",
             "effects": [
               {
                 "kind": "future_run_effect",
@@ -1020,7 +1020,7 @@
                 "kind": "use_target",
                 "timing": "on_play",
                 "targetType": "server",
-                "purpose": "make_run:600_on_play",
+                "purpose": "make_run:simple_run_event_on_play",
                 "hiddenInfoPolicy": "legal_targets_only"
               }
             ]
@@ -1032,7 +1032,7 @@
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "server",
-            "purpose": "make_run:600_on_play",
+            "purpose": "make_run:simple_run_event_on_play",
             "hiddenInfoPolicy": "legal_targets_only"
           }
         ],
@@ -1345,7 +1345,7 @@
         ],
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "604_on_play",
+            "capabilityKey": "simple_tag_punishment_operation_on_play",
             "conditions": [
               {
                 "kind": "requires_runner_tagged"
@@ -1614,7 +1614,7 @@
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "608_on_play",
+            "capabilityKey": "v08_archive_planning_operation_on_play",
             "effects": [
               {
                 "kind": "draw",
@@ -1704,7 +1704,7 @@
         },
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "609_on_play",
+            "capabilityKey": "v08_burst_credit_event_on_play",
             "effects": [
               {
                 "kind": "economy",
@@ -1855,7 +1855,7 @@
         },
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "611_on_play",
+            "capabilityKey": "v08_credit_surge_operation_on_play",
             "effects": [
               {
                 "kind": "economy",
@@ -1941,7 +1941,7 @@
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "612_on_play",
+            "capabilityKey": "v08_deep_draw_event_on_play",
             "effects": [
               {
                 "kind": "draw",
@@ -2149,7 +2149,7 @@
         },
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "615_on_play",
+            "capabilityKey": "v08_overclock_run_event_on_play",
             "effects": [
               {
                 "kind": "future_run_effect",
@@ -2179,7 +2179,7 @@
                 "kind": "use_target",
                 "timing": "on_play",
                 "targetType": "server",
-                "purpose": "make_run:615_on_play",
+                "purpose": "make_run:v08_overclock_run_event_on_play",
                 "hiddenInfoPolicy": "legal_targets_only"
               }
             ]
@@ -2191,7 +2191,7 @@
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "server",
-            "purpose": "make_run:615_on_play",
+            "purpose": "make_run:v08_overclock_run_event_on_play",
             "hiddenInfoPolicy": "legal_targets_only"
           }
         ],

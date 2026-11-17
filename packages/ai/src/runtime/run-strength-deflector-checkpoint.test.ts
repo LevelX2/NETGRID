@@ -49,7 +49,7 @@ it("keeps the admitted run-strength ability in the bound deflector break route",
     },
     executionOrigin: {
       rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-      leafPlanInstanceId: "plan:runner.convert_run_window:run%3Arun_255",
+      leafPlanInstanceId: `plan:runner.convert_run_window:run%3A${input.playerView.run!.runId}`,
       stateVersion: input.playerView.stateVersion,
     },
   });

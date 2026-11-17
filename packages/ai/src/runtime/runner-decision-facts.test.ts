@@ -18,7 +18,7 @@ describe("Runner decision facts", () => {
         reasonCode: "plan_first.runner.defense_and_recovery",
         selectedChoices: {
           choiceId: "discard_runner_5",
-          selectedOptionIds: ["card_runner_600_2"],
+          selectedOptionIds: ["card_c3pe"],
         },
       },
     },
@@ -46,7 +46,7 @@ describe("Runner decision facts", () => {
       resourceFrames: 2,
       expectedDecision: {
         actionId:
-          "runner.play_event.runner_600_1.rd.runner_600_1.simple_run_event:simple_run_event_on_play",
+          "runner.play_event.c3pd.rd.c3pd.702",
         reasonCode: "plan_first.runner.pressure_central",
       },
     },
