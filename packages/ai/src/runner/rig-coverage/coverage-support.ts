@@ -1,5 +1,8 @@
 import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
-import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
+import {
+  actionClickCost,
+  nonNegativeActionCreditCost,
+} from "../../runtime/action-cost";
 import { runnerPartialProgramSearchIsPayable } from "../../runtime/runner-partial-program-search-facts";
 import { runnerCandidateExecutesProgramSearch } from "../../runtime/runner-program-search-facts";
 import { runnerCandidateSourceDefinitionId } from "../../runtime/runner-action-source-facts";
@@ -126,15 +129,14 @@ export function runnerUrgentRemoteCoverageConversionQuote(
     installActionIds,
   );
   const runAction = input.legalActions.find(
-    (action) => action.actionId === evaluation.actionId,
+    (action) =>
+      action.actionId === evaluation.actionId &&
+      action.side === "runner" &&
+      action.timingPoint === input.playerView.timingPoint &&
+      action.expiresAtStateVersion === input.playerView.stateVersion,
   );
-  const runClickCost = runAction?.costs.reduce(
-    (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
-    0,
-  );
-  if (!installRoute || !runAction || !runClickCost || runClickCost <= 0) {
-    return undefined;
-  }
+  if (!installRoute || !runAction) return undefined;
+  const runClickCost = actionClickCost(runAction);
   const requiredClicksAfterFunding = installRoute.clickCost + runClickCost;
   if (input.playerView.own.clicks < requiredClicksAfterFunding) {
     return undefined;
@@ -235,7 +237,7 @@ export function runnerUrgentRemoteCoverageConversionQuote(
   };
 }
 
-export function runnerUrgentCoverageInstallProjection(
+function runnerUrgentCoverageInstallProjection(
   input: AiDecisionInput,
   visibleAnswer: VisibleCard,
   answerInstallCost: number,
@@ -253,12 +255,18 @@ export function runnerUrgentCoverageInstallProjection(
       const action = input.legalActions.find(
         (candidate) => candidate.actionId === actionId,
       );
-      if (!action) return [];
-      const clickCost = action.costs.reduce(
-        (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
-        0,
-      );
-      return clickCost > 0 ? [{ actionId, clickCost }] : [];
+      if (
+        !action ||
+        action.side !== "runner" ||
+        action.type !== "install_card" ||
+        action.timingPoint !== input.playerView.timingPoint ||
+        action.expiresAtStateVersion !== input.playerView.stateVersion ||
+        (action.payload?.cardId ?? action.source) !==
+          visibleAnswer.instanceId ||
+        nonNegativeActionCreditCost(action) !== answerInstallCost
+      )
+        return [];
+      return [{ actionId, clickCost: actionClickCost(action) }];
     })
     .sort(
       (left, right) =>
@@ -553,11 +561,14 @@ export function coverageSupportActionIds(
     searchEngineSetupActionIds: searchEngineSetupCandidates.map(
       (candidate) => candidate.actionId,
     ),
-    drawForAnswerActionIds: [
-      ...safeCardDrawForAnswerCandidates,
-      ...safeBasicDrawSubstitutes,
-      ...sideSafeRoleBasicDraws,
-    ]
+    drawForAnswerActionIds: uniqueBy(
+      [
+        ...safeCardDrawForAnswerCandidates,
+        ...safeBasicDrawSubstitutes,
+        ...sideSafeRoleBasicDraws,
+      ],
+      (candidate) => candidate.actionId,
+    )
       .filter((candidate) => {
         const action = input.legalActions.find(
           (legalAction) => legalAction.actionId === candidate.actionId,
@@ -649,10 +660,7 @@ export function runnerCoverageSearchTargetIsPayable(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );
   if (!action) return false;
-  const sourceCreditCost = action.costs.reduce(
-    (total, cost) => total + Math.max(0, cost.credits ?? 0),
-    0,
-  );
+  const sourceCreditCost = nonNegativeActionCreditCost(action);
   return (
     input.playerView.own.credits >= sourceCreditCost + targetBreaker.installCost
   );

@@ -1,20 +1,6 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
-import {
-  type AiDecisionInput,
-  type LegalAction,
-  type VisibleCard,
-} from "@netgrid/shared";
-import { createAiHintsByCard, RUNTIME_CARDS } from "../ai-hints";
-import {
-  assessKnownRezzedIcePath,
-  endTheRunSubroutineCount,
-} from "../visible-run-analysis";
-import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
-import { semanticRuntimeCorpObservedRemoteReachability } from "./semantic-runtime-corp-remote-reachability";
-import { visibleRunnerExposureCreditValue } from "./visible-runner-action-economy";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { decisionDerivedValue } from "../decision-derived-cache";
-
-const AI_HINTS_BY_CARD = createAiHintsByCard();
+import { visibleRunnerExposureCreditValue } from "./visible-runner-action-economy";
 import type {
   CorpScoringWindowAssessment,
   CorpServerLike,

@@ -126,6 +126,16 @@ describe("benchmark report formatting", () => {
       comparisonProfiles: ["random_legal_bot", "current_candidate"],
     });
     const report = formatMatchProgressionBenchmarkSuiteReport(suite);
+    const suiteRows = report.split("\n");
+    const tableIndex = suiteRows.findIndex((row) =>
+      row.startsWith("| Slot | Type | Use |"),
+    );
+    expect(tableIndex).toBeGreaterThanOrEqual(0);
+    const [tableHeader, tableSeparator, metricRow] =
+      suiteRows.slice(tableIndex);
+    expect(tableHeader!.split("|")).toHaveLength(77);
+    expect(tableSeparator!.split("|")).toHaveLength(77);
+    expect(metricRow!.split("|")).toHaveLength(77);
     const slots = listMatchProgressionBenchmarkDeckSlots();
     const smoke = suite.slots.find(
       (slot) => slot.slotId === "safety_smoke_demo_008",

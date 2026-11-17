@@ -5,7 +5,10 @@ import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { readExactCurrentInstalledCorpIceRezQuote } from "../../runtime/corp-exact-ice-rez-route";
 import { assessCorpScoreProtection } from "../../runtime/corp-score-protection-assessment";
 import { scoreContinuationClaims } from "./corp-defense-score-reserve";
-import { sanitizeForcedIceRezChoiceQuote } from "../../runtime/forced-ice-rez-choice-quote";
+import {
+  forcedIceRezChoiceIceId,
+  sanitizeForcedIceRezChoiceQuote,
+} from "../../runtime/forced-ice-rez-choice-quote";
 import { selectForcedRezVariant } from "./forced-rez-variant-selection";
 
 export function validCorpRezOrTrashChoiceResolution(
@@ -54,11 +57,8 @@ export function currentCorpRezOrTrashChoice(
   action: LegalAction,
 ) {
   const choice = input.playerView.pendingChoice;
-  const match =
-    choice &&
-    /^card_implementation\.corp_choice_rez_or_trash_ice_decision:([^:]+):([0-9]+)$/.exec(
-      choice.source,
-    );
+  const iceId =
+    choice && forcedIceRezChoiceIceId(choice.source, choice.stateVersion);
   const requirement = action.choiceRequirements?.[0];
   if (
     !Number.isSafeInteger(input.playerView.own.credits) ||
@@ -66,13 +66,12 @@ export function currentCorpRezOrTrashChoice(
     !Number.isSafeInteger(input.playerView.own.agendaPoints) ||
     input.playerView.own.agendaPoints < 0 ||
     !choice ||
-    !match ||
+    !iceId ||
     input.side !== "corp" ||
     choice.side !== "corp" ||
     choice.kind !== "select_option" ||
     choice.visibility !== "public" ||
     choice.stateVersion !== input.playerView.stateVersion ||
-    Number(match[2]) !== choice.stateVersion ||
     choice.minSelections !== 1 ||
     choice.maxSelections !== 1 ||
     action.side !== "corp" ||
@@ -97,9 +96,9 @@ export function currentCorpRezOrTrashChoice(
   )
     return undefined;
   const server = input.playerView.servers.find((s) =>
-    s.ice.some((ice) => ice.instanceId === match[1]),
+    s.ice.some((ice) => ice.instanceId === iceId),
   );
-  const ice = server?.ice.find((ice) => ice.instanceId === match[1]);
+  const ice = server?.ice.find((ice) => ice.instanceId === iceId);
   if (
     !server ||
     !ice ||

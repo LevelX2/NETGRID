@@ -6,6 +6,7 @@ import { scoreQuotedResourceCost } from "./score-quoted-resource-cost";
 import type { CorpEconomyNeedSignal } from "../economy/economy-types";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { candidateTargetIds } from "../../actions/action-candidate-facts";
 
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import {
@@ -919,15 +920,6 @@ function clickCost(candidate: ActionSemanticCandidate): number {
 
 function creditCost(candidate: ActionSemanticCandidate): number {
   return candidate.costProfile.creditCost ?? 0;
-}
-
-function candidateTargetIds(candidate: ActionSemanticCandidate): string[] {
-  return [
-    ...(candidate.targetContext?.selectedTargets ?? []),
-    ...(candidate.targetContext?.availableTargets ?? []),
-  ]
-    .map((target) => target.targetId)
-    .filter((targetId): targetId is string => typeof targetId === "string");
 }
 
 function invocationFor(

@@ -120,6 +120,9 @@ export function reconcileCorpCampaignContinuity(params: {
   const previousById = new Map(
     params.previous.map((campaign) => [campaign.campaignId, campaign]),
   );
+  const publicEvents = uniquePublicEvents(params.input).sort(
+    comparePublicEvents,
+  );
   const campaignIds = [
     ...new Set([...descriptorById.keys(), ...previousById.keys()]),
   ].sort();
@@ -127,7 +130,12 @@ export function reconcileCorpCampaignContinuity(params: {
     .map((campaignId) => {
       const descriptor = descriptorById.get(campaignId);
       const previous = previousById.get(campaignId);
-      return reconcileCampaign(params.input, descriptor, previous);
+      return reconcileCampaign(
+        params.input,
+        publicEvents,
+        descriptor,
+        previous,
+      );
     })
     .filter((campaign): campaign is ResidentCorpCampaign => campaign !== null)
     .sort((left, right) => left.campaignId.localeCompare(right.campaignId));
@@ -168,6 +176,7 @@ export function recentlyCompromisedCorpRemoteIds(
 
 function reconcileCampaign(
   input: AiDecisionInput,
+  publicEvents: readonly PublicGameEvent[],
   descriptor: CorpCampaignDescriptor | undefined,
   previous: ResidentCorpCampaign | undefined,
 ): ResidentCorpCampaign | null {
@@ -249,9 +258,10 @@ function reconcileCampaign(
   base.updatedAtStateVersion = stateVersion;
 
   const newOutcomes = publicOutcomesForCampaign(
-    input,
+    publicEvents,
     base,
     base.observedThroughStateVersion,
+    stateVersion,
   );
   base.publicOutcomes = uniqueOutcomes([
     ...base.publicOutcomes,
@@ -261,7 +271,10 @@ function reconcileCampaign(
   base.reaction = reconcileReactionState({
     input,
     previous: previous?.reaction,
-    outcomes: base.publicOutcomes,
+    newOutcomes,
+    observedReaction: base.publicOutcomes.some(
+      (outcome) => reactionTransitionForOutcome(outcome.kind) !== undefined,
+    ),
     descriptorCurrentlyAdmitted: descriptor?.currentlyAdmitted === true,
   });
 
@@ -342,20 +355,19 @@ function reconcileCampaign(
 function reconcileReactionState(params: {
   input: AiDecisionInput;
   previous: ResidentCorpCampaign["reaction"] | undefined;
-  outcomes: readonly ResidentCorpCampaignPublicOutcome[];
+  newOutcomes: readonly ResidentCorpCampaignPublicOutcome[];
+  observedReaction: boolean;
   descriptorCurrentlyAdmitted: boolean;
 }): ResidentCorpCampaign["reaction"] {
   const openWindowKinds = new Set<
     ResidentCorpCampaign["reaction"]["openWindowKinds"][number]
-  >();
-  let observedReaction = false;
-  for (const outcome of params.outcomes) {
+  >(params.previous?.openWindowKinds);
+  for (const outcome of params.newOutcomes) {
     const transition = reactionTransitionForOutcome(outcome.kind);
     if (!transition) {
       if (outcome.kind === "run_completed") openWindowKinds.clear();
       continue;
     }
-    observedReaction = true;
     if (transition.state === "opened") openWindowKinds.add(transition.kind);
     else openWindowKinds.delete(transition.kind);
   }
@@ -371,7 +383,7 @@ function reconcileReactionState(params: {
       reasonCode:
         sortedOpenWindows.length > 0
           ? "campaign_paused_for_public_reaction_windows"
-          : observedReaction
+          : params.observedReaction
             ? "campaign_reactions_resolved_awaiting_next_own_turn"
             : "campaign_waits_for_public_opponent_reactions",
       lastTransitionAtStateVersion: stateVersion,
@@ -397,7 +409,8 @@ function reconcileReactionState(params: {
       lastTransitionAtStateVersion: stateVersion,
     };
   }
-  const resumes = observedReaction || params.previous?.status === "paused";
+  const resumes =
+    params.observedReaction || params.previous?.status === "paused";
   return {
     status: resumes ? "resumable" : "idle",
     openWindowKinds: [],
@@ -440,17 +453,16 @@ function reactionTransitionForOutcome(
 }
 
 function publicOutcomesForCampaign(
-  input: AiDecisionInput,
+  publicEvents: readonly PublicGameEvent[],
   campaign: ResidentCorpCampaign,
   afterStateVersion: number,
+  stateVersion: number,
 ): ResidentCorpCampaignPublicOutcome[] {
-  const events = uniquePublicEvents(input)
-    .filter(
-      (event) =>
-        event.stateVersionAfter > afterStateVersion &&
-        event.stateVersionAfter <= input.playerView.stateVersion,
-    )
-    .sort(comparePublicEvents);
+  const events = publicEvents.filter(
+    (event) =>
+      event.stateVersionAfter > afterStateVersion &&
+      event.stateVersionAfter <= stateVersion,
+  );
   return events.flatMap((event) => outcomesForEvent(event, campaign));
 }
 
@@ -606,14 +618,20 @@ function outcomesForEvent(
       "campaign_public_ambush_resolved",
     );
   }
-  const accessEvent = isPublicAccessEvent(event);
-  if (accessEvent && sameServer) {
+  if (
+    isPublicAccessEvent(event) &&
+    (campaign.origin.targetServerId === undefined ||
+      targetServerId === campaign.origin.targetServerId)
+  ) {
     add(
       "access_resolved",
       "campaign_target_accessed",
       "campaign_public_access",
     );
-    if (campaign.origin.targetServerId?.startsWith("remote_")) {
+    if (
+      targetServerId?.startsWith("remote_") &&
+      targetServerId === campaign.origin.targetServerId
+    ) {
       add(
         "remote_compromised",
         "campaign_remote_compromised",

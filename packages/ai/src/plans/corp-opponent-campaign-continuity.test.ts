@@ -40,6 +40,74 @@ describe("Corp opponent-turn campaign continuity", () => {
     expect(recentlyCompromisedCorpRemoteIds(input, 15)).toEqual([]);
   });
 
+  it("cannot mark a remote compromised from an access with no server binding", () => {
+    const access = event(12, "access_card", { actor: "runner" });
+    const [campaign] = reconcileCorpCampaignContinuity({
+      input: decisionInput({
+        stateVersion: 12,
+        activeSide: "runner",
+        events: [access],
+      }),
+      previous: [],
+      descriptors: [agendaDescriptor()],
+    });
+
+    expect(campaign?.status).toBe("awaiting_opponent_outcome");
+    expect(campaign?.publicOutcomes).toEqual([]);
+  });
+
+  it("retains an open Trace after its event drops out of the diagnostic history", () => {
+    const [opened] = reconcileCorpCampaignContinuity({
+      input: decisionInput({
+        stateVersion: 11,
+        activeSide: "runner",
+        events: [event(11, "trace_started", {})],
+      }),
+      previous: [],
+      descriptors: [agendaDescriptor()],
+    });
+    expect(opened?.reaction.openWindowKinds).toEqual(["trace"]);
+
+    const [pending] = reconcileCorpCampaignContinuity({
+      input: decisionInput({
+        stateVersion: 47,
+        activeSide: "runner",
+        events: Array.from({ length: 36 }, (_, i) =>
+          event(12 + i, "continue_run", { serverId: "remote_1" }),
+        ),
+      }),
+      previous: [opened!],
+      descriptors: [agendaDescriptor()],
+    });
+
+    expect(pending?.publicOutcomes).toHaveLength(32);
+    expect(
+      pending?.publicOutcomes.some(({ kind }) => kind === "trace_started"),
+    ).toBe(false);
+    expect(pending?.reaction).toMatchObject({
+      status: "paused",
+      openWindowKinds: ["trace"],
+    });
+
+    const [stillPending] = reconcileCorpCampaignContinuity({
+      input: decisionInput({ stateVersion: 48, activeSide: "runner" }),
+      previous: [pending!],
+      descriptors: [agendaDescriptor()],
+    });
+    expect(stillPending?.reaction.openWindowKinds).toEqual(["trace"]);
+
+    const [resolved] = reconcileCorpCampaignContinuity({
+      input: decisionInput({
+        stateVersion: 49,
+        activeSide: "runner",
+        events: [event(49, "trace_resolved", {})],
+      }),
+      previous: [stillPending!],
+      descriptors: [agendaDescriptor()],
+    });
+    expect(resolved?.reaction.openWindowKinds).toEqual([]);
+  });
+
   it("does not bind a score project to a different root plan instance", () => {
     const domain = {
       scoreProjects: [

@@ -122,7 +122,20 @@ export function quoteRunnerBreakerUpgradeEconomics(
   const projectedMemoryAvailable =
     params.memoryAvailable + memorySupportAdditionalMu;
   const rejectionReasons: RunnerBreakerUpgradeEconomicRejection[] = [];
-  if (!validInputs) rejectionReasons.push("invalid_quote_input");
+  if (
+    !validInputs ||
+    ![
+      grossRunSavings,
+      upfrontCreditCost,
+      actionOpportunityCost,
+      totalInvestment,
+      netValueBeforeSafetyMargin,
+      projectedLiquidCreditsAfterUpgradeAndRun,
+      projectedMemoryAvailable,
+    ].every(Number.isSafeInteger)
+  ) {
+    rejectionReasons.push("invalid_quote_input");
+  }
   if (params.phase !== "midgame") rejectionReasons.push("not_midgame");
   if (params.scoreThreat) rejectionReasons.push("urgent_score_threat");
   if (params.plannedRunHorizon < 2)

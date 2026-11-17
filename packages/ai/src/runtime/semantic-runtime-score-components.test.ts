@@ -15,6 +15,7 @@ import type { AiDecisionDebug, LegalAction } from "@netgrid/shared";
 describe("semantic runtime score components", () => {
   it("rounds scores and derives confidence without selecting actions", () => {
     expect(roundSemanticRuntimeScore(12.345)).toBe(12.35);
+    expect(roundSemanticRuntimeScore(Number.MAX_VALUE)).toBe(Number.MAX_VALUE);
     expect(semanticRuntimeConfidence("mandatory_draw", 10)).toBe(0.95);
     expect(
       semanticRuntimeConfidence("runner.semantic.basic_economy_draw", 9000),

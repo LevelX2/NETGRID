@@ -7,35 +7,76 @@ import { isRemovableRunnerHazardCounterType } from "../../actions/runner-hazard-
  * quotes its cost even when the removal LegalAction is not affordable yet. */
 export function runnerPersistentHazardCounterFundingQuotes(
   input: AiDecisionInput,
-  hints: Iterable<{ effects?: readonly AiHintStructuredEffect[] }> = AI_HINTS_BY_CARD.values(),
+  hints: Iterable<{
+    effects?: readonly AiHintStructuredEffect[];
+  }> = AI_HINTS_BY_CARD.values(),
 ): { counterType: string; observedAmount: number; credits: number }[] {
   const counters = new Map<string, number>();
   for (const display of input.playerView.own.identity.counterDisplays ?? []) {
-    if (typeof display.counterType !== "string" ||
-      !isRemovableRunnerHazardCounterType(display.counterType)) continue;
+    if (
+      typeof display.counterType !== "string" ||
+      !isRemovableRunnerHazardCounterType(display.counterType)
+    )
+      continue;
     if (!Number.isSafeInteger(display.amount) || display.amount < 0)
       throw counterFundingError("invalid_observed_amount", display.counterType);
-    if (display.amount === 0) continue;
     if (counters.has(display.counterType))
-      throw counterFundingError("duplicate_observed_counter", display.counterType);
+      throw counterFundingError(
+        "duplicate_observed_counter",
+        display.counterType,
+      );
     counters.set(display.counterType, display.amount);
   }
-  if (counters.size === 0) return [];
-  const effects = [...hints].flatMap(hint => hint.effects ?? []);
-  return [...counters].map(([counterType, observedAmount]) => {
-    const quotes = effects.flatMap(effect =>
-      effect.counterRemoval?.counterType === counterType ? [effect.counterRemoval] : []);
-    if (quotes.length === 0) throw counterFundingError("missing_canonical_removal_quote", counterType);
+  const positiveCounters = [...counters].filter(([, amount]) => amount > 0);
+  if (positiveCounters.length === 0) return [];
+  const costsByCounter = new Map<
+    string,
+    NonNullable<AiHintStructuredEffect["counterRemoval"]>[]
+  >();
+  for (const hint of hints) {
+    for (const { counterRemoval } of hint.effects ?? []) {
+      if (
+        counterRemoval === undefined ||
+        !counters.has(counterRemoval.counterType)
+      )
+        continue;
+      const quotes = costsByCounter.get(counterRemoval.counterType);
+      if (quotes) quotes.push(counterRemoval);
+      else costsByCounter.set(counterRemoval.counterType, [counterRemoval]);
+    }
+  }
+  return positiveCounters.map(([counterType, observedAmount]) => {
+    const quotes = costsByCounter.get(counterType) ?? [];
+    if (quotes.length === 0)
+      throw counterFundingError("missing_canonical_removal_quote", counterType);
     const credits = quotes[0]!.credits;
-    if (quotes.some(quote => !Number.isSafeInteger(quote.credits) || quote.credits < 0 ||
-      quote.credits !== credits || quote.clicks !== 1 || quote.amount !== 1))
-      throw counterFundingError("conflicting_canonical_removal_quote", counterType);
+    if (
+      quotes.some(
+        (quote) =>
+          !Number.isSafeInteger(quote.credits) ||
+          quote.credits < 0 ||
+          quote.credits !== credits ||
+          quote.clicks !== 1 ||
+          quote.amount !== 1,
+      )
+    )
+      throw counterFundingError(
+        "conflicting_canonical_removal_quote",
+        counterType,
+      );
     return { counterType, observedAmount, credits };
   });
 }
 
 function counterFundingError(code: string, counterType: string): Error {
-  return Object.assign(new Error(`runner_persistent_hazard_counter_funding:${code}:${counterType}`), {
-    code, counterType, owner: "runner.defense_and_recovery",
-  });
+  return Object.assign(
+    new Error(
+      `runner_persistent_hazard_counter_funding:${code}:${counterType}`,
+    ),
+    {
+      code,
+      counterType,
+      owner: "runner.defense_and_recovery",
+    },
+  );
 }

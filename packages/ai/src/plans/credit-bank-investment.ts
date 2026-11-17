@@ -77,6 +77,7 @@ export function bankAlternativeIncomePerAction(
     ...candidates.flatMap((candidate) => {
       const p = candidate.economyProjection;
       return p?.kind === "immediate_liquid" &&
+        p.timing === "immediate" &&
         p.reliability === "guaranteed" &&
         p.creditRestriction === "general" &&
         p.payoutMode !== "all_available" &&
@@ -117,7 +118,9 @@ export function assessCreditBankInvestment(params: {
   const addedCredits = additionalLoadExecutions * params.creditsPerLoad;
   const additionalActionCost =
     additionalLoadExecutions * params.loadActionCost +
-    (params.storedCredits > 0 ? 0 : params.cashoutActionCost);
+    (params.storedCredits === 0 && additionalLoadExecutions > 0
+      ? params.cashoutActionCost
+      : 0);
   return {
     missingStoredCredits,
     additionalLoadExecutions,

@@ -180,6 +180,40 @@ describe("SP-135: the paid mitigation pump keeps its exact break purpose", () =>
     expect(hashGameState(replay.state)).toBe(hashGameState(state));
   });
 
+  it("does not budget a damage break beyond a hard end-the-run effect", () => {
+    const { input } = capture(354);
+    const ice = currentEncounteredIceCard(input)!;
+    const quote = ice.effectiveRunQuote!;
+    const damage = quote.subroutines.find(({ type }) => type === "do_damage")!;
+    const hardStop = {
+      ...damage,
+      id: "hard-stop-before-damage",
+      type: "end_the_run_and_trash_source_at_end_of_turn" as const,
+    };
+    ice.effectiveRunQuote = { ...quote, subroutines: [hardStop, damage] };
+    const continueAction = input.legalActions.find(
+      (action) =>
+        action.type === "continue_run" && action.payload?.encounterContinue,
+    )!;
+    continueAction.payload = {
+      ...continueAction.payload,
+      encounterSubroutineIds: [hardStop.id, damage.id].join(","),
+      unbrokenSubroutineCount: 2,
+    };
+    const breaker = input.playerView.own.rig!.find(
+      (card) => card.definitionId === "onr_v1_039_krash",
+    )!;
+    expect(
+      currentEncounterMitigationForBreaker(
+        input,
+        breaker,
+        quote.effectiveStrength,
+        () => true,
+        3,
+      ),
+    ).toBeUndefined();
+  });
+
   it.each([10, 9])(
     "requires the complete mitigation payment after four real pumps from %s credits",
     (credits) => {

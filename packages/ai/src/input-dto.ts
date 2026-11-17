@@ -1,6 +1,9 @@
 import { sanitizeCurrentCorpPunishQuoteSet } from "./corp/punish/punish-route-quote-sanitizer";
 import { sanitizeCorpStartDrawQuote } from "./runtime/corp-start-draw-quote-input";
-import { sanitizeForcedIceRezChoiceQuote } from "./runtime/forced-ice-rez-choice-quote";
+import {
+  forcedIceRezChoiceIceId,
+  sanitizeForcedIceRezChoiceQuote,
+} from "./runtime/forced-ice-rez-choice-quote";
 import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
@@ -3070,6 +3073,16 @@ function sanitizeVisibleChoiceRequest(
       playerViewStateVersion,
       playerViewSide,
     );
+  const forcedIceId =
+    playerViewSide === "corp" && choice.side === "corp"
+      ? forcedIceRezChoiceIceId(choice.source, playerViewStateVersion)
+      : undefined;
+  const forcedServer = forcedIceId === undefined
+    ? undefined
+    : servers.find((server) =>
+        server.ice.some((ice) => ice.instanceId === forcedIceId),
+      );
+  const forcedIce = forcedServer?.ice.find((ice) => ice.instanceId === forcedIceId);
   return {
     choiceId: choice.choiceId,
     side: choice.side,
@@ -3223,9 +3236,6 @@ function sanitizeVisibleChoiceRequest(
           servers,
         },
       );
-      const forcedServer = servers.find((server) =>
-        server.ice.some((ice) => choice.source.includes(`:${ice.instanceId}:`)),
-      );
       const forcedIceRezQuote =
         playerViewSide === "corp" && choice.side === "corp"
           ? sanitizeForcedIceRezChoiceQuote(
@@ -3236,9 +3246,7 @@ function sanitizeVisibleChoiceRequest(
                 stateVersion: playerViewStateVersion,
                 ownCredits,
                 ownAgendaPoints,
-                ice: forcedServer?.ice.find((ice) =>
-                  choice.source.includes(`:${ice.instanceId}:`),
-                ),
+                ice: forcedIce,
                 serverId: forcedServer?.id,
               },
               sanitizeVisibleEffectiveIceRunQuote,

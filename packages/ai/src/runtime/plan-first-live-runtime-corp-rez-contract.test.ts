@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
   aiInput,
   legalAction,
@@ -751,6 +752,37 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
+  it("does not use already-passed ICE to fund the current Tesseract encounter", () => {
+    resetResidentPlanPortfolioMemory();
+    const tesseract = corpUpgrade(
+      "tesseract",
+      "onr_v1_370_tesseract-fort-construction",
+      "Tesseract Fort Construction",
+    );
+    const input = corpInput(
+      [rezAction(tesseract, "rez-tesseract"), declineRez()],
+      "run.approach_ice",
+    );
+    input.playerView.run = activeRun("remote_1", 0);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          corpIce("inner", "onr_v1_237_data-wall", "Data Wall"),
+          corpIce("passed", "onr_v1_237_data-wall", "Data Wall", true),
+        ],
+        [tesseract],
+      ),
+    ];
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: "decline-rez",
+      fallbackUsed: false,
+    });
+  });
+
   it("declines Tesseract after the run has passed the last ICE [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const tesseract = corpUpgrade(
@@ -1171,6 +1203,7 @@ function corpIce(
     definitionId,
     title,
     rezzed,
+    subtypes: [...(CARD_DEFINITIONS_BY_ID[definitionId]?.subtypes ?? [])],
   });
 }
 

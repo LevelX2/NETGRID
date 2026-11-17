@@ -1,13 +1,10 @@
 import { describe, expect, it } from "vitest";
-import {
-  resolveCandidateTargetIdentity,
-  resolveTargetIdentity,
-} from "./target-identity-resolver";
+import { resolveCandidateTargetIdentity } from "./target-identity-resolver";
 
 describe("target identity resolver", () => {
   it("keeps side-safe server identities stable", () => {
     expect(
-      resolveTargetIdentity({
+      resolveCandidateTargetIdentity({
         actionType: "start_run",
         targetIdentity: "server:rd",
       }),
@@ -20,13 +17,13 @@ describe("target identity resolver", () => {
 
   it("keeps side-safe ICE identities stable only when server and position are present", () => {
     expect(
-      resolveTargetIdentity({
+      resolveCandidateTargetIdentity({
         actionType: "rez_ice",
         targetIdentity: "ice:remote_1:0:public_ice",
       }).status,
     ).toBe("complete");
     expect(
-      resolveTargetIdentity({
+      resolveCandidateTargetIdentity({
         actionType: "rez_ice",
         targetIdentity: "ice:unknown",
       }).status,
@@ -34,7 +31,7 @@ describe("target identity resolver", () => {
   });
 
   it("blocks hidden targets instead of emitting private identity", () => {
-    const resolution = resolveTargetIdentity({
+    const resolution = resolveCandidateTargetIdentity({
       actionType: "trigger_ability",
       targetIdentity: "unknown_hidden_blocked",
     });
@@ -45,7 +42,7 @@ describe("target identity resolver", () => {
 
   it("keeps side-safe choice option ids stable", () => {
     expect(
-      resolveTargetIdentity({
+      resolveCandidateTargetIdentity({
         actionType: "resolve_choice",
         targetIdentity: "choice:choice_1:option_a",
       }),

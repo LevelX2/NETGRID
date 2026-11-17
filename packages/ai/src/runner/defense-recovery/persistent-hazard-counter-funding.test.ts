@@ -21,6 +21,15 @@ describe("persistent hazard counter funding contracts", () => {
     else i.playerView.own.identity.counterDisplays = [];
     expect(runnerPersistentHazardCounterFundingQuotes(i, [])).toEqual([]);
   });
+  it("rejects conflicting duplicate projections even when the first display is zero", () => {
+    const i = input();
+    const displays = i.playerView.own.identity.counterDisplays!;
+    const display = displays[0]!;
+    displays.unshift({ ...display, id: "duplicate", amount: 0 });
+    expect(() => runnerPersistentHazardCounterFundingQuotes(i)).toThrow(
+      "duplicate_observed_counter",
+    );
+  });
   it("fails visibly on absent or conflicting canonical quotes", () => {
     expect(() => runnerPersistentHazardCounterFundingQuotes(input(), [])).toThrow("missing_canonical_removal_quote");
     expect(() => runnerPersistentHazardCounterFundingQuotes(input(), [hint(1), hint(4)])).toThrow("conflicting_canonical_removal_quote");

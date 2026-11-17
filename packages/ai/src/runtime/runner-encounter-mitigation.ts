@@ -352,7 +352,7 @@ export function currentEncounterMitigationForBreaker(
     for (const index of unbroken) {
       if (broken.has(index)) continue;
       const subroutine = quote!.subroutines[index]!;
-      if (subroutine.type === "end_the_run") break;
+      if (isVisibleHardEndRunSubroutine(subroutine)) break;
       if (subroutine.type === "trash_installed_program")
         programsTrashed = Math.min(programCount, programsTrashed + 1);
       if (subroutine.type !== "do_damage") continue;

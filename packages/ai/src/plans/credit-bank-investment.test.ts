@@ -33,6 +33,17 @@ describe("demand-bound bank investment economics", () => {
       }).additionalLoadExecutions,
     ).toBe(0);
   });
+  it("does not charge a withdrawal when an empty bank needs no load", () => {
+    expect(
+      assessCreditBankInvestment({ ...base, desiredLiquidity: 5 }),
+    ).toEqual({
+      missingStoredCredits: 0,
+      additionalLoadExecutions: 0,
+      projectedPayout: 0,
+      incrementalCreditsOverAlternative: 0,
+    });
+  });
+
   it("compares the complete remaining investment with the actual alternative", () => {
     expect(
       assessCreditBankInvestment({
