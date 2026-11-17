@@ -112,7 +112,6 @@ import {
   type SearchChoiceFeatureSnapshot,
 } from "./search-choice-option";
 import { selectedForcedChoiceOptionIds } from "./select-card-choice-option";
-import { selectedSetupMulliganChoiceOptionId } from "./setup-mulligan-choice-option";
 import { runnerTagAvoidanceChoiceResolution } from "./tag-avoidance-choice-option";
 import { latestTraceContext } from "./trace-context";
 
@@ -585,10 +584,9 @@ export function selectedChoicesForDecision(
       input.side === "corp"
         ? dependencies.evaluateCorpOpeningHand(input)
         : dependencies.evaluateRunnerOpeningHand(input);
-    const selectedOptionId = selectedSetupMulliganChoiceOptionId(
-      choice,
-      opening.decision,
-    );
+    const selectedOptionId = selectableOptions.find(
+      (option) => option.id === opening.decision,
+    )?.id;
     return resolved(
       selectedOptionId !== undefined ? [selectedOptionId] : [],
       "setup_mulligan",

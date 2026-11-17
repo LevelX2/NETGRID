@@ -1,3 +1,4 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { type AiDecisionInput } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { corpScoredAgendaFreeRezDefenseTarget } from "../defense/scored-agenda-free-rez-defense-target";
@@ -85,7 +86,7 @@ export function bindSelectedCorpScoreChoiceContinuation(
       moveBinding.sourceCardId.length > 0 &&
       moveBinding.targetCardId === targetCardId &&
       typeof moveBinding.amount === "number" &&
-      Number.isInteger(moveBinding.amount) &&
+      Number.isSafeInteger(moveBinding.amount) &&
       moveBinding.amount > 0);
   const exactPlacementBinding =
     result.route.head.semanticActionType !==
@@ -107,6 +108,8 @@ export function bindSelectedCorpScoreChoiceContinuation(
       ));
   if (
     !executor ||
+    executor.side !== "corp" ||
+    !actionMatchesCurrentDecision(input, selectedAction) ||
     moduleState?.kind !== "score" ||
     !targetCardId ||
     !exactScoreAction ||

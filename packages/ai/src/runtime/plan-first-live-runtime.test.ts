@@ -6671,6 +6671,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [creditSubversion]);
     input.playerView.timingPoint = "access.resolve_card";
+    creditSubversion.timingPoint = input.playerView.timingPoint;
     input.playerView.run = {
       runId: "credit-subversion-hq-run",
       attackedServerId: "hq",
@@ -18445,6 +18446,9 @@ describe("authoritative plan-first live runtime", () => {
       { credits: 0, clicks: 1 },
     );
     const input = aiInput("runner", [run, credit]);
+    input.playerView.stateVersion = 2;
+    for (const action of [run, credit])
+      action.expiresAtStateVersion = input.playerView.stateVersion;
     input.playerView.own.rig = [
       visibleCard("conference", "runner", "resource", {
         definitionId: "onr_v1_184_top-runners-conference",
@@ -18466,6 +18470,8 @@ describe("authoritative plan-first live runtime", () => {
             kind: "gain_credits",
             visibility: "public" as const,
             amount: 2,
+            side: "runner" as const,
+            sourceCardInstanceId: "conference",
             reason: "start_of_turn",
             sourceDefinitionId: "onr_v1_184_top-runners-conference",
           })),
@@ -23819,6 +23825,8 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [derez]);
     input.playerView.timingPoint = "run.jack_out_window";
+    for (const action of [derez])
+      action.timingPoint = input.playerView.timingPoint;
     input.playerView.run = {
       attackedServerId: "rd",
       phase: "movement",
@@ -23944,6 +23952,8 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [derez, continueRun]);
     input.playerView.timingPoint = "run.jack_out_window";
+    for (const action of [derez, continueRun])
+      action.timingPoint = input.playerView.timingPoint;
     input.playerView.run = {
       attackedServerId: "rd",
       phase: "movement",
@@ -24213,6 +24223,8 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [derez, continueRun]);
     input.playerView.timingPoint = "run.jack_out_window";
+    for (const action of [derez, continueRun])
+      action.timingPoint = input.playerView.timingPoint;
     input.playerView.run = {
       attackedServerId: "remote_1",
       phase: "movement",
@@ -24982,7 +24994,14 @@ describe("authoritative plan-first live runtime", () => {
       "trash_accessed_card",
       "Trash Krumz",
       { credits: 2, clicks: 0 },
-      { source: "corp-krumz" },
+      {
+        source: "corp-krumz",
+        payload: {
+          accessTrashBaseCost: 2,
+          accessTrashCostModifier: 0,
+          accessTrashTotalCost: 2,
+        },
+      },
     );
     const decline = legalAction(
       "decline",
@@ -25000,6 +25019,8 @@ describe("authoritative plan-first live runtime", () => {
     for (const action of [decline, trash]) action.expiresAtStateVersion = 2;
     accessInput.playerView.own.credits = 10;
     accessInput.playerView.timingPoint = "access.resolve_card";
+    for (const action of [decline, trash])
+      action.timingPoint = accessInput.playerView.timingPoint;
     accessInput.playerView.run = {
       attackedServerId: "hq",
       phase: "access",
@@ -25030,7 +25051,11 @@ describe("authoritative plan-first live runtime", () => {
       { credits: 4, clicks: 0 },
       {
         source: "visible-campaign",
-        payload: { accessTrashTotalCost: 4 },
+        payload: {
+          accessTrashBaseCost: 4,
+          accessTrashCostModifier: 0,
+          accessTrashTotalCost: 4,
+        },
       },
     );
     const decline = legalAction(
@@ -25047,6 +25072,8 @@ describe("authoritative plan-first live runtime", () => {
     });
     input.playerView.own.credits = 5;
     input.playerView.timingPoint = "access.resolve_card";
+    for (const action of [decline, trash])
+      action.timingPoint = input.playerView.timingPoint;
     input.playerView.run = {
       attackedServerId: "remote_1",
       phase: "access",

@@ -3,8 +3,7 @@ export type EvidenceCarrier = {
 };
 
 export function hasEvidenceFlag(entry: EvidenceCarrier, flag: string): boolean {
-  const evidence = new Set(entry.evidence);
-  return evidence.has(flag);
+  return entry.evidence.includes(flag);
 }
 
 export function evidenceValue(

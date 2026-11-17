@@ -49,6 +49,51 @@ describe("summarizeMatchProgressionMetrics", () => {
     expect(metrics.corpMultiIceInstallOrderFutureEffectDead).toBe(0);
   });
 
+  it("counts each actual remote conversion once, including immediate agenda installs", () => {
+    const created = (
+      targetServerId: string,
+      installPlacement: "root" | "ice",
+    ) => ({
+      ...action("install_card", targetServerId),
+      side: "corp" as const,
+      corpNewRemoteCreated: true as const,
+      installPlacement,
+      targetCardType:
+        installPlacement === "root" ? ("agenda" as const) : ("ice" as const),
+    });
+    const withPayload = created("remote_1", "root");
+    const empty = created("remote_2", "ice");
+    const baitAndAsset = {
+      ...action("install_card", "remote_2"),
+      side: "corp" as const,
+      reasonCode: "corp.asset_bait",
+    };
+    const metrics = summarizeMatchProgressionMetrics([
+      summary([withPayload, empty, baitAndAsset]),
+    ]);
+    expect(metrics.corpNewRemoteCreated).toBe(2);
+    expect(metrics.corpRemoteConvertedToAgendaAssetOrBait).toBe(2);
+    expect(metrics.corpRemoteConversionRate).toBe(1);
+    expect(metrics.corpRemoteCreatedThenNoScorePath).toBe(0);
+  });
+
+  it("ignores unknown remote role keys even when they name inherited object fields", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      summary([
+        {
+          ...action("run"),
+          evidence: [
+            "runner_remote_role_kind:constructor",
+            "runner_remote_role_server_scope:toString",
+            "runner_remote_role_kind:run_tax",
+          ],
+        },
+      ]),
+    ]);
+    expect(metrics.remoteRoleByKind).toBe(1);
+    expect(metrics.remoteRoleByServerScope).toBe(0);
+  });
+
   it("counts successful access runs once per match, including multiaccess", () => {
     const observed = (actionType: string) => ({
       ...action(actionType, "hq"),

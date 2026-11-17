@@ -12,7 +12,7 @@ import type {
 } from "../runtime/corp-tag-punish-types";
 import { rolesMatch } from "../role-match";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
-import type { CorpVisibleTagPunishOpportunity } from "./corp-visible-tag-punish-taken-diagnostics";
+import type { CorpVisibleTagPunishOpportunity } from "./corp-visible-tag-punish-opportunities";
 
 export type CorpVisibleTagPunishUnknownSkipDiagnosticsDependencies = {
   sourceDefinitionIdForAction: (

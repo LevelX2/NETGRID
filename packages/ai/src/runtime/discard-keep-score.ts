@@ -682,10 +682,9 @@ function corpHasReachableCardMatching(
   if (input.side !== "corp") return false;
   const activeVisibleCards = [
     ...input.playerView.own.gripOrHq,
-    ...input.playerView.servers.flatMap((server) => [
-      ...server.ice,
-      ...server.root,
-    ]),
+    ...input.playerView.servers.flatMap((server) =>
+      server.id === "archives" ? server.ice : [...server.ice, ...server.root],
+    ),
   ];
   if (
     activeVisibleCards.some(

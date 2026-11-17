@@ -4,6 +4,39 @@ import { aiInput } from "../semantic-ai-runtime-cutover.test-support";
 import { corpScorelineFeasibilityForDecisionInput } from "./corp-scoreline-feasibility";
 
 describe("corpScorelineFeasibilityForDecisionInput", () => {
+  it("subtracts printed agendas that are scored or removed while using actual Corp score", () => {
+    const input = aiInput("corp", []);
+    const definitionId = "onr_v1_191_black-ice-quality-assurance";
+    const card = {
+      definitionId,
+      known: true as const,
+      type: "agenda" as const,
+    };
+    input.playerView.own.agendaPoints = 1;
+    input.playerView.own.scoreArea = [
+      { ...card, instanceId: "scored", agendaPoints: 1 },
+    ];
+    input.playerView.specialZones = {
+      setAside: [],
+      setAsideCount: 0,
+      removedFromGameCount: 1,
+      removedFromGame: [{ ...card, instanceId: "removed", agendaPoints: 2 }],
+    };
+    Object.assign(input, {
+      ownDeckSnapshot: {
+        deckSnapshotId: "scoreline-physical-inventory",
+        side: "corp",
+        cards: [{ cardId: definitionId, quantity: 4 }],
+      },
+    });
+
+    expect(corpScorelineFeasibilityForDecisionInput(input)).toMatchObject({
+      remainingAgendaPoints: 4,
+      maxReachablePoints: 5,
+      feasible: false,
+    });
+  });
+
   it("counts mandatory draw windows instead of raw deck cards when a public extra draw is active", () => {
     const input = aiInput("corp", []);
     input.playerView.own.agendaPoints = 6;

@@ -15,7 +15,13 @@ export function quoteInstalledFixedTagAvoidance(
   generalCredits: number,
   consumedSourceIds: ReadonlySet<string>,
 ): { cost: number; trashedSourceIds: string[] } | undefined {
-  if (!Number.isSafeInteger(tags) || tags <= 0) return undefined;
+  if (
+    !Number.isSafeInteger(tags) ||
+    tags <= 0 ||
+    !Number.isSafeInteger(generalCredits) ||
+    generalCredits < 0
+  )
+    return undefined;
   const standaloneTrashSourceIds = new Set<string>();
   let repeatablePrice = Infinity;
 

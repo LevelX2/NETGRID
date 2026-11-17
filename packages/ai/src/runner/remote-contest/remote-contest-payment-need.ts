@@ -1,3 +1,4 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import type { RunnerRemoteContestSignal } from "../../plans/runner-tactical-plan-contracts";
@@ -32,8 +33,7 @@ export function runnerRemoteCoveragePaymentNeed(
     continuation.actionId !== pending.originalActionId ||
     !input.legalActions.every(
       (a) =>
-        a.side === "runner" &&
-        a.expiresAtStateVersion === input.playerView.stateVersion &&
+        actionMatchesCurrentDecision(input, a) &&
         (a === continuation ||
           (a.payload?.costPenaltySupportWindowId === windowId &&
             a.payload.costPenaltySupportOriginalActionId ===

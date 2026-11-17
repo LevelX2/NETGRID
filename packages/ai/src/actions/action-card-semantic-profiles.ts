@@ -1,6 +1,9 @@
 import { canonicalCapabilityId } from "@netgrid/cards/planning";
 import { type CardDefinitionId } from "@netgrid/shared";
-import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
+import {
+  AI_HINTS_BY_CARD,
+  type AiCardHint,
+} from "../catalog-ai-hint-authority";
 import type {
   ActionCardAbilitySemanticProfile,
   ActionCardSemanticProfile,
@@ -13,24 +16,14 @@ import type {
 import type {
   AiHintCondition,
   AiHintActionCapabilitySemantics,
-  AiHintActionCapacityProfile,
   AiHintEffectTargetProfile,
   AiHintStructuredEffect,
   AiHintTargetProfileV1,
 } from "../hint-ontology";
 
-const AI_HINTS = createAiHintsByCard();
 let cachedActionCardSemanticProfiles:
   | Readonly<Record<CardDefinitionId, ActionCardSemanticProfile>>
   | undefined;
-
-type ExtendedAiCardHint = AiCardHint & {
-  strategicRole?: string[];
-  riskTags?: string[];
-  tacticSignals?: string[];
-  actionTacticSignals?: string[];
-  actionCapacityProfiles?: AiHintActionCapacityProfile[];
-};
 
 export function buildActionCardSemanticProfilesByDefinitionId(): Readonly<
   Record<CardDefinitionId, ActionCardSemanticProfile>
@@ -38,17 +31,10 @@ export function buildActionCardSemanticProfilesByDefinitionId(): Readonly<
   if (cachedActionCardSemanticProfiles !== undefined) {
     return cachedActionCardSemanticProfiles;
   }
-  const entries = [...AI_HINTS.entries()]
-    .map(([cardId, hint]) => {
-      const profile = actionCardSemanticProfileFromHint(cardId, hint);
-      return profile ? ([cardId, profile] as const) : undefined;
-    })
-    .filter(
-      (
-        entry,
-      ): entry is readonly [CardDefinitionId, ActionCardSemanticProfile] =>
-        entry !== undefined,
-    );
+  const entries = [...AI_HINTS_BY_CARD].map(
+    ([cardId, hint]) =>
+      [cardId, actionCardSemanticProfileFromHint(cardId, hint)] as const,
+  );
   cachedActionCardSemanticProfiles = deepFreeze(
     Object.fromEntries(entries) as Record<
       CardDefinitionId,
@@ -61,20 +47,17 @@ export function buildActionCardSemanticProfilesByDefinitionId(): Readonly<
 function actionCardSemanticProfileFromHint(
   cardId: string,
   hint: AiCardHint,
-): ActionCardSemanticProfile | undefined {
-  const extendedHint = hint as ExtendedAiCardHint;
+): ActionCardSemanticProfile {
   const abilitySemantics = (hint.actionCapabilitySemantics ?? []).map(
     (semantics) => abilitySemanticProfile(cardId, semantics),
   );
   const compatibilitySignals = uniqueStrings([
-    ...(extendedHint.tacticSignals ?? []),
+    ...(hint.tacticSignals ?? []),
     ...(hint.functionSignals ?? []),
     ...hint.roles.map((role) => `role:${role}`),
     ...hint.planRoles.map((role) => `plan_role:${role}`),
     ...(hint.lineSupport ?? []).map((line) => `line_support:${line}`),
-    ...(extendedHint.strategicRole ?? []).map(
-      (role) => `strategic_role:${role}`,
-    ),
+    ...(hint.strategicRole ?? []).map((role) => `strategic_role:${role}`),
   ]);
   return {
     cardId,
@@ -87,16 +70,16 @@ function actionCardSemanticProfileFromHint(
         .map(hintEffectTarget)
         .filter((target): target is string => target !== undefined),
     ),
-    tacticSignals: uniqueStrings(extendedHint.actionTacticSignals ?? []),
+    tacticSignals: uniqueStrings(hint.actionTacticSignals ?? []),
     ...(compatibilitySignals.length > 0 ? { compatibilitySignals } : {}),
     strategySupport: strategySupportFromHint(hint),
     conditions: (hint.conditions ?? []).map(conditionFromHint),
     risks: riskTagsFromHint(hint),
     constraints: constraintsFromHint(hint),
     targetProfileMatches: (hint.targetProfiles ?? []).map(targetProfileMatch),
-    ...(extendedHint.actionCapacityProfiles?.length
+    ...(hint.actionCapacityProfiles?.length
       ? {
-          actionCapacityProfiles: extendedHint.actionCapacityProfiles.map(
+          actionCapacityProfiles: hint.actionCapacityProfiles.map(
             (profile) => ({
               ...profile,
               ...(profile.actionTypes
@@ -149,8 +132,7 @@ function conditionFromHint(condition: AiHintCondition): SemanticCondition {
 }
 
 function riskTagsFromHint(hint: AiCardHint): SemanticRisk[] {
-  const extendedHint = hint as ExtendedAiCardHint;
-  return (extendedHint.riskTags ?? []).map((risk) => ({
+  return (hint.riskTags ?? []).map((risk) => ({
     kind: risk,
     severity: "unknown",
     evidence: [`ai_hint_risk:${risk}`],

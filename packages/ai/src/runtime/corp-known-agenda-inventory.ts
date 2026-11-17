@@ -1,7 +1,7 @@
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
-import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
+import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 
 export type CorpKnownAgendaInventory = {
   totalAgendaPoints: number;
@@ -13,11 +13,12 @@ export type CorpKnownAgendaInventory = {
 };
 
 export function corpKnownAgendaInventory(
-  input: AiDecisionInput,
+  input: Pick<AiDecisionInput, "side" | "playerView"> & {
+    ownDeckSnapshot?: AiDeckStrategyDeckSnapshot;
+  },
 ): CorpKnownAgendaInventory | undefined {
   if (input.side !== "corp") return undefined;
-  const snapshot = (input as AiDecisionInputWithDeckCapabilities)
-    .ownDeckSnapshot;
+  const snapshot = input.ownDeckSnapshot;
   if (!snapshot || snapshot.side !== "corp") return undefined;
   let totalAgendaPoints = 0;
   for (const entry of snapshot.cards) {
@@ -64,10 +65,11 @@ function visibleAgendaPoints(cards: readonly VisibleCard[]): number {
     const definition = card.definitionId
       ? CARD_DEFINITIONS_BY_ID[card.definitionId]
       : undefined;
-    if (card.type !== "agenda" && definition?.type !== "agenda") return sum;
+    if (definition ? definition.type !== "agenda" : card.type !== "agenda")
+      return sum;
     return (
       sum +
-      normalizedAgendaPoints(card.agendaPoints ?? definition?.agendaPoints)
+      normalizedAgendaPoints(definition?.agendaPoints ?? card.agendaPoints)
     );
   }, 0);
 }

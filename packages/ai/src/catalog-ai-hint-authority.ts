@@ -14,10 +14,12 @@ export type { AiCardHint, AiRuntimeValueHintKey, AiRuntimeValueHints };
 
 const generatedArtifact = validateGeneratedArtifact(generatedCardSpecAiHints);
 const canonicalHints = new Map<string, AiCardHint>();
-const derivedCardSpecAiHintIds = new Set(generatedArtifact.cardIds);
+const recordsByCardId = new Map(
+  generatedArtifact.cards.map((record) => [record.cardId, record]),
+);
 
 export function cardIdHasGeneratedCardSpecAiHint(cardId: string): boolean {
-  return derivedCardSpecAiHintIds.has(cardId);
+  return recordsByCardId.has(cardId);
 }
 
 for (const record of generatedArtifact.cards) {
@@ -87,9 +89,7 @@ export function catalogAiHintReadModelForCardId(
   const hint = AI_HINTS_BY_CARD.get(cardId);
   if (hint === undefined) return undefined;
 
-  const record = generatedArtifact.cards.find(
-    (candidate) => candidate.cardId === cardId,
-  );
+  const record = recordsByCardId.get(cardId);
   if (record === undefined)
     throw new Error(`missing_generated_ai_hint_provenance: ${cardId}`);
   return Object.freeze({

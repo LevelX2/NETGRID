@@ -14,6 +14,9 @@ export function isExactScoreRecoveryChoiceOwner(
   const binding = signal?.recoveryChoiceBinding;
   return (
     executor?.moduleId === "corp.score_agenda" &&
+    executor.side === "corp" &&
+    executor.instanceId === origin?.executorInstanceId &&
+    origin?.selectedAtStateVersion === stateVersion &&
     moduleState?.kind === "score" &&
     signal?.phase === "recover_score_support" &&
     signal.terminalScore === true &&

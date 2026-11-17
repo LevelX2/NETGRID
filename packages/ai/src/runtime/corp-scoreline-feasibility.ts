@@ -6,7 +6,8 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 
-import { RUNTIME_CARDS } from "../ai-hints";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
+import { corpKnownAgendaInventory } from "./corp-known-agenda-inventory";
 import { corpAgendaInstallRequirement } from "../plans/corp-agenda-install-requirement";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 
@@ -60,14 +61,16 @@ export function assessCorpScorelineFeasibility(
   input: CorpScorelineFeasibilityInput,
 ): CorpScorelineFeasibility | undefined {
   if (input.side !== "corp" || !input.deckSnapshot) return undefined;
-  const totalAgendaPoints = input.deckSnapshot.cards.reduce((sum, entry) => {
-    const agendaPoints = RUNTIME_CARDS[entry.cardId]?.numeric.agendaPoints;
-    return (
-      sum +
-      (typeof agendaPoints === "number" ? agendaPoints * entry.quantity : 0)
-    );
-  }, 0);
-  if (totalAgendaPoints <= 0) return undefined;
+  const inventory = corpKnownAgendaInventory({
+    side: input.side,
+    playerView: input.playerView,
+    ownDeckSnapshot: input.deckSnapshot,
+  });
+  if (!inventory) return undefined;
+  const {
+    totalAgendaPoints,
+    remainingStealableAgendaPoints: remainingAgendaPoints,
+  } = inventory;
 
   const currentAgendaPoints = nonNegativeNumber(
     input.playerView.own.agendaPoints,
@@ -78,10 +81,6 @@ export function assessCorpScorelineFeasibility(
   const pointsToWin = Math.max(
     1,
     nonNegativeNumber(input.playerView.agendaPointsToWin),
-  );
-  const remainingAgendaPoints = Math.max(
-    0,
-    totalAgendaPoints - currentAgendaPoints - opponentAgendaPoints,
   );
   const maxReachablePoints = currentAgendaPoints + remainingAgendaPoints;
   const remainingDeckCards = optionalNonNegativeNumber(
@@ -95,8 +94,10 @@ export function assessCorpScorelineFeasibility(
       ? undefined
       : Math.floor(remainingDeckCards / mandatoryDrawCardsPerWindow);
   const deadline = scorelineDeadline(remainingMandatoryDraws);
-  const legalScoreActions = input.legalActions.filter((action) =>
-    actionAdvancesConcreteScoreline(input.playerView, action),
+  const legalScoreActions = input.legalActions.filter(
+    (action) =>
+      actionMatchesCurrentDecision(input, action) &&
+      actionAdvancesConcreteScoreline(input.playerView, action),
   );
   const affordableScoreActions = legalScoreActions.filter((action) =>
     actionIsCurrentlyAffordable(input.playerView, action),

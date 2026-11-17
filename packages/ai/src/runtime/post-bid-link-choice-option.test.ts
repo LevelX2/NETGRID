@@ -28,6 +28,7 @@ describe("post-bid link choice option", () => {
         traceValue: 1,
         runnerLink: 0,
         runnerBid: 0,
+        traceRulesProfile: "classic_blind_corp_ties",
       }),
     ).toBe("trace_link_small");
   });
@@ -68,6 +69,7 @@ describe("post-bid link choice option", () => {
         traceValue: 1,
         runnerLink: 0,
         runnerBid: 0,
+        traceRulesProfile: "classic_blind_corp_ties",
       }),
     ).toBe("pass");
   });

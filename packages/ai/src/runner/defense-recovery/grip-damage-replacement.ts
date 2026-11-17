@@ -1,7 +1,10 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
-import { unresolvedChoiceFailure } from "../../runtime/plan-bound-choice-contract";
+import {
+  exactCurrentChoiceAction,
+  unresolvedChoiceFailure,
+} from "../../runtime/plan-bound-choice-contract";
 import type { DefenseState, RunnerDefenseSignals } from "./defense-types";
 
 type ReplacementOption = NonNullable<
@@ -76,9 +79,8 @@ export function runnerGripDamageReplacementBinding(
   if (!choice || !isRunnerGripDamageReplacementWindow(input)) return;
   const action = input.legalActions.find((a) => a.type === "resolve_choice");
   if (!action) return;
-  const requirement = action.choiceRequirements?.[0];
-  const options = choice.options.filter((o) => o.selectable !== false);
-  const eligible = options
+  const eligible = choice.options
+    .filter((option) => option.selectable !== false)
     .flatMap((option) => {
       const source = gripReplacementSource(input, option);
       return source ? [{ option, ...source }] : [];
@@ -92,20 +94,10 @@ export function runnerGripDamageReplacementBinding(
   const selected = eligible[0];
   if (
     input.side !== "runner" ||
-    choice.side !== "runner" ||
     choice.kind !== "select_option" ||
-    choice.stateVersion !== input.playerView.stateVersion ||
     choice.minSelections !== 1 ||
     choice.maxSelections !== 1 ||
-    action.side !== "runner" ||
-    action.source !== "game_rule" ||
-    action.expiresAtStateVersion !== choice.stateVersion ||
-    action.choiceRequirements?.length !== 1 ||
-    requirement?.choiceId !== choice.choiceId ||
-    requirement.minSelections !== 1 ||
-    requirement.maxSelections !== 1 ||
-    requirement.optionIds.length !== options.length ||
-    options.some((o) => !requirement.optionIds.includes(o.id)) ||
+    exactCurrentChoiceAction(input, choice) !== action ||
     !selected
   ) {
     throw unresolvedChoiceFailure(
@@ -122,7 +114,7 @@ export function runnerGripDamageReplacementBinding(
     sourceDefinitionId: selected.card.definitionId!,
     replacementKind: selected.replacementKind,
     selectedOptionId: selected.option.id,
-    optionIds: options.map((o) => o.id),
+    optionIds: choice.options.map((option) => option.id),
   };
 }
 
@@ -148,7 +140,6 @@ export function selectedRunnerGripDamageReplacement(
   const option = choice?.options.find(
     (o) => o.id === binding?.selectedOptionId && o.selectable !== false,
   );
-  const requirement = action.choiceRequirements?.[0];
   const currentSource = option
     ? gripReplacementSource(input, option)
     : undefined;
@@ -164,14 +155,11 @@ export function selectedRunnerGripDamageReplacement(
     choice.choiceId !== binding.choiceId ||
     binding.stateVersion !== input.playerView.stateVersion ||
     action.actionId !== binding.actionId ||
-    action.side !== "runner" ||
-    action.expiresAtStateVersion !== binding.stateVersion ||
-    action.choiceRequirements?.length !== 1 ||
-    requirement?.choiceId !== binding.choiceId ||
-    requirement.minSelections !== 1 ||
-    requirement.maxSelections !== 1 ||
-    requirement.optionIds.length !== binding.optionIds.length ||
-    requirement.optionIds.some((id) => !binding.optionIds.includes(id)) ||
+    exactCurrentChoiceAction(input, choice) !== action ||
+    choice.minSelections !== 1 ||
+    choice.maxSelections !== 1 ||
+    choice.options.length !== binding.optionIds.length ||
+    choice.options.some(({ id }) => !binding.optionIds.includes(id)) ||
     !source ||
     currentSource?.card.instanceId !== source.instanceId ||
     currentSource?.replacementKind !== binding.replacementKind

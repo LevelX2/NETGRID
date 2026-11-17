@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  countSameStrategicPlanRepeatsWithoutProgress,
   isCorpEndgameStallSymptom,
   isEndgameKnownInfoTaken,
   isEndgameProtectionAction,
   isEndgameScoreOrStealPressureAction,
   isRunnerEndgameMeaningfulRunTaken,
   isEndgameSetupOrEconomyAction,
+  summarizeRunnerEndgameCloseoutWindow,
 } from "./runner-endgame-closeout";
 
 describe("runner endgame closeout", () => {
@@ -31,6 +33,48 @@ describe("runner endgame closeout", () => {
         actionType: "steal_agenda",
       }),
     ).toBe(false);
+  });
+
+  it("keeps a funded closeout in that window after an earlier credit block", () => {
+    const opportunity = {
+      side: "runner",
+      hqKnownAgendaCount: 1,
+      targetServerId: "hq",
+    };
+    expect(
+      summarizeRunnerEndgameCloseoutWindow(
+        [
+          { ...opportunity, runnerContestBlockedByCredits: true },
+          { ...opportunity, runnerRunStarted: true },
+        ],
+        true,
+      ),
+    ).toMatchObject({
+      raw: 2,
+      deduped: 1,
+      trueOpportunities: 1,
+      falsePositive: 0,
+      attempted: 1,
+    });
+  });
+
+  it("resets repeat attribution on board progress without a plan label", () => {
+    const prep = {
+      side: "corp",
+      planKind: "remote_build",
+      meaningfulBoardProgress: false,
+    };
+    const score = {
+      side: "corp",
+      planKind: undefined,
+      meaningfulBoardProgress: true,
+    };
+    expect(
+      countSameStrategicPlanRepeatsWithoutProgress(
+        [prep, prep, score, prep, { ...prep, meaningfulBoardProgress: true }],
+        (entry) => entry,
+      ),
+    ).toBe(1);
   });
 
   it("matches endgame plan kinds by bounded terms", () => {

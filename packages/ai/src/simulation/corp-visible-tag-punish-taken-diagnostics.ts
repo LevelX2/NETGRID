@@ -1,18 +1,11 @@
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 
 import { corpTagPunishSkipReason } from "../runtime/corp-tag-punish-skip-reason";
-import type {
-  CorpPunishKind,
-  CorpVisibleTagPayoffCategory,
-} from "../runtime/corp-tag-punish-types";
+import type { CorpVisibleTagPayoffCategory } from "../runtime/corp-tag-punish-types";
+import { fixedTaggedDamageOperation } from "../runtime/corp-fixed-tag-damage-operation-facts";
+import type { CorpVisibleTagPunishOpportunity } from "./corp-visible-tag-punish-opportunities";
+import { runnerSurvivalCounterContextForInput } from "./runner-survival-counter-context";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
-
-export type CorpVisibleTagPunishOpportunity = {
-  action: LegalAction;
-  kind: CorpPunishKind;
-  category: CorpVisibleTagPayoffCategory;
-  cardId: string | undefined;
-};
 
 export function applyCorpVisibleTagPunishTakenWindowDiagnostics(
   diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
@@ -46,16 +39,14 @@ export function applyCorpVisibleTagPunishTakenWindowDiagnostics(
     }
   }
 
-  const chosenLethal = corpPayoffOpportunityIsLethalOrNearLethal(
-    input,
-    chosenOpportunity,
+  const chosenLethal = visibleLethality(input, chosenOpportunity);
+  const alternativeLethality = alternatives.map((opportunity) =>
+    visibleLethality(input, opportunity),
   );
   const alternativeCategories = new Set(
     alternatives.map((opportunity) => opportunity.category),
   );
-  const alternativeLethal = alternatives.some((opportunity) =>
-    corpPayoffOpportunityIsLethalOrNearLethal(input, opportunity),
-  );
+
   if (
     chosenOpportunity.category === "damage" &&
     alternativeCategories.has("economic")
@@ -73,12 +64,9 @@ export function applyCorpVisibleTagPunishTakenWindowDiagnostics(
     alternativeCategories.has("damage")
   )
     diagnostics.corpVisibleTagPunishChosenTrashOverDamage = true;
-  if (
-    chosenLethal &&
-    alternatives.some((opportunity) => opportunity.category !== "damage")
-  )
+  if (chosenLethal === true && alternativeLethality.includes(false))
     diagnostics.corpVisibleTagPunishChosenLethalOverNonLethal = true;
-  if (!chosenLethal && alternativeLethal) {
+  if (chosenLethal === false && alternativeLethality.includes(true)) {
     diagnostics.corpVisibleTagPunishChosenNonLethalOverLethal = true;
     diagnostics.corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed = true;
   }
@@ -122,12 +110,41 @@ function corpVisibleTagPayoffImpact(opportunity: {
   }
 }
 
-function corpPayoffOpportunityIsLethalOrNearLethal(
+function visibleLethality(
   input: AiDecisionInput,
-  opportunity: { category: CorpVisibleTagPayoffCategory },
-): boolean {
-  return (
-    opportunity.category === "damage" &&
-    input.playerView.opponent.handCount <= 3
+  opportunity: CorpVisibleTagPunishOpportunity,
+): boolean | undefined {
+  const view = input.playerView;
+  const handCount = view.opponent.handCount;
+  if (!Number.isSafeInteger(handCount) || handCount < 0) return undefined;
+  const quote = view.corpPunishRouteQuoteSet?.routes.find(
+    (route) =>
+      route.complete &&
+      route.stateVersion === view.stateVersion &&
+      route.timingPoint === view.timingPoint &&
+      route.steps.length === 1 &&
+      route.steps[0]?.currentLegalAction?.actionId ===
+        opportunity.action.actionId &&
+      route.damageEnvelope.runnerHandCount === handCount,
   );
+  if (quote) {
+    const { minimum, maximum } = quote.damageEnvelope.effectiveDamage;
+    if (quote.guarantee === "guaranteed" && minimum > handCount) return true;
+    if (maximum <= handCount) return false;
+    return undefined;
+  }
+  if (
+    opportunity.category === "economic" ||
+    opportunity.category === "trash" ||
+    opportunity.category === "run_lock"
+  )
+    return false;
+  const fixedDamage =
+    opportunity.action.type === "play_operation" && opportunity.cardId
+      ? fixedTaggedDamageOperation(opportunity.cardId)?.damage
+      : undefined;
+  if (fixedDamage === undefined) return undefined;
+  if (fixedDamage <= handCount) return false;
+  const survival = runnerSurvivalCounterContextForInput(input);
+  return survival.damage || survival.flatline ? undefined : true;
 }
