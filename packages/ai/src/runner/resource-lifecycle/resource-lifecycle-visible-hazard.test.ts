@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/action-card-semantic-profiles";
@@ -169,7 +170,7 @@ describe("Resource lifecycle visible trace liability", () => {
         f.trash.payload!.cardImplementationAbilityKey = "another-capability";
       if (kind === "cost") f.trash.costs = [{ clicks: 2 }];
       if (kind === "definition")
-        f.input.playerView.own.rig![0]!.definitionId = "unknown-resource";
+        f.input.playerView.own.rig![0]!.definitionId = syntheticCardDefinitionId("unknown-resource");
       expect(f.signals()).toEqual([]);
     },
   );

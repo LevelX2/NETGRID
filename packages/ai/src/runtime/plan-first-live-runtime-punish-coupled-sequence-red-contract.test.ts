@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
@@ -383,7 +384,10 @@ describe("plan-first coupled Corp punish sequence contract", () => {
             kind: "meat_damage",
             sourceCardInstanceId: urban.instanceId,
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId: `${URBAN_RENEWAL_DEFINITION_ID}:abilities_on_play_damage`,
+            sourceCapabilityId: canonicalCapabilityId(
+              URBAN_RENEWAL_DEFINITION_ID,
+              capabilityKey("abilities_on_play_damage"),
+            ),
           },
         ],
       },
@@ -1117,10 +1121,14 @@ function punishStep(params: {
     sourceCardInstanceId: params.card.instanceId,
     sourceCardDefinitionId: params.card.definitionId!,
     sourceCapabilityBindingKind: "card_spec_capability_key",
-    sourceCapabilityId:
-      params.kind === "trace_tag"
-        ? `${params.card.definitionId!}:abilities_on_play_trace`
-        : `${params.card.definitionId!}:abilities_on_play_damage`,
+    sourceCapabilityId: canonicalCapabilityId(
+      params.card.definitionId!,
+      capabilityKey(
+        params.kind === "trace_tag"
+          ? "abilities_on_play_trace"
+          : "abilities_on_play_damage",
+      ),
+    ),
     clicks: 1,
     credits: params.credits,
     ...(params.currentLegalAction

@@ -43,7 +43,7 @@ describe("next-encounter break purpose", () => {
       ),
     ];
     input.playerView.run = {
-      runId: "run",
+      runId: 1,
       attackedServerId: "rd",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "rd", iceIndex },

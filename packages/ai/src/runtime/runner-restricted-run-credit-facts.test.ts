@@ -13,7 +13,7 @@ it.each([
 ])(
   "projects the canonical generic breaker pool of %s without treating it as liquid bank",
   (id, capacity) => {
-    expect(runnerRestrictedRunCreditProfile(id as string)).toEqual({
+    expect(runnerRestrictedRunCreditProfile(id)).toEqual({
       capacity,
       uses: ["using_icebreaker_during_run"],
       refreshTiming: "start_of_runner_turn",

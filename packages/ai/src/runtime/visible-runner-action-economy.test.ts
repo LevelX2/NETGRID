@@ -38,7 +38,7 @@ describe("visible Runner exposure income", () => {
 
 function card(definitionId: number, bits?: number): VisibleCard {
   return {
-    instanceId: definitionId,
+    instanceId: String(definitionId),
     definitionId,
     known: true,
     ...(bits === undefined ? {} : { counters: { bit: bits } }),

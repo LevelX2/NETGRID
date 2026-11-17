@@ -89,7 +89,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       if (variant === "gap") next.eventTail.splice(1, 1);
       if (variant === "wrong_server")
         next.eventTail[0]!.publicPayload.serverId = "rd";
-      if (variant === "wrong_run") next.playerView.run!.runId = "different";
+      if (variant === "wrong_run") next.playerView.run!.runId = 212;
       if (variant === "wrong_window")
         next.eventTail[2]!.publicPayload.runnerCostPenaltySupportWindowId =
           "different";
@@ -206,7 +206,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       supportResult.portfolio.pendingRunnerCostPenaltySupportOrigin,
     ).toEqual({
       ...originalPortfolio.pendingRunnerCostPenaltySupportOrigin,
-      windowId: "runner_cost_penalty_support.91",
+      windowId: 91,
     });
 
     const finalContinuation = continuedPaymentAction(
@@ -229,7 +229,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         leafPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
         side: "runner",
         windowKind: "optional_ability",
-        windowId: "runner_cost_penalty_support.91",
+        windowId: 91,
         stateVersion: 92,
         timingPoint: "runner_action.main",
       },
@@ -531,7 +531,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       supportResult.portfolio.pendingRunnerCostPenaltySupportOrigin,
     ).toEqual({
       ...previous.pendingRunnerCostPenaltySupportOrigin,
-      windowId: "runner_cost_penalty_support.91",
+      windowId: 91,
     });
   });
 
@@ -551,7 +551,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       sourceStepId: "plan:runner.rig_and_coverage:rig-root:find",
       originalActionId: originalAction.actionId,
       selectedAtStateVersion: 90,
-      windowId: "runner_cost_penalty_support.91",
+      windowId: 91,
     };
     const continuation = continuedPaymentAction(91, originalAction.actionId);
     const resolution = resolvePlanBoundRunnerCostPenaltyContinuation(
@@ -622,7 +622,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         leafPlanInstanceId: executorInstanceId,
         side: "runner",
         windowKind: "optional_ability",
-        windowId: "runner_cost_penalty_support.91",
+        windowId: 91,
         stateVersion: 91,
         timingPoint: "runner_action.main",
       },
@@ -715,7 +715,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         supportResult.portfolio.pendingRunnerCostPenaltySupportOrigin,
       ).toEqual({
         ...engineWindowResult.portfolio?.pendingRunnerCostPenaltySupportOrigin,
-        windowId: "runner_cost_penalty_support.91",
+        windowId: 91,
       });
     },
   );
@@ -891,7 +891,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         leafPlanInstanceId: "plan:runner.convert_run_window:run%3Arun_211",
         side: "runner",
         windowKind: "optional_ability",
-        windowId: "runner_cost_penalty_support.91",
+        windowId: 91,
         stateVersion: 226,
         timingPoint: "run.encounter_ice",
       },
@@ -922,13 +922,13 @@ describe("Runner cost/penalty support plan continuation", () => {
       supportResult.portfolio?.pendingRunnerCostPenaltySupportOrigin,
     ).toEqual({
       ...bidResult.portfolio?.pendingRunnerCostPenaltySupportOrigin,
-      windowId: "runner_cost_penalty_support.91",
+      windowId: 91,
     });
 
     const continuation = continuedPaymentAction(227, originalAction.actionId);
     continuation.timingPoint = "run.encounter_ice";
     continuation.payload!.runnerCostPenaltySupportWindowId =
-      "runner_cost_penalty_support.91";
+      91;
     const continuationInput = input(227, [continuation]);
     continuationInput.playerView.timingPoint = "run.encounter_ice";
     const continuationResolution =
@@ -975,7 +975,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       sourceStepId: "plan:runner.rig_and_coverage:rig-root:find",
       originalActionId: "runner.play.original",
       selectedAtStateVersion: 90,
-      windowId: "runner_cost_penalty_support.91",
+      windowId: 91,
     };
 
     expect(() =>
@@ -1034,7 +1034,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         leafPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
         side: "runner",
         windowKind: "optional_ability",
-        windowId: "runner_cost_penalty_support.91",
+        windowId: 91,
         stateVersion: 91,
         timingPoint: "runner_action.main",
       },
@@ -1163,7 +1163,7 @@ function continuedPaymentAction(
     payload: {
       cardId: "event-card",
       runnerCostPenaltySupportContinuation: true,
-      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.91",
+      runnerCostPenaltySupportWindowId: 91,
     },
   } as unknown as LegalAction;
 }
@@ -1273,7 +1273,7 @@ function supportAction(
     visibility: "private_to_actor",
     expiresAtStateVersion: stateVersion,
     payload: {
-      costPenaltySupportWindowId: "runner_cost_penalty_support.91",
+      costPenaltySupportWindowId: 91,
       costPenaltySupportOriginalActionId: originalActionId,
     },
   } as unknown as LegalAction;

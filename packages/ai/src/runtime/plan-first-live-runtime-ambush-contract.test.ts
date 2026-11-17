@@ -825,7 +825,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("r1", [], [installedTrap, installedLesley]),
     ];
     input.playerView.run = {
-      runId: "run-lesley-ambush",
+      runId: 1,
       attackedServerId: "r1",
       phase: "movement",
       position: { kind: "server", serverId: "r1" },

@@ -473,7 +473,7 @@ describe("decision-local Corp punish route quote input", () => {
     input.playerView.own.gripOrHq = [
       hiddenCard("hidden-data-sifters", DATA_SIFTERS),
       operation("scorched", SCORCHED),
-      operation("unknown-punish", "test-unknown-damage"),
+      operation("unknown-punish", syntheticCardDefinitionId("test-unknown-damage")),
     ];
 
     expect(buildBoundedCorpPunishRouteRequests(input)).toEqual([]);
@@ -723,7 +723,7 @@ function operation(instanceId: string, definitionId: number): VisibleCard {
     instanceId,
     known: true,
     definitionId,
-    title: definitionId,
+    title: String(definitionId),
     owner: "corp",
     controller: "corp",
     type: "operation",

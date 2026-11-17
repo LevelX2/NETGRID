@@ -298,16 +298,18 @@ export function fracterBreaker(): VisibleCard {
 }
 
 export function publicCentralEvent(
-  eventId: string,
+  eventLabel: `${"hq" | "rd"}-${"run" | "access"}-${number}`,
   actionType: "start_run" | "access_card",
   serverId: "hq" | "rd",
 ): AiDecisionInput["eventTail"][number] {
+  const runNumber = Number(eventLabel.slice(eventLabel.lastIndexOf("-") + 1));
+  const stateVersionAfter = runNumber * 2 - (actionType === "start_run" ? 1 : 0);
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type: actionType,
-    stateVersionBefore: 1,
-    stateVersionAfter: 2,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
+    stateHashAfter: `fnv1a:${eventLabel}`,
     visibilityClass: "public",
     publicPayload: {
       actor: "runner",

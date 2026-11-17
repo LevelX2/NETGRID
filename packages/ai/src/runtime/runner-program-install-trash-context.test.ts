@@ -170,7 +170,7 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
       visibleBreakerRoles: (card) =>
         card.instanceId === "only_fracter" ? ["breaker_fracter"] : [],
       rolesForCardId: (definitionId) =>
-        definitionId === "only_fracter" ? ["breaker_fracter"] : [],
+        definitionId === syntheticCardDefinitionId("only_fracter") ? ["breaker_fracter"] : [],
       isRunnerPressureRole: () => false,
       isRunnerEconomyRole: () => false,
       visibleCounterValue: () => 0,
@@ -331,7 +331,7 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
 function program(instanceId: string, memoryCost: number): VisibleCard {
   return {
     instanceId,
-    definitionId: instanceId,
+    definitionId: syntheticCardDefinitionId(instanceId),
     title: instanceId,
     type: "program",
     known: true,

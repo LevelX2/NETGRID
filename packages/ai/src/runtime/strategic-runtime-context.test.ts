@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import type {
@@ -626,7 +627,7 @@ function score(
     supportGaps: [],
     anchorEvidence: [
       {
-        cardId: "fixture-anchor",
+        cardId: syntheticCardDefinitionId("fixture-anchor"),
         quantity: 1,
         source: "derivedStrategyAnchor",
         strategyId,
@@ -827,7 +828,7 @@ function visibleCard(
 ): VisibleCard {
   return {
     instanceId,
-    definitionId: instanceId,
+    definitionId: syntheticCardDefinitionId(instanceId),
     title: instanceId,
     known: true,
     owner,

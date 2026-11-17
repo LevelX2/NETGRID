@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -120,7 +121,7 @@ function rdLabelOnlyAccessEvent(
   title: string,
 ): PublicGameEvent {
   return {
-    eventId,
+    eventId: stateVersionBefore + 2,
     type: "access_card",
     stateVersionBefore,
     stateVersionAfter: stateVersionBefore + 1,
@@ -144,7 +145,7 @@ function runnerRunStartEvent(
   serverId: string,
 ): PublicGameEvent {
   return {
-    eventId,
+    eventId: stateVersionBefore + 2,
     type: "start_run",
     stateVersionBefore,
     stateVersionAfter: stateVersionBefore + 1,
@@ -194,7 +195,7 @@ function action(actionId: string, type: LegalAction["type"]): LegalAction {
 function visibleIdentity(side: "runner" | "corp"): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: syntheticCardDefinitionId(side + "-identity"),
     title: `${side} identity`,
     owner: side,
     controller: side,

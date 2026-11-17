@@ -138,7 +138,7 @@ function blindCorpTraceState(): GameState {
 }
 
 function deckSnapshot(state: GameState): AiDeckStrategyDeckSnapshot {
-  const counts = new Map<string, number>();
+  const counts = new Map<number, number>();
   for (const instanceId of [
     ...state.corp.hq,
     ...state.corp.rd,

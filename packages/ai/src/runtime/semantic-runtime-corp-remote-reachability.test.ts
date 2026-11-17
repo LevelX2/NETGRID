@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -5,7 +6,7 @@ import { visibleCorpRootProvidesRemoteProtection } from "./semantic-runtime-corp
 
 const remote = {
   id: "r1",
-  ice: [card("remote-ice", "test_ice", { type: "ice", rezzed: true })],
+  ice: [card("remote-ice", syntheticCardDefinitionId("test_ice"), { type: "ice", rezzed: true })],
   root: [],
 };
 

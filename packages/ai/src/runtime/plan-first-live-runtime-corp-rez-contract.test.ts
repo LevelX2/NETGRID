@@ -1169,7 +1169,7 @@ function activeRun(
   iceIndex: number,
 ): NonNullable<PlayerView["run"]> {
   return {
-    runId: "corp-rez-contract-run",
+    runId: 1,
     attackedServerId,
     phase: "approach_ice",
     position: {
@@ -1295,7 +1295,7 @@ function rootRezEconomyInput(
   const input = corpInput([rez, declineRez()], "run.movement_rez_window", 2);
   input.playerView.own.credits = 5;
   input.playerView.run = {
-    runId: "root-rez-economy-run",
+    runId: 2,
     attackedServerId: "r1",
     phase: "movement",
     position: { kind: "server", serverId: "r1" },

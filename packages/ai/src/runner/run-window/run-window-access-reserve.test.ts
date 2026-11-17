@@ -25,7 +25,7 @@ function deck(id: string): DeckDefinition {
 function step(
   state: GameState,
   type: string,
-  sourceDefinition?: string,
+  sourceDefinition?: number,
 ): GameState {
   const actions = getLegalActions(state, state.activeSide).filter(
     (a) =>

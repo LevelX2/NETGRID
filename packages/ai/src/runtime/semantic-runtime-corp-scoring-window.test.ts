@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   type ResolvedCardDefinition,
   AiDecisionInput,
@@ -56,7 +57,7 @@ import {
 } from "./semantic-runtime-corp-scoring-window.test-support";
 
 const DEFINITION_BACKED_AGENDA_ID =
-  "test_definition_backed_score_window_agenda";
+  syntheticCardDefinitionId("test_definition_backed_score_window_agenda");
 
 describe("semanticRuntimeCorpScoringWindowAssessment", () => {
   afterEach(() => {

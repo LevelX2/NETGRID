@@ -218,7 +218,7 @@ describe("RunnerRigDemandProjection", () => {
         memoryChip,
         ...[1, 2, 3, 4].map((index) =>
           visibleCard(`filler-${index}`, {
-            definitionId: `filler-definition-${index}`,
+            definitionId: syntheticCardDefinitionId(`filler-definition-${index}`),
             type: "event",
           }),
         ),

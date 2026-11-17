@@ -759,7 +759,7 @@ function blockingIce(
     definitionId:
       subtype === "wall"
         ? 444
-        : "test-targeted-trash-sentry",
+        : syntheticCardDefinitionId("test-targeted-trash-sentry"),
     title: subtype === "wall" ? "Crystal Wall" : "Blocking Sentry",
     type: "ice",
     subtypes: [subtype],

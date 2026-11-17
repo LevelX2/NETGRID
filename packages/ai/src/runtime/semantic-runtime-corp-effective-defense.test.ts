@@ -697,7 +697,7 @@ function corpIce(
 ): AiDecisionInput["playerView"]["servers"][number]["ice"][number] {
   return {
     instanceId,
-    definitionId: instanceId,
+    definitionId: syntheticCardDefinitionId(instanceId),
     title: instanceId,
     known: true,
     type: "ice",

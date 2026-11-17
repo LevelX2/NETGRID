@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import traceCheckpoint from "../../../../data/scenarios/ai-decision-checkpoints/cp-03575-01-trace-bid-economy.json";
 import { createGame, getLegalActions, getPlayerView } from "@netgrid/engine";
 import type {
@@ -164,7 +165,7 @@ describe("Blind Trace bid assessment", () => {
     const blind = decisionInput({
       profile: "classic_blind",
       side: "corp",
-      sourceDefinitionId: "unknown_low_stakes_trace" as CardDefinitionId,
+      sourceDefinitionId: syntheticCardDefinitionId("unknown_low_stakes_trace"),
       printedTrace: 3,
       bidMax: 3,
     });
@@ -190,7 +191,7 @@ describe("Blind Trace bid assessment", () => {
     const modern = decisionInput({
       profile: "modern_open",
       side: "corp",
-      sourceDefinitionId: "unknown_low_stakes_trace" as CardDefinitionId,
+      sourceDefinitionId: syntheticCardDefinitionId("unknown_low_stakes_trace"),
       printedTrace: 3,
       bidMax: 8,
     });
@@ -208,7 +209,7 @@ describe("Blind Trace bid assessment", () => {
       decisionInput({
         profile: "classic_blind",
         side: "runner",
-        sourceDefinitionId: "unknown_low_stakes_trace" as CardDefinitionId,
+        sourceDefinitionId: syntheticCardDefinitionId("unknown_low_stakes_trace"),
         printedTrace: 5,
         bidMax: 5,
         ownCredits: 5,

@@ -266,7 +266,7 @@ function publicCentralEvent(
   stateVersionAfter = 2,
 ): AiDecisionInput["eventTail"][number] {
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type: actionType,
     stateVersionBefore: Math.max(0, stateVersionAfter - 1),
     stateVersionAfter,
@@ -285,7 +285,7 @@ function publicRunnerEndTurn(
   stateVersionAfter: number,
 ): AiDecisionInput["eventTail"][number] {
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type: "end_turn",
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,

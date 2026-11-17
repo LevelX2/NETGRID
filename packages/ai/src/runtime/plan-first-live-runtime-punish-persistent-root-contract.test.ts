@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
@@ -369,6 +370,10 @@ function closedAccountsQuoteSet(params: {
   card: VisibleCard;
   currentAction?: LegalAction;
 }): CorpPunishRouteQuoteSet {
+  const sourceCapabilityId = canonicalCapabilityId(
+    params.card.definitionId!,
+    capabilityKey("abilities_on_play_lose_credits"),
+  );
   return {
     schemaVersion: CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
     visibility: "private_to_actor",
@@ -407,7 +412,7 @@ function closedAccountsQuoteSet(params: {
               kind: "other_punish",
               sourceCardInstanceId: params.card.instanceId,
               sourceCapabilityBindingKind: "card_spec_capability_key",
-              sourceCapabilityId: `${params.card.definitionId!}:abilities_on_play_lose_credits`,
+              sourceCapabilityId,
             },
           ],
         },
@@ -421,7 +426,7 @@ function closedAccountsQuoteSet(params: {
             sourceCardInstanceId: params.card.instanceId,
             sourceCardDefinitionId: params.card.definitionId!,
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId: `${params.card.definitionId!}:abilities_on_play_lose_credits`,
+            sourceCapabilityId,
             clicks: 1,
             credits: 1,
             ...(params.currentAction

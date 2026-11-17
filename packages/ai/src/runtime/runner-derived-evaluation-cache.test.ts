@@ -45,7 +45,7 @@ describe("runner decision-derived evaluations", () => {
         ] as unknown as RunnerRunTargetEvaluation[],
     );
     const context = createRunnerMultiRunContext({
-      sourceDefinitionIdForAction: () => "all-nighter",
+      sourceDefinitionIdForAction: () => 288,
       targetServerId: () => undefined,
       payoffClass: () => "normal",
       canTakeRun: () => true,

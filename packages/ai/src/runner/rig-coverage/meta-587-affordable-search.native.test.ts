@@ -127,7 +127,7 @@ it.each([
     input.playerView.own.maxHandSize = input.playerView.own.gripOrHq.length;
   if (boundary === "no_stack_copy") {
     const target = input.ownDeckCapabilities.runner.breakerInventory.find(
-      (c: { cardId: string }) =>
+      (c: { cardId: number }) =>
         c.cardId === gap.directSearchChoiceBindings![0]!.targetDefinitionId,
     );
     target.quantityKnownInDeck = 0;

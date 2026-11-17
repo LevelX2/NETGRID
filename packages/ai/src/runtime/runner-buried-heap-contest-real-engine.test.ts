@@ -142,7 +142,7 @@ function run() {
   ];
   const selected: Array<{
     type: string;
-    target: string | undefined;
+    target: number | undefined;
     owner: string | undefined;
   }> = [];
   for (let step = 0; step < 40 && !state.winner; step++) {

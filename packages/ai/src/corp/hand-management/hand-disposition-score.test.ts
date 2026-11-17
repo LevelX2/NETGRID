@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
@@ -71,7 +72,7 @@ describe("Corp hand disposition score", () => {
       "agenda",
       2,
     );
-    const input = corpInput([agenda, card("other", "simple_asset", "asset")], {
+    const input = corpInput([agenda, card("other", syntheticCardDefinitionId("simple_asset"), "asset")], {
       hqIce: 2,
       rdIce: 0,
     });
