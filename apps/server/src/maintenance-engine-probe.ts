@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import {
   applyAction,
   applyRandomizedIceInstallSelection,
@@ -44,7 +45,7 @@ type ProbeStep = {
     quote: EngineRandomizedIceInstallSelectionQuote;
     selectedCandidate: EngineRandomizedIceInstallCandidate;
     randomDrawCounter: number;
-    randomDrawPurpose: string;
+    randomDrawPurpose: RandomPurpose;
   };
 };
 export type HistoricalEngineProbeResult = {

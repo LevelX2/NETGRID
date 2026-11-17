@@ -3,6 +3,7 @@ import {
   isMatchEventId,
   type CardDefinitionId,
   type MatchEventId,
+  type RandomPurpose,
 } from "@netgrid/shared";
 import { createHash, randomBytes } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
@@ -860,8 +861,9 @@ export type ReplayTimelineStep = {
 };
 
 export type ReplayRandomDrawEntry = {
+  domain: "engine" | "ai_turn_plan_selection";
   counter: number;
-  purpose: string;
+  purpose: RandomPurpose[0];
   valueHash: string;
 };
 
@@ -9005,24 +9007,18 @@ function minimalAiPreviewDetail(
 function replayRandomDrawEntries(record: StoredMatch): ReplayRandomDrawEntry[] {
   return [
     ...record.gameState.randomDrawRecords.map((entry) => ({
+      domain: "engine" as const,
       counter: entry.counter,
-      purpose: publicReplayRandomPurpose(entry.purpose),
+      purpose: entry.purpose[0],
       valueHash: `fnv1a:${fnv1a(String(entry.value))}`,
     })),
     ...(record.gameState.aiTurnPlanRandomDrawRecords ?? []).map((entry) => ({
+      domain: entry.domain,
       counter: entry.counter,
-      purpose: "ai_turn_plan_selection",
+      purpose: entry.purpose[0],
       valueHash: `fnv1a:${fnv1a(String(entry.value))}`,
     })),
   ];
-}
-
-function publicReplayRandomPurpose(purpose: string): string {
-  return purpose.includes("engine.randomized_ice_install_selection")
-    ? "engine_randomized_ice_install_selection"
-    : purpose.includes("engine.randomized_trace_bid_selection")
-      ? "engine_randomized_trace_bid_selection"
-      : purpose;
 }
 
 function replayExploitSuggestions(

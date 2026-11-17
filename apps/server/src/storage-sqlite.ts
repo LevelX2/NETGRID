@@ -18,6 +18,10 @@ import type { DeckSnapshot } from "@netgrid/decks";
 import { hashState } from "@netgrid/engine";
 import {
   isCardDefinitionId,
+  isRandomDrawRecord,
+  type RandomPurpose,
+  type RandomDomain,
+  type RandomDrawRecord,
   type AiDifficulty,
   type CardInstance,
   type GameEvent,
@@ -44,7 +48,7 @@ import { SIDE_PAYLOAD_EVENT_TAIL_LIMIT } from "./multiplayer-payload";
 import { preserveStoppedSqliteTarget } from "./storage-restore-snapshot";
 import { isStateSnapshotId, type StateSnapshotId } from "./state-snapshot-id";
 
-export const SQLITE_STORAGE_SCHEMA_VERSION = 9;
+export const SQLITE_STORAGE_SCHEMA_VERSION = 10;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
 export const DEFAULT_SQLITE_STORAGE_PATH =
   "data/runtime/multiplayer/netgrid.sqlite";
@@ -4928,7 +4932,7 @@ export function decodeStoredEngineEvent(row: StoredEngineEventRow): GameEvent {
   };
 }
 
-type StoredRandomDraw = [counter: number, purposeIndex: number, value: number];
+type StoredRandomDraw = [counter: number, purpose: RandomPurpose, value: number];
 
 const CARD_INSTANCE_ROW_FIELDS = [
   "instanceId",
@@ -5030,7 +5034,6 @@ type StoredGameState = Omit<
 > & BoardCardReferences<number> & {
   cardInstances: StoredCardInstance[];
   cardZones: CardInstance["zone"][];
-  randomPurposes: string[];
   randomDrawRecords: StoredRandomDraw[];
   aiTurnPlanRandomDrawRecords?: StoredRandomDraw[];
 };
@@ -5150,6 +5153,13 @@ function gameStateForStorage(
     aiTurnPlanRandomDrawRecords,
     ...stateFields
   } = state;
+  assertStoredRandomDraws(randomDrawRecords, state.randomCounter, "engine");
+  if (aiTurnPlanRandomDrawRecords !== undefined || state.aiTurnPlanRandomCounter !== undefined)
+    assertStoredRandomDraws(
+      aiTurnPlanRandomDrawRecords === undefined ? [] : aiTurnPlanRandomDrawRecords,
+      state.aiTurnPlanRandomCounter === undefined ? 0 : state.aiTurnPlanRandomCounter,
+      "ai_turn_plan_selection",
+    );
   const cardEntries = Object.entries(cardInstances);
   const cardPositions = new Map(
     cardEntries.map(([instanceId], index) => [instanceId, index + 1]),
@@ -5160,8 +5170,6 @@ function gameStateForStorage(
       throw invalidStoredGameState("Eine Spielzone verweist auf eine fehlende Karteninstanz.");
     return position;
   });
-  const purposeIndexes = new Map<string, number>();
-  const randomPurposes: string[] = [];
   const zoneIndexes = new Map<string, number>();
   const cardZones: CardInstance["zone"][] = [];
 
@@ -5178,13 +5186,7 @@ function gameStateForStorage(
   function encodeDraw(
     draw: GameState["randomDrawRecords"][number],
   ): StoredRandomDraw {
-    let position = purposeIndexes.get(draw.purpose);
-    if (position === undefined) {
-      position = randomPurposes.length;
-      purposeIndexes.set(draw.purpose, position);
-      randomPurposes.push(draw.purpose);
-    }
-    return [draw.counter, position, draw.value];
+    return [draw.counter, draw.purpose, draw.value];
   }
 
   return {
@@ -5194,7 +5196,6 @@ function gameStateForStorage(
       (entry) => cardInstanceForStorage(entry, encodeZone),
     ),
     cardZones,
-    randomPurposes,
     randomDrawRecords: randomDrawRecords.map(encodeDraw),
     ...(aiTurnPlanRandomDrawRecords
       ? {
@@ -5207,6 +5208,22 @@ function gameStateForStorage(
 
 function invalidStoredGameState(reason: string): StorageError {
   return new StorageError("stored_match_invalid", reason);
+}
+
+function assertStoredRandomDraws(
+  records: unknown,
+  cursor: unknown,
+  domain: RandomDomain,
+): asserts records is RandomDrawRecord[] {
+  if (
+    !Array.isArray(records) ||
+    !Number.isSafeInteger(cursor) ||
+    cursor !== records.length ||
+    !records.every(
+      (draw, index) => isRandomDrawRecord(draw, domain) && draw.counter === index,
+    )
+  )
+    throw invalidStoredGameState("Das SQLite-Zufallsprotokoll ist ungültig.");
 }
 
 export function decodeStoredGameState(json: string): GameState {
@@ -5224,11 +5241,7 @@ export function decodeStoredGameState(json: string): GameState {
     "eventLog" in stored ||
     (stored.run !== undefined && !isRunId(stored.run?.runId)) ||
     !Array.isArray(stored.cardZones) ||
-    !Array.isArray(stored.randomPurposes) ||
-    stored.randomPurposes.some(
-      (purpose) => typeof purpose !== "string" || purpose.length === 0,
-    ) ||
-    new Set(stored.randomPurposes).size !== stored.randomPurposes.length
+    "randomPurposes" in stored
   ) {
     throw invalidStoredGameState(
       "Der SQLite-Spielzustand nutzt ein ungültiges Speicherformat.",
@@ -5240,11 +5253,16 @@ export function decodeStoredGameState(json: string): GameState {
     corp: _corp,
     runner: _runner,
     specialZones: _specialZones,
-    randomPurposes,
     randomDrawRecords,
     aiTurnPlanRandomDrawRecords,
     ...stateFields
   } = stored;
+  if (
+    aiTurnPlanRandomDrawRecords === undefined &&
+    stored.aiTurnPlanRandomCounter !== undefined &&
+    stored.aiTurnPlanRandomCounter !== 0
+  )
+    throw invalidStoredGameState("Der SQLite-KI-Zufallszähler hat kein Protokoll.");
   const instances = decodeCardInstanceRows(cardInstances, cardZones);
   const board = mapBoardCardReferences(stored, (position) => {
     if (!Number.isSafeInteger(position) || position < 1 || position > cardInstances.length)
@@ -5254,28 +5272,21 @@ export function decodeStoredGameState(json: string): GameState {
 
   function decodeDraws(
     rows: StoredRandomDraw[],
-  ): GameState["randomDrawRecords"] {
+    cursor: number,
+    domain: RandomDomain,
+  ): RandomDrawRecord[] {
     if (!Array.isArray(rows))
       throw invalidStoredGameState("Das SQLite-Zufallsprotokoll ist ungültig.");
-    return rows.map((row) => {
+    const draws = rows.map((row) => {
       if (!Array.isArray(row) || row.length !== 3)
         throw invalidStoredGameState(
           "Eine Zeile im SQLite-Zufallsprotokoll ist ungültig.",
         );
-      const [counter, purposeIndex, value] = row;
-      const purpose = randomPurposes[purposeIndex];
-      if (
-        !Number.isSafeInteger(counter) ||
-        counter < 0 ||
-        !Number.isSafeInteger(purposeIndex) ||
-        purpose === undefined ||
-        !Number.isFinite(value)
-      )
-        throw invalidStoredGameState(
-          "Eine Zeile im SQLite-Zufallsprotokoll ist ungültig.",
-        );
+      const [counter, purpose, value] = row;
       return { counter, purpose, value };
     });
+    assertStoredRandomDraws(draws, cursor, domain);
+    return draws;
   }
 
   return {
@@ -5283,11 +5294,19 @@ export function decodeStoredGameState(json: string): GameState {
     ...board,
     eventLog: [],
     cardInstances: instances,
-    randomDrawRecords: decodeDraws(randomDrawRecords),
+    randomDrawRecords: decodeDraws(
+      randomDrawRecords,
+      stored.randomCounter,
+      "engine",
+    ),
     ...(aiTurnPlanRandomDrawRecords !== undefined
       ? {
           aiTurnPlanRandomDrawRecords: decodeDraws(
             aiTurnPlanRandomDrawRecords,
+            stored.aiTurnPlanRandomCounter === undefined
+              ? 0
+              : stored.aiTurnPlanRandomCounter,
+            "ai_turn_plan_selection",
           ).map((draw) => ({ ...draw, domain: "ai_turn_plan_selection" })),
         }
       : {}),

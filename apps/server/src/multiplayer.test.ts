@@ -119,6 +119,7 @@ import {
   type ChoiceRequest,
   type DeckDefinition,
   type GameEvent,
+  type EngineRandomizedIceInstallSelectionReceipt,
   type GameState,
   type LegalAction,
   type PublicGameEvent,
@@ -8648,8 +8649,12 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect(runnerReplay.randomDrawRecords.length).toBeGreaterThan(0);
     expect(
-      runnerReplay.randomDrawRecords.every((entry) =>
-        entry.valueHash.startsWith("fnv1a:"),
+      runnerReplay.randomDrawRecords.every(
+        (entry) =>
+          entry.valueHash.startsWith("fnv1a:") &&
+          Number.isSafeInteger(entry.purpose) &&
+          entry.purpose > 0 &&
+          (entry.domain === "engine" || entry.domain === "ai_turn_plan_selection"),
       ),
     ).toBe(true);
     expect(JSON.stringify(runnerReplay)).not.toMatch(
@@ -13005,7 +13010,7 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     const receipt = event?.privatePayload?.corp
       ?.randomizedIceInstallSelectionReceipt as
-      | { selectedLegalAction?: LegalAction }
+      | EngineRandomizedIceInstallSelectionReceipt
       | undefined;
     expect(receipt?.selectedLegalAction?.type).toBe("install_card");
     expect(receipt?.selectedLegalAction?.payload?.placement).toBe("ice");
@@ -13030,9 +13035,7 @@ describe("MVP 0.2 multiplayer service", () => {
       after.aiDecisionTraces?.at(-1)?.traceJson.randomizedIceInstallDecision,
     ).toMatchObject({
       selectedTargetServerId: receipt?.selectedLegalAction?.payload?.serverId,
-      rngDrawPurpose: expect.stringContaining(
-        "engine.randomized_ice_install_selection",
-      ),
+      rngDrawPurpose: receipt?.randomDraw.purpose,
     });
 
     const replay = await service.loadReplayDiagnostics(
@@ -13051,7 +13054,7 @@ describe("MVP 0.2 multiplayer service", () => {
       replay.replay.randomDrawRecords.find(
         (entry) => entry.counter === randomCounterBefore,
       )?.purpose,
-    ).toBe("engine_randomized_ice_install_selection");
+    ).toBe(receipt?.randomDraw.purpose[0]);
     expect(JSON.stringify(replay.replay)).not.toMatch(
       /candidateFingerprint|test-near-tie|corp\.install_card\..*\.(?:hq|rd)\./,
     );

@@ -1,6 +1,6 @@
 # Aktionspersistenz in SQLite
 
-Stand: 2026-10-11
+Stand: 2026-11-17
 Status: aktueller Implementierungsvertrag
 
 ## Zuständigkeit und Ladepfad
@@ -14,9 +14,12 @@ einschließlich seiner Engine-Historie verfügbar.
 
 Der aktuelle Spielzustand steht in `game_states`. Die JSON-Metadaten in
 `matches.record_json` enthalten keinen Spielzustand. Zustände und Snapshots
-speichern Zufallsaufzeichnungen als Tripel aus Zähler, numerischer Position
-des Zwecks und Zufallswert. Eine gemeinsame Zweckliste gilt für beide
-Zufallsprotokolle des Zustands. Der Leseweg stellt die Engine-Datensätze
+speichern Zufallsaufzeichnungen als Tripel aus Zähler, Zwecktuple und
+Zufallswert. Das Zwecktuple enthält den festen numerischen Code und die
+typisierten Argumente aus `packages/shared/src/random-purpose.ts`.
+Engine- und KI-Planungszufall haben getrennte Zähler. Der Codec prüft
+Zweckdomäne, Argumentform, fortlaufende Datensätze und den zugehörigen
+Zähler beim Schreiben und Lesen. Der Leseweg stellt die Engine-Datensätze
 wieder her und bezieht die Historie aus `engine_events`.
 
 Ein Match adressiert seinen Initialsnapshot mit 1. Gerade IDs binden
@@ -43,7 +46,7 @@ Fehlgeschlagene KI-Versuche führen ihren Diagnosecode im Fehlerdatensatz.
 Ereignisblobs beziehen ihre ID aus der Tabellenzeile. Öffentliche
 Ereignisblobs beziehen daraus auch StateVersions und StateHash.
 
-Das Match-Schema 7 speichert aktive Runs mit einer numerischen Run-ID
+Das Match-Schema 10 speichert die typisierten RNG-Tuples und numerische Run-IDs
 und erfordert einen passenden Matchdatenpfad. Ein konfigurierter
 separater Accountpfad kann die Konto-Tabellen einer Datenbank mit Schema 3
 weiterverwenden.
@@ -66,6 +69,9 @@ ein Delta-Konflikt wird dadurch nicht abgefangen oder still wiederholt.
   bleibt ein gesonderter vollständiger Truncate-Pfad.
 - Erfolg und Persistence Observer folgen erst nach erfolgreichem Commit.
   Ein Persistenzfehler erzeugt keinen erfolgreichen Aktionsresponse.
+- Öffentliche Replay-Zufallsnachweise enthalten Domäne, Zähler, numerischen
+  Zweckcode und den Hash des Zufallswerts. Die Argumente bleiben im
+  autoritativen Zustand und in den privilegierten Maintenance-Diagnosen.
 - Öffentliche Tails bleiben side-sicher. Delta-Metadaten, Logs und Fehler
   dürfen keine zusätzlichen verdeckten Kartendaten enthalten.
 - Reopen bewahrt Replay, StateHash und Idempotenz. Tests verwenden isolierte

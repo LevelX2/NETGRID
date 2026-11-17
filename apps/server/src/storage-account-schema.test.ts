@@ -54,6 +54,32 @@ describe("SQLite schema contract", () => {
     }
   });
 
+  it("rejects schema 9 before mutating an existing match database", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "netgrid-current-rng-schema-"));
+    const dbPath = join(dir, "previous.sqlite");
+    const backupDir = join(dir, "backups");
+    try {
+      new SqliteMatchStorage({ dbPath, backupDir }).close();
+      const db = new DatabaseSync(dbPath);
+      try {
+        db.exec("PRAGMA journal_mode = DELETE");
+        db.prepare(
+          "UPDATE storage_meta SET value = ? WHERE key = 'schema_version'",
+        ).run("9");
+      } finally {
+        db.close();
+      }
+      const before = await readFile(dbPath);
+      expect(() => new SqliteMatchStorage({ dbPath, backupDir })).toThrow(
+        /aktuelle Schema/,
+      );
+      expect(await readFile(dbPath)).toEqual(before);
+      expect(await readdir(backupDir)).toEqual([]);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
   it("rejects schema 1 without creating a migration backup", async () => {
     const dir = await mkdtemp(join(tmpdir(), "netgrid-account-schema-"));
     const dbPath = join(dir, "netgrid.sqlite");
