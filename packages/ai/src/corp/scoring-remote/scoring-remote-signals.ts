@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import {
   CorpRemoteOccupancyClaim,
@@ -75,7 +76,7 @@ export function buildCorpScoringRemoteProjectSignals(
         serverId !== undefined &&
         serverId !== "new_remote" &&
         params.input.playerView.servers.some(
-          (server) => server.id === serverId && serverId.startsWith("remote_"),
+          (server) => server.id === serverId && isRemoteServerId(serverId),
         ),
     )
     .sort()[0];
@@ -349,7 +350,7 @@ function preferredReusableRemote(
   return input.playerView.servers
     .filter(
       (server) =>
-        server.id.startsWith("remote_") &&
+        isRemoteServerId(server.id) &&
         remoteHasEngineCertifiedVisibleAgendaTarget(input, server.id) &&
         !claimed.has(server.id) &&
         !scoreTargets.has(server.id),
@@ -446,7 +447,7 @@ function reboundServerAfterNewRemoteIceInstall(
     return undefined;
   return input.playerView.servers.find(
     (server) =>
-      server.id.startsWith("remote_") &&
+      isRemoteServerId(server.id) &&
       server.id === receipt.event.publicPayload?.serverId &&
       server.ice.some(
         (ice: VisibleCard) => ice.instanceId === signal.sourceCardInstanceId,

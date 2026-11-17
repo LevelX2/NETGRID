@@ -199,7 +199,7 @@ describe("discard keep score", () => {
       {},
       {
         extraGrip: [agenda],
-        servers: [{ id: "remote_1", label: "Remote", ice: [], root: [donor] }],
+        servers: [{ id: "r1", label: "Remote", ice: [], root: [donor] }],
       },
     );
     const withoutDonor = score(
@@ -220,7 +220,7 @@ describe("discard keep score", () => {
         extraGrip: [agenda],
         servers: [
           {
-            id: "remote_1",
+            id: "r1",
             label: "Remote",
             ice: [],
             root: [{ ...donor, advancementCounters: 0 }],
@@ -255,7 +255,7 @@ describe("discard keep score", () => {
       [],
       {},
       {
-        servers: [{ id: "remote_1", label: "Remote", ice: [], root: [agenda] }],
+        servers: [{ id: "r1", label: "Remote", ice: [], root: [agenda] }],
       },
     );
     expect(result.evidence).not.toContain(

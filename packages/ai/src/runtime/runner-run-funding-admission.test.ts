@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   runnerInput,
   visibleCard,
@@ -12,7 +13,7 @@ import {
 
 describe("runner run funding admission", () => {
   it("preserves explicitly bound and unknown-ICE reserves during an urgent contest", () => {
-    const target = runTarget("run-remote", "remote_1", {
+    const target = runTarget("run-remote", "r1", {
       pathPassability: "reachable",
       creditsAfterRun: 1,
       score: 500,
@@ -55,7 +56,7 @@ describe("runner run funding admission", () => {
     });
   });
   it("does not use a credit route to cover a missing hand buffer", () => {
-    const target = runTarget("run-remote", "remote_1", {
+    const target = runTarget("run-remote", "r1", {
       pathPassability: "reachable",
       creditsAfterRun: 1,
       score: 500,
@@ -89,7 +90,7 @@ describe("runner run funding admission", () => {
   });
 
   it("rejects funding when the target already converts while preserving the floor", () => {
-    const target = runTarget("run-remote", "remote_1", {
+    const target = runTarget("run-remote", "r1", {
       pathPassability: "reachable",
       pathCost: 6,
       creditsAfterRun: 3,
@@ -189,7 +190,7 @@ describe("runner run funding admission", () => {
           root: [
             {
               ...visibleCard("visible-agenda", {
-                definitionId: "visible-agenda",
+                definitionId: syntheticCardDefinitionId("visible-agenda"),
                 type: "agenda",
               }),
               owner: "corp",
@@ -238,7 +239,7 @@ describe("runner run funding admission", () => {
   });
 
   it("keeps an acute score-threat funding route despite a direct alternative", () => {
-    const target = runTarget("run-remote", "remote_1", {
+    const target = runTarget("run-remote", "r1", {
       pathPassability: "blocked_unpayable",
       pathCost: 8,
       creditsAfterRun: -2,
@@ -336,7 +337,7 @@ describe("runner run funding admission", () => {
   });
 
   it("does not call a nonurgent gain-credits-first route directly convertible", () => {
-    const target = runTarget("run-remote", "remote_1", {
+    const target = runTarget("run-remote", "r1", {
       pathPassability: "reachable",
       pathCost: 16,
       creditsAfterRun: 3,
@@ -367,7 +368,7 @@ describe("runner run funding admission", () => {
   });
 
   it("admits the exact contest-reserve gap required by a score-threat plan", () => {
-    const target = runTarget("run-remote", "remote_1", {
+    const target = runTarget("run-remote", "r1", {
       pathPassability: "reachable",
       pathCost: 0,
       creditsAfterRun: 6,
@@ -476,7 +477,7 @@ describe("runner run funding admission", () => {
   });
 
   it("admits a negative local route score only with an exact urgency witness", () => {
-    const target = runTarget("run-remote", "remote_1", {
+    const target = runTarget("run-remote", "r1", {
       pathPassability: "blocked_unpayable",
       creditsAfterRun: -5,
       score: -120,
@@ -502,7 +503,7 @@ describe("runner run funding admission", () => {
   });
 
   it("keeps a negative local route score fail-closed without urgency", () => {
-    const target = runTarget("run-remote", "remote_1", {
+    const target = runTarget("run-remote", "r1", {
       pathPassability: "blocked_unpayable",
       creditsAfterRun: -5,
       score: -120,
@@ -550,7 +551,7 @@ describe("runner run funding admission", () => {
   });
 
   it("does not treat missing coverage as a credit-convertible gap", () => {
-    const target = runTarget("run-remote", "remote_1", {
+    const target = runTarget("run-remote", "r1", {
       pathPassability: "blocked_missing_coverage",
       creditsAfterRun: -2,
       score: 500,

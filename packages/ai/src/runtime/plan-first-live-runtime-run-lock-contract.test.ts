@@ -113,7 +113,7 @@ function runLockInput(
   input.playerView.turnSerial = 7;
   input.eventTail = [
     {
-      eventId: "visible-run-lock",
+      eventId: credits + 1,
       type: "resolve_trace",
       stateVersionBefore: Math.max(0, credits - 1),
       stateVersionAfter: credits,

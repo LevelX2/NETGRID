@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { corpRemoteHasEngineQuotedFundableScoreFriction } from "./corp-score-defense-continuity";
 
@@ -11,14 +12,14 @@ export function corpStartDrawAgendaSearchServerId(
     ) ||
     input.playerView.servers.some(
       (server) =>
-        server.id.startsWith("remote_") &&
+        isRemoteServerId(server.id) &&
         server.root.some((card) => card.known && card.type === "agenda"),
     )
   )
     return undefined;
   return input.playerView.servers.find(
     (server) =>
-      server.id.startsWith("remote_") &&
+      isRemoteServerId(server.id) &&
       server.root.length === 0 &&
       (server.ice.some(
         (ice) =>

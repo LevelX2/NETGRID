@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import {
   CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
@@ -283,7 +284,7 @@ export function corpRemoteCreationUnlockScoreProjects(
   const action = corpRemoteCreationLockRemovalAction(input, candidate);
   if (
     !action ||
-    input.playerView.servers.some((server) => server.id.startsWith("remote_"))
+    input.playerView.servers.some((server) => isRemoteServerId(server.id))
   ) {
     return [];
   }

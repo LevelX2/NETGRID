@@ -42,7 +42,7 @@ it.each([
   expect(action?.type).toBe(type);
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_2",
+    "plan:runner.contest_remote:remote%3Ar2",
   );
   if (index === 356) {
     expect(action?.payload?.subroutineIndex).toBe(2);
@@ -78,7 +78,7 @@ it("preserves the same accepted damage budget in the movement phase", () => {
   expect(decision.actionId).toBe("runner.continue_run");
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_2",
+    "plan:runner.contest_remote:remote%3Ar2",
   );
 });
 
@@ -145,7 +145,7 @@ it("keeps ordinary reserve, lethal damage and unfunded future ICE blocked", () =
       assessKnownRezzedIcePath,
       knownIcePathReason: (path) => JSON.stringify(path),
     });
-  const server = input.playerView.servers.find((s) => s.id === "remote_2")!;
+  const server = input.playerView.servers.find((s) => s.id === "r2")!;
   // The historical Archives no longer create an acute default reserve.
   // A genuinely required four-card ordinary reserve still blocks the path.
   expect(assess(input, server, 10, []).blocksPump).toBe(false);

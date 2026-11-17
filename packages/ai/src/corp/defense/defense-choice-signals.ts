@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { parseRunIdToken, type RunId } from "@netgrid/shared";
 import { isCardDefinitionId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
@@ -320,7 +321,7 @@ export function corpClassicDeflectorDefenseChoiceSignal(
       context.targetProfile === "archives"
         ? server.id === "archives"
         : context.targetProfile === "subsidiary_data_fort"
-          ? server.id.startsWith("remote_")
+          ? isRemoteServerId(server.id)
           : true,
     )
     .map((server) => server.id);
@@ -517,7 +518,7 @@ function classicDeflectorEntryEffect(
     subroutine.deflectorTarget === "archives"
       ? s.id === "archives"
       : subroutine.deflectorTarget === "subsidiary_data_fort"
-        ? s.id.startsWith("remote_")
+        ? isRemoteServerId(s.id)
         : subroutine.deflectorTarget === "any_data_fort",
   );
   return returnTargets.length === 1 &&
@@ -633,7 +634,7 @@ function corpAgendaPurgeDefenseTargetValue(
   const visibleAgendaCount =
     server?.root.filter((card) => card.known && card.type === "agenda")
       .length ?? 0;
-  if (serverId.startsWith("remote_") && visibleAgendaCount > 0) {
+  if (isRemoteServerId(serverId) && visibleAgendaCount > 0) {
     return 5_000 + visibleAgendaCount * 250 - layerPenalty;
   }
   if (
@@ -647,10 +648,10 @@ function corpAgendaPurgeDefenseTargetValue(
       (centralAllocation?.status === "known" ? 3_000 : 2_750) - layerPenalty
     );
   }
-  if (serverId.startsWith("remote_") && (server?.root.length ?? 0) > 0) {
+  if (isRemoteServerId(serverId) && (server?.root.length ?? 0) > 0) {
     return 2_500 - layerPenalty;
   }
   if (serverId === "archives") return 750 - layerPenalty;
-  if (serverId.startsWith("remote_")) return 500 - layerPenalty;
+  if (isRemoteServerId(serverId)) return 500 - layerPenalty;
   return 250 - layerPenalty;
 }

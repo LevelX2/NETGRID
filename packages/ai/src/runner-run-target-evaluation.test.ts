@@ -983,7 +983,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       traceRulesProfile: "modern_open",
       credits: 2,
       servers: [
-        server("remote_1", {
+        server("r1", {
           ice: [hunterTraceTagIce("remote-hunter")],
           root: [
             visibleCard("remote-agenda", {
@@ -996,7 +996,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         }),
       ],
       legalActions: [
-        runAction("run-remote-1", "remote_1"),
+        runAction("run-remote-1", "r1"),
         gainCreditAction("gain-credit"),
       ],
     });
@@ -1005,7 +1005,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "agenda",
       recommendation: "run_now",
       visibleTraceTagHazardUnavoidable: true,
@@ -1450,7 +1450,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       credits: 6,
       servers: [
         server("hq"),
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("remote-root-1", {
               known: false,
@@ -1461,7 +1461,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       ],
       legalActions: [
         runAction("run-hq", "hq"),
-        runAction("run-remote-1", "remote_1"),
+        runAction("run-remote-1", "r1"),
       ],
       rig: [
         visibleCard("boardwalk", {
@@ -1476,7 +1476,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const evaluations = evaluateRunnerRunTargets({ input });
 
     expect(evaluations[0]).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "score_threat",
       recommendation: "run_now",
     });
@@ -1494,7 +1494,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 8,
       servers: [
-        server("remote_1", {
+        server("r1", {
           ice: [barrierIce("remote-wall")],
           root: [
             visibleCard("remote-root", {
@@ -1504,7 +1504,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
       rig: [
         visibleCard("runner-blink", {
           definitionId: 219,
@@ -1520,7 +1520,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "score_threat",
       scoreThreat: true,
       pathPassability: "blocked_by_random_break_damage_hand_buffer",
@@ -1550,7 +1550,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 8,
       servers: [
-        server("remote_1", {
+        server("r1", {
           ice: [barrierIce("remote-wall")],
           root: [
             visibleCard("remote-root", {
@@ -1560,7 +1560,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
       rig: [
         visibleCard("runner-blink", {
           definitionId: 219,
@@ -1580,7 +1580,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "score_threat",
       pathPassability: "reachable",
       recommendation: "run_now",
@@ -1602,7 +1602,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 10,
       servers: [
-        server("remote_1", {
+        server("r1", {
           ice: [barrierIce("remote-wall")],
           root: [
             visibleCard("remote-root", {
@@ -1612,7 +1612,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
       rig: [
         visibleCard("runner-blink", {
           definitionId: 219,
@@ -1635,7 +1635,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "score_threat",
       pathPassability: "reachable",
       recommendation: "run_now",
@@ -1651,7 +1651,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       syntheticPublicEvent("blink-run-started", 2, "run_started", {
         actionType: "start_run",
         actor: "runner",
-        serverId: "remote_1",
+        serverId: "r1",
       }),
       syntheticPublicEvent("blink-failed", 3, "break_subroutine", {
         actionType: "break_subroutine",
@@ -1664,7 +1664,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 8,
       servers: [
-        server("remote_1", {
+        server("r1", {
           ice: [barrierIce("remote-wall")],
           root: [
             visibleCard("remote-root", {
@@ -1674,7 +1674,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
       rig: [
         visibleCard("runner-blink", {
           definitionId: 219,
@@ -1698,7 +1698,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(evaluation?.evidence).toEqual(
       expect.arrayContaining([
         "recentRandomBreakDamageFailure:true",
-        "recentRandomBreakDamageFailureTarget:remote_1",
+        "recentRandomBreakDamageFailureTarget:r1",
         "recentRandomBreakDamageAmount:3",
         "sameServerRepeatedRandomBreakDamageRiskPenalty:-900",
         "repeated_no_progress_random_break_damage_run:true",
@@ -2427,7 +2427,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 6,
       servers: [
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("remote-root-1", {
               definitionId: 493,
@@ -2437,13 +2437,13 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "known_low_value",
       knownAccessState: "known_no_current_payoff",
       recommendation: "known_no_current_payoff",
@@ -2454,7 +2454,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 4,
       servers: [
-        server("remote_1", {
+        server("r1", {
           ice: [vacuumLinkIce("remote-vacuum-link")],
           root: [
             visibleCard("remote-bbs", {
@@ -2468,7 +2468,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         }),
       ],
       legalActions: [
-        runAction("run-remote-1", "remote_1"),
+        runAction("run-remote-1", "r1"),
         gainCreditAction("gain-credit"),
       ],
     });
@@ -2476,7 +2476,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "trash_unaffordable",
       knownAccessState: "known_no_current_payoff",
       recommendation: "gain_credits_first",
@@ -2507,7 +2507,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         }),
       ],
       servers: [
-        server("remote_1", {
+        server("r1", {
           ice: [simpleCodeGateIce("remote-code-gate")],
           root: [
             visibleCard("remote-bbs", {
@@ -2521,7 +2521,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         }),
       ],
       legalActions: [
-        runAction("run-remote-1", "remote_1"),
+        runAction("run-remote-1", "r1"),
         gainCreditAction("gain-credit"),
       ],
     });
@@ -2529,7 +2529,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "trash_unaffordable",
       knownAccessState: "known_no_current_payoff",
       pathPassability: "blocked_missing_coverage",
@@ -2591,7 +2591,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 8,
       servers: [
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("remote-bbs", {
               definitionId: 521,
@@ -2603,13 +2603,13 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "trash_affordable",
       accessFacts: {
         knownTargetDefinitionIds: [521],
@@ -2653,7 +2653,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         }),
       ],
       servers: [
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("remote-bbs", {
               definitionId: 521,
@@ -2665,13 +2665,13 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "trash_affordable",
       accessFacts: {
         knownTargetDefinitionIds: [521],
@@ -2694,7 +2694,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 6,
       servers: [
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("spent-event", {
               definitionId: syntheticCardDefinitionId("spent-event"),
@@ -2705,7 +2705,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({
@@ -2718,7 +2718,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       knownAccessState: "known_no_current_payoff",
       recommendation: "declined_trash_memory_active",
     });
@@ -2733,15 +2733,15 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
   it("lets a currently affordable remote trash payoff override stale access-only memory", () => {
     const noProgressRemoteEvents = [
-      syntheticPublicEvent("evt_run_remote_1", 8, "start_run", {
+      syntheticPublicEvent("evt_run_r1", 8, "start_run", {
         actor: "runner",
         actionType: "start_run",
-        serverId: "remote_1",
+        serverId: "r1",
       }),
-      syntheticPublicEvent("evt_access_remote_1", 9, "access_card", {
+      syntheticPublicEvent("evt_access_r1", 9, "access_card", {
         actor: "runner",
         actionType: "access_card",
-        serverId: "remote_1",
+        serverId: "r1",
         cardDefinitionId: 529,
         accessedCardPositionKey: "root:0",
         accessedArea: "root",
@@ -2753,7 +2753,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       eventTail: noProgressRemoteEvents,
       servers: [
         server("rd"),
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("remote-trashable-root", {
               definitionId: 529,
@@ -2766,7 +2766,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         }),
       ],
       legalActions: [
-        runAction("run-remote-1", "remote_1"),
+        runAction("run-remote-1", "r1"),
         runAction("run-rd", "rd"),
       ],
     });
@@ -2774,7 +2774,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const evaluations = evaluateRunnerRunTargets({ input });
 
     const remoteEvaluation = evaluations.find(
-      (evaluation) => evaluation.targetServerId === "remote_1",
+      (evaluation) => evaluation.targetServerId === "r1",
     );
 
     expect(remoteEvaluation).toMatchObject({
@@ -2799,25 +2799,25 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 6,
       eventTail: [
-        syntheticPublicEvent("evt_run_remote_1", 8, "start_run", {
+        syntheticPublicEvent("evt_run_r1", 8, "start_run", {
           actor: "runner",
           actionType: "start_run",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
-        syntheticPublicEvent("evt_access_remote_1", 9, "access_card", {
+        syntheticPublicEvent("evt_access_r1", 9, "access_card", {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
+          serverId: "r1",
           cardDefinitionId: 529,
         }),
-        syntheticPublicEvent("evt_decline_remote_1", 10, "decline_trash", {
+        syntheticPublicEvent("evt_decline_r1", 10, "decline_trash", {
           actor: "runner",
           actionType: "decline_trash",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
       servers: [
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("remote-trashable-root", {
               definitionId: 529,
@@ -2829,7 +2829,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
@@ -2855,17 +2855,17 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         syntheticPublicEvent("evt-run-remote-1", 8, "start_run", {
           actor: "runner",
           actionType: "start_run",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
         syntheticPublicEvent("evt-access-remote-1", 9, "access_card", {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
+          serverId: "r1",
           cardDefinitionId: 588,
         }),
       ],
       servers: [
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("remote-agenda", {
               definitionId: 588,
@@ -2876,14 +2876,14 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
     bindRemoteAgendaStealQuote(input, "remote-agenda", 0);
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "agenda",
       recommendation: "run_now",
     });
@@ -2897,7 +2897,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       syntheticPublicEvent("evt-run-remote-1", 8, "start_run", {
         actor: "runner",
         actionType: "start_run",
-        serverId: "remote_1",
+        serverId: "r1",
       }),
       syntheticPublicEvent("evt-access-remote-1", 9, "access_card", {
         actor: "runner",
@@ -2923,7 +2923,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       stateVersion: 11,
       eventTail,
       servers: [
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("known-fetal-ai", {
               definitionId: 62,
@@ -2933,7 +2933,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
     // Current Fetal AI self-cost, rather than a historical declined-access event.
     bindRemoteAgendaStealQuote(input, "known-fetal-ai", 2);
@@ -2959,12 +2959,12 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       syntheticPublicEvent("evt-run-remote-1", 8, "start_run", {
         actor: "runner",
         actionType: "start_run",
-        serverId: "remote_1",
+        serverId: "r1",
       }),
       syntheticPublicEvent("evt-access-remote-1", 9, "access_card", {
         actor: "runner",
         actionType: "access_card",
-        serverId: "remote_1",
+        serverId: "r1",
         cardDefinitionId: 62,
         accessedCardPositionKey: "root:0",
         damageResolved: true,
@@ -2974,7 +2974,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       syntheticPublicEvent("evt-decline-remote-1", 10, "decline_trash", {
         actor: "runner",
         actionType: "decline_trash",
-        serverId: "remote_1",
+        serverId: "r1",
         stealCost: 2,
         stealBlockedByCost: true,
       }),
@@ -3021,7 +3021,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         }),
       ],
       servers: [
-        server("remote_1", {
+        server("r1", {
           ice: [dataDarts],
           root: [
             visibleCard("known-fetal-ai", {
@@ -3032,13 +3032,13 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({
       input,
       beliefState: beliefWithKnownRemoteRoot(
-        "remote_1",
+        "r1",
         "root:0",
         62,
         eventTail[1]!.eventId,
@@ -3046,14 +3046,14 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "agenda",
       accessPayoffContestable: false,
       recommendation: "draw_for_damage_buffer",
     });
     expect(evaluation?.evidence).toEqual(
       expect.arrayContaining([
-        "runner_visible_ice_and_known_access_damage_blocks_run_start:remote_1",
+        "runner_visible_ice_and_known_access_damage_blocks_run_start:r1",
         "known_remote_access_damage_survivable_after_action:false",
       ]),
     );
@@ -3071,7 +3071,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       syntheticPublicEvent("known-access", 9, "access_card", {
         actor: "runner",
         actionType: "access_card",
-        serverId: "remote_1",
+        serverId: "r1",
         cardDefinitionId: 62,
         accessedCardPositionKey: "root:0",
         damageResolved: true,
@@ -3085,7 +3085,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       eventTail,
       grip: Array.from({ length: 4 }, (_, i) => visibleCard(`buffer-${i}`)),
       servers: [
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("known-agenda", {
               definitionId: 62,
@@ -3095,13 +3095,13 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
     bindRemoteAgendaStealQuote(input, "known-agenda", 2);
     const [evaluation] = evaluateRunnerRunTargets({
       input,
       beliefState: beliefWithKnownRemoteRoot(
-        "remote_1",
+        "r1",
         "root:0",
         62,
         eventTail[1]!.eventId,
@@ -3116,7 +3116,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       "known_remote_access_damage_survivable_after_action:true",
     );
     expect(evaluation?.evidence).not.toContain(
-      "runner_visible_ice_and_known_access_damage_blocks_run_start:remote_1",
+      "runner_visible_ice_and_known_access_damage_blocks_run_start:r1",
     );
   });
 
@@ -3127,22 +3127,22 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         syntheticPublicEvent("evt-run-remote-1", 8, "start_run", {
           actor: "runner",
           actionType: "start_run",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
         syntheticPublicEvent("evt-access-remote-1", 9, "access_card", {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
+          serverId: "r1",
           cardDefinitionId: 529,
         }),
         syntheticPublicEvent("evt-install-remote-1", 10, "install_card", {
           actor: "corp",
           actionType: "install_card",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
       servers: [
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("remote-root", {
               definitionId: 529,
@@ -3154,13 +3154,13 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "trash_affordable",
       recommendation: "run_now",
     });
@@ -3176,17 +3176,17 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         syntheticPublicEvent("evt-run-remote-1", 8, "start_run", {
           actor: "runner",
           actionType: "start_run",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
         syntheticPublicEvent("evt-access-remote-1", 9, "access_card", {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
+          serverId: "r1",
           cardDefinitionId: 529,
         }),
       ],
       servers: [
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("remote-unknown-root", {
               known: false,
@@ -3194,13 +3194,13 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "unknown",
     });
     expect(evaluation?.evidence).not.toContain(
@@ -3212,7 +3212,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 6,
       servers: [
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("spent-event", {
               definitionId: syntheticCardDefinitionId("spent-event"),
@@ -3223,7 +3223,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({
@@ -3237,7 +3237,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       recommendation: "remote_changed_reassess",
     });
     expect(evaluation?.evidence).toEqual(
@@ -3252,7 +3252,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 8,
       servers: [
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("remote-bbs", {
               definitionId: 521,
@@ -3264,7 +3264,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
     const rankedAccessTargets = rankKnownRemoteAccessTargets([
       {
@@ -3274,7 +3274,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         targetKind: "asset",
         valueScore: 3,
         commitment: {
-          serverId: "remote_1",
+          serverId: "r1",
           knownAccessState: "known_payoff",
           intendedAccessAction: "trash",
           reason: "trash_affordable",
@@ -3282,7 +3282,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         },
         projection: {
           source: "pre_run",
-          serverId: "remote_1",
+          serverId: "r1",
           knownRootDefinitionId: 521,
           target: "asset",
           intendedAccessAction: "trash",
@@ -3298,7 +3298,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       recommendation: "run_now",
     });
     expect(evaluation?.evidence).toEqual(
@@ -3314,7 +3314,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 6,
       servers: [
-        server("remote_2", {
+        server("r2", {
           ice: [wallOfStaticIce("remote-ice-1")],
           root: [
             visibleCard("remote-root-2", {
@@ -3324,13 +3324,13 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-2", "remote_2")],
+      legalActions: [runAction("run-remote-2", "r2")],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_2",
+      targetServerId: "r2",
       scoreThreat: true,
       pathPassability: "blocked_missing_coverage",
       recommendation: "find_breaker_first",
@@ -3806,7 +3806,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 6,
       servers: [
-        server("remote_2", {
+        server("r2", {
           root: [
             visibleCard("remote-root-2", {
               known: false,
@@ -3816,7 +3816,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         }),
       ],
       legalActions: [
-        runAction("run-remote-2", "remote_2"),
+        runAction("run-remote-2", "r2"),
         gainCreditAction("gain-credit"),
       ],
     });
@@ -3884,7 +3884,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 2,
       servers: [
-        server("remote_2", {
+        server("r2", {
           root: [
             visibleCard("remote-root-2", {
               known: false,
@@ -3893,7 +3893,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-2", "remote_2")],
+      legalActions: [runAction("run-remote-2", "r2")],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({
@@ -3915,7 +3915,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_2",
+      targetServerId: "r2",
       scoreThreat: true,
       accessPayoff: "score_threat",
       recommendation: "gain_credits_first",
@@ -3953,9 +3953,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
   it("does not build a remote-pressure reserve for a known empty remote", () => {
     const input = pressureReserveInput(10);
     const remote = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
-    if (!remote) throw new Error("Missing remote_1 test server");
+    if (!remote) throw new Error("Missing r1 test server");
     remote.root = [];
 
     const posture = buildRunnerEconomyPosture({ input });
@@ -4039,7 +4039,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
     const posture = buildRunnerEconomyPosture({ input });
     const remote = evaluateRunnerRunTargets({ input }).find(
-      (evaluation) => evaluation.targetServerId === "remote_1",
+      (evaluation) => evaluation.targetServerId === "r1",
     );
 
     expect(posture.creditReservePolicy).toMatchObject({
@@ -4063,7 +4063,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
     const posture = buildRunnerEconomyPosture({ input });
     const remote = evaluateRunnerRunTargets({ input }).find(
-      (evaluation) => evaluation.targetServerId === "remote_1",
+      (evaluation) => evaluation.targetServerId === "r1",
     );
 
     expect(posture.creditReservePolicy).toMatchObject({
@@ -4196,7 +4196,7 @@ function bindRemoteAgendaStealQuote(
   creditCost: number,
 ): void {
   const remote = input.playerView.servers.find(
-    (entry) => entry.id === "remote_1",
+    (entry) => entry.id === "r1",
   )!;
   const agenda = remote.root.find(
     (card) => card.instanceId === agendaInstanceId,
@@ -4296,7 +4296,7 @@ function pressureReserveInput(
     rig: [fracter, ...(options.additionalRig ?? [])],
     servers: [
       server("rd", { ice: [expensiveBarrierIce("rd-tax")] }),
-      server("remote_1", {
+      server("r1", {
         ice: [
           expensiveBarrierIce("remote-tax-1"),
           expensiveBarrierIce("remote-tax-2"),
@@ -4312,7 +4312,7 @@ function pressureReserveInput(
     ],
     legalActions: [
       runAction("run-rd", "rd"),
-      runAction("run-remote-1", "remote_1"),
+      runAction("run-remote-1", "r1"),
       gainCreditAction("gain-credit"),
       ...(options.additionalActions ?? []),
     ],

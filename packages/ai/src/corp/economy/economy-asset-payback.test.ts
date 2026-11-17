@@ -5,11 +5,11 @@ import { assessCorpEconomyAssetPayback } from "./economy-asset-payback";
 
 describe("Corp economy asset payback", () => {
   it("prices a costly campaign against protection and actual remaining withdrawal clicks", () => {
-    const input = corpInput(remote("remote_1", []));
+    const input = corpInput(remote("r1", []));
     const quote = (setupActionCost: number) =>
       assessCorpEconomyAssetPayback({
         input,
-        serverId: "remote_1",
+        serverId: "r1",
         cadence: "finite_pool",
         baselineHorizonTurns: 3,
         finitePoolCredits: 15,
@@ -31,7 +31,7 @@ describe("Corp economy asset payback", () => {
       projectedPayoutExecutions: 2,
       projectedNetCredits: 0,
     });
-    input.playerView.servers = [remote("remote_1", [knownRezzedWall("wall")])];
+    input.playerView.servers = [remote("r1", [knownRezzedWall("wall")])];
     expect(quote(1)).toMatchObject({
       protectionState: "protected_not_contestable",
       projectedNetCredits: 5,
@@ -39,13 +39,13 @@ describe("Corp economy asset payback", () => {
   });
   it("empties a protected campaign in 3+2 payouts after a last-click installation", () => {
     const input = corpInput(
-      remote("remote_1", [knownRezzedWall("remote-wall")]),
+      remote("r1", [knownRezzedWall("remote-wall")]),
     );
     input.playerView.own.clicks = 1;
     const quote = (reservedNextTurnClicks = 0) =>
       assessCorpEconomyAssetPayback({
         input,
-        serverId: "remote_1",
+        serverId: "r1",
         cadence: "finite_pool",
         baselineHorizonTurns: 3,
         finitePoolCredits: 15,
@@ -78,8 +78,8 @@ describe("Corp economy asset payback", () => {
   it("counts the last partial withdrawal without inventing credits beyond the finite pool", () => {
     expect(
       assessCorpEconomyAssetPayback({
-        input: corpInput(remote("remote_1", [])),
-        serverId: "remote_1",
+        input: corpInput(remote("r1", [])),
+        serverId: "r1",
         cadence: "finite_pool",
         baselineHorizonTurns: 3,
         finitePoolCredits: 5,
@@ -97,8 +97,8 @@ describe("Corp economy asset payback", () => {
   it("prices an unprotected finite pool only through its immediate payout window", () => {
     expect(
       assessCorpEconomyAssetPayback({
-        input: corpInput(remote("remote_1", [])),
-        serverId: "remote_1",
+        input: corpInput(remote("r1", [])),
+        serverId: "r1",
         cadence: "finite_pool",
         baselineHorizonTurns: 3,
         finitePoolCredits: 16,
@@ -121,8 +121,8 @@ describe("Corp economy asset payback", () => {
   it("retains the bounded payout horizon behind a known unreachable path", () => {
     expect(
       assessCorpEconomyAssetPayback({
-        input: corpInput(remote("remote_1", [knownRezzedWall("remote-wall")])),
-        serverId: "remote_1",
+        input: corpInput(remote("r1", [knownRezzedWall("remote-wall")])),
+        serverId: "r1",
         cadence: "finite_pool",
         baselineHorizonTurns: 3,
         finitePoolCredits: 16,
@@ -144,8 +144,8 @@ describe("Corp economy asset payback", () => {
   it("keeps an already installed finite pool cashable before immediate exposure", () => {
     expect(
       assessCorpEconomyAssetPayback({
-        input: corpInput(remote("remote_1", [])),
-        serverId: "remote_1",
+        input: corpInput(remote("r1", [])),
+        serverId: "r1",
         cadence: "finite_pool",
         baselineHorizonTurns: 3,
         finitePoolCredits: 16,
@@ -167,8 +167,8 @@ describe("Corp economy asset payback", () => {
   it("prices the current payout capacity using the actual action cost", () => {
     expect(
       assessCorpEconomyAssetPayback({
-        input: corpInput(remote("remote_1", [knownRezzedWall("remote-wall")])),
-        serverId: "remote_1",
+        input: corpInput(remote("r1", [knownRezzedWall("remote-wall")])),
+        serverId: "r1",
         cadence: "finite_pool",
         baselineHorizonTurns: 3,
         finitePoolCredits: 16,

@@ -37,7 +37,7 @@ describe("Corp opening rush admission", () => {
       acceptancePercent: 50,
       quote: {
         schemaVersion: CORP_OPENING_RUSH_SCHEMA_VERSION,
-        opportunityKey: "opening-rush:2:agenda-1:remote_1",
+        opportunityKey: "opening-rush:2:agenda-1:r1",
         firstContestTurnSerial: 3,
         runnerAccessSuccessProbability: { numerator: 1, denominator: 2 },
       },
@@ -45,7 +45,7 @@ describe("Corp opening rush admission", () => {
   });
 
   it("rejects a project if its selected install belongs to a sibling remote", () => {
-    expect(assess("sibling", { installServerId: "remote_2" })).toMatchObject({
+    expect(assess("sibling", { installServerId: "r2" })).toMatchObject({
       status: "blocked",
       reason: "missing_exact_action",
     });
@@ -124,7 +124,7 @@ function assess(
         source: "agenda-1",
         timingPoint: "corp_action.main",
         expiresAtStateVersion: stateVersion,
-        payload: { serverId: options.installServerId ?? "remote_1" },
+        payload: { serverId: options.installServerId ?? "r1" },
       },
     ],
     playerView: {
@@ -136,7 +136,7 @@ function assess(
         { id: "rd", ice: [], root: [] },
         { id: "archives", ice: [], root: [] },
         {
-          id: "remote_1",
+          id: "r1",
           ice: [{ instanceId: "ice-1", known: true }],
           root: [],
         },
@@ -155,19 +155,19 @@ function assess(
     },
   } as unknown as AiDecisionInput;
   const project = {
-    projectId: "agenda:agenda-1:remote_1",
+    projectId: "agenda:agenda-1:r1",
     agendaInstanceId: "agenda-1",
     agendaDefinitionId: 401,
-    serverId: "remote_1",
+    serverId: "r1",
     actionIds: ["install-agenda"],
     phase: "install_agenda",
     sameTurnCloseout: false,
     terminalScore: false,
     feasible: false,
     protectionNeed: {
-      needId: "score-protection:agenda:agenda-1:remote_1",
-      parentProjectId: "agenda:agenda-1:remote_1",
-      targetServerId: "remote_1",
+      needId: "score-protection:agenda:agenda-1:r1",
+      parentProjectId: "agenda:agenda-1:r1",
+      targetServerId: "r1",
       observedAtStateVersion: stateVersion,
       objective: {
         kind: "funded_remote_access_risk",

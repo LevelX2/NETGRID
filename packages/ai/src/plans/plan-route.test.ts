@@ -191,7 +191,7 @@ describe("plan route binding", () => {
       targetContext: {
         selectedTargets: [
           {
-            targetId: "remote_1",
+            targetId: "r1",
             targetKind: "server" as const,
             targetSide: "corp" as const,
             visibilityScope: "public" as const,
@@ -218,7 +218,7 @@ describe("plan route binding", () => {
             capabilityId: "install_ice",
             semanticActionTypes: ["install.card"],
           },
-          target: { kind: "server", id: "remote_1" },
+          target: { kind: "server", id: "r1" },
           purpose: "Install the exact ICE on the exact selected server.",
         },
         candidates: [routeCandidate(install, 20)],

@@ -16,7 +16,7 @@ const cp = JSON.parse(
   ),
 );
 const install =
-  "runner.install_card.runner_341_2.runner_341_2";
+  "runner.install_card.c23u.c23u";
 afterEach(resetResidentPlanPortfolioMemory);
 
 function decide(variant: "native" | "surplus" | "remaining_click" = "native") {

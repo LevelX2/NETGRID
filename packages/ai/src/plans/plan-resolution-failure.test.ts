@@ -48,7 +48,7 @@ describe("PlanResolutionFailure", () => {
       legalActionTypes: ["install_card"],
       owner: "plan_module",
       removalCondition: "Materialize a current route head.",
-      planInstanceId: "corp.score_agenda:remote_1",
+      planInstanceId: "corp.score_agenda:r1",
       stepId: "install_agenda",
       routeCount: 0,
     });
@@ -61,7 +61,7 @@ describe("PlanResolutionFailure", () => {
       "plan_resolution_timing:corp_action.main",
       "plan_resolution_legal_action_types:install_card",
       "plan_resolution_removal_condition:Materialize a current route head.",
-      "plan_resolution_instance:corp.score_agenda:remote_1",
+      "plan_resolution_instance:corp.score_agenda:r1",
       "plan_resolution_step:install_agenda",
       "plan_resolution_route_count:0",
     ]);

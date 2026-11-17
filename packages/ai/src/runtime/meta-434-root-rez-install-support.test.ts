@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type {
@@ -31,7 +32,7 @@ function checkpoint(game: number, decision: number) {
 function addCostQuotes(input: AiDecisionInput) {
   const quotes: CorpRootRezIceInstallCostQuote[] = [];
   for (const action of input.legalActions) {
-    if (action.type !== "rez_card" || !action.source?.includes("chester-mix"))
+    if (action.type !== "rez_card" || !referencesDefaultDeckCard(action.source, 564))
       continue;
     const server = input.playerView.servers.find((s) =>
       s.root.some((c) => c.instanceId === action.source),

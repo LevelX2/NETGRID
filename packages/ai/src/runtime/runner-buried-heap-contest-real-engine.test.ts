@@ -71,10 +71,10 @@ function run() {
     .withRunnerProgramInstalled(283)
     .withRunnerProgramInstalled(223)
     .withCorpCredits(7)
-    .withCorpRemoteRoot("remote_1", 420, 1)
-    .withRezzedCorpIceOnServer("remote_1", 456)
-    .withRezzedCorpIceOnServer("remote_1", 455)
-    .withRezzedCorpIceOnServer("remote_1", 449);
+    .withCorpRemoteRoot("r1", 420, 1)
+    .withRezzedCorpIceOnServer("r1", 456)
+    .withRezzedCorpIceOnServer("r1", 455)
+    .withRezzedCorpIceOnServer("r1", 449);
   for (const def of [
     326,
     247,

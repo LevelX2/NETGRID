@@ -53,7 +53,7 @@ describe("exact advancement placement from the chosen score parent", () => {
     const first = chooseAiAction(before.input);
     expect(first).toMatchObject({
       actionId:
-        "corp.advance_card.corp_426_1.corp_426_1",
+        "corp.advance_card.c2mt.c2mt",
       fallbackUsed: false,
     });
   });
@@ -82,10 +82,10 @@ describe("exact advancement placement from the chosen score parent", () => {
       .withCorpHqSize(0)
       .withCorpCredits(7)
       .withCorpCardInHq(516)
-      .withCorpRemoteRoot("remote_1", 426)
-      .withRezzedCorpIceOnServer("remote_1", 449);
+      .withCorpRemoteRoot("r1", 426)
+      .withRezzedCorpIceOnServer("r1", 449);
     const agendaId = initial.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!.root[0]!;
     const input = buildAiDecisionInput(initial, "corp", {
       difficulty: "hard",

@@ -7,7 +7,7 @@ import {
 describe("access outcome projection", () => {
   it("keeps projected access outcomes distinct from observed outcomes", () => {
     const projected = createProjectedAccessOutcome({
-      serverId: "remote_1",
+      serverId: "r1",
       knownRootDefinitionId: 538,
       projectedIntent: "decline",
       reason: "reserve_would_break",
@@ -25,7 +25,7 @@ describe("access outcome projection", () => {
 
   it("models observed access outcomes separately", () => {
     const observed = observedAccessOutcomeEvidence({
-      serverId: "remote_1",
+      serverId: "r1",
       knownRootDefinitionId: 538,
       observedIntent: "trash",
       reason: "trash_affordable",

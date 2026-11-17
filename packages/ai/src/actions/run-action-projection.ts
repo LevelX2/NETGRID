@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { cardDefinitionIdValue } from "../card-definition-id-input";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
@@ -679,7 +680,7 @@ function targetKindForServerId(
   if (serverId === "hq") return "hq";
   if (serverId === "rd") return "rd";
   if (serverId === "archives") return "archives";
-  if (serverId.startsWith("remote_")) return "remote";
+  if (isRemoteServerId(serverId)) return "remote";
   return undefined;
 }
 
@@ -733,7 +734,7 @@ function targetServerIdsFromSignals(
     tokenSet.has("scope:remote")
   ) {
     const remoteServers = input.playerView.servers.filter((server) =>
-      server.id.startsWith("remote_"),
+      isRemoteServerId(server.id),
     );
     const remoteServer = remoteServers[0];
     if (remoteServers.length === 1 && remoteServer) {
@@ -764,7 +765,7 @@ function normalizeServerId(value: unknown): string | undefined {
   if (trimmed === "hq") return "hq";
   if (trimmed === "rd") return "rd";
   if (trimmed === "archives") return "archives";
-  if (trimmed.startsWith("remote_")) return trimmed;
+  if (isRemoteServerId(trimmed)) return trimmed;
   return undefined;
 }
 

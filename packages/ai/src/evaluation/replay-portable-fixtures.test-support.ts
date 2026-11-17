@@ -49,7 +49,7 @@ export function coverageRunGapPortableFixture(): ReplayPortableDecisionFixture {
     server("rd"),
     server("archives"),
     server(
-      "remote_1",
+      "r1",
       [
         visibleCard("portable.visible.remote_ice", "ice", {
           owner: "corp",

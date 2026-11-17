@@ -20,7 +20,7 @@ describe("visibleSourceDefinitionsByInstanceId", () => {
       },
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [knownIce],
           root: [knownRoot, unknownRoot],

@@ -778,11 +778,11 @@ describe("Runner tactical plan modules", () => {
 
   it("raises a known agenda remote as a witnessed P2 contest", () => {
     const module = tacticalModule("runner.contest_remote");
-    const runnerContext = context([run("remote", "remote_1")], {
+    const runnerContext = context([run("remote", "r1")], {
       remoteContests: [
         {
           contestId: "remote-1",
-          serverId: "remote_1",
+          serverId: "r1",
           purpose: "contest",
           knownAgendaThreat: true,
           reachable: true,
@@ -810,13 +810,13 @@ describe("Runner tactical plan modules", () => {
   });
 
   it("keeps a belief-dependent targeted bypass below P2 even against a known agenda", () => {
-    const bypass = run("targeted-bypass", "remote_1");
+    const bypass = run("targeted-bypass", "r1");
     const module = tacticalModule("runner.contest_remote");
     const runnerContext = context([bypass], {
       remoteContests: [
         {
           contestId: "remote-1",
-          serverId: "remote_1",
+          serverId: "r1",
           purpose: "contest",
           knownAgendaThreat: true,
           reachable: true,
@@ -840,19 +840,19 @@ describe("Runner tactical plan modules", () => {
   });
 
   it("does not retain a superseded support gap when a remote contest route becomes executable", () => {
-    const remoteRun = run("remote-run", "remote_1");
+    const remoteRun = run("remote-run", "r1");
     const module = tacticalModule("runner.contest_remote");
     const runnerContext = context([remoteRun], {
       remoteContests: [
         {
-          contestId: "remote:remote_1",
-          serverId: "remote_1",
+          contestId: "remote:r1",
+          serverId: "r1",
           purpose: "contest",
           knownAgendaThreat: true,
           terminalPatternThreat: true,
           reachable: true,
           marginalValue: 1400,
-          evidenceCode: "runner_matchpoint_remote_pattern_focus:remote_1",
+          evidenceCode: "runner_matchpoint_remote_pattern_focus:r1",
           supportNeedId: "coverage:breaker_wall",
           runActionAssessments: {
             [remoteRun.actionId]: {
@@ -910,7 +910,7 @@ describe("Runner tactical plan modules", () => {
     expect(materialized.step).toMatchObject({
       stepId: `${instance.instanceId}:contest`,
       capability: { capabilityId: "contest_remote" },
-      target: { kind: "server", id: "remote_1" },
+      target: { kind: "server", id: "r1" },
     });
     const route = bindBestCurrentPlanRoute({
       side: "runner",
@@ -1086,8 +1086,8 @@ describe("Runner tactical plan modules", () => {
     const runnerContext = context([expose], {
       remoteContests: [
         {
-          contestId: "remote:remote_1",
-          serverId: "remote_1",
+          contestId: "remote:r1",
+          serverId: "r1",
           purpose: "information",
           knownAgendaThreat: false,
           reachable: true,

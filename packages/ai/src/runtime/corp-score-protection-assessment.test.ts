@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { type VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
@@ -547,7 +548,7 @@ describe("assessCorpScoreProtection", () => {
       "unknown definition",
       {
         ...blink(),
-        definitionId: "missing-definition",
+        definitionId: syntheticCardDefinitionId("missing-definition"),
       },
     ],
     [

@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import {
   centralServerId,
   isRemoteServerTarget,
@@ -206,7 +207,7 @@ export function isCorpRemoteProtectionActionEntry(
       ) ||
       (entry.actionType === "install_card" &&
         entry.installPlacement === "ice" &&
-        Boolean(entry.targetServerId?.startsWith("remote_"))))
+        Boolean(isRemoteServerId(entry.targetServerId))))
   );
 }
 
@@ -269,7 +270,7 @@ export function corpRemoteCreatedConvertsTo<
   target: "agenda" | "asset" | "bait",
 ): boolean {
   const createdServerId = sequence[index]?.targetServerId;
-  if (!createdServerId?.startsWith("remote_")) return false;
+  if (!isRemoteServerId(createdServerId)) return false;
   return ownStrategicWindow(sequence, index, ownDecisions)
     .filter((entry) => entry.side === "corp" && entry.targetServerId === createdServerId)
     .some((entry) => {

@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -66,7 +67,7 @@ it("keeps the original run executor through untargeted Corp rez passes, Hunter t
         input.legalActions.find((a: any) => a.actionId === result.actionId)
           ?.payload.costPenaltySupportOriginalActionId,
       ).toBe("runner.resolve_choice");
-      expect(result.actionId).toContain("swiss-bank-account");
+      expect(referencesDefaultDeckCard(result.actionId, 210)).toBe(true);
     }
   }
 });
@@ -101,7 +102,7 @@ it.each([
       lane: "engine_window",
       actionId: input.legalActions[0].actionId,
       origin: {
-        rootPlanInstanceId: "run:run_142",
+        rootPlanInstanceId: "run:142",
         leafPlanInstanceId: "rules.window_resolution",
         side: "runner",
         windowKind: "mandatory_choice",

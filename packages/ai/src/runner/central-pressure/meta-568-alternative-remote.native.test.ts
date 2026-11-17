@@ -36,7 +36,7 @@ function targets() {
     input,
     runs,
     hq: runs.find((r) => r.actionId === "runner.start_run.hq")!,
-    remote: runs.find((r) => r.actionId === "runner.start_run.remote_4")!,
+    remote: runs.find((r) => r.actionId === "runner.start_run.r4")!,
   };
 }
 afterEach(resetResidentPlanPortfolioMemory);
@@ -45,7 +45,7 @@ it("chooses the admitted free unknown remote instead of falsely treating HQ as t
   const { input, runtime, validation } = fixture();
   expect(Object.values(validation)).toEqual(Array(9).fill(true));
   expect(
-    input.playerView.servers.find((s) => s.id === "remote_4")?.root[0],
+    input.playerView.servers.find((s) => s.id === "r4")?.root[0],
   ).toMatchObject({ known: false });
   input.planningStateIdentity = buildPlanningStateIdentity(input);
   restoreAiRuntimeCheckpoint(
@@ -57,7 +57,7 @@ it("chooses the admitted free unknown remote instead of falsely treating HQ as t
     result = chooseAiAction(input);
   expect(JSON.stringify(input)).toBe(before);
   expect(result).toMatchObject({
-    actionId: "runner.start_run.remote_4",
+    actionId: "runner.start_run.r4",
     fallbackUsed: false,
     timeoutUsed: false,
   });
@@ -85,7 +85,7 @@ it("retains the central last chance when the threatened fort is the only remaini
     runnerTerminalRemoteUnreachableCentralLastChance(
       p.input,
       p.hq,
-      p.runs.filter((r) => r.targetServerId !== "remote_4"),
+      p.runs.filter((r) => r.targetServerId !== "r4"),
     ),
   ).toBe(true);
 });

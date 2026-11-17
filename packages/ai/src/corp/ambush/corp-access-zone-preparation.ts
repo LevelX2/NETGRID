@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import { reconstructBeliefState } from "../../belief-state";
@@ -75,7 +76,7 @@ export function corpRdRecyclingSignals(
       server: undefined,
     })),
     ...input.playerView.servers
-      .filter((server) => server.id.startsWith("remote_"))
+      .filter((server) => isRemoteServerId(server.id))
       .flatMap((server) => server.root.map((card) => ({ card, server }))),
   ];
   const fastAgenda = locations
@@ -161,7 +162,7 @@ export function corpRdRecyclingSignals(
           (entry) =>
             entry.id === target &&
             !reservedScoreServerIds.has(entry.id) &&
-            entry.id.startsWith("remote_") &&
+            isRemoteServerId(entry.id) &&
             entry.root.length === 0,
         )
       );

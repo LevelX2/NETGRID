@@ -130,7 +130,7 @@ function input(
       servers: options.visibleTagSourceDefinitionId
         ? [
             {
-              id: "remote_1",
+              id: "r1",
               ice: [],
               root: [
                 {

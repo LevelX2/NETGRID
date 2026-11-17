@@ -53,7 +53,7 @@ function prepared(protectedRemote: boolean, credits = 8) {
     .withRezzedCorpIceOnServer("hq", 449)
     .withRezzedCorpIceOnServer("rd", 490);
   setup.withCorpCardInHq(497);
-  if (protectedRemote) setup.withRezzedCorpIceOnServer("remote_1", wall);
+  if (protectedRemote) setup.withRezzedCorpIceOnServer("r1", wall);
   return state;
 }
 function input(state: GameState) {
@@ -87,7 +87,7 @@ it("develops funded economy before speculative agenda search and takes the actua
   )!;
   expect(chosen).toMatchObject({
     type: "install_card",
-    payload: { serverId: "remote_1" },
+    payload: { serverId: "r1" },
   });
   expect(
     installationDecision.decisionDebug?.planFirstDecision

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type {
   AiDecisionInput,
   PublicGameEvent,
@@ -21,22 +22,22 @@ describe("Corp opponent-turn campaign continuity", () => {
         event(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
         event(12, "steal_agenda", {
           actor: "runner",
           actionType: "steal_agenda",
-          targetServerId: "remote_2",
+          targetServerId: "r2",
         }),
         event(14, "gain_credit", {
           actor: "runner",
           actionType: "gain_credit",
-          serverId: "remote_3",
+          serverId: "r3",
         }),
       ],
     });
 
-    expect(recentlyCompromisedCorpRemoteIds(input, 10)).toEqual(["remote_2"]);
+    expect(recentlyCompromisedCorpRemoteIds(input, 10)).toEqual(["r2"]);
     expect(recentlyCompromisedCorpRemoteIds(input, 15)).toEqual([]);
   });
 
@@ -73,7 +74,7 @@ describe("Corp opponent-turn campaign continuity", () => {
         stateVersion: 47,
         activeSide: "runner",
         events: Array.from({ length: 36 }, (_, i) =>
-          event(12 + i, "continue_run", { serverId: "remote_1" }),
+          event(12 + i, "continue_run", { serverId: "r1" }),
         ),
       }),
       previous: [opened!],
@@ -180,12 +181,12 @@ describe("Corp opponent-turn campaign continuity", () => {
       event(11, "start_run", {
         actor: "runner",
         actionType: "start_run",
-        serverId: "remote_1",
+        serverId: "r1",
       }),
       event(12, "rez_ice", {
         actor: "corp",
         actionType: "rez_ice",
-        serverId: "remote_1",
+        serverId: "r1",
       }),
       event(13, "trace", {
         actor: "corp",
@@ -195,7 +196,7 @@ describe("Corp opponent-turn campaign continuity", () => {
       event(14, "access_card", {
         actor: "runner",
         actionType: "access_card",
-        serverId: "remote_1",
+        serverId: "r1",
       }),
     ];
     const waiting = reconcileCorpCampaignContinuity({
@@ -242,7 +243,7 @@ describe("Corp opponent-turn campaign continuity", () => {
     const access = event(12, "access_card", {
       actor: "runner",
       actionType: "access_card",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     const waiting = reconcileCorpCampaignContinuity({
       input: decisionInput({
@@ -301,7 +302,7 @@ describe("Corp opponent-turn campaign continuity", () => {
         event(21, "trash_accessed_card", {
           actor: "runner",
           actionType: "trash_accessed_card",
-          serverId: "remote_1",
+          serverId: "r1",
           trashedCardId: "agenda-1",
         }),
       ],
@@ -322,7 +323,7 @@ describe("Corp opponent-turn campaign continuity", () => {
       activeSide: "corp",
     });
     missingRemote.playerView.servers = missingRemote.playerView.servers.filter(
-      (server) => server.id !== "remote_1",
+      (server) => server.id !== "r1",
     );
     expect(
       reconcileCorpCampaignContinuity({
@@ -350,7 +351,7 @@ describe("Corp opponent-turn campaign continuity", () => {
           event(11, "decline_trash", {
             actor: "runner",
             actionType: "decline_trash",
-            serverId: "remote_1",
+            serverId: "r1",
           }),
         ],
       }),
@@ -372,9 +373,9 @@ describe("Corp opponent-turn campaign continuity", () => {
         event(12, "access_card", {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
+          serverId: "r1",
           label: "first public label",
-          sourceDefinitionId: "public-definition-a",
+          sourceDefinitionId: syntheticCardDefinitionId("public-definition-a"),
         }),
       ],
     });
@@ -419,7 +420,7 @@ describe("Corp opponent-turn campaign continuity", () => {
       event(11, "rez_window_opened", {
         actor: "corp",
         actionType: "rez_window_opened",
-        serverId: "remote_1",
+        serverId: "r1",
         rezWindowOpened: true,
       }),
       event(12, "trace_started", {
@@ -466,7 +467,7 @@ describe("Corp opponent-turn campaign continuity", () => {
       event(15, "rez_window_resolved", {
         actor: "corp",
         actionType: "rez_window_resolved",
-        serverId: "remote_1",
+        serverId: "r1",
         rezWindowResolved: true,
       }),
       event(16, "prevention_window_resolved", {
@@ -477,7 +478,7 @@ describe("Corp opponent-turn campaign continuity", () => {
       event(17, "end_run", {
         actor: "runner",
         actionType: "end_run",
-        serverId: "remote_1",
+        serverId: "r1",
         runEnded: true,
       }),
     ];
@@ -515,7 +516,7 @@ describe("Corp opponent-turn campaign continuity", () => {
     const opened = event(11, "ambush_triggered", {
       actor: "corp",
       actionType: "ambush_triggered",
-      serverId: "remote_1",
+      serverId: "r1",
       ambushTriggered: true,
     });
     const paused = reconcileCorpCampaignContinuity({
@@ -561,19 +562,19 @@ function openingRushDescriptor(): CorpCampaignDescriptor {
   return {
     ...agendaDescriptor(),
     kind: "opening_rush",
-    openingRushOpportunityKey: "opening-rush:agenda-1:remote_1",
+    openingRushOpportunityKey: "opening-rush:agenda-1:r1",
   };
 }
 
 function agendaDescriptor(): CorpCampaignDescriptor {
   return {
-    campaignId: "campaign:agenda:agenda-1:remote_1",
+    campaignId: "campaign:agenda:agenda-1:r1",
     kind: "agenda",
     moduleId: "corp.score_agenda",
-    rootPlanInstanceId: "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
+    rootPlanInstanceId: "plan:corp.score_agenda:agenda%3Aagenda-1%3Ar1",
     originStateVersion: 10,
     milestoneId: "install_agenda",
-    targetServerId: "remote_1",
+    targetServerId: "r1",
     targetCardInstanceId: "agenda-1",
     currentlyAdmitted: true,
     evidenceCode: "test_agenda_campaign",
@@ -635,13 +636,13 @@ function decisionInput(params: {
         { id: "hq", label: "HQ", ice: [], root: [] },
         { id: "rd", label: "R&D", ice: [], root: [] },
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [],
           root: [
             {
               instanceId: "agenda-1",
-              definitionId: "agenda-definition",
+              definitionId: syntheticCardDefinitionId("agenda-definition"),
               type: "agenda",
               known: true,
             },

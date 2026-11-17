@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -170,7 +171,7 @@ export function createRunnerPumpViabilityContext(
     const endTheRunCount = currentSubroutines.filter(isVisibleHardEndRunSubroutine).length;
     const deflectorContext = {
       visibleRemoteServerCount: input.playerView.servers.filter((candidate) =>
-        candidate.id.startsWith("remote_"),
+        isRemoteServerId(candidate.id),
       ).length,
       visibleCorpCredits: input.playerView.opponent.credits,
     };

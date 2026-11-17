@@ -85,7 +85,7 @@ export function eventMayChangeHqPressure(event: PublicGameEvent): boolean {
 
 export function eventRefreshesCentralTarget(
   event: PublicGameEvent,
-  target: Exclude<ServerId, `remote_${number}` | "new_remote">,
+  target: Exclude<ServerId, `r${number}` | "new_remote">,
 ): boolean {
   const actionType =
     typeof event.publicPayload.actionType === "string"

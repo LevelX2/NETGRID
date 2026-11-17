@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import type {
   AiDecisionInput,
@@ -267,7 +268,7 @@ function deferredFullBreakIndexes(input: AiDecisionInput): number[] {
     {
       ...currentRunPathContext(input),
       visibleRemoteServerCount: input.playerView.servers.filter((server) =>
-        server.id.startsWith("remote_"),
+        isRemoteServerId(server.id),
       ).length,
     },
   );

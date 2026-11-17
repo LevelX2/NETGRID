@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { MatchEventId } from "@netgrid/shared";
 import type { CorpPlanDomain } from "./corp-tactical-plan-contracts";
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
@@ -630,7 +631,7 @@ function outcomesForEvent(
       "campaign_public_access",
     );
     if (
-      targetServerId?.startsWith("remote_") &&
+      isRemoteServerId(targetServerId) &&
       targetServerId === campaign.origin.targetServerId
     ) {
       add(
@@ -652,7 +653,7 @@ function outcomesForEvent(
     targetCardInstanceId === campaign.origin.targetCardInstanceId;
   if (trashEvent && sameServer && sameCard && exactCampaignTargetTrashed) {
     add("card_trashed", "campaign_material_trashed", "campaign_public_trash");
-    if (campaign.origin.targetServerId?.startsWith("remote_")) {
+    if (isRemoteServerId(campaign.origin.targetServerId)) {
       add(
         "remote_compromised",
         "campaign_remote_compromised",
@@ -674,7 +675,7 @@ function publicRemoteAccessTarget(event: PublicGameEvent): string | undefined {
     payload.accessServerId,
     isRecord(payload.targets) ? payload.targets.serverId : undefined,
   );
-  return serverId?.startsWith("remote_") ? serverId : undefined;
+  return isRemoteServerId(serverId) ? serverId : undefined;
 }
 
 function isPublicAccessEvent(event: PublicGameEvent): boolean {
@@ -719,7 +720,7 @@ function visibleTerminalStatus(
   }
   const targetServerId = campaign.origin.targetServerId;
   if (
-    targetServerId?.startsWith("remote_") &&
+    isRemoteServerId(targetServerId) &&
     !input.playerView.servers.some((server) => server.id === targetServerId)
   ) {
     return {

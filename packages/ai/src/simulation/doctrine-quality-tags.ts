@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { actionHasImmediateCreditGain } from "../actions/action-effect-classification";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
@@ -135,7 +136,7 @@ export function qualityTagsForActionWithDependencies(
     decision,
   );
   const visibleRemoteContest =
-    targetServerId?.startsWith("remote_") === true &&
+    isRemoteServerId(targetServerId) === true &&
     (targetServer?.rootCount ?? 0) > 0;
 
   if (
@@ -163,7 +164,7 @@ export function qualityTagsForActionWithDependencies(
   if (
     input.side === "corp" &&
     action.type === "install_card" &&
-    targetServerId?.startsWith("remote_") &&
+    isRemoteServerId(targetServerId) &&
     ((action.payload?.placement === "ice" &&
       (targetServer?.iceCount ?? 0) >= 2) ||
       (action.payload?.placement !== "ice" &&

@@ -9,7 +9,7 @@ import {
   visibleCard,
 } from "../../runner-hand-development.test-support";
 
-function actualCardRole(id: string, title?: string, unknownTarget?: "ice" | "root") {
+function actualCardRole(id: number, title?: string, unknownTarget?: "ice" | "root") {
   const definition = getPublicCardView(id)!;
   const card = visibleCard(`real-${id}`, {
     definitionId: id,

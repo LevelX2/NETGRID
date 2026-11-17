@@ -37,11 +37,11 @@ export type CandidateTargetIdentityResolverInput = {
   hardGateSummary?: string;
 };
 
-const SERVER_PATTERN = /^server:(hq|rd|archives|remote_\d+)$/;
-const ICE_PATTERN = /^ice:(hq|rd|archives|remote_\d+):\d+(?::[a-z0-9_.-]+)?$/i;
+const SERVER_PATTERN = /^server:(hq|rd|archives|r\d+)$/;
+const ICE_PATTERN = /^ice:(hq|rd|archives|r\d+):\d+(?::[a-z0-9_.-]+)?$/i;
 const OWN_CARD_PATTERN = /^ownCard:[a-zA-Z0-9_-]+:[a-zA-Z0-9_.:-]+$/;
 const CHOICE_PATTERN = /^choice:[a-zA-Z0-9_.:-]+:[a-zA-Z0-9_.:-]+$/;
-const ACCESS_PATTERN = /^access:(hq|rd|archives|remote_\d+):[a-zA-Z0-9_.:-]+$/;
+const ACCESS_PATTERN = /^access:(hq|rd|archives|r\d+):[a-zA-Z0-9_.:-]+$/;
 const INSTALLED_OWN_CARD_PATTERN =
   /^installedOwnCard:[a-zA-Z0-9_.:-]+:[a-zA-Z0-9_.:-]+$/;
 const ABILITY_PATTERN = /^ability:[a-zA-Z0-9_.:-]+:[a-zA-Z0-9_.:-]+$/;

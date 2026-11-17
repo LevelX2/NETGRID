@@ -246,7 +246,7 @@ describe("Corp tactical plan modules", () => {
     const install = {
       ...cardAction("install", "install.card", "ambush"),
       runProjectionSummary: {
-        serverId: "remote_1",
+        serverId: "r1",
         serverKind: "remote" as const,
         source: "legal_action_payload" as const,
         evidence: [],
@@ -262,7 +262,7 @@ describe("Corp tactical plan modules", () => {
               sourceDefinitionId: syntheticCardDefinitionId("ambush"),
               sourceInstanceId: "ambush-instance",
               actionIds: ["install"],
-              serverId: "remote_1",
+              serverId: "r1",
               phase: "install",
               assignedDomainPlanIds: [],
               duplicateAlreadyInstalled: false,
@@ -283,7 +283,7 @@ describe("Corp tactical plan modules", () => {
       ...cardAction("install-a", "install.card", "ambush"),
       sourceCardInstanceId: "ambush-a",
       runProjectionSummary: {
-        serverId: "remote_1",
+        serverId: "r1",
         serverKind: "remote" as const,
         source: "legal_action_payload" as const,
         evidence: [],
@@ -293,7 +293,7 @@ describe("Corp tactical plan modules", () => {
       ...cardAction("install-b", "install.card", "ambush"),
       sourceCardInstanceId: "ambush-b",
       runProjectionSummary: {
-        serverId: "remote_1",
+        serverId: "r1",
         serverKind: "remote" as const,
         source: "legal_action_payload" as const,
         evidence: [],
@@ -410,7 +410,7 @@ describe("Corp tactical plan modules", () => {
       ).toEqual([action.actionId]);
       expect(materialized.step.target).toEqual(
         phase === "install"
-          ? { kind: "server", id: "remote_1" }
+          ? { kind: "server", id: "r1" }
           : { kind: "card", id: "ambush-a" },
       );
       if (phase === "trigger") {
@@ -698,7 +698,7 @@ function ambushSignal(
     sourceDefinitionId: syntheticCardDefinitionId("ambush"),
     sourceInstanceId,
     actionIds: [actionId],
-    serverId: "remote_1",
+    serverId: "r1",
     phase,
     purposeCode: "develop_ambush",
     assignedDomainPlanIds: ["ambush"],

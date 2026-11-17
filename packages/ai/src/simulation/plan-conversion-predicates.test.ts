@@ -30,12 +30,12 @@ describe("planIntentConvertedWithin", () => {
           {
             side: "corp",
             actionType: "install_card",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
           },
           {
             side: "corp",
             actionType: "install_card",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
             evidence: ["corp.remote_support"],
           },
         ],
@@ -50,12 +50,12 @@ describe("planIntentConvertedWithin", () => {
           {
             side: "corp",
             actionType: "install_card",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
           },
           {
             side: "corp",
             actionType: "install_card",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
             evidence: [
               "remote_supportish_noise",
               "economy_assetish_noise",
@@ -74,12 +74,12 @@ describe("planIntentConvertedWithin", () => {
           {
             side: "corp",
             actionType: "install_card",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
           },
           {
             side: "corp",
             actionType: "install_card",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
             reasonCode: "corp.plan.remote_asset",
           },
         ],
@@ -94,12 +94,12 @@ describe("planIntentConvertedWithin", () => {
           {
             side: "corp",
             actionType: "install_card",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
           },
           {
             side: "corp",
             actionType: "install_card",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
             reasonCode: "corp.plan.assetish_noise",
           },
         ],
@@ -117,12 +117,12 @@ describe("planIntentConvertedWithin", () => {
           {
             side: "corp",
             actionType: "install_card",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
           },
           {
             side: "corp",
             actionType: "install_card",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
             reasonCode: "corp.plan.bait_runner",
           },
         ],
@@ -137,12 +137,12 @@ describe("planIntentConvertedWithin", () => {
           {
             side: "corp",
             actionType: "install_card",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
           },
           {
             side: "corp",
             actionType: "install_card",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
             reasonCode: "corp.plan.baitish_noise",
           },
         ],
@@ -158,7 +158,7 @@ describe("planIntentConvertedWithin", () => {
       corp: { servers: [{ id: "hq", kind: "hq" }] },
     } as unknown as GameState;
     const after = {
-      corp: { servers: [{ id: "hq", kind: "hq" }, { id: "remote_5", kind: "remote" }] },
+      corp: { servers: [{ id: "hq", kind: "hq" }, { id: "r5", kind: "remote" }] },
     } as unknown as GameState;
     const install = legalAction(
       "new-remote-install",
@@ -170,7 +170,7 @@ describe("planIntentConvertedWithin", () => {
     );
     const event = { publicPayload: { serverId: "new_remote" } } as PublicGameEvent;
     expect(simulationActionLocation(install, event, before, after)).toEqual({
-      targetServerId: "remote_5",
+      targetServerId: "r5",
       corpNewRemoteCreated: true,
     });
   });
@@ -206,24 +206,24 @@ describe("planIntentConvertedWithin", () => {
 
   it("keeps remote conversion on the server that was actually created", () => {
     const sequence = [
-      { side: "corp", actionType: "install_card", targetServerId: "remote_1" },
+      { side: "corp", actionType: "install_card", targetServerId: "r1" },
       {
         side: "corp",
         actionType: "install_card",
         targetCardType: "agenda",
-        targetServerId: "remote_2",
+        targetServerId: "r2",
       },
       {
         side: "corp",
         actionType: "advance_card",
         targetCardType: "agenda",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
       },
       {
         side: "corp",
         actionType: "install_card",
         targetCardType: "agenda",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
       },
     ];
     expect(corpRemoteCreatedConvertsTo(sequence, 0, 2, "agenda")).toBe(false);
@@ -235,11 +235,11 @@ describe("planIntentConvertedWithin", () => {
 
   it("recognizes an actual steal during a Runner strategic window", () => {
     const sequence = [
-      { side: "runner", actionType: "start_run", targetServerId: "remote_1" },
+      { side: "runner", actionType: "start_run", targetServerId: "r1" },
       {
         side: "runner",
         actionType: "steal_agenda",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
       },
     ];
     expect(

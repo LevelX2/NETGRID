@@ -21,7 +21,7 @@ describe("plan-first Remote same-server action variants", () => {
       "start_run",
       "Run Remote 1",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const insideJob = legalAction(
       "run-remote-inside-job",
@@ -34,7 +34,7 @@ describe("plan-first Remote same-server action variants", () => {
         payload: {
           cardId: "inside-job-1",
           sourceDefinitionId: 306,
-          serverId: "remote_1",
+          serverId: "r1",
           runnerEventRun: true,
         },
       },
@@ -50,7 +50,7 @@ describe("plan-first Remote same-server action variants", () => {
         payload: {
           cardId: "inside-job-2",
           sourceDefinitionId: 306,
-          serverId: "remote_1",
+          serverId: "r1",
           runnerEventRun: true,
         },
       },
@@ -70,7 +70,7 @@ describe("plan-first Remote same-server action variants", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [visibleCard("remote-target", "corp", "agenda")]),
+      server("r1", [], [visibleCard("remote-target", "corp", "agenda")]),
     ];
 
     const decision = liveContext({
@@ -122,7 +122,7 @@ describe("plan-first Remote same-server action variants", () => {
       "start_run",
       "Run empty Remote 1",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const endTurn = legalAction(
       "runner.end_turn",
@@ -139,7 +139,7 @@ describe("plan-first Remote same-server action variants", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1"),
+      server("r1"),
     ];
 
     const decision = liveContext({
@@ -170,7 +170,7 @@ function remoteTarget(
   score: number,
   recommendation: "run_now" | "do_not_run_now",
 ) {
-  const target = safeRuntimeRunTarget(actionId, "remote_1");
+  const target = safeRuntimeRunTarget(actionId, "r1");
   return {
     ...target,
     targetKind: "remote" as const,

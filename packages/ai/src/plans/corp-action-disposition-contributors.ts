@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { corpPunishPreparationConflictsScoreServer } from "../corp/punish/punish-preparation";
 import { corpReservedScoreServerIds } from "../runtime/corp-scoreline/score-hand-support";
 import { corpEconomyActionIsOwned } from "../corp/economy/economy-routes";
@@ -713,7 +714,7 @@ function contributeCorpActionDispositionForCandidate(
       );
       return;
     }
-    const targetRemote = globalDefenseServerId?.startsWith("remote_")
+    const targetRemote = isRemoteServerId(globalDefenseServerId)
       ? input.playerView.servers.find(
           (server) => server.id === globalDefenseServerId,
         )

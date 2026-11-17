@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import {
   semanticRuntimeCorpBoardTriage,
@@ -19,12 +20,12 @@ describe("semantic runtime corp board triage remote funding", () => {
   it("funds an existing score remote before protection when the rez path is unaffordable", () => {
     const remoteAgenda = corpAction("remote-scoreline", "install_card", {
       placement: "root",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     const basicCredit = corpAction("gain-credit", "gain_credit");
     const remoteIce = corpAction("remote-ice", "install_card", {
       placement: "ice",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     const input = corpInput({
       corpHq: [agendaCard("hq-agenda-1", 3)],
@@ -34,7 +35,7 @@ describe("semantic runtime corp board triage remote funding", () => {
       servers: [
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", [iceCard("rd-ice")]),
-        remoteServer("remote_1", [
+        remoteServer("r1", [
           iceCard("outer-ice", { rezCost: 3, rezzed: false }),
           iceCard("inner-ice", { rezCost: 2, rezzed: false }),
         ]),
@@ -43,7 +44,7 @@ describe("semantic runtime corp board triage remote funding", () => {
     const dependencies = testDependencies({
       scoringWindowByActionId: {
         [remoteAgenda.actionId]: scoringWindow({
-          serverId: "remote_1",
+          serverId: "r1",
           windowKind: "unsafe",
           scoreHorizon: "slow",
           runnerCanContestNow: false,
@@ -78,7 +79,7 @@ describe("semantic runtime corp board triage remote funding", () => {
     expect(triage).toMatchObject({
       primary: "fund_score_remote",
       severity: "critical",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
     expect(basicCreditComponent).toMatchObject({
       key: "corp_board_triage_alignment",
@@ -168,14 +169,14 @@ describe("semantic runtime corp board triage remote funding", () => {
     const remoteAgenda = corpAction(
       "remote-scoreline",
       "install_card",
-      { placement: "root", serverId: "remote_1" },
+      { placement: "root", serverId: "r1" },
       agenda.instanceId,
     );
     const remoteIceCard = iceCard("remote-second-ice");
     const remoteIce = corpAction(
       "install-second-remote-ice",
       "install_card",
-      { placement: "ice", serverId: "remote_1" },
+      { placement: "ice", serverId: "r1" },
       remoteIceCard.instanceId,
     );
     const gainCredit = corpAction("gain-credit", "gain_credit");
@@ -186,19 +187,19 @@ describe("semantic runtime corp board triage remote funding", () => {
       servers: [
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", [iceCard("rd-ice")]),
-        remoteServer("remote_1", [iceCard("remote-first-ice")]),
+        remoteServer("r1", [iceCard("remote-first-ice")]),
       ],
     });
     const dependencies = testDependencies({
       scoringWindowByActionId: {
         [remoteAgenda.actionId]: scoringWindow({
-          serverId: "remote_1",
+          serverId: "r1",
           windowKind: "unsafe",
           agendaStealSeverity: "game_ending",
           recommendedNextStep: "build_remote_ice",
         }),
         [remoteIce.actionId]: scoringWindow({
-          serverId: "remote_1",
+          serverId: "r1",
           windowKind: "durable",
           runnerCanContestNow: false,
           runnerCanReachAccessNow: false,
@@ -218,7 +219,7 @@ describe("semantic runtime corp board triage remote funding", () => {
 
     expect(semanticRuntimeCorpBoardTriage(input, dependencies)).toMatchObject({
       primary: "protect_score_remote",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
     expect(
       semanticRuntimeCorpBoardTriageActionComponent(
@@ -234,7 +235,7 @@ describe("semantic runtime corp board triage remote funding", () => {
       "advance-active-scoreline",
       "advance_card",
       {
-        serverId: "remote_1",
+        serverId: "r1",
       },
     );
     const newRemoteAgenda = corpAction("new-remote-scoreline", "install_card", {
@@ -253,7 +254,7 @@ describe("semantic runtime corp board triage remote funding", () => {
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", [iceCard("rd-ice")]),
         remoteServer(
-          "remote_1",
+          "r1",
           [iceCard("remote-ice")],
           [agendaCard("active-agenda", 2)],
         ),
@@ -262,7 +263,7 @@ describe("semantic runtime corp board triage remote funding", () => {
     const dependencies = testDependencies({
       scoringWindowByActionId: {
         [activeAdvance.actionId]: scoringWindow({
-          serverId: "remote_1",
+          serverId: "r1",
           windowKind: "unsafe",
           runnerCanContestBeforeScore: true,
           runnerCanReachAccessBeforeScore: true,
@@ -317,9 +318,9 @@ describe("semantic runtime corp board triage remote funding", () => {
     expect(triage).toMatchObject({
       primary: "fund_score_remote",
       severity: "high",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
-    expect(triage.evidence).toContain("corp_board_triage_target:remote_1");
+    expect(triage.evidence).toContain("corp_board_triage_target:r1");
     expect(triage.evidence).not.toContain(
       "corp_board_triage_target:new_remote",
     );
@@ -337,11 +338,11 @@ describe("semantic runtime corp board triage remote funding", () => {
   it("uses a funded missing-coverage score window instead of overprotecting or taking economy", () => {
     const remoteAgenda = corpAction("remote-scoreline", "install_card", {
       placement: "root",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     const remoteIce = corpAction("install-more-remote-ice", "install_card", {
       placement: "ice",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     const gainCredit = corpAction("gain-credit", "gain_credit");
     const input = corpInput({
@@ -351,7 +352,7 @@ describe("semantic runtime corp board triage remote funding", () => {
       servers: [
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", [iceCard("rd-ice")]),
-        remoteServer("remote_1", [
+        remoteServer("r1", [
           iceCard("remote-ice", { rezCost: 3, rezzed: false }),
         ]),
       ],
@@ -359,7 +360,7 @@ describe("semantic runtime corp board triage remote funding", () => {
     const dependencies = testDependencies({
       scoringWindowByActionId: {
         [remoteAgenda.actionId]: scoringWindow({
-          serverId: "remote_1",
+          serverId: "r1",
           windowKind: "unsafe",
           scoreHorizon: "next_turn",
           runnerCanContestNow: false,
@@ -399,7 +400,7 @@ describe("semantic runtime corp board triage remote funding", () => {
     expect(triage).toMatchObject({
       primary: "force_scoreline_clock",
       severity: "high",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
     expect(triage.evidence).not.toContain(
       "corp_board_triage_primary:protect_score_remote",
@@ -420,15 +421,15 @@ describe("semantic runtime corp board triage remote funding", () => {
   it("does not let non-scoreline remote support funding override a playable scoreline", () => {
     const remoteAgenda = corpAction("remote-scoreline", "install_card", {
       placement: "root",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     const remoteSupport = corpAction(
       "remote-scoreline-support",
       "install_card",
       {
         placement: "root",
-        serverId: "remote_1",
-        cardDefinitionId: "support_asset",
+        serverId: "r1",
+        cardDefinitionId: syntheticCardDefinitionId("support_asset"),
       },
     );
     const gainCredit = corpAction("gain-credit", "gain_credit");
@@ -439,7 +440,7 @@ describe("semantic runtime corp board triage remote funding", () => {
       servers: [
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", [iceCard("rd-ice")]),
-        remoteServer("remote_1", [
+        remoteServer("r1", [
           iceCard("remote-ice", { rezCost: 3, rezzed: false }),
         ]),
       ],
@@ -447,7 +448,7 @@ describe("semantic runtime corp board triage remote funding", () => {
     const dependencies = testDependencies({
       scoringWindowByActionId: {
         [remoteAgenda.actionId]: scoringWindow({
-          serverId: "remote_1",
+          serverId: "r1",
           windowKind: "temporary_safe",
           scoreHorizon: "slow",
           runnerCanContestNow: false,
@@ -466,7 +467,7 @@ describe("semantic runtime corp board triage remote funding", () => {
           recommendedNextStep: "score",
         }),
         [remoteSupport.actionId]: scoringWindow({
-          serverId: "remote_1",
+          serverId: "r1",
           windowKind: "unsafe",
           scoreHorizon: "slow",
           runnerCanContestNow: false,
@@ -507,7 +508,7 @@ describe("semantic runtime corp board triage remote funding", () => {
     expect(triage).toMatchObject({
       primary: "force_scoreline_clock",
       severity: "high",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
     expect(triage.evidence).not.toContain(
       "corp_board_triage_primary:fund_score_remote",
@@ -528,7 +529,7 @@ describe("semantic runtime corp board triage remote funding", () => {
   it("does not classify a ready score remote as funding when the rez floor is already met", () => {
     const remoteAgenda = corpAction("remote-scoreline", "install_card", {
       placement: "root",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     const gainCredit = corpAction("gain-credit", "gain_credit");
     const hqIce = corpAction("install-hq-ice", "install_card", {
@@ -542,7 +543,7 @@ describe("semantic runtime corp board triage remote funding", () => {
       servers: [
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", [iceCard("rd-ice")]),
-        remoteServer("remote_1", [
+        remoteServer("r1", [
           iceCard("remote-ice", { rezCost: 3, rezzed: false }),
         ]),
       ],
@@ -550,7 +551,7 @@ describe("semantic runtime corp board triage remote funding", () => {
     const dependencies = testDependencies({
       scoringWindowByActionId: {
         [remoteAgenda.actionId]: scoringWindow({
-          serverId: "remote_1",
+          serverId: "r1",
           windowKind: "unsafe",
           scoreHorizon: "next_turn",
           runnerCanContestNow: false,
@@ -592,7 +593,7 @@ describe("semantic runtime corp board triage remote funding", () => {
     expect(triage).toMatchObject({
       primary: "force_scoreline_clock",
       severity: "high",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
     expect(triage.evidence).not.toContain(
       "corp_board_triage_primary:fund_score_remote",

@@ -100,11 +100,11 @@ describe("hidden-info observational equivalence", () => {
       "Corp remote-root definition",
     );
     RealEngineFixtureBuilder.forState(left).withCorpRemoteRoot(
-      "remote_1",
+      "r1",
       remoteDefinition,
     );
     const remoteId = required(
-      left.corp.servers.find((server) => server.id === "remote_1")?.root[0],
+      left.corp.servers.find((server) => server.id === "r1")?.root[0],
       "facedown remote card",
     );
     const hiddenOtherId = required(

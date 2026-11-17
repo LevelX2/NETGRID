@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -52,7 +53,7 @@ it.each([
     (a) => a.actionId === decision.actionId,
   )!;
   expect(action.type).toBe("install_card");
-  expect(action.source).toContain("fall-guy");
+  expect(referencesDefaultDeckCard(action.source, 373)).toBe(true);
   const parent = "plan:runner.pressure_central:central%3Ahq";
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
     parent,

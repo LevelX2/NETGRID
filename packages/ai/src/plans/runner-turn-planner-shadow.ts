@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import {
   type AiDecision,
   type AiDecisionInput,
@@ -313,7 +314,7 @@ export function runnerCoverageDispositions(params: {
         : undefined;
     const runAbilityOwnerModuleId =
       typeof runAbilityServerId === "string"
-        ? runAbilityServerId.startsWith("remote_")
+        ? isRemoteServerId(runAbilityServerId)
           ? ("runner.contest_remote" as const)
           : runAbilityServerId === "hq" ||
               runAbilityServerId === "rd" ||

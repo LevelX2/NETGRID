@@ -63,7 +63,7 @@ it("retains the direct central run root across both real Pocket traces and Chiba
       expect(a.payload.costPenaltySupportWindowId).toBe(
         "runner_cost_penalty_support.126",
       );
-      expect(z.actionId).toContain("chiba-bank-account");
+      expect(input.playerView.own.rig.find((card: { instanceId: string }) => card.instanceId === a.source)?.definitionId).toBe(191);
     }
   }
 });
@@ -123,7 +123,7 @@ it.each([
       lane: "engine_window",
       actionId: input.legalActions[0].actionId,
       origin: {
-        rootPlanInstanceId: "run:run_119",
+        rootPlanInstanceId: "run:119",
         leafPlanInstanceId: "rules.window_resolution",
         side: "runner",
         windowKind: "run",
@@ -191,6 +191,7 @@ it("executes the full second-trace, Chiba and exact original bid sequence twice 
       expect(JSON.stringify(input)).toBe(before);
       expect(z.fallbackUsed || z.timeoutUsed).toBe(false);
       expect(a).toBeDefined();
+      if (i === 3) expect(state.cardInstances[a!.source]?.definitionId).toBe(191);
       actions.push(a!.actionId);
       const r = applyAction(state, {
         matchId: state.matchId,
@@ -205,10 +206,9 @@ it("executes the full second-trace, Chiba and exact original bid sequence twice 
       expect(validateGameState(state).ok).toBe(true);
     }
     expect(actions[0]).toBe("runner.continue_run.printed_subroutines_trace_a");
-    expect(actions[3]).toContain("chiba-bank-account");
     expect(actions[4]).toBe("runner.resolve_choice");
     expect(state.runner.credits).toBe(0);
     hashes.push(hashGameState(state));
   }
-  expect(hashes).toEqual(["fnv1a:3f7c6978", "fnv1a:3f7c6978"]);
+  expect(hashes).toEqual(["fnv1a:9495773f", "fnv1a:9495773f"]);
 });

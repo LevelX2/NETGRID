@@ -172,7 +172,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     current.playerView.opponent.agendaPoints = 5;
     current.playerView.servers = [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [],
         root: [
@@ -197,7 +197,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     expect(component?.reason).toContain(
       "terminal_contest_kind:visible_two_point_remote",
     );
-    expect(component?.reason).toContain("follow_up_server:remote_1");
+    expect(component?.reason).toContain("follow_up_server:r1");
   });
 
   it("does not release at five points for an unadvanced unknown remote", () => {
@@ -205,7 +205,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     current.playerView.opponent.agendaPoints = 5;
     current.playerView.servers = [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [],
         root: [

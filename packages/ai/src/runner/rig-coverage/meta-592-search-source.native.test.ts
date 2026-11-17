@@ -90,7 +90,7 @@ it("keeps the Stack-bound Rent-I-Con target through the real source and target E
     ),
   ).toBe(false);
   expect(validateGameState(state).ok).toBe(true);
-  expect(hashGameState(state)).toBe("fnv1a:a78ed387");
+  expect(hashGameState(state)).toBe("fnv1a:99f79fd4");
 });
 it.each([
   "wrong_source",

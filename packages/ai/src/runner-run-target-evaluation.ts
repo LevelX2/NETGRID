@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { MatchEventId } from "@netgrid/shared";
 import { visibleRunnerPathTraceContext } from "./run-analysis/trace-rules-profile-planning";
 import {
@@ -604,7 +605,7 @@ function evaluateRunnerRunTarget(
           targetKind !== "remote" ||
           !runnerTargetHasTerminalContestThreat(params.input, targetServerId),
         visibleRemoteServerCount: params.input.playerView.servers.filter(
-          (candidate) => candidate.id.startsWith("remote_"),
+          (candidate) => isRemoteServerId(candidate.id),
         ).length,
         additionalPassedIceCount: bypassedFirstIce ? 1 : 0,
         allowRandomBreakAttempts,
@@ -3151,7 +3152,7 @@ function runnerEmergencyReserve(input: AiDecisionInput): number {
 function remoteHasScoreThreat(
   server: AiDecisionInput["playerView"]["servers"][number] | undefined,
 ): boolean {
-  if (!server?.id.startsWith("remote_")) return false;
+  if (!isRemoteServerId(server?.id)) return false;
   return server.root.some(
     (card) =>
       card.type === "agenda" ||
@@ -3165,7 +3166,7 @@ function targetKindForServerId(
   if (serverId === "hq") return "hq";
   if (serverId === "rd") return "rd";
   if (serverId === "archives") return "archives";
-  if (serverId.startsWith("remote_")) return "remote";
+  if (isRemoteServerId(serverId)) return "remote";
   return undefined;
 }
 

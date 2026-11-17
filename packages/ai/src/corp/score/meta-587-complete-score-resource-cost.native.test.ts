@@ -30,7 +30,7 @@ it("finishes the equally valuable installed agenda through the cheaper complete 
   const advance = input.legalActions.find(
     (a: { type: string; source: string }) =>
       a.type === "advance_card" &&
-      a.source === "corp_65_1",
+      a.source === "cel",
   );
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(advance.actionId);
@@ -40,7 +40,7 @@ it("finishes the equally valuable installed agenda through the cheaper complete 
   expect(p.selectionAuthority).toBe("turn_plan_commitment");
   expect(p.selectedPlan!.moduleId).toBe("corp.score_agenda");
   expect(p.rootPlanInstanceId).toBe(
-    "plan:corp.score_agenda:agenda%3Acorp_65_1%3Aremote_1",
+    "plan:corp.score_agenda:agenda%3Acel%3Ar1",
   );
   expect(p.leafExecutorInstanceId).toBe(p.rootPlanInstanceId);
   expect(p.selectedStep!.stepId).toContain(":advance_agenda");

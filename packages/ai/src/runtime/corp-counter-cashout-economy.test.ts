@@ -153,7 +153,7 @@ function inputWithAsset(
     server("rd"),
     server("archives"),
     server(
-      "remote_1",
+      "r1",
       [],
       [
         visibleCard(INSTANCE_ID, "corp", "asset", {
@@ -182,7 +182,7 @@ function cardAction(
     { clicks, credits },
     {
       source: INSTANCE_ID,
-      payload: { cardId: INSTANCE_ID, serverId: "remote_1" },
+      payload: { cardId: INSTANCE_ID, serverId: "r1" },
     },
   );
 }

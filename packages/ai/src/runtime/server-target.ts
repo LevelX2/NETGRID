@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 
 export type CentralServerId = "hq" | "rd" | "archives";
@@ -11,7 +12,7 @@ export function centralServerId(
 }
 
 export function isRemoteServerTarget(serverId: string | undefined): boolean {
-  return serverId === "new_remote" || serverId?.startsWith("remote_") === true;
+  return serverId === "new_remote" || isRemoteServerId(serverId) === true;
 }
 
 export function serverBlocksStealthBitPayments(

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { VisibleCard } from "@netgrid/shared";
 import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
@@ -146,7 +147,7 @@ describe("Corp remote maturity policy", () => {
   it("keeps independently known rez subsets when one candidate quote is unknown", () => {
     const knownIce: VisibleCard = {
       instanceId: "known-ice",
-      definitionId: "known-ice-definition",
+      definitionId: syntheticCardDefinitionId("known-ice-definition"),
       title: "Known ICE",
       known: true,
       type: "ice",
@@ -156,8 +157,8 @@ describe("Corp remote maturity policy", () => {
       effectiveRezCostQuote: {
         context: "installed",
         cardId: "known-ice",
-        targetServerId: "remote_1",
-        projectedServerId: "remote_1",
+        targetServerId: "r1",
+        projectedServerId: "r1",
         expiresAtStateVersion: 19,
         complete: true,
         costKind: "fixed",
@@ -168,14 +169,14 @@ describe("Corp remote maturity policy", () => {
       effectivePostRezRunQuote: {
         context: "installed_post_rez",
         cardId: "known-ice",
-        iceDefinitionId: "known-ice-definition",
-        targetServerId: "remote_1",
-        projectedServerId: "remote_1",
+        iceDefinitionId: syntheticCardDefinitionId("known-ice-definition"),
+        targetServerId: "r1",
+        projectedServerId: "r1",
         expiresAtStateVersion: 19,
         complete: true,
         effectiveRunQuote: {
           iceInstanceId: "known-ice",
-          iceDefinitionId: "known-ice-definition",
+          iceDefinitionId: syntheticCardDefinitionId("known-ice-definition"),
           effectiveStrength: 0,
           subroutines: [],
         },
@@ -183,7 +184,7 @@ describe("Corp remote maturity policy", () => {
     };
     const unknownIce: VisibleCard = {
       instanceId: "unknown-ice",
-      definitionId: "unknown-ice-definition",
+      definitionId: syntheticCardDefinitionId("unknown-ice-definition"),
       title: "Unknown quote ICE",
       known: true,
       type: "ice",
@@ -194,7 +195,7 @@ describe("Corp remote maturity policy", () => {
 
     const maturity = assessCorpRemoteMaturityFromVisibleServer({
       observedAtStateVersion: 19,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       targetBand: "score_window",
       serverIce: [knownIce, unknownIce],
       runnerRig: [],

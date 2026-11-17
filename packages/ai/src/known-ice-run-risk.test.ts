@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type {
@@ -173,12 +174,12 @@ describe("known visible ICE run risk", () => {
 
   it("keeps a visible remote agenda runnable through unavoidable Hunter risk [legacy_compare]", () => {
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
-    const run = runAction("run-remote-1", "remote_1");
+    const run = runAction("run-remote-1", "r1");
     const gain = gainCreditAction("gain-credit");
     const input = aiInput({
       credits: 2,
       servers: [
-        server("remote_1", {
+        server("r1", {
           ice: [hunterTraceTagIce("remote-hunter")],
           root: [
             visibleCard("remote-agenda", {
@@ -192,7 +193,7 @@ describe("known visible ICE run risk", () => {
       ],
       legalActions: [run, gain],
     });
-    bindSyntheticAgendaStealQuotes(input, "remote_1", 0, {
+    bindSyntheticAgendaStealQuotes(input, "r1", 0, {
       "remote-agenda": 0,
     });
 
@@ -206,8 +207,8 @@ describe("known visible ICE run risk", () => {
     expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
     expect(evaluation).toMatchObject({
       actionId: run.actionId,
-      targetServerId: "remote_1",
-      accessServerId: "remote_1",
+      targetServerId: "r1",
+      accessServerId: "r1",
       accessPayoff: "agenda",
       knownAccessState: "known_payoff",
       pathPassability: "reachable",
@@ -223,12 +224,12 @@ describe("known visible ICE run risk", () => {
 
   it("fails closed when a visible remote agenda has no exact access route through unknown ICE [legacy_compare]", () => {
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
-    const run = runAction("run-remote-1", "remote_1");
+    const run = runAction("run-remote-1", "r1");
     const gain = gainCreditAction("gain-credit");
     const input = aiInput({
       credits: 2,
       servers: [
-        server("remote_1", {
+        server("r1", {
           ice: [
             visibleCard("unknown-ice", {
               type: "ice",
@@ -257,7 +258,7 @@ describe("known visible ICE run risk", () => {
 
     expect(evaluation).toMatchObject({
       actionId: run.actionId,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       accessPayoff: "agenda",
       routeQuote: {
         reachability: "conditional_access",
@@ -517,7 +518,7 @@ function traceEffectIce(
 ): VisibleCard {
   const ice: VisibleCard = {
     instanceId,
-    definitionId: "test_visible_trace_effect_ice",
+    definitionId: syntheticCardDefinitionId("test_visible_trace_effect_ice"),
     title: "Trace Risk ICE",
     type: "ice",
     subtypes: ["sentry", "trace"],
@@ -531,7 +532,7 @@ function traceEffectIce(
       {
         id: `${instanceId}_trace`,
         type: "initiate_trace",
-        sourceDefinitionId: "test_visible_trace_effect_ice",
+        sourceDefinitionId: syntheticCardDefinitionId("test_visible_trace_effect_ice"),
         sourceTitle: "Trace Risk ICE",
         traceLimit: 5,
         traceSuccessEffect: effect,
@@ -577,7 +578,7 @@ function engineRunnerTurnWithRezzedIce(
 
 function addCorpIceToServerForTest(
   state: GameState,
-  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  serverId: "hq" | "rd" | "archives" | `r${number}`,
   definitionId: number,
 ): CardInstanceId {
   const id =

@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -86,7 +87,7 @@ export function corpLayeredIceStagingParent(
   exactExecutableScoreProjectAvailable: boolean,
 ): CorpLayeredIceStagingParent | undefined {
   if (
-    (serverId !== "new_remote" && !serverId.startsWith("remote_")) ||
+    (serverId !== "new_remote" && !isRemoteServerId(serverId)) ||
     materialImmediateLiquidityAlternativeExists ||
     exactExecutableScoreProjectAvailable
   ) {

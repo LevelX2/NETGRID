@@ -86,7 +86,7 @@ describe("Runner encounter remote payoff", () => {
     );
     input.playerView.servers = [
       server(
-        "remote_1",
+        "r1",
         [ice],
         [
           visibleCard("campaign", "corp", "asset", {
@@ -99,10 +99,10 @@ describe("Runner encounter remote payoff", () => {
       ),
     ];
     input.playerView.run = {
-      runId: "run_1",
-      attackedServerId: "remote_1",
+      runId: 1,
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       encounteredIce: ice,
       successful: false,
     };
@@ -171,7 +171,7 @@ describe("Runner encounter remote payoff", () => {
     input.playerView.own.credits = 4;
     input.playerView.servers = [server("rd", [ice])];
     input.playerView.run = {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -191,7 +191,7 @@ describe("Runner encounter remote payoff", () => {
       context.encounterRemotePayoffAfterBreakAssessment(
         input,
         server(
-          "remote_1",
+          "r1",
           [],
           [
             visibleCard("empty-campaign", "corp", "asset", {

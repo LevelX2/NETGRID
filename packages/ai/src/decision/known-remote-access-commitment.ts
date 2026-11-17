@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import {
@@ -419,7 +420,7 @@ function knownRemoteContestReserve(input: AiDecisionInput): number {
   let visibleThreat = false;
   let urgentThreat = false;
   for (const server of input.playerView.servers) {
-    if (!server.id.startsWith("remote_") || server.root.length === 0) continue;
+    if (!isRemoteServerId(server.id) || server.root.length === 0) continue;
     if (
       server.root.some(
         (card) =>

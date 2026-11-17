@@ -223,7 +223,7 @@ describe("RealEngineDecisionCorpus", () => {
     expect(
       hasServerTargetContext(
         sampleFor(samples, "runner_real_remote_score_threat"),
-        "remote_1",
+        "r1",
       ),
     ).toBe(true);
   });
@@ -235,7 +235,7 @@ describe("RealEngineDecisionCorpus", () => {
     for (const [scenarioId, serverId] of [
       ["runner_real_safe_hq_access", "hq"],
       ["runner_real_safe_rd_access", "rd"],
-      ["runner_real_remote_score_threat", "remote_1"],
+      ["runner_real_remote_score_threat", "r1"],
     ] as const) {
       const scenario = scenarioFor(scenarios, scenarioId);
       const sample = sampleFor(samples, scenarioId);
@@ -345,9 +345,9 @@ describe("RealEngineDecisionCorpus", () => {
       "runner_real_target_choice_hq_remote_mix",
     );
     const serverAction = serverScenario.input.legalActions.find(
-      (action) => action.payload?.serverId === "remote_1",
+      (action) => action.payload?.serverId === "r1",
     );
-    if (!serverAction) throw new Error("Missing remote_1 run action");
+    if (!serverAction) throw new Error("Missing r1 run action");
     const serverReport = buildTargetChoiceShadowReport({
       action: serverAction,
       candidate: candidateFor(samples, serverScenario, serverAction),
@@ -357,7 +357,7 @@ describe("RealEngineDecisionCorpus", () => {
           opportunity: "remote_contest_window",
           priority: "critical",
           side: "runner",
-          targetId: "remote_1",
+          targetId: "r1",
           evidence: ["test:real_engine_remote_target"],
         },
       ],
@@ -368,7 +368,7 @@ describe("RealEngineDecisionCorpus", () => {
       selectedTargetsCreated: false,
       wouldSelect: {
         requirementId: "payload.serverId",
-        optionId: "remote_1",
+        optionId: "r1",
         confidence: "high",
       },
     });
@@ -436,9 +436,9 @@ describe("RealEngineDecisionCorpus", () => {
       "runner_real_target_choice_hq_remote_mix",
     );
     const serverAction = serverScenario.input.legalActions.find(
-      (action) => action.payload?.serverId === "remote_1",
+      (action) => action.payload?.serverId === "r1",
     );
-    if (!serverAction) throw new Error("Missing remote_1 run action");
+    if (!serverAction) throw new Error("Missing r1 run action");
     const discardScenario = scenarioFor(
       scenarios,
       "runner_real_target_choice_discard_choice",

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
@@ -27,7 +28,7 @@ describe("runnerHqSuccessWindowSetupAssessment", () => {
       ice: [
         {
           instanceId: "rezzed-ice",
-          definitionId: "rezzed-ice",
+          definitionId: syntheticCardDefinitionId("rezzed-ice"),
           title: "Rezzed ICE",
           owner: "corp",
           controller: "corp",

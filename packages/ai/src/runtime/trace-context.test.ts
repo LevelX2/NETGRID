@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -9,7 +10,7 @@ describe("latestTraceContext", () => {
     input.playerView.stateVersion = 2;
     input.eventTail = [
       {
-        eventId: "trace-started",
+        eventId: 3,
         type: "play_operation",
         stateVersionBefore: 1,
         stateVersionAfter: 2,
@@ -58,7 +59,7 @@ describe("latestTraceContext", () => {
     input.playerView.opponent.rig = [
       {
         instanceId: "link-card",
-        definitionId: "visible-link-card",
+        definitionId: syntheticCardDefinitionId("visible-link-card"),
         known: true,
         baseLink: 2,
       },
@@ -84,7 +85,7 @@ describe("latestTraceContext", () => {
     };
     input.eventTail = [
       {
-        eventId: "corp-bid",
+        eventId: 4,
         type: "resolve_choice",
         stateVersionBefore: 2,
         stateVersionAfter: 3,
@@ -98,7 +99,7 @@ describe("latestTraceContext", () => {
         },
       },
       {
-        eventId: "other-trace",
+        eventId: 5,
         type: "resolve_choice",
         stateVersionBefore: 3,
         stateVersionAfter: 4,

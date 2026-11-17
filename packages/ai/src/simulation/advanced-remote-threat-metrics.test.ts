@@ -5,24 +5,24 @@ import { summarizeAdvancedRemoteThreatMetrics } from "./advanced-remote-threat-m
 type Entry = AiSimulationSummary["actionSequence"][number];
 
 describe("advanced Remote threat metrics", () => {
-  const contestable = { serverId: "remote_1", contestable: true };
+  const contestable = { serverId: "r1", contestable: true };
   const blocked = {
-    serverId: "remote_2",
+    serverId: "r2",
     contestable: false,
     blocker: "ice_cost",
   } as const;
 
   it("counts qualifying contests and assigns a block to its own server", () => {
     const actionSequence = [
-      entry("remote_1", {
+      entry("r1", {
         runnerAdvancedRemoteThreats: [contestable, blocked],
       }),
-      entry("remote_2", {
+      entry("r2", {
         runnerAdvancedRemoteThreats: [
           { ...blocked, blocker: "post_run_reserve" },
         ],
       }),
-      entry("remote_1", { runnerAdvancedRemoteThreats: [contestable] }),
+      entry("r1", { runnerAdvancedRemoteThreats: [contestable] }),
     ];
     expect(
       summarizeAdvancedRemoteThreatMetrics([summary(actionSequence)]),
@@ -40,10 +40,10 @@ describe("advanced Remote threat metrics", () => {
 
   it("does not credit a previous attempt when that server later becomes contestable", () => {
     const actionSequence = [
-      entry("remote_2", { runnerAdvancedRemoteThreats: [blocked] }),
+      entry("r2", { runnerAdvancedRemoteThreats: [blocked] }),
       entry("hq", {
         runnerAdvancedRemoteThreats: [
-          { serverId: "remote_2", contestable: true },
+          { serverId: "r2", contestable: true },
         ],
       }),
     ];

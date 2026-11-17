@@ -66,7 +66,7 @@ it("spends an affordable mandatory ETR payment on the last action of the bound t
   expect(d.fallbackUsed).toBe(false);
   expect(d.timeoutUsed).toBe(false);
   expect(p.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_1",
+    "plan:runner.contest_remote:remote%3Ar1",
   );
   expect(p.selectedPlan!.moduleId).toBe("runner.convert_run_window");
   expect(p.route).toMatchObject({
@@ -96,7 +96,7 @@ it.each([
   if (boundary === "stale_action") action.expiresAtStateVersion -= 1;
   if (boundary === "known_mixed_encounter") {
     const remote = input.playerView.servers.find(
-      (server: { id: string }) => server.id === "remote_1",
+      (server: { id: string }) => server.id === "r1",
     );
     const encountered = input.playerView.run.encounteredIce;
     remote.ice[0] = { ...encountered, instanceId: remote.ice[0].instanceId };
@@ -138,7 +138,7 @@ it("keeps the free ETR break after paying Skeleton's strength in the same termin
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.timeoutUsed).toBe(false);
   expect(decision.decisionDebug!.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
     selectedPlan: { moduleId: "runner.convert_run_window" },
     route: { actionId: action.actionId, stateVersion: 342 },
   });

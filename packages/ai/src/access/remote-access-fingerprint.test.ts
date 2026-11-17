@@ -7,7 +7,7 @@ describe("remote access fingerprint", () => {
     const definitionId = syntheticCardDefinitionId("asset-a");
     expect(
       remoteAccessFingerprint({
-        serverId: "remote_1",
+        serverId: "r1",
         root: [
           {
             instanceId: "asset-1",
@@ -19,17 +19,17 @@ describe("remote access fingerprint", () => {
         ],
       }),
     ).toBe(
-      `server:remote_1;root_count:1;pos:0|instance:asset-1|definition:${definitionId}|known:true|rezzed:true|adv:0|counters:bit:3`,
+      `server:r1;root_count:1;pos:0|instance:asset-1|definition:${definitionId}|known:true|rezzed:true|adv:0|counters:bit:3`,
     );
   });
 
   it("changes when the same definition is replaced by another instance", () => {
     const previous = remoteAccessFingerprint({
-      serverId: "remote_1",
+      serverId: "r1",
       root: [{ instanceId: "a", definitionId: syntheticCardDefinitionId("same"), known: true }],
     });
     const current = remoteAccessFingerprint({
-      serverId: "remote_1",
+      serverId: "r1",
       root: [{ instanceId: "b", definitionId: syntheticCardDefinitionId("same"), known: true }],
     });
 
@@ -38,7 +38,7 @@ describe("remote access fingerprint", () => {
 
   it("changes when visible counters or root count changes", () => {
     const previous = remoteAccessFingerprint({
-      serverId: "remote_1",
+      serverId: "r1",
       root: [
         {
           instanceId: "a",
@@ -49,7 +49,7 @@ describe("remote access fingerprint", () => {
       ],
     });
     const current = remoteAccessFingerprint({
-      serverId: "remote_1",
+      serverId: "r1",
       root: [
         {
           instanceId: "a",

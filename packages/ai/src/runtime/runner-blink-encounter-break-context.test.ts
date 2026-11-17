@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { visibleRootIsKnownAgenda } from "./visible-root-agenda";
 import type { LegalAction, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
@@ -72,7 +73,7 @@ describe("runner Blink encounter break context", () => {
     ];
     input.playerView.servers = [
       server(
-        "remote_1",
+        "r1",
         [encounteredIce],
         [
           {
@@ -84,9 +85,9 @@ describe("runner Blink encounter break context", () => {
       ),
     ];
     input.playerView.run = {
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       encounteredIce,
       successful: false,
     };
@@ -108,7 +109,7 @@ describe("runner Blink encounter break context", () => {
       buildRandomBreakOrDamageRiskAssessment,
       isImmediateSafetyThreatSubroutine: () => true,
       isRemoteServerTarget: (serverId) =>
-        serverId?.startsWith("remote_") ?? false,
+        isRemoteServerId(serverId) ?? false,
       visibleRootIsKnownAgenda: (card) => card.known && card.type === "agenda",
     }).randomBreakOrDamageRiskAssessmentForEncounterBreak(input, action);
 
@@ -181,11 +182,11 @@ function assessmentForRootCard(rootCard: VisibleCard) {
     visibleCard("grip-1", "runner", "event"),
     visibleCard("grip-2", "runner", "event"),
   ];
-  input.playerView.servers = [server("remote_1", [encounteredIce], [rootCard])];
+  input.playerView.servers = [server("r1", [encounteredIce], [rootCard])];
   input.playerView.run = {
-    attackedServerId: "remote_1",
+    attackedServerId: "r1",
     phase: "encounter_ice",
-    position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+    position: { kind: "ice", serverId: "r1", iceIndex: 0 },
     encounteredIce,
     successful: false,
   };
@@ -202,7 +203,7 @@ function assessmentForRootCard(rootCard: VisibleCard) {
     buildRandomBreakOrDamageRiskAssessment,
     isImmediateSafetyThreatSubroutine: () => false,
     isRemoteServerTarget: (serverId) =>
-      serverId?.startsWith("remote_") ?? false,
+      isRemoteServerId(serverId) ?? false,
     visibleRootIsKnownAgenda: (card) => card.known && card.type === "agenda",
   }).randomBreakOrDamageRiskAssessmentForEncounterBreak(input, action);
 }

@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import {
   runnerGeneralCreditsAfterCompletedPath,
   runnerRunPathCreditBudgetAfterEncounter,
@@ -209,7 +210,7 @@ export function currentEncounterMitigationForAction(
       currentRunPathContext(input),
     );
     if (!path.canReachAccess) return true;
-    const stealCost = server.id.startsWith("remote_")
+    const stealCost = isRemoteServerId(server.id)
       ? runnerAgendaStealCreditRequirement(input, server.id)
       : undefined;
     return (

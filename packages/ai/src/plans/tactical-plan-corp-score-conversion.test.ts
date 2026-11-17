@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import {
   CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
@@ -38,7 +39,7 @@ describe("Corp same-turn score conversion", () => {
       const path = bestCorpSameTurnScoreConversionPath(input);
       expect(path).toMatchObject({
         agendaCardId: agenda.instanceId,
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         agendaPoints: 2,
         sameTurnGuaranteed: true,
         creditsRequired: clicks === 3 ? 2 : 10,
@@ -147,7 +148,7 @@ describe("Corp same-turn score conversion", () => {
           placement: "root",
         }),
         action("replace-vapor", "install_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
           rootReplacement: "asset_to_agenda",
         }),
@@ -192,12 +193,12 @@ describe("Corp same-turn score conversion", () => {
       root: [counterBank("bank", 2)],
       actions: [
         action("replace-bank", "install_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
           rootReplacement: "asset_to_agenda",
         }),
         action("advance", "advance_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
     });
@@ -216,18 +217,18 @@ describe("Corp same-turn score conversion", () => {
       root: [counterBank("empty-bank", 0)],
       actions: [
         action("replace-empty-bank", "install_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
           rootReplacement: "asset_to_agenda",
         }),
         action("advance", "advance_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
     });
 
     expect(bestCorpSameTurnScoreConversionPath(input)).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       steps: [
         expect.objectContaining({
           kind: "install_score_target",
@@ -250,12 +251,12 @@ describe("Corp same-turn score conversion", () => {
       root: [card("ordinary-asset", "asset", { advancementCounters: 2 })],
       actions: [
         action("replace-ordinary-asset", "install_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
           rootReplacement: "asset_to_agenda",
         }),
         action("advance", "advance_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
     });
@@ -278,18 +279,18 @@ describe("Corp same-turn score conversion", () => {
       root: [counterBank("terminal-bank", 2)],
       actions: [
         action("terminal-replacement", "install_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
           rootReplacement: "asset_to_agenda",
         }),
         action("terminal-advance", "advance_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
     });
 
     expect(bestCorpSameTurnScoreConversionPath(input)).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       steps: [
         expect.objectContaining({
           kind: "install_score_target",
@@ -317,7 +318,7 @@ describe("Corp same-turn score conversion", () => {
       root: [agenda, source],
       actions: [
         action("advance-agenda", "advance_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
         }),
         action("transfer", "activated_card_ability", source.instanceId, {
           scoreConversionCapability: "move_advancement",
@@ -1155,7 +1156,7 @@ function corpInput(params: {
         { id: "rd", label: "R&D", ice: [], root: [] },
         { id: "archives", label: "Archives", ice: [], root: [] },
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [],
           root: params.root ?? [],
@@ -1195,7 +1196,7 @@ function card(
 
 function counterBank(instanceId: string, advancementCounters: number) {
   return card(instanceId, "asset", {
-    definitionId: "synthetic-counter-bank",
+    definitionId: syntheticCardDefinitionId("synthetic-counter-bank"),
     advancementCounters,
     rezzed: true,
     counterBankPreparationQuote: {
@@ -1203,7 +1204,7 @@ function counterBank(instanceId: string, advancementCounters: number) {
       context: "corp_counter_bank_preparation",
       sourceCardId: instanceId,
       expiresAtStateVersion: 1,
-      location: { kind: "installed_root", serverId: "remote_1" },
+      location: { kind: "installed_root", serverId: "r1" },
       advancementCounters,
       advanceableBeforeRez: true,
       activatedAbilitiesRequireRez: true,

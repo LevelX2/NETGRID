@@ -13,7 +13,7 @@ describe("SelfplayDecisionSnapshotMining", () => {
     const summary = selfplaySummary([
       selfplayAction("runner", 1, "start_run", {
         selectedActionId: "run-remote-1",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         reasonCode: "runner.plan.remote_contest",
         evidence: ["known_no_current_payoff"],
         actionAlternatives: [
@@ -23,7 +23,7 @@ describe("SelfplayDecisionSnapshotMining", () => {
       }),
       selfplayAction("runner", 2, "start_run", {
         selectedActionId: "run-remote-2",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         reasonCode: "runner.plan.remote_contest",
         evidence: ["known_no_current_payoff"],
         runnerRunPenalizedAsKnownNoAccess: true,

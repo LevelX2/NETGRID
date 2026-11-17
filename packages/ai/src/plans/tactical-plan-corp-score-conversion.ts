@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { actionClickCost, actionCreditCost } from "../runtime/action-cost";
 import { requireVisibleCardDefinition } from "../runtime/visible-agenda-facts";
 import { quoteAgendaDefinitionScorePoints } from "@netgrid/engine";
@@ -598,7 +599,7 @@ function visitCapabilityCombinations(params: {
 
 function scoreTargets(input: AiDecisionInput): ScoreTarget[] {
   const installed = input.playerView.servers
-    .filter((server) => server.id.startsWith("remote_"))
+    .filter((server) => isRemoteServerId(server.id))
     .flatMap((server) =>
       server.root
         .filter(isVisibleAgenda)

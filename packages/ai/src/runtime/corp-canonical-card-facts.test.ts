@@ -146,7 +146,7 @@ describe("canonical Corp card facts", () => {
       corpDirectTagOperationProfile(518),
     ).toMatchObject({
       capabilityKey: "corp_utility_encounter_tag",
-      sourceCapabilityId: "518:corp_utility_encounter_tag",
+      sourceCapabilityId: 632,
     });
     expect(
       corpTaggedCreditDenialOperationProfile(497),

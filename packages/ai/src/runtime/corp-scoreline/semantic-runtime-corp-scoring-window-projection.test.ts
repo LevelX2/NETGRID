@@ -66,14 +66,14 @@ describe("scoringWindowHorizon", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
     const input = corpInput({
       ownClicks: 5,
       hq: [agenda],
-      servers: protectedCentralServers([remoteServer("remote_1", [])]),
+      servers: protectedCentralServers([remoteServer("r1", [])]),
     });
 
     expect(scoringWindowHorizon(input, action, testDependencies())).toBe(
@@ -88,14 +88,14 @@ describe("scoringWindowHorizon", () => {
     const action = corpAction(
       "install-no-click-agenda",
       "install_card",
-      { cardType: "agenda", placement: "root", serverId: "remote_1" },
+      { cardType: "agenda", placement: "root", serverId: "r1" },
       agenda.instanceId,
     );
     action.costs = [{ clicks: 0 }];
     const input = corpInput({
       ownClicks: 3,
       hq: [agenda],
-      servers: protectedCentralServers([remoteServer("remote_1", [])]),
+      servers: protectedCentralServers([remoteServer("r1", [])]),
     });
     expect(scoringWindowHorizon(input, action, testDependencies())).toBe("immediate");
     input.playerView.own.credits = 2;
@@ -119,7 +119,7 @@ describe("scoringWindowHorizon", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -131,7 +131,7 @@ describe("scoringWindowHorizon", () => {
       ownClicks: 3,
       ownCredits: 12,
       hq: [agenda, consultants],
-      servers: protectedCentralServers([remoteServer("remote_1", [])]),
+      servers: protectedCentralServers([remoteServer("r1", [])]),
     });
 
     expect(scoringWindowHorizon(input, action, testDependencies())).toBe(
@@ -149,7 +149,7 @@ describe("scoringWindowHorizon", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -160,7 +160,7 @@ describe("scoringWindowHorizon", () => {
       ownClicks: 3,
       ownCredits: 12,
       hq: [agenda, consultants],
-      servers: protectedCentralServers([remoteServer("remote_1", [])]),
+      servers: protectedCentralServers([remoteServer("r1", [])]),
     });
 
     expect(scoringWindowHorizon(input, action, testDependencies())).toBe(
@@ -179,8 +179,8 @@ describe("scoringWindowRezBudget", () => {
           context: "installed",
           complete: false,
           cardId: ice.instanceId,
-          targetServerId: "remote_1",
-          projectedServerId: "remote_1",
+          targetServerId: "r1",
+          projectedServerId: "r1",
           expiresAtStateVersion: 1,
         };
       },
@@ -203,11 +203,11 @@ describe("scoringWindowRezBudget", () => {
       const input = corpInput({
         ownCredits: 5,
         servers: protectedCentralServers([
-          remoteServer("remote_1", [wallIce("remote-wall")]),
+          remoteServer("r1", [wallIce("remote-wall")]),
         ]),
       });
       const server = input.playerView.servers.find(
-        (candidate) => candidate.id === "remote_1",
+        (candidate) => candidate.id === "r1",
       )!;
       corruptQuote(server.ice[0]);
 
@@ -239,11 +239,11 @@ describe("scoringWindowRezBudget", () => {
     const input = corpInput({
       ownCredits: 5,
       servers: protectedCentralServers([
-        remoteServer("remote_1", [wallIce("remote-wall")]),
+        remoteServer("r1", [wallIce("remote-wall")]),
       ]),
     });
     const server = input.playerView.servers.find(
-      (candidate) => candidate.id === "remote_1",
+      (candidate) => candidate.id === "r1",
     )!;
 
     expect(
@@ -263,14 +263,14 @@ describe("scoringWindowRezBudget", () => {
     const input = corpInput({
       ownCredits: 2,
       servers: protectedCentralServers([
-        remoteServer("remote_1", [
+        remoteServer("r1", [
           wallIce("rezzed-wall", { rezzed: true, rezCost: 0 }),
           wallIce("free-unrezzed-wall", { rezCost: 0 }),
         ]),
       ]),
     });
     const server = input.playerView.servers.find(
-      (candidate) => candidate.id === "remote_1",
+      (candidate) => candidate.id === "r1",
     )!;
 
     expect(scoringWindowRezBudget(input, server, 2, 3)).toMatchObject({
@@ -291,7 +291,7 @@ function advanceAction(cardId: string) {
   return corpAction(
     `advance-${cardId}`,
     "advance_card",
-    { cardId, serverId: "remote_1" },
+    { cardId, serverId: "r1" },
     cardId,
   );
 }
@@ -304,7 +304,7 @@ function scorelineInput(
     ownClicks,
     servers: protectedCentralServers([
       remoteServer(
-        "remote_1",
+        "r1",
         [wallIce("remote-wall", { rezzed: true })],
         [agenda],
       ),

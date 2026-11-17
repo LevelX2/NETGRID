@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { visibleCorpRootProvidesRemoteProtection } from "./semantic-runtime-corp-remote-reachability";
 
 const remote = {
-  id: "remote_1",
+  id: "r1",
   ice: [card("remote-ice", "test_ice", { type: "ice", rezzed: true })],
   root: [],
 };

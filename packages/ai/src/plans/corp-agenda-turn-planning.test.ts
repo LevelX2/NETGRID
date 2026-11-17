@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { CorpEconomyNeedSignal } from "../corp/economy/economy-types";
 import type { CorpDefenseSignal } from "./corp-defense-contracts";
 import type { CorpScoreProjectSignal } from "./corp-score-contracts";
@@ -192,7 +193,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
       scoreProject,
       [
         agendaCandidate(),
-        iceCandidate("remote-ice", "remote_1"),
+        iceCandidate("remote-ice", "r1"),
         iceCandidate("rd-ice", "rd"),
         economyCandidate(),
       ],
@@ -262,7 +263,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
       const scoreProject = project(2);
       const candidates = [
         agendaCandidate(),
-        iceCandidate("remote-ice", "remote_1"),
+        iceCandidate("remote-ice", "r1"),
         iceCandidate("rd-ice", "rd"),
       ];
       const providers = fundedProviders(scoreProject);
@@ -294,7 +295,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
       // Each install+rez costs 4 and individually preserves the 3-credit score reserve.
       // The combined 8-credit defense cannot preserve that reserve from 10 credits.
       if (kind === "joint_credit_gap") {
-        remote.projection = protectionProjection("remote-ice", "remote_1", 4);
+        remote.projection = protectionProjection("remote-ice", "r1", 4);
         central.installRoute = {
           ...central.installRoute,
           projection: protectionProjection("rd-ice", "rd", 4),
@@ -319,7 +320,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
     const input = decisionInput();
     const candidates = [
       agendaCandidate(),
-      iceCandidate("remote-hardening", "remote_1"),
+      iceCandidate("remote-hardening", "r1"),
     ];
     const slice = buildSlice(input, project(0), candidates);
 
@@ -331,14 +332,14 @@ describe("Corp agenda turn-planning vertical slice", () => {
     expect(slice.selectionReason).toBe(
       "engine_randomized_opening_rush_posture",
     );
-    expect(slice.opportunityKey).toBe("opening-rush:2:agenda-1:remote_1");
+    expect(slice.opportunityKey).toBe("opening-rush:2:agenda-1:r1");
   });
 
   it("is deterministic under candidate enumeration order", () => {
     const input = decisionInput();
     const candidates = [
       agendaCandidate(),
-      iceCandidate("remote-ice", "remote_1"),
+      iceCandidate("remote-ice", "r1"),
       iceCandidate("rd-ice", "rd"),
       economyCandidate(),
     ];
@@ -358,7 +359,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
 
     const invalidated = structuredClone(input);
     invalidated.playerView.servers = invalidated.playerView.servers.filter(
-      (server) => server.id !== "remote_1",
+      (server) => server.id !== "r1",
     );
     expect(campaignDisposition(invalidated, project(2))).toBe("abandon");
   });
@@ -371,9 +372,9 @@ describe("Corp agenda turn-planning vertical slice", () => {
       feasible: false,
       protectionNeed: {
         ...project(2).protectionNeed,
-        needId: "score-protection:agenda-1:remote_1:revision-2",
-        parentProjectId: "agenda:agenda-1:remote_1",
-        targetServerId: "remote_1",
+        needId: "score-protection:agenda-1:r1:revision-2",
+        parentProjectId: "agenda:agenda-1:r1",
+        targetServerId: "r1",
         observedAtStateVersion: input.playerView.stateVersion,
       },
     } as unknown as CorpScoreProjectSignal;
@@ -381,10 +382,10 @@ describe("Corp agenda turn-planning vertical slice", () => {
     const slice = buildSlice(
       input,
       blocked,
-      [iceCandidate("remote-hardening", "remote_1"), economyCandidate()],
+      [iceCandidate("remote-hardening", "r1"), economyCandidate()],
       [
         scoreProtectionProvider(
-          "score-protection:agenda-1:remote_1:revision-2",
+          "score-protection:agenda-1:r1:revision-2",
           "remote-hardening",
         ),
       ],
@@ -394,7 +395,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
       expect.objectContaining({
         family: "safe_setup",
         currentActionId: "remote-hardening",
-        parentNeedId: "score-protection:agenda-1:remote_1:revision-2",
+        parentNeedId: "score-protection:agenda-1:r1:revision-2",
         providerModuleId: "corp.defend_servers",
         expectedNeedProgress: "monotonic_protection_improvement",
       }),
@@ -653,11 +654,11 @@ function buildSlice(
 
 function project(agendaPoints: number): CorpScoreProjectSignal {
   return {
-    projectId: "agenda:agenda-1:remote_1",
-    agendaDefinitionId: "agenda-definition",
+    projectId: "agenda:agenda-1:r1",
+    agendaDefinitionId: syntheticCardDefinitionId("agenda-definition"),
     agendaInstanceId: "agenda-1",
     agendaPoints,
-    serverId: "remote_1",
+    serverId: "r1",
     actionIds: ["install-agenda"],
     phase: "install_agenda",
     sameTurnCloseout: false,
@@ -668,9 +669,9 @@ function project(agendaPoints: number): CorpScoreProjectSignal {
         creditBreakdown: [{ reserveId: "agenda", credits: 3 }],
         hardClickReserve: 0,
       },
-      needId: "score-protection:agenda:agenda-1:remote_1:revision-1",
-      parentProjectId: "agenda:agenda-1:remote_1",
-      targetServerId: "remote_1",
+      needId: "score-protection:agenda:agenda-1:r1:revision-1",
+      parentProjectId: "agenda:agenda-1:r1",
+      targetServerId: "r1",
       observedAtStateVersion: 20,
     } as unknown as NonNullable<CorpScoreProjectSignal["protectionNeed"]>,
     evidenceCode: "corp_opening_rush_engine_randomized",
@@ -680,10 +681,10 @@ function project(agendaPoints: number): CorpScoreProjectSignal {
       acceptancePercent: 50,
       quote: {
         schemaVersion: "corp-opening-rush-v1",
-        opportunityKey: "opening-rush:2:agenda-1:remote_1",
+        opportunityKey: "opening-rush:2:agenda-1:r1",
         agendaInstanceId: "agenda-1",
-        agendaDefinitionId: "agenda-definition",
-        targetServerId: "remote_1",
+        agendaDefinitionId: syntheticCardDefinitionId("agenda-definition"),
+        targetServerId: "r1",
         observedAtTurnSerial: 2,
         firstContestTurnSerial: 3,
         actionId: "install-agenda",
@@ -713,10 +714,10 @@ function scoreProtectionProvider(
 ): CorpDefenseSignal {
   return {
     kind: "score_protection_staging_install",
-    defenseId: "score-protection-staging:agenda-1:remote_1",
-    serverId: "remote_1",
+    defenseId: "score-protection-staging:agenda-1:r1",
+    serverId: "r1",
     phase: "install_ice",
-    parentProjectId: "agenda:agenda-1:remote_1",
+    parentProjectId: "agenda:agenda-1:r1",
     parentNeedId,
     delegatedPriorityClass: "P4",
     actionId,
@@ -766,14 +767,14 @@ function fundedProviders(
       effect: "satisfied",
       totalInstallAndRezCredits: 2,
       runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
-      projection: protectionProjection("remote-ice", "remote_1"),
+      projection: protectionProjection("remote-ice", "r1"),
     } as CorpDefenseSignal,
     {
       kind: "generic",
       phase: "install_ice",
       defenseId: "central:rd",
       serverId: "rd",
-      sourceDefinitionIds: ["rd-ice-definition"],
+      sourceDefinitionIds: [syntheticCardDefinitionId("rd-ice-definition")],
       sourceCardInstanceId: "rd-ice",
       actionIds: ["rd-ice"],
       urgent: false,
@@ -793,7 +794,7 @@ function agendaCandidate(): ActionSemanticCandidate {
     actionId: "install-agenda",
     semanticActionType: "install.card",
     sourceCardInstanceId: "agenda-1",
-    targetId: "remote_1",
+    targetId: "r1",
   });
 }
 
@@ -957,7 +958,7 @@ function decisionInput(): AiDecisionInput {
         { id: "rd", label: "R&D", ice: [], root: [] },
         { id: "archives", label: "Archives", ice: [], root: [] },
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [visibleCard("existing-remote-ice", "ice")],
           root: [],

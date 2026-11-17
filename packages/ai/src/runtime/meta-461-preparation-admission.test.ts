@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import type { AiDecisionInput } from "@netgrid/shared";
@@ -52,7 +53,7 @@ describe("real preparation admission in meta 461", () => {
     };
     bindExplicitZeroPublicStealQuotes(input, []);
     const preparation = input.legalActions.find(
-      (a) => a.type === "play_event" && a.source?.includes("promises-promises"),
+      (a) => a.type === "play_event" && referencesDefaultDeckCard(a.source, 177),
     )!;
     const targets = evaluateRunnerRunTargets({ input });
     const target = targets.find((r) => r.actionId === "runner.start_run.hq")!;
@@ -88,7 +89,7 @@ describe("real preparation admission in meta 461", () => {
     funded.playerView.opponent.handCount = 1;
     funded.playerView.publicEvents = [];
     funded.eventTail = [{
-      eventId: "known-hq-agenda",
+      eventId: (funded.playerView.stateVersion) + 1,
       type: "access_card",
       stateVersionBefore: funded.playerView.stateVersion - 1,
       stateVersionAfter: funded.playerView.stateVersion,
@@ -204,8 +205,8 @@ describe("real preparation admission in meta 461", () => {
     const rejected = input.legalActions.find((a) =>
       game === 19
         ? a.type === "install_card" &&
-          a.source === "runner_335_1"
-        : a.type === "play_event" && a.source?.includes("promises-promises"),
+          a.source === "c22h"
+        : a.type === "play_event" && referencesDefaultDeckCard(a.source, 177),
     );
     expect(rejected).toBeDefined();
     restoreAiRuntimeCheckpoint(
@@ -261,8 +262,8 @@ describe("preparation uses the executing owner's actual reserve and hand floor",
       .filter(
         (a) =>
           a.type === "play_event" &&
-          (a.source?.includes("prearranged-drop") ||
-            a.source?.includes("promises-promises")),
+          (referencesDefaultDeckCard(a.source, 176) ||
+            referencesDefaultDeckCard(a.source, 177)),
       )
       .map((a) => a.actionId);
     expect(rejected.length).toBeGreaterThan(0);
@@ -312,8 +313,8 @@ describe("preparation preserves an admitted parent after its own spend", () => {
       .filter(
         (a) =>
           a.type === "play_event" &&
-          (a.source?.includes("prearranged-drop") ||
-            a.source?.includes("promises-promises")),
+          (referencesDefaultDeckCard(a.source, 176) ||
+            referencesDefaultDeckCard(a.source, 177)),
       )
       .map((a) => a.actionId);
     if (game !== 13) expect(rejected.length).toBeGreaterThan(0);
@@ -359,7 +360,7 @@ describe("public expiring access payoff facts", () => {
     const last = consumed.eventTail.at(-1)!;
     consumed.eventTail.push({
       ...last,
-      eventId: "test-consumption",
+      eventId: (last.stateVersionAfter + 1) + 1,
       type: "access_card",
       stateVersionBefore: last.stateVersionAfter,
       stateVersionAfter: last.stateVersionAfter + 1,
@@ -373,7 +374,7 @@ describe("public expiring access payoff facts", () => {
     const different = structuredClone(input);
     different.eventTail.push({
       ...last,
-      eventId: "test-other-consumption",
+      eventId: (last.stateVersionAfter + 1) + 1,
       type: "access_card",
       stateVersionBefore: last.stateVersionAfter,
       stateVersionAfter: last.stateVersionAfter + 1,
@@ -407,7 +408,7 @@ it("keeps a genuinely convertible bonus and prioritizes its following access", (
     cp.runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toContain("promises-promises");
+  expect(referencesDefaultDeckCard(decision.actionId, 177)).toBe(true);
   expect(decision.evidence).toContain("plan_module:runner.pressure_central");
   expect(decision.fallbackUsed).toBe(false);
 });

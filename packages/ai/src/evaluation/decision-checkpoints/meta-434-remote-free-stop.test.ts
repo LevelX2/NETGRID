@@ -45,7 +45,7 @@ it.each([
   if (condition === "unknown_payoff") target.accessPayoff = "unknown";
   if (condition === "missing_outcome")
     for (const events of [input.eventTail, input.playerView.publicEvents])
-      delete events.find((e: { eventId: string }) => e.eventId === 96)!
+      delete events.find((e: { eventId: number }) => e.eventId === 96)!
         .publicPayload.result;
   expect(
     runnerRemoteRepeatedFreeStopEvidence(structuredClone(input), target),
@@ -92,7 +92,7 @@ it.each(["paid_defense", "next_turn", "new_installation"])(
     if (condition === "paid_defense")
       for (const events of [input.eventTail, input.playerView.publicEvents])
         events.find(
-          (e: { eventId: string }) => e.eventId === 95,
+          (e: { eventId: number }) => e.eventId === 95,
         )!.publicPayload.rezCostPaid = 1;
     if (condition === "next_turn") input.playerView.turnSerial++;
     if (condition === "new_installation")

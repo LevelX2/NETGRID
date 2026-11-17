@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
   candidateTargets,
@@ -159,7 +160,7 @@ function corpPrepareTargetValue(
 ): number {
   if (candidate.semanticActionType !== "install.card") return 0;
   const target = candidateTargets(candidate).find(
-    (targetId) => targetId === "new_remote" || targetId.startsWith("remote_"),
+    (targetId) => targetId === "new_remote" || isRemoteServerId(targetId),
   );
   if (!target || target === "new_remote") return 0;
   const server = context.input.playerView.servers.find(

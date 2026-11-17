@@ -91,8 +91,8 @@ function fixedPostRezWallServer(input: AiDecisionInput, cardId: string) {
       context: "installed",
       complete: true,
       cardId,
-      targetServerId: "remote_1",
-      projectedServerId: "remote_1",
+      targetServerId: "r1",
+      projectedServerId: "r1",
       expiresAtStateVersion: input.playerView.stateVersion,
       baseCredits: 3,
       finalCredits: 3,
@@ -104,16 +104,16 @@ function fixedPostRezWallServer(input: AiDecisionInput, cardId: string) {
       complete: true,
       cardId,
       iceDefinitionId: definitionId,
-      targetServerId: "remote_1",
-      projectedServerId: "remote_1",
+      targetServerId: "r1",
+      projectedServerId: "r1",
       expiresAtStateVersion: input.playerView.stateVersion,
       effectiveRunQuote: runQuote,
     },
   });
-  const target = server("remote_1", [wall]);
+  const target = server("r1", [wall]);
   input.playerView.servers = [
     ...input.playerView.servers.filter(
-      (candidate) => candidate.id !== "remote_1",
+      (candidate) => candidate.id !== "r1",
     ),
     target,
   ];

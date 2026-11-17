@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it, vi } from "vitest";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 
@@ -46,7 +47,7 @@ vi.mock(import("../../ai-hints"), async (importOriginal) => {
   };
 });
 
-const AI_HINTS_BY_CARD = mockedHints as Map<string, AiCardHint>;
+const AI_HINTS_BY_CARD = mockedHints as Map<number, AiCardHint>;
 
 describe("RunnerHandDevelopmentEvaluation", () => {
   it.each([0, 1])(
@@ -197,7 +198,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("classifies central access payoff from own hand without leaking card identity in redacted facts", () => {
     const accessCard = visibleCard("rd-interface-1", {
-      definitionId: "test-rd-interface",
+      definitionId: syntheticCardDefinitionId("test-rd-interface"),
       title: "R&D Interface",
       type: "hardware",
       installCost: 4,
@@ -301,7 +302,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     });
     const knownIce: VisibleCard = {
       instanceId: "known-hq-ice",
-      definitionId: "simple_barrier",
+      definitionId: syntheticCardDefinitionId("simple_barrier"),
       title: "Known ICE",
       type: "ice",
       owner: "corp",
@@ -465,7 +466,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("separates MU-blocked breaker setup from missing-credit setup", () => {
     const breaker = visibleCard("breaker-1", {
-      definitionId: "test-code-breaker",
+      definitionId: syntheticCardDefinitionId("test-code-breaker"),
       title: "Test Decoder",
       type: "program",
       subtypes: ["icebreaker", "decoder"],
@@ -474,7 +475,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       rulesText: "Icebreaker: break code gate subroutines.",
     });
     const economy = visibleCard("expensive-economy-1", {
-      definitionId: "test-expensive-economy",
+      definitionId: syntheticCardDefinitionId("test-expensive-economy"),
       title: "Expensive Economy",
       type: "resource",
       installCost: 5,
@@ -547,7 +548,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("marks bank and economy tools as acute setup when the Runner is credit-starved", () => {
     const broker = visibleCard("broker-1", {
-      definitionId: "test-broker",
+      definitionId: syntheticCardDefinitionId("test-broker"),
       title: "Broker",
       type: "resource",
       installCost: 0,
@@ -645,7 +646,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("uses source identifiers and ignores label-only hand card titles", () => {
     const console = visibleCard("console-1", {
-      definitionId: "test-console",
+      definitionId: syntheticCardDefinitionId("test-console"),
       title: "Useful Console",
       type: "hardware",
       installCost: 0,
@@ -792,7 +793,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       legalActions: [installAction("install-green-knight", prevention, 0)],
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [
             {
@@ -1095,7 +1096,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       const hint = AI_HINTS_BY_CARD.get(definitionId)!;
       const card = visibleCard(`trace-defense-${definitionId}`, {
         definitionId,
-        title: definitionId,
+        title: String(definitionId),
         type: hint.cardType as "program" | "resource",
         installCost: hint.costProfile?.credits ?? 0,
         memoryCost: hint.costProfile?.memory ?? 0,
@@ -1129,13 +1130,13 @@ describe("RunnerHandDevelopmentEvaluation", () => {
           role: withoutTrace.developmentRole,
           currentNeed: withoutTrace.currentNeed,
         },
-        definitionId,
+        String(definitionId),
       ).toEqual({
         definitionId,
         role: "defense_support",
         currentNeed: "none",
       });
-      expect(withTrace.currentNeed, definitionId).toBe("setup");
+      expect(withTrace.currentNeed, String(definitionId)).toBe("setup");
     }
   });
 
@@ -1150,7 +1151,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       const hint = AI_HINTS_BY_CARD.get(definitionId)!;
       const card = visibleCard(`trace-hardware-${definitionId}`, {
         definitionId,
-        title: definitionId,
+        title: String(definitionId),
         type: "hardware",
         installCost: hint.costProfile?.credits ?? 0,
       });
@@ -1165,7 +1166,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         card.instanceId,
       );
 
-      expect(evaluation.developmentRole, definitionId).not.toBe(
+      expect(evaluation.developmentRole, String(definitionId)).not.toBe(
         "defense_support",
       );
     }
@@ -1196,7 +1197,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("does not treat an unrelated target action as hand-card development", () => {
     const memory = visibleCard("memory-hand", {
-      definitionId: "test-memory-hardware",
+      definitionId: syntheticCardDefinitionId("test-memory-hardware"),
       title: "Memory Hardware",
       type: "hardware",
       installCost: 1,
@@ -1323,7 +1324,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("does not assign expose ownership from rules text without the structured fact", () => {
     const textOnlyExpose = visibleCard("text-only-expose-1", {
-      definitionId: "test-text-only-expose",
+      definitionId: syntheticCardDefinitionId("test-text-only-expose"),
       title: "Text-only expose",
       type: "program",
       installCost: 0,
@@ -1348,7 +1349,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("bounds visible remote threat text to exact tokens", () => {
     const shield = visibleCard("shield-noise-1", {
-      definitionId: "test-shield-noise",
+      definitionId: syntheticCardDefinitionId("test-shield-noise"),
       title: "Shield",
       type: "program",
       installCost: 0,
@@ -1364,12 +1365,12 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     });
     input.playerView.servers = [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [],
         root: [
           visibleCard("remote-noise", {
-            definitionId: "test-threat-noise",
+            definitionId: syntheticCardDefinitionId("test-threat-noise"),
             title: "Damageish Tagish Traceish",
             type: "asset",
           }),
@@ -1391,7 +1392,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("bounds persistent utility text signals to exact tokens", () => {
     const noisy = visibleCard("utility-noise-1", {
-      definitionId: "test-utility-noise",
+      definitionId: syntheticCardDefinitionId("test-utility-noise"),
       title: "Utility Noise",
       type: "resource",
       installCost: 0,
@@ -1417,7 +1418,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("bounds hand-development role text signals to exact tokens", () => {
     const noisy = visibleCard("role-noise-1", {
-      definitionId: "test-role-noise",
+      definitionId: syntheticCardDefinitionId("test-role-noise"),
       title: "Role Noise",
       type: "resource",
       installCost: 0,
@@ -1440,14 +1441,14 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("keeps duplicate or low-value hand cards conservative", () => {
     const duplicate = visibleCard("spare-resource-1", {
-      definitionId: "test-spare-resource",
+      definitionId: syntheticCardDefinitionId("test-spare-resource"),
       title: "Spare Resource",
       type: "resource",
       installCost: 1,
       rulesText: "A spare connection with no current setup role.",
     });
     const installed = visibleCard("spare-resource-installed", {
-      definitionId: "test-spare-resource",
+      definitionId: syntheticCardDefinitionId("test-spare-resource"),
       title: "Spare Resource",
       type: "resource",
     });
@@ -1474,7 +1475,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 });
 
 function structuredRunnerHint(
-  cardId: string,
+  cardId: number,
   cardType: string,
   effects: NonNullable<AiCardHint["effects"]>,
 ): AiCardHint {
@@ -1489,7 +1490,7 @@ function structuredRunnerHint(
   };
 }
 
-function withAiHint<T>(cardId: string, hint: AiCardHint, run: () => T): T {
+function withAiHint<T>(cardId: number, hint: AiCardHint, run: () => T): T {
   const previous = AI_HINTS_BY_CARD.get(cardId);
   AI_HINTS_BY_CARD.set(cardId, hint);
   try {

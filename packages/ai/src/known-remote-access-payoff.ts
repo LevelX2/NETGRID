@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { MatchEventId } from "@netgrid/shared";
 import { visibleRunnerPathTraceContext } from "./run-analysis/trace-rules-profile-planning";
 import { currentRunPathContext } from "./run-analysis/current-run-path-context";
@@ -91,7 +92,7 @@ export function evaluateKnownRemoteAccessPayoff(
   beliefState: BeliefState = reconstructBeliefState(input),
   economyPosture?: AccessReserveEconomyPosture,
 ): KnownRemoteAccessPayoff {
-  if (!serverId?.startsWith("remote_")) return unknownRemotePayoff("none");
+  if (!isRemoteServerId(serverId)) return unknownRemotePayoff("none");
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );
@@ -588,7 +589,7 @@ function remoteEventServerId(
   if (direct) return direct;
   const label = stringPayloadValue(event, "serverLabel")?.trim().toLowerCase();
   const match = /^remote[\s_-]+(\d+)$/.exec(label ?? "");
-  return match?.[1] ? `remote_${Number.parseInt(match[1], 10)}` : undefined;
+  return match?.[1] ? `r${Number.parseInt(match[1], 10)}` : undefined;
 }
 
 function stringPayloadValue(

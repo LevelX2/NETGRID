@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type {
   ActionRunProjectionSummary,
   ActionSemanticCandidate,
@@ -120,8 +121,7 @@ function normalizeServerId(value: unknown): string | undefined {
   if (normalized === "archives") {
     return "archives";
   }
-  const remoteId = normalizeRemoteServerId(normalized);
-  if (remoteId) return remoteId;
+  if (isRemoteServerId(normalized)) return normalized;
   return undefined;
 }
 
@@ -131,21 +131,6 @@ function stripServerPrefix(value: string): string {
   return value;
 }
 
-function normalizeRemoteServerId(value: string): string | undefined {
-  const prefix = value.startsWith("remote_")
-    ? "remote_"
-    : value.startsWith("remote-")
-      ? "remote-"
-      : undefined;
-  if (!prefix) return undefined;
-  const suffix = value.slice(prefix.length);
-  if (suffix.length === 0 || !onlyAsciiDigits(suffix)) return undefined;
-  return `remote_${suffix}`;
-}
-
-function onlyAsciiDigits(value: string): boolean {
-  return [...value].every((character) => character >= "0" && character <= "9");
-}
 
 function uniqueStrings(values: readonly string[]): string[] {
   return [...new Set(values)];

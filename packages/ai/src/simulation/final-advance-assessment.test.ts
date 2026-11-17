@@ -18,7 +18,7 @@ const GRID = 586;
 const TYCHO = 432;
 const OVERTIME = 509;
 const ICE = 589;
-const SERVER = "remote_1";
+const SERVER = "r1";
 const corpDeck = {
   ...DEMO_DECKS.demo_corp_001,
   cards: [

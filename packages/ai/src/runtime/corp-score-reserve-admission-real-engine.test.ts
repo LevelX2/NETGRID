@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import {
   applyAction,
@@ -83,7 +84,7 @@ function nativeFixture(
   );
   if (terminal) {
     RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot(
-      "remote_2",
+      "r2",
       AGENDA,
       4,
     );
@@ -91,7 +92,7 @@ function nativeFixture(
       state,
       getLegalActions(state, "corp").find(
         (a) =>
-          a.type === "score_agenda" && a.source.includes("tycho-extension"),
+          a.type === "score_agenda" && referencesDefaultDeckCard(a.source, 432),
       )!,
     );
     expect(getPlayerView(state, "corp").own.agendaPoints).toBe(4);
@@ -114,7 +115,7 @@ function nativeFixture(
     getLegalActions(state, "corp").find(
       (a) =>
         a.type === "install_card" &&
-        a.source.includes("chicago-branch") &&
+        referencesDefaultDeckCard(a.source, 524) &&
         a.payload?.serverId === "new_remote",
     )!,
   );
@@ -126,7 +127,7 @@ function nativeFixture(
     state,
     getLegalActions(state, "runner").find(
       (a) =>
-        a.type === "install_card" && a.source.includes("r-and-d-interface"),
+        a.type === "install_card" && referencesDefaultDeckCard(a.source, 351),
     )!,
   );
   state = apply(
@@ -259,7 +260,7 @@ it("excludes rezzed support after a native root replacement sends it to Archives
     getLegalActions(state, "corp").find(
       (a) =>
         a.type === "install_card" &&
-        a.source.includes("chicago-branch") &&
+        referencesDefaultDeckCard(a.source, 524) &&
         a.payload?.serverId === "new_remote",
     )!,
   );
@@ -278,7 +279,7 @@ it("excludes rezzed support after a native root replacement sends it to Archives
     getLegalActions(state, "corp").find(
       (a) =>
         a.type === "install_card" &&
-        a.source.includes("main-office-relocation") &&
+        referencesDefaultDeckCard(a.source, 417) &&
         a.payload?.serverId === server.id,
     )!,
   );
@@ -316,13 +317,13 @@ it("rejects the exact engine-funded nonterminal score before it consumes current
   expect(
     corpSameTurnScoreConversionPaths(input).find(
       (p) =>
-        p.agendaCardId.includes("tycho-extension") &&
+        referencesDefaultDeckCard(p.agendaCardId, 432) &&
         p.targetServerId === "new_remote",
     ),
   ).toMatchObject({ creditsRequired: 8, clicksRequired: 3 });
   const decision = chooseAiAction(input),
     action = input.legalActions.find((a) => a.actionId === decision.actionId)!;
-  expect(action.source).not.toContain("tycho-extension");
+  expect(referencesDefaultDeckCard(action.source, 432)).toBe(false);
   expect(decision.fallbackUsed).toBe(false);
   const scores = residentPlanPortfolioSnapshot(input)!
     .instances.filter((p) => p.moduleId === "corp.score_agenda")
@@ -399,7 +400,7 @@ it("keeps the native terminal score at P1 even when the remaining reserve is low
   expect(corpFundedCentralProtectionReserve(input)).toBe(5);
   expect(
     corpSameTurnScoreConversionPaths(input).some((p) =>
-      p.agendaCardId.includes("main-office-relocation"),
+      referencesDefaultDeckCard(p.agendaCardId, 417),
     ),
   ).toBe(true);
   state = finishNativeScore(state, 417);
@@ -432,13 +433,13 @@ it("quotes the already rezzed support before a new native target exists and comp
     input.legalActions.some(
       (a) =>
         a.type === "activated_card_ability" &&
-        a.source.includes("chicago-branch"),
+        referencesDefaultDeckCard(a.source, 524),
     ),
   ).toBe(false);
   expect(
     corpSameTurnScoreConversionPaths(input).find(
       (p) =>
-        p.agendaCardId.includes("main-office-relocation") &&
+        referencesDefaultDeckCard(p.agendaCardId, 417) &&
         p.targetServerId === "new_remote",
     ),
   ).toMatchObject({ creditsRequired: 6, clicksRequired: 3 });

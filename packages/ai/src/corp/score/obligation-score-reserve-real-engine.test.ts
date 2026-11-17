@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import standardDeckCatalog from "../../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import { applyAction, createGameAfterSetup, getLegalActions, getPlayerView } from "@netgrid/engine";
 import type { DeckDefinition, GameState, LegalAction } from "@netgrid/shared";
@@ -33,17 +34,17 @@ function fixture(credits: number, clicks: number, terminal = false): GameState {
     agendaPointsToWin: 7, runnerDeck, corpDeck });
   state = step(state, (a) => a.type === "mandatory_draw");
   RealEngineFixtureBuilder.forState(state)
-    .withCorpRemoteRoot("remote_1", 432, 4)
-    .withCorpRemoteRoot("remote_2", 520)
+    .withCorpRemoteRoot("r1", 432, 4)
+    .withCorpRemoteRoot("r2", 520)
     .withCorpHqSize(0)
     .withCorpCardInHq(terminal ? 405 : 427);
   state = step(state, (a) => a.type === "score_agenda");
-  const loan = getLegalActions(state, "corp").find((a) => a.type === "rez_card" && a.source.includes("acme-savings-and-loan"));
+  const loan = getLegalActions(state, "corp").find((a) => a.type === "rez_card" && referencesDefaultDeckCard(a.source, 520));
   expect(loan).toBeDefined();
   state = apply(state, loan!);
   expect(getPlayerView(state, "corp").own.agendaPoints).toBe(3);
   if (terminal) {
-    RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot("remote_3", 427, 5);
+    RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot("r3", 427, 5);
     state = step(state, (a) => a.type === "score_agenda" && a.payload?.selectedServerId === "archives");
     expect(getPlayerView(state, "corp").own.agendaPoints).toBe(6);
   }

@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { runnerPendingFreeSubtypeCoverageRole } from "./coverage-pending-subtype";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
@@ -35,7 +36,7 @@ it("keeps the existing free unconfigured Sentry answer instead of buying a secon
   expect(selected).toBeDefined();
   expect(
     selected.type === "install_card" &&
-      selected.source?.includes("morphing-tool"),
+      referencesDefaultDeckCard(selected.source, 150),
   ).toBe(false);
   expect(decision.decisionDebug!.planFirstDecision!).toMatchObject({
     rootPlanInstanceId: "plan:runner.economy:runner-portfolio-credit-reserve",

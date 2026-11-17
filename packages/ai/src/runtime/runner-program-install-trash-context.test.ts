@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -71,7 +72,7 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
         source: {
           kind: "card",
           sourceCardInstanceId: "krash",
-          sourceDefinitionId: "krash",
+          sourceDefinitionId: syntheticCardDefinitionId("krash"),
         },
         timingPoint: "runner_action.main",
         costs: [],

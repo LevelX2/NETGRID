@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import { corpScorelineFeasibilityForDecisionInput } from "../corp-scoreline-feasibility";
@@ -29,7 +30,7 @@ export function corpReservedScoreServerIds(
       return server !== undefined &&
         project.agendaInstanceId !== undefined &&
         project.phase === "install_agenda" &&
-        project.serverId?.startsWith("remote_") === true &&
+        isRemoteServerId(project.serverId) === true &&
         (exactLastClickContinuation || preparedScoreServer)
         ? [project.serverId]
         : [];

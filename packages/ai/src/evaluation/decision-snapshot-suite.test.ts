@@ -281,7 +281,7 @@ function playStrengthSnapshotCorpus(): DecisionSnapshot[] {
       "runner",
       [
         legalAction("run-remote", "start_run", "runner", {
-          payload: { serverId: "remote_1" },
+          payload: { serverId: "r1" },
         }),
         legalAction("draw-1", "draw_card", "runner"),
       ],
@@ -298,7 +298,7 @@ function playStrengthSnapshotCorpus(): DecisionSnapshot[] {
         runner: {
           runTargets: [
             runTarget({
-              targetServerId: "remote_1",
+              targetServerId: "r1",
               targetKind: "remote",
               accessPayoff: "agenda",
               recommendation: "run_now",
@@ -360,7 +360,7 @@ function playStrengthSnapshotCorpus(): DecisionSnapshot[] {
         legalAction("gain-1", "gain_credit", "corp"),
         legalAction("rez-ice", "rez_ice", "corp", {
           credits: 4,
-          payload: { serverId: "remote_1" },
+          payload: { serverId: "r1" },
         }),
       ],
       {

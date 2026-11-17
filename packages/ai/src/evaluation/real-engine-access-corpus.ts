@@ -206,7 +206,7 @@ export function buildRealEngineAccessCorpus(): RealEngineAccessCorpusScenario[] 
       reason: "unknown",
       valueScore: 0,
       expectedRecommendation: "known_no_current_payoff",
-      legalActionPayload: { serverId: "remote_1" },
+      legalActionPayload: { serverId: "r1" },
     }),
   ];
 }
@@ -231,7 +231,7 @@ function scenario(params: {
   includeSecondaryLowValueUpgrade?: boolean;
   legalActionPayload?: LegalAction["payload"];
 }): RealEngineAccessCorpusScenario {
-  const serverId = "remote_1";
+  const serverId = "r1";
   const definitionId = definitionIdFor(params.targetKind);
   const projection = projectAccessDecision({
     source: "access_window",
@@ -387,10 +387,10 @@ function runLegalAction(
   payload: LegalAction["payload"],
 ): LegalAction {
   return {
-    actionId: `${scenarioId}:run_remote_1`,
+    actionId: `${scenarioId}:run_r1`,
     side: "runner",
     type: "start_run",
-    label: "Run remote_1",
+    label: "Run r1",
     source: "basic_action",
     timingPoint: "runner_action.main",
     costs: [{ clicks: 1 }],

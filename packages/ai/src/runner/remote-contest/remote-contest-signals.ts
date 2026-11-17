@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -235,7 +236,7 @@ function runnerSameTurnAccessRemotePreparationSignals(
   const target = [...runTargets]
     .filter(
       (evaluation) =>
-        evaluation.targetServerId.startsWith("remote_") &&
+        isRemoteServerId(evaluation.targetServerId) &&
         admittedParents.some(
           (parent) =>
             parent.serverId === evaluation.targetServerId &&
@@ -363,7 +364,7 @@ function runnerRemoteInformationPreparationSignals(
         (evaluation) => evaluation.targetServerId === server.id,
       )?.knownAccessState;
       return (
-        server.id.startsWith("remote_") &&
+        isRemoteServerId(server.id) &&
         server.root.some((card) => card.known === false) &&
         (accessState === undefined ||
           accessState === "unknown" ||
@@ -624,7 +625,7 @@ export function buildRunnerRemoteContestSignals({
     // later draft, including its exact funding/coverage and risk bindings.
     ...runnerMatchpointRemoteFocusSignals(input, runTargets, coverageGaps),
     ...runLockReleaseRoutes.flatMap((route) => {
-      if (!route.serverId.startsWith("remote_")) return [];
+      if (!isRemoteServerId(route.serverId)) return [];
       return [
         {
           contestId: `remote:${route.serverId}`,
@@ -950,7 +951,7 @@ export function buildRunnerRemoteContestSignals({
         server.id,
       );
       if (
-        !server.id.startsWith("remote_") ||
+        !isRemoteServerId(server.id) ||
         !knownAgenda ||
         knownAgendaRunEvaluations.length === 0
       ) {
@@ -987,7 +988,7 @@ export function buildRunnerRemoteContestSignals({
     }),
     ...constrainedRunCandidates.flatMap(
       ({ candidate, serverId, marginalValue, evidenceCode }) => {
-        if (!serverId.startsWith("remote_")) return [];
+        if (!isRemoteServerId(serverId)) return [];
         return [
           {
             contestId: `remote:${serverId}`,

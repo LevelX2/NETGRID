@@ -12,7 +12,7 @@ describe("access decision projection", () => {
   it("projects agenda steal consistently", () => {
     const projection = projectAccessDecision({
       source: "pre_run",
-      serverId: "remote_1",
+      serverId: "r1",
       knownRootDefinitionId: 588,
       target: "agenda",
       intendedAccessAction: "steal",
@@ -31,7 +31,7 @@ describe("access decision projection", () => {
   it("projects visible agenda steal costs consistently", () => {
     const projection = projectAccessDecision({
       source: "access_window",
-      serverId: "remote_1",
+      serverId: "r1",
       knownRootDefinitionId: 588,
       target: "agenda",
       intendedAccessAction: "steal",
@@ -54,7 +54,7 @@ describe("access decision projection", () => {
   it("projects asset trash with finite pool and trash-cost waiver", () => {
     const projection = projectAccessDecision({
       source: "access_window",
-      serverId: "remote_1",
+      serverId: "r1",
       knownRootDefinitionId: 521,
       target: "asset",
       intendedAccessAction: "trash",
@@ -83,7 +83,7 @@ describe("access decision projection", () => {
   it("projects free upgrade trash", () => {
     const projection = projectAccessDecision({
       source: "access_window",
-      serverId: "remote_2",
+      serverId: "r2",
       target: "upgrade",
       intendedAccessAction: "trash",
       trashCost: 3,
@@ -101,7 +101,7 @@ describe("access decision projection", () => {
   it("projects declined trash and reserve break for plan memory", () => {
     const projection = projectAccessDecision({
       source: "plan_memory",
-      serverId: "remote_1",
+      serverId: "r1",
       knownRootDefinitionId: 538,
       target: "asset",
       intendedAccessAction: "decline",
@@ -144,7 +144,7 @@ describe("access decision projection", () => {
     }
     const projection = projectAccessDecision({
       source: "access_window",
-      serverId: "remote_1",
+      serverId: "r1",
       knownRootDefinitionId: 521,
       target: "asset",
       intendedAccessAction: "trash",
@@ -198,7 +198,7 @@ describe("access decision projection", () => {
     }
     const projection = projectAccessDecision({
       source: "access_window",
-      serverId: "remote_1",
+      serverId: "r1",
       knownRootDefinitionId: 534,
       target: "asset",
       intendedAccessAction: "trash",
@@ -212,7 +212,7 @@ describe("access decision projection", () => {
         definitionId: 534,
         targetKind: "asset",
         commitment: {
-          serverId: "remote_1",
+          serverId: "r1",
           knownAccessState: "known_payoff",
           intendedAccessAction: "trash",
           reason: "trash_affordable",

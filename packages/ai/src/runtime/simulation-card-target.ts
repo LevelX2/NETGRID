@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
   type CardInstanceId,
@@ -43,7 +44,7 @@ export function advancedAgendaStealSourceForAction(
         return undefined;
       if (
         instance.zone.zone === "serverRoot" &&
-        instance.zone.serverId.startsWith("remote_")
+        isRemoteServerId(instance.zone.serverId)
       )
         return "remote" as const;
       if (

@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { MatchEventId } from "@netgrid/shared";
 import { sortedUnique } from "./runtime/collection";
 import { cardDefinitionIdValue } from "./card-definition-id-input";
@@ -653,7 +654,7 @@ function unknownEntries(input: AiDecisionInput): BeliefEntry[] {
     });
   }
   const unknownRemoteRoots = input.playerView.servers
-    .filter((server) => server.id.startsWith("remote_"))
+    .filter((server) => isRemoteServerId(server.id))
     .reduce(
       (sum, server) => sum + server.root.filter((card) => !card.known).length,
       0,
@@ -681,7 +682,7 @@ function hypothesisEntries(
   const entries: BeliefEntry[] = [];
 
   for (const server of input.playerView.servers.filter((candidate) =>
-    candidate.id.startsWith("remote_"),
+    isRemoteServerId(candidate.id),
   )) {
     const unknownRoots = server.root.filter((card) => !card.known);
     const typeDeduction = remoteRootTypeDeductions.find(
@@ -750,7 +751,7 @@ function deriveRemoteRootTypeDeductions(
 ): RemoteRootTypeDeduction[] {
   const deductions: RemoteRootTypeDeduction[] = [];
   for (const server of input.playerView.servers.filter((candidate) =>
-    candidate.id.startsWith("remote_"),
+    isRemoteServerId(candidate.id),
   )) {
     const unknownRootCount = server.root.filter((card) => !card.known).length;
     if (
@@ -1005,14 +1006,14 @@ function normalizeKnownPositionMemory(
     entries
       .filter(
         (entry) =>
-          entry.zone.startsWith("remote_") && entry.positionKey !== "installed",
+          isRemoteServerId(entry.zone) && entry.positionKey !== "installed",
       )
       .map((entry) => `${entry.zone}:${entry.definitionId}`),
   );
   const byExactPosition = new Map<string, KnownPositionMemory>();
   for (const entry of entries) {
     if (
-      entry.zone.startsWith("remote_") &&
+      isRemoteServerId(entry.zone) &&
       entry.positionKey === "installed" &&
       preciseRemoteDefinitions.has(`${entry.zone}:${entry.definitionId}`)
     ) {
@@ -2257,8 +2258,8 @@ function hqHandMemoryAdjustment(
 }
 
 function beliefRemoteServerId(serverId: string): boolean {
-  if (!serverId.startsWith("remote_")) return false;
-  const suffix = serverId.slice("remote_".length);
+  if (!isRemoteServerId(serverId)) return false;
+  const suffix = serverId.slice(1);
   return (
     suffix.length > 0 &&
     [...suffix].every((character) => character >= "0" && character <= "9")
@@ -2434,7 +2435,7 @@ function deriveCorpOpponentModel(
     (event) => runPressureServerId(event) === "rd",
   ).length;
   const remoteRuns = runnerRuns.filter((event) =>
-    runPressureServerId(event)?.startsWith("remote_"),
+    isRemoteServerId(runPressureServerId(event)),
   ).length;
   const runEvents = runnerRuns.length;
   const centralRuns = hqRuns + rndRuns;
@@ -3268,7 +3269,7 @@ function invalidationReasonForEvent(
     return "card_resolution_event";
   if (family === "reveal" || family === "expose") return "reveal_expose_event";
   if (
-    serverId?.startsWith("remote_") &&
+    isRemoteServerId(serverId) &&
     (family === "install" || family === "advance")
   )
     return "remote_state_changed";
@@ -3429,7 +3430,7 @@ function visibleServerLabelId(label: string | undefined): string | undefined {
   if (normalized === "archives") return "archives";
   const remoteMatch = /^remote[\s_-]+(\d+)$/.exec(normalized);
   const remoteIndex = remoteMatch?.[1];
-  if (remoteIndex) return `remote_${Number.parseInt(remoteIndex, 10)}`;
+  if (remoteIndex) return `r${Number.parseInt(remoteIndex, 10)}`;
   return undefined;
 }
 
@@ -3439,7 +3440,7 @@ function canonicalStructuredServerId(serverId: string): string {
   if (normalized === "rd" || normalized === "rnd" || normalized === "r&d")
     return "rd";
   if (normalized === "archives") return "archives";
-  if (normalized.startsWith("remote_")) return normalized;
+  if (isRemoteServerId(normalized)) return normalized;
   return serverId;
 }
 

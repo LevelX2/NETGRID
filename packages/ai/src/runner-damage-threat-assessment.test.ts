@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
@@ -57,7 +58,7 @@ describe("runnerDamageThreatAssessment", () => {
         stateVersion: 40,
         servers: [
           {
-            id: "remote_1",
+            id: "r1",
             ice: [],
             root: retiredDamageCards().filter((c) => c.type !== "ice"),
           },
@@ -265,7 +266,7 @@ describe("runnerDamageThreatAssessment", () => {
           stateVersion: 14,
           servers: [
             {
-              id: "remote_1",
+              id: "r1",
               ice: [
                 card({
                   definitionId: 476,
@@ -312,7 +313,7 @@ describe("runnerDamageThreatAssessment", () => {
         servers: [
           {
             id: "rd",
-            ice: [card({ definitionId: "rd-ice", type: "ice", rezzed: false })],
+            ice: [card({ definitionId: syntheticCardDefinitionId("rd-ice"), type: "ice", rezzed: false })],
             root: [],
           },
         ],
@@ -382,7 +383,7 @@ describe("runnerDamageThreatAssessment", () => {
       stateVersion: 25,
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           ice: [],
           root: [
             card({
@@ -397,9 +398,9 @@ describe("runnerDamageThreatAssessment", () => {
     });
     current.playerView.timingPoint = "run.jack_out_window";
     current.playerView.run = {
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "movement",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
       successful: false,
     };
     current.legalActions = [
@@ -420,7 +421,7 @@ describe("runnerDamageThreatAssessment", () => {
     );
     expect(runnerKnownAccessDamageJackOutAssessment(current)).toEqual(
       expect.objectContaining({
-        serverId: "remote_1",
+        serverId: "r1",
         damageRisk: 2,
         evidenceCode: expect.stringContaining(
           "runner_known_access_damage_ambush_requires_jack_out",
@@ -612,7 +613,7 @@ describe("runnerDamageThreatAssessment", () => {
       action("jack-out", "jack_out", "game_rule"),
     ];
     const cumulativeDamageIce = card({
-      definitionId: "test-cumulative-damage-ice",
+      definitionId: syntheticCardDefinitionId("test-cumulative-damage-ice"),
       type: "ice",
       rezzed: true,
     });
@@ -722,13 +723,13 @@ describe("runnerDamageThreatAssessment", () => {
   it("accounts for the possible follow-up damage and its prevention only once with other damage", () => {
     const current = input({ handCount: 8, stateVersion: 20 });
     const followUp = card({
-      definitionId: "test-next-net-ice",
+      definitionId: syntheticCardDefinitionId("test-next-net-ice"),
       type: "ice",
       rezzed: true,
     });
     followUp.effectiveRunQuote = {
       iceInstanceId: followUp.instanceId,
-      iceDefinitionId: "test-next-net-ice",
+      iceDefinitionId: syntheticCardDefinitionId("test-next-net-ice"),
       effectiveStrength: 3,
       subroutines: [
         { id: "net", type: "do_damage", amount: 3, damageType: "net" },
@@ -777,7 +778,7 @@ describe("runnerDamageThreatAssessment", () => {
       event("run-start", 18, {
         actor: "runner",
         actionType: "start_run",
-        serverId: "remote_1",
+        serverId: "r1",
       }),
       event("fatal-attractor-fired", 19, {
         actor: "runner",
@@ -809,7 +810,7 @@ describe("runnerDamageThreatAssessment", () => {
 
     expect(runnerRecentFutureEncounterDamageSafetyAbort(blocked)).toMatchObject(
       {
-        serverId: "remote_1",
+        serverId: "r1",
         sourceDefinitionId: 454,
       },
     );
@@ -947,7 +948,7 @@ function input(params: {
         maxHandSize: params.maxHandSize ?? 5,
       },
       opponent: {
-        identity: card({ definitionId: "corp-identity", type: "identity" }),
+        identity: card({ definitionId: syntheticCardDefinitionId("corp-identity"), type: "identity" }),
         handCount: params.opponentHandCount ?? 5,
       },
       servers: (params.servers ?? []).map((server) => ({

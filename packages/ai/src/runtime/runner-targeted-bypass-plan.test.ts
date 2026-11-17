@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -395,7 +396,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     resetResidentPlanPortfolioMemory();
     rememberContinuation({
       ...targetedContinuation(),
-      sourceDefinitionId: "wrong-definition",
+      sourceDefinitionId: syntheticCardDefinitionId("wrong-definition"),
     } as unknown as RunnerTargetedBypassChoiceContinuation);
     const wrongDefinitionInput = choiceInput(11, {
       source:
@@ -688,7 +689,7 @@ function resolveChoiceAction(stateVersion: number): LegalAction {
 function paymentSupportEventTail(): AiDecisionInput["eventTail"] {
   return [
     {
-      eventId: "evt_11",
+      eventId: 12,
       type: "play_event",
       stateVersionBefore: 10,
       stateVersionAfter: 11,
@@ -702,7 +703,7 @@ function paymentSupportEventTail(): AiDecisionInput["eventTail"] {
       },
     },
     {
-      eventId: "evt_12",
+      eventId: 13,
       type: "activated_card_ability",
       stateVersionBefore: 11,
       stateVersionAfter: 12,
@@ -714,7 +715,7 @@ function paymentSupportEventTail(): AiDecisionInput["eventTail"] {
       },
     },
     {
-      eventId: "evt_13",
+      eventId: 14,
       type: "play_event",
       stateVersionBefore: 12,
       stateVersionAfter: 13,
@@ -734,7 +735,7 @@ function unusedPaymentSupportEventTail(): AiDecisionInput["eventTail"] {
   return [paymentSupportEventTail()[0]!, paymentSupportEventTail()[2]!].map(
     (event, index) => ({
       ...event,
-      eventId: `evt_${11 + index}`,
+      eventId: (11 + index) + 1,
       stateVersionBefore: 10 + index,
       stateVersionAfter: 11 + index,
     }),

@@ -44,7 +44,7 @@ describe("meta 461 current-turn pump survives the future path projection", () =>
         fallbackUsed: false,
         decisionDebug: {
           planFirstDecision: {
-            rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+            rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
             leafExecutorInstanceId: `plan:runner.convert_run_window:run%3A${input.playerView.run!.runId}`,
             route: {
               actionId: pump.actionId,
@@ -81,7 +81,7 @@ it("preserves the paid turn strength without charging inner Code Gates again", (
     3,
   );
   const inner = input.playerView.servers
-    .find((s) => s.id === "remote_1")!
+    .find((s) => s.id === "r1")!
     .ice.slice(0, 2);
   const path = assessKnownRezzedIcePath(inner, rig, 2);
   expect(path.canReachAccess).toBe(true);

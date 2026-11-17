@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import { selectableChoiceOptions } from "../../runtime/choice-option";
@@ -97,7 +98,7 @@ export function buildCorpAmbushPlanSignals(params: {
       if (
         params.input.playerView.servers.some(
           (server) =>
-            server.id.startsWith("remote_") &&
+            isRemoteServerId(server.id) &&
             server.root.some(
               (card) => card.definitionId === source.definitionId,
             ),
@@ -326,7 +327,7 @@ function scoreDecoySignals(params: {
         )
         .flatMap((candidate) => {
           const serverId = candidateTargetIds(candidate).find((target) =>
-            target.startsWith("remote_"),
+            isRemoteServerId(target),
           );
           const server = params.input.playerView.servers.find(
             (entry) => entry.id === serverId,
@@ -1408,7 +1409,7 @@ function installedCardLocation(
 }
 
 function isAmbushRemoteInstallServer(value: string): boolean {
-  return value === "new_remote" || value.startsWith("remote_");
+  return value === "new_remote" || isRemoteServerId(value);
 }
 
 function ambushContractFailure(

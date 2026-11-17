@@ -226,7 +226,7 @@ it("retains the basic draw when a three-card operation would overflow HQ", () =>
 it("keeps a terminal score ahead of the admitted defense draw", () => {
   const state = fixture();
   RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot(
-    "remote_1",
+    "r1",
     6,
     3,
   );

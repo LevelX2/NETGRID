@@ -49,7 +49,7 @@ describe("match 2f116732 Runner decisions", () => {
     });
   });
   it("D112 preserves the no-payoff exit without a success reward", () => {
-    const capture = structuredClone(successJson) as Capture;
+    const capture = structuredClone<unknown>(successJson) as Capture;
     const rig = capture.input.playerView.own.rig;
     if (!rig) throw new Error("Missing captured Runner rig");
     capture.input.playerView.own.rig = rig.filter(
@@ -60,7 +60,7 @@ describe("match 2f116732 Runner decisions", () => {
     expect(decision.decisionDebug?.planKind).toBe("runner.convert_run_window");
   });
   it("D112 never turns an unknown root or an unfinished ICE path into a safe reward", () => {
-    const capture = structuredClone(successJson) as Capture;
+    const capture = structuredClone<unknown>(successJson) as Capture;
     const server = capture.input.playerView.servers.find(
       (s) => s.id === "r1",
     )!;
@@ -75,7 +75,7 @@ describe("match 2f116732 Runner decisions", () => {
     expect(
       runnerCurrentRunHasSafeCompletionReward(capture.input as AiDecisionInput),
     ).toBe(false);
-    const unfinished = structuredClone(successJson) as Capture;
+    const unfinished = structuredClone<unknown>(successJson) as Capture;
     unfinished.input.playerView.run!.position = {
       kind: "ice",
       serverId: "r1",
@@ -118,14 +118,14 @@ describe("match 2f116732 Runner decisions", () => {
     });
   });
   it("D112 does not pay for the completion reward or ignore a known damage access", () => {
-    const paid = structuredClone(successJson) as Capture;
+    const paid = structuredClone<unknown>(successJson) as Capture;
     paid.input.legalActions.find(
       (a) => a.actionId === "runner.continue_run",
     )!.costs = [{ credits: 1 }];
     expect(
       runnerCurrentRunHasSafeCompletionReward(paid.input as AiDecisionInput),
     ).toBe(false);
-    const danger = structuredClone(successJson) as Capture;
+    const danger = structuredClone<unknown>(successJson) as Capture;
     danger.input.playerView.servers.find((s) => s.id === "r1")!.root = [
       {
         ...danger.input.playerView.opponent.scoreArea[0]!,
@@ -137,7 +137,7 @@ describe("match 2f116732 Runner decisions", () => {
     ).toBe(false);
   });
   it("D240 still funds a real post-run safety gap and protects a current remote threat", () => {
-    const underfunded = structuredClone(endgameJson) as Capture;
+    const underfunded = structuredClone<unknown>(endgameJson) as Capture;
     underfunded.input.playerView.own.credits = 6;
     const hq = evaluateRunnerRunTargets({
       input: underfunded.input as AiDecisionInput,
@@ -150,7 +150,7 @@ describe("match 2f116732 Runner decisions", () => {
         postRunFloorGap: 2,
       },
     });
-    const threatened = structuredClone(endgameJson) as Capture;
+    const threatened = structuredClone<unknown>(endgameJson) as Capture;
     const agenda = threatened.input.playerView.opponent.scoreArea[0]!;
     threatened.input.playerView.servers.find((s) => s.id === "r1")!.root =
       [

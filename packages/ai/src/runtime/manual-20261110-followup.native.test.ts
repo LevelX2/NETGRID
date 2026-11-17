@@ -95,7 +95,7 @@ it("keeps the last distinct tag enabler over redundant payoffs in the captured d
     "plan:corp.hand_and_agenda_management:discard-window%3Adiscard_corp_75%3A75",
   );
   expect(result.selectedChoices?.selectedOptionIds).not.toContain(
-    "card_corp_518_3",
+    "card_c37b",
   );
   expect(result.fallbackUsed).toBeFalsy();
 });

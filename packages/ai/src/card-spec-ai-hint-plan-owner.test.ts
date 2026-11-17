@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import {
   cardSpecPlanningCards,
   KNOWN_PLANNING_PLAN_OWNERS,
@@ -11,7 +12,7 @@ import {
 } from "./ai-hint-contracts";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
-function entry(cardId: string) {
+function entry(cardId: CardDefinitionId) {
   const result = cardSpecPlanningCards().find(
     (candidate) => candidate.definition.id === cardId,
   );

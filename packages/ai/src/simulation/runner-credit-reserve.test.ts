@@ -21,7 +21,7 @@ function reserveForRoles(roles: string[], activeRun = false): number {
 }
 
 function postRunReserveForRoles(roles: string[]): number {
-  return runnerPostRunReserveTargetForRemoteInput(input(), "remote_1", {
+  return runnerPostRunReserveTargetForRemoteInput(input(), "r1", {
     remoteServerHasScoreThreat: () => false,
     rolesForCardId: () => roles,
   });
@@ -39,7 +39,7 @@ function input(activeRun = false): AiDecisionInput {
       traceRulesProfile: "modern_open",
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           ice: [],
           root: [
             {
@@ -55,7 +55,7 @@ function input(activeRun = false): AiDecisionInput {
       ...(activeRun
         ? {
             run: {
-              attackedServerId: "remote_1",
+              attackedServerId: "r1",
               phase: "encounter",
               successful: false,
             },

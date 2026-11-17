@@ -54,7 +54,7 @@ it("funds the admitted same-turn HQ run from a mature bank when basic income can
   expect(input.playerView.own).toMatchObject({ credits: 6, clicks: 2 });
   expect(action).toMatchObject({
     type: "activated_card_ability",
-    source: "runner_366_1",
+    source: "c29d",
     payload: { cardImplementationAbilityKey: "withdraw_credits" },
   });
   expect(result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(

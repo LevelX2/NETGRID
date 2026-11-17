@@ -112,10 +112,10 @@ it("keeps two visible Cloak pools unavailable to Hunter's modern trace", () => {
       publicEvents: [],
       own: { credits: 4 },
       opponent: { credits: 0, clicks: 4, rig },
-      servers: [{ id: "remote_1", ice: [hunter], root: [] }],
+      servers: [{ id: "r1", ice: [hunter], root: [] }],
     },
   } as unknown as AiDecisionInput;
-  expect(corpRemoteContestabilityAssessment(input, "remote_1")).toMatchObject({
+  expect(corpRemoteContestabilityAssessment(input, "r1")).toMatchObject({
     visibleRunnerExposureContestCredits: 9,
     creditsAfterPath: 3,
     expectedTagsFromVisibleIce: 1,

@@ -39,7 +39,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.score_agenda:counter-bank%3Ahandoff%3Acorp_559_2%3Acorp_66_1%3Aremote_1%3Anew_remote",
+            "plan:corp.score_agenda:counter-bank%3Ahandoff%3Ac3ge%3Acet%3Ar1%3Anew_remote",
         },
       },
     });
@@ -47,7 +47,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
       input.legalActions.find((a) => a.actionId === result.actionId),
     ).toMatchObject({
       type: "install_card",
-      source: "corp_66_1",
+      source: "cet",
       payload: { serverId: "new_remote" },
     });
   });
@@ -55,7 +55,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
     const input = fixture("g10-d139"),
       rez = input.legalActions.find(
         (a) =>
-          a.type === "rez_card" && a.source === "corp_559_2",
+          a.type === "rez_card" && a.source === "c3ge",
       )!,
       result = chooseAiAction(input);
     expect(result).toMatchObject({
@@ -64,7 +64,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.score_agenda:counter-bank%3Arez-handoff%3Acorp_559_2%3Acorp_66_1%3Aremote_1%3Aremote_2",
+            "plan:corp.score_agenda:counter-bank%3Arez-handoff%3Ac3ge%3Acet%3Ar1%3Ar2",
           route: {
             actionId: rez.actionId,
             stateVersion: input.playerView.stateVersion,
@@ -81,7 +81,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
     )!;
     expect(action).toMatchObject({
       type: "install_card",
-      source: "corp_66_2",
+      source: "ceu",
       payload: { serverId: "new_remote" },
     });
     expect(result).toMatchObject({
@@ -89,7 +89,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.score_agenda:counter-bank%3Ahandoff%3Acorp_559_3%3Acorp_66_2%3Aremote_1%3Anew_remote",
+            "plan:corp.score_agenda:counter-bank%3Ahandoff%3Ac3gf%3Aceu%3Ar1%3Anew_remote",
           priority: { effectiveClass: "P1" },
           route: {
             actionId: action.actionId,

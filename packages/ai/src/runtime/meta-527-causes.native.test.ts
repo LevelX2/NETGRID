@@ -22,7 +22,7 @@ describe("meta 527 original Engine checkpoints", () => {
     const native = input.legalActions.find((a: { actionId: string }) => a.actionId === result.actionId);
     expect(native).toBeDefined();
     if (key === "region") {
-      expect(native.source).not.toBe("corp_135_1");
+      expect(native.source).not.toBe("cu5");
     } else {
       expect(["pump_breaker", "break_subroutine", "continue_run", "jack_out"]).toContain(native.type);
       expect(result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toContain("runner.convert_run_window");

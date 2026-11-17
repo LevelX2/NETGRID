@@ -54,7 +54,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 
 function fixture(
   expensive = false,
-  serverId: "rd" | "remote_1" = "rd",
+  serverId: "rd" | "r1" = "rd",
   credits = expensive ? 60 : 21,
   wallCount = 2,
 ) {
@@ -101,7 +101,7 @@ function fixture(
     card.faceup = true;
     state.runner.scoreArea.push(card.instanceId);
   }
-  if (serverId === "remote_1") {
+  if (serverId === "r1") {
     state.corp.servers.push({
       id: serverId,
       kind: "remote",
@@ -224,7 +224,7 @@ describe("Demolition Run's native successful-run replacement", () => {
   });
 
   it("admits no empty Remote follow-up despite positive known cash savings", () => {
-    const { eventTarget } = fixture(true, "remote_1");
+    const { eventTarget } = fixture(true, "r1");
     expect(eventTarget).toMatchObject({
       accessPayoff: "known_low_value",
       knownAccessState: "known_no_current_payoff",

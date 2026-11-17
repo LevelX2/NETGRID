@@ -19,7 +19,7 @@ function board(
       ]),
     ),
     corp: {
-      servers: [{ id: "remote_1", root: Object.keys(counters), ice: [] }],
+      servers: [{ id: "r1", root: Object.keys(counters), ice: [] }],
       scoreArea: corpScores,
     },
     runner: { scoreArea: runnerScores },

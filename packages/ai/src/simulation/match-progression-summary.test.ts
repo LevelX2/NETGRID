@@ -5,15 +5,15 @@ import { summarizeMatchProgressionMetrics } from "./match-progression-summary";
 
 describe("summarizeMatchProgressionMetrics", () => {
   it("takes the last reserve observation once per successful run", () => {
-    const observe = (runId: string, reserve: number) => ({
+    const observe = (runId: number, reserve: number) => ({
       ...action("access_card"),
       runnerReserveRunId: runId,
       runnerReserveAfterSuccessfulRun: reserve,
       runnerReserveAfterCentralRun: reserve,
     });
     const metrics = summarizeMatchProgressionMetrics([
-      summary([observe("run-1", 1), observe("run-1", -1)]),
-      summary([observe("run-1", 3)]),
+      summary([observe(1, 1), observe(1, -1)]),
+      summary([observe(1, 3)]),
     ]);
 
     expect(metrics.runnerReserveAfterSuccessfulRun).toBe(1);
@@ -61,10 +61,10 @@ describe("summarizeMatchProgressionMetrics", () => {
       targetCardType:
         installPlacement === "root" ? ("agenda" as const) : ("ice" as const),
     });
-    const withPayload = created("remote_1", "root");
-    const empty = created("remote_2", "ice");
+    const withPayload = created("r1", "root");
+    const empty = created("r2", "ice");
     const baitAndAsset = {
-      ...action("install_card", "remote_2"),
+      ...action("install_card", "r2"),
       side: "corp" as const,
       reasonCode: "corp.asset_bait",
     };
@@ -97,8 +97,8 @@ describe("summarizeMatchProgressionMetrics", () => {
   it("counts successful access runs once per match, including multiaccess", () => {
     const observed = (actionType: string) => ({
       ...action(actionType, "hq"),
-      runnerReserveRunId: "run-1",
-      runnerReserveAccessTarget: "hq",
+      runnerReserveRunId: 1,
+      runnerReserveAccessTarget: "hq" as const,
     });
     const metrics = summarizeMatchProgressionMetrics([
       summary([
@@ -114,7 +114,7 @@ describe("summarizeMatchProgressionMetrics", () => {
   it("counts successful remote access action types exactly", () => {
     const metrics = summarizeMatchProgressionMetrics([
       summary([
-        { ...action("play_event", "remote_1"), runnerRunStarted: true },
+        { ...action("play_event", "r1"), runnerRunStarted: true },
         action("access_card"),
         action("access_card_noise"),
       ]),

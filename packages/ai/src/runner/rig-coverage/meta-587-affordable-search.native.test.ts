@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { runnerAffordableCoverageSearchActionIds } from "./coverage-search-alternatives";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -33,7 +34,7 @@ it("uses the already bound affordable stack search before funding an unaffordabl
     decision = chooseAiAction(input);
   const search = input.legalActions.find(
     (a: { type: string; source: string }) =>
-      a.type === "play_event" && a.source?.includes("temple-microcode"),
+      a.type === "play_event" && referencesDefaultDeckCard(a.source, 326),
   );
   expect(search.payload.cardImplementationEffectKind).toBeUndefined();
   expect(decision.actionId).toBe(search.actionId);

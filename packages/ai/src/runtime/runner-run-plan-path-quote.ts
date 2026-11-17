@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import {
   requireVisibleTraceRulesProfile,
   visibleRunnerPathTraceContext,
@@ -1480,7 +1481,7 @@ function visibleDeflectorContextForInput(input: AiDecisionInput) {
     ...visibleRunnerPathTraceContext(input),
     ...currentRunPathContext(input),
     visibleRemoteServerCount: input.playerView.servers.filter((candidate) =>
-      candidate.id.startsWith("remote_"),
+      isRemoteServerId(candidate.id),
     ).length,
     visibleCorpCredits: input.playerView.opponent.credits,
     netOrCoreDamagePreventionRemaining: Math.max(

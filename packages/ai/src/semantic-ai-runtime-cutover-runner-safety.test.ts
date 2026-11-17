@@ -106,7 +106,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -124,7 +124,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [wallOfStatic("onr_v1_279.wall-of-static.coverage")],
         [visibleCard(588, "corp", "agenda")],
       ),
@@ -166,7 +166,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -190,13 +190,13 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [wallOfStatic("onr_v1_279.wall-of-static.trace-safety")],
         [visibleCard(588, "corp", "agenda")],
       ),
     ];
 
-    expect(missingBreakerCoverageKind(input.playerView, "remote_1")).toBe(
+    expect(missingBreakerCoverageKind(input.playerView, "r1")).toBe(
       "breaker_wall",
     );
     const decision = chooseRunnerAction(input);
@@ -489,16 +489,16 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [innerFilter, middleFilter, canisMajor],
         [chicagoBranch],
       ),
     ];
     input.playerView.run = {
       runId: "match-979-canis-major",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 2 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 2 },
       encounteredIce: canisMajor,
       successful: false,
     };
@@ -1031,7 +1031,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
     ]);
@@ -1042,7 +1042,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [],
         [
           visibleCard("agenda", "corp", "agenda", {
@@ -1052,7 +1052,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       ),
     ];
 
-    bindSyntheticAgendaStealQuotes(input, "remote_1", 0, { agenda: 0 });
+    bindSyntheticAgendaStealQuotes(input, "r1", 0, { agenda: 0 });
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("run-remote");
@@ -1077,7 +1077,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -1112,16 +1112,16 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [dataWall("remote-data-wall")], [hiddenAdvancedRoot]),
+      server("r1", [dataWall("remote-data-wall")], [hiddenAdvancedRoot]),
     ];
 
-    bindSyntheticAgendaStealQuotes(input, "remote_1", 0, {});
+    bindSyntheticAgendaStealQuotes(input, "r1", 0, {});
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("run-remote");
     expect(decision.reasonCode).toBe("plan_first.runner.contest_remote");
     expect(decision.evidence).toContain(
-      "plan_assessment_evidence:runner_irrecoverable_random_break_damage_score_threat_contest:remote_1",
+      "plan_assessment_evidence:runner_irrecoverable_random_break_damage_score_threat_contest:r1",
     );
     expect(decision.evidence).not.toContain(
       "fallback_reason:missing_module_coverage",
@@ -1130,7 +1130,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const unknownPath = structuredClone(input);
     unknownPath.decisionId = "irrecoverable-blink-unknown-ice";
     unknownPath.playerView.servers
-      .find((s) => s.id === "remote_1")!
+      .find((s) => s.id === "r1")!
       .ice.push(hiddenIce);
     resetResidentPlanPortfolioMemory();
     expect(
@@ -1148,7 +1148,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -1184,7 +1184,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [dataWall("remote-data-wall"), hiddenIce],
         [hiddenAdvancedRoot],
       ),
@@ -1207,7 +1207,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         "start_run",
         "Run remote",
         { credits: 0 },
-        { payload: { serverId: "remote_1" } },
+        { payload: { serverId: "r1" } },
       ),
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
     ]);
@@ -1222,7 +1222,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [wallOfStatic("onr_v1_279.wall-of-static.preview")],
         [visibleCard(588, "corp", "agenda")],
       ),

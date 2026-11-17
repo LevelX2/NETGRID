@@ -519,7 +519,7 @@ function runnerHqLookEvent(
   stateVersion: number,
 ): PublicGameEvent {
   return {
-    eventId: "runner-known-hq-payoff",
+    eventId: stateVersion + 1,
     type: "resolve_choice",
     stateVersionBefore: Math.max(0, stateVersion - 1),
     stateVersionAfter: stateVersion,

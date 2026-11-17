@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import type {
   ActionSemanticCandidate,
@@ -42,7 +43,7 @@ function goalSpecsForCandidate(
   const semantic = candidate.semanticActionType;
   const evidence = evidenceForCandidate(candidate);
   const targetServerId = targetServerForCandidate(candidate);
-  const hasRemoteTarget = targetServerId?.startsWith("remote_") === true;
+  const hasRemoteTarget = isRemoteServerId(targetServerId) === true;
   const hasCentralTarget = targetServerId === "hq" || targetServerId === "rd";
   const hasScoreCloseoutSignal = hasVisibleScoreCloseoutBasis(candidate);
   const specs: CorpGoalSpec[] = [];
@@ -267,8 +268,7 @@ function normalizeServerId(value: string | undefined): string | undefined {
   if (normalized === "rnd" || normalized === "r&d") return "rd";
   if (normalized === "archives") return "archives";
   if (normalized === "hq" || normalized === "rd") return normalized;
-  const remoteId = normalizeRemoteServerId(normalized);
-  if (remoteId) return remoteId;
+  if (isRemoteServerId(normalized)) return normalized;
   return undefined;
 }
 
@@ -278,21 +278,6 @@ function stripServerPrefix(value: string): string {
   return value;
 }
 
-function normalizeRemoteServerId(value: string): string | undefined {
-  const prefix = value.startsWith("remote_")
-    ? "remote_"
-    : value.startsWith("remote-")
-      ? "remote-"
-      : undefined;
-  if (!prefix) return undefined;
-  const suffix = value.slice(prefix.length);
-  if (suffix.length === 0 || !onlyAsciiDigits(suffix)) return undefined;
-  return `remote_${suffix}`;
-}
-
-function onlyAsciiDigits(value: string): boolean {
-  return [...value].every((character) => character >= "0" && character <= "9");
-}
 
 function dedupeGoals(goals: readonly TacticalGoalLike[]): TacticalGoalLike[] {
   const byId = new Map<string, TacticalGoalLike>();

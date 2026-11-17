@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
 import type { CorpSelectedRezCost } from "../../runtime/corp-funded-score-protection";
@@ -10,7 +11,7 @@ import {
 const route = {
   actionId: "corp.rez_ice.ice_1",
   sourceCardInstanceId: "ice_1",
-  sourceDefinitionId: "ice_definition",
+  sourceDefinitionId: syntheticCardDefinitionId("ice_definition"),
   targetServerId: "rd",
   routeKind: "access_reduction",
   quote: {
@@ -84,7 +85,7 @@ describe("Defense route contracts", () => {
       defenseId: "trash_program",
       serverId: "rd",
       phase: "resolve_program_trash",
-      sourceDefinitionIds: ["ice_definition"],
+      sourceDefinitionIds: [syntheticCardDefinitionId("ice_definition")],
       actionIds: ["corp.resolve_choice"],
       urgent: true,
       value: 1000,
@@ -97,7 +98,7 @@ describe("Defense route contracts", () => {
         choiceId: "trash_1",
         choiceSource: "card_implementation.trash_installed_program:ice_1",
         sourceStateVersion: 7,
-        origin: { kind: "encounter", runId: "run_1" },
+        origin: { kind: "encounter", runId: 1 },
         sourceIceInstanceId: "ice_1",
         selectedOptionId: "card_program_1",
         targetCardInstanceId: "program_1",
@@ -126,7 +127,7 @@ describe("Selected Defense Rez costs", () => {
   ] as const)("compares the exact quoted variant for %j", (first, other) => {
     const fixed: CorpSelectedRezCost = {
       iceInstanceId: "ice_1",
-      iceDefinitionId: "ice_definition",
+      iceDefinitionId: syntheticCardDefinitionId("ice_definition"),
       credits: 2,
       source: "engine_rez_cost_quote",
     };

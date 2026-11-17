@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { cardDefinitionIdValue } from "../card-definition-id-input";
 import type {
   CardDefinitionId,
@@ -1153,7 +1154,7 @@ function isCentralServer(serverId: string): boolean {
 }
 
 function isRemoteServer(serverId: string): boolean {
-  return serverId.startsWith("remote_");
+  return isRemoteServerId(serverId);
 }
 
 function remoteWithVisibleAgenda(playerView: PlayerView): boolean {

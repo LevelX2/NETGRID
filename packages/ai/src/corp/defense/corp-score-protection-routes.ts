@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
 import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
@@ -248,7 +249,7 @@ export function corpScoreProtectionStagingInstallSignal(
   const need = project.protectionNeed;
   const serverId = project.serverId;
   const existingRemote =
-    serverId?.startsWith("remote_") === true
+    isRemoteServerId(serverId) === true
       ? input.playerView.servers.find((server) => server.id === serverId)
       : undefined;
   const boundedStagingLayerLimitReached =
@@ -256,14 +257,14 @@ export function corpScoreProtectionStagingInstallSignal(
     (serverId === "new_remote" &&
       input.playerView.servers.some(
         (server) =>
-          server.id.startsWith("remote_") &&
+          isRemoteServerId(server.id) &&
           server.root.length === 0 &&
           server.ice.length >= 2,
       ));
   if (
     !need ||
     !serverId ||
-    (serverId !== "new_remote" && !serverId.startsWith("remote_")) ||
+    (serverId !== "new_remote" && !isRemoteServerId(serverId)) ||
     (serverId !== "new_remote" && existingRemote === undefined) ||
     // Productive routes were already admitted by the exact route scan. This
     // backstop may stage the first two layers, but it must not manufacture an

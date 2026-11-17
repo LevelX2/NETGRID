@@ -56,7 +56,7 @@ function prepared(sourceDefinitionId = fortress, hqDiscounted = false) {
     .withRunnerProgramInstalled(233)
     .withCorpCardInHq(filter)
     .withCorpCardInHq(432)
-    .withCorpRemoteRoot("remote_1", sourceDefinitionId)
+    .withCorpRemoteRoot("r1", sourceDefinitionId)
     .withRezzedCorpIceOnServer("rd", 459);
   const wallIds = Object.values(state.cardInstances)
     .filter((c) => c.definitionId === 449)
@@ -113,7 +113,7 @@ describe("pairing 472: actual Engine global ICE discount through the productive 
     )!;
     expect(action).toMatchObject({
       type: "rez_card",
-      payload: { serverId: "remote_1" },
+      payload: { serverId: "r1" },
     });
     expect(state.cardInstances[action.source!]!.definitionId).toBe(fortress);
     expect(chosen).toMatchObject({ fallbackUsed: false, timeoutUsed: false });

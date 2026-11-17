@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 
@@ -132,9 +133,9 @@ function positionFor(
 
 function exposePositionScore(position: RunnerExposeInstalledPosition): number {
   let score = 0;
-  if (position.serverId.startsWith("remote_") && position.area === "root")
+  if (isRemoteServerId(position.serverId) && position.area === "root")
     score += 1_000;
-  else if (position.serverId.startsWith("remote_") && position.area === "ice")
+  else if (isRemoteServerId(position.serverId) && position.area === "ice")
     score += 550;
   else if (position.area === "ice") score += 250;
   else score += 100;

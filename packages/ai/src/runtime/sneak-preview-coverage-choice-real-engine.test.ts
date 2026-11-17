@@ -219,8 +219,8 @@ function runHistoricalSneakPreviewCoveragePath() {
     .withRunnerProgramInstalled(229)
     .withRezzedCorpIceOnServer("hq", 456)
     .withRezzedCorpIceOnServer("rd", 473)
-    .withCorpRemoteRoot("remote_1", 432, 2)
-    .withRezzedCorpIceOnServer("remote_1", 456);
+    .withCorpRemoteRoot("r1", 432, 2)
+    .withRezzedCorpIceOnServer("r1", 456);
   moveRunnerCardToStack(state, 226);
 
   const openingInput = runnerInput(state);
@@ -336,8 +336,8 @@ function runMemoryPressuredSneakPreviewCoveragePath() {
     .withRezzedCorpIceOnServer("rd", 449)
     .withRezzedCorpIceOnServer("rd", 450)
     .withRezzedCorpIceOnServer("rd", 457)
-    .withCorpRemoteRoot("remote_1", 405, 2)
-    .withRezzedCorpIceOnServer("remote_1", 436);
+    .withCorpRemoteRoot("r1", 405, 2)
+    .withRezzedCorpIceOnServer("r1", 436);
   state.runner.memoryUsed = 3;
   const heapRentIConId = moveRunnerCardToHeap(
     state,

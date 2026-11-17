@@ -45,8 +45,8 @@ it.each([14, 26] as const)(
       input,
       deckCapabilities:
         createDeckCapabilitiesContext().deckCapabilitiesForInput(input),
-      runActionId: "runner.start_run.remote_1",
-      targetServerId: "remote_1",
+      runActionId: "runner.start_run.r1",
+      targetServerId: "r1",
     })!.target;
     expect(target.visibleTraceTagHazardUnavoidable).not.toBe(true);
     expect(target.unavoidableVisibleIceHazardCount ?? 0).toBe(0);

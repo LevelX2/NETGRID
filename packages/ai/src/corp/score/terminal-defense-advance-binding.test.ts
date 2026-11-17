@@ -59,7 +59,7 @@ it.each([
       ).toBe(true);
       expect(input.playerView.opponent.deckCount).toBeGreaterThan(0);
       expect(
-        assessCorpTerminalAgendaDefense(input, "remote_2", "terminal-test")
+        assessCorpTerminalAgendaDefense(input, "r2", "terminal-test")
           ?.best,
       ).toMatchObject({
         fundedProtection: false,
@@ -77,7 +77,7 @@ it.each([
           actionId: advance.actionId,
           ownerModuleId: "corp.score_agenda",
           disposition: "explicitly_nonproductive",
-          evidenceCode: "corp_terminal_agenda_defense:remote_2:0/1",
+          evidenceCode: "corp_terminal_agenda_defense:r2:0/1",
         }),
       );
     }

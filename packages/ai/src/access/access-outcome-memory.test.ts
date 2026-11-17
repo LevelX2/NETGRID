@@ -30,14 +30,14 @@ describe("access outcome memory", () => {
         publicEvent(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
+          serverId: "r1",
           cardDefinitionId: 529,
           accessedCardPositionKey: "root:0",
           accessedArea: "root",
         }),
       ],
       servers: [
-        server("remote_1", [
+        server("r1", [
           visibleCard("remote-root", {
             definitionId: 529,
             title: "Data Masons",
@@ -50,7 +50,7 @@ describe("access outcome memory", () => {
 
     const status = deriveObservedRemoteNoProgressAccessMemory(
       input,
-      "remote_1",
+      "r1",
     );
 
     expect(status).toMatchObject({
@@ -83,13 +83,13 @@ describe("access outcome memory", () => {
     expect(
       deriveObservedRemoteNoProgressAccessMemory(
         inputWithoutMatchId,
-        "remote_1",
+        "r1",
       ),
     ).toBeUndefined();
     expect(
       deriveObservedRemoteNoProgressAccessMemory(
         { ...input, side: "corp" },
-        "remote_1",
+        "r1",
       ),
     ).toBeUndefined();
   });
@@ -110,7 +110,7 @@ describe("access outcome memory", () => {
         }),
       ],
       servers: [
-        server("remote_1", [
+        server("r1", [
           visibleCard("remote-root", {
             definitionId: 529,
             type: "asset",
@@ -121,7 +121,7 @@ describe("access outcome memory", () => {
     });
 
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(input, "r1"),
     ).toMatchObject({
       applies: true,
       suppressesPlanBonus: true,
@@ -134,27 +134,27 @@ describe("access outcome memory", () => {
         publicEvent(8, "start_run", {
           actor: "runner",
           actionType: "start_run",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
         publicEvent(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
+          serverId: "r1",
           cardDefinitionId: 529,
         }),
         publicEvent(10, "start_run", {
           actor: "runner",
           actionType: "start_run",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
         publicEvent(11, "end_run", {
           actor: "runner",
           actionType: "end_run",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
       servers: [
-        server("remote_1", [
+        server("r1", [
           visibleCard("remote-root", {
             definitionId: 529,
             type: "asset",
@@ -165,7 +165,7 @@ describe("access outcome memory", () => {
     });
 
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(input, "r1"),
     ).toMatchObject({
       applies: true,
       suppressesPlanBonus: true,
@@ -182,22 +182,22 @@ describe("access outcome memory", () => {
         publicEvent(8, "start_run", {
           actor: "runner",
           actionType: "start_run",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
         publicEvent(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
+          serverId: "r1",
           cardDefinitionId: 529,
         }),
         publicEvent(10, "decline_trash", {
           actor: "runner",
           actionType: "decline_trash",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
       servers: [
-        server("remote_1", [
+        server("r1", [
           visibleCard("remote-root", {
             definitionId: 529,
             type: "asset",
@@ -208,7 +208,7 @@ describe("access outcome memory", () => {
     });
 
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(input, "r1"),
     ).toMatchObject({
       applies: true,
       suppressesPlanBonus: true,
@@ -227,22 +227,22 @@ describe("access outcome memory", () => {
         publicEvent(8, "start_run", {
           actor: "runner",
           actionType: "start_run",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
         publicEvent(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
+          serverId: "r1",
           cardDefinitionId: 529,
         }),
         publicEvent(10, "install_card", {
           actor: "corp",
           actionType: "install_card",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
       servers: [
-        server("remote_1", [
+        server("r1", [
           visibleCard("remote-root", {
             definitionId: 529,
             type: "asset",
@@ -253,7 +253,7 @@ describe("access outcome memory", () => {
     });
 
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(input, "r1"),
     ).toBeUndefined();
   });
 });
@@ -262,7 +262,7 @@ function aiInput(params: {
   eventTail: PublicGameEvent[];
   servers: PlayerView["servers"];
 }): AiDecisionInput {
-  const legalActions = [runAction("run-remote-1", "remote_1")];
+  const legalActions = [runAction("run-remote-1", "r1")];
   const playerView: PlayerView = {
     stateVersion: 11,
     side: "runner",

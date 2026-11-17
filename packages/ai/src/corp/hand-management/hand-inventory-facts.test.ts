@@ -198,7 +198,7 @@ describe("Corp hand inventory facts", () => {
       facts.records.find((record) => record.sourceInstanceId === "duplicate-a"),
     ).toMatchObject({
       planningDisposition: "redundant",
-      redundancyGroupId: "definition:duplicate-card",
+      redundancyGroupId: `definition:${syntheticCardDefinitionId("duplicate-card")}`,
     });
     expect(facts.pressure).toMatchObject({
       handSize: 6,
@@ -264,7 +264,7 @@ describe("Corp hand inventory facts", () => {
         actionDispositions: [],
       }),
     ).toBeUndefined();
-    expect(corpHandDuplicateCount(runner, "runner-card")).toBe(0);
+    expect(corpHandDuplicateCount(runner, syntheticCardDefinitionId("runner-card"))).toBe(0);
     expect(corpHandPressureAssessment(runner)).toMatchObject({
       handSize: 1,
       maximumHandSize: 5,
@@ -347,13 +347,13 @@ function corpInput(
 
 function card(
   instanceId: string,
-  definitionId: number,
+  fixtureName: string,
   type: NonNullable<VisibleCard["type"]>,
 ): VisibleCard {
   return {
     instanceId,
-    definitionId,
-    title: definitionId,
+    definitionId: syntheticCardDefinitionId(fixtureName),
+    title: fixtureName,
     type,
     known: true,
     owner: "corp",
@@ -364,7 +364,7 @@ function card(
 function candidate(
   actionId: string,
   sourceCardInstanceId: string,
-  sourceDefinitionId: number,
+  fixtureName: string,
 ): ActionSemanticCandidate {
   return {
     actionId,
@@ -378,7 +378,7 @@ function candidate(
     },
     sourceKind: "card",
     sourceCardInstanceId,
-    sourceDefinitionId,
+    sourceDefinitionId: syntheticCardDefinitionId(fixtureName),
     abilityBindingMethod: "unresolved",
     semanticActionType: "play.corp_operation",
     cardContextSignals: [],
@@ -411,11 +411,11 @@ function candidate(
 function economyCandidate(
   actionId: string,
   sourceCardInstanceId: string,
-  sourceDefinitionId: number,
+  fixtureName: string,
   netCredits: number,
 ): ActionSemanticCandidate {
   return {
-    ...candidate(actionId, sourceCardInstanceId, sourceDefinitionId),
+    ...candidate(actionId, sourceCardInstanceId, fixtureName),
     semanticActionType: "economy.gain_credit",
     economyProjection: {
       schemaVersion: "action-economy-projection-v1",

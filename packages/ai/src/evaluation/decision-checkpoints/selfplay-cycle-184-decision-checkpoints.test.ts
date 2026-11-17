@@ -24,7 +24,7 @@ type ReconstructedDecisionCapture = {
 
 describe("selfplay cycle 184 decision checkpoints", () => {
   it("jacks out before unknown central access with an empty grip under critical damage pressure", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       emptyGripRdJackOutJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -63,7 +63,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
   });
 
   it("does not treat a guaranteed draw-tax tag as defensive hand buffering under confirmed damage pressure", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       confirmedDamageTaxedDrawJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -98,7 +98,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
   });
 
   it("builds hand buffer before a nonterminal risky remote contest under critical damage pressure", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       criticalDamageRemoteContestJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -135,7 +135,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
   });
 
   it("builds hand buffer before a nonterminal risky central run with unrezzed ice under confirmed damage pressure", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       confirmedDamageUnrezzedRdJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -172,7 +172,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
   });
 
   it("keeps the terminal contest owner for survivable known access damage below the normal hand floor", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       terminalRemoteNonlethalDamageJson,
     ) as ReconstructedDecisionCapture;
     const input = capture.input;
@@ -272,7 +272,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
   });
 
   it("contests a terminal remote when the visible damage only violates the normal hand floor", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       terminalRemoteNonlethalDamageJson,
     ) as ReconstructedDecisionCapture;
     // The historical Nerve Labyrinth also had an unbreakable ETR. Use a
@@ -358,7 +358,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     continuation.playerView.timingPoint = "run.jack_out_window";
     continuation.playerView.own.clicks -= 1;
     continuation.playerView.run = {
-      runId: "selfplay-184-terminal-remote-continuation",
+      runId: continuation.playerView.stateVersion,
       attackedServerId: "r1",
       phase: "movement",
       position: { kind: "ice", serverId: "r1", iceIndex: 0 },
@@ -404,7 +404,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         planFirstDecision: {
           rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
           leafExecutorInstanceId:
-            "plan:runner.convert_run_window:run%3Aselfplay-184-terminal-remote-continuation",
+            `plan:runner.convert_run_window:run%3A${continuation.playerView.run.runId}`,
           selectedStep: {
             parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
           },

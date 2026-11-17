@@ -50,10 +50,10 @@ it.each([
     expect(d.selectedChoices?.selectedOptionIds).toHaveLength(2);
     expect(d.selectedChoices?.selectedOptionIds).toEqual(
       expect.arrayContaining([
-        "card_corp_79_1",
+        "card_chp",
         keep
-          ? "card_corp_65_1"
-          : "card_corp_516_1",
+          ? "card_cel"
+          : "card_c36t",
       ]),
     );
     expect(d.decisionDebug!.planFirstDecision!).toMatchObject({

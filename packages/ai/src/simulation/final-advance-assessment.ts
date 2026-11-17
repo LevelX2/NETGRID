@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { getPlayerView } from "@netgrid/engine";
 import {
   type AiDecisionInput,
@@ -43,7 +44,7 @@ export function finalAdvanceAssessmentForSimulationAction(
       (stateAfterAction.cardInstances[candidate]?.advancementCounters ?? 0) >
         (stateBeforeAction.cardInstances[candidate]?.advancementCounters ?? 0),
   );
-  if (!cardId || !targetServerId?.startsWith("remote_"))
+  if (!cardId || !isRemoteServerId(targetServerId))
     return { finalAdvance: false };
   const agenda = getPlayerView(stateAfterAction, "corp")
     .servers.find((server) => server.id === targetServerId)
@@ -94,7 +95,7 @@ export function isProtectBeforeAdvanceSimulationAction(
     if (gainedCredits <= 0) return false;
     return input.playerView.servers.some((server) => {
       if (
-        !server.id.startsWith("remote_") ||
+        !isRemoteServerId(server.id) ||
         !remoteHasNearFinalAgenda(input.playerView, server.id)
       )
         return false;
@@ -116,7 +117,7 @@ export function isProtectBeforeAdvanceSimulationAction(
     });
   }
   if (
-    !targetServerId?.startsWith("remote_") ||
+    !isRemoteServerId(targetServerId) ||
     !remoteHasNearFinalAgenda(input.playerView, targetServerId)
   )
     return false;

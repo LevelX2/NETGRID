@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -130,7 +131,7 @@ export function corpActiveScorelineClockPressure(
     severity,
     targetServerId,
     scoreRemoteServerId:
-      targetServerId && targetServerId.startsWith("remote_")
+      targetServerId && isRemoteServerId(targetServerId)
         ? targetServerId
         : undefined,
     requiredRezFloor: scorelineRequiredRezFloor(input, preferred, dependencies),
@@ -161,7 +162,7 @@ export function activeScorelineClockEntryIsPlayable(
   dependencies: CorpBoardTriageDependencies,
 ): boolean {
   if (!entry.serverId || entry.serverId === "new_remote") return false;
-  if (!entry.serverId.startsWith("remote_")) return false;
+  if (!isRemoteServerId(entry.serverId)) return false;
   if (!actionPushesConcreteAgendaScoreline(input, entry.action, dependencies)) {
     return false;
   }
@@ -333,7 +334,7 @@ export function corpDeckoutAgendaFloodPressure(
     severity,
     targetServerId,
     scoreRemoteServerId:
-      targetServerId && targetServerId.startsWith("remote_")
+      targetServerId && isRemoteServerId(targetServerId)
         ? targetServerId
         : undefined,
     requiredRezFloor,
@@ -453,7 +454,7 @@ export function corpHqAgendaFloodScorelinePressure(
     severity,
     targetServerId,
     scoreRemoteServerId:
-      targetServerId && targetServerId.startsWith("remote_")
+      targetServerId && isRemoteServerId(targetServerId)
         ? targetServerId
         : undefined,
     requiredRezFloor,
@@ -516,7 +517,7 @@ export function scorelineEntryCanRelieveHqAgendaFlood(
   dependencies: CorpBoardTriageDependencies,
 ): boolean {
   if (!entry.serverId || entry.serverId === "new_remote") return false;
-  if (!entry.serverId.startsWith("remote_")) return false;
+  if (!isRemoteServerId(entry.serverId)) return false;
   const assessment = entry.scoringWindow;
   if (!assessment) return false;
   if (
@@ -631,7 +632,7 @@ export function scorelineEntryIsRelativeHqAgendaRelief(
   dependencies: CorpBoardTriageDependencies,
 ): boolean {
   const assessment = entry.scoringWindow;
-  if (!entry.serverId || !entry.serverId.startsWith("remote_")) return false;
+  if (!entry.serverId || !isRemoteServerId(entry.serverId)) return false;
   if (!assessment) return false;
   const pointsToWin =
     corpTriagePositiveNumber(input.playerView.agendaPointsToWin) ?? 7;
@@ -1392,7 +1393,7 @@ export function existingScoreRemoteNeedsFundingBeforeProtection(
   return (
     entry.serverId !== undefined &&
     entry.serverId !== "new_remote" &&
-    entry.serverId.startsWith("remote_") &&
+    isRemoteServerId(entry.serverId) &&
     (belowExplicitReserve ||
       brokeFullPathAtLowCredits ||
       belowFullPathEvidenceFloor ||
@@ -1488,7 +1489,7 @@ export function existingScoreRemoteOutletExists(
 ): boolean {
   return input.playerView.servers.some(
     (server) =>
-      server.id.startsWith("remote_") &&
+      isRemoteServerId(server.id) &&
       (server.root.some(
         (card) => card.known !== false && corpTriageVisibleCardIsAgenda(card),
       ) ||
@@ -1832,7 +1833,7 @@ export function speculativeRemoteLayeringWouldDisplaceCentralProtection(
     if (
       entry.action.type !== "install_card" ||
       entry.action.payload?.placement === "ice" ||
-      (!entry.serverId?.startsWith("remote_") &&
+      (!isRemoteServerId(entry.serverId) &&
         entry.serverId !== "new_remote") ||
       entry.scoringWindow?.scoreHorizon === "immediate"
     ) {
@@ -2114,7 +2115,7 @@ export function installedIceProvidesConcreteRemoteScoreProtection(
   _dependencies: CorpBoardTriageDependencies,
   _options: { urgentScoreline?: boolean } = {},
 ): boolean {
-  if (serverId !== "new_remote" && !serverId.startsWith("remote_")) {
+  if (serverId !== "new_remote" && !isRemoteServerId(serverId)) {
     return false;
   }
   return installedIceProvidesExactAccessImprovement(input, action, serverId);

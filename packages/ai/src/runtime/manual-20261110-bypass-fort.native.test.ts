@@ -33,7 +33,7 @@ it("keeps Classic trace semantics when quoting the live inner path", () => {
     legalActions: getLegalActions(f.state, "runner"),
   };
   const path = assessKnownRezzedIcePath(
-    view.servers.find((s) => s.id === "remote_1")!.ice.slice(0, 1),
+    view.servers.find((s) => s.id === "r1")!.ice.slice(0, 1),
     view.own.rig ?? [],
     view.own.credits,
     [],
@@ -116,17 +116,17 @@ function fixture(
     .withCorpCredits(corpCredits)
     .withRunnerCardInGrip(INSIDE)
     .withRunnerProgramInstalled(KRASH)
-    .withCorpRemoteAgenda("remote_1", 1);
-  if (innerPresent) builder.withCorpIceOnServer("remote_1", innerDefinition);
-  builder.withCorpIceOnServer("remote_1", QUANDARY);
-  const server = state.corp.servers.find((s) => s.id === "remote_1")!;
+    .withCorpRemoteAgenda("r1", 1);
+  if (innerPresent) builder.withCorpIceOnServer("r1", innerDefinition);
+  builder.withCorpIceOnServer("r1", QUANDARY);
+  const server = state.corp.servers.find((s) => s.id === "r1")!;
   if (innerPresent && innerRezzed) {
     state.cardInstances[server.ice[0]!]!.rezzed = true;
     state.cardInstances[server.ice[0]!]!.faceup = true;
   }
   const action = getLegalActions(state, "runner").find(
     (a) =>
-      a.payload?.serverId === "remote_1" &&
+      a.payload?.serverId === "r1" &&
       (inside
         ? a.type === "play_event" &&
           state.cardInstances[a.source!]?.definitionId === INSIDE
@@ -146,7 +146,7 @@ function fixture(
     profileId: "bypass-fort",
   });
   const sourceCard = input.playerView.servers
-    .find((s) => s.id === "remote_1")!
+    .find((s) => s.id === "r1")!
     .ice.at(-1)!;
   const candidate = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -162,7 +162,7 @@ function fixture(
     input,
     sourceCard,
     candidate,
-    targetServerId: "remote_1",
+    targetServerId: "r1",
   });
   return { state, input, sourceCard, candidate, route };
 }
@@ -194,7 +194,7 @@ it.each([true, false])(
       ).toBeGreaterThanOrEqual(1);
       expect(
         getPlayerView(f.state, "runner").servers.find(
-          (s) => s.id === "remote_1",
+          (s) => s.id === "r1",
         )!.ice[0]!.effectivePostRezRunQuote,
       ).toBeUndefined();
     }
@@ -212,11 +212,11 @@ it("does not fund an inner continuation from money already spent on outer rez", 
 
 it("rejects a stale inner continuation quote", () => {
   const f = fixture(true, false);
-  const inner = f.input.playerView.servers.find((s) => s.id === "remote_1")!
+  const inner = f.input.playerView.servers.find((s) => s.id === "r1")!
     .ice[0]!;
   inner.effectivePostRezRunQuote!.expiresAtStateVersion--;
   expect(
-    projectExactCorpIceRezRoute({ ...f, targetServerId: "remote_1" }),
+    projectExactCorpIceRezRoute({ ...f, targetServerId: "r1" }),
   ).toBeUndefined();
 });
 

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import {
   assessKnownRezzedIcePath,
@@ -47,7 +48,7 @@ function knownPathAssessment(
 
 function event(publicPayload: Record<string, unknown>): PublicGameEvent {
   return {
-    eventId: `event-${JSON.stringify(publicPayload)}`,
+    eventId: 3,
     type: "start_run",
     stateVersionBefore: 1,
     stateVersionAfter: 2,
@@ -148,7 +149,7 @@ describe("visible run analysis server ids", () => {
       serverIdFromEvent(event({ serverLabel: "Remote 1" })),
     ).toBeUndefined();
     expect(serverIdFromEvent(event({ serverLabel: "R&D" }))).toBeUndefined();
-    expect(serverIdFromEvent(event({ serverId: "remote_1" }))).toBe("remote_1");
+    expect(serverIdFromEvent(event({ serverId: "r1" }))).toBe("r1");
     expect(serverIdFromEvent(event({ attackedServerId: "rd" }))).toBe("rd");
   });
 });
@@ -1708,7 +1709,7 @@ describe("visible run analysis trace hazards", () => {
       traceCreditSources: [
         {
           sourceCardInstanceId: "link-bit-source",
-          sourceDefinitionId: "link-bit-source-definition",
+          sourceDefinitionId: syntheticCardDefinitionId("link-bit-source-definition"),
           amount: 5,
           isStealth: false,
         },
@@ -1846,7 +1847,7 @@ describe("visible run analysis trace hazards", () => {
   it("cannot use two mutually exclusive link abilities of one installed source", () => {
     const source = {
       sourceCardInstanceId: "shared-source",
-      sourceDefinitionId: "shared-definition",
+      sourceDefinitionId: syntheticCardDefinitionId("shared-definition"),
       sourceTitle: "Link Source",
       activationCost: 1,
       tapSource: false,
@@ -1872,7 +1873,7 @@ describe("visible run analysis trace hazards", () => {
         traceCreditSources: [
           {
             sourceCardInstanceId: "trace-credit-source",
-            sourceDefinitionId: "trace-credit-source-definition",
+            sourceDefinitionId: syntheticCardDefinitionId("trace-credit-source-definition"),
             amount: 1,
             isStealth: false,
           },
@@ -2394,7 +2395,7 @@ describe("shared runner run route quote", () => {
       known: true,
       strength: 2,
       counters: { power: 2 },
-      selectedServerId: "remote_1",
+      selectedServerId: "r1",
       subtypes: ["icebreaker", "codecracker"],
     };
 
@@ -2404,7 +2405,7 @@ describe("shared runner run route quote", () => {
       1,
       [],
       0,
-      { targetServerId: "remote_1" },
+      { targetServerId: "r1" },
     );
     const changedFort = assessKnownRezzedIcePath(
       [classicCodeGateIce("remote-code-gate")],
@@ -2412,7 +2413,7 @@ describe("shared runner run route quote", () => {
       1,
       [],
       0,
-      { targetServerId: "remote_2" },
+      { targetServerId: "r2" },
     );
 
     expect(sameFort).toMatchObject({ blocked: false, canReachAccess: true });
@@ -2865,7 +2866,7 @@ function fragmentationStormIce(instanceId: string): VisibleCard {
 function traceDamageIce(instanceId: string, amount: number): VisibleCard {
   return {
     instanceId,
-    definitionId: "test_trace_damage_ice",
+    definitionId: syntheticCardDefinitionId("test_trace_damage_ice"),
     title: "Trace Damage ICE",
     type: "ice",
     subtypes: ["sentry", "trace"],
@@ -2874,7 +2875,7 @@ function traceDamageIce(instanceId: string, amount: number): VisibleCard {
     strength: 0,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "test_trace_damage_ice",
+      iceDefinitionId: syntheticCardDefinitionId("test_trace_damage_ice"),
       effectiveStrength: 0,
       subroutines: [
         {
@@ -2968,7 +2969,7 @@ function traceSupportQuote(
         baseLink,
         activationCost,
         safeForAccess,
-        sourceDefinitionId: "trace-base-link-source",
+        sourceDefinitionId: syntheticCardDefinitionId("trace-base-link-source"),
         sourceTitle,
         ...(sideEffect ? { sideEffect } : {}),
       },

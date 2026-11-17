@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { assessVisibleRunnerServerPath } from "../run-analysis/visible-run-server-path";
 import {
   type AiDecisionInput,
@@ -134,7 +135,7 @@ export function createRunnerPressureMetricContext(
       if (creditsAfterPath === undefined) {
         throw new Error("runner_pressure_metrics_completed_path_missing_credit_ledger");
       }
-      if (serverId.startsWith("remote_")) {
+      if (isRemoteServerId(serverId)) {
         const remoteReady = runnerRemotePressureReadyForMetrics(
           input,
           server,

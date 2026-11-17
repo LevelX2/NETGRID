@@ -438,7 +438,7 @@ describe("Corp turn planning coverage", () => {
     const parentInstanceId = "plan:corp.score_agenda:agenda-1";
     const providerInstanceId =
       "plan:corp.defend_servers:server-defense-portfolio";
-    const needId = "score-protection:agenda-1:remote_1";
+    const needId = "score-protection:agenda-1:r1";
     const defense = setup.heads.find(
       (head) => head.currentBinding.actionId === "action:defense",
     )!;
@@ -524,7 +524,7 @@ describe("Corp turn planning coverage", () => {
   it("rejects nominal providers and parent progress claims without need reduction", () => {
     const setup = coverageSetup();
     const parentInstanceId = "plan:corp.score_agenda:agenda-1";
-    const needId = "score-protection:agenda-1:remote_1";
+    const needId = "score-protection:agenda-1:r1";
     const report = buildCorpTurnPlanningCoverageReport({
       ...setup,
       progressRoots: [
@@ -570,7 +570,7 @@ describe("Corp turn planning coverage", () => {
           planInstanceId: "plan:corp.score_agenda:agenda-1",
           blocked: true,
           blockerCode: "no_complete_line",
-          requiredNeedId: "score-protection:agenda-1:remote_1",
+          requiredNeedId: "score-protection:agenda-1:r1",
           campaignDisposition: "blocked_replan",
           witness: {
             kind: "replan",

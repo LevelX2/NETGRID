@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -31,7 +32,7 @@ it("converts the existing agenda instead of generating capacity for another expo
     decision = chooseAiAction(input);
   const layoff = input.legalActions.find(
     (a: { type: string; source: string }) =>
-      a.type === "play_operation" && a.source?.includes("systematic-layoffs"),
+      a.type === "play_operation" && referencesDefaultDeckCard(a.source, 516),
   );
   expect(decision.actionId).toBe(layoff.actionId);
   expect(decision.fallbackUsed).toBe(false);
@@ -39,7 +40,7 @@ it("converts the existing agenda instead of generating capacity for another expo
   const p = decision.decisionDebug!.planFirstDecision!;
   expect(p.selectedPlan!.moduleId).toBe("corp.score_agenda");
   expect(p.rootPlanInstanceId).toBe(
-    "plan:corp.score_agenda:agenda%3Acorp_66_1%3Aremote_1",
+    "plan:corp.score_agenda:agenda%3Acet%3Ar1",
   );
   expect(p.selectedStep!.stepId).toContain(":convert_agenda");
   expect(p.route).toMatchObject({
@@ -51,7 +52,7 @@ it("converts the existing agenda instead of generating capacity for another expo
   const other = port.instances.find(
     (x) =>
       x.instanceId ===
-      "plan:corp.score_agenda:agenda%3Acorp_418_2%3Anew_remote",
+      "plan:corp.score_agenda:agenda%3Ac2l2%3Anew_remote",
   )!;
   const signal = (other.moduleState as { signal: CorpScoreProjectSignal })
     .signal;

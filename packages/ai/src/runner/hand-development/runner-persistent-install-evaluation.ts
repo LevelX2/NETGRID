@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { sortedUnique } from "../../runtime/collection";
 import type { CardDefinitionId } from "@netgrid/shared";
 import { visibleRunnerThreat } from "../visible-runner-threat";
@@ -1863,7 +1864,7 @@ export function runnerVisibleRemoteScoreThreat(
 ): boolean {
   return input.playerView.servers.some(
     (server) =>
-      server.id.startsWith("remote_") &&
+      isRemoteServerId(server.id) &&
       server.root.some(
         (card) =>
           card.known &&

@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -170,7 +171,7 @@ export function isServerId(value: string): boolean {
     value === "hq" ||
     value === "rd" ||
     value === "archives" ||
-    value.startsWith("remote_")
+    isRemoteServerId(value)
   );
 }
 

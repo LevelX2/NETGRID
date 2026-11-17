@@ -716,7 +716,7 @@ function iceInstallAction(): LegalAction {
 }
 
 function rootRezCreditAction(): LegalAction {
-  const actionId = "corp.rez_card.economy-asset.remote_1.economy-asset";
+  const actionId = "corp.rez_card.economy-asset.r1.economy-asset";
   return {
     actionId,
     side: "corp",
@@ -730,12 +730,12 @@ function rootRezCreditAction(): LegalAction {
     expiresAtStateVersion: 18,
     payload: {
       cardId: "economy-asset",
-      serverId: "remote_1",
+      serverId: "r1",
       rootRezCreditOutcomeQuoteSchemaVersion:
         CORP_ROOT_REZ_CREDIT_OUTCOME_QUOTE_SCHEMA_VERSION,
       rootRezCreditOutcomeQuoteComplete: true,
       rootRezCreditOutcomeQuoteSourceCardInstanceId: "economy-asset",
-      rootRezCreditOutcomeQuoteTargetServerId: "remote_1",
+      rootRezCreditOutcomeQuoteTargetServerId: "r1",
       rootRezCreditOutcomeQuoteStateVersion: 18,
       rootRezCreditOutcomeQuoteTimingPoint: "run.movement_rez_window",
       rootRezCreditOutcomeQuoteActionId: actionId,
@@ -830,13 +830,13 @@ function optionalRezChoiceView(
   quote: CorpOptionalRezChoiceQuote,
 ): PlayerView {
   const view = playerView(action);
-  view.servers[0]!.id = "remote_1";
+  view.servers[0]!.id = "r1";
   view.servers[0]!.label = "Remote 1";
   view.pendingChoice = {
     choiceId: "choice_optional_rez_12",
     side: "corp",
     source:
-      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data-fort:remote_1:installed-ice:1:12",
+      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data-fort:r1:installed-ice:1:12",
     prompt: "Karte rezzen?",
     kind: "select_cards",
     options: [
@@ -889,7 +889,7 @@ function optionalRezQuote(): Extract<
     sourceAgendaId: "data-fort",
     cardId: "installed-ice",
     cardDefinitionId: syntheticCardDefinitionId("installed-ice-definition"),
-    targetServerId: "remote_1",
+    targetServerId: "r1",
     installedZone: "serverIce",
     sequencePosition: 1,
     stateVersion: 12,

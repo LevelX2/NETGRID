@@ -18,7 +18,7 @@ describe("projectRunnerRunActions", () => {
           sourceDefinitionId: 162,
           cardId: "decoy",
           iceId: "hidden",
-          serverId: "remote_1",
+          serverId: "r1",
           ...reaction,
         },
       });
@@ -29,7 +29,7 @@ describe("projectRunnerRunActions", () => {
         payload: {
           sourceDefinitionId: 162,
           cardId: "decoy",
-          serverId: "remote_1",
+          serverId: "r1",
           runnerEventRun: true,
           eventApproachIceExposeBeforeRez: true,
         },
@@ -37,7 +37,7 @@ describe("projectRunnerRunActions", () => {
       expect(projectRunnerRunActions({ input: input([play]) })).toEqual([
         expect.objectContaining({
           actionId: play.actionId,
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           eventApproachIceExposeBeforeRez: true,
         }),
       ]);

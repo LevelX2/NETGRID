@@ -71,7 +71,7 @@ describe("Closed Accounts decision-local real-Engine punish quote", () => {
           kind: "other_punish",
           sourceCardDefinitionId: CLOSED_ACCOUNTS,
           sourceCapabilityId:
-            "497:abilities_on_play_lose_credits",
+            611,
           currentLegalAction: {
             actionId: currentAction.actionId,
             source: currentAction.source,

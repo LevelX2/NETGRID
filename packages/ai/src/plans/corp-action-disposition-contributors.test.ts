@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { CorpPlanDomain } from "./corp-tactical-plan-contracts";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it, vi } from "vitest";
@@ -153,10 +154,10 @@ describe("corp action disposition contributors", () => {
       ...emptyDomain(),
       scoreProjects: [
         {
-          projectId: "agenda:security-net:remote_2",
+          projectId: "agenda:security-net:r2",
           agendaPoints: 3,
           agendaInstanceId: "security-net",
-          serverId: "remote_2",
+          serverId: "r2",
           actionIds: [selected.actionId],
           phase: "score_agenda" as const,
           sameTurnCloseout: true,
@@ -186,7 +187,7 @@ describe("corp action disposition contributors", () => {
         disposition: "explicitly_nonproductive",
         ownerModuleId: "corp.score_agenda",
         evidenceCode:
-          "corp_bound_score_effect_target_variant_not_selected:agenda:security-net:remote_2",
+          "corp_bound_score_effect_target_variant_not_selected:agenda:security-net:r2",
       },
     ]);
   });
@@ -203,17 +204,17 @@ describe("corp action disposition contributors", () => {
       ...emptyDomain(),
       scoreProjects: [
         {
-          projectId: "agenda:fetal-ai-1:remote_1",
+          projectId: "agenda:fetal-ai-1:r1",
           agendaPoints: 3,
           agendaInstanceId: "fetal-ai-1",
-          serverId: "remote_1",
+          serverId: "r1",
           phase: "advance_agenda" as const,
           sameTurnCloseout: false,
           terminalScore: false,
           feasible: true,
           continuationReserve: {
             agendaCardId: "fetal-ai-1",
-            serverId: "remote_1",
+            serverId: "r1",
             requiredCreditsBeforeNextCorpTurn: 3,
             remainingAdvancementCounters: 3,
             nextCorpTurnGuaranteedFlexibleClicks: 3,
@@ -232,7 +233,7 @@ describe("corp action disposition contributors", () => {
               "parent_invalidated_or_higher_priority_preemption" as const,
           },
           evidenceCode:
-            "engine_certified_next_turn_score_continuation:fetal-ai-1:remote_1",
+            "engine_certified_next_turn_score_continuation:fetal-ai-1:r1",
         },
       ],
     };
@@ -250,7 +251,7 @@ describe("corp action disposition contributors", () => {
         disposition: "explicitly_nonproductive",
         ownerModuleId: "corp.score_agenda",
         evidenceCode:
-          "corp_score_continuation_advance_waits_for_credit_reserve:agenda:fetal-ai-1:remote_1:2",
+          "corp_score_continuation_advance_waits_for_credit_reserve:agenda:fetal-ai-1:r1:2",
       },
     ]);
   });
@@ -431,7 +432,7 @@ describe("corp action disposition contributors", () => {
       actionType: "install_card",
       semanticActionType: "install.card",
       sourceKind: "card",
-      sourceDefinitionId: "trace-support",
+      sourceDefinitionId: syntheticCardDefinitionId("trace-support"),
     } as unknown as ActionSemanticCandidate;
     const facts = {
       ...contributorFacts(),
@@ -459,7 +460,7 @@ describe("corp action disposition contributors", () => {
       ),
       corpHqOverflowReservedScoreServerDispositionEvidence: vi.fn(
         () =>
-          "corp_hq_overflow_install_rejected_reserved_score_server:remote_1",
+          "corp_hq_overflow_install_rejected_reserved_score_server:r1",
       ),
     };
 
@@ -484,7 +485,7 @@ describe("corp action disposition contributors", () => {
           projectId: "prepared-but-unfunded",
           agendaPoints: 2,
           agendaInstanceId: "agenda-in-hq",
-          serverId: "remote_1",
+          serverId: "r1",
           phase: "install_agenda" as const,
           sameTurnCloseout: false,
           terminalScore: false,
@@ -529,7 +530,7 @@ describe("corp action disposition contributors", () => {
       actionType: "activated_card_ability",
       semanticActionType: "card_ability.activate",
       sourceKind: "card",
-      sourceDefinitionId: "trace-tag-source",
+      sourceDefinitionId: syntheticCardDefinitionId("trace-tag-source"),
       functionalEffects: [
         {
           kind: "tag_source",
@@ -566,7 +567,7 @@ describe("corp action disposition contributors", () => {
       actionType: "activated_card_ability",
       semanticActionType: "card_ability.activate",
       sourceKind: "card",
-      sourceDefinitionId: "trace-tag-source",
+      sourceDefinitionId: syntheticCardDefinitionId("trace-tag-source"),
     } as unknown as ActionSemanticCandidate;
     const facts = {
       ...contributorFacts(),
@@ -593,7 +594,7 @@ describe("corp action disposition contributors", () => {
       actionType: "play_operation",
       semanticActionType: "play.corp_operation",
       sourceKind: "card",
-      sourceDefinitionId: "trace-tag-source",
+      sourceDefinitionId: syntheticCardDefinitionId("trace-tag-source"),
     } as unknown as ActionSemanticCandidate;
     const facts = {
       ...contributorFacts(),

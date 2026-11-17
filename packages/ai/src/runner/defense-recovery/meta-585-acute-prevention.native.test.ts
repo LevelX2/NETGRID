@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
+import { buildPlanningStateIdentity } from "../../plans/turn-planning-contracts";
 import { restoreAiRuntimeCheckpoint } from "../../evaluation/decision-checkpoints/runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -124,6 +125,7 @@ it("does not certify acute demand merely from a fully bound historical checkpoin
     ...cp.input,
     ...buildAiDecisionInputDto(cp.input),
   } as AiDecisionInputWithDeckCapabilities;
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
   restoreAiRuntimeCheckpoint(
     input,
     input.ownDeckSnapshot!.deckSnapshotId,
@@ -135,7 +137,9 @@ it("does not certify acute demand merely from a fully bound historical checkpoin
     (a) => a.actionId === decision.actionId,
   );
   expect(action?.type).toBe("install_card");
-  expect(action?.payload?.cardId).toMatch(/broker/);
+  const broker = input.playerView.own.gripOrHq.find((card) => card.definitionId === 366);
+  expect(broker).toBeDefined();
+  expect(action?.payload?.cardId).toBe(broker?.instanceId);
   expect(fridgeEvaluation(input)).toMatchObject({
     currentNeed: "setup", deferReason: "preserve_credit_floor",
   });

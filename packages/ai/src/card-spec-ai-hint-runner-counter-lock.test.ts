@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { cardSpecPlanningCards } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
@@ -5,18 +6,18 @@ import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 import { buildCorpIceCardFacts } from "./runtime/corp-ice-placement/corp-ice-placement";
 
 const entries = cardSpecPlanningCards();
-function entry(id: string) {
+function entry(id: CardDefinitionId) {
   const e = entries.find((c) => c.definition.id === id);
   if (!e) throw Error(`counter_lock_test_missing_card:${id}`);
   return e;
 }
-function mechanical(id: string) {
+function mechanical(id: CardDefinitionId) {
   const e = entry(id),
     planning = { ...e.planning };
   delete planning.planningAnnotations;
   return deriveCardSpecAiHint({ ...e, planning });
 }
-function hints(id: string) {
+function hints(id: CardDefinitionId) {
   const generated = AI_HINTS_BY_CARD.get(id);
   if (!generated) throw Error(`counter_lock_test_missing_hint:${id}`);
   return [mechanical(id), generated];

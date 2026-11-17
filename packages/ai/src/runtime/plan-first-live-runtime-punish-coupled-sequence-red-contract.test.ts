@@ -781,7 +781,7 @@ function coupledPunishInput(params: {
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1"),
+    server("r1"),
   ];
   input.playerView.legalActions = actions;
   input.legalActions = actions;
@@ -1294,7 +1294,7 @@ function installAgenda(card: VisibleCard, stateVersion: number): LegalAction {
         payload: {
           cardId: card.instanceId,
           sourceDefinitionId: card.definitionId!,
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
         },
       },

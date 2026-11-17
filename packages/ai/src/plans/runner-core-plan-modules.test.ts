@@ -1034,10 +1034,10 @@ describe("Runner core plan modules", () => {
             ...fundingRouteContract("credit"),
             needId: "fund-run",
             parentPlanInstanceId:
-              "plan:runner.contest_remote:remote%3Aremote_1",
+              "plan:runner.contest_remote:remote%3Ar1",
             driver: {
               kind: "contest",
-              targetId: "remote_1",
+              targetId: "r1",
               reasonCode: "material_remote_contest",
             },
             targetCredits: 4,
@@ -1061,10 +1061,10 @@ describe("Runner core plan modules", () => {
             ...fundingRouteContract("credit"),
             needId: "fund-run",
             parentPlanInstanceId:
-              "plan:runner.contest_remote:remote%3Aremote_1",
+              "plan:runner.contest_remote:remote%3Ar1",
             driver: {
               kind: "contest",
-              targetId: "remote_1",
+              targetId: "r1",
               reasonCode: "material_remote_contest",
             },
             targetCredits: 4,
@@ -1098,7 +1098,7 @@ describe("Runner core plan modules", () => {
             parentPlanInstanceId: "",
             driver: {
               kind: "contest",
-              targetId: "remote_1",
+              targetId: "r1",
               reasonCode: "raw_remote_scan",
             },
             targetCredits: 10,
@@ -1123,7 +1123,7 @@ describe("Runner core plan modules", () => {
 
   it("executes parent-bound funding only while the exact parent stays material", () => {
     const economy = coreModule("runner.economy");
-    const parentPlanInstanceId = "plan:runner.contest_remote:remote%3Aremote_1";
+    const parentPlanInstanceId = "plan:runner.contest_remote:remote%3Ar1";
     const runnerContext = context([candidate("credit")], {
       fundingNeeds: [
         {
@@ -1133,7 +1133,7 @@ describe("Runner core plan modules", () => {
           parentPlanInstanceId,
           driver: {
             kind: "contest",
-            targetId: "remote_1",
+            targetId: "r1",
             reasonCode: "admitted_remote_contest",
           },
           targetCredits: 7,
@@ -1161,7 +1161,7 @@ describe("Runner core plan modules", () => {
     const readyParent = structuredClone(instance);
     readyParent.instanceId = parentPlanInstanceId;
     readyParent.moduleId = "runner.contest_remote";
-    readyParent.dedupeKey = "remote:remote_1";
+    readyParent.dedupeKey = "remote:r1";
     delete readyParent.parentInstanceId;
     readyParent.moduleState = {
       kind: "remote_contest",
@@ -1222,10 +1222,10 @@ describe("Runner core plan modules", () => {
             ...fundingRouteContract("credit"),
             needId: "fund-remote-1",
             parentPlanInstanceId:
-              "plan:runner.contest_remote:remote%3Aremote_1",
+              "plan:runner.contest_remote:remote%3Ar1",
             driver: {
               kind: "contest",
-              targetId: "remote_1",
+              targetId: "r1",
               reasonCode: "admitted_remote_contest",
             },
             targetCredits: 7,
@@ -1243,9 +1243,9 @@ describe("Runner core plan modules", () => {
     );
     const support = instantiatePlanProposal(proposal!, 10);
     const parent = structuredClone(support);
-    parent.instanceId = "plan:runner.contest_remote:remote%3Aremote_1";
+    parent.instanceId = "plan:runner.contest_remote:remote%3Ar1";
     parent.moduleId = "runner.contest_remote";
-    parent.dedupeKey = "remote:remote_1";
+    parent.dedupeKey = "remote:r1";
     delete parent.parentInstanceId;
     delete parent.parentNeedId;
     parent.moduleState = {
@@ -1774,7 +1774,7 @@ describe("Runner core plan modules", () => {
         {
           gapId: "special:ap",
           requiredRole: "breaker_ap",
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           priorityClass: "P4",
           evidenceCode: "missing_special_ap_coverage",
           deckHasAnswer: true,

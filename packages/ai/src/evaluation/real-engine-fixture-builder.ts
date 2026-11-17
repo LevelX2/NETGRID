@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { CardInstanceId, GameState, ServerId } from "@netgrid/shared";
 
 export type RealEngineFixtureMutator = (
@@ -202,13 +203,13 @@ export class RealEngineFixtureBuilder {
     if (this.state.corp.servers.some((server) => server.id === serverId)) {
       return this;
     }
-    if (!serverId.startsWith("remote_")) {
+    if (!isRemoteServerId(serverId)) {
       throw new Error(`Missing central server ${serverId}`);
     }
     this.state.corp.servers.push({
       id: serverId,
       kind: "remote",
-      label: `Remote ${serverId.slice("remote_".length)}`,
+      label: `Remote ${serverId.slice(1)}`,
       ice: [],
       root: [],
     });

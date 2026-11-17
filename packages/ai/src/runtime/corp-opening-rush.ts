@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import { readExactCurrentInstalledCorpIceRezQuote } from "./corp-exact-ice-rez-route";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
@@ -143,7 +144,7 @@ export function assessCorpOpeningRush(params: {
     targetServerId && targetServerId !== "new_remote"
       ? input.playerView.servers.find((server) => server.id === targetServerId)
       : undefined;
-  if (!targetServer || !targetServer.id.startsWith("remote_")) {
+  if (!targetServer || !isRemoteServerId(targetServer.id)) {
     return blocked("missing_existing_remote", [
       `target_server:${targetServerId ?? "missing"}`,
     ]);

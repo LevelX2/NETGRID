@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { afterEach, describe, expect, it } from "vitest";
 import type { LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
@@ -145,7 +146,7 @@ describe("pilot-scope-registry", () => {
         runner: {
           runTargets: [
             {
-              ...safeCentralRunTarget("run-remote", "remote_1"),
+              ...safeCentralRunTarget("run-remote", "r1"),
               targetKind: "remote",
               accessTargetKind: "remote",
               scoreThreat: true,
@@ -153,7 +154,7 @@ describe("pilot-scope-registry", () => {
           ],
         },
       }),
-      action: legalAction("run-remote", "start_run", { serverId: "remote_1" }),
+      action: legalAction("run-remote", "start_run", { serverId: "r1" }),
       top: rankedAction("run-remote", 160, "remote_contest"),
     });
 
@@ -399,7 +400,7 @@ function runCandidateFromTarget(
   const serverKind =
     serverId === "hq" || serverId === "rd" || serverId === "archives"
       ? serverId
-      : serverId.startsWith("remote_")
+      : isRemoteServerId(serverId)
         ? "remote"
         : undefined;
   return {

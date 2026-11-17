@@ -233,7 +233,7 @@ function validTargetProjectedServerBinding(
   if (targetServerId === "new_remote") {
     return (
       typeof projectedServerId === "string" &&
-      /^remote_[1-9]\d*$/.test(projectedServerId)
+      /^r[1-9]\d*$/.test(projectedServerId)
     );
   }
   return projectedServerId === targetServerId;

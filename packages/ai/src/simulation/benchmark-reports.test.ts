@@ -319,7 +319,7 @@ describe("benchmark report formatting", () => {
       actionSequence: [
         selfplayAction("runner", 1, "start_run", {
           selectedActionId: "run-remote-a",
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           planKind: "runner.contest_remote",
           evidence: ["known_no_current_payoff"],
         }),
@@ -329,7 +329,7 @@ describe("benchmark report formatting", () => {
         }),
         selfplayAction("runner", 3, "start_run", {
           selectedActionId: "run-remote-b",
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           planKind: "runner.contest_remote",
           evidence: ["known_no_current_payoff"],
           runnerRunPenalizedAsKnownNoAccess: true,

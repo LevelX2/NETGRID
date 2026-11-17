@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { cardSpecPlanningCards } from "@netgrid/cards/planning";
 import { expect, it } from "vitest";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
@@ -7,14 +8,14 @@ import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 const SYD = 134;
 const BOOT = 116;
 const LISA = 121;
-function entry(id: string) {
+function entry(id: CardDefinitionId) {
   const found = cardSpecPlanningCards().find((c) => c.definition.id === id)!;
   const { planningAnnotations: _annotations, ...planning } = structuredClone(
     found.planning,
   );
   return { ...found, planning };
 }
-function mechanical(id: string) {
+function mechanical(id: CardDefinitionId) {
   return deriveCardSpecAiHint(entry(id));
 }
 

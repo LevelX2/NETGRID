@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
@@ -29,7 +30,7 @@ export function corpRemoteHasEngineQuotedReusableScoreFriction(
 ): boolean {
   const server = input.playerView.servers.find(
     (candidate) =>
-      candidate.id === serverId && candidate.id.startsWith("remote_"),
+      candidate.id === serverId && isRemoteServerId(candidate.id),
   );
   if (!server || server.root.length > 0 || server.ice.length === 0) {
     return false;
@@ -62,7 +63,7 @@ export function corpRemoteHasEngineQuotedFundableScoreFriction(
   const server = input.playerView.servers.find(
     (candidate) =>
       candidate.id === serverId &&
-      candidate.id.startsWith("remote_") &&
+      isRemoteServerId(candidate.id) &&
       candidate.root.length === 0,
   );
   if (!server) return false;
@@ -205,7 +206,7 @@ export function corpResidentScoreDefenseBinding(
       ? []
       : input.playerView.servers.filter(
           (server) =>
-            server.id.startsWith("remote_") &&
+            isRemoteServerId(server.id) &&
             (residentScoreServerId === "new_remote" ||
               server.id === residentScoreServerId) &&
             server.ice.some((ice) => ice.instanceId === stagedIceInstanceId),
@@ -228,7 +229,7 @@ export function corpResidentScoreDefenseBinding(
     typeof recentScoreStagingSignal?.sourceCardInstanceId === "string"
       ? input.playerView.servers.filter(
           (server) =>
-            server.id.startsWith("remote_") &&
+            isRemoteServerId(server.id) &&
             (residentScoreServerId === "new_remote" ||
               server.id === residentScoreServerId) &&
             server.ice.some(
@@ -241,12 +242,12 @@ export function corpResidentScoreDefenseBinding(
   const residentScoreStagingReceipt =
     residentScoreAgendaCardInstanceId !== undefined &&
     (residentScoreServerId === "new_remote" ||
-      residentScoreServerId?.startsWith("remote_") === true) &&
+      isRemoteServerId(residentScoreServerId) === true) &&
     typeof recentScoreStagingSignal?.sourceCardInstanceId === "string" &&
     residentScoreStagingServers.length === 1;
   const residentConcreteScoreServers =
     residentScoreAgendaCardInstanceId !== undefined &&
-    residentScoreServerId?.startsWith("remote_") === true
+    isRemoteServerId(residentScoreServerId) === true
       ? input.playerView.servers.filter(
           (server) =>
             server.id === residentScoreServerId && server.ice.length > 0,

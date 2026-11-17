@@ -175,7 +175,7 @@ describe("run-strength consumable stock through the real development owner", () 
   it("keeps urgent advanced remote contest ahead of inventory", () => {
     const s = fixture();
     RealEngineFixtureBuilder.forState(s).withCorpRemoteRoot(
-      "remote_1",
+      "r1",
       432,
       3,
     );

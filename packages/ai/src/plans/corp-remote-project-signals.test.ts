@@ -52,7 +52,7 @@ describe("resident Corp scoring remote project", () => {
       const state = opening.state;
       state.turnSerial = 8;
       state.corp.servers.push({
-        id: "remote_1",
+        id: "r1",
         kind: "remote",
         label: "Remote 1",
         ice: [],
@@ -60,7 +60,7 @@ describe("resident Corp scoring remote project", () => {
       });
       RealEngineFixtureBuilder.forState(state)
         .withCorpCardInHq(agenda)
-        .withRezzedCorpIceOnServer("remote_1", rex)
+        .withRezzedCorpIceOnServer("r1", rex)
         .withCorpCredits(1)
         .withRunnerCredits(5);
       const currentInput = {
@@ -87,7 +87,7 @@ describe("resident Corp scoring remote project", () => {
       });
       expect(signal).toMatchObject({
         projectId: "strategic-score-remote",
-        serverId: "remote_1",
+        serverId: "r1",
         phase,
         maturity: {
           knowledge: "known",
@@ -108,7 +108,7 @@ describe("resident Corp scoring remote project", () => {
       assessMaturityForServer: () => undefined,
     });
     expect(signal).toMatchObject({
-      serverId: "remote_2",
+      serverId: "r2",
       target: { status: "bound", targetBindingRevision: 1 },
       cadence: { actionsUsed: 1, open: false },
     });
@@ -130,7 +130,7 @@ describe("resident Corp scoring remote project", () => {
       previous.instances[1]!.parentInstanceId = "other";
     if (mismatch === "missing_event") currentInput.eventTail = [];
     if (mismatch === "different_server")
-      currentInput.eventTail![0]!.publicPayload!.serverId = "remote_3";
+      currentInput.eventTail![0]!.publicPayload!.serverId = "r3";
     const [signal] = buildCorpScoringRemoteProjectSignals({
       input: currentInput,
       previous,
@@ -179,7 +179,7 @@ describe("resident Corp scoring remote project", () => {
 
   it("re-emits one stable prebuild project and prefers a partially built empty remote", () => {
     const assessMaturityForServer = vi.fn((serverId: string) =>
-      serverId === "remote_2"
+      serverId === "r2"
         ? {
             knowledge: "known" as const,
             observedAtStateVersion: 10,
@@ -201,11 +201,11 @@ describe("resident Corp scoring remote project", () => {
       assessMaturityForServer,
     });
     expect(assessMaturityForServer).toHaveBeenCalledTimes(1);
-    expect(assessMaturityForServer).toHaveBeenCalledWith("remote_2", "taxing");
+    expect(assessMaturityForServer).toHaveBeenCalledWith("r2", "taxing");
     expect(signals).toHaveLength(1);
     expect(signals[0]).toMatchObject({
       projectId: "strategic-score-remote",
-      serverId: "remote_2",
+      serverId: "r2",
       phase: "harden_to_protection_target",
       need: { capability: "improve_remote_protection_path" },
     });
@@ -230,13 +230,13 @@ describe("resident Corp scoring remote project", () => {
       scoreProjects: [
         {
           projectId: "score-1",
-          serverId: "remote_2",
+          serverId: "r2",
           agendaInstanceId: "a",
           feasible: true,
         },
       ],
       assessMaturityForServer: (serverId) =>
-        serverId === "remote_2" ? ready : undefined,
+        serverId === "r2" ? ready : undefined,
     });
     expect(signal?.phase).toBe("leased_to_score_project");
     expect(signal?.need).toBeUndefined();
@@ -246,7 +246,7 @@ describe("resident Corp scoring remote project", () => {
     const currentInput = input();
     currentInput.playerView.servers = currentInput.playerView.servers.map(
       (server) =>
-        server.id === "remote_2"
+        server.id === "r2"
           ? { ...server, root: [{ instanceId: "upgrade", known: true }] }
           : server,
     );
@@ -256,7 +256,7 @@ describe("resident Corp scoring remote project", () => {
       scoreProjects: [
         {
           projectId: "blocked-score",
-          serverId: "remote_2",
+          serverId: "r2",
           agendaInstanceId: "agenda-in-hq",
           feasible: false,
         },
@@ -265,7 +265,7 @@ describe("resident Corp scoring remote project", () => {
     });
 
     expect(signal).toMatchObject({
-      serverId: "remote_2",
+      serverId: "r2",
       phase: "assessment_unknown",
     });
   });
@@ -277,12 +277,12 @@ describe("resident Corp scoring remote project", () => {
       scoreProjects: [
         {
           projectId: "score-agenda-1",
-          serverId: "remote_2",
+          serverId: "r2",
           agendaInstanceId: "agenda-in-hq",
           protectionNeed: {
-            needId: "score-protection:score-agenda-1:remote_2:revision-4",
+            needId: "score-protection:score-agenda-1:r2:revision-4",
             parentProjectId: "score-agenda-1",
-            targetServerId: "remote_2",
+            targetServerId: "r2",
             observedAtStateVersion: 10,
           },
           feasible: false,
@@ -292,18 +292,18 @@ describe("resident Corp scoring remote project", () => {
     });
 
     expect(signal).toMatchObject({
-      serverId: "remote_2",
+      serverId: "r2",
       phase: "leased_to_score_project",
       need: {
         needId: "remote-hardening:strategic-score-remote:0",
         capability: "improve_remote_protection_path",
-        targetServerId: "remote_2",
+        targetServerId: "r2",
       },
       consumerSupport: {
         kind: "awaiting_remote_protection",
         agendaInstanceId: "agenda-in-hq",
-        targetServerId: "remote_2",
-        protectionNeedId: "score-protection:score-agenda-1:remote_2:revision-4",
+        targetServerId: "r2",
+        protectionNeedId: "score-protection:score-agenda-1:r2:revision-4",
       },
     });
   });
@@ -311,12 +311,12 @@ describe("resident Corp scoring remote project", () => {
   it("keeps the score lease identity stable across a turn-only state change", () => {
     const scoreProject = (observedAtStateVersion: number) => ({
       projectId: "score-agenda-1",
-      serverId: "remote_2",
+      serverId: "r2",
       agendaInstanceId: "agenda-in-hq",
       protectionNeed: {
-        needId: "score-protection:score-agenda-1:remote_2:revision-4",
+        needId: "score-protection:score-agenda-1:r2:revision-4",
         parentProjectId: "score-agenda-1",
-        targetServerId: "remote_2",
+        targetServerId: "r2",
         observedAtStateVersion,
       },
       feasible: false,
@@ -367,7 +367,7 @@ function executedRemoteInstall() {
   currentInput.legalActions = [];
   currentInput.eventTail = [
     {
-      eventId: "evt_10",
+      eventId: 11,
       type: "install_card",
       stateVersionBefore: 9,
       stateVersionAfter: 10,
@@ -376,7 +376,7 @@ function executedRemoteInstall() {
         actor: "corp",
         actionType: "install_card",
         installPlacement: "ice",
-        serverId: "remote_2",
+        serverId: "r2",
       },
     },
   ] as AiDecisionInput["eventTail"];
@@ -499,8 +499,8 @@ function input(): AiDecisionInput {
         { id: "hq", ice: [], root: [] },
         { id: "rd", ice: [], root: [] },
         { id: "archives", ice: [], root: [] },
-        { id: "remote_1", ice: [], root: [{ instanceId: "asset" }] },
-        { id: "remote_2", ice: [{ instanceId: "ice-1" }], root: [] },
+        { id: "r1", ice: [], root: [{ instanceId: "asset" }] },
+        { id: "r2", ice: [{ instanceId: "ice-1" }], root: [] },
       ],
     },
     legalActions: [
@@ -510,7 +510,7 @@ function input(): AiDecisionInput {
         type: "install_card",
         source: "agenda-in-hq",
         expiresAtStateVersion: 10,
-        payload: { placement: "root", serverId: "remote_2" },
+        payload: { placement: "root", serverId: "r2" },
       },
     ],
   } as unknown as AiDecisionInput;

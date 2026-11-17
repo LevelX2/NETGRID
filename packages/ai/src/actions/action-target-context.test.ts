@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
@@ -35,7 +36,7 @@ describe("applyTargetContextProjection", () => {
           delayedInstallAbility: "set_aside_from_grip",
           cardId: "shell-traders-1",
           targetCardId: "dwarf-1",
-          targetCardDefinitionId: "dwarf-definition",
+          targetCardDefinitionId: syntheticCardDefinitionId("dwarf-definition"),
         },
       },
       undefined,
@@ -48,7 +49,7 @@ describe("applyTargetContextProjection", () => {
           targetId: "dwarf-1",
           targetKind: "card",
           targetSide: "runner",
-          targetDefinitionId: "dwarf-definition",
+          targetDefinitionId: syntheticCardDefinitionId("dwarf-definition"),
         }),
       ]),
     );
@@ -123,12 +124,12 @@ function action(type: string): LegalAction {
     source: "agenda",
     timingPoint: "corp_action.main",
     costs: [],
-    payload: { serverId: "remote_1" },
+    payload: { serverId: "r1" },
     targetRequirements: [
       {
         id: "server",
         kind: "server",
-        allowedServers: ["remote_1"],
+        allowedServers: ["r1"],
       },
     ],
     visibility: "public",

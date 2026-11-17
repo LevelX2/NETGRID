@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
 
@@ -11,26 +12,26 @@ describe("isBreakerInstallAction", () => {
   it("uses visible source card coverage and ignores label-only breaker text", () => {
     const breaker = visibleCard({
       instanceId: "runner-breaker-1",
-      definitionId: "custom-breaker",
+      definitionId: syntheticCardDefinitionId("custom-breaker"),
       title: "Custom Tool",
       subtypes: ["Icebreaker", "Fracter"],
     });
     const noisyBreaker = visibleCard({
       instanceId: "runner-breaker-noise",
-      definitionId: "custom-breaker",
+      definitionId: syntheticCardDefinitionId("custom-breaker"),
       title: "Fracterish Tool",
       subtypes: ["Icebreaker"],
     });
     const universalBreaker = visibleCard({
       instanceId: "runner-breaker-universal",
-      definitionId: "custom-breaker",
+      definitionId: syntheticCardDefinitionId("custom-breaker"),
       title: "Universal Tool",
       subtypes: ["Icebreaker"],
       rulesText: "Break one ice subroutine.",
     });
     const traceBreaker = visibleCard({
       instanceId: "runner-breaker-trace",
-      definitionId: "custom-trace-breaker",
+      definitionId: syntheticCardDefinitionId("custom-trace-breaker"),
       title: "Trace Tool",
       subtypes: ["Icebreaker"],
       rulesText: "Break an ice subroutine that traces.",
@@ -96,7 +97,7 @@ describe("missingBreakerCoverageKind", () => {
             title: "Wall of Static",
           }),
         ),
-        "remote_1",
+        "r1",
       ),
     ).toBe("breaker_wall");
   });
@@ -145,7 +146,7 @@ function playerViewWithIce(ice: VisibleCard): PlayerView {
     ...playerViewWithGrip([]),
     servers: [
       {
-        id: "remote_1",
+        id: "r1",
         ice: [ice],
         root: [],
       },
@@ -163,14 +164,14 @@ function missingCoverageForIceText(text: string) {
         rulesText: "",
       }),
     ),
-    "remote_1",
+    "r1",
   );
 }
 
 function visibleCard(overrides: Partial<VisibleCard>): VisibleCard {
   const card = {
     instanceId: "card",
-    definitionId: "definition",
+    definitionId: syntheticCardDefinitionId("definition"),
     title: "Visible Card",
     type: "program",
     known: true,

@@ -22,7 +22,7 @@ describe("runner installed-card expose choice", () => {
 
   it("moves to another position after the remote root was exposed exactly", () => {
     const current = input();
-    current.eventTail.push(exposeEvent("remote_1", "root", 0));
+    current.eventTail.push(exposeEvent("r1", "root", 0));
     const choice = current.playerView.pendingChoice!;
 
     expect(
@@ -36,7 +36,7 @@ describe("runner installed-card expose choice", () => {
 
   it("forgets the ICE slot replaced by a public Singapore City Grid swap", () => {
     const current = input();
-    current.eventTail.push(exposeEvent("remote_1", "ice", 0), {
+    current.eventTail.push(exposeEvent("r1", "ice", 0), {
       eventId: 4,
       type: "resolve_choice",
       stateVersionBefore: 2,
@@ -46,14 +46,14 @@ describe("runner installed-card expose choice", () => {
         actor: "corp",
         actionType: "resolve_choice",
         hiddenZoneAction: "hq_ice_swap_swap",
-        serverId: "remote_1",
+        serverId: "r1",
         iceIndex: 0,
       },
     });
     expect(runnerExposeInstalledOpportunity(current).unseenPositions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          serverId: "remote_1",
+          serverId: "r1",
           area: "ice",
           index: 0,
         }),
@@ -79,8 +79,8 @@ describe("runner installed-card expose choice", () => {
     const current = input();
     current.eventTail.push(
       exposeEvent("hq", "ice", 0),
-      exposeEvent("remote_1", "ice", 0, 3),
-      exposeEvent("remote_1", "root", 0, 4),
+      exposeEvent("r1", "ice", 0, 3),
+      exposeEvent("r1", "root", 0, 4),
     );
 
     expect(runnerExposeInstalledOpportunity(current).unseenPositions).toEqual(
@@ -100,7 +100,7 @@ describe("runner installed-card expose choice", () => {
         actor: "runner",
         actionType: "play_event",
         publicRevealKind: "expose",
-        exposedServerIds: "hq,remote_1",
+        exposedServerIds: "hq,r1",
         exposedPositionKeys: "ice:0,ice:0",
         publicRevealDefinitionIds: "wall,code-gate",
       },
@@ -110,14 +110,14 @@ describe("runner installed-card expose choice", () => {
       runnerExposeInstalledOpportunity(current).unseenPositions.map(
         (position) => `${position.serverId}:${position.area}:${position.index}`,
       ),
-    ).toEqual(["remote_1:root:0"]);
+    ).toEqual(["r1:root:0"]);
   });
 
   it("treats a replacement card at an exposed remote-root position as unseen", () => {
     const current = input();
     current.eventTail.push(
-      exposeEvent("remote_1", "root", 0),
-      installEvent("remote_1", "root"),
+      exposeEvent("r1", "root", 0),
+      installEvent("r1", "root"),
     );
     current.playerView.servers[1]!.root = [
       {
@@ -155,7 +155,7 @@ function input(): AiDecisionInput {
           root: [],
         },
         {
-          id: "remote_1",
+          id: "r1",
           ice: [{ instanceId: "hidden_remote_ice", known: false }],
           root: [
             {

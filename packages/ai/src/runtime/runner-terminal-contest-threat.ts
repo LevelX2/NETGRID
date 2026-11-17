@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { reconstructBeliefState } from "../belief-state";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
@@ -89,13 +90,13 @@ export function runnerTerminalContestThreat(
             : typeof targets?.scoredFromServerId === "string"
               ? targets.scoredFromServerId
               : undefined;
-        return serverId?.startsWith("remote_") ? [serverId] : [];
+        return isRemoteServerId(serverId) ? [serverId] : [];
       }),
     );
     const remoteServerIds = input.playerView.servers
       .filter(
         (server) =>
-          server.id.startsWith("remote_") &&
+          isRemoteServerId(server.id) &&
           previouslyScoredRemoteIds.has(server.id) &&
           server.root.some((card, index) =>
             rootMayBeAgenda(input, server.id, card, index, pointsNeeded),
@@ -126,7 +127,7 @@ export function runnerTerminalContestThreat(
     const visibleRemoteIds = input.playerView.servers
       .filter(
         (server) =>
-          server.id.startsWith("remote_") &&
+          isRemoteServerId(server.id) &&
           server.root.some(
             (card, index) =>
               rootMayBeAgenda(input, server.id, card, index, pointsNeeded) &&
@@ -157,7 +158,7 @@ export function runnerTerminalContestThreat(
   const visibleTwoPointRemoteIds = input.playerView.servers
     .filter(
       (server) =>
-        server.id.startsWith("remote_") &&
+        isRemoteServerId(server.id) &&
         server.root.some(
           (card, index) =>
             rootMayBeAgenda(input, server.id, card, index, pointsNeeded) &&
@@ -183,7 +184,7 @@ export function runnerTerminalContestThreat(
   const protectedHiddenRemoteIds = input.playerView.servers
     .filter(
       (server) =>
-        server.id.startsWith("remote_") &&
+        isRemoteServerId(server.id) &&
         server.ice.length >= 2 &&
         server.root.some(
           (card, index) =>
@@ -212,7 +213,7 @@ export function runnerTargetHasTerminalContestThreat(
   input: AiDecisionInput,
   targetServerId: string,
 ): boolean {
-  if (!targetServerId.startsWith("remote_")) return false;
+  if (!isRemoteServerId(targetServerId)) return false;
   const terminalThreat = runnerTerminalContestThreat(input);
   if (!terminalThreat) return false;
   if (terminalThreat.remoteServerIds.includes(targetServerId)) return true;

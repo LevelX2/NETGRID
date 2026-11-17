@@ -32,21 +32,21 @@ describe("real Engine inputs through the live Semantic Runtime", () => {
       [
         "runner_real_target_choice_hq_remote_mix",
         {
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           actionTypes: ["play_event", "start_run"],
         },
       ],
       [
         "runner_real_remote_score_threat",
         {
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           actionTypes: ["play_event", "start_run"],
         },
       ],
       [
         "runner_real_remote_known_agenda_contest",
         {
-          targetServerId: "remote_2",
+          targetServerId: "r2",
           actionTypes: ["play_event", "start_run"],
         },
       ],

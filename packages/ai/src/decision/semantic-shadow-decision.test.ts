@@ -23,7 +23,7 @@ describe("SemanticShadowDecision", () => {
         stateVersion: input.playerView.stateVersion,
         selectedTargetsByActionId: {
           "run-rd": { server: "rd" },
-          "run-remote": { server: "remote_1" },
+          "run-remote": { server: "r1" },
         },
       }),
       tacticalGoals: [
@@ -202,7 +202,7 @@ describe("SemanticShadowDecision", () => {
         payload: { serverId: "rd" },
       }),
       legalAction("run-remote", "start_run", "runner", 0, {
-        payload: { serverId: "remote_1" },
+        payload: { serverId: "r1" },
       }),
     ]);
     const frame = buildSemanticDecisionFrame({
@@ -223,7 +223,7 @@ describe("SemanticShadowDecision", () => {
           }),
           runTarget({
             actionId: "run-remote",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
             targetKind: "remote",
             recommendation: "run_now",
             accessPayoff: "score_threat",
@@ -246,7 +246,7 @@ describe("SemanticShadowDecision", () => {
           component: "target_fit",
           evidence: expect.arrayContaining([
             "target_choice_recommendation:true",
-            "target_choice_option:remote_1",
+            "target_choice_option:r1",
           ]),
         }),
       ]),

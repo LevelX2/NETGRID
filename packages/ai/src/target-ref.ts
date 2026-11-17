@@ -76,7 +76,7 @@ const HIDDEN_INFO_MARKERS = [
   "decklist",
   "deckorder",
 ] as const;
-const SERVER_PATTERN = /^(hq|rd|archives|remote_\d+|new_remote)$/;
+const SERVER_PATTERN = /^(hq|rd|archives|r\d+|new_remote)$/;
 const ID_PATTERN = /^[a-zA-Z0-9_.:-]+$/;
 
 export function buildTargetRef(input: TargetRefInput): TargetRef {

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -88,7 +89,7 @@ describe("selectedCorpDiscardChoiceOptionIds", () => {
   it("fails closed when an existing reachable Archives agenda has unknown points", () => {
     const unknown = {
       ...agenda("unknown-existing", 2),
-      definitionId: "unknown-existing-definition",
+      definitionId: syntheticCardDefinitionId("unknown-existing-definition"),
     } satisfies VisibleCard;
     delete (unknown as VisibleCard).agendaPoints;
     const input = discardInput(
@@ -217,7 +218,7 @@ describe("selectedCorpDiscardChoiceOptionIds", () => {
     const unknownAgenda = {
       ...agenda("agenda-unknown", 2),
       agendaPoints: undefined,
-      definitionId: "unknown-agenda-definition",
+      definitionId: syntheticCardDefinitionId("unknown-agenda-definition"),
     } as unknown as VisibleCard;
     const input = discardInput([unknownAgenda, operation("operation-1")], {
       count: 1,

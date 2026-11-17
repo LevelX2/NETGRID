@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import {
   candidateTargetIds,
   exactBasicLiquidCreditCandidate,
@@ -605,7 +606,7 @@ function economyDevelopmentStepValue(
     return Math.max(1, signal.payback.projectedNetCredits * 10);
 
   const targetServerId = candidateTargetIds(candidate).find(
-    (targetId) => targetId === "new_remote" || targetId.startsWith("remote_"),
+    (targetId) => targetId === "new_remote" || isRemoteServerId(targetId),
   );
   if (!targetServerId) return 10;
   if (targetServerId === "new_remote") {

@@ -26,7 +26,7 @@ function fixture() {
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
         cardImplementationAbilityKey: "trash_source_action",
         cardImplementationAbilityId:
-          "48:trash_source_action",
+          63,
         cardImplementationTrashesSource: true,
       },
     },

@@ -20,18 +20,18 @@ import { planningHeadMatchesCommittedPhaseRoot } from "./corp-turn-planner-cutov
 
 describe("Corp TurnPlanner selected-head binding", () => {
   it("uses a blocked score route's explicit replan witness before its stale self head", () => {
-    const projectId = "agenda:project-babylon:remote_4";
+    const projectId = "agenda:project-babylon:r4";
     const planInstanceId =
-      "plan:corp.score_agenda:agenda%3Aproject-babylon%3Aremote_4";
-    const actionId = "corp.install_card.project-babylon.remote_4";
-    const needId = "score-protection:project-babylon:remote_4";
+      "plan:corp.score_agenda:agenda%3Aproject-babylon%3Ar4";
+    const actionId = "corp.install_card.project-babylon.r4";
+    const needId = "score-protection:project-babylon:r4";
     const roots = corpPlanProgressRoots({
       domain: {
         scoreProjects: [
           {
             projectId,
             feasible: false,
-            evidenceCode: "corp_score_protection_funding_gap:remote_4:1",
+            evidenceCode: "corp_score_protection_funding_gap:r4:1",
             protectionNeed: { needId },
           },
         ],
@@ -149,7 +149,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
 
   it("keeps an urgent same-turn score head inside its exact agenda root", () => {
     const scoreRoot =
-      "plan:corp.score_agenda:agenda%3Ahostile-takeover%3Aremote_1";
+      "plan:corp.score_agenda:agenda%3Ahostile-takeover%3Ar1";
     const scoreHead = {
       rootPlanInstanceId: scoreRoot,
       rootPlanModuleId: "corp.score_agenda" as const,
@@ -185,7 +185,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
         ...scoreHead,
         moduleId: "corp.economy",
         executorPlanInstanceId:
-          "plan:corp.economy:score-support%3Aagenda%3Atycho%3Aremote_1",
+          "plan:corp.economy:score-support%3Aagenda%3Atycho%3Ar1",
       },
     });
 
@@ -211,15 +211,15 @@ describe("Corp TurnPlanner selected-head binding", () => {
   });
 
   it("returns from an exact defense support leaf to its score root", () => {
-    const scoreRoot = "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_2";
+    const scoreRoot = "plan:corp.score_agenda:agenda%3Aagenda-1%3Ar2";
     const supportHead = {
       rootPlanInstanceId: scoreRoot,
       rootPlanModuleId: "corp.score_agenda" as const,
       moduleId: "corp.defend_servers" as const,
       executorPlanInstanceId:
-        "plan:corp.defend_servers:score-protection%3Aagenda-1%3Aremote_2",
+        "plan:corp.defend_servers:score-protection%3Aagenda-1%3Ar2",
       executorParentPlanInstanceId: scoreRoot,
-      executorParentNeedId: "score-protection:agenda-1:remote_2",
+      executorParentNeedId: "score-protection:agenda-1:r2",
       priorityClass: "P4" as const,
       nextMilestoneId: "score_server_protected",
     };
@@ -257,7 +257,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
       specializedPlanningLineMatchesRoute({
         ...shared,
         linePlanInstanceId:
-          "plan:corp.economy:defense-reserve%3Aremote_1%3Aice-1",
+          "plan:corp.economy:defense-reserve%3Ar1%3Aice-1",
       }),
     ).toBe(false);
     expect(
@@ -281,7 +281,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
       acceptableActions: [
         {
           actionId:
-            "corp.install_card.corp_71_1.rd.corp_71_1.4",
+            "corp.install_card.cfx.rd.cfx.4",
         },
       ],
       planExecution: {
@@ -296,15 +296,15 @@ describe("Corp TurnPlanner selected-head binding", () => {
 
     expect(result.ok, result.message).toBe(true);
     expect(result.decision?.actionId).toBe(
-      "corp.install_card.corp_71_1.rd.corp_71_1.4",
+      "corp.install_card.cfx.rd.cfx.4",
     );
     expect(planning).toMatchObject({
       mode: "cutover",
       shadowComparison: {
         liveActionId:
-          "corp.install_card.corp_71_1.rd.corp_71_1.4",
+          "corp.install_card.cfx.rd.cfx.4",
         shadowActionId:
-          "corp.install_card.corp_71_1.rd.corp_71_1.4",
+          "corp.install_card.cfx.rd.cfx.4",
         shadowRootPlanInstanceId:
           "plan:corp.defend_servers:server-defense-portfolio",
         agreement: true,
@@ -314,7 +314,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
         rematerialization: {
           status: "executable",
           actionId:
-            "corp.install_card.corp_71_1.rd.corp_71_1.4",
+            "corp.install_card.cfx.rd.cfx.4",
         },
       },
     });
@@ -326,7 +326,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
       turnPlanExecutionLease: {
         currentBinding: {
           actionId:
-            "corp.install_card.corp_71_1.rd.corp_71_1.4",
+            "corp.install_card.cfx.rd.cfx.4",
         },
       },
     });
@@ -347,18 +347,18 @@ describe("Corp TurnPlanner selected-head binding", () => {
 
 describe("Corp defense provider authority", () => {
   const binding = {
-    parentPlanInstanceId: "plan:corp.score_agenda:agenda%3Aone%3Aremote_1",
-    parentNeedId: "score-protection:one:remote_1",
+    parentPlanInstanceId: "plan:corp.score_agenda:agenda%3Aone%3Ar1",
+    parentNeedId: "score-protection:one:r1",
   };
   const route = {
     instance: {
       parentInstanceId: binding.parentPlanInstanceId,
       parentNeedId: binding.parentNeedId,
     },
-    step: { target: { kind: "server", id: "remote_1" } },
+    step: { target: { kind: "server", id: "r1" } },
   } as never;
   it("keeps exact parent, need and server support and rejects unrelated projected siblings", () => {
-    const line = { targetServerId: "remote_1", supportBinding: binding };
+    const line = { targetServerId: "r1", supportBinding: binding };
     expect(corpDefensePlanningLineMatchesRoute(line, route)).toBe(true);
     expect(
       corpDefensePlanningLineMatchesRoute(
@@ -401,7 +401,7 @@ describe("Corp defense provider authority", () => {
     ).toBe(true);
     expect(
       corpDefensePlanningLineMatchesRoute(
-        { targetServerId: "remote_1", supportBinding: binding },
+        { targetServerId: "r1", supportBinding: binding },
         general,
       ),
     ).toBe(false);

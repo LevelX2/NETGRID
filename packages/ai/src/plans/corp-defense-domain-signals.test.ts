@@ -92,7 +92,7 @@ describe("corp defense domain signals", () => {
       ...action.payload,
       serverId: "new_remote",
       postInstallRezQuoteTargetServerId: "new_remote",
-      postInstallRezQuoteProjectedServerId: "remote_2",
+      postInstallRezQuoteProjectedServerId: "r2",
       postInstallEffectiveRunQuoteJson: JSON.stringify({
         iceInstanceId: "candidate-ice",
         iceDefinitionId: 449,
@@ -145,7 +145,7 @@ describe("corp defense domain signals", () => {
     const signal = corpQualitativeIceStagingSignal(
       input,
       candidate,
-      "remote_1",
+      "r1",
       undefined,
       facts,
       { kind: "score", parentProjectId: "score-project-1" },
@@ -153,7 +153,7 @@ describe("corp defense domain signals", () => {
 
     expect(signal).toMatchObject({
       kind: "generic",
-      serverId: "remote_1",
+      serverId: "r1",
       phase: "install_defense_support",
       sourceDefinitionIds: [449],
     });
@@ -205,7 +205,7 @@ describe("corp defense domain signals", () => {
       corpQualitativeIceStagingSignal(
         input,
         candidate,
-        "remote_1",
+        "r1",
         centralAllocation,
         facts,
         { kind: "score", parentProjectId: "score-project-1" },
@@ -258,14 +258,14 @@ describe("corp defense domain signals", () => {
       corpQualitativeIceStagingSignal(
         input,
         candidate,
-        "remote_1",
+        "r1",
         centralAllocation,
         facts,
         { kind: "score", parentProjectId: "score-project-1" },
       ),
     ).toMatchObject({
       kind: "generic",
-      serverId: "remote_1",
+      serverId: "r1",
       phase: "install_defense_support",
     });
   });
@@ -277,7 +277,7 @@ describe("corp defense domain signals", () => {
       corpQualitativeIceStagingSignal(
         input,
         candidate,
-        "remote_1",
+        "r1",
         undefined,
         facts,
         { kind: "remote", parentProjectId: "remote-project-1" },
@@ -496,11 +496,11 @@ function layeredRemoteFixture(
     expiresAtStateVersion: stateVersion,
     payload: {
       placement: "ice",
-      serverId: "remote_1",
+      serverId: "r1",
       postInstallRezQuoteComplete: true,
       postInstallRezQuoteCardId: source.instanceId,
-      postInstallRezQuoteTargetServerId: "remote_1",
-      postInstallRezQuoteProjectedServerId: "remote_1",
+      postInstallRezQuoteTargetServerId: "r1",
+      postInstallRezQuoteProjectedServerId: "r1",
       postInstallRezQuoteExpiresAtStateVersion: stateVersion,
       postInstallRezQuoteFinalCredits: rezCredits,
       postInstallEffectiveRunQuoteJson: JSON.stringify({
@@ -530,7 +530,7 @@ function layeredRemoteFixture(
         { id: "rd", ice: [], root: [] },
         { id: "archives", ice: [], root: [] },
         {
-          id: "remote_1",
+          id: "r1",
           root: [],
           ice: Array.from({ length: existingUnrezzedLayers }, (_, index) => ({
             ...source,

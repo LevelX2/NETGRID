@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { beforeEach, expect, it } from "vitest";
 import { createGameAfterSetup } from "@netgrid/engine";
@@ -151,7 +152,7 @@ for (const decision of [80, 126])
       (a) => a.actionId === after.actionId,
     )!;
     expect(rez.type).toBe("rez_card");
-    expect(rez.source).toContain("fortress-architects");
+    expect(referencesDefaultDeckCard(rez.source, 536)).toBe(true);
     expect(after.reasonCode).toBe("plan_first.corp.defend_servers");
     expect(after.decisionDebug?.planFirstDecision?.selectedStep).toEqual(
       before.decisionDebug?.planFirstDecision?.selectedStep,
@@ -167,14 +168,14 @@ it("funds the actual D80 install/rez gap from the current counter payout first",
     result = choose(cp);
   expect(cp.input.playerView.own.credits).toBe(2);
   expect(result.actionId).toBe(
-    "corp.activated_card_ability.corp_405_1.corp_405_1.activated.onr_v1_193_corporate-coup:abilities_activated_corp_main_take_hosted_credits",
+    "corp.activated_card_ability.c2i5.c2i5.activated.483",
   );
   expect(result.decisionDebug?.planFirstDecision).toMatchObject({
     rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
     selectedStep: {
       parentInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
       needId:
-        "install:rd:corp.install_card.corp_444_2.rd.corp_444_2.1",
+        "install:rd:corp.install_card.c2qu.rd.c2qu.1",
     },
   });
 });

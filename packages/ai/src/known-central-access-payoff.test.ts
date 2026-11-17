@@ -58,7 +58,7 @@ describe("known central access payoff HQ knownness", () => {
             groupId: "candidate-hidden-ice",
             reason: "hidden_ice_install_candidates",
             sourceEventId: 3,
-            serverId: "remote_1",
+            serverId: "r1",
             installPlacement: "ice",
             candidateDefinitions: [
               { definitionId: 442, count: 1 },
@@ -155,7 +155,7 @@ describe("known central access payoff HQ knownness", () => {
         { id: "hq", label: "HQ", ice: [], root: [] },
         { id: "rd", label: "R&D", ice: [], root: [] },
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [],
           root: [
@@ -208,7 +208,7 @@ describe("known central access payoff HQ knownness", () => {
             groupId: "candidate-hidden-root",
             reason: "hidden_root_install_candidates",
             sourceEventId: 3,
-            serverId: "remote_1",
+            serverId: "r1",
             installPlacement: "root",
             candidateDefinitions: [
               { definitionId: 588, count: 1 },
@@ -248,7 +248,7 @@ describe("known central access payoff HQ knownness", () => {
       {
         actor: "corp",
         actionType: "install_card",
-        serverId: "remote_1",
+        serverId: "r1",
         installPlacement: "root",
       },
     );

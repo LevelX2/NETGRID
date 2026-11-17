@@ -139,7 +139,7 @@ it("quotes and executes scored damage through the existing punish owner", () => 
 it("converts a current tag before advancing a score project that cannot close this turn", () => {
   const s = fixture(5, false);
   RealEngineFixtureBuilder.forState(s)
-    .withCorpRemoteRoot("remote_1", SOLO, 1)
+    .withCorpRemoteRoot("r1", SOLO, 1)
     .withCorpCardInHq(514)
     .withCorpCardInHq(496)
     .withCorpCardInHq(URBAN)
@@ -155,7 +155,7 @@ it("converts a current tag before advancing a score project that cannot close th
   expect(action).toMatchObject({
     type: "play_operation",
     payload: {
-      cardImplementationAbilityId: "514:abilities_on_play_damage",
+      cardImplementationAbilityId: 628,
     },
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
@@ -225,7 +225,7 @@ it("projects the scored domain damage as damage with its exact capability, witho
     damageAmount: 1,
     cardImplementationCapabilityBindingKind: "card_spec_capability_key",
     cardImplementationAbilityId:
-      "61:tagged_runner_meat_damage_reduce_hand_size_on_success",
+      74,
   });
   const projected = input(state).legalActions.find(
     (a) => a.actionId === action.actionId,

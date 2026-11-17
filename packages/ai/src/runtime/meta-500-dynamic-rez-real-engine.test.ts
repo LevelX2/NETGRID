@@ -53,10 +53,10 @@ function nativeFixture(outsideGate: boolean, credits = 9) {
     .withCorpCredits(credits)
     .withRunnerCredits(6)
     .withRunnerProgramInstalled(251)
-    .withCorpRemoteRoot("remote_1", 63, 2)
-    .withCorpIceOnServer("remote_1", 89);
+    .withCorpRemoteRoot("r1", 63, 2)
+    .withCorpIceOnServer("r1", 89);
   if (outsideGate)
-    b.withRezzedCorpIceOnServer("remote_1", 92);
+    b.withRezzedCorpIceOnServer("r1", 92);
   state.runner.memoryUsed = 1;
   state = apply(
     state,
@@ -65,12 +65,12 @@ function nativeFixture(outsideGate: boolean, credits = 9) {
   state = apply(
     state,
     getLegalActions(state, "runner").find(
-      (a) => a.type === "start_run" && a.payload?.serverId === "remote_1",
+      (a) => a.type === "start_run" && a.payload?.serverId === "r1",
     )!,
   );
   for (let n = 0; n < 12; n++) {
     const ice = getPlayerView(state, "corp").servers.find(
-      (s) => s.id === "remote_1",
+      (s) => s.id === "r1",
     )!.ice[0]!;
     if (
       state.run?.approachedIceId === ice.instanceId &&
@@ -107,7 +107,7 @@ it("binds a real Engine dynamic stop to the existing Defense plan and actual rez
   const state = nativeFixture(true),
     before = hashState(state),
     input = inputFor(state);
-  const ice = input.playerView.servers.find((s) => s.id === "remote_1")!
+  const ice = input.playerView.servers.find((s) => s.id === "r1")!
     .ice[0]!;
   expect(ice.effectiveRezResourceExchangeQuote).toMatchObject({
     complete: true,
@@ -132,12 +132,12 @@ it("binds a real Engine dynamic stop to the existing Defense plan and actual rez
   });
   expect(hashState(state)).toBe(before);
   expect(
-    getPlayerView(state, "runner").servers.find((s) => s.id === "remote_1")!
+    getPlayerView(state, "runner").servers.find((s) => s.id === "r1")!
       .ice[0],
   ).not.toHaveProperty("effectiveRezResourceExchangeQuote");
   const next = apply(state, action);
   const actual = getPlayerView(next, "corp").servers.find(
-    (s) => s.id === "remote_1",
+    (s) => s.id === "r1",
   )!.ice[0]!;
   expect(
     actual.effectiveRunQuote!.subroutines.filter(
@@ -150,7 +150,7 @@ it("binds a real Engine dynamic stop to the existing Defense plan and actual rez
 it("holds the native Minotaur rez when no active outside wall or gate exists", () => {
   const input = inputFor(nativeFixture(false));
   expect(
-    input.playerView.servers.find((s) => s.id === "remote_1")!.ice[0]!
+    input.playerView.servers.find((s) => s.id === "r1")!.ice[0]!
       .effectiveRezResourceExchangeQuote,
   ).toMatchObject({
     complete: false,
@@ -168,7 +168,7 @@ it.each([5, 6])(
   (credits) => {
     const input = inputFor(nativeFixture(true, credits));
     expect(
-      input.playerView.servers.find((s) => s.id === "remote_1")!.ice[0]!
+      input.playerView.servers.find((s) => s.id === "r1")!.ice[0]!
         .effectiveRezResourceExchangeQuote,
     ).toMatchObject({ complete: true, hardEndTheRunSubroutineCount: 1 });
     expect(input.legalActions.some((a) => a.type === "rez_ice")).toBe(

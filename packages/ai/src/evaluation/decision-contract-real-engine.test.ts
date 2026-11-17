@@ -193,7 +193,7 @@ describe("hardened decision contracts on real Engine inputs", () => {
     RealEngineFixtureBuilder.forState(inactive)
       .withCorpHqSize(0)
       .withCorpCardInHq(130)
-      .withCorpRemoteRoot("remote_1", 123, 0, {
+      .withCorpRemoteRoot("r1", 123, 0, {
         faceup: true,
         rezzed: true,
       })
@@ -202,7 +202,7 @@ describe("hardened decision contracts on real Engine inputs", () => {
     const inactiveInstall = installAction(
       inactiveInput,
       130,
-      "remote_1",
+      "r1",
     );
     const inactiveDecision = chooseCorpAction(inactiveInput);
     expect(inactiveDecision.actionId).not.toBe(inactiveInstall.actionId);
@@ -221,11 +221,11 @@ describe("hardened decision contracts on real Engine inputs", () => {
     RealEngineFixtureBuilder.forState(active)
       .withCorpHqSize(0)
       .withCorpCardInHq(130)
-      .withCorpRemoteRoot("remote_1", 123, 0, {
+      .withCorpRemoteRoot("r1", 123, 0, {
         faceup: true,
         rezzed: true,
       })
-      .withCorpRemoteRoot("remote_1", 59, 0, {
+      .withCorpRemoteRoot("r1", 59, 0, {
         faceup: true,
         rezzed: false,
       })
@@ -234,7 +234,7 @@ describe("hardened decision contracts on real Engine inputs", () => {
     const activeInstall = installAction(
       activeInput,
       130,
-      "remote_1",
+      "r1",
     );
     const activeDecision = chooseCorpAction(activeInput);
     expect(activeDecision.actionId).not.toBe(activeInstall.actionId);
@@ -259,7 +259,7 @@ describe("hardened decision contracts on real Engine inputs", () => {
       corpDeck: CORP_DECK,
     });
     RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot(
-      "remote_1",
+      "r1",
       29,
       0,
       { faceup: true, rezzed: true },
@@ -329,7 +329,7 @@ describe("hardened decision contracts on real Engine inputs", () => {
     );
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot(
-      "remote_1",
+      "r1",
       29,
       0,
       { faceup: true, rezzed: true },

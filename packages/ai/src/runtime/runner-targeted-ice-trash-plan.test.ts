@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { RunnerRunTargetEvaluation } from "../run-analysis/runner-run-target-types";
 import type {
   AiDecisionInput,
@@ -430,14 +431,14 @@ describe("Runner targeted ICE disruption plan", () => {
       abilityRef: {
         sourceCardInstanceId: "worm-1",
         sourceAbilityId:
-          "321:abilities_on_play_trash_unrezzed_ice",
+          405,
       },
       payload: {
         cardId: "worm-1",
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
         cardImplementationAbilityKey: "abilities_on_play_trash_unrezzed_ice",
         cardImplementationAbilityId:
-          "321:abilities_on_play_trash_unrezzed_ice",
+          405,
       },
     } satisfies LegalAction;
     const [candidate] = buildActionSemanticCandidates({
@@ -639,7 +640,7 @@ function targetedTrashCandidate(): ActionSemanticCandidate {
     actionType: "play_event",
     actorSide: "runner",
     semanticActionType: "play.runner_event",
-    sourceDefinitionId: "runner-targeted-ice-trash-event",
+    sourceDefinitionId: syntheticCardDefinitionId("runner-targeted-ice-trash-event"),
     sourceCardInstanceId: "jettison-1",
     effectTargets: ["pay_rez_cost_to_trash_rezzed_ice"],
     costProfile: {
@@ -655,7 +656,7 @@ function targetedUnrezzedTrashCandidate(): ActionSemanticCandidate {
   return {
     ...targetedTrashCandidate(),
     actionId: "runner.play.worm-1",
-    sourceDefinitionId: "runner-targeted-unrezzed-ice-trash-event",
+    sourceDefinitionId: syntheticCardDefinitionId("runner-targeted-unrezzed-ice-trash-event"),
     sourceCardInstanceId: "worm-1",
     effectTargets: [],
     targetContext: {
@@ -687,7 +688,7 @@ function canonicalForgedCandidate(): ActionSemanticCandidate {
     abilityRef: {
       sourceCardInstanceId: "forged-1",
       sourceAbilityId:
-        "298:abilities_on_play_corp_choice_rez_or_trash_ice",
+        382,
     },
     payload: {
       cardId: "forged-1",
@@ -695,7 +696,7 @@ function canonicalForgedCandidate(): ActionSemanticCandidate {
       cardImplementationAbilityKey:
         "abilities_on_play_corp_choice_rez_or_trash_ice",
       cardImplementationAbilityId:
-        "298:abilities_on_play_corp_choice_rez_or_trash_ice",
+        382,
     },
   } satisfies LegalAction;
   const [candidate] = buildActionSemanticCandidates({

@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { exactBasicLiquidCreditCandidate } from "../../actions/action-candidate-facts";
 import { assessCorpSpendAgainstScoreFundingMilestones } from "../score/corp-score-funding";
 import { corpFundedCentralProtectionReserve } from "../defense/corp-server-protection-reserve";
@@ -650,7 +651,7 @@ export function corpEconomyDevelopmentCampaigns(
     addCampaign(card, "install");
   }
   for (const server of input.playerView.servers) {
-    if (!server.id.startsWith("remote_")) continue;
+    if (!isRemoteServerId(server.id)) continue;
     for (const card of server.root) {
       if (card.rezzed !== true) addCampaign(card, "rez", server.id);
     }

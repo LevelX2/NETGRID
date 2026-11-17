@@ -867,7 +867,7 @@ describe("DeckCapabilityProfile", () => {
     try {
       const inputView = playerView("corp");
       inputView.servers = [
-        server("remote_1", [
+        server("r1", [
           visibleCard("plan-a", syntheticCardDefinitionId("local_plan_a"), "corp", "operation", {
             title: "Structured Plan A",
           }),
@@ -918,7 +918,7 @@ describe("DeckCapabilityProfile", () => {
   it("bounds corp profile text signals to exact tokens", () => {
     const inputView = playerView("corp");
     inputView.servers = [
-      server("remote_1", [
+      server("r1", [
         visibleCard(
           "corp-advance",
           syntheticCardDefinitionId("local_alpha_advance"),

@@ -21,7 +21,7 @@ import {
   validMandatoryInstalledRezCosts,
 } from "./defense-validation";
 const installId =
-  "corp.install_card.corp_15_2.rd.corp_15_2.3";
+  "corp.install_card.c3i.rd.c3i.3";
 function fixture() {
   return JSON.parse(
     readFileSync(

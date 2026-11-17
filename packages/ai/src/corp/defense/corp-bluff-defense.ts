@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { assessCorpScoreProtection } from "../../runtime/corp-score-protection-assessment";
 import { readExactCurrentInstalledCorpIceRezQuote } from "../../runtime/corp-exact-ice-rez-route";
@@ -19,7 +20,7 @@ export function corpBluffDefenseNeed(
   if (
     input.side !== "corp" ||
     !server ||
-    !serverId.startsWith("remote_") ||
+    !isRemoteServerId(serverId) ||
     !Number.isSafeInteger(reserveCredits) ||
     reserveCredits < 0
   )

@@ -30,7 +30,7 @@ function emptyAnalysis(): DoctrineQualityCaseAnalysisReportInput {
           side: "corp",
           actionType: "end_turn",
           reasonCode: "corp.plan.defer_score",
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           qualityTags: ["score_window_missed"],
         },
       ],
@@ -52,7 +52,7 @@ describe("simulation report formatters", () => {
     example.reasonCode = "reason\ncontinuation";
     const report = formatDoctrineQualityCaseAnalysisReport(analysis);
     expect(report).toContain(
-      "| seed\\|rerun | 7 | corp | end_turn | reason continuation | remote_1 | score_window_missed |",
+      "| seed\\|rerun | 7 | corp | end_turn | reason continuation | r1 | score_window_missed |",
     );
   });
   it("formats doctrine case analysis without runtime payload details", () => {
@@ -64,7 +64,7 @@ describe("simulation report formatters", () => {
     expect(report).toContain("# Custom Case Report");
     expect(report).toContain("| scoreWindowMissed | 1 | 1 |");
     expect(report).toContain(
-      "| case-seed | 7 | corp | end_turn | corp.plan.defer_score | remote_1 | score_window_missed |",
+      "| case-seed | 7 | corp | end_turn | corp.plan.defer_score | r1 | score_window_missed |",
     );
     expect(report).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,

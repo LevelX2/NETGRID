@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, PlayerView, VisibleCard } from "@netgrid/shared";
 import { cardProvidesBreakerCoverage } from "../../plans/tactical-plan-breaker-cards";
@@ -145,7 +146,7 @@ function searchCoverageServerPriority(
 ): number {
   const root = server.root ?? [];
   const ice = server.ice ?? [];
-  let priority = server.id.startsWith("remote_") ? 90 : 40;
+  let priority = isRemoteServerId(server.id) ? 90 : 40;
   if (server.id === "rd") priority += 20;
   if (server.id === "hq") priority += 12;
   if (server.id === "archives") priority -= 10;

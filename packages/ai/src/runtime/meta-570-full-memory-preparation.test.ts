@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -49,7 +50,7 @@ it("replaces the acceptable redundant program, funds and wins the original remot
   let state: GameState = saved.state;
   const initial = state;
   const heads: string[] = [];
-  const root = "plan:runner.contest_remote:remote%3Aremote_1";
+  const root = "plan:runner.contest_remote:remote%3Ar1";
   for (let n = 0; n < 80 && !state.winner; n++) {
     const side = state.activeSide;
     const input =
@@ -83,11 +84,11 @@ it("replaces the acceptable redundant program, funds and wins the original remot
     }
     if (n === 1) {
       expect(action.payload.runnerProgramTrashBeforeInstall).toBe(true);
-      expect(action.source).toContain("codecracker");
+      expect(referencesDefaultDeckCard(action.source, 226)).toBe(true);
     }
     if (n === 2)
       expect(decision.selectedChoices?.selectedOptionIds).toEqual([
-        expect.stringContaining("vienna-22"),
+        "card_cyp",
       ]);
     const result = applyAction(state, {
       matchId: state.matchId,

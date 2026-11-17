@@ -70,8 +70,8 @@ function position({
   );
   const fixture = RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
-    .withCorpRemoteRoot("remote_1", agendaId, readyAgenda ? 5 : 1)
-    .withRezzedCorpIceOnServer("remote_1", iceId)
+    .withCorpRemoteRoot("r1", agendaId, readyAgenda ? 5 : 1)
+    .withRezzedCorpIceOnServer("r1", iceId)
     .withRunnerCredits(5)
     .withRunnerGripSize(0);
   if (source) fixture.withRunnerProgramInstalled(sourceId);
@@ -113,7 +113,7 @@ function position({
 
 function quote(input: ReturnType<typeof position>) {
   const view = input.playerView;
-  const remote = view.servers.find((server) => server.id === "remote_1");
+  const remote = view.servers.find((server) => server.id === "r1");
   if (!remote) throw new Error("missing remote");
   return assessCorpScoreProtection({
     serverIce: remote.ice,
@@ -134,7 +134,7 @@ describe("Corp score protection with a publicly active hidden-install ability", 
     expect(input.playerView.opponent).not.toHaveProperty("stack");
     expect(input.playerView.opponent).not.toHaveProperty("gripOrHq");
     const remote = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     if (!remote) throw new Error("missing test remote");
     expect(
@@ -157,7 +157,7 @@ describe("Corp score protection with a publicly active hidden-install ability", 
       ]),
     });
     expect(
-      assessCorpTerminalAgendaDefense(input, "remote_1", "agenda:terminal"),
+      assessCorpTerminalAgendaDefense(input, "r1", "agenda:terminal"),
     ).toBeUndefined();
   });
 

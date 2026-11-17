@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { applyAction, getLegalActions, getPlayerView, hashGameState } from "@netgrid/engine";
@@ -35,12 +36,12 @@ function decide(f: ReturnType<typeof fixture>) {
 }
 it.each(cases)("G%i D%i progresses the native certified recycling agenda before a nonwinning sibling",(g,d)=>{
   const f=fixture(g,d), {input,result,projects}=decide(f);
-  const target=input.playerView.servers.find(s=>s.id==="remote_1")!.root.find(c=>c.type==="agenda")!;
+  const target=input.playerView.servers.find(s=>s.id==="r1")!.root.find(c=>c.type==="agenda")!;
   const action=input.legalActions.find(a=>a.actionId===result.actionId)!;
   expect(action.type).toBe("advance_card");
   expect(action.source).toBe(target.instanceId);
   expect(result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe("corp.score_agenda");
-  expect(result.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe("plan:corp.score_agenda:"+encodeURIComponent("agenda:"+target.instanceId+":remote_1"));
+  expect(result.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe("plan:corp.score_agenda:"+encodeURIComponent("agenda:"+target.instanceId+":r1"));
   expect(projects.some(p=>p.routeAssessment==="corp_resident_score_parent_dominates_sibling_route" && !p.feasible)).toBe(true);
   expect(getLegalActions(f.state,"corp").map(a=>a.actionId).sort()).toEqual(input.legalActions.map(a=>a.actionId).sort());
   if(!result.actionId)throw Error("concrete native action required");
@@ -49,12 +50,12 @@ it.each(cases)("G%i D%i progresses the native certified recycling agenda before 
   const view=getPlayerView(next.state,"corp");
   expect(view.own.clicks).toBe(input.playerView.own.clicks-1);
   expect(view.own.credits).toBe(input.playerView.own.credits-1);
-  expect(view.servers.find(s=>s.id==="remote_1")!.root.find(c=>c.instanceId===target.instanceId)!.advancementCounters).toBe(1);
-  expect(view.servers.filter(s=>s.id.startsWith("remote_")).length).toBe(input.playerView.servers.filter(s=>s.id.startsWith("remote_")).length);
+  expect(view.servers.find(s=>s.id==="r1")!.root.find(c=>c.instanceId===target.instanceId)!.advancementCounters).toBe(1);
+  expect(view.servers.filter(s=>isRemoteServerId(s.id)).length).toBe(input.playerView.servers.filter(s=>isRemoteServerId(s.id)).length);
 });
 it.each(["stale","incomplete","unfundable","no_recycling_agenda","healthy_deck"] as const)("does not claim prepared recycling dominance with %s evidence", variant=>{
   const f=fixture(6,382),input=f.checkpoint.input as AiDecisionInputWithDeckCapabilities;
-  const agenda=input.playerView.servers.find(s=>s.id==="remote_1")!.root.find(c=>c.type==="agenda")!;
+  const agenda=input.playerView.servers.find(s=>s.id==="r1")!.root.find(c=>c.type==="agenda")!;
   const quote=agenda.scoreContinuationQuote!;
   if(!quote.complete)throw Error("native complete quote required");
   if(variant==="stale")quote.expiresAtStateVersion--;
@@ -63,7 +64,7 @@ it.each(["stale","incomplete","unfundable","no_recycling_agenda","healthy_deck"]
   if(variant==="no_recycling_agenda")agenda.definitionId=415;
   if(variant==="healthy_deck")input.playerView.own.stackOrRdCount=7;
   const {projects}=decide(f);
-  const current=projects.filter(p=>p.agendaInstanceId==="corp_406_3" && p.phase==="install_agenda");
+  const current=projects.filter(p=>p.agendaInstanceId==="c2if" && p.phase==="install_agenda");
   expect(current.length).toBeGreaterThan(0);
   expect(current.some(p=>p.routeAssessment==="corp_resident_score_parent_dominates_sibling_route")).toBe(false);
 });

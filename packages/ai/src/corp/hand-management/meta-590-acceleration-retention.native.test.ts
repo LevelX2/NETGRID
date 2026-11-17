@@ -71,8 +71,8 @@ it.each([
     choiceId: "discard_corp_221",
     selectedOptionIds: [
       keep
-        ? "card_corp_65_1"
-        : "card_corp_509_1",
+        ? "card_cel"
+        : "card_c359",
     ],
   });
   expect(d.decisionDebug!.planFirstDecision!).toMatchObject({

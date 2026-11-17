@@ -83,7 +83,7 @@ describe("plan portfolio", () => {
       turnKey: "runner-turn-3",
       tacticalPlans: [
         plan("runner.develop_hand_card", 700, "card", "hand-a"),
-        plan("runner.contest_remote", 900, "server", "remote_1"),
+        plan("runner.contest_remote", 900, "server", "r1"),
         plan("runner.build_credit_bank", 800, "bank", "bank-a"),
         plan("runner.build_credit_bank", 790, "bank", "bank-b"),
         plan("runner.build_credit_bank", 780, "bank", "bank-c"),
@@ -105,7 +105,7 @@ describe("plan portfolio", () => {
       turnKey: "runner-turn-4",
       tacticalPlans: [
         plan("runner.clear_tags_or_survive", 990, "capability", "tag-clear"),
-        plan("runner.contest_remote", 900, "server", "remote_1"),
+        plan("runner.contest_remote", 900, "server", "r1"),
         plan("runner.build_credit_bank", 800, "bank", "bank-a"),
       ],
     });
@@ -137,7 +137,7 @@ describe("plan portfolio", () => {
       "corp.create_score_window",
       1_129,
       "server",
-      "remote_1",
+      "r1",
       13,
     );
     scoreConversion.status = "blocked";
@@ -191,7 +191,7 @@ describe("plan portfolio", () => {
       "corp.create_score_window",
       1_129,
       "server",
-      "remote_1",
+      "r1",
       14,
     );
     blockedScore.status = "blocked";
@@ -278,7 +278,7 @@ describe("plan portfolio", () => {
       input: decisionInput("corp", 30),
       turnKey: "corp-turn-8",
       tacticalPlans: [
-        plan("corp.create_score_window", 950, "server", "remote_1", 30),
+        plan("corp.create_score_window", 950, "server", "r1", 30),
         plan("corp.build_credit_bank", 700, "bank", "corp-bank", 30),
       ],
     });
@@ -416,14 +416,14 @@ describe("plan portfolio", () => {
       "corp.create_score_window",
       950,
       "server",
-      "remote_1",
+      "r1",
       80,
     );
     const background = plan(
       "corp.establish_scoring_remote",
       690,
       "server",
-      "remote_1",
+      "r1",
       80,
     );
     foreground.currentStep.actionCandidateIds = ["install-shared-ice"];
@@ -474,7 +474,7 @@ describe("plan portfolio", () => {
       "corp.create_score_window",
       950,
       "server",
-      "remote_1",
+      "r1",
       90,
     );
     foreground.creditDemands = [
@@ -582,7 +582,7 @@ describe("plan portfolio", () => {
       "corp.create_score_window",
       950,
       "server",
-      "remote_1",
+      "r1",
       92,
     );
     scorePlan.creditDemands = [
@@ -750,7 +750,7 @@ describe("plan portfolio", () => {
     input.playerView.own.clicks = 2;
     input.playerView.servers = [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [],
         root: [
@@ -813,7 +813,7 @@ describe("plan portfolio", () => {
     input.playerView.own.clicks = 2;
     input.playerView.servers = [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [],
         root: [{ instanceId: "capacity-source", known: true, advancementCounters: 2 }],

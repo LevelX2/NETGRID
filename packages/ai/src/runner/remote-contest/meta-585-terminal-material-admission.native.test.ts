@@ -40,7 +40,7 @@ it.each([
     const target = evaluateRunnerRunTargets({
       input,
       deckCapabilities: buildDeckCapabilityProfileFromInput(input),
-    }).find((entry) => entry.actionId === "runner.start_run.remote_1")!;
+    }).find((entry) => entry.actionId === "runner.start_run.r1")!;
     expect(target.pathPassability).toBe("reachable");
     expect(target.visibleTraceTagHazardUnavoidable).toBe(!admitted);
     if (!admitted) {
@@ -63,15 +63,15 @@ it.each([
     const before = JSON.stringify(input);
     const decision = chooseAiAction(input);
     if (admitted) {
-      expect(decision.actionId).toBe("runner.start_run.remote_1");
+      expect(decision.actionId).toBe("runner.start_run.r1");
       expect(
         decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
       ).toBe("runner.contest_remote");
       expect(
         decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toBe("plan:runner.contest_remote:remote%3Aremote_1");
+      ).toBe("plan:runner.contest_remote:remote%3Ar1");
     } else {
-      expect(decision.actionId).not.toBe("runner.start_run.remote_1");
+      expect(decision.actionId).not.toBe("runner.start_run.r1");
     }
     expect(
       input.legalActions.some(

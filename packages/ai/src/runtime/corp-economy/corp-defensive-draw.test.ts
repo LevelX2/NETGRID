@@ -223,7 +223,7 @@ describe("Corp defensive draw context", () => {
     expect(corpMissingConcreteScoreDefenseDrawNeed(setup.args)).toMatchObject({
       needId: `score-defense-draw:${setup.need.needId}:${draw.actionId}`,
       parentProjectId: setup.need.parentProjectId,
-      serverId: "remote_1",
+      serverId: "r1",
       cleanupReplacementDraw: false,
       evidence: expect.arrayContaining([
         "funded_protection_baseline:known_unprotected",
@@ -556,7 +556,7 @@ describe("Corp defensive draw context", () => {
     const install = corpAction(
       "corp.install.remote-defense-ice.remote-1",
       "install_card",
-      { placement: "ice", serverId: "remote_1" },
+      { placement: "ice", serverId: "r1" },
       "remote-defense-ice",
     );
     install.costs = [{ clicks: 1 }];
@@ -604,7 +604,7 @@ describe("Corp defensive draw context", () => {
 
     setup.input.eventTail = [
       {
-        eventId: "mandatory-draw",
+        eventId: 3,
         type: "mandatory_draw",
         stateVersionBefore: 1,
         stateVersionAfter: 2,
@@ -617,7 +617,7 @@ describe("Corp defensive draw context", () => {
         },
       },
       {
-        eventId: "optional-draw",
+        eventId: 4,
         type: "draw_card",
         stateVersionBefore: 2,
         stateVersionAfter: 3,
@@ -686,7 +686,7 @@ function targetedScoreDefenseDrawSetup(handCount = 3): {
     ),
     [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [centralIce("remote-existing")],
         root: [corpCard("score-agenda", "agenda")],
@@ -745,9 +745,9 @@ function targetedScoreDefenseDrawSetup(handCount = 3): {
     evidence: [],
   };
   const need = {
-    needId: "need:remote_1",
-    parentProjectId: "score-project:remote_1",
-    targetServerId: "remote_1",
+    needId: "need:r1",
+    parentProjectId: "score-project:r1",
+    targetServerId: "r1",
     observedAtStateVersion: 13,
     objective: {
       kind: "funded_remote_access_risk",

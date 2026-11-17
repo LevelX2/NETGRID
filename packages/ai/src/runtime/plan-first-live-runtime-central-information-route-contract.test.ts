@@ -63,7 +63,7 @@ describe("plan-first Central information-action ownership", () => {
           cardId: pipeline.instanceId,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "157:convert_socket_set_to_pipe_counter",
+            218,
           cardImplementationAbilityKey: "convert_socket_set_to_pipe_counter",
           cardImplementationAbilityTiming: "runner_paid",
         },

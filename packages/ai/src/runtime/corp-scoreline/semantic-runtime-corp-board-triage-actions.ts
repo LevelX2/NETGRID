@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -42,7 +43,7 @@ export function existingReadyRemoteCanReceiveScoreline(
   );
   return (
     server !== undefined &&
-    server.id.startsWith("remote_") &&
+    isRemoteServerId(server.id) &&
     server.ice.length > 0 &&
     (server.root.length === 0 ||
       corpLegalActions(input).some((action) => {
@@ -258,7 +259,7 @@ export function actionRelievesHqAgendaPressureViaSafeRemote(
   if (
     action.type !== "install_card" ||
     action.payload?.placement === "ice" ||
-    !actionServerId?.startsWith("remote_")
+    !isRemoteServerId(actionServerId)
   ) {
     return false;
   }
@@ -318,7 +319,7 @@ export function actionCreatesPurgeActionDebt(action: LegalAction): boolean {
 export function actionBuildsScoreRemote(
   entry: Pick<ScoredLegalAction, "action" | "roles" | "serverId">,
 ): boolean {
-  if (!entry.serverId || !entry.serverId.startsWith("remote_")) return false;
+  if (!entry.serverId || !isRemoteServerId(entry.serverId)) return false;
   if (entry.action.type !== "install_card") return false;
   return (
     entry.action.payload?.placement === "ice" ||

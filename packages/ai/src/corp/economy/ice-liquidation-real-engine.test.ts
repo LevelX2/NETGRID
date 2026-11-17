@@ -46,7 +46,7 @@ function fixture() {
     (c) => c.definitionId === SYD,
   )!;
   state.corp.servers.push({
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     ice: walls.map((c) => c.instanceId),
@@ -58,7 +58,7 @@ function fixture() {
     c.zone = {
       side: "corp",
       zone: c === syd ? "serverRoot" : "serverIce",
-      serverId: "remote_1",
+      serverId: "r1",
     };
     c.rezzed = true;
     c.faceup = true;
@@ -155,7 +155,7 @@ it("funds an exact need from one redundant static layer and revalidates the real
     sales.find((a) => a.actionId === funding.headActionId)!,
   );
   expect(after.corp.credits).toBe(4);
-  expect(after.corp.servers.find((s) => s.id === "remote_1")!.ice).toHaveLength(
+  expect(after.corp.servers.find((s) => s.id === "r1")!.ice).toHaveLength(
     1,
   );
   const post = inputFor(after);
@@ -178,7 +178,7 @@ it("does not certify stale actions or missing post-removal protection facts", ()
       expiresAtStateVersion: input.playerView.stateVersion - 1,
     }).status,
   ).toBe("unknown");
-  const remote = input.playerView.servers.find((s) => s.id === "remote_1")!;
+  const remote = input.playerView.servers.find((s) => s.id === "r1")!;
   delete remote.ice[0]!.effectiveRunQuote;
   expect(assessCorpIceLiquidation(input, sale).status).toBe("unknown");
 });

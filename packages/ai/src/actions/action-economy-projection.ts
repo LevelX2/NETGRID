@@ -753,7 +753,7 @@ export function rootRezCreditOutcomeProjectionStatus(
     targetServerId === "rd" ||
     targetServerId === "archives" ||
     (typeof targetServerId === "string" &&
-      /^remote_[1-9][0-9]*$/.test(targetServerId));
+      /^r[1-9][0-9]*$/.test(targetServerId));
   const exactCandidateStateVersion =
     candidate.stateVersion === undefined ||
     candidate.stateVersion === stateVersion;

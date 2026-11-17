@@ -76,7 +76,7 @@ describe("Corp plan-bound rez-or-trash ICE choice", () => {
       kind: "rez_or_trash_ice",
       selectedOptionId: "trash_ice",
       preservedScoreProjectId:
-        "agenda:corp_7_1:remote_2",
+        "agenda:c1p:r2",
       sourceStateVersion: 223,
     });
     expect(
@@ -126,7 +126,7 @@ describe("Corp plan-bound rez-or-trash ICE choice", () => {
   it("preserves the terminal score when redundant rez spends required agenda points", () => {
     const input = currentInput();
     input.playerView.own.credits = 3;
-    const quote = input.playerView.servers.find((s) => s.id === "remote_2")!
+    const quote = input.playerView.servers.find((s) => s.id === "r2")!
       .ice[1]!.effectiveRezCostQuote!;
     if (!quote.complete) throw new Error("Expected complete native quote");
     quote.mandatoryAdditionalCosts.agendaPoints = 1;
@@ -146,7 +146,7 @@ describe("Corp plan-bound rez-or-trash ICE choice", () => {
 
   it("does not call ICE redundant when the existing rezzed stop is absent", () => {
     const input = currentInput();
-    input.playerView.servers.find((s) => s.id === "remote_2")!.ice.shift();
+    input.playerView.servers.find((s) => s.id === "r2")!.ice.shift();
     expect(
       corpRezOrTrashDefenseChoiceSignal(input, candidates, projects)
         ?.choiceResolution,
@@ -155,7 +155,7 @@ describe("Corp plan-bound rez-or-trash ICE choice", () => {
 
   it("does not treat unknown protection as a certified stop", () => {
     const input = currentInput();
-    input.playerView.servers.find((s) => s.id === "remote_2")!.ice[0]!.known =
+    input.playerView.servers.find((s) => s.id === "r2")!.ice[0]!.known =
       false;
     expect(
       corpRezOrTrashDefenseChoiceSignal(input, candidates, projects)
@@ -180,7 +180,7 @@ describe("Corp plan-bound rez-or-trash ICE choice", () => {
     "fails closed for %s",
     (defect) => {
       const input = currentInput();
-      const ice = input.playerView.servers.find((s) => s.id === "remote_2")!
+      const ice = input.playerView.servers.find((s) => s.id === "r2")!
         .ice[1]!;
       if (defect === "missing_quote") delete ice.effectiveRezCostQuote;
       if (defect === "stale_quote")

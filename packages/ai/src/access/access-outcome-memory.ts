@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { MatchEventId } from "@netgrid/shared";
 import { cardDefinitionIdValue } from "../card-definition-id-input";
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
@@ -40,7 +41,7 @@ export function deriveObservedRemoteNoProgressAccessMemory(
   ) {
     return undefined;
   }
-  if (!serverId?.startsWith("remote_")) return undefined;
+  if (!isRemoteServerId(serverId)) return undefined;
   const currentKnownRoots = currentKnownRemoteRoots(input, serverId);
   if (currentKnownRoots.length === 0) return undefined;
   if (
@@ -234,10 +235,10 @@ function canonicalServerId(serverId: string): string {
   if (normalized === "rd" || normalized === "rnd" || normalized === "r&d")
     return "rd";
   if (normalized === "archives") return "archives";
-  if (normalized.startsWith("remote_")) return normalized;
+  if (isRemoteServerId(normalized)) return normalized;
   const remoteMatch = /^remote[\s_-]+(\d+)$/.exec(normalized);
   const remoteIndex = remoteMatch?.[1];
-  if (remoteIndex) return `remote_${Number.parseInt(remoteIndex, 10)}`;
+  if (remoteIndex) return `r${Number.parseInt(remoteIndex, 10)}`;
   return serverId;
 }
 
@@ -248,7 +249,7 @@ function visibleServerLabelId(label: string | undefined): string | undefined {
     canonical === "hq" ||
     canonical === "rd" ||
     canonical === "archives" ||
-    canonical.startsWith("remote_")
+    isRemoteServerId(canonical)
   ) {
     return canonical;
   }

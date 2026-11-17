@@ -1,8 +1,9 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import { expect, it } from "vitest";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
-function hint(id: string) {
+function hint(id: CardDefinitionId) {
   const entry = cardSpecPlanningCardByDefinitionId(id);
   if (!entry) throw new Error(`missing_test_card:${id}`);
   return deriveCardSpecAiHint(entry);

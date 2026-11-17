@@ -5,7 +5,7 @@ import { sameTurnScoreConversionPreventsTerminalSteal } from "../corp/score/scor
 describe("same-turn score conversion terminal-steal ownership", () => {
   it("keeps the sole agenda's terminal prevention after its exact install", () => {
     const facts = {
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       opponentAgendaPoints: 6,
       agendaPoints: 1,
       agendaPointsToWin: 7,
@@ -63,7 +63,7 @@ describe("same-turn score conversion terminal-steal ownership", () => {
   it("retains terminal-steal prevention for an existing protected score server", () => {
     expect(
       sameTurnScoreConversionPreventsTerminalSteal({
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         opponentAgendaPoints: 6,
         agendaPoints: 1,
         agendaPointsToWin: 7,

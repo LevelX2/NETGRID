@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -394,7 +395,7 @@ function openingCentralBaselineTriage(
   }
   const hasDevelopedRemote = input.playerView.servers.some(
     (server) =>
-      server.id.startsWith("remote_") &&
+      isRemoteServerId(server.id) &&
       (server.ice.length > 0 || server.root.length > 0),
   );
   if (hasDevelopedRemote) return undefined;
@@ -402,7 +403,7 @@ function openingCentralBaselineTriage(
     (entry) =>
       entry.action.type === "install_card" &&
       (entry.serverId === "new_remote" ||
-        entry.serverId?.startsWith("remote_")) &&
+        isRemoteServerId(entry.serverId)) &&
       entry.action.payload?.placement !== "root_agenda",
   );
   if (!hasCompetingEmptyRemoteDevelopment) return undefined;

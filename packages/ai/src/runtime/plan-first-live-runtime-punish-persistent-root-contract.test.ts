@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
@@ -318,7 +319,7 @@ function advanceToUnknownQuoteWithScoreAlternative(
           payload: {
             cardId: agenda.instanceId,
             sourceDefinitionId: agenda.definitionId!,
-            serverId: "remote_1",
+            serverId: "r1",
             placement: "root",
           },
         },
@@ -335,14 +336,14 @@ function advanceToUnknownQuoteWithScoreAlternative(
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1"),
+    server("r1"),
   ];
   input.playerView.legalActions = actions;
   input.legalActions = actions;
   bindSyntheticAgendaInstallQuotes(input);
   input.playerView.opponent.rig = [
     visibleCard("runner-virus", "runner", "program", {
-      definitionId: "test-runner-virus",
+      definitionId: syntheticCardDefinitionId("test-runner-virus"),
       title: "Visible Runner Virus",
       counters: { virus: 3 },
     }),

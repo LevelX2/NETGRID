@@ -7,7 +7,7 @@ import {
 } from "./remote-server-threat";
 
 const run: LegalAction = {
-  actionId: "runner.start_run.remote_1",
+  actionId: "runner.start_run.r1",
   type: "start_run",
   side: "runner",
   label: "Run remote",
@@ -16,7 +16,7 @@ const run: LegalAction = {
   expiresAtStateVersion: 1,
   visibility: "public",
   costs: [{ clicks: 1 }],
-  payload: { serverId: "remote_1" },
+  payload: { serverId: "r1" },
   targetRequirements: [],
 };
 
@@ -25,7 +25,7 @@ it.each(["coverage", "cost", "reserve"] as const)(
   (block) => {
     const input = { side: "runner", legalActions: [run] } as AiDecisionInput;
     const profile: RunnerRemoteThreatProfile = {
-      serverId: "remote_1",
+      serverId: "r1",
       advanced: true,
       relevantTrash: false,
       blockedByBreakerCoverage: block === "coverage",
@@ -38,7 +38,7 @@ it.each(["coverage", "cost", "reserve"] as const)(
     const diagnostics = runnerRemoteThreatTargetingDiagnosticsForAction(
       input,
       run,
-      "remote_1",
+      "r1",
       {
         runnerRemoteThreatProfile: () => profile,
         runnerCentralRunHasClearPressureJustification: () => false,
@@ -46,7 +46,7 @@ it.each(["coverage", "cost", "reserve"] as const)(
         runnerCentralRunBurnsRemoteContestReserve: () => false,
       },
     );
-    expect(diagnostics.runnerContestedAdvancedRemoteServerId).toBe("remote_1");
+    expect(diagnostics.runnerContestedAdvancedRemoteServerId).toBe("r1");
     expect(
       diagnostics.runnerRemoteRunStartedWithInsufficientPostRunReserve === true,
     ).toBe(block === "reserve");

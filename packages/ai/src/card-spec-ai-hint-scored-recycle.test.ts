@@ -1,10 +1,11 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { cardSpecPlanningCards } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
-function source(id: string) {
+function source(id: CardDefinitionId) {
   const entry = cardSpecPlanningCards().find((card) => card.definition.id === id);
   if (entry === undefined) throw new Error(`scored_recycle_test_source_missing:${id}`);
   return entry;

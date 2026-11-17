@@ -208,7 +208,7 @@ describe("Defense hand-buffer phase ownership", () => {
             drawCardsAmount: 3,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityId:
-              "44:on_play_remove_tags_and_draw",
+              58,
             cardImplementationAbilityKey: "on_play_remove_tags_and_draw",
           },
         },
@@ -384,7 +384,7 @@ function creditDrawBufferFixture(tags = 0) {
         cardImplementationAbilityKey:
           "abilities_activated_runner_main_gain_credits",
         cardImplementationAbilityId:
-          "391:abilities_activated_runner_main_gain_credits",
+          466,
       },
     },
   );

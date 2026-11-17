@@ -151,8 +151,8 @@ describe("plan-first Corp conditional root-rez contract", () => {
   it("declines Dr. Dreff without an engine-certified future-encounter rez quote [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const input = drDreffInput({
-      attackedServerId: "remote_1",
-      dreffServerId: "remote_1",
+      attackedServerId: "r1",
+      dreffServerId: "r1",
       iceIndex: 0,
       hqIce: [corpIce("data-wall", 449, "Data Wall")],
       credits: 0,
@@ -175,32 +175,32 @@ describe("plan-first Corp conditional root-rez contract", () => {
   it.each([
     {
       label: "an earlier ICE window",
-      attackedServerId: "remote_1",
-      dreffServerId: "remote_1",
+      attackedServerId: "r1",
+      dreffServerId: "r1",
       iceIndex: 1,
       hqIce: [corpIce("data-wall", 449, "Data Wall")],
       credits: 0,
     },
     {
       label: "a run on another fort",
-      attackedServerId: "remote_2",
-      dreffServerId: "remote_1",
+      attackedServerId: "r2",
+      dreffServerId: "r1",
       iceIndex: 0,
       hqIce: [corpIce("data-wall", 449, "Data Wall")],
       credits: 0,
     },
     {
       label: "no visible HQ ICE",
-      attackedServerId: "remote_1",
-      dreffServerId: "remote_1",
+      attackedServerId: "r1",
+      dreffServerId: "r1",
       iceIndex: 0,
       hqIce: [],
       credits: 4,
     },
     {
       label: "only unaffordable visible HQ ICE",
-      attackedServerId: "remote_1",
-      dreffServerId: "remote_1",
+      attackedServerId: "r1",
+      dreffServerId: "r1",
       iceIndex: 0,
       hqIce: [
         corpIce(
@@ -405,7 +405,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       ]),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [encoder]),
+      server("r1", [], [encoder]),
     ];
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
@@ -438,7 +438,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [encoder]),
+      server("r1", [], [encoder]),
     ];
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
@@ -499,7 +499,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     {
       label: "when the current run attacks another fort",
       rig: [runnerStealthCreditPool("stealth-pool", 6)],
-      runServerId: "remote_1" as const,
+      runServerId: "r1" as const,
     },
   ])(
     "declines a fort-bound stealth-credit lockout $label [legacy_compare]",
@@ -525,7 +525,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
         ),
         server("rd"),
         server("archives"),
-        ...(runServerId === "remote_1" ? [server("remote_1")] : []),
+        ...(runServerId === "r1" ? [server("r1")] : []),
       ];
 
       const decision = liveContext().chooseSemanticRuntimeAction(input, {});
@@ -583,10 +583,10 @@ describe("plan-first Corp conditional root-rez contract", () => {
         server("hq"),
         server("rd"),
         server("archives"),
-        server("remote_1", [], [pacifica]),
+        server("r1", [], [pacifica]),
       ];
       if (includeDecline) {
-        input.playerView.run = activeRun("remote_1", 0);
+        input.playerView.run = activeRun("r1", 0);
       }
 
       expect(
@@ -618,7 +618,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       ]),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [dataMasons]),
+      server("r1", [], [dataMasons]),
     ];
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
@@ -687,7 +687,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       ]),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [dataMasons]),
+      server("r1", [], [dataMasons]),
     ];
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
@@ -718,25 +718,25 @@ describe("plan-first Corp conditional root-rez contract", () => {
       [rezAction(tesseract, "rez-tesseract"), declineRez()],
       "run.approach_ice",
     );
-    input.playerView.run = activeRun("remote_1", 0);
+    input.playerView.run = activeRun("r1", 0);
     input.playerView.servers = [
       server("hq"),
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [corpIce("remote-ice", 449, "Data Wall")],
         [tesseract],
       ),
     ];
 
     input.playerView.servers.find(
-      (s) => s.id === "remote_1",
+      (s) => s.id === "r1",
     )!.ice[0]!.effectiveRezCostQuote = {
       context: "installed",
       cardId: "remote-ice",
-      targetServerId: "remote_1",
-      projectedServerId: "remote_1",
+      targetServerId: "r1",
+      projectedServerId: "r1",
       expiresAtStateVersion: input.playerView.stateVersion,
       complete: true,
       baseCredits: 1,
@@ -763,13 +763,13 @@ describe("plan-first Corp conditional root-rez contract", () => {
       [rezAction(tesseract, "rez-tesseract"), declineRez()],
       "run.approach_ice",
     );
-    input.playerView.run = activeRun("remote_1", 0);
+    input.playerView.run = activeRun("r1", 0);
     input.playerView.servers = [
       server("hq"),
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [
           corpIce("inner", 449, "Data Wall"),
           corpIce("passed", 449, "Data Wall", true),
@@ -795,16 +795,16 @@ describe("plan-first Corp conditional root-rez contract", () => {
       "run.movement_rez_window",
     );
     input.playerView.run = {
-      ...activeRun("remote_1", 0),
+      ...activeRun("r1", 0),
       phase: "movement",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
     };
     input.playerView.servers = [
       server("hq"),
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [corpIce("remote-ice", 449, "Data Wall", true)],
         [tesseract],
       ),
@@ -1035,8 +1035,8 @@ describe("plan-first Corp conditional root-rez contract", () => {
 });
 
 type DrDreffInputParams = {
-  attackedServerId: "remote_1" | "remote_2";
-  dreffServerId: "remote_1" | "remote_2";
+  attackedServerId: "r1" | "r2";
+  dreffServerId: "r1" | "r2";
   iceIndex: number;
   hqIce: VisibleCard[];
   credits: number;
@@ -1056,7 +1056,7 @@ function drDreffInput(params: DrDreffInputParams): AiDecisionInput {
     server("rd"),
     server("archives"),
     server(
-      "remote_1",
+      "r1",
       [
         corpIce("remote-1-inner", 449, "Data Wall", true),
         ...(params.iceIndex > 0
@@ -1070,12 +1070,12 @@ function drDreffInput(params: DrDreffInputParams): AiDecisionInput {
             ]
           : []),
       ],
-      params.dreffServerId === "remote_1" ? [dreff] : [],
+      params.dreffServerId === "r1" ? [dreff] : [],
     ),
     server(
-      "remote_2",
+      "r2",
       [corpIce("remote-2-inner", 449, "Data Wall", true)],
-      params.dreffServerId === "remote_2" ? [dreff] : [],
+      params.dreffServerId === "r2" ? [dreff] : [],
     ),
   ];
   return input;
@@ -1105,7 +1105,7 @@ function jennyJettInput(params: {
       cardImplementationFortRunRezSupportQuoteComplete: true,
       cardImplementationFortRunRezSupportQuoteSourceCardInstanceId:
         jenny.instanceId,
-      cardImplementationFortRunRezSupportQuoteTargetServerId: "remote_1",
+      cardImplementationFortRunRezSupportQuoteTargetServerId: "r1",
       cardImplementationFortRunRezSupportQuoteStateVersion: 1,
       cardImplementationFortRunRezSupportQuoteActionId: rezJenny.actionId,
       cardImplementationFortRunRezSupportQuoteRezCredits: 1,
@@ -1122,13 +1122,13 @@ function jennyJettInput(params: {
   const input = corpInput([rezJenny, declineRez()], "run.approach_ice");
   input.playerView.own.credits = params.credits;
   input.playerView.own.gripOrHq = [hqIce];
-  input.playerView.run = activeRun("remote_1", params.iceIndex);
+  input.playerView.run = activeRun("r1", params.iceIndex);
   input.playerView.servers = [
     server("hq"),
     server("rd"),
     server("archives"),
     server(
-      "remote_1",
+      "r1",
       Array.from({ length: params.installedIceCount }, (_entry, index) =>
         corpIce(
           `remote-ice-${index}`,
@@ -1165,7 +1165,7 @@ function corpInput(
 }
 
 function activeRun(
-  attackedServerId: "hq" | "remote_1" | "remote_2",
+  attackedServerId: "hq" | "r1" | "r2",
   iceIndex: number,
 ): NonNullable<PlayerView["run"]> {
   return {
@@ -1268,7 +1268,7 @@ function rootRezEconomyInput(
       payload: {
         cardId: asset.instanceId,
         rootRez: true,
-        serverId: "remote_1",
+        serverId: "r1",
         ...(outcome === "missing"
           ? {}
           : {
@@ -1276,7 +1276,7 @@ function rootRezEconomyInput(
                 "corp-root-rez-credit-outcome-quote-v1",
               rootRezCreditOutcomeQuoteComplete: true,
               rootRezCreditOutcomeQuoteSourceCardInstanceId: asset.instanceId,
-              rootRezCreditOutcomeQuoteTargetServerId: "remote_1",
+              rootRezCreditOutcomeQuoteTargetServerId: "r1",
               rootRezCreditOutcomeQuoteStateVersion: 2,
               rootRezCreditOutcomeQuoteTimingPoint: "run.movement_rez_window",
               rootRezCreditOutcomeQuoteActionId:
@@ -1296,16 +1296,16 @@ function rootRezEconomyInput(
   input.playerView.own.credits = 5;
   input.playerView.run = {
     runId: "root-rez-economy-run",
-    attackedServerId: "remote_1",
+    attackedServerId: "r1",
     phase: "movement",
-    position: { kind: "server", serverId: "remote_1" },
+    position: { kind: "server", serverId: "r1" },
     successful: false,
   };
   input.playerView.servers = [
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1", [], [asset]),
+    server("r1", [], [asset]),
   ];
   return input;
 }

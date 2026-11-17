@@ -42,7 +42,7 @@ describe("runner install classification", () => {
       }) as unknown as AiDecisionInput;
     expect(context.hasRunnerPlayablePressureCard(forTarget("hq"))).toBe(false);
     expect(context.hasRunnerRunnablePressureAction(forTarget("hq"))).toBe(true);
-    expect(context.hasRunnerRunnablePressureAction(forTarget("remote_1"))).toBe(
+    expect(context.hasRunnerRunnablePressureAction(forTarget("r1"))).toBe(
       false,
     );
   });

@@ -58,7 +58,7 @@ describe("plan-first Corp card variant contracts", () => {
       ]),
     );
     expect(portfolio).toContain(
-      "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
+      "plan:corp.score_agenda:agenda%3Aagenda-1%3Ar1",
     );
     expect(portfolio).toContain('"actionIds":["play-overtime"]');
     expect(portfolio).not.toContain(fixture.installPrepared.actionId);
@@ -82,7 +82,7 @@ describe("plan-first Corp card variant contracts", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_priority_class:P4",
-        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
+        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:r1",
       ]),
     );
   });
@@ -109,7 +109,7 @@ describe("plan-first Corp card variant contracts", () => {
       ]),
     );
     expect(portfolio).toContain(
-      "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
+      "plan:corp.score_agenda:agenda%3Aagenda-1%3Ar1",
     );
     expect(portfolio).toContain('"actionIds":["play-overtime"]');
     expect(portfolio).not.toContain(fixture.installPrepared.actionId);
@@ -133,7 +133,7 @@ describe("plan-first Corp card variant contracts", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_priority_class:P4",
-        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
+        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:r1",
       ]),
     );
   });
@@ -298,7 +298,7 @@ describe("plan-first Corp card variant contracts", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [source]),
+      server("r1", [], [source]),
     ];
     bindCurrentStateVersion(input);
 
@@ -460,7 +460,7 @@ function scoreConversionFixture(params: {
     title: "Overtime Incentives",
     cost: 4,
   });
-  const installPrepared = installAgenda(agenda, "remote_1");
+  const installPrepared = installAgenda(agenda, "r1");
   const installNew = installAgenda(agenda, "new_remote");
   const overtimeAction = params.includeOvertime
     ? playOvertime(overtime)
@@ -488,7 +488,7 @@ function scoreConversionFixture(params: {
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1", [
+    server("r1", [
       preparedDataWall("prepared-wall-1"),
       preparedDataWall("prepared-wall-2"),
     ]),
@@ -537,7 +537,7 @@ function annualReviewsFixture(params: {
     { credits: 0, clicks: 1 },
     { payload: { drawCardsAmount: 1 } },
   );
-  const agendaInstall = installAgenda(agenda, "remote_1");
+  const agendaInstall = installAgenda(agenda, "r1");
   const actions = [
     annualReviews,
     basicDraw,
@@ -562,7 +562,7 @@ function annualReviewsFixture(params: {
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1"),
+    server("r1"),
   ];
   bindSyntheticAgendaInstallQuotes(input);
   attachOwnDeckSnapshot(input, {
@@ -611,7 +611,7 @@ function preparedDataWall(instanceId: string): VisibleCard {
 
 function installAgenda(
   agenda: VisibleCard,
-  serverId: "remote_1" | "new_remote",
+  serverId: "r1" | "new_remote",
 ): LegalAction {
   return legalAction(
     `install-${agenda.instanceId}-${serverId}`,

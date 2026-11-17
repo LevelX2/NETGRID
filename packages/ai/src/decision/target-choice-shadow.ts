@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import {
@@ -547,7 +548,7 @@ function optionsWithEvidencePrefix(
 
 function targetShapeBonus(optionId: string): number {
   if (optionId === "hq" || optionId === "rd") return 10;
-  if (optionId.startsWith("remote_")) return 5;
+  if (isRemoteServerId(optionId)) return 5;
   return 0;
 }
 
@@ -665,7 +666,7 @@ function isCentralTarget(optionId: string): boolean {
 }
 
 function isRemoteTarget(optionId: string): boolean {
-  return optionId.startsWith("remote_");
+  return isRemoteServerId(optionId);
 }
 
 function isScorelineTarget(

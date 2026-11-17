@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -20,7 +21,7 @@ describe("plan-first Runner composite economy-card ownership", () => {
     input.playerView.own.clicks = 2;
     input.playerView.own.gripOrHq = [
       visibleCard("stakeout-card", "runner", "event", {
-        definitionId: "test_stakeout",
+        definitionId: syntheticCardDefinitionId("test_stakeout"),
         title: "Stakeout",
       }),
     ];
@@ -30,7 +31,7 @@ describe("plan-first Runner composite economy-card ownership", () => {
         {
           schemaVersion: "runner-hand-development-evaluation-v4",
           cardInstanceId: "stakeout-card",
-          definitionId: "test_stakeout",
+          definitionId: syntheticCardDefinitionId("test_stakeout"),
           title: "Stakeout",
           cardType: "event",
           availability: "legal_now",
@@ -73,7 +74,7 @@ describe("plan-first Runner composite economy-card ownership", () => {
     input.playerView.own.clicks = 0;
     input.playerView.own.gripOrHq = [
       visibleCard("stakeout-card", "runner", "event", {
-        definitionId: "test_stakeout",
+        definitionId: syntheticCardDefinitionId("test_stakeout"),
         title: "Stakeout",
       }),
     ];
@@ -102,7 +103,7 @@ function stakeoutLikeAction() {
       source: "stakeout-card",
       payload: {
         cardId: "stakeout-card",
-        sourceDefinitionId: "test_stakeout",
+        sourceDefinitionId: syntheticCardDefinitionId("test_stakeout"),
         gainCreditsAmount: 2,
         drawCardsAmount: 1,
       },

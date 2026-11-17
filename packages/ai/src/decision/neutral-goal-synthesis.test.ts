@@ -47,7 +47,7 @@ describe("neutral goal synthesis", () => {
         runner: {
           runTargets: [
             {
-              targetServerId: "remote_1",
+              targetServerId: "r1",
               targetKind: "remote",
               scoreThreat: true,
               recommendation: "run_now",

@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { describe, expect, it } from "vitest";
 import { evaluateRunnerHandDevelopment } from "./hand-development-evaluation";
 import { readFileSync } from "node:fs";
@@ -33,7 +34,7 @@ describe("Runner hint metadata consumers", () => {
       checkpoint.runtime,
     );
     const decision = chooseAiAction(input);
-    expect(decision.actionId).not.toContain("startup-immolator");
+    expect(referencesDefaultDeckCard(decision.actionId, 280)).toBe(false);
     expect(
       decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
     ).not.toContain("startup-immolator");

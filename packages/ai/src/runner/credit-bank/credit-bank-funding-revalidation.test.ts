@@ -15,9 +15,9 @@ function bank(): RunnerCreditBankSignal {
     value: 1209,
     evidenceCodes: ["bound_run_funding"],
     runFunding: {
-      parentPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      needId: "run-support:remote:remote_1",
-      runActionId: "runner.start_run.remote_1",
+      parentPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      needId: "run-support:remote:r1",
+      runActionId: "runner.start_run.r1",
       stateVersion: 324,
       gap: 5,
       routeAssessment: {
@@ -37,15 +37,15 @@ function bank(): RunnerCreditBankSignal {
 
 function parent(): RunnerRemoteContestSignal {
   return {
-    contestId: "remote:remote_1",
-    serverId: "remote_1",
+    contestId: "remote:r1",
+    serverId: "r1",
     purpose: "contest",
     knownAgendaThreat: false,
     terminalPatternThreat: true,
     reachable: false,
     marginalValue: 1400,
     evidenceCode: "bound_terminal_remote",
-    supportNeedId: "run-support:remote:remote_1",
+    supportNeedId: "run-support:remote:r1",
     runActionAssessments: {},
   };
 }
@@ -73,7 +73,7 @@ describe("bank funding revalidation at the actual run-owner boundary", () => {
     (boundary) => {
       const original = bank(),
         remote = parent();
-      if (boundary === "different_parent") remote.contestId = "remote:remote_2";
+      if (boundary === "different_parent") remote.contestId = "remote:r2";
       if (boundary === "different_need") remote.supportNeedId = "other-need";
       if (boundary === "no_value") remote.marginalValue = 0;
       if (boundary === "prepared_route") {

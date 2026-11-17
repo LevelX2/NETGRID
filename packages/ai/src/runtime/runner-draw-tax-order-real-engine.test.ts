@@ -64,7 +64,7 @@ it("avoids a public draw-tax tag by placing the same credit click before the dra
   RealEngineFixtureBuilder.forState(initial)
     .withRunnerCredits(0)
     .withRunnerGripSize(2)
-    .withCorpRemoteRoot("remote_1", city, 0, { faceup: true, rezzed: true });
+    .withCorpRemoteRoot("r1", city, 0, { faceup: true, rezzed: true });
   initial.runner.clicks = 2;
   function branch(creditFirst: boolean) {
     let state = structuredClone(initial);

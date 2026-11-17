@@ -88,7 +88,7 @@ describe("semantic runtime score components", () => {
     expect(
       scrubEvidence([
         "safe:entry",
-        "remote_1:known_payoff",
+        "r1:known_payoff",
         "server_1:central",
         "scenario_1:fixture",
         "cardInstances:hidden",
@@ -98,7 +98,7 @@ describe("semantic runtime score components", () => {
       ]),
     ).toEqual([
       "safe:entry",
-      "remote_1:known_payoff",
+      "r1:known_payoff",
       "server_1:central",
       "scenario_1:fixture",
     ]);

@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { CardInstanceId, GameState } from "@netgrid/shared";
 import { serverIdForCorpInstalledCard } from "../runtime/installed-card-location";
 import { cardTargetTypeForInstance } from "../runtime/simulation-card-target";
@@ -46,7 +47,7 @@ export function createAgendaProgressionObserver() {
         !afterCard ||
         afterCard.advancementCounters <= beforeCard.advancementCounters ||
         cardTargetTypeForInstance(before, cardId) !== "agenda" ||
-        !serverIdForCorpInstalledCard(after, cardId)?.startsWith("remote_")
+        !isRemoteServerId(serverIdForCorpInstalledCard(after, cardId))
       ) {
         continue;
       }
@@ -85,7 +86,7 @@ export function createAgendaProgressionObserver() {
         pending.delete(cardId);
         continue;
       }
-      if (!serverIdForCorpInstalledCard(after, cardId)?.startsWith("remote_")) {
+      if (!isRemoteServerId(serverIdForCorpInstalledCard(after, cardId))) {
         pending.delete(cardId);
       }
     }

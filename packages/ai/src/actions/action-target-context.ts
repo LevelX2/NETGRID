@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { cardDefinitionIdValue } from "../card-definition-id-input";
 import type { LegalAction } from "@netgrid/shared";
 import { breakSubroutineIndexesForAction } from "../runtime/subroutine-indexes";
@@ -153,7 +154,7 @@ function normalizeServerId(value: unknown): string | undefined {
   if (normalized === "rd") return "rd";
   if (normalized === "archives") return "archives";
   if (normalized === "new_remote") return "new_remote";
-  if (normalized.startsWith("remote_")) return normalized;
+  if (isRemoteServerId(normalized)) return normalized;
   return undefined;
 }
 
@@ -180,7 +181,7 @@ function serverKindForId(
   if (serverId === "hq") return "hq";
   if (serverId === "rd") return "rd";
   if (serverId === "archives") return "archives";
-  if (serverId.startsWith("remote_")) return "remote";
+  if (isRemoteServerId(serverId)) return "remote";
   return undefined;
 }
 

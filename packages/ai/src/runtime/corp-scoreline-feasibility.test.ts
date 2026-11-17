@@ -47,7 +47,7 @@ describe("corpScorelineFeasibilityForDecisionInput", () => {
       virusDrawCount: 1,
     };
     input.playerView.publicEvents.push({
-      eventId: "evt-extra-mandatory-draw",
+      eventId: 2,
       type: "mandatory_draw",
       stateVersionBefore: 0,
       stateVersionAfter: 1,

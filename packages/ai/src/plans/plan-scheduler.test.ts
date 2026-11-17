@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
   type AiDecisionInput,
@@ -544,7 +545,7 @@ describe("shared plan scheduler", () => {
       semanticActionType: "play.operation",
       sourceKind: "card" as const,
       sourceCardInstanceId: "copy-a",
-      sourceDefinitionId: "same-operation",
+      sourceDefinitionId: syntheticCardDefinitionId("same-operation"),
     };
     const copyB = {
       ...copyA,
@@ -605,7 +606,7 @@ describe("shared plan scheduler", () => {
         scope: "tactical",
         evidenceCode: "runner_visible_remote_window",
         guarantee: "visible_state_forced",
-        target: { kind: "server", id: "remote_1" },
+        target: { kind: "server", id: "r1" },
       },
     ];
     const tactical = module("runner", "runner.contest_remote", "P4", action);
@@ -616,7 +617,7 @@ describe("shared plan scheduler", () => {
       return [
         {
           ...proposal("runner", "runner.contest_remote"),
-          target: { kind: "server" as const, id: "remote_1" },
+          target: { kind: "server" as const, id: "r1" },
         },
       ];
     });
@@ -653,14 +654,14 @@ describe("shared plan scheduler", () => {
       label: "foreign plan",
       signal: {
         planModuleId: "runner.pressure_central" as const,
-        target: { kind: "server" as const, id: "remote_1" },
+        target: { kind: "server" as const, id: "r1" },
       },
     },
     {
       label: "foreign target",
       signal: {
         planModuleId: "runner.contest_remote" as const,
-        target: { kind: "server" as const, id: "remote_2" },
+        target: { kind: "server" as const, id: "r2" },
       },
     },
     {
@@ -668,7 +669,7 @@ describe("shared plan scheduler", () => {
       signal: {
         planModuleId: "runner.contest_remote" as const,
         planDedupeKey: "other-remote",
-        target: { kind: "server" as const, id: "remote_1" },
+        target: { kind: "server" as const, id: "r1" },
       },
     },
     {
@@ -700,7 +701,7 @@ describe("shared plan scheduler", () => {
       tactical.discover = () => [
         {
           ...proposal("runner", "runner.contest_remote"),
-          target: { kind: "server", id: "remote_1" },
+          target: { kind: "server", id: "r1" },
         },
       ];
       tactical.assess = (instance) => ({
@@ -746,7 +747,7 @@ describe("shared plan scheduler", () => {
         scope: "tactical",
         evidenceCode: "stale_remote",
         guarantee: "visible_state_forced",
-        target: { kind: "server", id: "remote_1" },
+        target: { kind: "server", id: "r1" },
       },
     ];
     const discover = vi.fn();

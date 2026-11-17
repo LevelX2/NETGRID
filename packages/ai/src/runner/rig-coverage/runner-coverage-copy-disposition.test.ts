@@ -150,11 +150,11 @@ describe("exact Runner coverage-copy ownership", () => {
       domain.centralPressure.pop();
       Object.assign(gap, {
         requesterModuleId: "runner.contest_remote",
-        requesterPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        requesterPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       });
       const remoteParent = {
         ...parent,
-        contestId: "remote:remote_1",
+        contestId: "remote:r1",
         marginalValue: 0,
       };
       (domain.remoteContests as unknown[]).push(remoteParent);

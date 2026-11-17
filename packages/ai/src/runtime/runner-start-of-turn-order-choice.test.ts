@@ -5,8 +5,8 @@ import { selectedRunnerStartOfTurnOrderChoiceOptionId } from "./runner-start-of-
 
 describe("Runner start-of-turn order choice", () => {
   it("resolves a due credit gain before an optional installed-card conversion without changing the bound action", () => {
-    const smithsPawnshopId = "runner_392_1";
-    const topRunnersConferenceId = "runner_396_1";
+    const smithsPawnshopId = "c2f5";
+    const topRunnersConferenceId = "c2g1";
     const options = [
       {
         id: `source_${smithsPawnshopId}`,
@@ -98,8 +98,8 @@ describe("Runner start-of-turn order choice", () => {
   });
 
   it("orders two equivalent delayed-install countdown sources without choosing their later target", () => {
-    const firstShellId = "runner_388_1";
-    const secondShellId = "runner_388_2";
+    const firstShellId = "c2e9";
+    const secondShellId = "c2ea";
     const options = [secondShellId, firstShellId].map((instanceId) => ({
       id: `source_${instanceId}`,
       label: "The Shell Traders",

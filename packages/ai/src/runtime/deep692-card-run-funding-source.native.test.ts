@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
@@ -53,7 +54,7 @@ function funding(
 ) {
   const input = original(),
     actionId = cardRun
-      ? "runner.play_event.runner_43_1.rd.runner_43_1"
+      ? "runner.play_event.c9l.rd.c9l"
       : "runner.start_run.rd";
   const target = evaluateRunnerRunTargets({ input }).find(
     (t) => t.actionId === actionId,
@@ -116,7 +117,7 @@ it("does not certify any random-self-damage funding route for the exact grip-bac
   );
 });
 it("retains the original funded basic run when its zero hand buffer needs no grip source", () => {
-  expect(funding(false).routeActionIds[0]).toContain("do-the-drine");
+  expect(referencesDefaultDeckCard(funding(false).routeActionIds[0], 40)).toBe(true);
   expect(funding(false).routeAssessment.status).toBe("covered_guaranteed");
 });
 it("keeps ordinary credit funding for the same event when its hand source survives", () => {

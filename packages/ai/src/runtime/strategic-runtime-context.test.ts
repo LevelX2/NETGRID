@@ -151,7 +151,7 @@ describe("strategic runtime context", () => {
           server("rd"),
           server("archives"),
           server(
-            "remote_1",
+            "r1",
             [],
             [
               visibleCard("agenda-remote", "corp", "agenda", {
@@ -262,7 +262,7 @@ describe("strategic runtime context", () => {
           server("rd"),
           server("archives"),
           server(
-            "remote_1",
+            "r1",
             [],
             [
               visibleCard("agenda-remote", "corp", "agenda", {

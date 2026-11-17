@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { buildCorpRezDefenseSignals } from "./defense-rez-discovery";
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { corpProgramTrashDefenseSignals } from "./program-trash-signal";
@@ -191,7 +192,7 @@ export function buildCorpDefenseNeeds({
               project.need?.capability === "improve_remote_protection_path",
           );
           if (
-            serverId.startsWith("remote_") &&
+            isRemoteServerId(serverId) &&
             residentRemoteProtectionProject !== undefined &&
             residentRemoteProtectionProject.serverId !== serverId
           ) {

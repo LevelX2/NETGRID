@@ -1,9 +1,10 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { VisibleCard } from "@netgrid/shared";
 import { runnerRigAfterEncounter } from "./runner-rig-after-encounter";
 
 const boon = (extra: Partial<VisibleCard> = {}): VisibleCard => ({
-  instanceId: "boon", definitionId: "onr_v1_002_boon-1-0", known: true,
+  instanceId: "boon", definitionId: syntheticCardDefinitionId("onr_v1_002_boon-1-0"), known: true,
   strength: 4, strengthAfterEncounter: 3,
   randomRunStrengthState: { status: "resolved", actualStrength: 3, currentStrengthAdjustment: 1 },
   ...extra,

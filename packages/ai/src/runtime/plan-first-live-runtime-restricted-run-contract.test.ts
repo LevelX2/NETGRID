@@ -73,7 +73,7 @@ describe("plan-first Engine-restricted run contract", () => {
   it("declines an optional restricted run when every target lacks current marginal value", () => {
     resetResidentPlanPortfolioMemory();
     const archivesRun = optionalRestrictedRun("archives");
-    const remoteRun = optionalRestrictedRun("remote_1");
+    const remoteRun = optionalRestrictedRun("r1");
     const decline = legalAction(
       "runner.trigger_ability.decline_optional_bonus_run",
       "runner",
@@ -94,7 +94,7 @@ describe("plan-first Engine-restricted run contract", () => {
       score: 160,
     };
     const unaffordableRemote = {
-      ...safeRuntimeRunTarget(remoteRun.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(remoteRun.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       knownAccessState: "known_no_current_payoff" as const,
@@ -178,7 +178,7 @@ describe("plan-first Engine-restricted run contract", () => {
   it("keeps Wilson's exact run-only actions owned by the restricted run window", () => {
     resetResidentPlanPortfolioMemory();
     const runHq = wilsonRun("hq");
-    const runRemote = wilsonRun("remote_1");
+    const runRemote = wilsonRun("r1");
     const end = legalAction(
       "runner.end_turn",
       "runner",
@@ -197,7 +197,7 @@ describe("plan-first Engine-restricted run contract", () => {
     ];
     input.playerView.own.rig = [
       visibleCard(
-        "runner_399_1",
+        "c2gp",
         "runner",
         "resource",
         {
@@ -209,7 +209,7 @@ describe("plan-first Engine-restricted run contract", () => {
     input.playerView.opponent.deckCount = 10;
     const productiveHq = safeRuntimeRunTarget(runHq.actionId, "hq");
     const noPayoffRemote = {
-      ...safeRuntimeRunTarget(runRemote.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(runRemote.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       knownAccessState: "known_no_current_payoff" as const,
@@ -249,7 +249,7 @@ describe("plan-first Engine-restricted run contract", () => {
           parentInstanceId: "rules.restricted_action_sequence",
           moduleState: expect.objectContaining({
             signal: expect.objectContaining({
-              serverId: "remote_1",
+              serverId: "r1",
               actionAssessments: {
                 [runRemote.actionId]: expect.objectContaining({
                   admissible: false,
@@ -265,12 +265,12 @@ describe("plan-first Engine-restricted run contract", () => {
   it("ends the turn when the only ordinary Remote run is explicitly nonproductive", () => {
     resetResidentPlanPortfolioMemory();
     const runRemote = legalAction(
-      "runner.start_run.remote_1",
+      "runner.start_run.r1",
       "runner",
       "start_run",
       "Run remote 1",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const end = legalAction(
       "runner.end_turn",
@@ -289,7 +289,7 @@ describe("plan-first Engine-restricted run contract", () => {
     ];
     input.playerView.opponent.deckCount = 10;
     const noPayoffRemote = {
-      ...safeRuntimeRunTarget(runRemote.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(runRemote.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       knownAccessState: "known_no_current_payoff" as const,
@@ -318,8 +318,8 @@ describe("plan-first Engine-restricted run contract", () => {
   });
 });
 
-function wilsonRun(serverId: "hq" | "remote_1"): LegalAction {
-  const sourceId = "runner_399_1";
+function wilsonRun(serverId: "hq" | "r1"): LegalAction {
+  const sourceId = "c2gp";
   return legalAction(
     `runner.start_run.${sourceId}.${serverId}.${sourceId}.gain_run_only_action`,
     "runner",
@@ -371,7 +371,7 @@ function restrictedRun(serverId: "archives" | "rd"): LegalAction {
   );
 }
 
-function optionalRestrictedRun(serverId: "archives" | "remote_1"): LegalAction {
+function optionalRestrictedRun(serverId: "archives" | "r1"): LegalAction {
   return legalAction(
     `runner.start_run.${serverId}.optional_restricted`,
     "runner",

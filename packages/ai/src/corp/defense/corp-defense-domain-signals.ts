@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { readPostInstallEffectiveRunQuote } from "../../runtime/post-install-ice-run-quote";
 import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
@@ -179,9 +180,7 @@ export function corpIceInstallPositionEffect(
     (serverId === "new_remote"
       ? typeof action.payload.postInstallRezQuoteProjectedServerId !==
           "string" ||
-        !action.payload.postInstallRezQuoteProjectedServerId.startsWith(
-          "remote_",
-        )
+        !isRemoteServerId(action.payload.postInstallRezQuoteProjectedServerId)
       : action.payload.postInstallRezQuoteProjectedServerId !== serverId)
   )
     return "unknown";
@@ -371,7 +370,7 @@ export function corpQualitativeIceStagingSignal(
   paymentBudget?: Readonly<{ credits: number; clicks: number }>,
 ): CorpDefenseSignal | undefined {
   const isCentral = serverId === "hq" || serverId === "rd";
-  const isExistingRemote = serverId.startsWith("remote_");
+  const isExistingRemote = isRemoteServerId(serverId);
   const isBoundNewRemote =
     serverId === "new_remote" && layeredParent?.kind === "remote";
   if (!isCentral && !isExistingRemote && !isBoundNewRemote) return undefined;
@@ -473,9 +472,7 @@ export function corpQualitativeIceStagingSignal(
   if (
     isBoundNewRemote &&
     (typeof action.payload.postInstallRezQuoteProjectedServerId !== "string" ||
-      !action.payload.postInstallRezQuoteProjectedServerId.startsWith(
-        "remote_",
-      ))
+      !isRemoteServerId(action.payload.postInstallRezQuoteProjectedServerId))
   ) {
     return undefined;
   }
@@ -737,7 +734,7 @@ function isInstallQuoteTarget(
     value === "rd" ||
     value === "archives" ||
     value === "new_remote" ||
-    /^remote_[0-9]+$/.test(value)
+    /^r[0-9]+$/.test(value)
   );
 }
 
@@ -1085,7 +1082,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
     };
   }
   if (
-    serverId.startsWith("remote_") &&
+    isRemoteServerId(serverId) &&
     server?.root.length === 0 &&
     server.ice.length >= 2
   ) {
@@ -1138,7 +1135,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
   };
   const hasResidentRemoteAgenda = input.playerView.servers.some(
     (candidateServer) =>
-      candidateServer.id.startsWith("remote_") &&
+      isRemoteServerId(candidateServer.id) &&
       candidateServer.root.some((card) => card.known && card.type === "agenda"),
   );
   const sourceHasNoVisibleBreakerAnswer =

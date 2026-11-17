@@ -111,7 +111,7 @@ function corpGlobalIceSupportPlacementSignal(
     action.payload.placement !== "root" ||
     typeof target !== "string" ||
     (target !== "new_remote" &&
-      (!/^remote_[1-9]\d*$/.test(target) ||
+      (!/^r[1-9]\d*$/.test(target) ||
         !existing ||
         existing.root.some(
           (card) => card.type === "asset" || card.type === "agenda",
@@ -143,7 +143,7 @@ function corpGlobalIceSupportPlacementSignal(
     p.postInstallRezQuoteExpiresAtStateVersion !==
       input.playerView.stateVersion ||
     typeof p.postInstallRezQuoteProjectedServerId !== "string" ||
-    !/^remote_[1-9]\d*$/.test(p.postInstallRezQuoteProjectedServerId) ||
+    !/^r[1-9]\d*$/.test(p.postInstallRezQuoteProjectedServerId) ||
     (target === "new_remote"
       ? input.playerView.servers.some(
           (s) => s.id === p.postInstallRezQuoteProjectedServerId,

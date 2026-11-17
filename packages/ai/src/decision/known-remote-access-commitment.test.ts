@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import type { AiDecisionInput, PlayerView, VisibleCard } from "@netgrid/shared";
@@ -24,11 +25,11 @@ describe("known remote access commitment", () => {
 
   it("models agenda access as a steal commitment", () => {
     expect(
-      knownRemoteAgendaAccessCommitment("remote_1", [
+      knownRemoteAgendaAccessCommitment("r1", [
         "known_remote_agenda_root:root:0",
       ]),
     ).toMatchObject({
-      serverId: "remote_1",
+      serverId: "r1",
       knownAccessState: "known_payoff",
       intendedAccessAction: "steal",
       reason: "agenda_payoff",
@@ -44,7 +45,7 @@ describe("known remote access commitment", () => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({ credits: 4 }),
       {
-        serverId: "remote_1",
+        serverId: "r1",
         definitionId: 538,
         rootType: "asset",
         trashCost: 4,
@@ -85,7 +86,7 @@ describe("known remote access commitment", () => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({ credits: 2 }),
       {
-        serverId: "remote_1",
+        serverId: "r1",
         definitionId: 538,
         rootType: "asset",
         trashCost: 4,
@@ -119,7 +120,7 @@ describe("known remote access commitment", () => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({ credits: 8 }),
       {
-        serverId: "remote_1",
+        serverId: "r1",
         definitionId: 578,
         rootType: "upgrade",
         trashCost: 1,
@@ -181,7 +182,7 @@ describe("known remote access commitment", () => {
         ],
       }),
       {
-        serverId: "remote_1",
+        serverId: "r1",
         definitionId: 538,
         rootType: "asset",
         trashCost: 4,
@@ -195,7 +196,7 @@ describe("known remote access commitment", () => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({ credits: 8 }),
       {
-        serverId: "remote_1",
+        serverId: "r1",
         definitionId: 534,
         rootType: "asset",
         trashCost: 4,
@@ -234,7 +235,7 @@ describe("known remote access commitment", () => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({ credits: 10 }),
       {
-        serverId: "remote_1",
+        serverId: "r1",
         definitionId: 538,
         rootType: "asset",
         trashCost: 4,
@@ -268,7 +269,7 @@ describe("known remote access commitment", () => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({ credits: 4 }),
       {
-        serverId: "remote_1",
+        serverId: "r1",
         definitionId: 559,
         rootType: "asset",
         trashCost: 1,
@@ -311,7 +312,7 @@ function aiInput(params: {
     timingPoint: "runner_action.main",
     own: {
       identity: visibleCard("runner-identity", {
-        definitionId: "runner-identity",
+        definitionId: syntheticCardDefinitionId("runner-identity"),
         title: "Runner Identity",
         type: "identity",
       }),
@@ -328,7 +329,7 @@ function aiInput(params: {
     },
     opponent: {
       identity: visibleCard("corp-identity", {
-        definitionId: "corp-identity",
+        definitionId: syntheticCardDefinitionId("corp-identity"),
         title: "Corp Identity",
         type: "identity",
       }),
@@ -344,7 +345,7 @@ function aiInput(params: {
     },
     servers: [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [],
         root: [],

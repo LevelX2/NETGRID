@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import {
   quoteAgendaDefinitionSelfStealCreditCost,
@@ -63,7 +64,7 @@ export function corpForcedAgendaDiscardHasSaferTerminalAlternative(
     preparationClicks === 0 ||
     view.servers.some(
       (server) =>
-        server.id.startsWith("remote_") &&
+        isRemoteServerId(server.id) &&
         server.root.some((card) => !card.known || card.type === "agenda"),
     )
   )
@@ -168,7 +169,7 @@ export function corpFloodInstallCreatesCombinedTerminalExposure(
     .flatMap((server) => {
       if (
         server.id === serverId ||
-        !server.id.startsWith("remote_") ||
+        !isRemoteServerId(server.id) ||
         server.ice.length !== 0 ||
         server.statuses?.some((status) => status.kind === "run_prohibited") ||
         server.root.length !== 1
@@ -234,7 +235,7 @@ function paidRemoteCompletesFloodExposure(
     const existing = server.root[0];
     if (
       server.id === targetServerId ||
-      !server.id.startsWith("remote_") ||
+      !isRemoteServerId(server.id) ||
       server.statuses?.some((status) => status.kind === "run_prohibited") ||
       server.root.length !== 1 ||
       !existing ||

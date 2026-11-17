@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { CorpEconomyNeedSignal } from "../corp/economy/economy-types";
 import type {
   CorpDefenseSignal,
@@ -73,7 +74,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
     {
       urgent: false,
       pressure: undefined,
-      serverId: "remote_1",
+      serverId: "r1",
       priority: "P6",
     },
   ])(
@@ -434,7 +435,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
         delegatedPriorityClass: "P4",
         actionId: "install-remote",
         sourceCardInstanceId: "ice-1",
-        sourceDefinitionId: "ice-definition",
+        sourceDefinitionId: syntheticCardDefinitionId("ice-definition"),
         evidenceCode: "score_protection_staging_install:agenda-1:new_remote",
       };
       input.legalActions = [
@@ -457,7 +458,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
             postInstallRezQuoteComplete: true,
             postInstallRezQuoteCardId: "ice-1",
             postInstallRezQuoteTargetServerId: "new_remote",
-            postInstallRezQuoteProjectedServerId: "remote_1",
+            postInstallRezQuoteProjectedServerId: "r1",
             postInstallRezQuoteExpiresAtStateVersion: 30,
             postInstallRezQuoteFinalCredits: 1,
             postInstallRezQuoteMandatoryAgendaPointCost: requiredPoints,
@@ -529,7 +530,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       delegatedPriorityClass: "P4",
       actionId: "install-rd",
       sourceCardInstanceId: "ice-1",
-      sourceDefinitionId: "ice-definition",
+      sourceDefinitionId: syntheticCardDefinitionId("ice-definition"),
       effect: "satisfied",
       runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
       totalInstallAndRezCredits: 2,
@@ -681,7 +682,7 @@ function defenseSignal(params: {
     defenseId: "central-defense:rd",
     serverId: "rd",
     phase: "install_ice",
-    sourceDefinitionIds: ["ice-definition"],
+    sourceDefinitionIds: [syntheticCardDefinitionId("ice-definition")],
     actionIds: ["install-rd"],
     urgent: false,
     ...(params.centralPressure
@@ -698,7 +699,7 @@ function defenseSignal(params: {
         knowledge: "known",
         actionId: "install-rd",
         sourceCardInstanceId: "ice-1",
-        sourceDefinitionId: "ice-definition",
+        sourceDefinitionId: syntheticCardDefinitionId("ice-definition"),
         targetServerId: "rd",
         before: { knowledge: "known" },
         after: {
@@ -764,7 +765,7 @@ function installCandidate(
 ): ActionSemanticCandidate {
   return {
     ...baseCandidate(actionId, "install.card", sourceId),
-    sourceDefinitionId: "ice-definition",
+    sourceDefinitionId: syntheticCardDefinitionId("ice-definition"),
     targetContext: {
       selectedTargets: [
         {

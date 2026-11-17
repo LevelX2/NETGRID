@@ -6,20 +6,20 @@ import { actionLimitDiagnosisForSimulation } from "./ai-behavior-baseline-runtim
 describe("actionLimitDiagnosisForSimulation", () => {
   it("binds a classified action limit to the last owner, plan, step and no-progress class", () => {
     const sequence: AiSimulationSummary["actionSequence"] = [
-      action("start_run", "runner.contest_remote", "remote_1"),
+      action("start_run", "runner.contest_remote", "r1"),
       action("gain_credit", "corp.economy", undefined, "corp"),
-      action("start_run", "runner.contest_remote", "remote_1"),
-      action("start_run", "runner.contest_remote", "remote_1"),
-      action("start_run", "runner.contest_remote", "remote_1"),
-      action("start_run", "runner.contest_remote", "remote_1"),
-      action("access_card", "runner.contest_remote", "remote_1"),
+      action("start_run", "runner.contest_remote", "r1"),
+      action("start_run", "runner.contest_remote", "r1"),
+      action("start_run", "runner.contest_remote", "r1"),
+      action("start_run", "runner.contest_remote", "r1"),
+      action("access_card", "runner.contest_remote", "r1"),
     ];
 
     expect(actionLimitDiagnosisForSimulation(summary(sequence))).toEqual({
       classified: true,
       owner: "plan_module",
-      planInstanceId: "plan:runner.contest_remote:remote_1",
-      stepId: "plan:runner.contest_remote:remote_1:contest",
+      planInstanceId: "plan:runner.contest_remote:r1",
+      stepId: "plan:runner.contest_remote:r1:contest",
       noProgressCluster: "action_limit_runner_repeated_no_progress_run",
       noProgressSubcluster: "access_pending",
     });

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -68,15 +69,15 @@ describe("corp score defense continuity", () => {
           instanceId: "defense-child",
           moduleId: "corp.defend_servers",
           parentInstanceId: "score-root",
-          dedupeKey: "defense:remote_1",
+          dedupeKey: "defense:r1",
           updatedAtStateVersion: 10,
           moduleState: {
             kind: "defense",
             signals: [
               {
                 kind: "score_protection_staging_install",
-                serverId: "remote_1",
-                parentProjectId: "agenda:agenda-1:remote_1",
+                serverId: "r1",
+                parentProjectId: "agenda:agenda-1:r1",
                 sourceCardInstanceId: "ice-1",
               },
             ],
@@ -121,7 +122,7 @@ describe("corp score defense continuity", () => {
       corpResidentScoreDefenseBinding(previous, input, visibleCardIsAgenda),
     ).toEqual({
       agendaInstanceId: "agenda-1",
-      serverId: "remote_1",
+      serverId: "r1",
     });
   });
 
@@ -146,7 +147,7 @@ describe("corp score defense continuity", () => {
         {
           instanceId: "score-support",
           moduleId: "corp.economy",
-          dedupeKey: "score-support:agenda-1:remote_1",
+          dedupeKey: "score-support:agenda-1:r1",
           parentInstanceId: "score-root",
         },
       ],
@@ -157,7 +158,7 @@ describe("corp score defense continuity", () => {
       corpResidentScoreDefenseBinding(previous, input, visibleCardIsAgenda),
     ).toEqual({
       agendaInstanceId: "agenda-1",
-      serverId: "remote_1",
+      serverId: "r1",
     });
   });
 
@@ -165,7 +166,7 @@ describe("corp score defense continuity", () => {
     const input = decisionInput(42);
     input.playerView.own.credits = 22;
     input.playerView.servers[0] = {
-      id: "remote_1",
+      id: "r1",
       label: "Remote 1",
       root: [],
       ice: [
@@ -178,8 +179,8 @@ describe("corp score defense continuity", () => {
           effectiveRezCostQuote: {
             context: "installed",
             cardId: "shock-r",
-            targetServerId: "remote_1",
-            projectedServerId: "remote_1",
+            targetServerId: "r1",
+            projectedServerId: "r1",
             expiresAtStateVersion: 42,
             complete: true,
             costKind: "fixed",
@@ -191,8 +192,8 @@ describe("corp score defense continuity", () => {
             context: "installed_post_rez",
             cardId: "shock-r",
             iceDefinitionId: 480,
-            targetServerId: "remote_1",
-            projectedServerId: "remote_1",
+            targetServerId: "r1",
+            projectedServerId: "r1",
             expiresAtStateVersion: 42,
             complete: true,
             effectiveRunQuote: {
@@ -213,23 +214,23 @@ describe("corp score defense continuity", () => {
     };
 
     expect(
-      corpRemoteHasEngineQuotedReusableScoreFriction(input, "remote_1"),
+      corpRemoteHasEngineQuotedReusableScoreFriction(input, "r1"),
     ).toBe(true);
     expect(
-      corpRemoteHasEngineQuotedFundableScoreFriction(input, "remote_1", 3),
+      corpRemoteHasEngineQuotedFundableScoreFriction(input, "r1", 3),
     ).toBe(true);
   });
 
   it("does not force score reuse over a persistent remote root", () => {
     const input = decisionInput(42);
     input.playerView.servers[0] = {
-      id: "remote_1",
+      id: "r1",
       label: "Remote 1",
       root: [
         {
           instanceId: "economy-asset",
           known: true,
-          definitionId: "asset-definition",
+          definitionId: syntheticCardDefinitionId("asset-definition"),
           type: "asset",
         },
       ],
@@ -237,12 +238,12 @@ describe("corp score defense continuity", () => {
         {
           instanceId: "rezzed-ice",
           known: true,
-          definitionId: "ice-definition",
+          definitionId: syntheticCardDefinitionId("ice-definition"),
           type: "ice",
           rezzed: true,
           effectiveRunQuote: {
             iceInstanceId: "rezzed-ice",
-            iceDefinitionId: "ice-definition",
+            iceDefinitionId: syntheticCardDefinitionId("ice-definition"),
             effectiveStrength: 2,
             subroutines: [
               { id: "tax", type: "runner_lose_credits", amount: 1 },
@@ -253,7 +254,7 @@ describe("corp score defense continuity", () => {
     };
 
     expect(
-      corpRemoteHasEngineQuotedReusableScoreFriction(input, "remote_1"),
+      corpRemoteHasEngineQuotedReusableScoreFriction(input, "r1"),
     ).toBe(false);
   });
 });
@@ -267,14 +268,14 @@ function decisionInput(stateVersion: number): AiDecisionInput {
           {
             instanceId: "agenda-1",
             known: true,
-            definitionId: "agenda-definition",
+            definitionId: syntheticCardDefinitionId("agenda-definition"),
             type: "agenda",
           },
         ],
       },
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           ice: [{ instanceId: "ice-1" }],
           root: [],
         },
@@ -283,7 +284,7 @@ function decisionInput(stateVersion: number): AiDecisionInput {
   } as unknown as AiDecisionInput;
 }
 
-function scoreRoot(serverId = "remote_1") {
+function scoreRoot(serverId = "r1") {
   return {
     instanceId: "score-root",
     moduleId: "corp.score_agenda",

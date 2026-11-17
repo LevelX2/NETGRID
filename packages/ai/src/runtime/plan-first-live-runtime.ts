@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { runnerBankRunFundingContinuation } from "../run-analysis/runner-bank-run-funding-continuation";
 import {
   candidateTargetIds,
@@ -3299,7 +3300,7 @@ function prepareRunnerDomain(
                   kind: "parent_plan_support" as const,
                   needId: route.supportNeedId,
                   driver: {
-                    kind: route.serverId.startsWith("remote_")
+                    kind: isRemoteServerId(route.serverId)
                       ? ("contest" as const)
                       : ("run" as const),
                     targetId: route.serverId,

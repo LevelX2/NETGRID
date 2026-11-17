@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { cardSpecPlanningCards } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
@@ -7,14 +8,14 @@ import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 const offSiteId = 508;
 const reclamationId = 22;
 
-function generatedHint(cardId: string) {
+function generatedHint(cardId: CardDefinitionId) {
   const hint = AI_HINTS_BY_CARD.get(cardId);
   if (hint === undefined)
     throw new Error(`missing_generated_test_hint:${cardId}`);
   return hint;
 }
 
-function entry(cardId: string) {
+function entry(cardId: CardDefinitionId) {
   const card = cardSpecPlanningCards().find(
     (candidate) => candidate.definition.id === cardId,
   );

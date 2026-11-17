@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 
 import { reconstructBeliefState } from "../belief-state";
@@ -28,7 +29,7 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
     runnerKnownCardPositionInvalidationFlags(invalidationReasons);
   const knownRemote = memory.filter(
     (entry) =>
-      entry.zone.startsWith("remote_") && entry.positionKey.startsWith("root:"),
+      isRemoteServerId(entry.zone) && entry.positionKey.startsWith("root:"),
   );
   const knownRemoteAgendas = knownRemote.filter(
     (entry) => definitionTypeForMetrics(entry.definitionId) === "agenda",

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
   type AiDecisionInput,
@@ -90,7 +91,7 @@ export function scoringWindow(
   overrides: Partial<CorpScoringWindowAssessment>,
 ): CorpScoringWindowAssessment {
   return {
-    serverId: "remote_1",
+    serverId: "r1",
     windowKind: "unsafe",
     runnerCanContestNow: true,
     runnerCanReachAccessNow: true,
@@ -156,7 +157,7 @@ export function centralServer(
 }
 
 export function remoteServer(
-  id: `remote_${number}`,
+  id: `r${number}`,
   ice: readonly VisibleCard[],
   root: readonly VisibleCard[] = [],
 ): AiDecisionInput["playerView"]["servers"][number] {
@@ -239,7 +240,7 @@ function bindEngineInstallQuotes(
         postInstallRezQuoteCardId: sourceCard.instanceId,
         postInstallRezQuoteTargetServerId: serverId,
         postInstallRezQuoteProjectedServerId:
-          serverId === "new_remote" ? "remote_1" : serverId,
+          serverId === "new_remote" ? "r1" : serverId,
         postInstallRezQuoteExpiresAtStateVersion: stateVersion,
         postInstallRezQuoteComplete: true,
         postInstallRezQuoteBaseCredits: sourceCard.rezCost,
@@ -256,7 +257,7 @@ export function assetCard(instanceId: string): VisibleCard {
     known: true,
     type: "asset",
     owner: "corp",
-    definitionId: "support_asset",
+    definitionId: syntheticCardDefinitionId("support_asset"),
   } as VisibleCard;
 }
 

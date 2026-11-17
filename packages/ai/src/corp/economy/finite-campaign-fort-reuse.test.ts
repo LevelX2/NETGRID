@@ -111,7 +111,7 @@ function fixture(pool?: number) {
   const agendaId = ids(AGENDA)[0]!;
   const walls = ids(WALL);
   state.corp.servers.push({
-    id: "remote_1",
+    id: "r1",
     label: "Remote 1",
     kind: "remote",
     ice: [],
@@ -137,13 +137,13 @@ function fixture(pool?: number) {
   for (const [index, serverId] of [
     "hq",
     "rd",
-    "remote_1",
-    "remote_1",
+    "r1",
+    "r1",
   ].entries()) {
     move(walls[index]!, {
       side: "corp",
       zone: "serverIce",
-      serverId: serverId as "hq" | "rd" | "remote_1",
+      serverId: serverId as "hq" | "rd" | "r1",
     });
   }
   state.corp.credits = 10;
@@ -160,7 +160,7 @@ function fixture(pool?: number) {
     move(campaignId, {
       side: "corp",
       zone: "serverRoot",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     state.cardInstances[campaignId]!.counters = { bit: pool };
     move(agendaId, { side: "corp", zone: "hq" });
@@ -176,7 +176,7 @@ function reservedScoreProject(
     projectId: "reserved-score",
     agendaInstanceId: agendaId,
     agendaPoints: 3,
-    serverId: "remote_1",
+    serverId: "r1",
     phase: "install_agenda",
     sameTurnCloseout: false,
     terminalScore: false,
@@ -247,7 +247,7 @@ describe("finite campaign fort reuse", () => {
     expect(after.corp.servers.at(-1)?.root).toEqual([]);
     const clearedInput = inputFor(after);
     const laterScore = reservedScoreProject(agendaId);
-    expect(corpCampaignSlotJustCleared(clearedInput, "remote_1")).toBe(true);
+    expect(corpCampaignSlotJustCleared(clearedInput, "r1")).toBe(true);
     expect(corpCampaignSlotJustCleared(clearedInput, "rd")).toBe(false);
     expect(
       corpScoreProjectReservesSlotAfterCampaign(clearedInput, laterScore),
@@ -313,7 +313,7 @@ describe("finite campaign fort reuse", () => {
       (entry) =>
         entry.type === "install_card" &&
         entry.source === campaignId &&
-        entry.payload?.serverId === "remote_1",
+        entry.payload?.serverId === "r1",
     );
     expect(action).toBeDefined();
     const campaignOffered = (score: CorpScoreProjectSignal) =>

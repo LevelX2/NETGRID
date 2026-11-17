@@ -3046,7 +3046,7 @@ function isExactOptionalRezChoiceQuoteBinding(
     sourceAgenda?.known !== true ||
     sourceAgenda.type !== "agenda" ||
     !nonEmptyString(quote.targetServerId) ||
-    !/^remote_[1-9][0-9]*$/.test(quote.targetServerId) ||
+    !/^r[1-9][0-9]*$/.test(quote.targetServerId) ||
     !boundServer ||
     boundServerCard?.known !== true ||
     boundServerCard.definitionId !== quote.cardDefinitionId ||

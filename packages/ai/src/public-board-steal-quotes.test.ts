@@ -29,7 +29,7 @@ it.each([
       definitionId,
       owner: "corp",
       controller: "corp",
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
       faceup,
       rezzed: isRezzed,
       advancementCounters: 0,
@@ -48,14 +48,14 @@ it.each([
       false,
     );
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
       root: ["public-tax", "agenda"],
     });
     if (archived) {
-      state.corp.servers.find((server) => server.id === "remote_1")!.root = [
+      state.corp.servers.find((server) => server.id === "r1")!.root = [
         "agenda",
       ];
       state.corp.archives.push("public-tax");
@@ -71,7 +71,7 @@ it.each([
       legalActions: view.legalActions,
     };
     const before = native.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!;
     expect(before.runnerAgendaStealCostQuote?.minimumCreditCost).toBe(minimum);
     expect(

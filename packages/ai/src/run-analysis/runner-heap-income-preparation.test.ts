@@ -28,7 +28,7 @@ function facts() {
   const target = evaluateRunnerRunTargets({
     input,
     deckCapabilities: input.ownDeckCapabilities!,
-  }).find((entry) => entry.actionId === "runner.start_run.remote_1")!;
+  }).find((entry) => entry.actionId === "runner.start_run.r1")!;
   const action = input.legalActions.find(
     (entry) =>
       entry.payload?.cardImplementationEffectKind === "move_top_trash_to_grip",

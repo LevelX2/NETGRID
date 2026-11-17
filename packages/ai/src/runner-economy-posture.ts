@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { assessVisibleRunnerServerPath } from "./run-analysis/visible-run-server-path";
 import { actionHasImmediateCreditGain, exactImmediateCreditGainAmount } from "./actions/action-effect-classification";
 import { actionMatchesCurrentDecision } from "./actions/current-legal-action";
@@ -886,7 +887,7 @@ function runnerRemotePressureReserveAssessment(params: {
         : 5;
   const candidates = params.input.playerView.servers.flatMap((server) => {
     if (
-      !server.id.startsWith("remote_") ||
+      !isRemoteServerId(server.id) ||
       server.ice.length < 2 ||
       server.root.length === 0
     )
@@ -982,7 +983,7 @@ function runnerRdPressureSpendTarget(input: AiDecisionInput): number {
 function runnerHasImmediateRemoteScoreThreat(input: AiDecisionInput): boolean {
   return input.playerView.servers.some(
     (server) =>
-      server.id.startsWith("remote_") &&
+      isRemoteServerId(server.id) &&
       server.root.some(
         (card) =>
           (card.known === false && (card.advancementCounters ?? 0) > 0) ||
@@ -1091,7 +1092,7 @@ function runnerEmergencyReserve(input: AiDecisionInput): number {
 function remoteHasScoreThreat(
   server: AiDecisionInput["playerView"]["servers"][number] | undefined,
 ): boolean {
-  if (!server?.id.startsWith("remote_")) return false;
+  if (!isRemoteServerId(server?.id)) return false;
   return server.root.some(
     (card) =>
       card.type === "agenda" ||

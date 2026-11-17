@@ -15,8 +15,8 @@ import {
 import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
 
 const positions = [
-  [7, 280, "runner_35_3"],
-  [19, 186, "runner_35_3"],
+  [7, 280, "c7v"],
+  [19, 186, "c7v"],
 ] as const;
 
 function fixture(game: number, decision: number) {
@@ -150,7 +150,7 @@ describe("pairing 582 incoming identical program preserves recurring economy", (
       // two consumable breakers still preserves six recurring credits.
       expect(selected.selectedChoices).toEqual({
         choiceId: cp.input.playerView.pendingChoice.choiceId,
-        selectedOptionIds: ["card_runner_283_1"],
+        selectedOptionIds: ["card_c1qx"],
       });
       if (!selected.actionId || !selected.selectedChoices)
         throw new Error("Expected the direct native memory choice.");
@@ -170,7 +170,7 @@ describe("pairing 582 incoming identical program preserves recurring economy", (
         rig.filter((c) => c.definitionId === 35),
       ).toHaveLength(2);
       expect(
-        rig.some((c) => c.instanceId === "runner_283_2"),
+        rig.some((c) => c.instanceId === "c1qy"),
       ).toBe(true);
       expect(rig.some((c) => c.definitionId === 223)).toBe(true);
       expect(

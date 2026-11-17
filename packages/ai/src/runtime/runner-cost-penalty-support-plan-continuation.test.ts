@@ -28,7 +28,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       previous.pendingRunnerCostPenaltySupportOrigin = {
         rootPlanInstanceId: previous.rootForegroundInstanceId!,
         executorInstanceId: previous.executorInstanceId!,
-        sourceStepId: "run_211:convert",
+        sourceStepId: "211:convert",
         originalActionId: "runner.continue_run",
         selectedAtStateVersion: 90,
       };
@@ -50,7 +50,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         variant === "wrong_timing" ? "run.encounter_ice" : "run.approach_ice";
       next.eventTail = [
         {
-          eventId: "evt_91",
+          eventId: 92,
           type: "continue_run",
           stateVersionBefore: 90,
           stateVersionAfter: 91,
@@ -61,7 +61,7 @@ describe("Runner cost/penalty support plan continuation", () => {
           },
         },
         {
-          eventId: "evt_92",
+          eventId: 93,
           type: "decline_rez",
           stateVersionBefore: 91,
           stateVersionAfter: 92,
@@ -72,7 +72,7 @@ describe("Runner cost/penalty support plan continuation", () => {
           },
         },
         {
-          eventId: "evt_93",
+          eventId: 94,
           type: "decline_rez",
           stateVersionBefore: 92,
           stateVersionAfter: 93,
@@ -139,7 +139,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       ...selected.route,
       planInstanceId: selected.portfolio.executorInstanceId!,
       head: { ...selected.route.head, actionType: "continue_run" },
-      step: { ...selected.route.step, stepId: "run_211:convert" },
+      step: { ...selected.route.step, stepId: "211:convert" },
     };
     reconcileSelectedRunnerCostPenaltySupportOrigin(
       before,
@@ -149,7 +149,7 @@ describe("Runner cost/penalty support plan continuation", () => {
     expect(selected.portfolio.pendingRunnerCostPenaltySupportOrigin).toEqual({
       rootPlanInstanceId: selected.portfolio.rootForegroundInstanceId,
       executorInstanceId: selected.portfolio.executorInstanceId,
-      sourceStepId: "run_211:convert",
+      sourceStepId: "211:convert",
       originalActionId: action.actionId,
       selectedAtStateVersion: 90,
     });
@@ -670,7 +670,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         lane: "engine_window",
         actionId: originalAction.actionId,
         origin: {
-          rootPlanInstanceId: "run:run_211",
+          rootPlanInstanceId: "run:211",
           leafPlanInstanceId: "rules.window_resolution",
           side: "runner",
           windowKind: "mandatory_choice",
@@ -722,36 +722,36 @@ describe("Runner cost/penalty support plan continuation", () => {
 
   it("preserves a direct run-root owner when the mandatory trace starts before a run-window leaf exists", () => {
     const originalAction = traceBidAction(69);
-    const choiceId = "run_66.asp.trace.runner.bid.69";
+    const choiceId = "66.asp.trace.runner.bid.69";
     originalAction.choiceRequirements![0]!.choiceId = choiceId;
     originalAction.payload = { choiceId, choiceKind: "bid_amount" };
     const previous = directRunRootPortfolio(65);
     previous.selectedActionOrigin = {
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      executorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      selectedActionId: "runner.start_run.remote_1",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      executorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      selectedActionId: "runner.start_run.r1",
       selectedAtStateVersion: 65,
       immediateChoicePolicy: "resolve_runner_run_start_order",
       continuedThroughStateVersion: 65,
-      sourceStepId: "plan:runner.contest_remote:remote%3Aremote_1:contest",
+      sourceStepId: "plan:runner.contest_remote:remote%3Ar1:contest",
       sourceActionType: "start_run",
     };
     const traceInput = traceBidInput(69, [originalAction]);
     traceInput.playerView.run = {
       ...traceInput.playerView.run!,
-      runId: "run_66",
-      attackedServerId: "remote_1",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      runId: 66,
+      attackedServerId: "r1",
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
     } as never;
     traceInput.playerView.pendingChoice = {
       ...traceInput.playerView.pendingChoice!,
       choiceId,
-      source: "trace:run_66.asp.trace",
+      source: "trace:66.asp.trace",
       stateVersion: 69,
     } as never;
     traceInput.eventTail = [
       {
-        eventId: "evt_66",
+        eventId: 67,
         type: "start_run",
         stateVersionBefore: 65,
         stateVersionAfter: 66,
@@ -759,22 +759,22 @@ describe("Runner cost/penalty support plan continuation", () => {
           actor: "runner",
           actionType: "start_run",
           effectKind: "run",
-          serverId: "remote_1",
+          serverId: "r1",
         },
       },
       {
-        eventId: "evt_67",
+        eventId: 68,
         type: "rez_ice",
         stateVersionBefore: 66,
         stateVersionAfter: 67,
         publicPayload: {
           actor: "corp",
           actionType: "rez_ice",
-          serverId: "remote_1",
+          serverId: "r1",
         },
       },
       {
-        eventId: "evt_68",
+        eventId: 69,
         type: "continue_run",
         stateVersionBefore: 67,
         stateVersionAfter: 68,
@@ -783,11 +783,11 @@ describe("Runner cost/penalty support plan continuation", () => {
           actionType: "continue_run",
           effectKind: "trace",
           traceStarted: true,
-          serverId: "remote_1",
+          serverId: "r1",
         },
       },
       {
-        eventId: "evt_69",
+        eventId: 70,
         type: "resolve_choice",
         stateVersionBefore: 68,
         stateVersionAfter: 69,
@@ -806,7 +806,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       lane: "engine_window",
       actionId: originalAction.actionId,
       origin: {
-        rootPlanInstanceId: "run:run_66",
+        rootPlanInstanceId: "run:66",
         leafPlanInstanceId: "rules.window_resolution",
         side: "runner",
         windowKind: "mandatory_choice",
@@ -827,8 +827,8 @@ describe("Runner cost/penalty support plan continuation", () => {
     expect(
       engineWindowResult.portfolio?.pendingRunnerCostPenaltySupportOrigin,
     ).toEqual({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      executorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      executorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       sourceStepId: "run.encounter_ice:69",
       originalActionId: originalAction.actionId,
       selectedAtStateVersion: 69,
@@ -854,7 +854,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       lane: "engine_window",
       actionId: originalAction.actionId,
       origin: {
-        rootPlanInstanceId: "run:run_211",
+        rootPlanInstanceId: "run:211",
         leafPlanInstanceId: "rules.window_resolution",
         side: "runner",
         windowKind: "mandatory_choice",
@@ -1179,7 +1179,7 @@ function traceBidAction(stateVersion: number): LegalAction {
     targetRequirements: [],
     choiceRequirements: [
       {
-        choiceId: "run_211.hunter.trace.runner.bid.225",
+        choiceId: "211.hunter.trace.runner.bid.225",
         minSelections: 1,
         maxSelections: 1,
         optionIds: ["bid_0", "bid_1", "bid_2", "bid_3", "bid_4", "bid_5"],
@@ -1188,7 +1188,7 @@ function traceBidAction(stateVersion: number): LegalAction {
     visibility: "private_to_actor",
     expiresAtStateVersion: stateVersion,
     payload: {
-      choiceId: "run_211.hunter.trace.runner.bid.225",
+      choiceId: "211.hunter.trace.runner.bid.225",
       choiceKind: "bid_amount",
     },
   } as unknown as LegalAction;
@@ -1201,7 +1201,7 @@ function traceBidInput(
   const value = input(stateVersion, legalActions, true);
   value.playerView.timingPoint = "run.encounter_ice";
   value.playerView.run = {
-    runId: "run_211",
+    runId: 211,
     attackedServerId: "hq",
     phase: "encounter_ice",
     position: { kind: "ice", serverId: "hq", iceIndex: 1 },
@@ -1209,9 +1209,9 @@ function traceBidInput(
     successful: false,
   } as never;
   value.playerView.pendingChoice = {
-    choiceId: "run_211.hunter.trace.runner.bid.225",
+    choiceId: "211.hunter.trace.runner.bid.225",
     side: "runner",
-    source: "trace:run_211.hunter.trace",
+    source: "trace:211.hunter.trace",
     prompt: "Runner Link-Payment wählen",
     presentationKey: "generic_bid_amount",
     kind: "bid_amount",
@@ -1230,7 +1230,7 @@ function traceBidInput(
   } as never;
   value.eventTail = [
     {
-      eventId: "evt_224",
+      eventId: 225,
       type: "continue_run",
       stateVersionBefore: 223,
       stateVersionAfter: 224,
@@ -1243,7 +1243,7 @@ function traceBidInput(
       },
     },
     {
-      eventId: "evt_225",
+      eventId: 226,
       type: "resolve_choice",
       stateVersionBefore: 224,
       stateVersionAfter: 225,
@@ -1351,7 +1351,7 @@ function runPortfolio(stateVersion: number): ResidentPlanPortfolio {
         moduleState: {
           kind: "run_window",
           signal: {
-            windowId: "run:run_211",
+            windowId: "run:211",
             serverId: "hq",
           },
         },
@@ -1363,7 +1363,7 @@ function runPortfolio(stateVersion: number): ResidentPlanPortfolio {
 }
 
 function directRunRootPortfolio(stateVersion: number): ResidentPlanPortfolio {
-  const instanceId = "plan:runner.contest_remote:remote%3Aremote_1";
+  const instanceId = "plan:runner.contest_remote:remote%3Ar1";
   return {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "runner",

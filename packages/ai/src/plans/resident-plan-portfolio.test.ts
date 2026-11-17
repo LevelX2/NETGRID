@@ -437,7 +437,7 @@ describe("resident plan portfolio", () => {
         origin: {
           rootPlanInstanceId: "plan:corp.score_agenda:agenda%3Aremote-1",
           moduleId: "corp.score_agenda",
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           targetCardInstanceId: "agenda-1",
         },
         milestoneId: "agenda_installed",

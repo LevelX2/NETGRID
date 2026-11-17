@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { runnerGeneralCreditsAfterCompletedPath } from "../../run-analysis/visible-run-credit-budget";
 import { paidBreakPrecedesHarmlessResolution } from "./run-window-harmless-resolution";
 import {
@@ -412,7 +413,7 @@ export function currentRunAbortAssessment(
   ) {
     return {
       evidenceCode: [
-        run.attackedServerId.startsWith("remote_")
+        isRemoteServerId(run.attackedServerId)
           ? "runner_critical_low_grip_unknown_remote_access_requires_jack_out"
           : input.playerView.own.gripOrHq.length === 0
             ? "runner_critical_empty_grip_unknown_central_access_requires_jack_out"
@@ -432,7 +433,7 @@ export function currentRunAbortAssessment(
   if (
     run.phase === "movement" &&
     run.position?.kind === "server" &&
-    run.attackedServerId.startsWith("remote_")
+    isRemoteServerId(run.attackedServerId)
   ) {
     if (
       runnerRemoteHasKnownNoCurrentPayoff(input, run.attackedServerId) &&
@@ -1996,7 +1997,7 @@ export function currentEncounterHasUnbrokenResolvableDeflector(
   if (unbrokenSubroutineCount !== quote.subroutines.length) return false;
   const deflectorContext = {
     visibleRemoteServerCount: input.playerView.servers.filter((server) =>
-      server.id.startsWith("remote_"),
+      isRemoteServerId(server.id),
     ).length,
     visibleCorpCredits: input.playerView.opponent.credits,
   };
@@ -2007,7 +2008,7 @@ export function currentEncounterHasUnbrokenResolvableDeflector(
 
 function currentActiveRunHasKnownNoPayoff(input: AiDecisionInput): boolean {
   const serverId = input.playerView.run?.attackedServerId;
-  if (!serverId?.startsWith("remote_")) return false;
+  if (!isRemoteServerId(serverId)) return false;
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );

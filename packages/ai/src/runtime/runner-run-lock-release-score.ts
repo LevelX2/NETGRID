@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import type {
   AiDecisionInput,
@@ -251,7 +252,7 @@ function plausibleFollowUpRun(
           ...visibleRunnerPathTraceContext(input),
           excludeStealthTraceCredits: excludeStealthCredits,
           visibleRemoteServerCount: input.playerView.servers.filter((entry) =>
-            entry.id.startsWith("remote_"),
+            isRemoteServerId(entry.id),
           ).length,
           visibleCorpCredits: input.playerView.opponent.credits,
         },
@@ -316,7 +317,7 @@ function serverHasContestPayoff(
 ): boolean {
   if (serverId === "hq") return input.playerView.opponent.handCount > 0;
   if (serverId === "rd") return input.playerView.opponent.deckCount > 0;
-  if (!serverId.startsWith("remote_")) return false;
+  if (!isRemoteServerId(serverId)) return false;
   const server = input.playerView.servers.find(
     (entry) => entry.id === serverId,
   );

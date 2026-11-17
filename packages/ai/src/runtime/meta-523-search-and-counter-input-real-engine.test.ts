@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { afterEach, expect, it } from "vitest";
 import {
   applyAction,
@@ -95,7 +96,7 @@ function phases() {
     initial,
     "runner",
     (a) =>
-      a.type === "install_card" && a.source?.includes("short-circuit") === true,
+      a.type === "install_card" && referencesDefaultDeckCard(a.source, 389) === true,
   );
   const input = () =>
     buildAiDecisionInput(state, "runner", {
@@ -125,7 +126,7 @@ function phases() {
     "runner",
     (a) =>
       a.type === "install_card" &&
-      a.source?.includes("krash") === true &&
+      referencesDefaultDeckCard(a.source, 251) === true &&
       a.payload?.runnerProgramTrashBeforeInstall !== true,
   );
   const installed = input();
@@ -181,7 +182,7 @@ function counterAccess() {
     initial,
     "runner",
     (a) =>
-      a.type === "install_card" && a.source?.includes("armageddon") === true,
+      a.type === "install_card" && referencesDefaultDeckCard(a.source, 136) === true,
   );
   const ready = buildAiDecisionInput(state, "runner", {
     difficulty: "hard",

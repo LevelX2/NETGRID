@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -644,7 +645,7 @@ function activeUpgradeUtility(
   }
   if (
     agendas.length === 0 &&
-    serverId.startsWith("remote_") &&
+    isRemoteServerId(serverId) &&
     server.ice.length > 0 &&
     hasEligibleRestrictedAgenda(input, sourceCard, server) &&
     (signals.has("score.agenda_difficulty_discount") ||
@@ -679,7 +680,7 @@ function activeUpgradeUtility(
     utility.add("central_agenda_steal_tax");
   }
   if (
-    serverId.startsWith("remote_") &&
+    isRemoteServerId(serverId) &&
     (server.root.length > 0 || server.ice.length > 0) &&
     signals.has("remote.capacity_support")
   ) {
@@ -706,7 +707,7 @@ function hasEligibleRestrictedAgenda(
     return profiles.some((profile) => subtypes.has(normalizedToken(profile.requiredSubtype!)));
   };
   if (server.root.some(compatible)) return true;
-  if (!server.id.startsWith("remote_") || server.ice.length === 0) return false;
+  if (!isRemoteServerId(server.id) || server.ice.length === 0) return false;
   return (input.playerView.own.gripOrHq ?? []).some((card) =>
     compatible(card) && input.legalActions.some((action) =>
       actionMatchesCurrentDecision(input, action) && action.type === "install_card" &&

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   applyAction,
   createGameAfterSetup,
@@ -143,7 +144,7 @@ describe("corp ICE action and Engine quote facts", () => {
       postInstallRezQuoteBaseCredits: 3,
       postInstallRezQuoteFinalCredits: 2,
       postInstallRezQuoteMandatoryAgendaPointCost: 0,
-      postInstallRezQuoteReductionSourceDefinitionIds: "cost-reducer",
+      postInstallRezQuoteReductionSourceDefinitionIds: String(syntheticCardDefinitionId("cost-reducer")),
     };
 
     expect(corpIcePlacementPostInstallRezCostFact(input, action)).toEqual({
@@ -160,7 +161,7 @@ describe("corp ICE action and Engine quote facts", () => {
       ...action.payload,
       postInstallRezQuoteCardId: wall.instanceId,
       postInstallRezQuoteTargetServerId: "new_remote",
-      postInstallRezQuoteProjectedServerId: "remote_1",
+      postInstallRezQuoteProjectedServerId: "r1",
       postInstallRezQuoteExpiresAtStateVersion: 1,
       postInstallRezQuoteComplete: true,
       postInstallRezQuoteBaseCredits: 3,
@@ -173,7 +174,7 @@ describe("corp ICE action and Engine quote facts", () => {
       status: "known",
       amount: 3,
     });
-    input.playerView.servers.push(server("remote_1", []));
+    input.playerView.servers.push(server("r1", []));
     expect(corpIcePlacementPostInstallRezCostFact(input, action)).toMatchObject({
       status: "unknown",
       reason: "binding_drift",
@@ -607,9 +608,9 @@ describe("corp ICE factual support", () => {
     });
     const input = corpInput({
       hq: [ballAndChain],
-      servers: [server("remote_1", [])],
+      servers: [server("r1", [])],
     });
-    const action = installIceAction(ballAndChain, "remote_1");
+    const action = installIceAction(ballAndChain, "r1");
     input.legalActions = [action];
 
     expect(assessCorpIcePlacementForDiagnostics(input, action)).toMatchObject({
@@ -686,7 +687,7 @@ function corpInput(
 }
 
 function server(
-  id: "hq" | "rd" | "archives" | `remote_${number}`,
+  id: "hq" | "rd" | "archives" | `r${number}`,
   ice: VisibleCard[],
 ): AiDecisionInput["playerView"]["servers"][number] {
   return {

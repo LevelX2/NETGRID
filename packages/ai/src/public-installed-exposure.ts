@@ -74,7 +74,7 @@ export function publicInstalledExposures(
     const key = `${serverId}:${positionKey}`;
     if (
       !definitionId ||
-      !/^(hq|rd|archives|remote_\d+)$/.test(serverId) ||
+      !/^(hq|rd|archives|r\d+)$/.test(serverId) ||
       !/^(ice|root):\d+$/.test(positionKey) ||
       seen.has(key)
     ) {

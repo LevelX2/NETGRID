@@ -24,10 +24,10 @@ const DATA_WALL = 450;
 
 describe("corpCounterBankScoreProjects", () => {
   it.each([
-    ["unclaimed", "other", "remote_1", false, true],
-    ["active exact decoy", "vapor", "remote_1", false, false],
-    ["different server", "vapor", "remote_2", false, true],
-    ["already revealed", "vapor", "remote_1", true, true],
+    ["unclaimed", "other", "r1", false, true],
+    ["active exact decoy", "vapor", "r1", false, false],
+    ["different server", "vapor", "r2", false, true],
+    ["already revealed", "vapor", "r1", true, true],
   ] as const)(
     "keeps liquidation separate from a %s",
     (_label, sourceId, serverId, rezzed, allowed) => {
@@ -42,7 +42,7 @@ describe("corpCounterBankScoreProjects", () => {
             source: "vapor",
             payload: {
               cardId: "vapor",
-              serverId: "remote_1",
+              serverId: "r1",
               ...(rezzed
                 ? {
                     cardImplementationAdvancementCounterCost: 1,
@@ -55,7 +55,7 @@ describe("corpCounterBankScoreProjects", () => {
       );
       const input = withDeck(aiInput("corp", [action]));
       input.playerView.servers = [
-        server("remote_1", [], [vapor("vapor", "installed_root", 1, rezzed)]),
+        server("r1", [], [vapor("vapor", "installed_root", 1, rezzed)]),
       ];
       const ambush: CorpAmbushSignal = {
         commitmentVersion: "corp_ambush_commitment_v1",
@@ -101,13 +101,13 @@ describe("corpCounterBankScoreProjects", () => {
         { credits: 0, clicks: 1 },
         {
           source: "vapor",
-          payload: { cardId: "vapor", serverId: "remote_1", placement: "root" },
+          payload: { cardId: "vapor", serverId: "r1", placement: "root" },
         },
       ),
     );
     const input = withDeck(aiInput("corp", [install]));
     input.playerView.own.gripOrHq = [vapor("vapor", "corp_hq")];
-    input.playerView.servers = [secureRemote("remote_1")];
+    input.playerView.servers = [secureRemote("r1")];
 
     expect(
       corpCounterBankScoreProjects(
@@ -121,7 +121,7 @@ describe("corpCounterBankScoreProjects", () => {
         actionIds: ["install-vapor"],
         counterBank: expect.objectContaining({
           sourceCardInstanceId: "vapor",
-          serverId: "remote_1",
+          serverId: "r1",
           counterTarget: 3,
         }),
       }),
@@ -138,13 +138,13 @@ describe("corpCounterBankScoreProjects", () => {
         { credits: 0, clicks: 1 },
         {
           source: "vapor",
-          payload: { cardId: "vapor", serverId: "remote_1", placement: "root" },
+          payload: { cardId: "vapor", serverId: "r1", placement: "root" },
         },
       ),
     );
     const input = withDeck(aiInput("corp", [install]));
     input.playerView.own.gripOrHq = [vapor("vapor", "corp_hq")];
-    input.playerView.servers = [server("remote_1")];
+    input.playerView.servers = [server("r1")];
 
     expect(
       corpCounterBankScoreProjects(
@@ -154,7 +154,7 @@ describe("corpCounterBankScoreProjects", () => {
       ),
     ).toEqual([]);
 
-    input.playerView.servers = [secureRemote("remote_1")];
+    input.playerView.servers = [secureRemote("r1")];
     input.playerView.own.gripOrHq[0]!.counterBankPreparationQuote = {
       ...input.playerView.own.gripOrHq[0]!.counterBankPreparationQuote!,
       expiresAtStateVersion: 0,
@@ -194,7 +194,7 @@ describe("corpCounterBankScoreProjects", () => {
     );
     const input = withDeck(aiInput("corp", [advance]));
     input.playerView.servers = [
-      secureRemote("remote_1", [vapor("vapor", "installed_root", 2)]),
+      secureRemote("r1", [vapor("vapor", "installed_root", 2)]),
     ];
 
     expect(
@@ -240,14 +240,14 @@ describe("corpCounterBankScoreProjects", () => {
         "rez_card",
         "Rez Vapor Ops",
         { credits: 0, clicks: 0 },
-        { source: "vapor", payload: { cardId: "vapor", serverId: "remote_1" } },
+        { source: "vapor", payload: { cardId: "vapor", serverId: "r1" } },
       ),
     );
     const input = withDeck(aiInput("corp", [installAgenda, rez]));
     input.playerView.own.clicks = 2;
     input.playerView.own.gripOrHq = [agenda("agenda")];
     input.playerView.servers = [
-      secureRemote("remote_1", [vapor("vapor", "installed_root", 3)]),
+      secureRemote("r1", [vapor("vapor", "installed_root", 3)]),
     ];
 
     expect(
@@ -311,7 +311,7 @@ describe("corpCounterBankScoreProjects", () => {
           { clicks: 0, credits: 0 },
           {
             source: "vapor",
-            payload: { cardId: "vapor", serverId: "remote_1" },
+            payload: { cardId: "vapor", serverId: "r1" },
           },
         ),
       );
@@ -330,8 +330,8 @@ describe("corpCounterBankScoreProjects", () => {
         : agenda("existing");
       existing.advancementCounters = counters;
       input.playerView.servers = [
-        server("remote_1", [], [vapor("vapor", "installed_root", 3, rezzed)]),
-        server("remote_2", [], [existing]),
+        server("r1", [], [vapor("vapor", "installed_root", 3, rezzed)]),
+        server("r2", [], [existing]),
       ];
       const projects = corpCounterBankScoreProjects(
         input,
@@ -378,7 +378,7 @@ describe("corpCounterBankScoreProjects", () => {
           source: "agenda",
           payload: {
             cardId: "agenda",
-            serverId: "remote_1",
+            serverId: "r1",
             placement: "root",
             rootReplacement: "asset_to_agenda",
           },
@@ -392,14 +392,14 @@ describe("corpCounterBankScoreProjects", () => {
         "rez_card",
         "Rez Vapor Ops",
         { credits: 0, clicks: 0 },
-        { source: "vapor", payload: { cardId: "vapor", serverId: "remote_1" } },
+        { source: "vapor", payload: { cardId: "vapor", serverId: "r1" } },
       ),
     );
     const input = withDeck(aiInput("corp", [installAgenda, rez]));
     input.playerView.own.clicks = 2;
     input.playerView.own.gripOrHq = [agenda("agenda")];
     input.playerView.servers = [
-      secureRemote("remote_1", [vapor("vapor", "installed_root", 3)]),
+      secureRemote("r1", [vapor("vapor", "installed_root", 3)]),
     ];
 
     expect(
@@ -424,14 +424,14 @@ describe("corpCounterBankScoreProjects", () => {
         "rez_card",
         "Rez Vapor Ops",
         { credits: 0, clicks: 0 },
-        { source: "vapor", payload: { cardId: "vapor", serverId: "remote_1" } },
+        { source: "vapor", payload: { cardId: "vapor", serverId: "r1" } },
       ),
     );
     const input = withDeck(aiInput("corp", [rez]));
     input.playerView.own.clicks = 1;
     input.playerView.servers = [
-      secureRemote("remote_1", [vapor("vapor", "installed_root", 3)]),
-      server("remote_2", [], [agenda("agenda")]),
+      secureRemote("r1", [vapor("vapor", "installed_root", 3)]),
+      server("r2", [], [agenda("agenda")]),
     ];
 
     expect(
@@ -445,7 +445,7 @@ describe("corpCounterBankScoreProjects", () => {
         phase: "rez_counter_bank_for_handoff",
         actionIds: ["rez-vapor"],
         agendaInstanceId: "agenda",
-        serverId: "remote_2",
+        serverId: "r2",
       }),
     );
   });
@@ -460,13 +460,13 @@ describe("corpCounterBankScoreProjects", () => {
           "rez_card",
           "Rez Vapor Ops",
           { credits: 0, clicks: 0 },
-          { source: "vapor", payload: { cardId: "vapor", serverId: "remote_1" } },
+          { source: "vapor", payload: { cardId: "vapor", serverId: "r1" } },
         ),
       );
       const input = withDeck(aiInput("corp", [rez]));
       input.playerView.own.clicks = 2;
       input.playerView.servers = [
-        secureRemote("remote_1", [vapor("vapor", "installed_root", 3)]),
+        secureRemote("r1", [vapor("vapor", "installed_root", 3)]),
         server(serverId, [], [agenda("agenda")]),
       ];
 
@@ -500,7 +500,7 @@ describe("corpCounterBankScoreProjects", () => {
     );
     const input = withDeck(aiInput("corp", [cashout]));
     input.playerView.servers = [
-      server("remote_1", [], [vapor("vapor", "installed_root", 2, true)]),
+      server("r1", [], [vapor("vapor", "installed_root", 2, true)]),
     ];
 
     const projects = corpCounterBankScoreProjects(
@@ -536,7 +536,7 @@ describe("corpCounterBankScoreProjects", () => {
         { credits: 0, clicks: 1 },
         {
           source: "asset",
-          payload: { cardId: "asset", serverId: "remote_1", placement: "root" },
+          payload: { cardId: "asset", serverId: "r1", placement: "root" },
         },
       ),
     );
@@ -548,7 +548,7 @@ describe("corpCounterBankScoreProjects", () => {
       }),
     ];
     input.playerView.servers = [
-      secureRemote("remote_1", [vapor("vapor", "installed_root", 3)]),
+      secureRemote("r1", [vapor("vapor", "installed_root", 3)]),
     ];
 
     expect(
@@ -615,7 +615,7 @@ function vapor(
       location:
         location === "corp_hq"
           ? { kind: "corp_hq" }
-          : { kind: "installed_root", serverId: "remote_1" },
+          : { kind: "installed_root", serverId: "r1" },
       advancementCounters,
       advanceableBeforeRez: true,
       activatedAbilitiesRequireRez: true,
@@ -640,7 +640,7 @@ function agenda(instanceId: string): VisibleCard {
   });
 }
 
-function secureRemote(id: `remote_${number}`, root: VisibleCard[] = []) {
+function secureRemote(id: `r${number}`, root: VisibleCard[] = []) {
   const definition = CARD_DEFINITIONS_BY_ID[DATA_WALL];
   if (!definition || definition.type !== "ice") {
     throw new Error("Missing Data Wall test definition.");

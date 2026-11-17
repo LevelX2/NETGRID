@@ -26,8 +26,8 @@ const fixture = JSON.parse(
   ),
 );
 const fresh = (): GameState => structuredClone(fixture.state);
-const source = "corp_28_2",
-  target = "corp_17_1";
+const source = "c6e",
+  target = "c3x";
 const input = (s: GameState) =>
   buildAiDecisionInput(s, "corp", {
     difficulty: "hard",

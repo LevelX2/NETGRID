@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
@@ -211,7 +212,7 @@ describe("runner run plan path quote", () => {
   it("uses visible public ICE trace caps and encounter-only trace credits", () => {
     const cappedTrace = quoteRunnerRunPath(
       runnerEncounterInput({
-        iceDefinitionId: "onr_proteus_024_homing-missile",
+        iceDefinitionId: syntheticCardDefinitionId("onr_proteus_024_homing-missile"),
         iceTitle: "Homing Missile",
         iceStrength: 5,
         credits: 15,
@@ -239,7 +240,7 @@ describe("runner run plan path quote", () => {
     );
     const temporaryPoolTrace = quoteRunnerRunPath(
       runnerEncounterInput({
-        iceDefinitionId: "onr_v1_290_pocket-v-r",
+        iceDefinitionId: syntheticCardDefinitionId("onr_v1_290_pocket-v-r"),
         iceTitle: "Pocket V.R.",
         iceStrength: 4,
         credits: 8,
@@ -273,7 +274,7 @@ describe("runner run plan path quote", () => {
   it("keeps special visible payment choices distinct from unavoidable threats", () => {
     const puzzle = quoteRunnerRunPath(
       runnerEncounterInput({
-        iceDefinitionId: "onr_proteus_030_puzzle",
+        iceDefinitionId: syntheticCardDefinitionId("onr_proteus_030_puzzle"),
         iceTitle: "Puzzle",
         iceStrength: 3,
         rig: [],
@@ -294,7 +295,7 @@ describe("runner run plan path quote", () => {
     );
     const washedUp = quoteRunnerRunPath(
       runnerEncounterInput({
-        iceDefinitionId: "onr_proteus_039_washed-up-solo-construct",
+        iceDefinitionId: syntheticCardDefinitionId("onr_proteus_039_washed-up-solo-construct"),
         iceTitle: "Washed-Up Solo Construct",
         iceStrength: 2,
         credits: 1,

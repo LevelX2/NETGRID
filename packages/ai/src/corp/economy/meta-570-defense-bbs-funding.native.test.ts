@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -74,7 +75,7 @@ it("funds the native next-runner HQ reserve through free setup without delaying 
     expect(JSON.stringify(input)).toBe(before);
     expect(decision).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
     expect(action.type).toBe(type);
-    expect(action.source).toContain("bbs-whispering-campaign");
+    expect(referencesDefaultDeckCard(action.source, 521)).toBe(true);
     if (index < 3)
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
         rootPlanInstanceId: parent,

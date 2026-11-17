@@ -66,9 +66,9 @@ function position(badPublicity: number): GameState {
   );
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
-    .withCorpRemoteRoot("remote_1", 427)
-    .withRezzedCorpIceOnServer("remote_1", 482)
-    .withRezzedCorpIceOnServer("remote_1", 457)
+    .withCorpRemoteRoot("r1", 427)
+    .withRezzedCorpIceOnServer("r1", 482)
+    .withRezzedCorpIceOnServer("r1", 457)
     .withRunnerProgramInstalled(251)
     .withRunnerProgramInstalled(226)
     .withRunnerCredits(7);
@@ -100,7 +100,7 @@ describe("public next-run credits in a Corp protection assessment", () => {
       expect(input.playerView.runnerNextTurnCreditClicks).toBe(3);
       const defense = assessCorpTerminalAgendaDefense(
         input,
-        "remote_1",
+        "r1",
         "agenda:terminal",
       );
       expect(defense?.need.baseline).toMatchObject({
@@ -120,7 +120,7 @@ describe("public next-run credits in a Corp protection assessment", () => {
       let runner = applyStep(state, "corp", "end_turn");
       for (let i = 0; i < 3; i++)
         runner = applyStep(runner, "runner", "gain_credit");
-      runner = applyStep(runner, "runner", "start_run", "remote_1");
+      runner = applyStep(runner, "runner", "start_run", "r1");
       expect(runner.runner.credits).toBe(10);
       expect(runner.run?.badPublicityCredits).toBe(badPublicity);
     },

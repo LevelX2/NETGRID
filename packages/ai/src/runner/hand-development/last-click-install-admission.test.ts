@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
@@ -27,7 +28,7 @@ it.each([
   const action = input.legalActions.find(
     (a: { actionId: string }) =>
       a.actionId.includes("install_card") &&
-      a.actionId.includes("hq-interface"),
+      referencesDefaultDeckCard(a.actionId, 341),
   );
   const candidate = buildActionSemanticCandidates({
     legalActions: [action],

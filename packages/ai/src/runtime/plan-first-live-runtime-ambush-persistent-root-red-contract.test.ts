@@ -306,7 +306,7 @@ function scoringServers(agenda: VisibleCard) {
     server("rd"),
     server("archives"),
     server(
-      "remote_1",
+      "r1",
       [
         visibleCard("remote-ice", "corp", "ice", {
           definitionId: 449,

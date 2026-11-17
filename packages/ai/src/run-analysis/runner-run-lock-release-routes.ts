@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
@@ -51,7 +52,7 @@ export function runnerRunLockReleaseRoutes(
         "A legal run-lock release must have an exact semantic candidate before it can be bound to its parent Run plan.",
     });
   }
-  const remote = projection.serverId.startsWith("remote_");
+  const remote = isRemoteServerId(projection.serverId);
   const dedupeKey = remote
     ? `remote:${projection.serverId}`
     : `central:${projection.serverId}`;

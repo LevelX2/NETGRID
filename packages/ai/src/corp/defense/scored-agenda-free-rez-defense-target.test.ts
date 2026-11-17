@@ -15,12 +15,12 @@ const fixture = (name: string) =>
       "utf8",
     ),
   );
-const sourceAgendaId = "corp_424_1";
+const sourceAgendaId = "c2md";
 
 describe("Defense-owned scored-agenda free rez", () => {
   it.each([
-    ["free-rez-central-loss", "corp_485_1"],
-    ["free-rez-single-remote", "corp_490_1"],
+    ["free-rez-central-loss", "c2zx"],
+    ["free-rez-single-remote", "c311"],
   ])(
     "preserves the native Score executor and exact choice binding: %s",
     (name, targetId) => {
@@ -123,14 +123,14 @@ describe("Defense-owned scored-agenda free rez", () => {
   it("prioritizes current R&D agenda exposure over the more expensive HQ ICE", () => {
     const { input } = fixture("free-rez-central-loss");
     const target = corpScoredAgendaFreeRezDefenseTarget(input, sourceAgendaId)!;
-    expect(target.card.instanceId).toBe("corp_485_1");
+    expect(target.card.instanceId).toBe("c2zx");
     expect(target.rezCredits).toBe(7);
     expect(
       input.playerView.servers
         .find((server: { id: string }) => server.id === "hq")
         .ice.find(
           (card: { instanceId: string }) =>
-            card.instanceId === "corp_490_1",
+            card.instanceId === "c311",
         ).effectiveRezCostQuote.finalCredits,
     ).toBe(13);
   });

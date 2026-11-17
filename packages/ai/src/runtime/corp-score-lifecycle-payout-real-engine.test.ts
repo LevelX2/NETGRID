@@ -57,7 +57,7 @@ it("projects the actual unconditional on-score payout into the existing reserve 
   if (!drawn.ok) throw Error(JSON.stringify(drawn.error));
   state = drawn.state;
   RealEngineFixtureBuilder.forState(state)
-    .withCorpRemoteRoot("remote_1", charity, 4)
+    .withCorpRemoteRoot("r1", charity, 4)
     .withCorpCredits(1)
     .withCorpHqSize(0);
   const input = buildAiDecisionInput(state, "corp", {

@@ -403,10 +403,10 @@ function moveCorpCardToRemoteAndRez(
     server.ice = server.ice.filter((id) => id !== cardId);
     server.root = server.root.filter((id) => id !== cardId);
   }
-  let remote = state.corp.servers.find((server) => server.id === "remote_1");
+  let remote = state.corp.servers.find((server) => server.id === "r1");
   if (!remote) {
     remote = {
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
@@ -417,7 +417,7 @@ function moveCorpCardToRemoteAndRez(
   remote.root.push(cardId);
   state.cardInstances[cardId] = {
     ...card,
-    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     faceup: true,
     rezzed: true,
   };

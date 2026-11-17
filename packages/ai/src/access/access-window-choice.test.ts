@@ -23,7 +23,7 @@ describe("access window choice", () => {
   it("projects access window trash choices", () => {
     const projection = projectAccessWindowChoice({
       actionType: "trash_accessed_card",
-      serverId: "remote_1",
+      serverId: "r1",
       knownRootDefinitionId: 534,
       targetType: "asset_node",
       trashCost: 4,
@@ -35,7 +35,7 @@ describe("access window choice", () => {
 
     expect(projection).toMatchObject({
       source: "access_window",
-      serverId: "remote_1",
+      serverId: "r1",
       target: "asset",
       intendedAccessAction: "trash",
       projections: [
@@ -50,7 +50,7 @@ describe("access window choice", () => {
     expect(
       projectAccessWindowChoice({
         actionType: "steal_agenda",
-        serverId: "remote_1",
+        serverId: "r1",
         knownRootDefinitionId: 588,
         targetType: "unknown",
         trashCost: 4,
@@ -69,7 +69,7 @@ describe("access window choice", () => {
     expect(
       projectAccessWindowChoice({
         actionType: "decline_trash",
-        serverId: "remote_1",
+        serverId: "r1",
         targetType: "asset_node",
         trashCost: 4,
         generalTrashCost: 0,

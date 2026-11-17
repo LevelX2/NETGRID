@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import {
   type AiDecisionInput,
   type VisibleCard,
@@ -311,7 +312,7 @@ function counterBankInstalledScoreTargets(
   return input.playerView.servers
     .filter(
       (server) =>
-        server.id.startsWith("remote_") && server.id !== bank.serverId,
+        isRemoteServerId(server.id) && server.id !== bank.serverId,
     )
     .flatMap((server) =>
       server.root.flatMap((card) => {
@@ -504,7 +505,7 @@ function counterBankRemoteIsSecure(
   input: AiDecisionInput,
   serverId: string,
 ): boolean {
-  if (!serverId.startsWith("remote_")) return false;
+  if (!isRemoteServerId(serverId)) return false;
   const assessment = corpRemoteContestabilityAssessment(input, serverId);
   return (
     assessment !== undefined &&

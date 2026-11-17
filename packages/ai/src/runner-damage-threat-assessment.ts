@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { isCardDefinitionId, type MatchEventId } from "@netgrid/shared";
 import {
   runnerFortPassTollWindow,
@@ -491,7 +492,7 @@ export function runnerCriticalUnknownAccessRequiredHandFloor(
   const unknownAccess =
     serverId === "hq" ||
     serverId === "rd" ||
-    (serverId.startsWith("remote_") &&
+    (isRemoteServerId(serverId) &&
       input.playerView.servers.some(
         (server) =>
           server.id === serverId && server.root.some((card) => !card.known),
@@ -868,7 +869,7 @@ export function runnerKnownRemoteAccessDamageAmbushAssessment(
     (candidate) => candidate.id === serverId,
   );
   if (
-    !server?.id.startsWith("remote_") ||
+    !isRemoteServerId(server?.id) ||
     server.root.length !== 1 ||
     server.root[0]?.known === false ||
     server.root[0]?.rezzed !== true
@@ -1543,7 +1544,7 @@ function serverHasRunnerExposureRisk(
 ): boolean {
   return (
     server.ice.some((ice) => ice.known === false || ice.rezzed !== true) ||
-    (server.id.startsWith("remote_") &&
+    (isRemoteServerId(server.id) &&
       server.root.some((card) => card.known === false))
   );
 }

@@ -118,11 +118,11 @@ describe("real engine access corpus", () => {
     );
 
     expect(payloadScenario.legalAction.payload).toEqual({
-      serverId: "remote_1",
+      serverId: "r1",
     });
     expect(payloadScenario.evidence).toEqual(
       expect.arrayContaining([
-        "access_decision_projection_server:remote_1",
+        "access_decision_projection_server:r1",
         "expected_recommendation:known_no_current_payoff",
       ]),
     );

@@ -41,14 +41,14 @@ it("distinguishes active, payable and unfundable root protection in a native rem
   const current = applied.state;
   RealEngineFixtureBuilder.forState(current)
     .withCorpCredits(0)
-    .withCorpRemoteRoot("remote_1", redHerrings, 0);
-  const root = current.corp.servers.find((server) => server.id === "remote_1")!
+    .withCorpRemoteRoot("r1", redHerrings, 0);
+  const root = current.corp.servers.find((server) => server.id === "r1")!
     .root[0]!;
   const protection = (state: GameState, creditCost = 0) =>
     remoteProtectionScoreForSimulation(
       state,
       { playerView: getPlayerView(state, "corp") } as AiDecisionInput,
-      "remote_1",
+      "r1",
       creditCost,
     );
   expect(protection(current)).toBe(-45);
@@ -80,7 +80,7 @@ describe("runnerContestRiskForSimulation", () => {
 });
 
 function contestRiskWithRunnerRig(rig: VisibleCard[]): string {
-  return runnerContestRiskForSimulation(gameState(), aiInput(rig), "remote_1");
+  return runnerContestRiskForSimulation(gameState(), aiInput(rig), "r1");
 }
 
 function gameState(): GameState {
@@ -89,7 +89,7 @@ function gameState(): GameState {
       credits: 4,
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           ice: ["remote-ice-instance"],
           root: [],
         },
@@ -113,7 +113,7 @@ function aiInput(rig: VisibleCard[]): AiDecisionInput {
       },
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           ice: [
             {
               instanceId: "remote-ice-instance",

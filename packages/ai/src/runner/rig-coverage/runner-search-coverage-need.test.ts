@@ -19,7 +19,7 @@ describe("runnerVisibleSearchCoverageNeed", () => {
           }),
         ],
         servers: [
-          server("remote_1", [
+          server("r1", [
             quotedIce({
               instanceId: "shotgun-wire",
               definitionId: 481,

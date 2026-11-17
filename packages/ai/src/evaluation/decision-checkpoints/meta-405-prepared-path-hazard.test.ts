@@ -37,19 +37,27 @@ it.each([false, true])(
         status: "blocked",
         creditGap: 2,
       });
-      expect(decision.actionId).toBe(
-        "runner.play_event.czd.hq.czd.221",
-      );
-      const central = evaluateRunnerRunTargets({ input }).find(
-        (target) => target.actionId === decision.actionId,
-      )!;
+      const eventRunId = "runner.play_event.czd.hq.czd.221";
+      const targets = evaluateRunnerRunTargets({ input });
+      const eventRun = targets.find((target) => target.actionId === eventRunId);
+      expect(eventRun).toMatchObject({
+        creditsAfterRun: 0,
+        routeQuote: { reachability: "guaranteed_access" },
+      });
+      expect(
+        decision.decisionDebug?.actionAlternatives?.find(
+          (candidate) => candidate.actionId === eventRunId,
+        )?.whyNot,
+      ).toContain("run_route_excluded:post_run_credit_floor");
+      expect(decision.actionId).toBe("runner.start_run.hq");
+      const central = targets.find((target) => target.actionId === decision.actionId)!;
       expect(central.routeQuote).toMatchObject({
         reachability: "guaranteed_access",
         fundingGap: 0,
         unknownIceCount: 0,
       });
       expect(central.visibleIceHazardPenalty).toBe(0);
-      expect(central.creditsAfterRun).toBe(0);
+      expect(central.creditsAfterRun).toBe(5);
       expect(decision.fallbackUsed).toBe(false);
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
         rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",

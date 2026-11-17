@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { afterEach, expect, it } from "vitest";
 import {
   applyAction,
@@ -114,7 +115,7 @@ it("admits HQ access via empty Archives while rejecting the ordinary Archives ru
   });
   const targets = evaluateRunnerRunTargets({ input });
   const shredder = targets.find((t) =>
-    t.actionId.includes("shredder-uplink-protocol"),
+    referencesDefaultDeckCard(t.actionId, 274),
   );
   expect(shredder).toMatchObject({
     targetServerId: "archives",
@@ -141,7 +142,7 @@ it("admits HQ access via empty Archives while rejecting the ordinary Archives ru
   ).toContain("runner_archives_visible_state_has_no_agenda_payoff");
 });
 
-it.each(["rd", "remote_1"] as const)(
+it.each(["rd", "r1"] as const)(
   "blocks a route to %s whose exact action is dispositioned by Defense",
   (serverId) => {
     const { state, snapshot } = fixture(
@@ -149,7 +150,7 @@ it.each(["rd", "remote_1"] as const)(
       "standard_corp_cheap_bag_tricks",
     );
     RealEngineFixtureBuilder.forState(state).withCorpIceOnServer(
-      "remote_1",
+      "r1",
       473,
     );
     const input = buildAiDecisionInput(state, "runner", {
@@ -182,8 +183,8 @@ it.each(["rd", "remote_1"] as const)(
     ];
     const remoteContests: RunnerPlanDomain["remoteContests"] = [
       {
-        contestId: "remote:remote_1",
-        serverId: "remote_1",
+        contestId: "remote:r1",
+        serverId: "r1",
         purpose: "access",
         knownAgendaThreat: false,
         reachable: true,
@@ -239,7 +240,7 @@ it.each([false, true])(
       .withRunnerCardInGrip(302);
     if (terminal) {
       const agenda = Object.values(state.cardInstances).find((c) =>
-        c.definitionId.includes("corporate-war"),
+        c.definitionId === 408,
       )!;
       RealEngineFixtureBuilder.forState(state).withCorpCardInHq(
         agenda.definitionId,
@@ -267,7 +268,7 @@ it.each([false, true])(
     });
     const projected = { ...input, ...buildAiDecisionInputDto(input) };
     const event = projected.legalActions.find((a) =>
-      a.source?.includes("hot-tip-for-wns"),
+      referencesDefaultDeckCard(a.source, 302),
     )!;
     expect(event.payload?.runnerConditionalAgendaPointQuoteAmount).toBe(1);
     const decision = chooseAiAction(projected);
@@ -306,10 +307,10 @@ it.each(["none", "previous_turn"])(
       eventTail: state.eventLog,
     });
     expect(
-      input.legalActions.find((a) => a.source?.includes("hot-tip-for-wns"))
+      input.legalActions.find((a) => referencesDefaultDeckCard(a.source, 302))
         ?.payload?.runnerConditionalAgendaPointQuoteAmount,
     ).toBe(0);
-    expect(chooseAiAction(input).actionId).not.toContain("hot-tip-for-wns");
+    expect(referencesDefaultDeckCard(chooseAiAction(input).actionId, 302)).toBe(false);
   },
 );
 
@@ -333,7 +334,7 @@ it.each(["missing", "stale", "source", "capability"])(
       eventTail: state.eventLog,
     });
     const payload = input.legalActions.find((a) =>
-      a.source?.includes("hot-tip-for-wns"),
+      referencesDefaultDeckCard(a.source, 302),
     )!.payload!;
     if (boundary === "missing")
       delete payload.runnerConditionalAgendaPointQuoteSchema;

@@ -9,7 +9,7 @@ import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 afterEach(resetResidentPlanPortfolioMemory);
 it.each([
   [4, 178, "hq"],
-  [34, 203, "remote_1"],
+  [34, 203, "r1"],
 ] as const)(
   "preserves the real unbreakable path at G%i D%i",
   (g, d, server) => {

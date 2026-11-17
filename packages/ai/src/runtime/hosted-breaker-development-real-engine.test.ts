@@ -250,7 +250,7 @@ describe("hosted breaker investment through real Engine and plan owners", () => 
     if (reason === "short_horizon") s.runner.stack = s.runner.stack.slice(0, 2);
     if (reason === "urgent")
       RealEngineFixtureBuilder.forState(s).withCorpRemoteRoot(
-        "remote_1",
+        "r1",
         432,
         3,
       );
