@@ -9,6 +9,7 @@ import {
 } from "@netgrid/engine";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
+import { buildPlanningStateIdentity } from "../../plans/turn-planning-contracts";
 import { restoreAiRuntimeCheckpoint } from "../../evaluation/decision-checkpoints/runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 const load = () =>
@@ -19,7 +20,7 @@ const load = () =>
     ),
   );
 const gate =
-  "corp.install_card.corp_473_3.hq.corp_473_3.1";
+  "corp.install_card.c2xb.hq.c2xb.1";
 function choose(
   f: ReturnType<typeof load>,
   order: "original" | "reverse" | "gate_first" = "original",
@@ -33,6 +34,7 @@ function choose(
     input.legalActions.sort(
       (a, b) => Number(b.actionId === gate) - Number(a.actionId === gate),
     );
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
   const before = JSON.stringify(input);
   restoreAiRuntimeCheckpoint(
     input,

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   applyAction,
   createGame,
@@ -127,9 +128,10 @@ it.each([0, 1, 2])(
     state.phase = "corp_action_phase";
     state.timingPoint = "corp_action.main";
     state.corp.clicks = 3;
-    const iceId = [...state.corp.hq, ...state.corp.rd].find((id) =>
-      id.includes("data-wall"),
-    )!;
+    const iceId = [...state.corp.hq, ...state.corp.rd].find(
+      (id) => state.cardInstances[id]?.definitionId === 449,
+    );
+    if (!iceId) throw new Error("Native Corp deck lacks Data Wall");
     state.corp.hq = state.corp.hq.filter((id) => id !== iceId);
     state.corp.rd = state.corp.rd.filter((id) => id !== iceId);
     const server = state.corp.servers.find(({ id }) => id === "rd")!;
@@ -447,7 +449,7 @@ function inputWithRunnerVirusCounters(
           } as VisibleCard)
         : ({
             instanceId: "generic-virus-pressure",
-            definitionId: "test_generic_virus_pressure",
+            definitionId: syntheticCardDefinitionId("test_generic_virus_pressure"),
             title: "Generic Virus Pressure",
             type: "program",
             known: true,
@@ -457,7 +459,7 @@ function inputWithRunnerVirusCounters(
   );
   input.playerView.publicEvents = [
     {
-      eventId: "rd-run",
+      eventId: 3,
       type: "action_resolved",
       stateVersionBefore: 1,
       stateVersionAfter: 2,
