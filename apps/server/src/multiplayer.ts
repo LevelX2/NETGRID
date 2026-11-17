@@ -165,6 +165,12 @@ import type {
   StorageMaintenanceSnapshotCompactionResult,
   StorageMaintenanceSummary,
 } from "./storage-sqlite";
+import {
+  aiAttemptStateSnapshotId,
+  INITIAL_STATE_SNAPSHOT_ID,
+  preActionStateSnapshotId,
+  type StateSnapshotId,
+} from "./state-snapshot-id";
 
 export type MatchStatus = ApiMatchStatus;
 export type HostSideSelection = Side | "random";
@@ -352,7 +358,7 @@ export type TokenRecord = {
 };
 
 export type StateSnapshot = {
-  snapshotId: string;
+  snapshotId: StateSnapshotId;
   matchId: string;
   stateVersion: number;
   matchVersion: number;
@@ -379,7 +385,7 @@ export type UndoSnapshot = {
   undoRequestId: string;
   matchId: string;
   targetEventId: string;
-  snapshotId: string;
+  snapshotId: StateSnapshotId | null;
   requestedBy: Side;
   status: UndoStatus;
   hiddenInfoSafe: boolean;
@@ -523,7 +529,7 @@ export type AiDecisionHistoricalAudit = {
   };
   analysisSnapshot: {
     schemaVersion: "netgrid-actor-analysis-snapshot-v1";
-    snapshotId: string;
+    snapshotId: StateSnapshotId;
     stateHash: string;
     stateVersion: number;
     matchVersion: number;
@@ -911,10 +917,8 @@ export type CreateMatchResult = {
   mode: MatchMode;
   baseline: RulesBaseline;
   playerView: PlayerView;
-  legalActions: LegalAction[];
   matchVersion: number;
   lobby?: MatchStartLobbyPayload;
-  pendingChoice?: PlayerView["pendingChoice"];
   playerClock?: ApiPlayerClockSnapshot;
   aiTurnPresentation?: AiTurnPresentationState;
   winner?: Side | "draw";
@@ -930,11 +934,9 @@ export type JoinMatchResult = {
   side: Side;
   webSocketUrl: string;
   playerView: PlayerView;
-  legalActions: LegalAction[];
   matchVersion: number;
   matchStatus?: MatchStatus;
   lobby?: MatchStartLobbyPayload;
-  pendingChoice?: PlayerView["pendingChoice"];
   pendingUndo?: PendingUndoRequest & { needsResponse: boolean };
   aiTurnPresentation?: AiTurnPresentationState;
   playerClock?: ApiPlayerClockSnapshot;
@@ -944,7 +946,7 @@ export type JoinMatchResult = {
 };
 
 export type ReconnectResult = JoinMatchResult & {
-  eventTail: PublicGameEvent[];
+  eventTail?: PublicGameEvent[];
 };
 
 export type MaintenanceRecoveryAccessResult = {
@@ -1618,7 +1620,6 @@ export class MultiplayerService {
         mode,
         baseline: record.match.baseline,
         playerView: undefined as unknown as PlayerView,
-        legalActions: [],
         matchVersion: record.match.matchVersion,
         ...(lobbyPayload.playerClock
           ? { playerClock: lobbyPayload.playerClock }
@@ -1789,7 +1790,7 @@ export class MultiplayerService {
       actionReceipts: [],
       undoSnapshots: [],
       stateSnapshots: [
-        this.snapshotFor(matchId, gameState, 1, "snap_initial", false),
+        this.snapshotFor(matchId, gameState, 1, INITIAL_STATE_SNAPSHOT_ID, false),
       ],
     };
 
@@ -1813,11 +1814,7 @@ export class MultiplayerService {
       mode,
       baseline,
       playerView: payload.playerView,
-      legalActions: payload.legalActions,
       matchVersion: record.match.matchVersion,
-      ...(payload.pendingChoice
-        ? { pendingChoice: payload.pendingChoice }
-        : {}),
       ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(payload.aiTurnPresentation
         ? { aiTurnPresentation: payload.aiTurnPresentation }
@@ -2101,13 +2098,9 @@ export class MultiplayerService {
       playerView: isSidePayload(payload)
         ? payload.playerView
         : (undefined as unknown as PlayerView),
-      legalActions: isSidePayload(payload) ? payload.legalActions : [],
       matchVersion: record.match.matchVersion,
       ...(!isSidePayload(payload) && payload.startLobby
         ? { lobby: payload.startLobby }
-        : {}),
-      ...(isSidePayload(payload) && payload.pendingChoice
-        ? { pendingChoice: payload.pendingChoice }
         : {}),
       ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(isSidePayload(payload) && payload.aiTurnPresentation
@@ -2334,7 +2327,6 @@ export class MultiplayerService {
         side: tokenRecord.allowedSide,
         webSocketUrl: this.webSocketUrl(),
         playerView: undefined as unknown as PlayerView,
-        legalActions: [],
         matchVersion: record.match.matchVersion,
         matchStatus: record.match.status,
         ...(lobbyPayload.playerClock
@@ -2353,11 +2345,7 @@ export class MultiplayerService {
       side: tokenRecord.allowedSide,
       webSocketUrl: this.webSocketUrl(),
       playerView: payload.playerView,
-      legalActions: payload.legalActions,
       matchVersion: record.match.matchVersion,
-      ...(payload.pendingChoice
-        ? { pendingChoice: payload.pendingChoice }
-        : {}),
       ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(payload.aiTurnPresentation
         ? { aiTurnPresentation: payload.aiTurnPresentation }
@@ -2444,15 +2432,11 @@ export class MultiplayerService {
       playerView: isSidePayload(payload)
         ? payload.playerView
         : (undefined as unknown as PlayerView),
-      legalActions: isSidePayload(payload) ? payload.legalActions : [],
       matchVersion: record.match.matchVersion,
-      eventTail: payload.eventTail,
+      ...(!isSidePayload(payload) ? { eventTail: payload.eventTail } : {}),
       matchStatus: payload.matchStatus,
       ...(!isSidePayload(payload) && payload.startLobby
         ? { lobby: payload.startLobby }
-        : {}),
-      ...(isSidePayload(payload) && payload.pendingChoice
-        ? { pendingChoice: payload.pendingChoice }
         : {}),
       ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(isSidePayload(payload) && payload.pendingUndo
@@ -2560,15 +2544,11 @@ export class MultiplayerService {
       playerView: isSidePayload(payload)
         ? payload.playerView
         : (undefined as unknown as PlayerView),
-      legalActions: isSidePayload(payload) ? payload.legalActions : [],
       matchVersion: record.match.matchVersion,
-      eventTail: payload.eventTail,
+      ...(!isSidePayload(payload) ? { eventTail: payload.eventTail } : {}),
       matchStatus: payload.matchStatus,
       ...(!isSidePayload(payload) && payload.startLobby
         ? { lobby: payload.startLobby }
-        : {}),
-      ...(isSidePayload(payload) && payload.pendingChoice
-        ? { pendingChoice: payload.pendingChoice }
         : {}),
       ...(isSidePayload(payload) && payload.pendingUndo
         ? { pendingUndo: payload.pendingUndo }
@@ -2660,13 +2640,8 @@ export class MultiplayerService {
       side,
       webSocketUrl: this.webSocketUrl(),
       playerView: payload.playerView,
-      legalActions: payload.legalActions,
       matchVersion: record.match.matchVersion,
-      eventTail: payload.eventTail,
       matchStatus: payload.matchStatus,
-      ...(payload.pendingChoice
-        ? { pendingChoice: payload.pendingChoice }
-        : {}),
       ...(payload.pendingUndo ? { pendingUndo: payload.pendingUndo } : {}),
       ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(payload.aiTurnPresentation
@@ -3284,6 +3259,7 @@ export class MultiplayerService {
     sessionToken: string;
     actionId: string;
     clientKnownStateVersion: number;
+    clientKnownMatchVersion: number;
     idempotencyKey: string;
     selectedTargets?: Record<string, string>;
     selectedChoices?: Record<string, unknown>;
@@ -3391,7 +3367,10 @@ export class MultiplayerService {
         };
       }
 
-      if (input.clientKnownStateVersion !== record.gameState.stateVersion) {
+      if (
+        input.clientKnownStateVersion !== record.gameState.stateVersion ||
+        input.clientKnownMatchVersion !== record.match.matchVersion
+      ) {
         const receipt = this.receiptFor(
           record,
           input.side,
@@ -3431,7 +3410,7 @@ export class MultiplayerService {
         input.matchId,
         record.gameState,
         record.match.matchVersion,
-        `snap_before_${record.gameState.stateVersion + 1}`,
+        preActionStateSnapshotId(record.gameState.stateVersion + 1),
         false,
       );
       const result = applyAction(record.gameState, action, {
@@ -4216,6 +4195,7 @@ export class MultiplayerService {
     side: Side;
     sessionToken: string;
     targetEventId: string;
+    clientKnownMatchVersion: number;
     reason?: string;
   }): Promise<UndoResult> {
     return this.withMatchLock(input.matchId, async () => {
@@ -4242,6 +4222,17 @@ export class MultiplayerService {
             "Undo ist aktuell nicht möglich.",
           ),
         };
+      if (input.clientKnownMatchVersion !== record.match.matchVersion)
+        return {
+          ok: false,
+          error: safeError(
+            "stale_state",
+            "Der Spielzustand ist veraltet.",
+            record.gameState,
+            input.side,
+          ),
+          payload: this.payloadFor(record, input.side),
+        };
       const targetIndex = record.eventLog.findIndex(
         (event) => event.eventId === input.targetEventId,
       );
@@ -4262,7 +4253,7 @@ export class MultiplayerService {
           undoRequestId: randomId("undo"),
           matchId: input.matchId,
           targetEventId: input.targetEventId,
-          snapshotId: "blocked",
+          snapshotId: null,
           requestedBy: input.side,
           status: "blocked",
           hiddenInfoSafe: false,
@@ -4278,11 +4269,13 @@ export class MultiplayerService {
           payload: this.payloadFor(record, input.side),
         };
       }
-      const snapshot = record.stateSnapshots.find(
-        (candidate) =>
-          candidate.snapshotId ===
-          `snap_before_${record.eventLog[targetIndex]?.stateVersionAfter}`,
-      );
+      const transition = record.eventLog[targetIndex]!.stateVersionAfter;
+      const snapshot = transition > 0
+        ? record.stateSnapshots.find(
+            (candidate) =>
+              candidate.snapshotId === preActionStateSnapshotId(transition),
+          )
+        : undefined;
       if (!snapshot)
         return {
           ok: false,
@@ -4377,7 +4370,9 @@ export class MultiplayerService {
         finalStateHash: "",
         errors: ["Match is not active."],
       };
-    const initial = record.stateSnapshots[0]?.gameState;
+    const initial = record.stateSnapshots.find(
+      (snapshot) => snapshot.snapshotId === INITIAL_STATE_SNAPSHOT_ID,
+    )?.gameState;
     if (!initial)
       return {
         ok: false,
@@ -5424,7 +5419,9 @@ export class MultiplayerService {
       (receipt) => receipt.stateVersionAfter <= snapshot.stateVersion,
     );
     record.stateSnapshots = record.stateSnapshots.filter(
-      (candidate) => candidate.stateVersion <= snapshot.stateVersion,
+      (candidate) =>
+        candidate.stateVersion <= snapshot.stateVersion &&
+        candidate.snapshotId !== snapshot.snapshotId,
     );
     return true;
   }
@@ -6113,7 +6110,7 @@ export class MultiplayerService {
         record.match.matchId,
         gameState,
         record.match.matchVersion,
-        "snap_initial",
+        INITIAL_STATE_SNAPSHOT_ID,
         false,
       ),
     ];
@@ -6322,7 +6319,7 @@ export class MultiplayerService {
       record.match.matchId,
       state,
       record.match.matchVersion,
-      `snap_before_${state.stateVersion + 1}`,
+      preActionStateSnapshotId(state.stateVersion + 1),
       false,
     );
     const rejectedActionResult = (
@@ -6497,7 +6494,7 @@ export class MultiplayerService {
       record.match.matchId,
       state,
       record.match.matchVersion,
-      `snap_ai_attempt_${decisionIndex}`,
+      aiAttemptStateSnapshotId(decisionIndex),
       false,
     );
     const beliefState = beliefCaptureFor(record, state, side);
@@ -6784,7 +6781,7 @@ export class MultiplayerService {
     matchId: string,
     gameState: GameState,
     matchVersion: number,
-    snapshotId: string,
+    snapshotId: StateSnapshotId,
     hiddenInfoBarrier: boolean,
   ): StateSnapshot {
     return {
@@ -7216,7 +7213,9 @@ function replayStateHashChecks(record: StoredMatch): {
     ReplayStateHashCheck & { randomDrawCounters: number[] }
   > = {};
   const errors: string[] = [];
-  const initial = record.stateSnapshots[0]?.gameState;
+  const initial = record.stateSnapshots.find(
+    (snapshot) => snapshot.snapshotId === INITIAL_STATE_SNAPSHOT_ID,
+  )?.gameState;
   if (!initial) {
     errors.push("initial_snapshot_missing");
     return { byEventId, errors };
@@ -10024,7 +10023,7 @@ function renderGamebook(record: StoredMatch, locale: GamebookLocale): string {
     "",
   );
   const initial = record.stateSnapshots.find(
-    (snapshot) => snapshot.snapshotId === "snap_initial",
+    (snapshot) => snapshot.snapshotId === INITIAL_STATE_SNAPSHOT_ID,
   )?.gameState;
   if (initial) {
     lines.push(`## ${messages.setupHeading}`, "");
@@ -10124,10 +10123,12 @@ function gamebookStateBefore(
   record: StoredMatch,
   event: GameEvent,
 ): GameState | undefined {
+  const snapshotId = event.stateVersionAfter === 0
+    ? INITIAL_STATE_SNAPSHOT_ID
+    : preActionStateSnapshotId(event.stateVersionAfter);
   return (
     record.stateSnapshots.find(
-      (snapshot) =>
-        snapshot.snapshotId === `snap_before_${event.stateVersionAfter}`,
+      (snapshot) => snapshot.snapshotId === snapshotId,
     )?.gameState ??
     record.stateSnapshots.find(
       (snapshot) => snapshot.stateVersion === event.stateVersionBefore,
@@ -10142,7 +10143,7 @@ function gamebookStateAfter(
   return (
     record.stateSnapshots.find(
       (snapshot) =>
-        snapshot.snapshotId === `snap_before_${event.stateVersionAfter + 1}`,
+        snapshot.snapshotId === preActionStateSnapshotId(event.stateVersionAfter + 1),
     )?.gameState ??
     (record.gameState.stateVersion === event.stateVersionAfter
       ? record.gameState

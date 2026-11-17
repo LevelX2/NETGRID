@@ -3676,10 +3676,11 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     state.runner.credits = 20;
     state.runner.clicks = 3;
 
-    const optionGain = (option: { id: string; value?: unknown }) =>
-      typeof option.value === "number"
-        ? option.value
-        : Number(/^gain_(\d+)_set_aside_\d+$/.exec(option.id)?.[1] ?? 0);
+    const optionGain = (option: { value?: unknown }): number => {
+      if (typeof option.value !== "number")
+        throw new Error("Playful-AI-Optionswert fehlt.");
+      return option.value;
+    };
     const eventId = moveRunnerCardToGrip(state, 316);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -3701,14 +3702,14 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       randomDiceLoopRemainingDice: 0,
     });
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
-      "gain_0_set_aside_3",
-      "gain_1_set_aside_2",
-      "gain_2_set_aside_1",
-      "gain_3_set_aside_0",
+      "1",
+      "2",
+      "3",
+      "4",
     ]);
 
     const creditsBeforeChoice = state.runner.credits;
-    state = applyChoice(state, "runner", "gain_1_set_aside_2");
+    state = applyChoice(state, "runner", "2");
     const firstResolvePayload = state.eventLog.at(-1)?.publicPayload;
     const firstFollowupRolls = String(
       firstResolvePayload?.randomDiceLoopRolls ?? "",

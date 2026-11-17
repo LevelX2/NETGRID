@@ -14,7 +14,7 @@ export function DiagnosticsDrawer({
   if (!open) return null;
   const hash =
     payload.finalStateHash ??
-    payload.eventTail.at(-1)?.stateHashAfter ??
+    payload.playerView.publicEvents.at(-1)?.stateHashAfter ??
     payload.playerView.publicEvents.at(-1)?.stateHashAfter ??
     "pending";
   return (

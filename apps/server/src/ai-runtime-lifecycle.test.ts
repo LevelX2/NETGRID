@@ -41,19 +41,20 @@ function fixture(storage: MultiplayerStorage = new InMemoryMatchStorage()) {
     );
     if (
       "error" in payload ||
-      !payload.pendingChoice ||
-      !payload.legalActions[0]
+      !payload.playerView.pendingChoice ||
+      !payload.playerView.legalActions[0]
     )
       throw new Error("Missing setup choice");
     const kept = await service.submitAction({
       matchId: created.matchId,
       side: "runner",
       sessionToken: created.hostSessionToken,
-      actionId: payload.legalActions[0].actionId,
+      actionId: payload.playerView.legalActions[0].actionId,
+      clientKnownMatchVersion: payload.matchVersion,
       clientKnownStateVersion: payload.playerView.stateVersion,
       idempotencyKey: "keep",
       selectedChoices: {
-        choiceId: payload.pendingChoice.choiceId,
+        choiceId: payload.playerView.pendingChoice.choiceId,
         selectedOptionIds: ["keep"],
       },
     });
@@ -205,11 +206,14 @@ describe("server-owned AI runtime lifetime", () => {
         game.created.hostSessionToken,
       );
       if ("error" in payload) throw new Error(payload.error.code);
-      const action = payload.legalActions.find((a) => a.type === "gain_credit");
+      const action = payload.playerView.legalActions.find(
+        (a) => a.type === "gain_credit",
+      );
       if (!action) throw new Error("Missing human main action");
       const result = await f.service.submitAction({
         ...game.auth,
         actionId: action.actionId,
+        clientKnownMatchVersion: payload.matchVersion,
         clientKnownStateVersion: payload.playerView.stateVersion,
         idempotencyKey: "terminal-engine-action",
       });

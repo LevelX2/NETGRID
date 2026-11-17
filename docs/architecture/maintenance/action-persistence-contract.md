@@ -12,6 +12,25 @@ Normale Aktionen benötigen keine vollständige Hydration aller öffentlichen
 Events, KI-Traces, Receipts und Snapshots. Der aktuelle GameState bleibt
 einschließlich seiner Engine-Historie verfügbar.
 
+Der aktuelle Spielzustand steht in `game_states`. Die JSON-Metadaten in
+`matches.record_json` enthalten keinen Spielzustand. Zustände und Snapshots
+speichern Zufallsaufzeichnungen als Tripel aus Zähler, numerischer Position
+des Zwecks und Zufallswert. Eine gemeinsame Zweckliste gilt für beide
+Zufallsprotokolle des Zustands. Der Leseweg stellt die Engine-Datensätze
+wieder her und bezieht die Historie aus `engine_events`.
+
+Ein Match adressiert seinen Initialsnapshot mit 1. Gerade IDs binden
+Vor-Aktionssnapshots an die Nummer des Übergangs, ungerade IDs oberhalb
+von 1 binden Diagnose-Snapshots an die Nummer des KI-Versuchs. Ein
+blockiertes Undo speichert keinen Snapshot-Verweis. Ein erfolgreiches
+Undo entfernt den Vor-Aktionssnapshot des verworfenen Übergangs, damit
+das nächste Aktionsangebot an diesem Zustand einen Snapshot mit der
+aktuellen MatchVersion erhält.
+
+Das Match-Schema 4 erfordert einen passenden Matchdatenpfad. Ein konfigurierter
+separater Accountpfad kann die Konto-Tabellen einer Datenbank mit Schema 3
+weiterverwenden.
+
 Der Service verwendet den Aktionspfad, wenn der Adapter beide Fähigkeiten
 anbietet und eine verifizierte Baseline liefert. Adapter ohne diese Fähigkeit
 und vollständige Lifecycle-, Undo- und Replaypfade verwenden den vollständigen

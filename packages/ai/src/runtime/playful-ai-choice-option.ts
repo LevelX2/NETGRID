@@ -1,13 +1,23 @@
 import type { ChoiceOption } from "@netgrid/shared";
 
-import { playfulAiGainValue } from "./choice-option";
-
 export function selectedPlayfulAiChoiceOptionId(
   selectableOptions: readonly ChoiceOption[],
 ): string | undefined {
-  return [...selectableOptions].sort(
-    (left, right) =>
-      playfulAiGainValue(right) - playfulAiGainValue(left) ||
-      left.id.localeCompare(right.id),
-  )[0]?.id;
+  let best: { id: string; amount: number } | undefined;
+  for (const option of selectableOptions) {
+    const amount = option.value;
+    if (
+      typeof amount !== "number" ||
+      !Number.isSafeInteger(amount) ||
+      amount < 0
+    )
+      return undefined;
+    if (
+      !best ||
+      amount > best.amount ||
+      (amount === best.amount && option.id.localeCompare(best.id) < 0)
+    )
+      best = { id: option.id, amount };
+  }
+  return best?.id;
 }

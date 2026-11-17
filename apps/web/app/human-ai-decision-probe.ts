@@ -18,10 +18,7 @@ const HUMAN_VS_AI_MODES = new Set<ApiMatchMode>([
 
 export function humanAiDecisionProbeAvailable(
   session: { side: Side; mode?: ApiMatchMode } | null,
-  payload: Pick<
-    ApiSidePayload,
-    "side" | "playerView" | "legalActions" | "winner"
-  > | null,
+  payload: Pick<ApiSidePayload, "side" | "playerView" | "winner"> | null,
 ): boolean {
   return Boolean(
     session &&
@@ -30,7 +27,7 @@ export function humanAiDecisionProbeAvailable(
     HUMAN_VS_AI_MODES.has(session.mode) &&
     session.side === payload.side &&
     payload.playerView.side === session.side &&
-    payload.legalActions.length > 0 &&
+    payload.playerView.legalActions.length > 0 &&
     !payload.winner,
   );
 }

@@ -1,5 +1,4 @@
 import {
-  getLegalActions,
   getPlayerView,
   hashState,
   redactPublicEventForSide,
@@ -54,8 +53,13 @@ export function buildSidePayload(
         chronicleTurnContext[event.eventId],
       ),
     );
+  const engineView = getPlayerView(record.gameState, side);
   const playerView = {
-    ...getPlayerView(record.gameState, side),
+    ...engineView,
+    legalActions:
+      record.match.status === "active" && !deps.isAiSide(side)
+        ? engineView.legalActions
+        : [],
     ...(deps.ownDeckGuideRef
       ? { ownDeckGuideRef: { ...deps.ownDeckGuideRef } }
       : {}),
@@ -96,19 +100,11 @@ export function buildSidePayload(
     isPublic: record.match.isPublic,
     side,
     playerView,
-    legalActions:
-      record.match.status === "active" && !deps.isAiSide(side)
-        ? getLegalActions(record.gameState, side)
-        : [],
-    eventTail,
     opponentStatus: {
       side: opponentSide,
       connected: opponentIsAi || (opponent?.connected ?? false),
       ...(opponentDisplayName ? { displayName: opponentDisplayName } : {}),
     },
-    ...(playerView.pendingChoice
-      ? { pendingChoice: playerView.pendingChoice }
-      : {}),
     ...(pendingUndo ? { pendingUndo } : {}),
     ...(aiTurnPresentation ? { aiTurnPresentation } : {}),
     ...(deps.playerClockSnapshot

@@ -1261,8 +1261,8 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it.each([
-    { highestSelectable: true, expected: "gain_3_set_aside_0" },
-    { highestSelectable: false, expected: "gain_2_set_aside_1" },
+    { highestSelectable: true, expected: "4" },
+    { highestSelectable: false, expected: "3" },
   ])("ranks selectable random-dice splits when the highest is selectable=$highestSelectable", ({ highestSelectable, expected }) => {
     const input = inputWithChoice(
       {
@@ -1272,7 +1272,7 @@ describe("selectedChoicesForDecision", () => {
         minSelections: 1,
         maxSelections: 1,
         options: [0, 1, 2, 3].map((gainedCredits) => ({
-          id: `gain_${gainedCredits}_set_aside_${3 - gainedCredits}`,
+          id: String(gainedCredits + 1),
           label: `${gainedCredits} credits`,
           value: gainedCredits,
           ...(gainedCredits === 3 ? { selectable: highestSelectable } : {}),

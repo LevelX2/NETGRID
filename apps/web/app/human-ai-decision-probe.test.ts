@@ -16,19 +16,19 @@ const payload = {
   playerView: {
     side: "runner",
     stateVersion: 9,
+    legalActions: [
+      {
+        actionId: "runner.start_run.rd",
+        type: "start_run",
+        label: "Run auf R&D",
+        side: "runner",
+        source: "basic_action",
+        timingPoint: "runner_action.main",
+        costs: [],
+        payload: { serverId: "rd" },
+      },
+    ],
   },
-  legalActions: [
-    {
-      actionId: "runner.start_run.rd",
-      type: "start_run",
-      label: "Run auf R&D",
-      side: "runner",
-      source: "basic_action",
-      timingPoint: "runner_action.main",
-      costs: [],
-      payload: { serverId: "rd" },
-    },
-  ],
 } as unknown as ApiSidePayload;
 
 const preview = {
@@ -62,7 +62,7 @@ describe("human-side AI decision probe", () => {
     expect(
       humanAiDecisionProbeAvailable(
         { side: "runner", mode: "human_runner_vs_corp_ai" },
-        { ...payload, legalActions: [] },
+        { ...payload, playerView: { ...payload.playerView, legalActions: [] } },
       ),
     ).toBe(false);
   });
@@ -88,7 +88,9 @@ describe("human-side AI decision probe", () => {
   });
 
   it("maps the selected LegalAction to a server or own-card highlight without changing it", () => {
-    expect(humanAiDecisionProbeActionContext(payload.legalActions[0])).toEqual({
+    expect(
+      humanAiDecisionProbeActionContext(payload.playerView.legalActions[0]),
+    ).toEqual({
       kind: "server",
       id: "rd",
       label: "R&D",

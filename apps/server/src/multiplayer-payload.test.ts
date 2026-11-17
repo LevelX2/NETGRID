@@ -29,17 +29,47 @@ describe("multiplayer side payload projection", () => {
       retentionProtectionPayload: { retentionProtected: false },
     });
 
-    expect(payload.eventTail).toHaveLength(SIDE_PAYLOAD_EVENT_TAIL_LIMIT);
     expect(payload.playerView.publicEvents).toHaveLength(
       SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
     );
-    expect(payload.playerView.publicEvents).toEqual(payload.eventTail);
-    expect(payload.eventTail[0]?.eventId).toBe("evt_7");
-    expect(payload.eventTail.at(-1)?.eventId).toBe("evt_86");
+    expect(payload).not.toHaveProperty("eventTail");
+    expect(payload).not.toHaveProperty("legalActions");
+    expect(payload).not.toHaveProperty("pendingChoice");
+    expect(payload.playerView.publicEvents[0]?.eventId).toBe("evt_7");
+    expect(payload.playerView.publicEvents.at(-1)?.eventId).toBe("evt_86");
     expect(
-      payload.eventTail[0]?.publicPayload.chronicleTurnNumber,
+      payload.playerView.publicEvents[0]?.publicPayload.chronicleTurnNumber,
     ).toBeGreaterThan(1);
-    expect(payload.eventTail[0]?.publicPayload.chronicleTurnSide).toBe("corp");
+    expect(
+      payload.playerView.publicEvents[0]?.publicPayload.chronicleTurnSide,
+    ).toBe("corp");
+  });
+
+  it("only offers actions for an active human side", () => {
+    const record = storedMatchWithEvents(0);
+    const deps = {
+      isAiSide: (side: Side) => side === "runner",
+      safeDisplayNameFor: () => undefined,
+      aiTurnPresentationFor: () => undefined,
+      resultSummaryFor: () => undefined,
+      retentionProtectionPayload: { retentionProtected: false },
+    };
+
+    const human = buildSidePayload(record, "runner", {
+      ...deps,
+      isAiSide: () => false,
+    });
+    expect(human.playerView.legalActions).not.toHaveLength(0);
+    expect(
+      buildSidePayload(record, "runner", deps).playerView.legalActions,
+    ).toEqual([]);
+
+    record.match.status = "finished";
+    const finished = buildSidePayload(record, "runner", {
+      ...deps,
+      isAiSide: () => false,
+    });
+    expect(finished.playerView.legalActions).toEqual([]);
   });
 
   it("projects only the explicitly supplied own deck guide reference", () => {
@@ -148,7 +178,7 @@ describe("multiplayer side payload projection", () => {
     const corpPayload = buildSidePayload(record, "corp", deps);
     const runnerPayload = buildSidePayload(record, "runner", deps);
     expect(
-      corpPayload.pendingChoice?.options[0]?.hqInstallRezOptionQuote,
+      corpPayload.playerView.pendingChoice?.options[0]?.hqInstallRezOptionQuote,
     ).toMatchObject({
       choiceId: "choice_data_fort_optional_rez_12",
       cardId: iceId,
@@ -163,7 +193,7 @@ describe("multiplayer side payload projection", () => {
       mandatoryContinuationComplete: true,
       rezAndMandatoryContinuationExecutable: true,
     });
-    expect(runnerPayload.pendingChoice).toBeUndefined();
+    expect(runnerPayload.playerView.pendingChoice).toBeUndefined();
     expect(JSON.stringify(runnerPayload)).not.toContain(
       "corp-optional-rez-choice-quote-v2",
     );
@@ -217,19 +247,19 @@ describe("multiplayer side payload projection", () => {
 
     const corpPayload = buildSidePayload(record, "corp", deps);
     const runnerPayload = buildSidePayload(record, "runner", deps);
-    expect(corpPayload.pendingChoice?.options).toHaveLength(2);
+    expect(corpPayload.playerView.pendingChoice?.options).toHaveLength(2);
     expect(
-      corpPayload.pendingChoice?.options.every(
+      corpPayload.playerView.pendingChoice?.options.every(
         (option) => option.card?.known === true,
       ),
     ).toBe(true);
-    expect(runnerPayload.pendingChoice).toBeUndefined();
+    expect(runnerPayload.playerView.pendingChoice).toBeUndefined();
     expect(
       runnerPayload.playerView.specialZones?.setAside.every(
         (card) => card.known === false,
       ),
     ).toBe(true);
-    for (const option of corpPayload.pendingChoice?.options ?? []) {
+    for (const option of corpPayload.playerView.pendingChoice?.options ?? []) {
       if (option.card?.definitionId)
         expect(JSON.stringify(runnerPayload)).not.toContain(
           option.card.definitionId,

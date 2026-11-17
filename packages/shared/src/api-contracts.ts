@@ -1,5 +1,4 @@
 import type {
-  LegalAction,
   PlayerView,
   PublicGameEvent,
   Side,
@@ -428,10 +427,7 @@ export type ApiSidePayload = {
   isPublic: boolean;
   side: Side;
   playerView: PlayerView;
-  legalActions: LegalAction[];
-  eventTail: PublicGameEvent[];
   opponentStatus: ApiOpponentStatus;
-  pendingChoice?: PlayerView["pendingChoice"];
   pendingUndo?: ApiPendingUndoRequest & { needsResponse: boolean };
   aiTurnPresentation?: ApiAiTurnPresentationState;
   playerClock?: ApiPlayerClockSnapshot;
@@ -466,37 +462,9 @@ export type ApiServicePayload = ApiSidePayload | ApiLobbyPayload;
 
 export type ApiServerMessage =
   | { type: "match_joined"; payload: { matchId: string; side: Side } }
-  | {
-      type: "state_update";
-      payload: {
-        matchStatus: ApiMatchStatus;
-        matchVersion: number;
-        playerView: PlayerView;
-        playerClock?: ApiPlayerClockSnapshot;
-        pendingUndo?: NonNullable<ApiSidePayload["pendingUndo"]> | null;
-      };
-    }
+  | { type: "state_update"; payload: ApiSidePayload }
   | { type: "lobby_update"; payload: ApiLobbyPayload }
-  | {
-      type: "legal_actions";
-      payload: { stateVersion?: number; legalActions: LegalAction[] };
-    }
-  | { type: "event_log_update"; payload: { events: PublicGameEvent[] } }
   | { type: "opponent_status"; payload: ApiOpponentStatus }
-  | {
-      type: "undo_request";
-      payload: NonNullable<ApiSidePayload["pendingUndo"]>;
-    }
-  | { type: "ai_turn"; payload: ApiAiTurnPresentationState | null | undefined }
-  | {
-      type: "match_finished";
-      payload: {
-        matchStatus: ApiMatchStatus;
-        winner: Winner;
-        finalStateHash: string;
-        resultSummary?: ApiGameResultSummary;
-      };
-    }
   | {
       type: "error";
       payload: ApiUserErrorPayload;
@@ -514,10 +482,6 @@ export type ApiServerMessage =
         stateHashAfter?: string;
       };
     }
-  | {
-      type: "choice_request";
-      payload: { choice: PlayerView["pendingChoice"] | null };
-    }
   | { type: "pong"; payload: { clientTime?: number; serverTime: number } };
 
 export type ApiCreateMatchResponse = {
@@ -532,7 +496,6 @@ export type ApiCreateMatchResponse = {
   webSocketUrl: string;
   mode: ApiMatchMode;
   playerView?: PlayerView;
-  legalActions: LegalAction[];
   matchVersion: number;
   lobby?: ApiMatchStartLobbyPayload;
   playerClock?: ApiPlayerClockSnapshot;
@@ -553,7 +516,6 @@ export type ApiJoinMatchResponse = {
   reconnectToken: string;
   webSocketUrl: string;
   playerView?: PlayerView;
-  legalActions: LegalAction[];
   matchVersion: number;
   matchStatus?: ApiMatchStatus;
   lobby?: ApiMatchStartLobbyPayload;
