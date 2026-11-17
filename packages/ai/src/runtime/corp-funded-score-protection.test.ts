@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
   type LegalAction,
@@ -28,7 +29,7 @@ describe("assessBestFundedCorpScoreProtection", () => {
   it("includes installed pass protection when projecting another breakable ICE", () => {
     const setup = routeSetup({
       source: handIce("outer", 491),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [fundedIce("inner", 450, false)],
       corpCredits: 6,
       runnerCredits: 6,
@@ -50,7 +51,7 @@ describe("assessBestFundedCorpScoreProtection", () => {
       serverRoot: root,
       runnerRig: setup.runnerRig,
       runnerCredits: 6,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       observedAtStateVersion: 7,
       availableCorpCredits: 6,
       availableCorpClicks: 3,
@@ -238,7 +239,7 @@ describe("assessBestFundedCorpScoreProtection", () => {
           effectiveRezCostQuote: {
             ...wall.effectiveRezCostQuote!,
             finalCredits: 5,
-            increaseSourceDefinitionIds: ["test_public_rez_surcharge"],
+            increaseSourceDefinitionIds: [syntheticCardDefinitionId("test_public_rez_surcharge")],
           },
         },
       ],
@@ -276,8 +277,8 @@ describe("assessBestFundedCorpScoreProtection", () => {
             effectiveRezCostQuote: {
               context: "installed",
               cardId: "data-wall",
-              targetServerId: "remote_1",
-              projectedServerId: "remote_1",
+              targetServerId: "r1",
+              projectedServerId: "r1",
               expiresAtStateVersion: 7,
               complete: false,
             },
@@ -338,7 +339,7 @@ describe("assessBestFundedCorpScoreProtection", () => {
     const wall = fundedIce("data-wall", 450, false);
     for (const effectiveRezCostQuote of [
       { ...wall.effectiveRezCostQuote!, cardId: "other-card" },
-      { ...wall.effectiveRezCostQuote!, targetServerId: "remote_2" as const },
+      { ...wall.effectiveRezCostQuote!, targetServerId: "r2" as const },
       { ...wall.effectiveRezCostQuote!, expiresAtStateVersion: 8 },
     ]) {
       expect(
@@ -367,7 +368,7 @@ describe("assessBestFundedCorpScoreProtection", () => {
       serverIce: [projectedWall],
       runnerRig: [blink()],
       runnerCredits: 0,
-      targetServerId: "remote_1" as const,
+      targetServerId: "r1" as const,
       observedAtStateVersion: 7,
       availableCorpCredits: 2,
       availableCorpClicks: 3,
@@ -409,7 +410,7 @@ describe("assessBestFundedCorpScoreProtection", () => {
             ...wall,
             effectiveRezCostQuote: {
               ...wall.effectiveRezCostQuote!,
-              reductionSourceDefinitionIds: ["encoder", "encoder"],
+              reductionSourceDefinitionIds: [syntheticCardDefinitionId("encoder"), syntheticCardDefinitionId("encoder")],
             },
           },
         ],
@@ -604,9 +605,9 @@ describe("corpFundedScoreProtectionCertifiesBinding", () => {
   const exactNeed = (
     baseline: CorpFundedScoreProtectionAssessment,
   ): CorpFundedRemoteAccessRiskNeed => ({
-    needId: "score-protection:agenda:agenda-1:remote_1",
-    parentProjectId: "agenda:agenda-1:remote_1",
-    targetServerId: "remote_1",
+    needId: "score-protection:agenda:agenda-1:r1",
+    parentProjectId: "agenda:agenda-1:r1",
+    targetServerId: "r1",
     observedAtStateVersion: 7,
     objective: {
       kind: "funded_remote_access_risk",
@@ -627,8 +628,8 @@ describe("corpFundedScoreProtectionCertifiesBinding", () => {
     corpFundedScoreProtectionCertifiesBinding({
       need,
       expectedParentProjectId:
-        overrides.expectedParentProjectId ?? "agenda:agenda-1:remote_1",
-      expectedTargetServerId: overrides.expectedTargetServerId ?? "remote_1",
+        overrides.expectedParentProjectId ?? "agenda:agenda-1:r1",
+      expectedTargetServerId: overrides.expectedTargetServerId ?? "r1",
       observedAtStateVersion: overrides.observedAtStateVersion ?? 7,
     });
 
@@ -645,9 +646,9 @@ describe("corpFundedScoreProtectionCertifiesBinding", () => {
     expect(certifies(need)).toBe(true);
     expect(certifies(undefined)).toBe(false);
     expect(
-      certifies(need, { expectedParentProjectId: "agenda:foreign:remote_1" }),
+      certifies(need, { expectedParentProjectId: "agenda:foreign:r1" }),
     ).toBe(false);
-    expect(certifies(need, { expectedTargetServerId: "remote_2" })).toBe(false);
+    expect(certifies(need, { expectedTargetServerId: "r2" })).toBe(false);
     expect(certifies(need, { observedAtStateVersion: 8 })).toBe(false);
   });
 
@@ -681,7 +682,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
   it("classifies Hunter as no progress", () => {
     const route = routeFor({
       source: handIce("hunter", 461),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [],
       corpCredits: 5,
       preferPostInstallSourceProgress: true,
@@ -708,7 +709,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
   it("classifies Filter against Blink as progress", () => {
     const route = routeFor({
       source: handIce("filter", 456),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [],
       corpCredits: 5,
     });
@@ -735,7 +736,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
   it("recognizes recurring-credit-aware Runner tax even when access stays certain", () => {
     const route = routeFor({
       source: handIce("sleeper", 482),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [fundedIce("filter", 456, true)],
       corpCredits: 5,
       runnerRig: [
@@ -765,7 +766,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
   it("classifies a second necessary ETR as satisfied", () => {
     const route = routeFor({
       source: handIce("data-wall", 450),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [fundedIce("filter", 456, true)],
       corpCredits: 5,
     });
@@ -792,7 +793,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
     };
     const route = routeFor({
       source: handIce("haunting", 459),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [
         fundedIce("ball-and-chain-1", 434, true),
         fundedIce("ball-and-chain-2", 434, true),
@@ -820,7 +821,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
   it("fails closed when a fixed ICE post-install run quote is malformed", () => {
     const setup = routeSetup({
       source: handIce("filter", 456),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [],
       corpCredits: 5,
     });
@@ -847,7 +848,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
     };
     const route = routeFor({
       source: handIce("filter", 456),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [fundedIce("hunter", 461, true)],
       corpCredits: 3,
       scoreReserve,
@@ -871,7 +872,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
     const source = handIce("filter", 456);
     const setup = routeSetup({
       source,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [],
       corpCredits: 5,
     });
@@ -912,7 +913,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
     const source = handIce("filter", 456);
     const setup = routeSetup({
       source,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [],
       corpCredits: 5,
     });
@@ -933,7 +934,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
     const source = handIce("data-wall", 450);
     const setup = routeSetup({
       source,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [fundedIce("filter", 456, true)],
       corpCredits: 2,
     });
@@ -964,7 +965,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
   it("fails closed when current resources drift from the stored baseline", () => {
     const setup = routeSetup({
       source: handIce("data-wall", 450),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [fundedIce("existing-filter", 456, true)],
       corpCredits: 5,
     });
@@ -983,7 +984,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
   it("fails closed when the need reserve drifts from its baseline", () => {
     const setup = routeSetup({
       source: handIce("filter", 456),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [],
       corpCredits: 5,
     });
@@ -1031,7 +1032,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
     const source = handIce("filter", 456);
     const setup = routeSetup({
       source,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [],
       corpCredits: 5,
     });
@@ -1065,7 +1066,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
   it("fails closed on incomplete or identity-drifted post-install rez quotes", () => {
     const setup = routeSetup({
       source: handIce("filter", 456),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [],
       corpCredits: 5,
     });
@@ -1105,7 +1106,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
   it("projects a mandatory agenda-point cost in a post-install rez quote", () => {
     const setup = routeSetup({
       source: handIce("filter", 456),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [],
       corpCredits: 5,
       corpAgendaPoints: 1,
@@ -1130,7 +1131,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
     });
     const insufficientSetup = routeSetup({
       source: handIce("data-wall", 450),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [fundedIce("existing-filter", 456, true)],
       corpCredits: 5,
       corpAgendaPoints: 0,
@@ -1163,7 +1164,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
       corpCredits: 5,
     });
 
-    for (const projectedServerId of ["hq", "remote_0"]) {
+    for (const projectedServerId of ["hq", "r0"]) {
       expect(
         projectCorpFundedIceInstallRoute({
           ...setup,
@@ -1185,7 +1186,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
   it("preserves duplicate post-install modifier source ids", () => {
     const setup = routeSetup({
       source: handIce("filter", 456),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [],
       corpCredits: 5,
     });
@@ -1197,7 +1198,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
           ...setup.action,
           payload: {
             ...setup.action.payload,
-            postInstallRezQuoteReductionSourceDefinitionIds: "encoder,encoder",
+            postInstallRezQuoteReductionSourceDefinitionIds: [syntheticCardDefinitionId("encoder"), syntheticCardDefinitionId("encoder")].join(","),
           },
         },
       }),
@@ -1210,7 +1211,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
   it("projects Sandstorm's exact first-ETR choice and one-credit funding gap", () => {
     const setup = routeSetup({
       source: handIce("sandstorm", 94),
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       currentIce: [fundedIce("filter", 456, true)],
       corpCredits: 6,
     });
@@ -1345,7 +1346,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
 
 function routeFor(params: {
   source: VisibleCard;
-  targetServerId: "new_remote" | "remote_1";
+  targetServerId: "new_remote" | "r1";
   currentIce?: CorpFundedScoreProtectionIceInput[];
   corpCredits: number;
   scoreReserve?: CorpScoreReserve;
@@ -1359,7 +1360,7 @@ function routeFor(params: {
 
 function routeSetup(params: {
   source: VisibleCard;
-  targetServerId: "new_remote" | "remote_1";
+  targetServerId: "new_remote" | "r1";
   currentIce?: CorpFundedScoreProtectionIceInput[];
   corpCredits: number;
   scoreReserve?: CorpScoreReserve;
@@ -1416,7 +1417,7 @@ function routeSetup(params: {
 }
 
 function needFor(
-  targetServerId: "new_remote" | "remote_1",
+  targetServerId: "new_remote" | "r1",
   baseline: CorpFundedScoreProtectionAssessment,
   scoreReserve: CorpScoreReserve,
 ): CorpFundedRemoteAccessRiskNeed {
@@ -1449,7 +1450,7 @@ function fundedAssessment(params: {
     serverIce: params.serverIce,
     runnerRig: params.runnerRig ?? [blink()],
     runnerCredits: params.runnerCredits ?? 0,
-    targetServerId: "remote_1",
+    targetServerId: "r1",
     observedAtStateVersion: 7,
     availableCorpCredits: params.corpCredits,
     availableCorpClicks: params.corpClicks ?? 3,
@@ -1519,7 +1520,7 @@ function variableInstallAction(
 
 function installAction(
   source: VisibleCard,
-  serverId: "new_remote" | "remote_1",
+  serverId: "new_remote" | "r1",
   existingIceCount: number,
 ): LegalAction {
   const installCredits = serverId === "new_remote" ? 0 : existingIceCount;
@@ -1555,7 +1556,7 @@ function installAction(
       postInstallRezQuoteCardId: source.instanceId,
       postInstallRezQuoteTargetServerId: serverId,
       postInstallRezQuoteProjectedServerId:
-        serverId === "new_remote" ? "remote_1" : serverId,
+        serverId === "new_remote" ? "r1" : serverId,
       postInstallEffectiveRunQuoteJson: JSON.stringify({
         iceInstanceId: source.instanceId,
         iceDefinitionId: sourceDefinition.id,
@@ -1590,8 +1591,8 @@ function variableFundedIce(
     effectiveRezCostQuote: {
       context: "installed",
       cardId: instanceId,
-      targetServerId: "remote_1",
-      projectedServerId: "remote_1",
+      targetServerId: "r1",
+      projectedServerId: "r1",
       expiresAtStateVersion: 7,
       complete: true,
       costKind: "variable",
@@ -1668,8 +1669,8 @@ function fundedIce(
     effectiveRezCostQuote: {
       context: "installed",
       cardId: instanceId,
-      targetServerId: "remote_1",
-      projectedServerId: "remote_1",
+      targetServerId: "r1",
+      projectedServerId: "r1",
       expiresAtStateVersion: 7,
       complete: true,
       costKind: "fixed",

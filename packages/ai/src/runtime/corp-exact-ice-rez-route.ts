@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import {
   isCardDefinitionId,
   type AiDecisionInput,
@@ -7,8 +8,8 @@ import {
   type VisibleCorpTraceIceRezQuote,
 } from "@netgrid/shared";
 import {
-  parseCardDefinitionIdCsv,
-  validOptionalCardDefinitionIds,
+  parseOptionalCardDefinitionIdCsv,
+  validOptionalRezModifierDefinitionIds,
 } from "../card-definition-id-input";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
@@ -124,8 +125,8 @@ export function readExactCurrentInstalledCorpIceRezQuote(params: {
     !nonNegativeSafeInteger(quote.baseCredits) ||
     !nonNegativeSafeInteger(quote.finalCredits) ||
     !nonNegativeSafeInteger(quote.mandatoryAdditionalCosts?.agendaPoints) ||
-    !validOptionalCardDefinitionIds(quote.reductionSourceDefinitionIds) ||
-    !validOptionalCardDefinitionIds(quote.increaseSourceDefinitionIds) ||
+    !validOptionalRezModifierDefinitionIds(quote.reductionSourceDefinitionIds) ||
+    !validOptionalRezModifierDefinitionIds(quote.increaseSourceDefinitionIds) ||
     !definitionIdListsDisjoint(
       quote.reductionSourceDefinitionIds,
       quote.increaseSourceDefinitionIds,
@@ -632,7 +633,7 @@ function readKnownCurrentRunAccessPathTax(params: {
     (candidate) => candidate.id === targetServerId,
   );
   if (
-    !targetServerId.startsWith("remote_") ||
+    !isRemoteServerId(targetServerId) ||
     run?.attackedServerId !== targetServerId ||
     run.phase !== "approach_ice" ||
     run.position?.kind !== "ice" ||
@@ -696,7 +697,7 @@ function quoteQualitativeEncounterActivationCredits(params: {
             subroutine.type !== "deflect_run" ||
             visibleDeflectorSubroutineCanResolve(subroutine, {
               visibleRemoteServerCount: input.playerView.servers.filter(
-                (candidate) => candidate.id.startsWith("remote_"),
+                (candidate) => isRemoteServerId(candidate.id),
               ).length,
               visibleCorpCredits:
                 input.playerView.own.credits - totalRezCredits,
@@ -1085,7 +1086,7 @@ function currentRunMarginalDefenseThreat(
     (candidate) => candidate.id === accessServerId,
   );
   if (!server) return undefined;
-  if (accessServerId?.startsWith("remote_")) {
+  if (isRemoteServerId(accessServerId)) {
     return server.root.some((card) => card.known && card.type === "agenda")
       ? "visible_agenda_remote"
       : undefined;
@@ -1327,7 +1328,7 @@ function discountedRezActionQuote(
   ) {
     return undefined;
   }
-  const reductionSourceDefinitionIds = commaSeparatedDefinitionIds(
+  const reductionSourceDefinitionIds = parseOptionalCardDefinitionIdCsv(
     payload.rezCostReductionSourceDefinitionIds,
   );
   if (
@@ -1372,13 +1373,7 @@ function discountedRezActionQuote(
   };
 }
 
-function commaSeparatedDefinitionIds(value: unknown): CardDefinitionId[] | undefined {
-  if (typeof value !== "string" || value.length === 0) return undefined;
-  const values = parseCardDefinitionIdCsv(value);
-  return values !== undefined && new Set(values).size === values.length
-    ? values
-    : undefined;
-}
+
 
 function nonBlankString(value: unknown): value is string {
   return typeof value === "string" && value.length > 0;

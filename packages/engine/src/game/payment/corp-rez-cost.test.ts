@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest";
 import { hashState } from "../hash";
 import {
   assertCorpRootRezCostQuoteValid,
+  projectInstalledCorpIceRezCost,
   quoteCorpRezCost,
   quoteCorpRootRezCost,
   rezCostForCard,
@@ -113,6 +114,33 @@ function makeState(noisyUsed = false): GameState {
 }
 
 describe("corp rez costs", () => {
+  it("preserves each rezzed modifier copy in the numeric rez projection", () => {
+    const state = makeState();
+    const wall = state.cardInstances[BASKERVILLE_ID]!;
+    wall.definitionId = 450;
+    for (const [index, serverId] of (["r1", "r2"] as const).entries()) {
+      const instanceId = "data-masons-" + index;
+      state.corp.servers.push({
+        id: serverId,
+        kind: "remote",
+        label: serverId,
+        ice: [],
+        root: [instanceId],
+      });
+      state.cardInstances[instanceId] = {
+        ...wall,
+        instanceId,
+        definitionId: 529,
+        zone: { side: "corp", zone: "serverRoot", serverId },
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    expect(projectInstalledCorpIceRezCost(state, BASKERVILLE_ID)).toMatchObject({
+      complete: true,
+      reductionSourceDefinitionIds: [529, 529],
+    });
+  });
   it("applies Classic Sleepy self-rez reduction only after noisy breaker use this run", () => {
     const normalState = makeState(false);
     expect(rezCostForCard(normalState, BASKERVILLE_ID)).toBe(10);

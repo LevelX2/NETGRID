@@ -1,4 +1,4 @@
-import { parseOptionalCardDefinitionIdCsv, validOptionalCardDefinitionIds } from "../card-definition-id-input";
+import { parseOptionalCardDefinitionIdCsv, validOptionalRezModifierDefinitionIds } from "../card-definition-id-input";
 import { readPostInstallEffectiveRunQuote } from "./post-install-ice-run-quote";
 import {
   traceComparisonIsSuccessful,
@@ -1223,8 +1223,8 @@ function readCompleteFundedRezQuote(
     !nonNegativeSafeInteger(quote.baseCredits) ||
     !nonNegativeSafeInteger(quote.finalCredits) ||
     !validMandatoryRezCosts(quote.mandatoryAdditionalCosts) ||
-    !validOptionalCardDefinitionIds(quote.reductionSourceDefinitionIds) ||
-    !validOptionalCardDefinitionIds(quote.increaseSourceDefinitionIds)
+    !validOptionalRezModifierDefinitionIds(quote.reductionSourceDefinitionIds) ||
+    !validOptionalRezModifierDefinitionIds(quote.increaseSourceDefinitionIds)
   ) {
     return { status: "unknown", reason: "rez_cost_quote_drift" };
   }
@@ -1651,7 +1651,7 @@ function validTargetProjectedServerBinding(
   if (targetServerId === "new_remote") {
     return (
       typeof projectedServerId === "string" &&
-      /^remote_[1-9]\d*$/.test(projectedServerId)
+      /^r[1-9]\d*$/.test(projectedServerId)
     );
   }
   return projectedServerId === targetServerId;

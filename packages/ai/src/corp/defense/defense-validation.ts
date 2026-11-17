@@ -1,6 +1,6 @@
 import { isRunId } from "@netgrid/shared";
 import { isCardDefinitionId } from "@netgrid/shared";
-import { parseCardDefinitionIdCsv } from "../../card-definition-id-input";
+import { parseOptionalCardDefinitionIdCsv } from "../../card-definition-id-input";
 import type { AiDecisionInput, VisibleCorpRezCostQuote } from "@netgrid/shared";
 import { validCorpRezOrTrashChoiceResolution } from "./rez-or-trash-choice";
 import {
@@ -362,17 +362,6 @@ export function selectedRezAgendaPointCost(
   return total;
 }
 
-export function validDefinitionIdArray(value: unknown): boolean {
-  if (value === undefined) return true;
-  return (
-    Array.isArray(value) &&
-    value.every(
-      (id, index) =>
-        isCardDefinitionId(id) &&
-        (index === 0 || value[index - 1]! < id),
-    )
-  );
-}
 
 export function definitionIdListsAreDisjoint(
   left: readonly number[],
@@ -385,10 +374,10 @@ export function definitionIdListsAreDisjoint(
 export function validPostInstallRezQuoteModifiers(
   payload: NonNullable<AiDecisionInput["legalActions"][number]["payload"]>,
 ): boolean {
-  const reductionIds = commaSeparatedDefinitionIds(
+  const reductionIds = parseOptionalCardDefinitionIdCsv(
     payload.postInstallRezQuoteReductionSourceDefinitionIds,
   );
-  const increaseIds = commaSeparatedDefinitionIds(
+  const increaseIds = parseOptionalCardDefinitionIdCsv(
     payload.postInstallRezQuoteIncreaseSourceDefinitionIds,
   );
   if (reductionIds === undefined || increaseIds === undefined) return false;
@@ -406,22 +395,10 @@ export function validPostInstallProjectedServerBinding(
 ): boolean {
   return targetServerId === "new_remote"
     ? typeof projectedServerId === "string" &&
-        /^remote_[1-9]\d*$/.test(projectedServerId)
+        /^r[1-9]\d*$/.test(projectedServerId)
     : projectedServerId === targetServerId;
 }
 
-function validCommaSeparatedDefinitionIds(value: unknown): boolean {
-  if (value === undefined) return true;
-  if (typeof value !== "string" || value.length === 0) return false;
-  const ids = parseCardDefinitionIdCsv(value);
-  return ids !== undefined && validDefinitionIdArray(ids);
-}
-
-function commaSeparatedDefinitionIds(value: unknown): number[] | undefined {
-  if (value === undefined) return [];
-  if (!validCommaSeparatedDefinitionIds(value)) return undefined;
-  return parseCardDefinitionIdCsv(value as string);
-}
 
 export function knownExactInstallRouteCreditCost(
   projection: KnownCorpFundedIceInstallRouteProjection,

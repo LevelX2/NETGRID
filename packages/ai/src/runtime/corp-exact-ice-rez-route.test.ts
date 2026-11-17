@@ -139,7 +139,7 @@ describe("exact Corp ICE rez route", () => {
       ...fixture,
       targetServerId: "rd",
     })!;
-    const project = testScoreContinuationProject("remote_1");
+    const project = testScoreContinuationProject("r1");
     const remaining =
       fixture.input.playerView.own.credits - route.totalRezCredits;
     for (const required of [remaining, remaining + 1]) {
@@ -192,7 +192,7 @@ describe("exact Corp ICE rez route", () => {
       targetServerId: "rd",
     })!;
     expect(route.currentEncounterDefense?.activationCredits).toBe(2);
-    const project = testScoreContinuationProject("remote_1");
+    const project = testScoreContinuationProject("r1");
     expect(
       assessCorpExactIceRezAgainstScoreReserves({
         input: fixture.input,
@@ -626,13 +626,13 @@ describe("exact Corp ICE rez route", () => {
       input: fixture.input,
       candidate: fixture.ordinaryCandidate,
       sourceCard: fixture.sourceCard,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
     const discountedProjection = projectExactCorpIceRezRoute({
       input: fixture.input,
       candidate: fixture.discountedCandidate,
       sourceCard: fixture.sourceCard,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
 
     expect(ordinaryProjection).toMatchObject({
@@ -665,9 +665,9 @@ describe("exact Corp ICE rez route", () => {
         input: missingReceipt,
         candidate: fixture.discountedCandidate,
         sourceCard: missingReceipt.playerView.servers
-          .find((server) => server.id === "remote_1")!
+          .find((server) => server.id === "r1")!
           .ice.find((ice) => ice.instanceId === fixture.sourceCard.instanceId)!,
-        targetServerId: "remote_1",
+        targetServerId: "r1",
       }),
     ).toBeUndefined();
   });
@@ -1745,7 +1745,10 @@ describe("exact Corp ICE rez route", () => {
     ) {
       const action = getLegalActions(state, "runner").find(
         (candidate) =>
-          candidate.type === "continue_run" || candidate.type === "access_card",
+          candidate.type === "continue_run" ||
+          candidate.type === "access_card" ||
+          candidate.type === "decline_trash" ||
+          candidate.type === "steal_agenda",
       );
       if (!action) throw new Error("Run completion did not reach prevention");
       state = applyEngineAction(
@@ -1841,9 +1844,9 @@ describe("exact Corp ICE rez route", () => {
     if (!decline) throw new Error("Engine did not expose the rez decline");
 
     const scoreAgenda = input.playerView.servers
-      .find((server) => server.id === "remote_1")!
+      .find((server) => server.id === "r1")!
       .root.find(
-        (card) => card.instanceId === "score_reserve_agenda_remote_1",
+        (card) => card.instanceId === "score_reserve_agenda_r1",
       )!;
     expect(scoreAgenda.type).toBe("agenda");
     const scoreQuote = scoreAgenda.scoreContinuationQuote;
@@ -1873,17 +1876,17 @@ describe("exact Corp ICE rez route", () => {
         route,
         scoreProjects: [
           {
-            projectId: "agenda:score_reserve_agenda_remote_1:remote_1",
+            projectId: "agenda:score_reserve_agenda_r1:r1",
             agendaPoints: 2,
-            serverId: "remote_1",
+            serverId: "r1",
             phase: "advance_agenda",
             sameTurnCloseout: false,
             terminalScore: false,
             feasible: true,
             evidenceCode: "test",
             continuationReserve: {
-              agendaCardId: "score_reserve_agenda_remote_1",
-              serverId: "remote_1",
+              agendaCardId: "score_reserve_agenda_r1",
+              serverId: "r1",
               requiredCreditsBeforeNextCorpTurn: 3,
               remainingAdvancementCounters: 3,
               nextCorpTurnGuaranteedFlexibleClicks: 3,
@@ -1935,7 +1938,7 @@ describe("exact Corp ICE rez route", () => {
 
     expect(
       fixture.input.playerView.servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       )!.root[0]?.scoreContinuationQuote,
     ).toMatchObject({
       complete: true,
@@ -1953,8 +1956,8 @@ describe("exact Corp ICE rez route", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow(450, 0);
     fixture.state.corp.credits = 7;
-    addProtectedNextTurnScoreRemote(fixture.state, 2, "remote_1");
-    addProtectedNextTurnScoreRemote(fixture.state, 2, "remote_2");
+    addProtectedNextTurnScoreRemote(fixture.state, 2, "r1");
+    addProtectedNextTurnScoreRemote(fixture.state, 2, "r2");
     const input = engineRezDecisionInput(
       fixture.state,
       "multi-score-server-reserve",
@@ -1965,20 +1968,20 @@ describe("exact Corp ICE rez route", () => {
     if (!decline) throw new Error("Engine did not expose the rez decline");
     expect(input.playerView.opponent.clicks).toBeGreaterThanOrEqual(2);
     expect(
-      input.playerView.servers.find((server) => server.id === "remote_1")!
+      input.playerView.servers.find((server) => server.id === "r1")!
         .ice[0]?.effectiveRezCostQuote,
     ).toMatchObject({ complete: true, finalCredits: 3 });
     expect(
       readExactCurrentInstalledCorpIceRezQuote({
         input,
         sourceCard: input.playerView.servers.find(
-          (server) => server.id === "remote_1",
+          (server) => server.id === "r1",
         )!.ice[0]!,
-        targetServerId: "remote_1",
+        targetServerId: "r1",
       }),
     ).toMatchObject({ totalRezCredits: 3 });
     const remoteIce = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!.ice[0]!;
     expect(
       assessCorpScoreProtection({
@@ -2014,16 +2017,16 @@ describe("exact Corp ICE rez route", () => {
         input,
         route,
         scoreProjects: [
-          testScoreContinuationProject("remote_1"),
-          testScoreContinuationProject("remote_2"),
+          testScoreContinuationProject("r1"),
+          testScoreContinuationProject("r2"),
         ],
       }),
     ).toMatchObject({
       preservesReserve: false,
       requiredCreditsAfterRez: 6,
       immediateRezIceIds: [
-        "score_reserve_remote_ice_remote_1",
-        "score_reserve_remote_ice_remote_2",
+        "score_reserve_remote_ice_r1",
+        "score_reserve_remote_ice_r2",
       ],
     });
 
@@ -2041,7 +2044,7 @@ describe("exact Corp ICE rez route", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineOliviaIceRezWindow();
     fixture.state.corp.credits = 5;
-    addProtectedNextTurnScoreRemote(fixture.state, 2, "remote_2");
+    addProtectedNextTurnScoreRemote(fixture.state, 2, "r2");
     const input = engineRezDecisionInput(
       fixture.state,
       "discounted-rez-preserves-remote",
@@ -2493,7 +2496,7 @@ function engineOliviaIceRezWindow() {
   state.runner.credits = 0;
   state.corp.credits = 10;
   state.corp.servers.push({
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     ice: [],
@@ -2501,9 +2504,9 @@ function engineOliviaIceRezWindow() {
   });
   const iceId = "exact_olivia_filter" as CardInstanceId;
   const oliviaId = "exact_olivia_source" as CardInstanceId;
-  addUnrezzedIce(state, iceId, 444, "remote_1");
+  addUnrezzedIce(state, iceId, 444, "r1");
   const remote = state.corp.servers.find(
-    (candidate) => candidate.id === "remote_1",
+    (candidate) => candidate.id === "r1",
   )!;
   remote.root.push(oliviaId);
   state.cardInstances[oliviaId] = {
@@ -2511,7 +2514,7 @@ function engineOliviaIceRezWindow() {
     definitionId: 575,
     owner: "corp",
     controller: "corp",
-    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     faceup: true,
     rezzed: true,
     advancementCounters: 0,
@@ -2519,7 +2522,7 @@ function engineOliviaIceRezWindow() {
   };
   const startRun = getLegalActions(state, "runner").find(
     (action) =>
-      action.type === "start_run" && action.payload?.serverId === "remote_1",
+      action.type === "start_run" && action.payload?.serverId === "r1",
   );
   if (!startRun) throw new Error("Engine did not expose the remote run");
   const result = applyAction(state, {
@@ -2569,7 +2572,7 @@ function engineOliviaIceRezWindow() {
     (candidate) => candidate.actionId === discountedAction.actionId,
   );
   const sourceCard = input.playerView.servers
-    .find((server) => server.id === "remote_1")
+    .find((server) => server.id === "r1")
     ?.ice.find((ice) => ice.instanceId === iceId);
   if (!ordinaryCandidate || !discountedCandidate || !sourceCard) {
     throw new Error("Engine-backed Olivia fixture is incomplete");
@@ -2589,7 +2592,7 @@ function addUnrezzedIce(
   state: GameState,
   instanceId: CardInstanceId,
   definitionId: number,
-  serverId: "rd" | "remote_1" | "remote_2",
+  serverId: "rd" | "r1" | "r2",
 ): void {
   const server = state.corp.servers.find(
     (candidate) => candidate.id === serverId,
@@ -2612,12 +2615,12 @@ function addUnrezzedIce(
 function addProtectedNextTurnScoreRemote(
   state: GameState,
   advancementCounters: number,
-  serverId: "remote_1" | "remote_2" = "remote_1",
+  serverId: "r1" | "r2" = "r1",
 ): void {
   state.corp.servers.push({
     id: serverId,
     kind: "remote",
-    label: serverId === "remote_1" ? "Remote 1" : "Remote 2",
+    label: serverId === "r1" ? "Remote 1" : "Remote 2",
     ice: [],
     root: [],
   });
@@ -2668,7 +2671,7 @@ function engineAgendaServerRezWindow() {
   state.runner.credits = 0;
   state.corp.credits = 2;
   state.corp.servers.push({
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     ice: [],
@@ -2676,14 +2679,14 @@ function engineAgendaServerRezWindow() {
   });
   const agendaId = "agenda_server_priority_agenda" as CardInstanceId;
   state.corp.servers
-    .find((server) => server.id === "remote_1")!
+    .find((server) => server.id === "r1")!
     .root.push(agendaId);
   state.cardInstances[agendaId] = {
     instanceId: agendaId,
     definitionId: 588,
     owner: "corp",
     controller: "corp",
-    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     faceup: false,
     rezzed: false,
     advancementCounters: 0,
@@ -2693,11 +2696,11 @@ function engineAgendaServerRezWindow() {
     state,
     "agenda_server_priority_ice" as CardInstanceId,
     450,
-    "remote_1",
+    "r1",
   );
   const startRun = getLegalActions(state, "runner").find(
     (action) =>
-      action.type === "start_run" && action.payload?.serverId === "remote_1",
+      action.type === "start_run" && action.payload?.serverId === "r1",
   );
   if (!startRun) throw new Error("Engine did not expose the agenda-server run");
   state = applyEngineAction(
@@ -2738,7 +2741,7 @@ function currentExactRezRoute(
   return route;
 }
 
-function testScoreContinuationProject(serverId: "remote_1" | "remote_2") {
+function testScoreContinuationProject(serverId: "r1" | "r2") {
   return {
     projectId: `agenda:score_reserve_agenda_${serverId}:${serverId}`,
     agendaPoints: 2,

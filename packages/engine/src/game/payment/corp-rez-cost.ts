@@ -363,20 +363,14 @@ function projectExactCorpRezCost(
       targetServerId,
       projectedServerId,
     );
-  const reductionSourceDefinitionIds = [
-    ...new Set(
-      quote.modifiers
-        .filter((modifier) => modifier.kind === "reduction")
-        .map((modifier) => modifier.sourceDefinitionId),
-    ),
-  ].sort((left, right) => left - right);
-  const increaseSourceDefinitionIds = [
-    ...new Set(
-      quote.modifiers
-        .filter((modifier) => modifier.kind === "increase")
-        .map((modifier) => modifier.sourceDefinitionId),
-    ),
-  ].sort((left, right) => left - right);
+  const reductionSourceDefinitionIds = quote.modifiers
+    .filter((modifier) => modifier.kind === "reduction")
+    .map((modifier) => modifier.sourceDefinitionId)
+    .sort((left, right) => left - right);
+  const increaseSourceDefinitionIds = quote.modifiers
+    .filter((modifier) => modifier.kind === "increase")
+    .map((modifier) => modifier.sourceDefinitionId)
+    .sort((left, right) => left - right);
   const commonCompleteFields = {
     cardId,
     projectedServerId,
@@ -1490,7 +1484,7 @@ export function quoteCorpRezCost(
     publicPayload.rezCostReductionSourceDefinitionIds = [
       ...existingSourceDefinitionIds,
       sourceDefinitionId,
-    ].join(",");
+    ].sort((left, right) => left - right).join(",");
     publicPayload.rezCostReductionAmount = baseCredits - finalCredits;
     publicPayload.rezCostPaid = finalCredits;
     modifiers.push({
@@ -1504,7 +1498,7 @@ export function quoteCorpRezCost(
     });
   } else if (existingSourceDefinitionIds.length > 0) {
     publicPayload.rezCostReductionSourceDefinitionIds =
-      existingSourceDefinitionIds.join(",");
+      existingSourceDefinitionIds.sort((left, right) => left - right).join(",");
     publicPayload.rezCostReductionAmount = baseCredits - finalCredits;
     publicPayload.rezCostPaid = finalCredits;
   }

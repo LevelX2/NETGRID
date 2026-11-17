@@ -21,15 +21,25 @@ export function parseCardDefinitionIdCsv(
   return ids.every((id) => id !== undefined) ? ids : undefined;
 }
 
-export function validOptionalCardDefinitionIds(value: unknown): boolean {
+export function validOptionalCardDefinitionIds(
+  value: unknown,
+  { allowRepeats = false }: { allowRepeats?: boolean } = {},
+): boolean {
   return (
     value === undefined ||
     (Array.isArray(value) &&
       value.every(
         (id, index) =>
-          isCardDefinitionId(id) && (index === 0 || value[index - 1] < id),
+          isCardDefinitionId(id) &&
+          (index === 0 ||
+            value[index - 1] < id ||
+            (allowRepeats && value[index - 1] === id)),
       ))
   );
+}
+
+export function validOptionalRezModifierDefinitionIds(value: unknown): boolean {
+  return validOptionalCardDefinitionIds(value, { allowRepeats: true });
 }
 
 export function parseOptionalCardDefinitionIdCsv(
@@ -38,7 +48,7 @@ export function parseOptionalCardDefinitionIdCsv(
   if (value === undefined) return [];
   if (typeof value !== "string" || value.length === 0) return undefined;
   const ids = parseCardDefinitionIdCsv(value);
-  return ids !== undefined && validOptionalCardDefinitionIds(ids)
+  return ids !== undefined && validOptionalRezModifierDefinitionIds(ids)
     ? ids
     : undefined;
 }

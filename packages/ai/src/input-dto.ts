@@ -1,3 +1,4 @@
+import { validOptionalCardDefinitionIds } from "./card-definition-id-input";
 import { isCardDefinitionId, isMatchEventId, isRunId, type RunId } from "@netgrid/shared";
 import { sanitizeCurrentCorpPunishQuoteSet } from "./corp/punish/punish-route-quote-sanitizer";
 import { sanitizeCorpStartDrawQuote } from "./runtime/corp-start-draw-quote-input";
@@ -2144,9 +2145,11 @@ function sanitizeInstalledCorpRezCostQuote(
   if (!quote.complete) return { ...binding, complete: false };
   const reductionSourceDefinitionIds = sanitizedCardDefinitionIds(
     quote.reductionSourceDefinitionIds,
+    { allowRepeats: true },
   );
   const increaseSourceDefinitionIds = sanitizedCardDefinitionIds(
     quote.increaseSourceDefinitionIds,
+    { allowRepeats: true },
   );
   const modifiersValid =
     (quote.reductionSourceDefinitionIds === undefined ||
@@ -2932,7 +2935,7 @@ function isExistingRunServerId(
     value === "hq" ||
     value === "rd" ||
     value === "archives" ||
-    (typeof value === "string" && /^remote_[1-9][0-9]*$/.test(value))
+    (typeof value === "string" && /^r[1-9][0-9]*$/.test(value))
   );
 }
 
@@ -3579,14 +3582,13 @@ function sanitizedStringArray(value: unknown): string[] | undefined {
   return strings.slice();
 }
 
-function sanitizedCardDefinitionIds(value: unknown): number[] | undefined {
-  if (
-    !Array.isArray(value) ||
-    !value.every(isCardDefinitionId) ||
-    value.some((id, index) => index > 0 && value[index - 1]! >= id)
-  )
-    return undefined;
-  return value.slice();
+function sanitizedCardDefinitionIds(
+  value: unknown,
+  options?: { allowRepeats?: boolean },
+): number[] | undefined {
+  return Array.isArray(value) && validOptionalCardDefinitionIds(value, options)
+    ? value.slice()
+    : undefined;
 }
 
 function modifierDefinitionIdListsAreDisjoint(
@@ -3601,7 +3603,7 @@ function modifierDefinitionIdListsAreDisjoint(
 function isExistingCorpServerId(
   value: string,
 ): value is CorpOptionalRezChoiceQuote["targetServerId"] {
-  return /^remote_[1-9][0-9]*$/.test(value);
+  return /^r[1-9][0-9]*$/.test(value);
 }
 
 const OPTIONAL_REZ_COMPLETE_QUOTE_FIELDS = [
