@@ -514,12 +514,18 @@ export function applyPlanOutcomeReceipt(
       ),
     ],
   };
-  if (portfolio.executorInstanceId === updated.instanceId && terminal) {
+  const residentIds = new Set(next.instances.map(({ instanceId }) => instanceId));
+  if (
+    !portfolio.executorInstanceId ||
+    !residentIds.has(portfolio.executorInstanceId) ||
+    !portfolio.rootForegroundInstanceId ||
+    !residentIds.has(portfolio.rootForegroundInstanceId)
+  ) {
     delete next.executorInstanceId;
-  }
-  if (portfolio.rootForegroundInstanceId === updated.instanceId && terminal) {
     delete next.rootForegroundInstanceId;
+    next.instances = next.instances.map(clearAssignment);
   }
+  delete next.selectedActionOrigin;
   assertResidentPlanPortfolio(next, timingPoint);
   return next;
 }
@@ -563,18 +569,11 @@ export function assertResidentPlanPortfolio(
     portfolio.instances.map((instance) => instance.instanceId),
   );
   const duplicateCount = portfolio.instances.length - ids.size;
-  const executor = portfolio.executorInstanceId
-    ? portfolio.instances.find(
-        (instance) => instance.instanceId === portfolio.executorInstanceId,
-      )
-    : undefined;
   if (
     portfolio.schemaVersion !== RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION ||
     duplicateCount > 0 ||
     executors.length > 1 ||
-    (portfolio.executorInstanceId !== undefined &&
-      (executors.length !== 1 || !executor)) ||
-    (executor !== undefined && executor.executionState !== "executor")
+    executors[0]?.instanceId !== portfolio.executorInstanceId
   ) {
     throw portfolioFailure(
       "executor_invariant_broken",
@@ -824,9 +823,6 @@ function assignExecutor(
   reason: NonNullable<ReconcileResidentPlanPortfolioParams["selectionReason"]>,
   timingPoint: string,
 ): ResidentPlanPortfolio {
-  const previousExecutorId = portfolio.instances.find(
-    (instance) => instance.executionState === "executor",
-  )?.instanceId;
   if (!selectedId) {
     return {
       ...portfolio,
@@ -877,17 +873,15 @@ function assignExecutor(
           ),
         );
       }
-    } else if (
-      instance.executionState === "executor" ||
-      (previousExecutorId === instance.instanceId &&
-        instance.instanceId !== selectedId)
-    ) {
+    } else if (before === "executor") {
       next.executionState =
         instance.viability === "ready" ? "preempted" : "idle";
       next.portfolioRole =
-        instance.executionClass === "urgent_response"
-          ? "response_candidate"
-          : "background";
+        instance.instanceId === rootId
+          ? "foreground"
+          : instance.executionClass === "urgent_response"
+            ? "response_candidate"
+            : "background";
       transitions.push(
         transition(
           next,

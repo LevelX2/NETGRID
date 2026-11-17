@@ -114,9 +114,7 @@ export function buildRunnerRemoteTrashAccessContext(
   const corpValueRemaining = remoteTrashVisibleCorpValueRemaining(accessed);
   const finitePoolEconomy =
     bbsWhisperingCampaign ||
-    (role === "economy" &&
-      (corpValueRemaining > 0 ||
-        remoteTrashCardLooksLikeFinitePoolForMetrics(accessed)));
+    (role === "economy" && remoteTrashCardLooksLikeFinitePoolForMetrics(accessed));
   const relevant =
     trashable &&
     ((role !== "low_value" && role !== "unknown") || finitePoolEconomy);

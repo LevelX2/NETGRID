@@ -9,27 +9,52 @@ import type {
 import { sortedUnique } from "./collection";
 import { serverIdForCorpInstalledCard } from "./installed-card-location";
 
-export function targetServerIdForSimulationAction(
+export function simulationActionLocation(
   action: LegalAction,
   event: PublicGameEvent,
-  stateBeforeAction: GameState,
-): string | undefined {
-  if (typeof action.payload?.serverId === "string")
-    return action.payload.serverId;
-  if (typeof event.publicPayload.serverId === "string")
-    return event.publicPayload.serverId;
-  if (typeof action.payload?.targetServerId === "string")
-    return action.payload.targetServerId;
-  if (typeof event.publicPayload.targetServerId === "string")
-    return event.publicPayload.targetServerId;
+  before: GameState,
+  after: GameState,
+): { targetServerId?: string; corpNewRemoteCreated?: true } {
+  if (action.side === "corp" && after.corp.servers.length > before.corp.servers.length) {
+    const beforeIds = new Set(before.corp.servers.map(({ id }) => id));
+    const created = after.corp.servers.filter(
+      ({ id, kind }) => kind === "remote" && !beforeIds.has(id),
+    );
+    if (created.length === 1) {
+      return { targetServerId: created[0]!.id, corpNewRemoteCreated: true };
+    }
+  }
+  if (action.side === "runner" && after.run && after.run.runId !== before.run?.runId) {
+    return { targetServerId: after.run.attackedServerId };
+  }
+  if (
+    action.side === "runner" &&
+    before.run &&
+    (action.type === "access_card" ||
+      action.type === "steal_agenda" ||
+      action.type === "trash_accessed_card" ||
+      action.type === "decline_trash" ||
+      action.type === "jack_out")
+  ) {
+    return { targetServerId: before.run.attackedServerId };
+  }
+  const serverId = [
+    action.payload?.serverId,
+    event.publicPayload.serverId,
+    action.payload?.targetServerId,
+    event.publicPayload.targetServerId,
+  ].find((id): id is string => typeof id === "string" && id !== "new_remote");
+  if (serverId) return { targetServerId: serverId };
   const cardId =
     typeof action.payload?.cardId === "string"
       ? action.payload.cardId
       : typeof event.publicPayload.targetCardId === "string"
         ? event.publicPayload.targetCardId
         : undefined;
-  if (cardId) return serverIdForCorpInstalledCard(stateBeforeAction, cardId);
-  return undefined;
+  const targetServerId = cardId
+    ? serverIdForCorpInstalledCard(before, cardId)
+    : undefined;
+  return targetServerId ? { targetServerId } : {};
 }
 
 export function targetCardIdsForSimulationAction(

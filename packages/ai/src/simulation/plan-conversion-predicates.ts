@@ -48,6 +48,7 @@ const RUNNER_STRATEGIC_ACTION_TYPES = [
   "install_card",
   "play_event",
   "start_run",
+  "steal_agenda",
   "gain_credit",
   "draw_card",
   "trash_accessed_card",
@@ -83,7 +84,8 @@ export function isStrategicPlanDecision(
   if (entry.side === "runner") {
     return RUNNER_STRATEGIC_ACTION_TYPES.includes(entry.actionType ?? "");
   }
-  return CORP_STRATEGIC_ACTION_TYPES.includes(entry.actionType ?? "");
+  return entry.side === "corp" &&
+    CORP_STRATEGIC_ACTION_TYPES.includes(entry.actionType ?? "");
 }
 
 export function ownStrategicWindow<T extends PlanConversionDecisionEntry>(
@@ -92,7 +94,7 @@ export function ownStrategicWindow<T extends PlanConversionDecisionEntry>(
   ownDecisions: number,
 ): T[] {
   const side = sequence[index]?.side;
-  if (!side) return [];
+  if (!side || !Number.isSafeInteger(ownDecisions) || ownDecisions <= 0) return [];
   const window: T[] = [];
   for (let cursor = index + 1; cursor < sequence.length; cursor += 1) {
     const entry = sequence[cursor]!;
@@ -108,7 +110,7 @@ export function previousOwnStrategicWindow<
   T extends PlanConversionDecisionEntry,
 >(sequence: T[], index: number, ownDecisions: number): T[] {
   const side = sequence[index]?.side;
-  if (!side) return [];
+  if (!side || !Number.isSafeInteger(ownDecisions) || ownDecisions <= 0) return [];
   const window: T[] = [];
   for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
     const entry = sequence[cursor]!;
@@ -160,6 +162,7 @@ export function nextEntriesForSide<T extends { side?: string }>(
   side: string,
   ownActionWindow: number,
 ): T[] {
+  if (!Number.isSafeInteger(ownActionWindow) || ownActionWindow <= 0) return [];
   const entries: T[] = [];
   for (
     let candidateIndex = index + 1;
@@ -263,19 +266,18 @@ export function corpRemoteCreatedConvertsTo<
   ownDecisions: number,
   target: "agenda" | "asset" | "bait",
 ): boolean {
+  const createdServerId = sequence[index]?.targetServerId;
+  if (!createdServerId?.startsWith("remote_")) return false;
   return ownStrategicWindow(sequence, index, ownDecisions)
-    .filter((entry) => entry.side === "corp")
+    .filter((entry) => entry.side === "corp" && entry.targetServerId === createdServerId)
     .some((entry) => {
       if (target === "agenda") {
-        return (
-          entry.actionType === "score_agenda" ||
-          entry.actionType === "advance_card" ||
-          entry.targetCardType === "agenda" ||
-          hasPlanConversionEvidenceFlag(
-            entry,
-            "corp_agenda_installed_in_protected_remote:true",
-          )
-        );
+        return entry.actionType === "install_card" &&
+          (entry.targetCardType === "agenda" ||
+            hasPlanConversionEvidenceFlag(
+              entry,
+              "corp_agenda_installed_in_protected_remote:true",
+            ));
       }
       if (target === "bait") {
         return (
@@ -689,7 +691,7 @@ export function runnerProbeConvertsToUsefulInfoOrPivot<
   return window.some(
     (later) =>
       isMeaningfulProgress(later) ||
-      later.targetServerId !== target ||
+      (later.targetServerId !== undefined && later.targetServerId !== target) ||
       ["recover_economy", "rig", "remote_contest"].some((needle) =>
         planKindMatchesTerm(planKindForConversion(later), needle),
       ),

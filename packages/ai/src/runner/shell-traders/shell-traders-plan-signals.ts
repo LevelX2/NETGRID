@@ -116,7 +116,6 @@ export function buildRunnerShellTradersPipelineSignals({
       ability === "set_aside_from_grip"
         ? shellCountersBefore
         : Math.max(0, shellCountersBefore - 1);
-    const targetInstallCost = visibleInstallCost(targetCard);
     const targetMemoryCost =
       targetCard.type === "program" ? visibleMemoryCost(targetCard) : 0;
     const rawFreeMemory = Math.max(
@@ -337,7 +336,6 @@ export function buildRunnerShellTradersPipelineSignals({
         value,
         shellCountersBefore,
         shellCountersAfterAction,
-        targetInstallCost,
         targetMemoryCost,
         freeMemory,
         ...(coverageSubstitution ? { coverageSubstitution } : {}),

@@ -1,6 +1,5 @@
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { isRemoteServerTarget } from "../runtime/server-target";
-import { averageNumber } from "./simulation-metric-aggregation";
 
 export function progressionEntriesWithRunTargets(
   actionSequence: AiSimulationSummary["actionSequence"],
@@ -28,30 +27,6 @@ export function progressionEntriesWithRunTargets(
     }
     return entry;
   });
-}
-
-export function averageTurnsFromFinalAdvanceToScoreOrSteal(
-  summaries: AiSimulationSummary[],
-): number {
-  const deltas = summaries.flatMap((summary) => {
-    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-    return sequence
-      .map((entry, index) => {
-        if (entry.side !== "corp" || entry.finalAdvance !== true)
-          return undefined;
-        const later = sequence
-          .slice(index + 1)
-          .find(
-            (candidate) =>
-              candidate.actionType === "score_agenda" ||
-              candidate.actionType === "steal_agenda",
-          );
-        if (!later?.turnNumber || !entry.turnNumber) return undefined;
-        return Math.max(0, later.turnNumber - entry.turnNumber);
-      })
-      .filter((value): value is number => typeof value === "number");
-  });
-  return averageNumber(deltas);
 }
 
 export function countCorpMultiIceInstallOrderFutureEffectDead(

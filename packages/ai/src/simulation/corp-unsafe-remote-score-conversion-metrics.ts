@@ -546,7 +546,7 @@ export function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         )
       )
         basicDrawTakenWhileBetterAgendaDrawAvailable += 1;
-      if (hasEvidenceFlag(entry, "corp_new_remote_created:true"))
+      if (entry.corpNewRemoteCreated === true)
         corpNewRemoteCreated += 1;
       if (hasEvidenceFlag(entry, "corp_new_remote_created_with_plan:true"))
         corpNewRemoteCreatedWithPlan += 1;
@@ -586,24 +586,24 @@ export function summarizeCorpUnsafeRemoteScoreConversionMetrics(
       if (hasEvidenceFlag(entry, "corp_remote_ice_consolidation_taken:true"))
         corpRemoteIceConsolidationTaken += 1;
       if (
-        hasEvidenceFlag(entry, "corp_new_remote_created:true") &&
+        entry.corpNewRemoteCreated === true &&
         !corpRemoteCreatedConverts(sequence, index, 3)
       ) {
         corpEmptyRemoteStayedUnusedTurns += 1;
         corpRemoteCreatedThenNoScorePath += 1;
       }
       if (
-        hasEvidenceFlag(entry, "corp_new_remote_created:true") &&
+        entry.corpNewRemoteCreated === true &&
         corpRemoteCreatedConvertsTo(sequence, index, 3, "agenda")
       )
         corpRemoteCreatedThenAgendaInstalledWithin3 += 1;
       if (
-        hasEvidenceFlag(entry, "corp_new_remote_created:true") &&
+        entry.corpNewRemoteCreated === true &&
         corpRemoteCreatedConvertsTo(sequence, index, 3, "asset")
       )
         corpRemoteCreatedThenAssetInstalledWithin3 += 1;
       if (
-        hasEvidenceFlag(entry, "corp_new_remote_created:true") &&
+        entry.corpNewRemoteCreated === true &&
         corpRemoteCreatedConvertsTo(sequence, index, 3, "bait")
       )
         corpRemoteCreatedThenBaitOrAmbushWithin3 += 1;

@@ -949,7 +949,6 @@ describe("AI module boundaries", () => {
         new Set([
           "decision/target-choice-shadow.ts",
           "decision/semantic-shadow-decision.ts",
-          "diagnostics/semantic-runtime-debug.ts",
         ]),
       ],
       [

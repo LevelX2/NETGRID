@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { PlanProposal } from "./plan-kernel-types";
 import {
   applyPlanOutcomeReceipt,
+  selectResidentPlanPortfolioExecutor,
   assertResidentPlanPortfolio,
   reconcileResidentPlanPortfolio,
   RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION,
@@ -321,8 +322,18 @@ describe("resident plan portfolio", () => {
       selectedExecutorInstanceId: "plan:runner.pressure:rd",
     });
 
+    const selected = selectResidentPlanPortfolioExecutor({
+      portfolio: initial,
+      selectedExecutorInstanceId: "plan:runner.economy:fund-rd",
+      timingPoint: "runner_action.main",
+      reason: "preempted_by_validated_value",
+    });
+    expect(
+      selected.instances.find(({ instanceId }) => instanceId === selected.rootForegroundInstanceId),
+    ).toMatchObject({ portfolioRole: "foreground", executionState: "preempted" });
+
     const completed = applyPlanOutcomeReceipt(
-      initial,
+      selected,
       {
         planInstanceId: "plan:runner.pressure:rd",
         stateVersionBefore: 78,
@@ -336,6 +347,8 @@ describe("resident plan portfolio", () => {
     );
 
     expect(completed.instances).toHaveLength(0);
+    expect(completed.executorInstanceId).toBeUndefined();
+    expect(completed.rootForegroundInstanceId).toBeUndefined();
     expect(completed.transitions).toContainEqual(
       expect.objectContaining({
         instanceId: "plan:runner.economy:fund-rd",

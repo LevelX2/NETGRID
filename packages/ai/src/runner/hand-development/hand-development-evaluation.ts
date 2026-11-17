@@ -14,7 +14,7 @@ import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent
 import { RUNTIME_CARDS } from "../../ai-hints";
 import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 import {
-  actionDevelopsPersistentCardNow,
+  actionAppliesPersistentInstallFitNow,
   persistentDevelopmentActionProjection,
 } from "../../actions/persistent-development-action";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
@@ -1192,7 +1192,7 @@ function evaluateRunnerPersistentInstall(
   currentNeed: RunnerHandDevelopmentCurrentNeed,
 ): RunnerPersistentInstallEvaluation | undefined {
   const action = context.legalAction;
-  if (!action || !actionDevelopsPersistentCardNow(action)) return undefined;
+  if (!action || !actionAppliesPersistentInstallFitNow(action)) return undefined;
   if (!isPersistentRunnerCard(context.card)) return undefined;
 
   const profile = persistentFunctionalProfileForCard(

@@ -28,6 +28,7 @@ const BBS_WHISPERING_CAMPAIGN_DEFINITION_ID =
 export function remoteTrashRoleForVisibleCard(
   card: VisibleCard,
 ): RemoteTrashRole {
+  if (!card.known) return "unknown";
   const structuredRole = getStructuredRemoteRoleForCard(card.definitionId);
   if (structuredRole) {
     if (structuredRole.kind === "remote_capacity") return "remote_capacity";
@@ -52,14 +53,7 @@ export function remoteTrashRoleForVisibleCard(
   const hint = card.definitionId
     ? REMOTE_TRASH_ROLE_AI_HINTS.get(card.definitionId)
     : undefined;
-  const structuredValue = card.definitionId
-    ? projectRemoteRootValue({
-        definitionId: card.definitionId,
-        visibleCard: card,
-        ...(hint?.effects ? { effects: hint.effects } : {}),
-        ...(hint?.valueHints ? { valueHints: hint.valueHints } : {}),
-      })
-    : undefined;
+  const structuredValue = remoteVisibleRootValue(card, hint);
   if (
     structuredValue?.kind === "finite_economy_pool" ||
     structuredValue?.kind === "recurring_economy"
@@ -117,7 +111,6 @@ export function remoteTrashRoleForVisibleCard(
   if (rolesMatch(roles, ["ambush", "trap"])) return "ambush";
   if (hint?.valueHints?.remoteRootValue === 1) return "low_value";
   if (rolesMatch(roles, ["low_value"])) return "low_value";
-  if (card.type === "asset" || card.type === "upgrade") return "unknown";
   return "unknown";
 }
 
@@ -126,7 +119,7 @@ export function remoteTrashRoleForAccessedVisibleCard(
   card: VisibleCard,
 ): RemoteTrashRole {
   const role = remoteTrashRoleForVisibleCard(card);
-  if (role !== "unknown") return role;
+  if (!card.known || role !== "unknown") return role;
   if (accessedCardContributesToVisibleRunTaxForMetrics(input, card))
     return "run_tax";
   return role;
@@ -174,7 +167,14 @@ export function remoteTrashVisibleCorpValueRemaining(
 export function remoteTrashCardLooksLikeFinitePoolForMetrics(
   card: VisibleCard,
 ): boolean {
+  if (!card.known) return false;
   if (remoteTrashCardIsBbsWhisperingCampaign(card)) return true;
+  const hint = card.definitionId
+    ? REMOTE_TRASH_ROLE_AI_HINTS.get(card.definitionId)
+    : undefined;
+  const rootValue = remoteVisibleRootValue(card, hint);
+  if (rootValue?.kind === "finite_economy_pool") return true;
+  if (rootValue?.kind === "recurring_economy") return false;
   const runtimeDefinition = card.definitionId
     ? RUNTIME_CARDS[card.definitionId]
     : undefined;
@@ -204,36 +204,28 @@ export function remoteTrashCardLooksLikeFinitePoolForMetrics(
   );
 }
 
+function remoteVisibleRootValue(
+  card: VisibleCard,
+  hint: ReturnType<typeof REMOTE_TRASH_ROLE_AI_HINTS.get>,
+) {
+  return card.definitionId
+    ? projectRemoteRootValue({
+        definitionId: card.definitionId,
+        visibleCard: card,
+        ...(hint?.effects ? { effects: hint.effects } : {}),
+        ...(hint?.valueHints ? { valueHints: hint.valueHints } : {}),
+      })
+    : undefined;
+}
+
 function finitePoolRulesTextMatches(rulesText: string): boolean {
-  const tokens = remoteTrashRulesTextTokens(rulesText);
+  const tokens = rulesText.toLocaleLowerCase("en-US").split(/[^a-z0-9]+/).filter(Boolean);
   const tokenSet = new Set(tokens);
   return (
     tokenSet.has("put") &&
     remoteTrashTokensIncludePhrase(tokens, ["from", "the", "bank"]) &&
     tokenSet.has("take") &&
     tokenSet.has("bits")
-  );
-}
-
-function remoteTrashRulesTextTokens(text: string): string[] {
-  const tokens: string[] = [];
-  let current = "";
-  for (const character of text.toLocaleLowerCase("en-US")) {
-    if (isAsciiLetterOrDigit(character)) {
-      current += character;
-    } else if (current.length > 0) {
-      tokens.push(current);
-      current = "";
-    }
-  }
-  if (current.length > 0) tokens.push(current);
-  return tokens;
-}
-
-function isAsciiLetterOrDigit(character: string): boolean {
-  return (
-    (character >= "a" && character <= "z") ||
-    (character >= "0" && character <= "9")
   );
 }
 

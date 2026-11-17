@@ -60,8 +60,11 @@ Karte oder einen bestimmten Zielserver als Produktregel fest.
   Determinismus sowie erwartete und verbotene Aktionstypen.
 - Die Mutation Witness mit einer kontextblinden Auswahl muss dieses Gate
   nachweislich verletzen.
-- Der Korpus umfasst 53 nicht redundante Engine-Szenarien; reine Engine- oder
-  Shadow-Diagnostikszenarien zählen nicht automatisch als Live-Verhaltensbeleg.
+- Der Korpus umfasst 53 unterschiedliche Engine-Szenarien. Für die
+  Laufzeitentscheidung erhält die KI die tatsächlich verwendete Deckliste.
+  Separat ausgezeichnete Deck-Doctrine-Snapshots sind reine Diagnostik.
+  Fälle mit zufälliger Aktionswahl werden mit Quote und Apply an der Engine
+  geprüft.
 - `packages/ai/src/evaluation/real-engine-default-runtime.test.ts` führt alle
   53 Eingaben zusätzlich durch den öffentlichen Chooser ohne Modusoverride.
   Es prüft die aktuelle LegalAction und StateVersion, Root und Executor,
@@ -118,7 +121,15 @@ Run-Reserve zählt die letzte beobachtete Access-Reserve je Run. Bekannte
 ICE-Pfade verwenden das Trace-Profil und Corp-Creditbudget der Entscheidung.
 Bei Trash-Entscheidungen erfasst der Benchmark das legale Angebot, die
 ausgeführte Trash-Aktion und den ausdrücklichen Verzicht. Die Bewertung der
-verbleibenden Creditreserve wird zusätzlich erfasst.
+verbleibenden Creditreserve wird zusätzlich erfasst. Wiederkehrende Credits
+werden getrennt vom erschöpfbaren Vorrat einer Kampagne bewertet.
+
+Advancement, Score und Steal werden im Simulator über dieselbe Instanz einer
+Agenda verbunden. Die Simulationszusammenfassungen enthalten daraus nur
+Zählwerte und Zugabstände. Die Entstehung eines Remotes kommt aus der
+Änderung des Spielzustands. Konversionen zählen die Folgeaktion am konkret
+entstandenen Remote. Im Soak werden unterschiedliche Seeds und die Anzahl
+ihrer tatsächlich gestarteten Spiele getrennt ausgewiesen.
 Das R&D-Regressionsfixture für wiederholten Zugriff erzeugt den beobachteten
 Vorzustand durch Engine-Aktionen mit einer fest gebundenen Deckpaarung.
 Vor der Wahlprüfung muss der aktuelle Belief die bekannte, unveränderte und

@@ -128,6 +128,7 @@ export type AiSimulationActionSequenceEntry = {
   corpIcePortfolioFixGateBlockedByNoRemotePlan?: boolean;
   corpIcePortfolioFixGateBlockedByEmergencyProtection?: boolean;
   corpIcePortfolioEvidence?: string[];
+  corpNewRemoteCreated?: true;
   advancementCountersAdded?: number;
   scoreActionsAvailable?: number;
   targetCardType?: ProgressionCardTargetType;

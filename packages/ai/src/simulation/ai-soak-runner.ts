@@ -5,16 +5,24 @@ import type { AiSimulationSummary } from "./ai-simulation-summary";
 import type { AiSoakResult } from "./quality-metrics";
 import { SOAK_SEEDS } from "./soak-seed-data";
 
+export type AiSoakConfig = Pick<
+  AiSimulationConfig,
+  | "runnerDeckId"
+  | "corpDeckId"
+  | "agendaPointsToWin"
+  | "maxActions"
+  | "runnerDifficulty"
+  | "corpDifficulty"
+>;
+
 export type AiSoakRunnerDependencies = {
   simulateAiGame: (config?: AiSimulationConfig) => AiSimulationSummary;
 };
 
 export function createAiSoakRunner(dependencies: AiSoakRunnerDependencies): {
-  simulateAiSoak: (config?: Partial<AiSimulationConfig>) => AiSoakResult;
+  simulateAiSoak: (config?: AiSoakConfig) => AiSoakResult;
 } {
-  function simulateAiSoak(
-    config: Partial<AiSimulationConfig> = {},
-  ): AiSoakResult {
+  function simulateAiSoak(config: AiSoakConfig = {}): AiSoakResult {
     const difficultyPairs =
       config.runnerDifficulty !== undefined &&
       config.corpDifficulty !== undefined
@@ -28,10 +36,8 @@ export function createAiSoakRunner(dependencies: AiSoakRunnerDependencies): {
             runnerDifficulty: config.runnerDifficulty ?? difficulty,
             corpDifficulty: config.corpDifficulty ?? difficulty,
           }));
-    const summaries = [
-      ...SOAK_SEEDS.tuningSeeds,
-      ...SOAK_SEEDS.holdoutSeeds,
-    ].flatMap((seed) =>
+    const seeds = [...SOAK_SEEDS.tuningSeeds, ...SOAK_SEEDS.holdoutSeeds];
+    const summaries = seeds.flatMap((seed) =>
       difficultyPairs.map((difficulties) =>
         dependencies.simulateAiGame({
           seed,
@@ -65,7 +71,8 @@ export function createAiSoakRunner(dependencies: AiSoakRunnerDependencies): {
     return {
       summaries,
       aggregate: {
-        seeds: summaries.length,
+        seeds: new Set(seeds).size,
+        games: summaries.length,
         illegalActions: summaries.reduce(
           (sum, summary) => sum + summary.metrics.illegalActions,
           0,

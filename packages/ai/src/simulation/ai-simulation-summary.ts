@@ -2,6 +2,7 @@ import type { CURRENT_RULES_BASELINE, GameState } from "@netgrid/shared";
 import type { AiSimulationActionSequenceEntry } from "./ai-simulation-action-sequence-entry";
 import type { AiSimulationRuntimeFailure } from "./ai-simulation-runtime-failure";
 import type { AiQualityMetrics } from "./quality-metric-types";
+import type { AgendaProgressionOutcomes } from "./agenda-progression-observation";
 
 export type AiSimulationTerminationKind =
   | "game_result"
@@ -24,6 +25,7 @@ export type AiSimulationSummary = {
   replayOk: boolean;
   replayErrors: string[];
   actionSequence: AiSimulationActionSequenceEntry[];
+  agendaProgressionOutcomes?: AgendaProgressionOutcomes;
   errors: string[];
   runtimeFailures?: AiSimulationRuntimeFailure[];
   cardPoolVersion: typeof CURRENT_RULES_BASELINE.engineSchemaVersion;

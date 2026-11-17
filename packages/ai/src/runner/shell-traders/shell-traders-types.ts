@@ -18,7 +18,6 @@ export type RunnerShellTradersPipelineSignal = {
   value: number;
   shellCountersBefore: number;
   shellCountersAfterAction: number;
-  targetInstallCost: number;
   targetMemoryCost: number;
   freeMemory: number;
   replacementAssessment: Readonly<{

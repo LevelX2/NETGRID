@@ -34,7 +34,7 @@ import {
 } from "../runtime/simulation-card-target";
 import {
   targetCardIdsForSimulationAction,
-  targetServerIdForSimulationAction,
+  simulationActionLocation,
 } from "../runtime/simulation-action-target";
 import type { AiSimulationConfig } from "./ai-simulation-config";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
@@ -44,6 +44,7 @@ import {
   finalAdvanceAssessmentForSimulationAction,
   isProtectBeforeAdvanceSimulationAction,
 } from "./final-advance-assessment";
+import { createAgendaProgressionObserver } from "./agenda-progression-observation";
 import { isHoldoutSeed } from "./holdout-seed";
 import {
   safeEvidenceForSimulationDecision,
@@ -287,6 +288,7 @@ export function createAiGameSimulator(
       ),
     };
     const actionSequence: AiSimulationSummary["actionSequence"] = [];
+    const agendaProgression = createAgendaProgressionObserver();
     const errors: string[] = [];
     const runtimeFailures: AiSimulationRuntimeFailure[] = [];
     const maxActions = config.maxActions ?? 120;
@@ -424,10 +426,11 @@ export function createAiGameSimulator(
         errors.push(simulationRuntimeFailureToken(failure));
         break;
       }
-      const targetServerId = targetServerIdForSimulationAction(
+      const { targetServerId, corpNewRemoteCreated } = simulationActionLocation(
         action,
         result.event,
         stateBeforeAction,
+        result.state,
       );
       const targetCardIds = targetCardIdsForSimulationAction(
         input,
@@ -462,12 +465,23 @@ export function createAiGameSimulator(
       );
       const finalAdvance = finalAdvanceAssessmentForSimulationAction(
         stateBeforeAction,
+        result.state,
         input,
         action,
         targetServerId,
         targetCardIds,
         advancementCountersAdded,
       );
+      agendaProgression.observe({
+        before: stateBeforeAction,
+        after: result.state,
+        actionIndex: index,
+        turn: completedTurns + 1,
+        targetCardIds,
+        ...(finalAdvance.targetCardId
+          ? { finalAdvanceTargetId: finalAdvance.targetCardId }
+          : {}),
+      });
       const protectBeforeAdvance = isProtectBeforeAdvanceSimulationAction(
         stateBeforeAction,
         input,
@@ -552,6 +566,7 @@ export function createAiGameSimulator(
         fallbackUsed: decision.fallbackUsed,
         timeoutUsed: decision.timeoutUsed ?? false,
         ...(targetServerId ? { targetServerId } : {}),
+        ...(corpNewRemoteCreated ? { corpNewRemoteCreated } : {}),
         ...(advancementCountersAdded > 0 ? { advancementCountersAdded } : {}),
         ...(scoreActionsAvailable > 0 ? { scoreActionsAvailable } : {}),
         ...(targetCardType ? { targetCardType } : {}),
@@ -626,6 +641,7 @@ export function createAiGameSimulator(
       replayOk: replay.ok,
       replayErrors: replay.errors,
       actionSequence,
+      agendaProgressionOutcomes: agendaProgression.outcomes(),
       errors,
       runtimeFailures,
       cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,

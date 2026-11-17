@@ -10,10 +10,8 @@ export function benchmarkProfileById(
   const profile = profiles.find(
     (candidate) => candidate.benchmarkProfileId === profileId,
   );
-  if (profile) return profile;
-  return {
-    benchmarkProfileId: profileId,
-    runnerMode: profileId,
-    corpMode: profileId,
-  };
+  if (!profile) {
+    throw new Error(`Unknown simulation benchmark profile: ${profileId}`);
+  }
+  return profile;
 }

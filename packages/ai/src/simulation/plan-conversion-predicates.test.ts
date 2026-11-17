@@ -1,4 +1,7 @@
+import type { GameState, PublicGameEvent } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { simulationActionLocation } from "../runtime/simulation-action-target";
+import { legalAction } from "../semantic-ai-runtime-cutover.test-support";
 import {
   corpProtectionConvertsToScoreSafety,
   corpRemoteCreatedConvertsTo,
@@ -6,6 +9,7 @@ import {
   planKindForConversion,
   planIntentConvertedWithin,
   runnerProbeConvertsToUsefulInfoOrPivot,
+  runnerRemoteContestConvertsToStealTrashOrAbort,
 } from "./plan-conversion-predicates";
 
 describe("planIntentConvertedWithin", () => {
@@ -23,10 +27,15 @@ describe("planIntentConvertedWithin", () => {
     expect(
       corpRemoteCreatedConvertsTo(
         [
-          { side: "corp", actionType: "install_card" },
           {
             side: "corp",
             actionType: "install_card",
+            targetServerId: "remote_1",
+          },
+          {
+            side: "corp",
+            actionType: "install_card",
+            targetServerId: "remote_1",
             evidence: ["corp.remote_support"],
           },
         ],
@@ -38,10 +47,15 @@ describe("planIntentConvertedWithin", () => {
     expect(
       corpRemoteCreatedConvertsTo(
         [
-          { side: "corp", actionType: "install_card" },
           {
             side: "corp",
             actionType: "install_card",
+            targetServerId: "remote_1",
+          },
+          {
+            side: "corp",
+            actionType: "install_card",
+            targetServerId: "remote_1",
             evidence: [
               "remote_supportish_noise",
               "economy_assetish_noise",
@@ -57,10 +71,15 @@ describe("planIntentConvertedWithin", () => {
     expect(
       corpRemoteCreatedConvertsTo(
         [
-          { side: "corp", actionType: "install_card" },
           {
             side: "corp",
             actionType: "install_card",
+            targetServerId: "remote_1",
+          },
+          {
+            side: "corp",
+            actionType: "install_card",
+            targetServerId: "remote_1",
             reasonCode: "corp.plan.remote_asset",
           },
         ],
@@ -72,10 +91,15 @@ describe("planIntentConvertedWithin", () => {
     expect(
       corpRemoteCreatedConvertsTo(
         [
-          { side: "corp", actionType: "install_card" },
           {
             side: "corp",
             actionType: "install_card",
+            targetServerId: "remote_1",
+          },
+          {
+            side: "corp",
+            actionType: "install_card",
+            targetServerId: "remote_1",
             reasonCode: "corp.plan.assetish_noise",
           },
         ],
@@ -90,10 +114,15 @@ describe("planIntentConvertedWithin", () => {
     expect(
       corpRemoteCreatedConvertsTo(
         [
-          { side: "corp", actionType: "install_card" },
           {
             side: "corp",
             actionType: "install_card",
+            targetServerId: "remote_1",
+          },
+          {
+            side: "corp",
+            actionType: "install_card",
+            targetServerId: "remote_1",
             reasonCode: "corp.plan.bait_runner",
           },
         ],
@@ -105,10 +134,15 @@ describe("planIntentConvertedWithin", () => {
     expect(
       corpRemoteCreatedConvertsTo(
         [
-          { side: "corp", actionType: "install_card" },
           {
             side: "corp",
             actionType: "install_card",
+            targetServerId: "remote_1",
+          },
+          {
+            side: "corp",
+            actionType: "install_card",
+            targetServerId: "remote_1",
             reasonCode: "corp.plan.baitish_noise",
           },
         ],
@@ -117,6 +151,71 @@ describe("planIntentConvertedWithin", () => {
         "bait",
       ),
     ).toBe(false);
+  });
+
+  it("reads a new remote's concrete id from the applied Engine state", () => {
+    const before = {
+      corp: { servers: [{ id: "hq", kind: "hq" }] },
+    } as unknown as GameState;
+    const after = {
+      corp: { servers: [{ id: "hq", kind: "hq" }, { id: "remote_5", kind: "remote" }] },
+    } as unknown as GameState;
+    const install = legalAction(
+      "new-remote-install",
+      "corp",
+      "install_card",
+      "Install in a new remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "new_remote" } },
+    );
+    const event = { publicPayload: { serverId: "new_remote" } } as PublicGameEvent;
+    expect(simulationActionLocation(install, event, before, after)).toEqual({
+      targetServerId: "remote_5",
+      corpNewRemoteCreated: true,
+    });
+  });
+
+  it("keeps remote conversion on the server that was actually created", () => {
+    const sequence = [
+      { side: "corp", actionType: "install_card", targetServerId: "remote_1" },
+      {
+        side: "corp",
+        actionType: "install_card",
+        targetCardType: "agenda",
+        targetServerId: "remote_2",
+      },
+      {
+        side: "corp",
+        actionType: "advance_card",
+        targetCardType: "agenda",
+        targetServerId: "remote_1",
+      },
+      {
+        side: "corp",
+        actionType: "install_card",
+        targetCardType: "agenda",
+        targetServerId: "remote_1",
+      },
+    ];
+    expect(corpRemoteCreatedConvertsTo(sequence, 0, 2, "agenda")).toBe(false);
+    expect(corpRemoteCreatedConvertsTo(sequence, 0, 3, "agenda")).toBe(true);
+    expect(corpRemoteCreatedConvertsTo(sequence.slice(2), 0, 0, "agenda")).toBe(
+      false,
+    );
+  });
+
+  it("recognizes an actual steal during a Runner strategic window", () => {
+    const sequence = [
+      { side: "runner", actionType: "start_run", targetServerId: "remote_1" },
+      {
+        side: "runner",
+        actionType: "steal_agenda",
+        targetServerId: "remote_1",
+      },
+    ];
+    expect(
+      runnerRemoteContestConvertsToStealTrashOrAbort(sequence, 0, () => false),
+    ).toBe(true);
   });
 
   it("matches runner setup reason codes by bounded terms", () => {

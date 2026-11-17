@@ -229,7 +229,6 @@ describe("Runner core plan modules", () => {
           value: 12,
           shellCountersBefore: 0,
           shellCountersAfterAction: 3,
-          targetInstallCost: 5,
           targetMemoryCost: 1,
           freeMemory: 1,
           replacementAssessment: {
@@ -329,7 +328,6 @@ describe("Runner core plan modules", () => {
           value: 12,
           shellCountersBefore: 0,
           shellCountersAfterAction: 3,
-          targetInstallCost: 5,
           targetMemoryCost: 1,
           freeMemory: 1,
           replacementAssessment: {

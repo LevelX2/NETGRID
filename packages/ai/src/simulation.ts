@@ -107,6 +107,7 @@ export type {
   AiQualityMetrics,
   AiSoakResult,
 } from "./simulation/quality-metrics";
+export type { AiSoakConfig } from "./simulation/ai-soak-runner";
 export { detectAiSelfplaySuspiciousDecisions } from "./simulation/selfplay-trace-mining";
 export type {
   AiSelfplayActionLimitClusterId,

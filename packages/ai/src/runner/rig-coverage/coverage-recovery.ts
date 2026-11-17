@@ -21,8 +21,11 @@ import {
   assessKnownRezzedIcePath,
   runnerKnownPathAssessmentIsCostNoAccess,
 } from "../../visible-run-analysis";
-import { runnerVisibleDeckBreaker } from "./coverage-card-facts";
-import { runnerBreakerCapabilityCoversRole } from "./coverage-card-facts";
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
+import {
+  runnerBreakerCapabilityCoversRole,
+  runnerVisibleDeckBreaker,
+} from "./coverage-card-facts";
 export type RunnerCostEffectiveCoverageRecovery = Readonly<{
   requiredRole: RunnerCoverageGapSignal["requiredRole"];
   totalRecoveryCost: number;
@@ -116,6 +119,7 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
     comparisonBudget,
     server.root,
     input.playerView.opponent.credits,
+    visibleIcePathTraceContext(input),
   );
   const currentOperatingCost = currentPath.visibleBreakCost;
   if (
@@ -170,6 +174,7 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
         comparisonBudget,
         server.root,
         input.playerView.opponent.credits,
+        visibleIcePathTraceContext(input),
       );
       const breakCost = path.visibleBreakCost;
       if (
@@ -286,6 +291,7 @@ export function runnerCostEffectiveDeckCoverageAlternative(
         comparisonBudget,
         server.root,
         input.playerView.opponent.credits,
+        visibleIcePathTraceContext(input),
       );
       const breakCost = path.visibleBreakCost;
       const eligible =
@@ -381,6 +387,7 @@ export function runnerCoverageInstallActionValues(
           input.playerView.own.credits - cost,
           server.root,
           input.playerView.opponent.credits,
+          visibleIcePathTraceContext(input),
         );
         if (path.canReachAccess) {
           return 300 - cost - (path.visibleBreakCost ?? 0);

@@ -19,6 +19,7 @@ import {
 
 export type FinalAdvanceSimulationAssessment = {
   finalAdvance: boolean;
+  targetCardId?: CardInstanceId;
   unsafeFinalAdvance?: boolean;
   protectedFinalAdvance?: boolean;
   remoteProtectionScore?: number;
@@ -28,6 +29,7 @@ export type FinalAdvanceSimulationAssessment = {
 
 export function finalAdvanceAssessmentForSimulationAction(
   stateBeforeAction: GameState,
+  stateAfterAction: GameState,
   input: AiDecisionInput,
   action: LegalAction,
   targetServerId: string | undefined,
@@ -38,7 +40,9 @@ export function finalAdvanceAssessmentForSimulationAction(
     return { finalAdvance: false };
   const cardId = targetCardIds.find(
     (candidate) =>
-      cardTargetTypeForInstance(stateBeforeAction, candidate) === "agenda",
+      cardTargetTypeForInstance(stateBeforeAction, candidate) === "agenda" &&
+      (stateAfterAction.cardInstances[candidate]?.advancementCounters ?? 0) >
+        (stateBeforeAction.cardInstances[candidate]?.advancementCounters ?? 0),
   );
   if (!cardId || !targetServerId?.startsWith("remote_"))
     return { finalAdvance: false };
@@ -49,7 +53,7 @@ export function finalAdvanceAssessmentForSimulationAction(
     CARD_DEFINITIONS_BY_ID[definitionId]?.advancementRequirement ??
     RUNTIME_CARDS[definitionId]?.numeric.advancementRequirement ??
     0;
-  const countersAfter = instance.advancementCounters + advancementCountersAdded;
+  const countersAfter = stateAfterAction.cardInstances[cardId]!.advancementCounters;
   const advancesRemainingAfterAction = Math.max(0, requirement - countersAfter);
   if (advancesRemainingAfterAction > 1) return { finalAdvance: false };
   const remoteProtectionScore = remoteProtectionScoreForSimulation(
@@ -69,6 +73,7 @@ export function finalAdvanceAssessmentForSimulationAction(
     (runnerContestRisk === "high" || remoteProtectionScore < 60);
   return {
     finalAdvance: true,
+    targetCardId: cardId,
     unsafeFinalAdvance,
     protectedFinalAdvance: !unsafeFinalAdvance,
     remoteProtectionScore,

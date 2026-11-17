@@ -72,6 +72,15 @@ describe("remoteTrashRoleForVisibleCard", () => {
 });
 
 describe("remoteTrashCardLooksLikeFinitePoolForMetrics", () => {
+  it("keeps recurring credit out of the finite-pool metrics", () => {
+    expect(
+      remoteTrashCardLooksLikeFinitePoolForMetrics({
+        ...cardWithRulesText("Put 8 bits from the bank on this card. Take bits."),
+        counters: { recurring_credit: 8 },
+      }),
+    ).toBe(false);
+  });
+
   it("matches finite-pool rules text by bounded phrases", () => {
     expect(
       remoteTrashCardLooksLikeFinitePoolForMetrics(

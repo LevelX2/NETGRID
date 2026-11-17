@@ -1,4 +1,3 @@
-import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { chooseAiAction } from "../index";
@@ -10,15 +9,13 @@ import { buildRealEngineDecisionCorpusScenarios } from "./real-engine-decision-c
 describe("real Engine inputs through the live Semantic Runtime", () => {
   it("selects the expected action family from every competitive annotated scenario", () => {
     expect(
-      evaluateAnnotatedScenarios((input) =>
-        chooseWithoutPersistentMemory(input),
-      ),
+      evaluateAnnotatedScenarios(chooseWithoutPersistentMemory),
     ).toEqual([]);
   }, 60_000);
 
   it("would fail for a deterministic chooser that ignores the scenario context", () => {
     const failures = evaluateAnnotatedScenarios(
-      (input) => input.legalActions.at(-1)?.actionId ?? "missing-action",
+      ({ input }) => input.legalActions.at(-1)?.actionId ?? "missing-action",
     );
 
     expect(failures.length).toBeGreaterThan(0);
@@ -99,8 +96,10 @@ describe("real Engine inputs through the live Semantic Runtime", () => {
   });
 });
 
+type CorpusFixture = ReturnType<typeof buildRealEngineDecisionCorpusScenarios>[number];
+
 function evaluateAnnotatedScenarios(
-  selectActionId: (input: AiDecisionInput) => string,
+  selectActionId: (scenario: CorpusFixture) => string,
 ): string[] {
   const scenarios = buildRealEngineDecisionCorpusScenarios().filter(
     (scenario) => scenario.leagueExpectation,
@@ -109,8 +108,8 @@ function evaluateAnnotatedScenarios(
 
   expect(scenarios).toHaveLength(20);
   for (const scenario of scenarios) {
-    const firstActionId = selectActionId(scenario.input);
-    const secondActionId = selectActionId(scenario.input);
+    const firstActionId = selectActionId(scenario);
+    const secondActionId = selectActionId(scenario);
     const selected = scenario.input.legalActions.find(
       (action) => action.actionId === firstActionId,
     );
@@ -145,15 +144,16 @@ function evaluateAnnotatedScenarios(
   return failures;
 }
 
-function chooseWithoutPersistentMemory(input: AiDecisionInput): string {
+function chooseWithoutPersistentMemory(scenario: CorpusFixture): string {
   resetResidentPlanPortfolioMemory();
   resetRunnerRunPlanMemory();
   resetStrategicIntentMemory();
-  const decision = chooseAiAction(input, {
+  const decision = chooseAiAction(scenario.input, {
     persistTacticalPlanMemory: false,
+    ...scenario.engineOptions,
   });
-  if (decision.selectionKind && decision.selectionKind !== "direct") {
-    throw new Error("test_requires_applied_engine_randomized_decision");
-  }
-  return decision.actionId;
+  const result = scenario.applyEngineSelection(decision);
+  if (!result) return decision.actionId ?? "missing-direct-action";
+  if (!result.ok) throw new Error(`Engine rejected corpus selection: ${scenario.scenarioId}`);
+  return result.receipt.selectedLegalAction.actionId;
 }

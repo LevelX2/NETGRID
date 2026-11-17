@@ -6,11 +6,16 @@ import {
 import snapshotsData08 from "../../../../data/decks/deck-snapshots-0.8.json";
 import {
   DEMO_DECKS,
+  type AiDecision,
   type GameState,
   type LegalAction,
   type Side,
 } from "@netgrid/shared";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
+import {
+  applySimulationEngineSelection,
+  simulationEngineRuntimeOptions,
+} from "../simulation/engine-selection";
 import { buildDeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
 import {
   buildRunnerEconomyPosture,
@@ -26,6 +31,13 @@ import {
   RealEngineFixtureBuilder,
   type RealEngineFixtureMutator,
 } from "./real-engine-fixture-builder";
+
+type EngineBoundCorpusScenario = RealEngineDecisionCorpusScenario & {
+  engineOptions: ReturnType<typeof simulationEngineRuntimeOptions>;
+  applyEngineSelection: (
+    decision: AiDecision,
+  ) => ReturnType<typeof applySimulationEngineSelection>;
+};
 
 export const REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS = [
   "runner_real_low_credits",
@@ -192,7 +204,7 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
   >
 >;
 
-export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorpusScenario[] {
+export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScenario[] {
   return [
     runnerScenario(
       "runner_real_low_credits",
@@ -520,7 +532,10 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_basic_economy_draw",
       "real-corp-economy-draw",
       (fixture) => {
-        fixture.withCorpCredits(0);
+        fixture
+          .withCorpCredits(0)
+          .withCorpIceOnServer("hq", "simple_barrier_ice")
+          .withCorpIceOnServer("rd", "simple_code_gate_ice");
       },
       [],
       "demo_corp_008_snapshot_v0_8",
@@ -713,7 +728,7 @@ export const SELFPLAY_PROMOTED_REAL_ENGINE_CORPUS_SCENARIO_IDS = [
   "selfplay_promoted_corp_rez_decline",
 ] as const;
 
-export function buildSelfplayPromotedRealEngineCorpusScenarios(): RealEngineDecisionCorpusScenario[] {
+export function buildSelfplayPromotedRealEngineCorpusScenarios(): EngineBoundCorpusScenario[] {
   return [
     runnerScenario(
       "selfplay_promoted_runner_remote_no_payoff_pivot",
@@ -767,7 +782,7 @@ function runnerScenario(
   mutate: RealEngineFixtureMutator,
   evidence: readonly string[] = [],
   deckSnapshotId?: string,
-): RealEngineDecisionCorpusScenario {
+): EngineBoundCorpusScenario {
   return RealEngineDecisionCorpusScenarioBuilder.runnerTurn(scenarioId, seed)
     .mutateFixture(mutate)
     .addEvidence(evidence)
@@ -781,7 +796,7 @@ function corpScenario(
   mutate: RealEngineFixtureMutator,
   evidence: readonly string[] = [],
   deckSnapshotId?: string,
-): RealEngineDecisionCorpusScenario {
+): EngineBoundCorpusScenario {
   return RealEngineDecisionCorpusScenarioBuilder.corpMain(scenarioId, seed)
     .mutateFixture(mutate)
     .addEvidence(evidence)
@@ -795,7 +810,7 @@ function corpRezScenario(
   corpCredits: number,
   deckSnapshotId?: string,
   evidence: readonly string[] = [],
-): RealEngineDecisionCorpusScenario {
+): EngineBoundCorpusScenario {
   let state = toRunnerTurn(createCorpusGame(seed));
   RealEngineFixtureBuilder.forState(state).withCorpRezWindow(corpCredits);
   state = apply(
@@ -821,7 +836,7 @@ function runnerDiscardChoiceScenario(
   scenarioId: string,
   seed: string,
   deckSnapshotId?: string,
-): RealEngineDecisionCorpusScenario {
+): EngineBoundCorpusScenario {
   let state = toRunnerTurn(createCorpusGame(seed));
   RealEngineFixtureBuilder.forState(state)
     .withRunnerCredits(5)
@@ -907,10 +922,8 @@ class RealEngineDecisionCorpusScenarioBuilder {
     return this;
   }
 
-  build(): RealEngineDecisionCorpusScenario {
-    const deckSnapshot = snapshotById(
-      this.deckSnapshotId ?? defaultSnapshotIdForSide(this.side),
-    );
+  build(): EngineBoundCorpusScenario {
+    const deckSnapshot = snapshotById(defaultSnapshotIdForSide(this.side));
     const input = buildAiDecisionInput(this.state, this.side, {
       decisionId: this.scenarioId,
       profileId: `${this.side}-ai-real-engine-corpus`,
@@ -919,6 +932,9 @@ class RealEngineDecisionCorpusScenarioBuilder {
     return {
       scenarioId: this.scenarioId,
       input,
+      engineOptions: simulationEngineRuntimeOptions(this.state),
+      applyEngineSelection: (decision) =>
+        applySimulationEngineSelection(this.state, decision, this.scenarioId),
       ...(this.side === "runner"
         ? {
             runner: {
@@ -1000,8 +1016,8 @@ function deckDoctrineForSnapshot(snapshotId: string) {
 
 function defaultSnapshotIdForSide(side: Side): string {
   return side === "runner"
-    ? "demo_runner_008_snapshot_v0_8"
-    : "demo_corp_008_snapshot_v0_8";
+    ? "demo_runner_001_snapshot_v0_6"
+    : "demo_corp_001_snapshot_v0_6";
 }
 
 function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
@@ -1041,9 +1057,15 @@ function toRunnerTurn(state: GameState): GameState {
     next.pendingChoice?.source === "discard_phase" &&
     next.pendingChoice.side === "corp"
   ) {
-    next = applyChoice(next, "corp", [
-      String(next.pendingChoice.options[0]?.id),
-    ]);
+    const choice = next.pendingChoice;
+    const selectedOptionIds = choice.options
+      .filter((option) => option.selectable !== false)
+      .slice(0, choice.minSelections)
+      .map((option) => option.id);
+    if (selectedOptionIds.length !== choice.minSelections) {
+      throw new Error("Incomplete current Corp discard offer in corpus fixture");
+    }
+    next = applyChoice(next, "corp", selectedOptionIds);
   }
   return next;
 }
@@ -1082,14 +1104,17 @@ function applyChoice(
   const selected = legalActions.find(
     (action) => action.type === "resolve_choice",
   );
-  if (!selected) throw new Error("Missing resolve_choice action");
+  const choice = state.pendingChoice;
+  if (!selected || !choice || choice.side !== side) {
+    throw new Error("Missing current resolve_choice action in corpus fixture");
+  }
   const result = applyAction(state, {
     matchId: state.matchId,
     side,
     actionId: selected.actionId,
     clientKnownStateVersion: state.stateVersion,
     selectedChoices: {
-      choiceId: state.pendingChoice?.choiceId,
+      choiceId: choice.choiceId,
       selectedOptionIds,
     },
     idempotencyKey: `${side}-${state.stateVersion}-${selected.actionId}-${selectedOptionIds.join(".")}`,

@@ -21655,6 +21655,7 @@ describe("authoritative plan-first live runtime", () => {
       stop,
     ]);
     afterOpen.playerView.stateVersion = 2;
+    for (const action of afterOpen.legalActions) action.expiresAtStateVersion = 2;
     afterOpen.playerView.own.clicks = 7;
     afterOpen.playerView.own.credits = 7;
     afterOpen.playerView.own.memoryLimit = 4;
@@ -21679,8 +21680,12 @@ describe("authoritative plan-first live runtime", () => {
       },
     });
 
-    const afterFirstInstall = aiInput("runner", [restrictedProgramB, stop]);
+    const afterFirstInstall = aiInput("runner", [
+      restrictedProgramB,
+      stop,
+    ]);
     afterFirstInstall.playerView.stateVersion = 3;
+    for (const action of afterFirstInstall.legalActions) action.expiresAtStateVersion = 3;
     afterFirstInstall.playerView.own.clicks = 6;
     afterFirstInstall.playerView.own.credits = 5;
     afterFirstInstall.playerView.own.memoryLimit = 4;
@@ -21704,8 +21709,11 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
 
-    const afterSecondInstall = aiInput("runner", [stop]);
+    const afterSecondInstall = aiInput("runner", [
+      stop,
+    ]);
     afterSecondInstall.playerView.stateVersion = 4;
+    for (const action of afterSecondInstall.legalActions) action.expiresAtStateVersion = 4;
     afterSecondInstall.playerView.own.clicks = 5;
     afterSecondInstall.playerView.own.credits = 2;
     afterSecondInstall.playerView.own.memoryLimit = 4;
@@ -22296,6 +22304,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [install, stop]);
     input.playerView.stateVersion = 2;
+    for (const action of input.legalActions) action.expiresAtStateVersion = 2;
     input.playerView.own.gripOrHq = [
       visibleCard("program-card", "runner", "program", {
         definitionId: "onr_v1_007_blink",
@@ -31783,6 +31792,7 @@ function activeRestrictedValuPakInput() {
   );
   const input = aiInput("runner", [install, stop]);
   input.playerView.stateVersion = 5;
+  for (const action of input.legalActions) action.expiresAtStateVersion = 5;
   input.playerView.own.credits = 5;
   input.playerView.own.clicks = 5;
   input.playerView.own.memoryLimit = 4;

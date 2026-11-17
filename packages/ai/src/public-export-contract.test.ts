@@ -116,7 +116,6 @@ describe("AI public export contract", () => {
       "utf8",
     );
     const forbiddenPublicModules = [
-      "./diagnostics/semantic-runtime-debug",
       "./diagnostics/coverage-selection-debug",
       "./diagnostics/semantic-runtime-action-alternatives",
       "./diagnostics/semantic-runtime-ranked-alternatives",

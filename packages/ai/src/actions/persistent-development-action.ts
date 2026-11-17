@@ -20,14 +20,19 @@ export function persistentDevelopmentActionProjection(
 ): PersistentDevelopmentActionProjection | undefined {
   if (action.side !== "runner") return undefined;
   if (action.type === "install_card") {
+    const sourceCardId =
+      action.source === "basic_action" || action.source === "game_rule"
+        ? undefined
+        : action.source;
     const targetCardId = firstString(
       action.payload?.cardId,
+      sourceCardId,
       action.payload?.targetCardId,
-      action.source,
     );
     if (!targetCardId) return undefined;
     const targetDefinitionId = firstString(
       action.payload?.cardDefinitionId,
+      action.payload?.sourceDefinitionId,
       action.payload?.targetCardDefinitionId,
     );
     return projection({
@@ -63,7 +68,7 @@ export function persistentDevelopmentActionProjection(
   });
 }
 
-export function actionDevelopsPersistentCardNow(action: LegalAction): boolean {
+export function actionAppliesPersistentInstallFitNow(action: LegalAction): boolean {
   return (
     persistentDevelopmentActionProjection(action)?.appliesInstallFitNow === true
   );

@@ -2,7 +2,7 @@ import { traceCorpBaseStrength, traceRulesDefinition } from "@netgrid/engine";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { createAiHintsByCard } from "../ai-hints";
-import { corpVisibleCardPlayCost } from "./corp-tag-punish-payoff-profiles";
+import { corpVisibleCardPlayCost } from "./corp-visible-card-play-cost";
 import type { LatestTraceContext } from "./trace-context";
 import { corpCurrentRunAgendaExposure } from "../corp/defense/corp-server-protection-reserve";
 

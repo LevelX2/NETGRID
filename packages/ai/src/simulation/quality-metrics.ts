@@ -8,6 +8,7 @@ export type AiSoakResult = {
   summaries: AiSimulationSummary[];
   aggregate: {
     seeds: number;
+    games: number;
     illegalActions: number;
     replayFailures: number;
     fallbackRate: number;

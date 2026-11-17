@@ -24,13 +24,13 @@ import {
   averageFirstProgressionTurn,
   averageRunnerContestRisk,
   averageTurnsFromFirstAdvanceToScore,
+  averageTurnsFromFinalAdvanceToScoreOrSteal,
   countFinalAdvancesResolvedBySameTurnCorpScore,
   countFinalAdvancesStolenBeforeCorpScore,
   countRunnerDrawThenDiscardSameTurn,
 } from "./match-progression-average-metrics";
 import { summarizePlanConversionMetrics } from "./plan-conversion-metrics";
 import {
-  averageTurnsFromFinalAdvanceToScoreOrSteal,
   countRunnerTurnsBelowContestReserve,
   countPressureTargetSwitches,
   isCorpRemoteAdvancementProgress,

@@ -1,5 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { actionMatchesCurrentDecision } from "./current-legal-action";
 import {
   runnerEncounterCreditBudgetForInput,
   spendRunnerEncounterActionCost,
@@ -15,6 +16,7 @@ export function projectRunnerEncounterCashCost(
     input.side !== "runner" ||
     input.playerView.timingPoint !== "run.encounter_ice" ||
     input.playerView.run?.phase !== "encounter_ice" ||
+    candidate.actorSide !== input.side ||
     candidate.stateVersion !== input.playerView.stateVersion ||
     (candidate.actionType !== "pump_breaker" &&
       candidate.actionType !== "break_subroutine")
@@ -23,9 +25,10 @@ export function projectRunnerEncounterCashCost(
   const action = input.legalActions.find(
     (entry) => entry.actionId === candidate.actionId,
   );
-  if (!action) return candidate;
+  if (!actionMatchesCurrentDecision(input, action) || action.type !== candidate.actionType)
+    return candidate;
   const grossCost = candidate.costProfile.creditCost;
-  if (!Number.isSafeInteger(grossCost) || (grossCost ?? 0) <= 0)
+  if (grossCost === undefined || !Number.isSafeInteger(grossCost) || grossCost <= 0)
     return candidate;
   const budget = runnerEncounterCreditBudgetForInput(input);
   // A bank activation is a separate Engine action, not current payment cash.
@@ -35,10 +38,10 @@ export function projectRunnerEncounterCashCost(
     input,
     action,
     budget,
-    cost: grossCost!,
+    cost: grossCost,
   });
   if (payment.restrictedSpent === 0) return candidate;
-  const cashCost = grossCost! - payment.restrictedSpent;
+  const cashCost = grossCost - payment.restrictedSpent;
   const economy = candidate.economyProjection;
   return {
     ...candidate,
