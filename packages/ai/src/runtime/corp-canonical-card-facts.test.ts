@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import { createAiHintsByCard } from "../ai-hints";
@@ -37,7 +38,7 @@ describe("canonical Corp card facts", () => {
     ).toEqual([{ entryServerId: "archives", accessServerId: "hq" }]);
     for (const definitionId of [
       undefined,
-      "unknown",
+      syntheticCardDefinitionId("unknown"),
       306,
       323,
       399,
@@ -84,7 +85,7 @@ describe("canonical Corp card facts", () => {
       corpConditionalScoreCreditProfile(408),
     ).toEqual({ threshold: 12, gainAmount: 12 });
     expect(
-      corpConditionalScoreCreditProfile("onr_v1_201_foetal-ai"),
+      corpConditionalScoreCreditProfile(62),
     ).toBeUndefined();
 
     expect(

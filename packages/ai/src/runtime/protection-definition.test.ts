@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import { isProtectionDefinitionId } from "./protection-definition";
@@ -11,9 +12,9 @@ describe("protection definition", () => {
     ).toBe(true);
   });
 
-  it("does not infer protection from definition-id text", () => {
-    expect(isProtectionDefinitionId("custom-red-herrings-proxy")).toBe(false);
-    expect(isProtectionDefinitionId("test_tesseract_remote")).toBe(false);
-    expect(isProtectionDefinitionId("namatoki_like_upgrade")).toBe(false);
+  it("does not assign protection to an unregistered definition", () => {
+    expect(
+      isProtectionDefinitionId(syntheticCardDefinitionId("unknown-upgrade")),
+    ).toBe(false);
   });
 });

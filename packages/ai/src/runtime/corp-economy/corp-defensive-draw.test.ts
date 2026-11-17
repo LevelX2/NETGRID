@@ -1,5 +1,6 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import type { AiDeckStrategyDeckSnapshot } from "../../deck-strategy-snapshot";
 
 import {
   corpMissingConcreteDefenseDrawNeed,
@@ -663,11 +664,7 @@ describe("Corp defensive draw context", () => {
 
 function targetedScoreDefenseDrawSetup(handCount = 3): {
   input: AiDecisionInput & {
-    ownDeckSnapshot?: {
-      deckSnapshotId: string;
-      side: "corp";
-      cards: Array<{ cardId: string; quantity: number }>;
-    };
+    ownDeckSnapshot?: AiDeckStrategyDeckSnapshot;
   };
   need: CorpFundedRemoteAccessRiskNeed & {
     baseline: KnownCorpFundedScoreProtectionAssessment;
@@ -679,7 +676,9 @@ function targetedScoreDefenseDrawSetup(handCount = 3): {
     costs: [{ clicks: 1 }],
     expiresAtStateVersion: 13,
   };
-  const input = corpInputWithHqCardsAndServers(
+  const input: AiDecisionInput & {
+    ownDeckSnapshot?: AiDeckStrategyDeckSnapshot;
+  } = corpInputWithHqCardsAndServers(
     13,
     Array.from({ length: handCount }, (_, index) =>
       corpCard(`operation-${index}`, "operation"),
@@ -693,13 +692,7 @@ function targetedScoreDefenseDrawSetup(handCount = 3): {
       },
     ],
     [exactDraw],
-  ) as AiDecisionInput & {
-    ownDeckSnapshot?: {
-      deckSnapshotId: string;
-      side: "corp";
-      cards: Array<{ cardId: string; quantity: number }>;
-    };
-  };
+  );
   input.playerView.stateVersion = 13;
   input.playerView.own.maxHandSize = 5;
   input.playerView.own.clicks = 2;

@@ -762,10 +762,14 @@ describe("Corp compromised Ambush disposition", () => {
     };
     (
       left.input as InputWithTestOnlyHiddenRunnerHand
-    ).testOnlyHiddenRunnerHandDefinitionIds = ["hidden_runner_card_a"];
+    ).testOnlyHiddenRunnerHandDefinitionIds = [
+      syntheticCardDefinitionId("hidden_runner_card_a"),
+    ];
     (
       right.input as InputWithTestOnlyHiddenRunnerHand
-    ).testOnlyHiddenRunnerHandDefinitionIds = ["hidden_runner_card_b"];
+    ).testOnlyHiddenRunnerHandDefinitionIds = [
+      syntheticCardDefinitionId("hidden_runner_card_b"),
+    ];
 
     const leftBelief = reconstructBeliefState(left.input);
     const rightBelief = reconstructBeliefState(right.input);
@@ -1069,7 +1073,7 @@ function installedTrapFixture(options: {
     input.playerView.timingPoint = "run.movement_rez_window";
     accessRez.timingPoint = input.playerView.timingPoint;
     input.playerView.run = {
-      runId: "run-access-remote-1",
+      runId: input.playerView.stateVersion,
       attackedServerId: "r1",
       phase: "movement",
       position: { kind: "server", serverId: "r1" },

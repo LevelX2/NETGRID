@@ -1,4 +1,4 @@
-import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import type { CardDefinitionId, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
@@ -55,7 +55,7 @@ function corpInput(): AiDecisionInputWithDeckCapabilities {
       activeSide: "corp",
       phase: "corp_action_phase",
       own: {
-        identity: card("corp-identity", "corp-identity", "identity"),
+        identity: card("corp-identity", 3, "identity"),
         credits: 5,
         clicks: 3,
         agendaPoints: 3,
@@ -67,7 +67,7 @@ function corpInput(): AiDecisionInputWithDeckCapabilities {
         tags: 0,
       },
       opponent: {
-        identity: card("runner-identity", "runner-identity", "identity"),
+        identity: card("runner-identity", 587, "identity"),
         credits: 5,
         clicks: 3,
         agendaPoints: 6,
@@ -93,14 +93,14 @@ function agenda(instanceId: string): VisibleCard {
 
 function card(
   instanceId: string,
-  definitionId: number,
+  definitionId: CardDefinitionId,
   type: NonNullable<VisibleCard["type"]>,
   agendaPoints?: number,
 ): VisibleCard {
   return {
     instanceId,
     definitionId,
-    title: definitionId,
+    title: instanceId,
     type,
     known: true,
     owner: "corp",

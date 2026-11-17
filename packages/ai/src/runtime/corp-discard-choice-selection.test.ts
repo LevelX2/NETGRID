@@ -399,32 +399,32 @@ function engineArchivesDiscardInput(options: {
 function agenda(instanceId: string, agendaPoints: number): VisibleCard {
   return {
     instanceId,
-    definitionId: `definition-${instanceId}`,
+    definitionId: syntheticCardDefinitionId(`definition-${instanceId}`),
     title: instanceId,
     type: "agenda",
     agendaPoints,
     known: true,
-  } as VisibleCard;
+  };
 }
 
 function operation(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: `definition-${instanceId}`,
+    definitionId: syntheticCardDefinitionId(`definition-${instanceId}`),
     title: instanceId,
     type: "operation",
     known: true,
-  } as VisibleCard;
+  };
 }
 
 function ice(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: `definition-${instanceId}`,
+    definitionId: syntheticCardDefinitionId(`definition-${instanceId}`),
     title: instanceId,
     type: "ice",
     known: true,
-  } as VisibleCard;
+  };
 }
 
 function discardInput(

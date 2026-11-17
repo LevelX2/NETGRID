@@ -35,13 +35,23 @@ it("resolves the native Cinderella hardware choice from its numeric definition",
   });
 
   const decision = chooseAiAction(input, simulationEngineRuntimeOptions(state));
-  expect(decision.actionId).toBe("corp.resolve_choice");
   const selected = decision.selectedChoices;
-  expect(selected?.choiceId).toBe(choice.choiceId);
-  const target = choice.options.find(
-    (option) => option.id === selected?.selectedOptionIds[0],
-  )?.value;
-  if (typeof target !== "string" || !state.runner.rig.hardware.includes(target)) {
+  if (
+    decision.actionId !== "corp.resolve_choice" ||
+    selected?.choiceId !== choice.choiceId ||
+    !Array.isArray(selected.selectedOptionIds) ||
+    selected.selectedOptionIds.length !== 1
+  ) {
+    throw new Error("Defense must resolve the active hardware choice");
+  }
+  const [selectedOptionId] = selected.selectedOptionIds;
+  const option = choice.options.find(
+    (candidate) => candidate.id === selectedOptionId,
+  );
+  if (
+    typeof option?.value !== "string" ||
+    !state.runner.rig.hardware.includes(option.value)
+  ) {
     throw new Error("Defense must choose one installed hardware");
   }
 
@@ -50,10 +60,13 @@ it("resolves the native Cinderella hardware choice from its numeric definition",
     side: "corp",
     actionId: decision.actionId,
     clientKnownStateVersion: state.stateVersion,
-    ...(selected ? { selectedChoices: selected } : {}),
+    selectedChoices: {
+      choiceId: choice.choiceId,
+      selectedOptionIds: [option.id],
+    },
   });
   if (!resolved.ok) throw new Error(resolved.error.message);
   expect(validateGameState(resolved.state).ok).toBe(true);
-  expect(resolved.state.runner.rig.hardware).not.toContain(target);
-  expect(resolved.state.runner.heap).toContain(target);
+  expect(resolved.state.runner.rig.hardware).not.toContain(option.value);
+  expect(resolved.state.runner.heap).toContain(option.value);
 });

@@ -107,7 +107,7 @@ describe("zone-specific access preparation", () => {
     expect(corpRdRecyclingSignals(input, candidates)[0]?.actionIds).toEqual([]);
     input.playerView.activeSide = "runner";
     input.playerView.run = {
-      runId: "run-1",
+      runId: input.playerView.stateVersion,
       attackedServerId: "r1",
       phase: "movement",
       successful: false,
@@ -139,7 +139,7 @@ describe("zone-specific access preparation", () => {
   it("does not reveal a held protected decoy during an unrelated central run", () => {
     const { input, candidates } = setup(true, true);
     input.playerView.run = {
-      runId: "central",
+      runId: input.playerView.stateVersion,
       attackedServerId: "rd",
       phase: "movement",
       successful: false,

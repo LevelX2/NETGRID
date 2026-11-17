@@ -5,7 +5,7 @@ import {
   getPlayerView,
   hashState,
 } from "@netgrid/engine";
-import { DEMO_DECKS, type GameState } from "@netgrid/shared";
+import { DEMO_DECKS, type CardDefinitionId, type GameState } from "@netgrid/shared";
 import { expect, it } from "vitest";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -53,7 +53,7 @@ it("keeps Classic trace semantics when quoting the live inner path", () => {
 it("keeps the funded bypass-soak route with the Defense owner and its original action", () => {
   resetResidentPlanPortfolioMemory();
   const f = fixture(true, false);
-  const counts = new Map<string, number>();
+  const counts = new Map<CardDefinitionId, number>();
   for (const card of Object.values(f.state.cardInstances)) {
     if (card.owner === "corp" && card.instanceId !== f.state.corp.identity)
       counts.set(card.definitionId, (counts.get(card.definitionId) ?? 0) + 1);

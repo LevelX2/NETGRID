@@ -5,7 +5,7 @@ import {
   createGameAfterSetup,
   getLegalActions,
 } from "@netgrid/engine";
-import type { DeckDefinition, GameState } from "@netgrid/shared";
+import type { CardDefinitionId, DeckDefinition, GameState } from "@netgrid/shared";
 import { metaTenStandardDecks as catalog } from "../evaluation/meta-ten-standard-decks.test-support";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "./ai-decision-input";
@@ -165,7 +165,7 @@ function apply(
   if (!result.ok) throw Error(result.error.message);
   return result.state;
 }
-function complete(state: GameState, target: string) {
+function complete(state: GameState, target: CardDefinitionId) {
   for (let step = 0; step < 6 && state.pendingChoice; step++) {
     const choice = buildAiDecisionInput(state, "runner", {
       difficulty: "hard",
