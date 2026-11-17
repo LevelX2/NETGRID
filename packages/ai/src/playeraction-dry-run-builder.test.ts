@@ -66,6 +66,59 @@ describe("playeraction dry-run builder", () => {
     expect(result.playerAction?.selectedTargets).toEqual({ serverId: "rd" });
   });
 
+  it("blocks a resolved target that differs from the bound target", () => {
+    const binding = buildCandidatePathBinding({
+      signature: buildSemanticActionSignature({
+        actionType: "start_run",
+        semanticActionType: "run_pressure",
+        sourceKind: "basic_action",
+        targetIdentity: "server:rd",
+      }),
+      actionId: "runner.start_run.rd",
+      stateVersion: 20,
+      side: "runner",
+      intentContractId: "test.run",
+    });
+    const result = buildPlayerActionFromCandidateBinding({
+      binding,
+      targetIdentity: resolveCandidateTargetIdentity({
+        actionType: "start_run",
+        targetIdentity: "server:hq",
+      }),
+    });
+    expect(result).toMatchObject({
+      status: "blocked",
+      blockers: ["target_identity_differs_from_binding"],
+    });
+  });
+
+  it("uses the Engine's choice payload for a bound option", () => {
+    const targetIdentity = "choice:choice_1:option_a";
+    const binding = buildCandidatePathBinding({
+      signature: buildSemanticActionSignature({
+        actionType: "resolve_choice",
+        semanticActionType: "choice.resolve",
+        sourceKind: "game_rule",
+        targetIdentity,
+      }),
+      actionId: "runner.resolve_choice.test",
+      stateVersion: 20,
+      side: "runner",
+      intentContractId: "test.choice",
+    });
+    const result = buildPlayerActionFromCandidateBinding({
+      binding,
+      targetIdentity: resolveCandidateTargetIdentity({
+        actionType: "resolve_choice",
+        targetIdentity,
+      }),
+    });
+    expect(result.playerAction?.selectedChoices).toEqual({
+      choiceId: "choice_1",
+      selectedOptionIds: ["option_a"],
+    });
+  });
+
   it("blocks when target identity is missing", () => {
     const binding = buildCandidatePathBinding({
       signature: buildSemanticActionSignature({
@@ -148,7 +201,7 @@ describe("player action builder from LegalActionWitness", () => {
   it("builds no-target basic actions", () => {
     const result = buildPlayerActionFromWitness({
       witness: buildLegalActionWitness({
-        legalAction: action("gain_credit", { targetRequirements: [] }),
+        legalAction: action("gain_credit", { expiresAtStateVersion: 17 }),
         stateVersion: 17,
       }),
       legalActionIds: ["test.gain_credit"],
@@ -167,6 +220,7 @@ describe("player action builder from LegalActionWitness", () => {
     const result = buildPlayerActionFromWitness({
       witness: buildLegalActionWitness({
         legalAction: action("start_run", {
+          expiresAtStateVersion: 20,
           payload: { serverId: "hq" },
           targetRequirements: [
             { id: "server", kind: "server", allowedServers: ["hq"] },
@@ -185,6 +239,7 @@ describe("player action builder from LegalActionWitness", () => {
       witness: buildLegalActionWitness({
         legalAction: action("install_card", {
           actionId: "runner.install_card.program.hardware_host",
+          expiresAtStateVersion: 23,
           payload: {
             cardId: "program_to_install",
             hostOnCardId: "hardware_host",
@@ -214,33 +269,70 @@ describe("player action builder from LegalActionWitness", () => {
     expect(result.playerAction?.selectedTargets).toBeUndefined();
   });
 
-  it("builds choice options", () => {
+  it("builds exact choice IDs and options containing separators", () => {
     const result = buildPlayerActionFromWitness({
       witness: buildLegalActionWitness({
         legalAction: action("resolve_choice", {
+          expiresAtStateVersion: 21,
           choiceRequirements: [
             {
-              choiceId: "choice_1",
+              choiceId: "choice:1",
               minSelections: 1,
               maxSelections: 1,
-              optionIds: ["option_a"],
+              optionIds: ["option:a"],
             },
           ],
           targetRequirements: [],
         }),
         stateVersion: 21,
         selectedChoices: {
-          choiceId: "choice_1",
-          selectedOptionIds: ["option_a"],
+          choiceId: "choice:1",
+          selectedOptionIds: ["option:a"],
         },
       }),
     });
 
     expect(result.status).toBe("built");
     expect(result.playerAction?.selectedChoices).toEqual({
-      choiceId: "choice_1",
-      selectedOptionIds: ["option_a"],
+      choiceId: "choice:1",
+      selectedOptionIds: ["option:a"],
     });
+  });
+
+  it("blocks a multiple-option selection where one option cannot reconstruct the action", () => {
+    const result = buildPlayerActionFromWitness({
+      witness: buildLegalActionWitness({
+        legalAction: action("resolve_choice", {
+          expiresAtStateVersion: 22,
+          choiceRequirements: [
+            {
+              choiceId: "choice_2",
+              minSelections: 2,
+              maxSelections: 2,
+              optionIds: ["option_a", "option_b"],
+            },
+          ],
+        }),
+        stateVersion: 22,
+        selectedChoices: {
+          choiceId: "choice_2",
+          selectedOptionIds: ["option_a", "option_b"],
+        },
+      }),
+    });
+    expect(result.status).toBe("blocked");
+    expect(result.blockers).toContain("choice_option_missing");
+  });
+
+  it("blocks a witness from a different state version", () => {
+    const result = buildPlayerActionFromWitness({
+      witness: buildLegalActionWitness({
+        legalAction: action("gain_credit", { expiresAtStateVersion: 1 }),
+        stateVersion: 2,
+      }),
+    });
+    expect(result.status).toBe("blocked");
+    expect(result.blockers).toContain("witness_state_version_mismatch");
   });
 
   it("blocks hidden targets and missing legal action membership", () => {

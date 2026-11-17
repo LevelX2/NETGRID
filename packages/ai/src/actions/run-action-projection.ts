@@ -1,4 +1,3 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
@@ -81,12 +80,20 @@ export function projectInternalRunnerRunActions(
     const runnerCreditGainOnCorpRez = numberPayloadValue(action, [
       "runnerCreditGainOnCorpRez",
     ]);
-    const successfulRunSelfTags = successfulRunSelfTagsForRunAction(
+    const capabilityKey = stringPayloadValue(
       action,
-      hint,
+      "cardImplementationAbilityKey",
     );
+    const successfulRunCapability = capabilityKey
+      ? hint?.actionCapabilitySemantics?.find(
+          (entry) => entry.capabilityKey === capabilityKey,
+        )
+      : undefined;
+    const successfulRunEffects = successfulRunCapability?.effects ?? [];
+    const successfulRunSelfTags =
+      successfulRunSelfTagsForRunAction(successfulRunEffects);
     const successfulRunRunnerCreditGain =
-      successfulRunRunnerCreditGainForRunAction(action, hint);
+      successfulRunRunnerCreditGainForRunAction(successfulRunEffects);
     const successfulRunRunnerCreditGainRequiresOpponentCredits =
       successfulRunRunnerCreditGain !== undefined &&
       hint?.riskTags?.includes("corp_empty_credit_pool_whiff") === true;
@@ -115,12 +122,12 @@ export function projectInternalRunnerRunActions(
       ...(accessReplacementLookCount !== undefined
         ? { accessReplacementLookCount }
         : {}),
-      constraintSignals: constraintSignalsForRunAction(
-        action,
+      constraintSignals: constraintSignalsForRunAction(action, candidate),
+      riskSignals: riskSignalsForRunAction(
         candidate,
-        signals,
+        hint,
+        successfulRunSelfTags,
       ),
-      riskSignals: riskSignalsForRunAction(action, candidate, hint),
       ...(successfulRunSelfTags > 0 ? { successfulRunSelfTags } : {}),
       ...(temporaryRunCredits > 0 ? { temporaryRunCredits } : {}),
       ...(postRunSelfDamage > 0 ? { postRunSelfDamage } : {}),
@@ -351,7 +358,6 @@ function runActionRelevant(
   ) {
     return false;
   }
-  const text = runActionSearchText(action, signals);
   if (runActionHasStructuredSignal(signals, ["path blocked", "path_blocked"]))
     return false;
   const explicitRunSignals = runActionHasStructuredSignal(signals, [
@@ -489,20 +495,14 @@ function runActionSignals(
   ]).filter((signal) => signal.length > 0);
 }
 
+type RunCapabilityEffects = NonNullable<
+  NonNullable<AiCardHint["actionCapabilitySemantics"]>[number]["effects"]
+>;
+
 function successfulRunRunnerCreditGainForRunAction(
-  action: LegalAction,
-  hint: AiCardHint | undefined,
+  effects: RunCapabilityEffects,
 ): number | undefined {
-  const capabilityKey = stringPayloadValue(
-    action,
-    "cardImplementationAbilityKey",
-  );
-  if (!capabilityKey) return undefined;
-  const capability = hint?.actionCapabilitySemantics?.find(
-    (entry) => entry.capabilityKey === capabilityKey,
-  );
-  if (!capability) return undefined;
-  const total = (capability.effects ?? []).reduce((sum, effect) => {
+  const total = effects.reduce((sum, effect) => {
     if (
       effect.kind !== "economy" ||
       effect.scope !== "runner" ||
@@ -585,13 +585,6 @@ function runActionStructure(
   if (action.type === "play_event") return "event_run";
   if (action.type === "resolve_choice") return "target_choice";
   return "run_enabler";
-}
-
-function runActionSearchText(
-  action: LegalAction,
-  signals: readonly string[],
-): string {
-  return `${action.type} ${payloadSearchText(action)} ${signals.join(" ")}`.toLowerCase();
 }
 
 function targetServerIdsForRunAction(
@@ -1006,7 +999,6 @@ function accessSignalsForHintEffect(
 function constraintSignalsForRunAction(
   action: LegalAction,
   candidate: ActionSemanticCandidate | undefined,
-  signals: readonly string[],
 ): string[] {
   return uniqueStrings([
     ...(runSpendLimitForAction(action) !== undefined ? ["spend_limit"] : []),
@@ -1059,20 +1051,8 @@ function tokensIncludePhrase(
   );
 }
 
-function successfulRunSelfTagsForRunAction(
-  action: LegalAction,
-  hint: AiCardHint | undefined,
-): number {
-  const capabilityKey = stringPayloadValue(
-    action,
-    "cardImplementationAbilityKey",
-  );
-  const capability = capabilityKey
-    ? hint?.actionCapabilitySemantics?.find(
-        (entry) => entry.capabilityKey === capabilityKey,
-      )
-    : undefined;
-  return (capability?.effects ?? []).reduce((sum, effect) => {
+function successfulRunSelfTagsForRunAction(effects: RunCapabilityEffects): number {
+  return effects.reduce((sum, effect) => {
     if (
       effect.kind !== "tag" ||
       effect.scope !== "runner" ||
@@ -1090,17 +1070,13 @@ function successfulRunSelfTagsForRunAction(
 }
 
 function riskSignalsForRunAction(
-  action: LegalAction,
   candidate: ActionSemanticCandidate | undefined,
   hint: AiCardHint | undefined,
+  successfulRunSelfTags: number,
 ): string[] {
-  const riskTags =
-    (hint as { riskTags?: string[] } | undefined)?.riskTags ?? [];
-  const successfulRunSelfTag =
-    successfulRunSelfTagsForRunAction(action, hint) > 0;
   return uniqueStrings([
-    ...riskTags,
-    ...(successfulRunSelfTag ? ["tag_self:successful_run"] : []),
+    ...(hint?.riskTags ?? []),
+    ...(successfulRunSelfTags > 0 ? ["tag_self:successful_run"] : []),
     ...(candidate?.risks ?? []).map((risk) => `${risk.kind}:${risk.severity}`),
   ]);
 }
@@ -1149,27 +1125,6 @@ function payloadStringArray(
   return payloadStringValues(action, keys).map((value) =>
     value.trim().toLowerCase(),
   );
-}
-
-function payloadSearchText(action: LegalAction): string {
-  const payload = payloadRecord(action);
-  return Object.values(payload)
-    .flatMap((value) => {
-      if (typeof value === "string") return [value];
-      if (typeof value === "number" || typeof value === "boolean") {
-        return [String(value)];
-      }
-      if (Array.isArray(value)) {
-        return value
-          .filter(
-            (entry) => typeof entry === "string" || typeof entry === "number",
-          )
-          .map(String);
-      }
-      return [];
-    })
-    .join(" ")
-    .toLowerCase();
 }
 
 function booleanPayloadValue(action: LegalAction, key: string): boolean {

@@ -130,22 +130,24 @@ function runStartFixture(version: number) {
     card.faceup = true;
     card.rezzed = false;
   }
-  // Let the Engine pay out the installed conferences before asking for a run.
-  // Fresh, unpaid economy investments correctly defer this non-urgent run.
+  // Stage the non-urgent run after each installed conference has paid twice.
+  // The first payout alone can still defer the run while its value is low.
   state.activeSide = "corp";
   state.phase = "corp_action_phase";
   state.timingPoint = "corp_action.main";
   state.corp.clicks = 0;
-  for (
-    let step = 0;
-    step < 5 && (state.activeSide !== "runner" || state.pendingChoice);
-    step++
-  ) {
+  const payoutCounts = new Map(conferences.map((card) => [card.instanceId, 0]));
+  const runWindowReady = () =>
+    state.activeSide === "runner" &&
+    state.pendingChoice === undefined &&
+    conferences.every((card) => payoutCounts.get(card.instanceId)! >= 2);
+  for (let step = 0; step < 20 && !runWindowReady(); step++) {
     const side = state.pendingChoice?.side ?? state.activeSide;
     const actions = getLegalActions(state, side);
     const action = state.pendingChoice
       ? actions.find((candidate) => candidate.type === "resolve_choice")
-      : actions.find((candidate) => candidate.type === "end_turn");
+      : actions.find((candidate) => candidate.type === "mandatory_draw") ??
+        actions.find((candidate) => candidate.type === "end_turn");
     if (!action)
       throw new Error("Missing Engine action while realizing fixture economy");
     const result = applyAction(state, {
@@ -164,10 +166,23 @@ function runStartFixture(version: number) {
         : {}),
     });
     if (!result.ok) throw new Error(result.error.message);
+    const effects = result.state.eventLog.at(-1)?.publicPayload?.resolvedEffects;
+    if (Array.isArray(effects)) {
+      for (const effect of effects) {
+        const source = effect?.sourceCardInstanceId;
+        if (
+          typeof source === "string" &&
+          effect.kind === "gain_credits" &&
+          effect.reason === "start_of_turn" &&
+          payoutCounts.has(source)
+        ) {
+          payoutCounts.set(source, payoutCounts.get(source)! + 1);
+        }
+      }
+    }
     state = result.state;
   }
-  expect(state.activeSide).toBe("runner");
-  expect(state.pendingChoice).toBeUndefined();
+  expect(runWindowReady()).toBe(true);
   const input = (current: GameState, sourceOnly = false) => {
     const full = buildAiDecisionInput(current, "runner", {
       decisionId: `${state.matchId}:${current.stateVersion}`,

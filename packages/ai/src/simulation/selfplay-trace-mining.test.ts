@@ -1,3 +1,4 @@
+import { summarizeRunnerRepeatRemoteNoTrashMetrics } from "./runner-repeat-remote-no-trash-metrics";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { describe, expect, it } from "vitest";
 import {
@@ -10,6 +11,47 @@ import {
 } from "./selfplay-trace-mining";
 
 describe("SelfplayTraceMining", () => {
+  it("uses the full stable hash in suggested fixture names", () => {
+    const summary = selfplaySummary([]);
+    const [finding] = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: ["action_limit_reached"],
+    });
+    expect(finding?.suggestedFixtureName).toMatch(/^action_limit_reached-[0-9a-f]{8}[.]fixture[.]json$/);
+  });
+  it("keeps a remote's decline across credit clicks and distinguishes new ICE", () => {
+    const decline = selfplayAction("runner", 1, "decline_trash", {
+      targetServerId: "remote_1",
+      runnerRemoteAccessWithRelevantTrashableCard: true,
+      runnerRemoteAccessWithTrashableCard: true,
+      runnerRemoteTrashDeclined: true,
+      runnerSkippedAffordableRelevantRemoteTrash: true,
+    });
+    const gain = selfplayAction("runner", 2, "gain_credit");
+    const run = selfplayAction("runner", 4, "play_event", {
+      runnerRunStarted: true,
+      targetServerId: "remote_1",
+    });
+    const changed = selfplayAction("corp", 3, "install_card", {
+      targetServerId: "remote_1",
+      installPlacement: "ice",
+    });
+    expect(summarizeRunnerRepeatRemoteNoTrashMetrics([
+      selfplaySummary([decline, gain, run]),
+    ])).toMatchObject({
+      runnerRepeatRunOnSameRemoteAfterDecliningTrash: 1,
+      runnerRepeatRunOnSameRemoteNoNewInfo: 1,
+      runnerRepeatRemoteNoTrashFixGateSuspicious: 1,
+      runnerRepeatRemoteRunSuppressedAfterNoTrash: 0,
+    });
+    expect(summarizeRunnerRepeatRemoteNoTrashMetrics([
+      selfplaySummary([decline, gain, changed, run]),
+    ])).toMatchObject({
+      runnerRepeatRunOnSameRemoteAfterDecliningTrash: 1,
+      runnerRepeatRunOnSameRemoteNoNewInfo: 0,
+      runnerRepeatRemoteNoTrashFixGateSuspicious: 0,
+    });
+  });
+
   it("extracts redaction-safe decision points from selfplay summaries", () => {
     const summary = selfplaySummary([
       selfplayAction("runner", 1, "start_run", {

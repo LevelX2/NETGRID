@@ -808,6 +808,35 @@ describe("plan portfolio", () => {
     ).toEqual([]);
   });
 
+  it("records the sum of counter costs when one route uses two abilities from the same source", () => {
+    const input = decisionInput("corp", 97);
+    input.playerView.own.clicks = 2;
+    input.playerView.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [],
+        root: [{ instanceId: "capacity-source", known: true, advancementCounters: 2 }],
+      },
+    ];
+    const actionIds = ["first-ability", "second-ability"];
+    input.legalActions = actionIds.map(actionCapacityLegalAction);
+    const foreground = plan("corp.create_score_window", 980, "card", "agenda", 97);
+    foreground.actionDemands = [corpActionDemand(foreground.planId, 2, 4)];
+    const candidates = actionIds.map((id) => ({
+      ...actionCapacityCandidate(id, 1, {
+        sourceCardInstanceId: "capacity-source",
+        sourceCounterType: "advancement",
+        sourceCounterCost: 1,
+      }),
+      actionType: "activated_card_ability" as const,
+    }));
+    const portfolio = buildPlanPortfolio({ input, tacticalPlans: [foreground], candidates });
+    expect(portfolio.foreground?.resourceReservation.sourceCounters).toEqual({
+      "capacity-source:advancement": 2,
+    });
+  });
+
   it("invalidates a remembered action-capacity source when it disappears", () => {
     const firstInput = decisionInput("corp", 98);
     firstInput.playerView.own.clicks = 3;

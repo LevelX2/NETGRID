@@ -1438,8 +1438,6 @@ export function summarizeMatchProgressionMetrics(
     runnerRemoteTrashFixGateSuspicious: actionSequence.filter(
       (entry) => entry.runnerRemoteTrashFixGateSuspicious === true,
     ).length,
-    runnerRepeatRemoteNoTrashFixGateSuspicious:
-      repeatRemoteNoTrashMetrics.runnerRepeatRemoteNoTrashFixGateSuspicious,
     handUseRate:
       runnerHandUseOpportunityWindows > 0
         ? round(runnerHandUseActionsTaken / runnerHandUseOpportunityWindows)

@@ -88,6 +88,8 @@ function recurringEconomyCandidates(
   context: PlanSchedulerContext,
   signal: RunnerRecurringEconomySignal,
 ): PlanMaterialization["candidates"] {
+  // The installed commitment defers runs while other plans still own their actions.
+  if (signal.phase === "hold") return [];
   const actionIds = new Set(signal.actionIds);
   return context.actionCandidates
     .filter(
@@ -99,10 +101,6 @@ function recurringEconomyCandidates(
     )
     .map((candidate) => ({
       candidate,
-      stepValue:
-        signal.value +
-        (signal.phase === "hold" && candidate.semanticActionType === "draw.card"
-          ? 10
-          : 0),
+      stepValue: signal.value,
     }));
 }

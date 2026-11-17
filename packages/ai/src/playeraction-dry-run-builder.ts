@@ -118,6 +118,15 @@ function dryRunBlockers(input: PlayerActionDryRunBuildInput): string[] {
       input.targetIdentity.blocker ?? "target_identity_not_complete",
     );
   }
+  if (input.binding.targetIdentity !== input.targetIdentity.identity) {
+    blockers.add("target_identity_differs_from_binding");
+  }
+  if (
+    input.targetIdentity.kind === "choice" &&
+    !candidateChoicePayload(input.targetIdentity.identity)
+  ) {
+    blockers.add("choice_identity_not_exact");
+  }
   if (!actionFamilySupported(input.binding.actionType, input.targetIdentity)) {
     blockers.add("unsupported_action_family_for_dry_run_builder");
   }
@@ -131,9 +140,6 @@ function actionFamilySupported(
   if (targetIdentity.kind === "none") return noTargetActions.has(actionType);
   if (targetIdentity.kind === "server") return actionType === "start_run";
   if (targetIdentity.kind === "choice") return actionType === "resolve_choice";
-  if (targetIdentity.kind === "installedOwnCard") {
-    return installedOwnCardActions.has(actionType);
-  }
   return false;
 }
 
@@ -155,6 +161,19 @@ function witnessBuildBlockers(input: PlayerActionWitnessBuildInput): string[] {
     !legalActionIdSet.has(input.witness.actionId)
   ) {
     blockers.add("action_not_in_legal_actions");
+  }
+  if (
+    input.witness.stateVersion !== input.witness.timingProfile.expiresAtStateVersion
+  ) {
+    blockers.add("witness_state_version_mismatch");
+  }
+  if (
+    (input.witness.targetRef.kind === "ownInstalled" &&
+      input.witness.targetRef.playerActionTargetRequired) ||
+    (input.witness.targetRef.kind === "choice" &&
+      !witnessChoicePayload(input.witness))
+  ) {
+    blockers.add("witness_has_no_exact_playeraction_target");
   }
   if (!witnessActionFamilySupported(input.witness)) {
     blockers.add("unsupported_action_family_for_witness_builder");
@@ -193,18 +212,21 @@ function witnessTargetPayload(
     };
   }
   if (witness.targetRef.kind === "choice") {
-    const [, choiceId, optionId] = witness.targetRef.identity.split(":");
-    return {
-      selectedChoices: {
-        choiceId: choiceId ?? "choice",
-        selectedOptionIds: [optionId ?? "option"],
-      },
-    };
-  }
-  if (witness.targetRef.kind === "ownInstalled") {
-    return { selectedTargets: { targetRef: witness.targetRef.identity } };
+    return { selectedChoices: witnessChoicePayload(witness)! };
   }
   return {};
+}
+
+function witnessChoicePayload(
+  witness: LegalActionWitness,
+): PlayerAction["selectedChoices"] {
+  const choiceRef = witness.choiceRef;
+  if (!choiceRef) return undefined;
+  const prefix = "choice:" + choiceRef.choiceId + ":";
+  if (!witness.targetRef.identity.startsWith(prefix)) return undefined;
+  const optionId = witness.targetRef.identity.slice(prefix.length);
+  if (!choiceRef.optionIds.includes(optionId)) return undefined;
+  return { choiceId: choiceRef.choiceId, selectedOptionIds: [optionId] };
 }
 
 function witnessBuildEvidence(input: PlayerActionWitnessBuildInput): string[] {
@@ -228,15 +250,15 @@ function targetPayload(
     };
   }
   if (targetIdentity.kind === "choice") {
-    const [, choiceId, optionId] = targetIdentity.identity.split(":");
-    return {
-      selectedChoices: { [choiceId ?? "choice"]: optionId ?? "option" },
-    };
-  }
-  if (targetIdentity.kind === "installedOwnCard") {
-    return { selectedTargets: { targetIdentity: targetIdentity.identity } };
+    return { selectedChoices: candidateChoicePayload(targetIdentity.identity)! };
   }
   return {};
+}
+
+function candidateChoicePayload(identity: string): PlayerAction["selectedChoices"] {
+  const [, choiceId, optionId] = /^choice:([^:]+):([^:]+)$/.exec(identity) ?? [];
+  if (!choiceId || !optionId) return undefined;
+  return { choiceId, selectedOptionIds: [optionId] };
 }
 
 function dryRunEvidence(input: PlayerActionDryRunBuildInput): string[] {
@@ -265,7 +287,6 @@ const installedOwnCardActions = new Set([
   "install_card",
   "advance_card",
   "rez_ice",
-  "rez_card",
   "rez_card",
   "score_agenda",
 ]);

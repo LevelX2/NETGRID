@@ -4,6 +4,8 @@ import type {
   Side,
 } from "@netgrid/shared";
 import { FORBIDDEN_AI_INPUT_FIELDS } from "../runtime/ai-decision-input";
+import { isRemoteServerTarget } from "../runtime/server-target";
+import { fnv1a } from "../runtime/stable-hash";
 import type { AiSimulationConfig } from "./ai-simulation-config";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import type { SimulationControllerMode } from "./simulation-types";
@@ -2265,11 +2267,7 @@ function selfplayFixtureName(
   detectorId: AiSelfplayTraceMiningDetectorId,
   stateVersion: number,
 ): string {
-  return `${detectorId}-${fnv1a(`${seed}:${detectorId}:${stateVersion}`).slice(0, 8)}.fixture.json`;
-}
-
-function isRemoteServerTarget(serverId: string | undefined): boolean {
-  return serverId === "new_remote" || serverId?.startsWith("remote_") === true;
+  return `${detectorId}-${fnv1a(`${seed}:${detectorId}:${stateVersion}`)}.fixture.json`;
 }
 
 function sortedUnique(values: string[]): string[] {
@@ -2305,13 +2303,4 @@ function isAsciiLetterOrDigit(character: string): boolean {
     (character >= "A" && character <= "Z") ||
     (character >= "0" && character <= "9")
   );
-}
-
-function fnv1a(value: string): string {
-  let hash = 0x811c9dc5;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return `fnv1a:${(hash >>> 0).toString(16).padStart(8, "0")}`;
 }

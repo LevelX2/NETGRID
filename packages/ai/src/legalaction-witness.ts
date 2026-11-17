@@ -291,6 +291,12 @@ function targetRefForAction(
   }
   if (action.choiceRequirements && action.choiceRequirements.length > 0) {
     const selection = selectedChoiceForAction(action, selectedChoices);
+    if (!selection) {
+      return buildTargetRef({
+        kind: "unknown_unprojected",
+        blocker: "choice_option_missing",
+      });
+    }
     return {
       ...buildTargetRef({
         kind: "choice",
@@ -329,18 +335,25 @@ function choiceRefForAction(
 function selectedChoiceForAction(
   action: LegalAction,
   selectedChoices: Readonly<Record<string, unknown>> | undefined,
-): { choiceId: string; optionId: string } {
+): { choiceId: string; optionId: string } | undefined {
   const requirement = action.choiceRequirements?.[0];
-  const choiceId =
-    stringRecordValue(selectedChoices, "choiceId") ??
-    requirement?.choiceId ??
-    "unknown";
-  const selectedOptionIds = selectedChoices?.selectedOptionIds;
-  const optionId =
-    Array.isArray(selectedOptionIds) && typeof selectedOptionIds[0] === "string"
-      ? selectedOptionIds[0]
-      : "unknown";
-  return { choiceId, optionId };
+  const choiceId = stringRecordValue(selectedChoices, "choiceId");
+  const optionIds = selectedChoices?.selectedOptionIds;
+  if (
+    action.choiceRequirements?.length !== 1 ||
+    !requirement ||
+    choiceId !== requirement.choiceId ||
+    requirement.minSelections > 1 ||
+    requirement.maxSelections < 1 ||
+    !Array.isArray(optionIds) ||
+    optionIds.length !== 1 ||
+    typeof optionIds[0] !== "string" ||
+    !requirement.optionIds.includes(optionIds[0]) ||
+    safeId(choiceId) !== choiceId ||
+    safeId(optionIds[0]) !== optionIds[0]
+  )
+    return undefined;
+  return { choiceId, optionId: optionIds[0] };
 }
 
 function costProfileForAction(

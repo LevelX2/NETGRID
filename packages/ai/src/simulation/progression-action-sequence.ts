@@ -29,57 +29,58 @@ export function progressionEntriesWithRunTargets(
   });
 }
 
+type ActionSequence = AiSimulationSummary["actionSequence"];
+
 export function countCorpMultiIceInstallOrderFutureEffectDead(
-  sequence: AiSimulationSummary["actionSequence"],
+  sequence: ActionSequence,
 ): number {
-  return sequence.filter((entry, index) => {
+  const laterInstalls = new Set<string>();
+  let count = 0;
+  for (let index = sequence.length - 1; index >= 0; index--) {
+    const entry = sequence[index]!;
+    const key = corpIceInstallTurnAndServer(entry);
+    if (key === undefined) continue;
     if (
-      entry.side !== "corp" ||
-      entry.actionType !== "install_card" ||
-      entry.installPlacement !== "ice" ||
-      entry.corpFutureRunIceInstalledAsDeadEffect !== true ||
-      !entry.targetServerId ||
-      !entry.turnNumber
+      entry.corpFutureRunIceInstalledAsDeadEffect === true &&
+      laterInstalls.has(key)
     )
-      return false;
-    return sequence
-      .slice(index + 1)
-      .some(
-        (later) =>
-          later.side === "corp" &&
-          later.turnNumber === entry.turnNumber &&
-          later.actionType === "install_card" &&
-          later.installPlacement === "ice" &&
-          later.targetServerId === entry.targetServerId,
-      );
-  }).length;
+      count++;
+    laterInstalls.add(key);
+  }
+  return count;
 }
 
 export function countCorpMultiIceInstallOrderOptimized(
-  sequence: AiSimulationSummary["actionSequence"],
+  sequence: ActionSequence,
 ): number {
-  return sequence.filter((entry, index) => {
+  const earlierOrdinaryInstalls = new Set<string>();
+  let count = 0;
+  for (const entry of sequence) {
+    const key = corpIceInstallTurnAndServer(entry);
+    if (key === undefined) continue;
     if (
-      entry.side !== "corp" ||
-      entry.actionType !== "install_card" ||
-      entry.installPlacement !== "ice" ||
-      entry.corpFutureRunIceInstalledAsLiveEffect !== true ||
-      !entry.targetServerId ||
-      !entry.turnNumber
+      entry.corpFutureRunIceInstalledAsLiveEffect === true &&
+      earlierOrdinaryInstalls.has(key)
     )
-      return false;
-    return sequence
-      .slice(0, index)
-      .some(
-        (previous) =>
-          previous.side === "corp" &&
-          previous.turnNumber === entry.turnNumber &&
-          previous.actionType === "install_card" &&
-          previous.installPlacement === "ice" &&
-          previous.targetServerId === entry.targetServerId &&
-          previous.corpFutureRunIceInstalled !== true,
-      );
-  }).length;
+      count++;
+    if (entry.corpFutureRunIceInstalled !== true)
+      earlierOrdinaryInstalls.add(key);
+  }
+  return count;
+}
+
+function corpIceInstallTurnAndServer(
+  entry: ActionSequence[number],
+): string | undefined {
+  if (
+    entry.side !== "corp" ||
+    entry.actionType !== "install_card" ||
+    entry.installPlacement !== "ice" ||
+    !entry.targetServerId ||
+    !entry.turnNumber
+  )
+    return undefined;
+  return `${entry.turnNumber}:${entry.targetServerId}`;
 }
 
 export function isCorpRemoteAdvancementProgress(

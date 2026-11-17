@@ -124,39 +124,22 @@ export function allocatePlanPortfolioActionCapacity(
       unallocatedCredits - selectedActionCapacityRoute.totalCreditCost,
     );
 
+    const sourceCounters: Record<string, number> = {};
     for (const step of currentRouteSteps) {
       if (step.actionId) reservedActionIds.add(step.actionId);
       if (step.cardsConsumed > 0 && step.sourceCardInstanceId)
         reservedCardIds.add(step.sourceCardInstanceId);
-      if (
-        step.sourceCardInstanceId &&
-        step.sourceCounterType &&
-        (step.sourceCounterCost ?? 0) > 0
-      ) {
+      const spent = step.sourceCounterCost;
+      if (step.sourceCardInstanceId && step.sourceCounterType && spent) {
         const key = `${step.sourceCardInstanceId}:${step.sourceCounterType}`;
         reservedSourceCounters.set(
           key,
-          (reservedSourceCounters.get(key) ?? 0) + step.sourceCounterCost!,
+          (reservedSourceCounters.get(key) ?? 0) + spent,
         );
+        sourceCounters[key] = (sourceCounters[key] ?? 0) + spent;
       }
     }
 
-    const sourceCounters = Object.fromEntries(
-      currentRouteSteps.flatMap((step) => {
-        if (
-          !step.sourceCardInstanceId ||
-          !step.sourceCounterType ||
-          !step.sourceCounterCost
-        )
-          return [];
-        return [
-          [
-            `${step.sourceCardInstanceId}:${step.sourceCounterType}`,
-            step.sourceCounterCost,
-          ],
-        ];
-      }),
-    );
     const sourceCardInstanceIds = [
       ...new Set(
         currentRouteSteps.flatMap((step) =>
