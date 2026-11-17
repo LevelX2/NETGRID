@@ -31,6 +31,8 @@ export function corpInput(overrides: {
     eventTail: overrides.eventTail ?? [],
     playerView: {
       stateVersion: 1,
+      timingPoint: "corp_action.main",
+      traceRulesProfile: "modern_open",
       own: {
         credits: overrides.ownCredits ?? 5,
         clicks: overrides.ownClicks ?? 3,

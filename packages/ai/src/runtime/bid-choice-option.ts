@@ -242,11 +242,9 @@ function knownRemainingRunCashCost(
   if (remainingIce.some((ice) => !ice.known || ice.rezzed === false)) {
     return undefined;
   }
+  const afterEncounter = quoteRunnerRunPath(input, plan, "after_current_encounter");
   const quotesByIceId = new Map(
-    quoteRunnerRunPath(input, plan).iceQuotes.map((quote) => [
-      quote.iceRef.instanceId,
-      quote,
-    ]),
+    afterEncounter.iceQuotes.map((quote) => [quote.iceRef.instanceId, quote]),
   );
   let totalCashCost = 0;
   for (const ice of remainingIce) {

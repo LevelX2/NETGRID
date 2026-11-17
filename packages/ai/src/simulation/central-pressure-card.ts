@@ -1,5 +1,4 @@
-import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
-import { createAiHintsByCard } from "../ai-hints";
+import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { cardRolesForId } from "../runtime/card-role-lookup";
 import { rolesMatch } from "../role-match";
 import { isRunnerPressureRole } from "../runtime/runner-role-classification";
@@ -7,12 +6,8 @@ import type { CentralServerId } from "../runtime/server-target";
 import { sortedUnique } from "../runtime/collection";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { definitionTypeForMetrics } from "./card-metric-lookup";
-import {
-  assessKnownRezzedIcePath,
-  runnerRunPathCreditBudgetWithVisiblePools,
-} from "../visible-run-analysis";
-
-const CENTRAL_PRESSURE_AI_HINTS = createAiHintsByCard();
+import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import { quoteVisibleRunnerPathForMetrics } from "./visible-run-path-for-metrics";
 
 export function isCentralPressureCardForMetrics(
   definitionId: string | undefined,
@@ -57,7 +52,7 @@ export function centralPressureTargetsForCard(
 }
 
 function centralPressureRolesForCard(definitionId: string): string[] {
-  return cardRolesForId(definitionId, CENTRAL_PRESSURE_AI_HINTS);
+  return cardRolesForId(definitionId, AI_HINTS_BY_CARD);
 }
 
 export function centralPressureTargetIsGoodForMetrics(
@@ -67,19 +62,18 @@ export function centralPressureTargetIsGoodForMetrics(
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === target,
   );
-  if (!server) return false;
-  const assessment = assessKnownRezzedIcePath(
-    server.ice,
-    input.playerView.own.rig ?? [],
-    runnerRunPathCreditBudgetWithVisiblePools(
-      input.playerView.own.credits,
-      input.playerView.own.rig ?? [],
-    ),
-    server.root,
-    input.playerView.opponent.credits,
-    visibleRunnerPathTraceContext(input),
+  if (
+    !server ||
+    (target === "hq" && input.playerView.opponent.handCount === 0) ||
+    (target === "rd" && input.playerView.opponent.deckCount === 0)
+  )
+    return false;
+  const assessment = quoteVisibleRunnerPathForMetrics(
+    input,
+    server,
+    assessKnownRezzedIcePath,
   );
-  if (assessment.blocked) return false;
+  if (!assessment.canReachAccess) return false;
   const cheap =
     (assessment.visibleBreakCost ?? 0) <= 1 || server.ice.length === 0;
   if (!cheap) return false;

@@ -1,7 +1,7 @@
 import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
-import { RUNTIME_CARDS } from "../../ai-hints";
+import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "../../ai-hints";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 import {
   assessEngineCertifiedPostRezIcePath,
@@ -11,7 +11,6 @@ import { readExactCurrentInstalledCorpIceRezQuote } from "../corp-exact-ice-rez-
 import { semanticRuntimeCorpObservedRemoteReachability } from "../semantic-runtime-corp-remote-reachability";
 import { visibleRunnerExposureCreditValue } from "../visible-runner-action-economy";
 import type { CorpServerLike } from "./semantic-runtime-corp-scoring-window-contracts";
-import { SCORING_WINDOW_AI_HINTS_BY_CARD } from "./semantic-runtime-corp-scoring-window-card-data";
 import { visibleRunnerHeapBreakerPreparations } from "../corp-public-heap-breaker-preparation";
 
 function scoringWindowVisibleCardText(card: VisibleCard): string {
@@ -410,7 +409,7 @@ function visibleRunnerHasPaidDelayedInstallSource(
 ): boolean {
   return rig.some((card) => {
     if (card.known === false || !card.definitionId) return false;
-    const hint = SCORING_WINDOW_AI_HINTS_BY_CARD.get(card.definitionId);
+    const hint = AI_HINTS_BY_CARD.get(card.definitionId);
     return (
       hint?.roles?.includes("delayed_install") === true &&
       hint.effects?.some(

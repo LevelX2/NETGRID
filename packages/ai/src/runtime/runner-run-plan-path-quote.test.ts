@@ -10,6 +10,80 @@ import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
 import type { RunnerRunPlan } from "./runner-run-plan-snapshot";
 
 describe("runner run plan path quote", () => {
+  it("does not reuse a broken subroutine in the shared remaining path", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_252_keeper",
+      iceTitle: "Keeper",
+      iceStrength: 4,
+      rig: [],
+      subroutines: [
+        { id: "already-broken", type: "end_the_run" },
+        { id: "still-open", type: "corp_gain_credit", amount: 1 },
+      ],
+      legalActions: [
+        continueAction({
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 2,
+        }),
+      ],
+    });
+    Object.assign(input.legalActions[0]!.payload!, {
+      encounterSubroutineIds: "still-open",
+      unbrokenSubroutineCount: 1,
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    expect(quote.canReachAccess).toBe(true);
+    expect(quote.iceQuotes[0]!.subroutineQuotes).toMatchObject([
+      { index: 0, broken: true, threatClass: "irrelevant_to_current_plan" },
+      { index: 1, broken: false },
+    ]);
+  });
+
+  it("prices only the later ICE when an encounter choice is open", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_246_fragmentation-storm",
+      iceTitle: "Fragmentation Storm",
+      iceStrength: 4,
+      futureIce: [
+        visibleIce({
+          instanceId: "later-ice",
+          iceDefinitionId: "onr_v1_261_quandary",
+          iceTitle: "Quandary",
+          iceStrength: 2,
+        }),
+      ],
+      subroutines: [fragmentationStormTraceSubroutine()],
+      legalActions: [],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan(), "after_current_encounter");
+    expect(quote.iceQuotes.map(({ iceRef }) => iceRef.instanceId)).toEqual([
+      "later-ice",
+    ]);
+  });
+
+  it("does not mix another target with the active encounter", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_252_keeper",
+      iceTitle: "Keeper",
+      iceStrength: 4,
+      legalActions: [
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+    expect(
+      quoteRunnerRunPath(input, { ...runPlan(), targetServer: { id: "hq" } }),
+    ).toMatchObject({
+      quoteStatus: "unknown",
+      canReachAccess: false,
+      cannotReachReason: "active_run_target_mismatch",
+      iceQuotes: [],
+    });
+  });
   it("keeps temporary run money out of the active Trace route", () => {
     const input = runnerEncounterInput({
       iceDefinitionId: "onr_v1_246_fragmentation-storm",
@@ -464,6 +538,41 @@ describe("runner run plan path quote", () => {
     ]);
     expect(sequence?.totalCost).toBe(3);
     expect(sequence?.evidence).toContain("required_subroutine_indexes:0,1");
+  });
+
+  it("does not use a break action that itself ends the run to reach access", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_261_quandary",
+      iceTitle: "Quandary",
+      iceStrength: 2,
+      breakerStrength: 2,
+      subroutines: [{ id: "q-etr", type: "end_the_run" }],
+      legalActions: [
+        {
+          ...breakAction({ actionId: "break-and-end", costs: [] }),
+          payload: {
+            iceId: "ice-1",
+            subroutineIndex: 0,
+            breakerEndsRunAfterBreak: true,
+          },
+        },
+        breakAction({
+          actionId: "paid-break",
+          costs: [{ credits: 2 }],
+          subroutineIndex: 0,
+        }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    const sequence = quote.iceQuotes[0]?.cheapestAccessPreservingSequence;
+    expect(sequence?.steps.map(({ actionId }) => actionId)).toEqual([
+      "paid-break",
+    ]);
   });
 
   it("targets the required ETR subroutine instead of a cheaper harmless break", () => {

@@ -6,7 +6,6 @@ import {
   buildSemanticDecisionFrame,
   type TacticalGoalLike,
 } from "./semantic-decision-frame";
-import { buildEmptySemanticDecisionTrace } from "./semantic-decision-trace";
 
 describe("SemanticDecisionFrame", () => {
   it("contains exactly the LegalAction ids from AiDecisionInput", () => {
@@ -156,21 +155,6 @@ describe("SemanticDecisionFrame", () => {
     expect(JSON.stringify(frame.economyContext)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState/i,
     );
-  });
-
-  it("creates an empty trace without selectedActionId before ranking", () => {
-    const input = inputFor("runner", [
-      legalAction("runner-1", "gain_credit", "runner"),
-    ]);
-    const frame = buildSemanticDecisionFrame({ input });
-
-    const trace = buildEmptySemanticDecisionTrace(frame);
-
-    expect(trace.schemaVersion).toBe("semantic-decision-trace-v1");
-    expect(trace.frameSummary.legalActionCount).toBe(1);
-    expect(trace.rankedActions).toEqual([]);
-    expect(trace.selectedActionId).toBeUndefined();
-    expect(trace.noRuntimeEffect).toBe(true);
   });
 
   it("accepts Doctrine diagnostics only as report-only no-effect frame data", () => {

@@ -6,6 +6,7 @@ import {
   runnerStartOfTurnOptionalInstalledCardConversionProfile,
   runnerStartOfTurnRandomEffectProfile,
 } from "./runner-canonical-card-facts";
+import { exactCurrentChoiceAction } from "./plan-bound-choice-contract";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -15,7 +16,6 @@ type PendingChoiceOption = PendingChoice["options"][number];
 type BoundStartOfTurnOption = {
   optionId: string;
   sourceCardInstanceId: string;
-  definitionId: string;
   orderClass:
     | "random_effect"
     | "credit_loss"
@@ -31,9 +31,7 @@ export function selectedRunnerStartOfTurnOrderChoiceOptionId(
   choice: PendingChoice,
   selectableOptions: readonly PendingChoiceOption[],
 ): string | undefined {
-  const requirement = action.choiceRequirements?.[0];
   const sourceStateVersion = runnerStartOrderSourceStateVersion(choice.source);
-  const optionIds = choice.options.map((option) => option.id);
   const exactRuleWindow =
     input.side === "runner" &&
     choice.side === "runner" &&
@@ -45,17 +43,7 @@ export function selectedRunnerStartOfTurnOrderChoiceOptionId(
     choice.minSelections === 1 &&
     choice.maxSelections === 1 &&
     selectableOptions.length === choice.options.length &&
-    action.side === "runner" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+    exactCurrentChoiceAction(input, choice) === action;
   if (!exactRuleWindow) return undefined;
 
   const bound = selectableOptions.map((option) =>
@@ -111,7 +99,6 @@ function boundStartOfTurnOption(
     ? {
         optionId: option.id,
         sourceCardInstanceId: source.instanceId,
-        definitionId: source.definitionId,
         orderClass: profile.orderClass,
         amount: profile.amount,
       }
@@ -119,7 +106,6 @@ function boundStartOfTurnOption(
       ? {
           optionId: option.id,
           sourceCardInstanceId: source.instanceId,
-          definitionId: source.definitionId,
           orderClass: randomEffectProfile.orderClass,
           amount: Math.max(
             randomEffectProfile.maximumDamage,
@@ -130,7 +116,6 @@ function boundStartOfTurnOption(
         ? {
             optionId: option.id,
             sourceCardInstanceId: source.instanceId,
-            definitionId: source.definitionId,
             orderClass: optionalConversionProfile.orderClass,
             amount: optionalConversionProfile.gainCredits,
           }
@@ -138,7 +123,6 @@ function boundStartOfTurnOption(
           ? {
               optionId: option.id,
               sourceCardInstanceId: source.instanceId,
-              definitionId: source.definitionId,
               orderClass: delayedInstallCountdownProfile.orderClass,
               amount: 1,
             }

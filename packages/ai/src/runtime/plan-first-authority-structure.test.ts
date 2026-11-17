@@ -113,7 +113,6 @@ describe("plan-first live authority structure", () => {
       readSource("runtime", "ai-live-runtime-composition.ts"),
       readSource("runtime", "semantic-runtime-orchestration-composition.ts"),
       readSource("runtime", "semantic-runtime-entrypoints-composition.ts"),
-      readSource("runtime", "semantic-runtime-decision-composition.ts"),
       readSource("runtime", "semantic-runtime-decision-context.ts"),
       readSource("runtime", "plan-first-live-runtime.ts"),
       extractedOwnerSources,

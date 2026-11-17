@@ -80,6 +80,9 @@ const AI_HINTS_BY_CARD = createAiHintsByCard();
 export function quoteRunnerRunPath(
   input: AiDecisionInput,
   plan: RunnerRunPlan,
+  scope:
+    | "entire_remaining_path"
+    | "after_current_encounter" = "entire_remaining_path",
 ): RunnerRunPathQuote {
   const serverId = plan.targetServer.id;
   const server = input.playerView.servers.find(
@@ -99,12 +102,17 @@ export function quoteRunnerRunPath(
   }
 
   const activeRun = input.playerView.run;
+  if (activeRun && activeRun.attackedServerId !== serverId) {
+    return unknownPathQuote(input, plan, "active_run_target_mismatch");
+  }
   const activeRunTargetsPlan =
     activeRun?.attackedServerId === plan.targetServer.id;
-  const currentEncounter =
+  const encounteredIce =
     activeRun?.phase === "encounter_ice"
       ? currentEncounteredIceCard(input)
       : undefined;
+  const currentEncounter =
+    scope === "after_current_encounter" ? undefined : encounteredIce;
   const currentQuote = currentEncounter
     ? quoteIceEncounter({
         input,
@@ -114,6 +122,9 @@ export function quoteRunnerRunPath(
       })
     : undefined;
   const currentIceInstanceId = currentEncounter?.instanceId;
+  const currentUnbrokenIndexes = currentEncounter
+    ? currentEncounterUnbrokenSubroutineIndexes(input)
+    : undefined;
   const remainingActiveRunIce =
     activeRunTargetsPlan && activeRun.position?.kind === "ice"
       ? activeRunRemainingPathIce(input, server?.ice ?? [])
@@ -130,7 +141,7 @@ export function quoteRunnerRunPath(
     .filter((ice) => ice.instanceId !== currentIceInstanceId)
     .map((ice) =>
       quoteIceEncounter({
-        input: currentEncounter
+        input: encounteredIce
           ? {
               ...input,
               playerView: {
@@ -196,14 +207,24 @@ export function quoteRunnerRunPath(
         subroutineRequiresBreak(subroutine.threatClass),
       ),
   );
-  const sharedPathIce = currentEncounter
-    ? [
-        currentEncounter,
-        ...serverIce.filter(
-          (ice) => ice.instanceId !== currentEncounter.instanceId,
-        ),
-      ]
-    : serverIce;
+  const currentRunQuote = currentEncounter?.effectiveRunQuote;
+  const sharedPathIce =
+    currentEncounter && currentRunQuote && currentUnbrokenIndexes
+      ? [
+          ...serverIce.filter(
+            (ice) => ice.instanceId !== currentEncounter.instanceId,
+          ),
+          {
+            ...currentEncounter,
+            effectiveRunQuote: {
+              ...currentRunQuote,
+              subroutines: currentRunQuote.subroutines.filter((_, index) =>
+                currentUnbrokenIndexes.has(index),
+              ),
+            },
+          },
+        ]
+      : serverIce;
   const unknownIceCount = sharedPathIce.filter(
     (ice) => !ice.known || ice.rezzed === false,
   ).length;
@@ -218,12 +239,7 @@ export function quoteRunnerRunPath(
       input.playerView.own.rig ?? [],
       {
         liquidCredits: input.playerView.own.credits,
-        excludeStealthCredits:
-          server?.statuses?.some(
-            (status) =>
-              status.kind === "run_payment_restriction" &&
-              status.restriction === "runner_stealth_bit_payment_sources",
-          ) === true,
+        excludeStealthCredits: serverExcludesStealthCredits(input, serverId),
       },
     ),
     server?.root ?? [],
@@ -285,7 +301,9 @@ function activeRunRemainingPathIce(
     return currentRunRemainingIce(input);
   }
   const currentOrApproachedIceIndex = Math.max(0, run.position.iceIndex);
-  return serverIce.slice(0, currentOrApproachedIceIndex + 1);
+  return serverIce
+    .slice(0, currentOrApproachedIceIndex + 1)
+    .filter((ice) => ice.instanceId !== run.pendingAutoPassIceId);
 }
 
 export function runnerRunPlanCurrentEncounterSequence(params: {
@@ -320,7 +338,10 @@ export function runnerRunPlanCurrentEncounterRequiresBreak(params: {
   input: AiDecisionInput;
   plan: RunnerRunPlan;
 }): boolean {
-  if (params.input.playerView.run?.phase !== "encounter_ice") {
+  if (
+    params.input.playerView.run?.phase !== "encounter_ice" ||
+    params.input.playerView.run.attackedServerId !== params.plan.targetServer.id
+  ) {
     return false;
   }
   const currentEncounter = currentEncounteredIceCard(params.input);
@@ -610,7 +631,13 @@ function cheapestTraceAccessSequence(params: {
       params.input.playerView.own.runnerTraceSupportQuote,
       remainingGeneralCredits,
       params.input.playerView.run?.runTraceLinkBonus,
-      { traceRulesProfile },
+      {
+        traceRulesProfile,
+        excludeStealthCredits: serverExcludesStealthCredits(
+          params.input,
+          params.plan.targetServer.id,
+        ),
+      },
     );
     const corpBidCapacity = visibleCorpTraceBidCapacityForSubroutine(
       params.ice.effectiveRunQuote,
@@ -695,7 +722,11 @@ function cheapestDirectBreakSequence(params: {
 }): RunnerRunEncounterActionSequence | undefined {
   const { input, plan, ice, requiredSubroutineIndexes } = params;
   const selectedBreakActions = selectBreakActionsForRequiredSubroutines(
-    breakActionsForIce(input, ice),
+    breakActionsForIce(input, ice).filter(
+      (action) =>
+        params.preservesAccessObjective === false ||
+        action.payload?.breakerEndsRunAfterBreak !== true,
+    ),
     requiredSubroutineIndexes,
   );
   if (!selectedBreakActions) return undefined;
@@ -892,15 +923,17 @@ function sequenceForActions(params: {
         )
       : 0;
   const projectedProbeCreditLoss = probeCreditLossBeforeSequence + cashCost;
-  const probeEncounterHasImmediateSafetyThreat =
-    currentEncounteredIceCard(
-      params.input,
-    )?.effectiveRunQuote?.subroutines.some(
-      isImmediateSafetyThreatSubroutine,
-    ) === true;
+  const probeSafetyThreats =
+    params.plan.objective.kind === "probe_unknown_ice"
+      ? currentProbeSafetyThreats(params.input)
+      : [];
   const probeEncounterSafetyExceedsAcceptedDamage =
     params.plan.objective.kind === "probe_unknown_ice" &&
-    probeSafetyThreatExceedsAcceptedDamage(params.input, params.plan);
+    probeSafetyThreatExceedsAcceptedDamage(
+      probeSafetyThreats,
+      params.input.playerView.own.gripOrHq.length,
+      params.plan.objective.riskBudget.maxDamage,
+    );
   const probeCanConvertToFundedFullPath =
     params.plan.objective.kind === "probe_unknown_ice" &&
     !currentRunRemainingIce(params.input).some(
@@ -949,7 +982,7 @@ function sequenceForActions(params: {
             `sequence_probe_credit_loss_before:${probeCreditLossBeforeSequence}`,
             `sequence_probe_credit_loss_projected:${projectedProbeCreditLoss}`,
             `sequence_probe_credit_loss_limit:${params.plan.objective.riskBudget.maxCreditLoss}`,
-            `sequence_probe_immediate_safety_threat:${probeEncounterHasImmediateSafetyThreat}`,
+            `sequence_probe_immediate_safety_threat:${probeSafetyThreats.length > 0}`,
             `sequence_probe_safety_exceeds_accepted_damage:${probeEncounterSafetyExceedsAcceptedDamage}`,
             `sequence_probe_full_path_conversion:${probeCanConvertToFundedFullPath}`,
             `sequence_probe_credit_loss_budget_exceeded:${violatesProbeRiskBudget}`,
@@ -962,15 +995,25 @@ function sequenceForActions(params: {
   };
 }
 
-function probeSafetyThreatExceedsAcceptedDamage(
+function currentProbeSafetyThreats(
   input: AiDecisionInput,
-  plan: RunnerRunPlan,
+): VisibleEffectiveSubroutine[] {
+  if (!encounterContinueAction(input)) return [];
+  const subroutines =
+    currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines;
+  if (!subroutines) return [];
+  const unbroken = currentEncounterUnbrokenSubroutineIndexes(input);
+  return subroutines.filter(
+    (subroutine, index) =>
+      unbroken.has(index) && isImmediateSafetyThreatSubroutine(subroutine),
+  );
+}
+
+function probeSafetyThreatExceedsAcceptedDamage(
+  immediateThreats: readonly VisibleEffectiveSubroutine[],
+  gripCount: number,
+  maximumAcceptedDamage: number,
 ): boolean {
-  if (plan.objective.kind !== "probe_unknown_ice") return false;
-  const immediateThreats =
-    currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines.filter(
-      isImmediateSafetyThreatSubroutine,
-    ) ?? [];
   if (immediateThreats.length === 0) return false;
   const damageAmounts = immediateThreats.map(directVisibleDamageAmount);
   if (damageAmounts.some((amount) => amount === undefined)) return true;
@@ -978,10 +1021,7 @@ function probeSafetyThreatExceedsAcceptedDamage(
     (sum, amount) => sum + (amount ?? 0),
     0,
   );
-  return (
-    totalDamage > plan.objective.riskBudget.maxDamage ||
-    totalDamage >= input.playerView.own.gripOrHq.length
-  );
+  return totalDamage > maximumAcceptedDamage || totalDamage >= gripCount;
 }
 
 function directVisibleDamageAmount(
@@ -1069,9 +1109,9 @@ function subroutineQuotesForIce(
   currentEncounter: boolean,
 ): RunnerRunSubroutineQuote[] {
   const quoteSubroutines = ice.effectiveRunQuote?.subroutines;
-  const allBroken =
-    currentEncounter &&
-    encounterContinueAction(input)?.payload?.unbrokenSubroutineCount === 0;
+  const unbroken = currentEncounter
+    ? currentEncounterUnbrokenSubroutineIndexes(input)
+    : undefined;
   const futurePathAssessment = currentEncounter
     ? encounterRunRemainderEffectAssessment(input)
     : undefined;
@@ -1082,7 +1122,8 @@ function subroutineQuotesForIce(
         subroutine,
         currentEncounter ? plan : undefined,
       );
-      const threatClass = allBroken
+      const broken = unbroken !== undefined && !unbroken.has(index);
+      const threatClass = broken
         ? "irrelevant_to_current_plan"
         : currentThreatClassForSubroutine(
             input,
@@ -1093,7 +1134,7 @@ function subroutineQuotesForIce(
       return {
         index,
         threatClass,
-        broken: allBroken,
+        broken,
         evidence: [
           `subroutine_type:${subroutine.type}`,
           ...(baseThreatClass === "future_path_modifier" &&
@@ -1336,42 +1377,31 @@ function currentRequiredBreakSubroutineIndexes(
     | EncounterRunRemainderEffectAssessment
     | undefined = encounterRunRemainderEffectAssessment(input),
 ): Set<number> {
-  const continueAction = encounterContinueAction(input);
-  const unbrokenCount =
-    typeof continueAction?.payload?.unbrokenSubroutineCount === "number"
-      ? continueAction.payload.unbrokenSubroutineCount
-      : undefined;
-  if (unbrokenCount === 0) return new Set();
-
-  const quoteSubroutines = ice.effectiveRunQuote?.subroutines;
-  if (quoteSubroutines) {
-    const continueWillEndRun =
-      continueAction?.payload?.encounterWillEndRun === true;
-    if (currentEncounterRequiresFullBreak(input))
-      return currentEncounterUnbrokenSubroutineIndexes(input);
-    return new Set(
-      quoteSubroutines.flatMap((subroutine, index) => {
-        if (
-          visibleDeflectorSubroutineCanResolve(
-            subroutine,
-            visibleDeflectorContextForInput(input),
-          )
+  const unbroken = currentEncounterUnbrokenSubroutineIndexes(input);
+  if (currentEncounterRequiresFullBreak(input)) return unbroken;
+  const continueWillEndRun =
+    encounterContinueAction(input)?.payload?.encounterWillEndRun === true;
+  return new Set(
+    (ice.effectiveRunQuote?.subroutines ?? []).flatMap((subroutine, index) => {
+      if (!unbroken.has(index)) return [];
+      if (
+        visibleDeflectorSubroutineCanResolve(
+          subroutine,
+          visibleDeflectorContextForInput(input),
         )
-          return [index];
-        const threatClass = threatClassForSubroutine(input, subroutine, plan);
-        if (threatClass === "must_break_for_access") {
-          return continueWillEndRun ? [index] : [];
-        }
-        if (threatClass === "must_break_for_survival") return [index];
-        return threatClass === "future_path_modifier" &&
-          futurePathAssessment?.mustBreak === true
-          ? [index]
-          : [];
-      }),
-    );
-  }
-
-  return new Set();
+      )
+        return [index];
+      const threatClass = threatClassForSubroutine(input, subroutine, plan);
+      if (threatClass === "must_break_for_access") {
+        return continueWillEndRun ? [index] : [];
+      }
+      if (threatClass === "must_break_for_survival") return [index];
+      return threatClass === "future_path_modifier" &&
+        futurePathAssessment?.mustBreak === true
+        ? [index]
+        : [];
+    }),
+  );
 }
 
 function currentSafetyBreakSubroutineIndexes(
@@ -1379,25 +1409,16 @@ function currentSafetyBreakSubroutineIndexes(
   plan: RunnerRunPlan,
   ice: VisibleCard,
 ): Set<number> {
-  const continueAction = encounterContinueAction(input);
-  const unbrokenCount =
-    typeof continueAction?.payload?.unbrokenSubroutineCount === "number"
-      ? continueAction.payload.unbrokenSubroutineCount
-      : undefined;
-  if (unbrokenCount === 0) return new Set();
-
-  const quoteSubroutines = ice.effectiveRunQuote?.subroutines;
-  if (quoteSubroutines) {
-    return new Set(
-      quoteSubroutines.flatMap((subroutine, index) =>
-        threatClassForSubroutine(input, subroutine, plan) ===
+  const unbroken = currentEncounterUnbrokenSubroutineIndexes(input);
+  return new Set(
+    (ice.effectiveRunQuote?.subroutines ?? []).flatMap((subroutine, index) =>
+      unbroken.has(index) &&
+      threatClassForSubroutine(input, subroutine, plan) ===
         "must_break_for_survival"
-          ? [index]
-          : [],
-      ),
-    );
-  }
-  return new Set();
+        ? [index]
+        : [],
+    ),
+  );
 }
 
 function futurePathModifierRequiredEvidence(
@@ -1472,18 +1493,23 @@ function visibleDeflectorContextForInput(input: AiDecisionInput) {
     ),
     prohibitNoisyIcebreakers:
       input.playerView.run?.prohibitNoisyIcebreakers === true,
-    ...(input.playerView.servers
-      .find(
-        (candidate) => candidate.id === input.playerView.run?.attackedServerId,
-      )
-      ?.statuses?.some(
-        (status) =>
-          status.kind === "run_payment_restriction" &&
-          status.restriction === "runner_stealth_bit_payment_sources",
-      )
-      ? { excludeStealthTraceCredits: true }
-      : {}),
+    excludeStealthTraceCredits: serverExcludesStealthCredits(
+      input,
+      input.playerView.run?.attackedServerId,
+    ),
   };
+}
+
+function serverExcludesStealthCredits(
+  input: AiDecisionInput,
+  serverId: string | undefined,
+): boolean {
+  return input.playerView.servers
+    .find((server) => server.id === serverId)
+    ?.statuses?.some(
+      (status) => status.kind === "run_payment_restriction" &&
+        status.restriction === "runner_stealth_bit_payment_sources",
+    ) === true;
 }
 
 function effectiveIceStrength(ice: VisibleCard): number | undefined {

@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { actionCreditCost } from "../../runtime/action-cost";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type {
   CorpDefenseSignal,
@@ -90,7 +91,7 @@ function currentSavings(
     after < 0 ||
     after >= before ||
     install.payload.iceInstallTotalCost !== before ||
-    install.costs.reduce((sum, c) => sum + (c.credits ?? 0), 0) !== before
+    actionCreditCost(install) !== before
   )
     return undefined;
   return before - after;
@@ -108,36 +109,41 @@ export function corpIceInstallCostSupportSignals(
       (need.phase !== "install_ice" && need.phase !== "install_defense_support")
     )
       return [];
-    const install = input.legalActions.find(
-      (a) =>
-        need.actionIds?.includes(a.actionId) &&
-        a.type === "install_card" &&
-        a.payload?.placement === "ice",
+    const installs = input.legalActions.filter(
+      (action) =>
+        need.actionIds?.includes(action.actionId) &&
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload.serverId === need.serverId,
     );
-    if (!install) return [];
-    return input.legalActions.flatMap((rez) => {
-      const saving = currentSavings(input, rez, install);
-      const candidate = candidates.find((c) => c.actionId === rez.actionId);
-      if (saving === undefined || !candidate?.sourceDefinitionId) return [];
-      return [
-        {
-          kind: "generic" as const,
-          defenseId: `install-cost-support:${install.actionId}:${rez.actionId}`,
-          serverId: need.serverId,
-          phase: "rez_response" as const,
-          sourceDefinitionIds: [candidate.sourceDefinitionId],
-          actionIds: [rez.actionId],
-          targetIceInstanceId: rez.source,
-          followupIceInstanceId: install.source,
-          immediateInstallSupport: true,
-          iceInstallCostSupportActionId: install.actionId,
-          urgent: false,
-          rezWindowVerdict: "productive" as const,
-          value: need.value,
-          evidenceCode: `corp_free_rez_saves_selected_ice_install_credits:${saving}`,
-        },
-      ];
-    });
+    const rezActions = input.legalActions.filter(
+      ({ type }) => type === "rez_card",
+    );
+    return installs.flatMap((install) =>
+      rezActions.flatMap((rez) => {
+        const saving = currentSavings(input, rez, install);
+        const candidate = candidates.find((c) => c.actionId === rez.actionId);
+        if (saving === undefined || !candidate?.sourceDefinitionId) return [];
+        return [
+          {
+            kind: "generic" as const,
+            defenseId: `install-cost-support:${install.actionId}:${rez.actionId}`,
+            serverId: need.serverId,
+            phase: "rez_response" as const,
+            sourceDefinitionIds: [candidate.sourceDefinitionId],
+            actionIds: [rez.actionId],
+            targetIceInstanceId: rez.source,
+            followupIceInstanceId: install.source,
+            immediateInstallSupport: true,
+            iceInstallCostSupportActionId: install.actionId,
+            urgent: false,
+            rezWindowVerdict: "productive" as const,
+            value: need.value,
+            evidenceCode: `corp_free_rez_saves_selected_ice_install_credits:${saving}`,
+          },
+        ];
+      }),
+    );
   });
 }
 

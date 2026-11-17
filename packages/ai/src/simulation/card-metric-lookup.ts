@@ -28,13 +28,6 @@ export function trashCostForDefinitionForMetrics(
   );
 }
 
-export function remoteRootTrashCostForMetrics(
-  card: VisibleCard,
-): number | undefined {
-  if (!card.definitionId) return undefined;
-  return trashCostForDefinitionForMetrics(card.definitionId);
-}
-
 export function remoteTrashCostForVisibleCard(
   card: VisibleCard,
 ): number | undefined {

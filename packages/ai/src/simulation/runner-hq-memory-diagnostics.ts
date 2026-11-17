@@ -4,8 +4,10 @@ import { reconstructBeliefState } from "../belief-state";
 import { isLowValueKnownAccessCard } from "../runtime/runner-low-value-known-access-card";
 import { roundNumber as round } from "../runtime/number-rounding";
 import {
-  eventMayChangeHqPressure as aiEventMayChangeHqPressure,
+  eventMayChangeHqPressure,
+  findLastHistoryIndex,
   mergedPublicHistory,
+  runStartServerIdFromEvent,
 } from "../public-event-history";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import {
@@ -74,10 +76,26 @@ export function runnerHqMemoryDiagnosticsForMetrics(
     ...(centralRun &&
     centralTarget === "hq" &&
     isRepeatedLowValueCentralRunForMetrics(input, "hq") &&
-    !mergedPublicHistory(input).some(aiEventMayChangeHqPressure)
+    !hqPressureChangedSinceLastHqRun(input)
       ? { hqRunRepeatedWithoutNewHqInfo: true }
       : {}),
   };
+}
+
+function hqPressureChangedSinceLastHqRun(input: AiDecisionInput): boolean {
+  const history = mergedPublicHistory(input);
+  const afterLastHqRun =
+    findLastHistoryIndex(
+      history,
+      (event) => runStartServerIdFromEvent(event) === "hq",
+    ) + 1;
+  return history
+    .slice(afterLastHqRun)
+    .some(
+      (event) =>
+        event.publicPayload.actor !== "runner" &&
+        eventMayChangeHqPressure(event),
+    );
 }
 
 export function runnerHqMemoryInvalidationFlags(

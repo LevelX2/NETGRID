@@ -1,4 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
+import { actionCreditCost } from "./action-cost";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import type { AiHintEffectTargetProfile } from "../hint-ontology";
@@ -53,11 +55,8 @@ export function runnerPartialProgramSearchIsPayable(
   const action = input.legalActions.find(
     (a) => a.actionId === candidate.actionId,
   );
-  if (!action) return false;
-  const credits = action.costs.reduce(
-    (sum, cost) => sum + (cost.credits ?? 0),
-    0,
-  );
+  if (!actionMatchesCurrentDecision(input, action)) return false;
+  const credits = actionCreditCost(action);
   return (
     input.playerView.own.gripOrHq.length < input.playerView.own.maxHandSize &&
     input.playerView.own.credits >= credits + profile.costPerTaken!

@@ -1517,6 +1517,7 @@
             "resolvedEffects": [
               {
                 "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_2.effect.0.gain_credits",
+                "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_2",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3666,6 +3667,7 @@
             "resolvedEffects": [
               {
                 "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+                "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4001,6 +4003,7 @@
             "resolvedEffects": [
               {
                 "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+                "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4395,6 +4398,7 @@
             "resolvedEffects": [
               {
                 "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+                "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4769,6 +4773,7 @@
             "resolvedEffects": [
               {
                 "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+                "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5136,6 +5141,7 @@
             "resolvedEffects": [
               {
                 "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+                "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5520,6 +5526,7 @@
             "resolvedEffects": [
               {
                 "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+                "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5837,6 +5844,7 @@
             "resolvedEffects": [
               {
                 "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+                "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6151,6 +6159,7 @@
             "resolvedEffects": [
               {
                 "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+                "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6451,6 +6460,7 @@
             "resolvedEffects": [
               {
                 "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+                "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6951,6 +6961,7 @@
           "resolvedEffects": [
             {
               "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+              "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -7325,6 +7336,7 @@
           "resolvedEffects": [
             {
               "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+              "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -7692,6 +7704,7 @@
           "resolvedEffects": [
             {
               "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+              "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -8076,6 +8089,7 @@
           "resolvedEffects": [
             {
               "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+              "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -8393,6 +8407,7 @@
           "resolvedEffects": [
             {
               "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+              "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -8707,6 +8722,7 @@
           "resolvedEffects": [
             {
               "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+              "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -9007,6 +9023,7 @@
           "resolvedEffects": [
             {
               "effectId": "onr_v1_184_top-runners-conference.runner_onr_v1_184_top-runners-conference_1.effect.0.gain_credits",
+              "sourceCardInstanceId": "runner_onr_v1_184_top-runners-conference_1",
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -9359,7 +9376,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 190,
-      "sideSafePlanningFingerprint": "fnv1a:6aadc454"
+      "sideSafePlanningFingerprint": "fnv1a:559915dd"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_last_call_at_rd_1.0.0",

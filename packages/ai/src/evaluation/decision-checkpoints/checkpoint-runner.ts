@@ -1,8 +1,9 @@
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
+  applyAction,
+  applyRandomizedTraceBidSelection,
   quoteCorpPunishRoute,
   quoteRandomizedTraceBidSelection,
-  applyRandomizedTraceBidSelection,
 } from "@netgrid/engine";
 
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -75,6 +76,8 @@ export function runAiDecisionCheckpoint(
     quoteRandomizedTraceBidSelection: (request) =>
       quoteRandomizedTraceBidSelection(state, request),
   });
+  const alreadyApplied =
+    decision.selectionKind === "engine_randomized_trace_bid_selection";
   if (decision.selectionKind === "engine_randomized_trace_bid_selection") {
     const applied = applyRandomizedTraceBidSelection(
       state,
@@ -120,6 +123,28 @@ export function runAiDecisionCheckpoint(
       decision,
       ...(strategicIntent ? { strategicIntent } : {}),
     };
+  }
+  if (!alreadyApplied) {
+    const applied = applyAction(structuredClone(state), {
+      matchId: state.matchId,
+      side: fixture.actor,
+      actionId: selectedAction.actionId,
+      clientKnownStateVersion: input.playerView.stateVersion,
+      ...(decision.selectedChoices
+        ? { selectedChoices: decision.selectedChoices }
+        : {}),
+    });
+    if (!applied.ok) {
+      return {
+        ok: false,
+        code: "engine_legality_drift",
+        message: applied.error.message,
+        input,
+        decision,
+        selectedAction,
+        ...(strategicIntent ? { strategicIntent } : {}),
+      };
+    }
   }
   const forbidden = fixture.expectation.forbiddenActions?.some((matcher) =>
     actionMatches(input, selectedAction, matcher),

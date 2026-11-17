@@ -65,24 +65,6 @@ export type SemanticDecisionTraceDoctrineGoalSummary = {
   evidence: string[];
 };
 
-export const SEMANTIC_DECISION_TRACE_DIAGNOSTIC_SECTION_IDS = [
-  "semantic_shadow_top",
-  "pilot_scope",
-  "calibration_profile",
-  "target_choice_shadow",
-  "doctrine_goal",
-  "mistake_summary",
-] as const;
-
-export type SemanticDecisionTraceDiagnosticSectionId =
-  (typeof SEMANTIC_DECISION_TRACE_DIAGNOSTIC_SECTION_IDS)[number];
-
-export type SemanticDecisionTraceDiagnosticSection = {
-  id: SemanticDecisionTraceDiagnosticSectionId;
-  title: string;
-  items: string[];
-};
-
 export type SemanticDecisionTrace = {
   schemaVersion: typeof SEMANTIC_DECISION_TRACE_SCHEMA_VERSION;
   frameSummary: {
@@ -103,23 +85,3 @@ export type SemanticDecisionTrace = {
   selectedActionId?: string;
   noRuntimeEffect?: boolean;
 };
-
-export function buildEmptySemanticDecisionTrace(
-  frame: SemanticDecisionFrame,
-): SemanticDecisionTrace {
-  return {
-    schemaVersion: SEMANTIC_DECISION_TRACE_SCHEMA_VERSION,
-    frameSummary: {
-      side: frame.side,
-      stateVersion: frame.stateVersion,
-      ...(frame.profileId ? { profileId: frame.profileId } : {}),
-      legalActionCount: frame.legalActionIds.length,
-      actionCandidateCount: frame.actionCandidates.length,
-      tacticalGoalCount: frame.tacticalGoals.length,
-      hiddenInfoPolicy: frame.hiddenInfoPolicy,
-    },
-    rankedActions: [],
-    rejectedActions: [],
-    noRuntimeEffect: true,
-  };
-}

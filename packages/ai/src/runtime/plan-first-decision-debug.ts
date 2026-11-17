@@ -1,5 +1,4 @@
 import {
-  type AiDecision,
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
   AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
   type AiDecisionInput,
@@ -8,20 +7,19 @@ import {
   type LegalAction,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import { buildCorpDefenseTurnPlanningSlice } from "../corp/defense/corp-defense-turn-planning";
 import { buildCorpAgendaTurnPlanningSlice } from "../corp/score/corp-agenda-turn-planning";
 import { type CorpPlanDomain } from "../plans/corp-tactical-plan-contracts";
 import {
   type PlanSchedulerContext,
   type PlanSchedulerResult,
-  type SidePlanRegistry,
 } from "../plans/plan-scheduler";
 import { type ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import { runnerDelayedInstallReplanningBoundary } from "../plans/runner-delayed-install-replanning-boundary";
 import { type RunnerPlanDomain } from "../plans/runner-tactical-plan-contracts";
 import {
   buildCanonicalLegalActionInvocation,
-  buildSemanticActionSetFingerprint,
   turnPlanningFingerprint,
 } from "../plans/turn-planning-contracts";
 import {
@@ -37,16 +35,9 @@ export function planFirstDecisionDebug(params: {
   input: AiDecisionInput;
   context: PlanSchedulerContext;
   result: PlanSchedulerResult;
-  registry: SidePlanRegistry;
-  selectedChoicesForDecision: (
-    input: AiDecisionInput,
-    action: LegalAction,
-    currentPortfolio?: ResidentPlanPortfolio,
-  ) => AiDecision["selectedChoices"] | undefined;
   planWindowKind: AiPlanFirstDecisionDebug["executionOrigin"]["windowKind"];
   action: LegalAction;
   planId: string;
-  planKind: string | undefined;
   assessmentEvidenceCodes: readonly string[];
   turnPlanningDebug?: AiTurnPlanningDebug;
 }): AiPlanFirstDecisionDebug {
@@ -481,11 +472,13 @@ function turnPlanningProjectionDebug(params: {
         semanticActionType: candidate.semanticActionType,
         invocationKey: invocation.invocationKey,
         witnessValid:
+          candidate.actorSide === params.input.side &&
+          candidate.stateVersion === stateIdentity.stateVersion &&
           params.input.legalActions.some(
-            (action) => action.actionId === candidate.actionId,
-          ) &&
-          buildSemanticActionSetFingerprint(params.input.legalActions).length >
-            0,
+            (action) =>
+              action.actionId === candidate.actionId &&
+              actionMatchesCurrentDecision(params.input, action),
+          ),
       },
     ],
     selectedLine: {

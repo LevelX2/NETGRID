@@ -83,6 +83,7 @@ describe("Runner start-of-turn order choice", () => {
         },
       ],
     } as unknown as LegalAction;
+    input.legalActions = [action];
     const actionBefore = structuredClone(action);
 
     expect(
@@ -160,6 +161,7 @@ describe("Runner start-of-turn order choice", () => {
         },
       ],
     } as unknown as LegalAction;
+    input.legalActions = [action];
     const actionBefore = structuredClone(action);
 
     expect(

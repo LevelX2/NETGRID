@@ -88,7 +88,7 @@ import {
 } from "./runtime/visible-card-lookup";
 import {
   definitionTypeForMetrics,
-  remoteRootTrashCostForMetrics,
+  remoteTrashCostForVisibleCard,
 } from "./simulation/card-metric-lookup";
 import {
   centralRunStreakWithoutValueForMetrics,
@@ -197,7 +197,7 @@ export const aiLiveRuntimeDependencies = {
   evaluateKnownCentralPayoff: evaluateKnownCentralAccessPayoff,
   definitionType: definitionTypeForMetrics,
   definitionTypeForMetrics,
-  remoteRootTrashCostForMetrics,
+  remoteRootTrashCostForMetrics: remoteTrashCostForVisibleCard,
   canBreakerDefinitionBreakIce,
   runnerVisibleIceCreatesCoverageNeedForMetrics,
   runnerMissingBreakerRolesForMetrics,
@@ -212,13 +212,13 @@ export const aiLiveRuntimeDependencies = {
   applyCorpVisibleTagPunishTakenWindowDiagnostics,
   shouldAvoidRandomBreakOrDamageRisk: randomBreakOrDamageRiskShouldAvoidRun,
   guidanceValue: runnerRunTargetSemanticGuidanceValue,
-  remoteRootTrashCost: remoteRootTrashCostForMetrics,
+  remoteRootTrashCost: remoteTrashCostForVisibleCard,
   staleKnownRndRepeatRunPenalty,
   rndFreshRepeatRunBoost,
   publicHistory: mergedAiPublicHistory,
   eventVersion: aiEventVersion,
   serverIdFromEvent: aiServerIdFromEvent,
-  rootTrashCost: remoteRootTrashCostForMetrics,
+  rootTrashCost: remoteTrashCostForVisibleCard,
   targetServerId: semanticRuntimeServerId,
   randomBreakRecoveryAssessment: runnerRandomBreakRecoveryAssessment,
   findVisibleCard,

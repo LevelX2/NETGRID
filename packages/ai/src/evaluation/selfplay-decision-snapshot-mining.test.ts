@@ -172,6 +172,14 @@ describe("SelfplayDecisionSnapshotMining", () => {
       ]),
     );
     expect(containsForbiddenSemanticMarker(activityCandidates)).toBe(false);
+
+    const paired = buildSelfplayDecisionSnapshotMiningReport(
+      [summary, structuredClone(summary)],
+      { detectorIds: ["repeated_no_progress_run", "repeated_known_no_payoff_remote"] },
+    );
+    expect(paired.candidates).toHaveLength(4);
+    expect(new Set(paired.candidates.map(({ snapshotId }) => snapshotId)).size).toBe(4);
+    expect(new Set(paired.promotionQueue.map(({ snapshotId }) => snapshotId)).size).toBe(4);
   });
 
   it("keeps findings without redacted action alternatives as blocked candidates", () => {

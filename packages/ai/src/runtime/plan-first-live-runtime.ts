@@ -4553,11 +4553,8 @@ function decisionFromScheduler(
     input,
     context,
     result,
-    registry,
-    selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
     action,
     planId,
-    planKind,
     assessmentEvidenceCodes: planEvidence,
     planWindowKind: planDecisionWindowKindForSemantic(
       result.lane === "plan" ? result.route.head.semanticActionType : "",

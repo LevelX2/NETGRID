@@ -4,7 +4,7 @@ import {
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
-import { RUNTIME_CARDS } from "../../ai-hints";
+import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "../../ai-hints";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
 import { decisionDerivedValue } from "../../decision-derived-cache";
 import { readExactCurrentInstalledCorpIceRezQuote } from "../corp-exact-ice-rez-route";
@@ -25,7 +25,6 @@ import {
   scoringWindowVisibleCardTextTokens,
   tokensIncludePhrase,
 } from "./semantic-runtime-corp-scoring-window-runner-pressure";
-import { SCORING_WINDOW_AI_HINTS_BY_CARD } from "./semantic-runtime-corp-scoring-window-card-data";
 export {
   scoringWindowAccessAssessment,
   scoringWindowPostRezProtectionAssessment,
@@ -250,7 +249,7 @@ function scoringWindowVisibleAdvancementBurstAmount(card: VisibleCard): number {
     ? Math.max(
         0,
         ...(
-          SCORING_WINDOW_AI_HINTS_BY_CARD.get(card.definitionId)?.effects ?? []
+          AI_HINTS_BY_CARD.get(card.definitionId)?.effects ?? []
         )
           .filter(
             (effect) =>
@@ -665,7 +664,7 @@ function iceHasSameFortRepositionRisk(ice: VisibleCard): boolean {
 
 function scoringWindowCardSignals(card: VisibleCard): string[] {
   const hint = card.definitionId
-    ? SCORING_WINDOW_AI_HINTS_BY_CARD.get(card.definitionId)
+    ? AI_HINTS_BY_CARD.get(card.definitionId)
     : undefined;
   return [
     ...(hint?.roles ?? []),

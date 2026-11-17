@@ -192,6 +192,8 @@ export function buildSelfplayDecisionSnapshotMiningReport(
       if (!point) return [];
       return [candidateFromFinding(point, finding)];
     });
+  const clusters = clusterCandidates(candidates);
+  const promotionQueue = buildPromotionQueue(candidates);
   const report: SelfplayDecisionSnapshotMiningReport = {
     schemaVersion: SELFPLAY_DECISION_SNAPSHOT_MINING_SCHEMA_VERSION,
     scope: "selfplay_decision_snapshot_mining_report_only",
@@ -202,10 +204,10 @@ export function buildSelfplayDecisionSnapshotMiningReport(
     blockedCandidateCount: candidates.filter((candidate) =>
       candidate.status.startsWith("blocked_"),
     ).length,
-    clusterCount: clusterCandidates(candidates).length,
+    clusterCount: clusters.length,
     candidatesByMistakeClass: countCandidateMistakeClasses(candidates),
-    clusters: clusterCandidates(candidates),
-    promotionQueue: buildPromotionQueue(candidates),
+    clusters,
+    promotionQueue,
     candidates,
     redactionStatus: "passed",
     productiveUseAllowed: false,
@@ -218,8 +220,8 @@ export function buildSelfplayDecisionSnapshotMiningReport(
       `source_decision_point_count:${points.length}`,
       `finding_count:${findings.length}`,
       `candidate_count:${candidates.length}`,
-      `cluster_count:${clusterCandidates(candidates).length}`,
-      `promotion_queue_count:${buildPromotionQueue(candidates).length}`,
+      `cluster_count:${clusters.length}`,
+      `promotion_queue_count:${promotionQueue.length}`,
       "runtime_consumer:none",
       "productive_use_allowed:false",
     ],
@@ -293,7 +295,9 @@ function clusterCandidates(
       candidate.mistakeClasses.join("+") || "unclassified",
       candidate.selectedActionType,
     ].join(":");
-    byId.set(key, [...(byId.get(key) ?? []), candidate]);
+    const cluster = byId.get(key);
+    if (cluster) cluster.push(candidate);
+    else byId.set(key, [candidate]);
   }
   return [...byId.entries()]
     .map(([clusterId, clusterCandidates]) => {
@@ -348,7 +352,8 @@ function candidateFromFinding(
 ): SelfplayDecisionSnapshotCandidate {
   const mistakeClasses = mistakeClassesForDetectors(finding.detectorIds);
   const snapshotId = safe(
-    `selfplay_${point.seed}_${point.stateVersion}_${finding.detectorIds.join("_")}`,
+    ["selfplay", point.summaryIndex, point.actionIndex, point.seed, point.stateVersion, ...finding.detectorIds]
+      .join("_"),
   );
   const legalActionCandidates = point.actionAlternatives.map(
     legalActionCandidateFromAlternative,
