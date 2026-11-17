@@ -18,7 +18,7 @@ const payload = {
     stateVersion: 9,
     legalActions: [
       {
-        actionId: "runner.start_run.rd",
+        actionId: 1,
         type: "start_run",
         label: "Run auf R&D",
         side: "runner",

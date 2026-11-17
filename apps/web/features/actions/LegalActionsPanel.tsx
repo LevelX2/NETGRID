@@ -1,5 +1,6 @@
 "use client";
 
+import { optionPresentation, type SelectionId } from "../../lib/presented-player-view";
 import {
   Building2,
   Check,
@@ -8,12 +9,8 @@ import {
   Search,
   X,
 } from "lucide-react";
-import type {
-  LegalAction,
-  PlayerView,
-  Side,
-  VisibleCard,
-} from "@netgrid/shared";
+import type { Side, VisibleCard } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../../lib/presented-player-view";
 import { useLocale, useTranslations } from "use-intl/react";
 
 import {
@@ -91,20 +88,20 @@ export function LegalActionsPanel({
   activeAiSide?: Side;
   disabled: boolean;
   highlighted?: boolean;
-  selectedDiscardOptionIds: string[];
-  selectedFieldCardChoiceOptionIds: string[];
+  selectedDiscardOptionIds: SelectionId[];
+  selectedFieldCardChoiceOptionIds: SelectionId[];
   onAction(action: LegalAction): void;
   onChoiceOption(
     action: LegalAction,
-    choiceId: string,
-    selectedOptionId: string,
+    choiceId: SelectionId,
+    selectedOptionId: SelectionId,
   ): void;
   onChoiceOptions(
     action: LegalAction,
-    choiceId: string,
-    selectedOptionIds: string[],
+    choiceId: SelectionId,
+    selectedOptionIds: SelectionId[],
   ): void;
-  onDiscardChoiceToggle(optionId: string): void;
+  onDiscardChoiceToggle(optionId: SelectionId): void;
   onFieldCardChoiceClear(): void;
   onPriorityWindowHoldEnabled(enabled: boolean): void;
   onFloatPanel?: (() => void) | undefined;
@@ -151,7 +148,7 @@ export function LegalActionsPanel({
               disabled={disabled}
               data-testid="setup-choice-button"
             >
-              {option.id === "keep" ? (
+              {optionPresentation(option) === "keep" ? (
                 <Check size={15} />
               ) : (
                 <RotateCcw size={15} />

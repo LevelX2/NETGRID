@@ -1,12 +1,6 @@
 import { cardDefinitionIdValue } from "./card-definition-id";
-import type {
-  CardDefinitionId,
-  MatchEventId,
-  PlayerView,
-  PublicGameEvent,
-  Side,
-  VisibleCard,
-} from "@netgrid/shared";
+import type { CardDefinitionId, MatchEventId, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
+import type { PlayerView } from "../lib/presented-player-view";
 import {
   chronicleActionUseByEventId,
   formatChronicleEffectItems,

@@ -1,7 +1,6 @@
 import type {
   ApiMatchMode,
   ApiSidePayload,
-  LegalAction,
   Side,
 } from "@netgrid/shared";
 import {
@@ -9,6 +8,7 @@ import {
   serverTargetIdForAction,
   type ActionContext,
 } from "./action-board-ui";
+import type { LegalAction } from "../lib/presented-player-view";
 import type { AiDecisionPreview } from "../lib/client-api";
 
 const HUMAN_VS_AI_MODES = new Set<ApiMatchMode>([

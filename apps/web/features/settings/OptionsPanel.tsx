@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "use-intl/react";
-import type { PlayerView } from "@netgrid/shared";
+import type { PlayerView } from "../../lib/presented-player-view";
 
 import type { SessionInfo } from "../../app/session-recovery";
 import { normalizeAppLocale } from "../../i18n/locale";

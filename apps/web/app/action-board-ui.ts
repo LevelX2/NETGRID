@@ -1,15 +1,12 @@
-import type { AccessPresentationId } from "./access-reveal-ui";
 import {
-  isCardDefinitionId,
-  type LegalAction,
-  type MatchEventId,
-  type PlayerView,
-  type PublicGameEvent,
-  type Side,
-  type VisibleCard,
-  type VisibleChoiceOption,
-  type VisibleServerStatus,
-} from "@netgrid/shared";
+  optionBidAmount,
+  optionPresentation,
+  optionServer,
+  type SelectionId,
+} from "../lib/presented-player-view";
+import type { AccessPresentationId } from "./access-reveal-ui";
+import { isCardDefinitionId, type MatchEventId, type PublicGameEvent, type Side, type VisibleCard, type VisibleServerStatus } from "@netgrid/shared";
+import type { LegalAction, PlayerView, VisibleChoiceOption } from "../lib/presented-player-view";
 import { actionHasAbility } from "./action-payload";
 import {
   publicCardTitle,
@@ -2555,10 +2552,10 @@ export function serverBoardRows<T extends { id: string }>(
       (left, right) => centralOrder.get(left.id)! - centralOrder.get(right.id)!,
     );
   const remotes = servers
-    .filter((server) => /^remote_\d+$/.test(server.id))
+    .filter((server) => /^r\d+$/.test(server.id))
     .sort((left, right) => remoteNumber(left.id) - remoteNumber(right.id));
   const other = servers.filter(
-    (server) => !centralOrder.has(server.id) && !/^remote_\d+$/.test(server.id),
+    (server) => !centralOrder.has(server.id) && !/^r\d+$/.test(server.id),
   );
   const centralRow = { kind: "centrals" as const, servers: central };
   const remoteRow = {
@@ -2589,7 +2586,7 @@ export function serverDisplayLabel(serverIdOrLabel: string): string {
   if (serverIdOrLabel === "archives" || serverIdOrLabel === "Archives")
     return "Archive";
   if (serverIdOrLabel === "new_remote") return "neuem Remote";
-  const remote = /^remote_(\d+)$/.exec(serverIdOrLabel);
+  const remote = /^r(\d+)$/.exec(serverIdOrLabel);
   if (remote?.[1]) return `Remote ${remote[1]}`;
   return normalizeVisibleTerms(serverIdOrLabel);
 }
@@ -2605,7 +2602,7 @@ export function localizedServerDisplayLabel(
     return actionPresentationText(locale, "serverArchives");
   if (serverIdOrLabel === "new_remote")
     return actionPresentationText(locale, "serverNewRemote");
-  const remote = /^remote_(\d+)$/.exec(serverIdOrLabel);
+  const remote = /^r(\d+)$/.exec(serverIdOrLabel);
   if (remote?.[1])
     return actionPresentationText(locale, "serverRemote", {
       number: remote[1],
@@ -2631,9 +2628,8 @@ export function serverTargetIdForChoiceOption(
     value === "new_remote" || serverIds.includes(value);
   if (typeof option.value === "string" && isKnownServer(option.value))
     return option.value;
-  if (isKnownServer(option.id)) return option.id;
-  const fortId = /^fort_(.+)$/.exec(option.id)?.[1];
-  return fortId && isKnownServer(fortId) ? fortId : null;
+  const serverId = optionServer(option);
+  return serverId && isKnownServer(serverId) ? serverId : null;
 }
 
 export function accessRevealStatusLabel(
@@ -3046,9 +3042,9 @@ export function cardChoiceIsReadonlyPrivateLook(
   )
     return false;
   const doneOptions = choice.options.filter(
-    (option) => option.id === "done" && option.selectable !== false,
+    (option) => optionPresentation(option) === "done" && option.selectable !== false,
   );
-  const cardOptions = choice.options.filter((option) => option.id !== "done");
+  const cardOptions = choice.options.filter((option) => optionPresentation(option) !== "done");
   return (
     doneOptions.length === 1 &&
     cardOptions.length > 0 &&
@@ -3060,11 +3056,11 @@ export function cardChoiceIsReadonlyPrivateLook(
 
 export function cardChoiceReadonlyConfirmationOptionId(
   choice: NonNullable<PlayerView["pendingChoice"]>,
-): string | null {
+): SelectionId | null {
   if (!cardChoiceIsReadonlyPrivateLook(choice)) return null;
   return (
     choice.options.find(
-      (option) => option.id === "done" && option.selectable !== false,
+      (option) => optionPresentation(option) === "done" && option.selectable !== false,
     )?.id ?? null
   );
 }
@@ -3186,7 +3182,7 @@ export function fieldCardChoiceAuxiliaryOptions(
   if (!choice.source.startsWith("card_implementation.scored_agenda_free_rez:"))
     return [];
   return choice.options.filter(
-    (option) => option.selectable !== false && option.id === "skip",
+    (option) => option.selectable !== false && optionPresentation(option) === "skip",
   );
 }
 
@@ -3216,13 +3212,15 @@ function fieldCardChoiceOptionTargetsCard(
   card: Pick<VisibleCard, "instanceId">,
 ): boolean {
   return (
-    option.value === card.instanceId || option.id === `card_${card.instanceId}`
+    option.value === card.instanceId ||
+    option.card?.instanceId === card.instanceId ||
+    option.id === `card_${card.instanceId}`
   );
 }
 
 export function fieldCardChoiceInfo(
   choice: NonNullable<PlayerView["pendingChoice"]>,
-  selectedOptionIds: string[],
+  selectedOptionIds: SelectionId[],
   locale: AppLocale | string = "de",
 ): FieldCardChoiceInfo {
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
@@ -3275,7 +3273,7 @@ function visibleFieldCards(view: PlayerView): VisibleCard[] {
 export function runnerProgramInstallTrashChoiceInfo(
   choice: NonNullable<PlayerView["pendingChoice"]>,
   view: PlayerView,
-  selectedOptionIds: string[],
+  selectedOptionIds: SelectionId[],
 ): RunnerProgramInstallTrashChoiceInfo | null {
   if (!choice.source.startsWith("runner_program_trash_before_install:"))
     return null;
@@ -4213,7 +4211,7 @@ export function choiceOptionPresentationLabel(
 
   switch (choice.presentationKey) {
     case "delayed_install_destination":
-      if (option.id === "rig")
+      if (optionPresentation(option) === "rig")
         return actionPresentationText(locale, "choiceInstallInMemory");
       if (cardTitle)
         return actionPresentationText(locale, "choiceInstallOnHost", {
@@ -4221,13 +4219,13 @@ export function choiceOptionPresentationLabel(
         });
       break;
     case "runner_draw_tax":
-      if (option.id === "pay_credit")
+      if (optionPresentation(option) === "pay_credit")
         return actionPresentationText(locale, "choicePayOneCredit");
-      if (option.id === "take_tag")
+      if (optionPresentation(option) === "take_tag")
         return actionPresentationText(locale, "choiceTakeOneTag");
       break;
     case "runner_draw_tax_rez":
-      if (option.id.startsWith("rez_")) {
+      if (optionPresentation(option) === "rez") {
         const amount = Number(metadata?.creditCost);
         if (Number.isFinite(amount) && amount >= 0)
           return actionPresentationText(locale, "choiceRezCardForCredits", {
@@ -4238,7 +4236,7 @@ export function choiceOptionPresentationLabel(
       }
       break;
     case "access_ability":
-      if (option.id === "pay") {
+      if (optionPresentation(option) === "pay") {
         const amount = Number(metadata?.creditCost);
         if (Number.isFinite(amount))
           return actionPresentationText(locale, "choicePayCredits", {
@@ -4246,7 +4244,7 @@ export function choiceOptionPresentationLabel(
             credits: creditLabel(amount),
           });
       }
-      if (option.id === "use")
+      if (optionPresentation(option) === "use")
         return actionPresentationText(
           locale,
           metadata?.optionKind === "trash_source"
@@ -4257,7 +4255,7 @@ export function choiceOptionPresentationLabel(
         );
       break;
     case "extra_draw":
-      if (option.id === "draw")
+      if (optionPresentation(option) === "draw")
         return actionPresentationText(locale, "choiceDrawAdditionalCard");
       break;
     case "pdca_damage_replacement": {
@@ -4271,7 +4269,7 @@ export function choiceOptionPresentationLabel(
       break;
     }
     case "damage_replacement": {
-      if (option.id === "pass")
+      if (optionPresentation(option) === "pass")
         return actionPresentationText(locale, "choiceDoNotReplace");
       const amount = Number(metadata?.amount ?? 1);
       if (
@@ -4349,11 +4347,11 @@ export function choiceOptionPresentationLabel(
       break;
     }
     case "black_ice_or_bad_publicity":
-      if (option.id === "derez" && cardTitle)
+      if (optionPresentation(option) === "derez" && cardTitle)
         return actionPresentationText(locale, "choiceDerezCard", {
           card: cardTitle,
         });
-      if (option.id === "bad_publicity")
+      if (optionPresentation(option) === "bad_publicity")
         return actionPresentationText(locale, "choiceTakeBadPublicity", {
           amount: 2,
         });
@@ -4412,9 +4410,9 @@ export function choiceOptionPresentationLabel(
         });
       return actionPresentationText(locale, "choiceNoAdvancementCounters");
     case "corp_economy_credit_choice":
-      if (option.id === "take_credit")
+      if (optionPresentation(option) === "take_credit")
         return actionPresentationText(locale, "choiceTakeOneCredit");
-      if (option.id.startsWith("corp_installed_economy_credit_"))
+      if (optionPresentation(option) === "corp_installed_economy_credit")
         return actionPresentationText(
           locale,
           "choicePlaceCreditsOnEconomyCard",
@@ -4434,13 +4432,13 @@ export function choiceOptionPresentationLabel(
         });
       break;
     case "start_run_redirect":
-      if (option.id === "pass")
+      if (optionPresentation(option) === "pass")
         return actionPresentationText(locale, "choiceDoNotRedirectRun");
-      if (cardTitle && option.id.startsWith("redirect_"))
+      if (cardTitle && optionPresentation(option) === "redirect")
         return actionPresentationText(locale, "choiceRedirectRunWithCard", {
           card: cardTitle,
         });
-      if (cardTitle && option.id.startsWith("herman_"))
+      if (cardTitle && optionPresentation(option) === "herman")
         return actionPresentationText(locale, "choiceReorderIceWithCard", {
           card: cardTitle,
         });
@@ -4495,13 +4493,13 @@ export function choiceOptionPresentationLabel(
         });
       break;
     case "paid_source_return":
-      if (option.id === "leave_in_heap")
+      if (optionPresentation(option) === "leave_in_heap")
         return actionPresentationText(locale, "choiceLeaveInHeap");
-      if (option.id === "pay_1_return_to_grip")
+      if (optionPresentation(option) === "pay_1_return_to_grip")
         return actionPresentationText(locale, "choicePayOneReturnToGrip");
       break;
     case "counter_prevention":
-      if (option.id === "pass")
+      if (optionPresentation(option) === "pass")
         return actionPresentationText(locale, "choiceReceiveVirusCounter");
       if (cardTitle)
         return actionPresentationText(locale, "choicePayOneWithCard", {
@@ -4509,7 +4507,7 @@ export function choiceOptionPresentationLabel(
         });
       break;
     case "corp_start_rez":
-      if (option.id === "pass")
+      if (optionPresentation(option) === "pass")
         return actionPresentationText(locale, "choiceDoNotRez");
       if (cardTitle) {
         const amount = Number(metadata?.creditCost);
@@ -4522,7 +4520,7 @@ export function choiceOptionPresentationLabel(
       }
       break;
     case "satellite_monitors":
-      if (option.id === "use")
+      if (optionPresentation(option) === "use")
         return actionPresentationText(locale, "choiceResolveDiceSeries");
       break;
     case "incubator_transform": {
@@ -4558,20 +4556,20 @@ export function choiceOptionPresentationLabel(
       break;
     }
     case "vacuum_link":
-      if (option.id === "resume_from_rezzed_ice_back")
+      if (optionPresentation(option) === "resume_from_rezzed_ice_back")
         return actionPresentationText(
           locale,
           "choiceContinueFromDesignatedIce",
         );
-      if (option.id === "jack_out")
+      if (optionPresentation(option) === "jack_out")
         return actionPresentationText(locale, "choiceJackOut");
       break;
     case "aardvark_rez":
-      if (option.id === "rez_trash_worm")
+      if (optionPresentation(option) === "rez_trash_worm")
         return actionPresentationText(locale, "choiceRezAardvark");
       break;
     case "shuffle_grip":
-      if (option.id === "shuffle_grip")
+      if (optionPresentation(option) === "shuffle_grip")
         return actionPresentationText(locale, "choiceShuffleRunnerGrip");
       break;
     case "gypsy_reveal":
@@ -4603,11 +4601,11 @@ export function choiceOptionPresentationLabel(
         });
       break;
     case "jack_out_after_rez":
-      if (option.id === "jack_out")
+      if (optionPresentation(option) === "jack_out")
         return actionPresentationText(locale, "choiceJackOut");
       break;
     case "trace_base_link":
-      if (option.id === "pass")
+      if (optionPresentation(option) === "pass")
         return actionPresentationText(locale, "choiceDoNotUseBaseLink");
       if (cardTitle && Number.isFinite(numericValue))
         return actionPresentationText(locale, "choiceUseBaseLinkCard", {
@@ -4616,7 +4614,7 @@ export function choiceOptionPresentationLabel(
         });
       break;
     case "trace_post_bid_link": {
-      if (option.id === "pass")
+      if (optionPresentation(option) === "pass")
         return actionPresentationText(locale, "choiceDoNotUsePostBidLink");
       const amount = Number(metadata?.postBidTraceLinkDelta);
       if (cardTitle && Number.isFinite(amount))
@@ -4627,7 +4625,7 @@ export function choiceOptionPresentationLabel(
       break;
     }
     case "trace_success_cancel":
-      if (option.id === "pass")
+      if (optionPresentation(option) === "pass")
         return actionPresentationText(locale, "choiceDoNotCancelTrace");
       if (cardTitle)
         return actionPresentationText(locale, "choiceCancelTraceWithCard", {
@@ -4670,7 +4668,7 @@ export function choiceOptionPresentationLabel(
         });
       break;
     case "resource_trash_for_credits":
-      if (option.id.startsWith("card_")) return option.label;
+      if (optionPresentation(option) === "card") return option.label;
       break;
     case "free_rez_ice":
       if (cardTitle) return rezVariantLabel(cardTitle);
@@ -4724,7 +4722,7 @@ export function choiceOptionPresentationLabel(
       }
       break;
   }
-  switch (option.id) {
+  switch (optionPresentation(option)) {
     case "keep":
       return actionPresentationText(locale, "choiceKeepHand");
     case "mulligan":
@@ -4738,9 +4736,8 @@ export function choiceOptionPresentationLabel(
     case "decline":
       return actionPresentationText(locale, "choiceDecline");
   }
-  const bidMatch = /^bid_(\d+)$/.exec(option.id);
-  if (bidMatch?.[1]) {
-    const amount = Number(bidMatch[1]);
+  const amount = optionBidAmount(option);
+  if (amount !== undefined) {
     return actionPresentationText(locale, "choiceBid", {
       amount,
       credits: actionPresentationNoun(locale, "credit", amount),
@@ -4753,23 +4750,16 @@ export function choiceOptionPresentationLabel(
   ) {
     return new Intl.NumberFormat(normalizedLocale).format(option.value);
   }
-  if (
-    option.id === "hq" ||
-    option.id === "rd" ||
-    option.id === "archives" ||
-    option.id === "new_remote" ||
-    /^remote_\d+$/.test(option.id)
-  ) {
+  const serverId = optionServer(option);
+  if (serverId) {
     return localizedServerDisplayLabel(
-      option.id,
+      serverId,
       normalizeActionPresentationLocale(locale),
     );
   }
   if (
     choice.source === "discard_phase" ||
-    /^(card|agenda|ice|breaker|program|hardware|resource|asset|upgrade)_/.test(
-      option.id,
-    )
+    optionPresentation(option) === "card"
   ) {
     return option.label;
   }
@@ -5061,6 +5051,6 @@ function addStringRef(refs: Set<string>, value: unknown): void {
 
 function remoteNumber(serverId: string): number {
   return Number(
-    /^remote_(\d+)$/.exec(serverId)?.[1] ?? Number.MAX_SAFE_INTEGER,
+    /^r(\d+)$/.exec(serverId)?.[1] ?? Number.MAX_SAFE_INTEGER,
   );
 }

@@ -2,7 +2,8 @@ import { type CardDefinitionId } from "@netgrid/shared";
 import { Layers3 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import type { PlayerView, Side, VisibleCard } from "@netgrid/shared";
+import type { Side, VisibleCard } from "@netgrid/shared";
+import type { PlayerView } from "../../lib/presented-player-view";
 import { useTranslations } from "use-intl/react";
 
 import { CardView } from "../cards/CardView";

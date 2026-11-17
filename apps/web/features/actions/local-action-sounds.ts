@@ -1,4 +1,5 @@
-import type { LegalAction, MatchEventId, PublicGameEvent, Side } from "@netgrid/shared";
+import type { MatchEventId, PublicGameEvent, Side } from "@netgrid/shared";
+import type { LegalAction } from "../../lib/presented-player-view";
 
 import {
   actionSoundForActionType,

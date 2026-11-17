@@ -13,7 +13,7 @@ import {
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ButtonHTMLAttributes, CSSProperties } from "react";
-import type { LegalAction } from "@netgrid/shared";
+import type { LegalAction } from "../../lib/presented-player-view";
 import { useTranslations } from "use-intl/react";
 import {
   actionConsumesClick,

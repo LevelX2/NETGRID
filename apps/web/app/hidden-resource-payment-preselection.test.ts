@@ -176,15 +176,10 @@ describe("hidden resource payment preselection", () => {
       "withdraw-1",
       "window-1",
     );
-    support.payload = {
-      ...support.payload,
-      costPenaltySupportOriginalActionId: "running-interference",
-    };
     const pending = pendingPaymentSupportContinuation("match-1", support, 12);
     expect(pending).toEqual({
       matchId: "match-1",
       windowId: "window-1",
-      originalActionId: "running-interference",
       supportSubmittedAtStateVersion: 12,
     });
 

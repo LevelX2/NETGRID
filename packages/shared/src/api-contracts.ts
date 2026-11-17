@@ -10,6 +10,7 @@ import type {
   ApiLobbyPresentationDescriptor,
   ApiUserErrorPayload,
 } from "./presentation-contracts";
+import type { OfferedPlayerView } from "./match-offer-contracts";
 
 export type ApiMatchStatus =
   | "pending"
@@ -427,7 +428,7 @@ export type ApiSidePayload = {
   matchVersion: number;
   isPublic: boolean;
   side: Side;
-  playerView: PlayerView;
+  playerView: OfferedPlayerView;
   opponentStatus: ApiOpponentStatus;
   pendingUndo?: ApiPendingUndoRequest & { needsResponse: boolean };
   aiTurnPresentation?: ApiAiTurnPresentationState;
@@ -496,7 +497,7 @@ export type ApiCreateMatchResponse = {
   joinUrl?: string;
   webSocketUrl: string;
   mode: ApiMatchMode;
-  playerView?: PlayerView;
+  playerView?: OfferedPlayerView;
   matchVersion: number;
   lobby?: ApiMatchStartLobbyPayload;
   playerClock?: ApiPlayerClockSnapshot;
@@ -516,7 +517,7 @@ export type ApiJoinMatchResponse = {
   sessionToken: string;
   reconnectToken: string;
   webSocketUrl: string;
-  playerView?: PlayerView;
+  playerView?: OfferedPlayerView;
   matchVersion: number;
   matchStatus?: ApiMatchStatus;
   lobby?: ApiMatchStartLobbyPayload;

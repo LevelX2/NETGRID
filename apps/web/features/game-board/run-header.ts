@@ -1,4 +1,4 @@
-import type { PlayerView } from "@netgrid/shared";
+import type { PlayerView } from "../../lib/presented-player-view";
 
 export function runHeaderIceTitle(view: PlayerView): string | null {
   const run = view.run;

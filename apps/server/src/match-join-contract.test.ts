@@ -69,6 +69,13 @@ async function fixture() {
     created,
     socket,
     frames,
+    baseUrl: `http://127.0.0.1:${address.port}`,
+    offer() {
+      const frame = frames.find((frame) => frame.type === "state_update");
+      if (!frame || frame.type !== "state_update")
+        throw new Error("Missing numeric state update");
+      return frame.payload;
+    },
     next,
     join,
     async close() {
@@ -90,7 +97,7 @@ describe("authenticated WebSocket match contract", () => {
         payload: {
           matchId: f.created.matchId,
           side: "runner",
-          actionId: f.created.playerView.legalActions[0]!.actionId,
+          actionId: f.offer().playerView.legalActions[0]!.actionId,
           clientKnownMatchVersion: f.created.matchVersion,
           clientKnownStateVersion: f.created.playerView.stateVersion + 1,
           idempotencyKey: "malformed-ws-rejection",
@@ -164,6 +171,62 @@ describe("authenticated WebSocket match contract", () => {
       await f.close();
     }
   });
+  it("binds the same numeric choice in HTTP and WebSocket and rejects string IDs", async () => {
+    const f = await fixture();
+    try {
+      const acknowledgement = f.next("match_joined");
+      f.join();
+      await acknowledgement;
+      const state = f.offer();
+      const response = await fetch(
+        `${f.baseUrl}/api/matches/${f.created.matchId}/bootstrap?side=runner`,
+        { headers: { authorization: `Bearer ${f.created.hostSessionToken}` } },
+      );
+      expect(response.status).toBe(200);
+      expect(await response.json()).toMatchObject({
+        playerView: {
+          legalActions: state.playerView.legalActions,
+          pendingChoice: state.playerView.pendingChoice,
+        },
+      });
+      const choice = state.playerView.pendingChoice!;
+      const action = state.playerView.legalActions.find((action) => action.type === "resolve_choice")!;
+      const keep = choice.options.find((option) => option.presentation === "keep")!;
+      expect(action.actionId).toBe(1);
+      expect(typeof choice.choiceId).toBe("number");
+      expect(typeof keep.id).toBe("number");
+      const payload = {
+        matchId: f.created.matchId,
+        side: "runner",
+        actionId: action.actionId,
+        clientKnownStateVersion: state.playerView.stateVersion,
+        clientKnownMatchVersion: state.matchVersion,
+        idempotencyKey: "numeric-ws-choice",
+        selectedChoices: {
+          choiceId: choice.choiceId,
+          selectedOptionIds: [keep.id],
+        },
+      };
+      const stringAction = f.next("error");
+      f.socket.send(JSON.stringify({
+        type: "submit_action",
+        payload: { ...payload, actionId: String(action.actionId) },
+      }));
+      expect(await stringAction).toMatchObject({ type: "error" });
+      expect((await f.service.loadForTest(f.created.matchId))?.actionReceipts).toEqual([]);
+      const accepted = f.next("action_receipt");
+      f.socket.send(JSON.stringify({ type: "submit_action", payload }));
+      expect(await accepted).toMatchObject({
+        type: "action_receipt",
+        payload: {
+          accepted: true,
+          stateVersionAfter: state.playerView.stateVersion + 1,
+        },
+      });
+    } finally {
+      await f.close();
+    }
+  });
   it("sends the same rejected receipt and error for a repeated stale action", async () => {
     const f = await fixture();
     try {
@@ -175,7 +238,7 @@ describe("authenticated WebSocket match contract", () => {
         payload: {
           matchId: f.created.matchId,
           side: "runner",
-          actionId: f.created.playerView.legalActions[0]!.actionId,
+          actionId: f.offer().playerView.legalActions[0]!.actionId,
           clientKnownMatchVersion: f.created.matchVersion,
           clientKnownStateVersion: f.created.playerView.stateVersion + 1,
           idempotencyKey: "repeated-ws-rejection",

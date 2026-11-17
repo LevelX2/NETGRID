@@ -14,13 +14,17 @@ import type {
   ApiAccountActivePublicMatchIds,
   ApiMatchCardPool,
   ApiUserErrorPayload,
+  MatchActionSubmission,
   MatchEventId,
+  PlayerView,
 } from "@netgrid/shared";
 import {
   isApiUserErrorCode,
+  isMatchOfferId,
   runtimeProfileFromEnvironment,
   testCardsEnabledFromEnvironment,
 } from "@netgrid/shared";
+import { buildMatchPlayerOffer } from "@netgrid/engine";
 import {
   createConnectionAuditLoggerFromEnv,
   noopConnectionAuditLogger,
@@ -161,16 +165,7 @@ type ClientWsMessage =
     }
   | {
       type: "submit_action";
-      payload: {
-        matchId: string;
-        side: Side;
-        actionId: string;
-        clientKnownStateVersion: number;
-        clientKnownMatchVersion: number;
-        idempotencyKey: string;
-        selectedTargets?: Record<string, string>;
-        selectedChoices?: Record<string, unknown>;
-      };
+      payload: MatchActionSubmission;
     }
   | {
       type: "request_undo";
@@ -545,7 +540,7 @@ export class NetgridRealtimeServer {
     context: WsContext,
     payload: Extract<ClientWsMessage, { type: "submit_action" }>["payload"],
   ): Promise<void> {
-    const result = await this.service.submitAction({
+    const result = await this.service.submitActionOffer({
       matchId: context.matchId,
       side: context.side,
       sessionToken: context.sessionToken,
@@ -3485,7 +3480,7 @@ async function routeHttp(
             bindingSource: "authenticated_create",
           });
         }
-        sendJson(response, 201, created);
+        sendJson(response, 201, localeNeutralServiceResult(created));
       } catch (error) {
         if (error instanceof UpdateAdmissionError) throw error;
         sendJson(response, 400, {
@@ -3932,7 +3927,7 @@ async function routeHttp(
           response,
           result.ok && result.newMatch ? 201 : result.ok ? 200 : 409,
           result.ok && result.newMatch
-            ? result.newMatch
+            ? localeNeutralServiceResult(result.newMatch)
             : localeNeutralServiceResult(result),
         );
         return;
@@ -4069,7 +4064,7 @@ async function routeHttp(
         if (advanced.ok) {
           sendJson(response, 200, {
             ok: true,
-            requesterPayload: advanced.requesterPayload,
+            requesterPayload: localeNeutralServiceResult(advanced.requesterPayload),
             ...(advanced.publicEvent
               ? { publicEvent: advanced.publicEvent }
               : {}),
@@ -4483,7 +4478,10 @@ function sendBootstrap(
     send(socket, { type: "lobby_update", payload });
     return;
   }
-  send(socket, { type: "state_update", payload });
+  send(socket, {
+    type: "state_update",
+    payload: { ...payload, playerView: buildMatchPlayerOffer(payload.playerView) },
+  });
 }
 
 function isLobbyPayload(payload: ServicePayload): payload is LobbyPayload {
@@ -4519,7 +4517,7 @@ function apiUserErrorPayload(error: {
   code: string;
   diagnosticCode?: string;
   currentStateVersion?: number;
-  playerView?: ApiUserErrorPayload["playerView"];
+  playerView?: PlayerView;
 }): ApiUserErrorPayload {
   return {
     code: isApiUserErrorCode(error.code)
@@ -4529,21 +4527,29 @@ function apiUserErrorPayload(error: {
     ...(typeof error.currentStateVersion === "number"
       ? { currentStateVersion: error.currentStateVersion }
       : {}),
-    ...(error.playerView ? { playerView: error.playerView } : {}),
+    ...(error.playerView
+      ? { playerView: buildMatchPlayerOffer(error.playerView) }
+      : {}),
   };
 }
 
 function localeNeutralServiceResult<T>(result: T): T | Record<string, unknown> {
-  if (!result || typeof result !== "object" || !("error" in result))
+  if (!result || typeof result !== "object")
     return result;
-  const record = result as Record<string, unknown>;
+  const { opponentPayload: _opponentPayload, ...record } =
+    result as Record<string, unknown>;
+  if (record.playerView)
+    record.playerView = buildMatchPlayerOffer(record.playerView as PlayerView);
+  for (const key of ["actorPayload", "requesterPayload", "payload"] as const) {
+    if (record[key]) record[key] = localeNeutralServiceResult(record[key]);
+  }
   const error = record.error;
-  if (!error || typeof error !== "object" || !("code" in error)) return result;
+  if (!error || typeof error !== "object" || !("code" in error)) return record;
   const errorRecord = error as {
     code: unknown;
     diagnosticCode?: string;
     currentStateVersion?: number;
-    playerView?: ApiUserErrorPayload["playerView"];
+    playerView?: PlayerView;
   };
   if (typeof errorRecord.code !== "string") return result;
   return {
@@ -4566,13 +4572,46 @@ function localeNeutralServiceResult<T>(result: T): T | Record<string, unknown> {
 function parseWsMessage(raw: string): ClientWsMessage | null {
   try {
     const parsed = JSON.parse(raw) as ClientWsMessage;
-    return typeof parsed?.type === "string" &&
-      typeof parsed.payload === "object"
-      ? parsed
-      : null;
+    if (
+      typeof parsed?.type !== "string" ||
+      !isMessageRecord(parsed.payload)
+    ) return null;
+    if (parsed.type === "submit_action" && !isMatchActionSubmission(parsed.payload))
+      return null;
+    return parsed;
   } catch {
     return null;
   }
+}
+
+function isMessageRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isMatchActionSubmission(value: Record<string, unknown>): boolean {
+  const choice = value.selectedChoices;
+  return (
+    typeof value.matchId === "string" &&
+    (value.side === "corp" || value.side === "runner") &&
+    isMatchOfferId(value.actionId) &&
+    typeof value.clientKnownStateVersion === "number" &&
+    Number.isSafeInteger(value.clientKnownStateVersion) &&
+    value.clientKnownStateVersion >= 0 &&
+    typeof value.clientKnownMatchVersion === "number" &&
+    Number.isSafeInteger(value.clientKnownMatchVersion) &&
+    value.clientKnownMatchVersion >= 0 &&
+    typeof value.idempotencyKey === "string" &&
+    value.idempotencyKey.length > 0 &&
+    (value.selectedTargets === undefined ||
+      (isMessageRecord(value.selectedTargets) &&
+        Object.values(value.selectedTargets).every((target) => typeof target === "string"))) &&
+    (choice === undefined ||
+      (isMessageRecord(choice) &&
+        Object.keys(choice).length === 2 &&
+        isMatchOfferId(choice.choiceId) &&
+        Array.isArray(choice.selectedOptionIds) &&
+        choice.selectedOptionIds.every(isMatchOfferId)))
+  );
 }
 
 function checkRateLimit(

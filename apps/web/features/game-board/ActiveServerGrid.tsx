@@ -1,13 +1,10 @@
 "use client";
 
+import { type SelectionId } from "../../lib/presented-player-view";
 import { Route } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
-import type {
-  LegalAction,
-  PlayerView,
-  Side,
-  VisibleCard,
-} from "@netgrid/shared";
+import type { Side, VisibleCard } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../../lib/presented-player-view";
 import { useLocale, useTranslations } from "use-intl/react";
 
 import type { BoardHighlight } from "../../app/action-cues";
@@ -53,7 +50,7 @@ const CORP_HQ_HAND_PANEL_INLINE_CHROME_PX = 14;
 const RunIcon = Route;
 
 type DiscardOption = {
-  id: string;
+  id: SelectionId;
 };
 
 export function ActiveServerGrid({
@@ -94,7 +91,7 @@ export function ActiveServerGrid({
   viewedInstalledExposeCardId: string | null;
   exposedCardHighlightIds: ReadonlySet<string>;
   selectedActionContext: ActionContext | null;
-  selectedDiscardOptionIdSet: ReadonlySet<string>;
+  selectedDiscardOptionIdSet: ReadonlySet<SelectionId>;
   boardLaneStyle: CSSProperties;
   handCardsStyle: CSSProperties;
   zoneCardsStyle: CSSProperties;
@@ -106,7 +103,7 @@ export function ActiveServerGrid({
   enrichCard(card: VisibleCard): DisplayVisibleCard;
   scoreAreaCardsBySide(side: Side): VisibleCard[];
   discardOptionForCard(card: VisibleCard): DiscardOption | null;
-  toggleDiscardOption(optionId: string): void;
+  toggleDiscardOption(optionId: SelectionId): void;
   fieldChoiceCardProps(card: VisibleCard): FieldChoiceCardProps;
   onAction(action: LegalAction): void;
   onFocus(card: DisplayVisibleCard, hiddenSide?: Side): void;

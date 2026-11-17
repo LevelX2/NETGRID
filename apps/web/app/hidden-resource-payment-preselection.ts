@@ -1,11 +1,6 @@
 import { isCanonicalCapabilityId, type CanonicalCapabilityId, type RunId } from "@netgrid/shared";
-import type {
-  LegalAction,
-  PlayerView,
-  Side,
-  VisibleCard,
-  VisibleRunnerPaymentSupportAbility,
-} from "@netgrid/shared";
+import type { Side, VisibleCard, VisibleRunnerPaymentSupportAbility } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../lib/presented-player-view";
 
 type PaymentSupportAbilityIdentity = {
   sourceAbilityId: CanonicalCapabilityId;
@@ -42,7 +37,6 @@ export type PaymentSupportPreselectionResolution =
 export type PendingPaymentSupportContinuation = {
   matchId: string;
   windowId: string;
-  originalActionId: string;
   supportSubmittedAtStateVersion: number;
 };
 
@@ -170,22 +164,17 @@ export function pendingPaymentSupportContinuation(
   stateVersion: number,
 ): PendingPaymentSupportContinuation | null {
   const windowId = supportAction.payload?.costPenaltySupportWindowId;
-  const originalActionId =
-    supportAction.payload?.costPenaltySupportOriginalActionId;
   if (
     supportAction.type !== "activated_card_ability" ||
     supportAction.payload?.cardImplementationAbilityTiming !==
       "runner_cost_penalty_support" ||
     typeof windowId !== "string" ||
-    windowId.length === 0 ||
-    typeof originalActionId !== "string" ||
-    originalActionId.length === 0
+    windowId.length === 0
   )
     return null;
   return {
     matchId,
     windowId,
-    originalActionId,
     supportSubmittedAtStateVersion: stateVersion,
   };
 }
@@ -203,7 +192,6 @@ export function resolvePaymentSupportContinuation(
   if (currentActions.length === 0) return { kind: "waiting" };
   const matches = currentActions.filter(
     (action) =>
-      action.actionId === pending.originalActionId &&
       action.payload?.runnerCostPenaltySupportContinuation === true &&
       action.payload?.runnerCostPenaltySupportWindowId === pending.windowId,
   );

@@ -41,6 +41,7 @@ import {
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import {
   applyAction,
+  bindMatchActionOffer,
   applyRandomizedIceInstallSelection,
   applyRandomizedTurnPlanSelection,
   applyRandomizedTraceBidSelection,
@@ -60,6 +61,7 @@ import {
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
+  isRemoteServerId,
   sanitizeAiDecisionDebug,
   type ApiAiPacingMode,
   type ApiAiTurnPresentationState,
@@ -84,7 +86,6 @@ import {
   type ApiSeriesResultSummary,
   type ApiSeriesMode,
   type ApiSeriesStatus,
-  type ApiServicePayload,
   type ApiSidePayload,
   type ApiPlayerClockConfig,
   type ApiPlayerClockSnapshot,
@@ -106,6 +107,7 @@ import {
   type GameEvent,
   type GameState,
   type LegalAction,
+  type MatchActionSubmission,
   type PlayerAction,
   type PlayerController,
   type PlayerView,
@@ -788,10 +790,12 @@ export type StartupReconciliationInput = {
   terminalResultMatchIds: readonly string[];
 };
 
-export type SidePayload = ApiSidePayload;
+export type SidePayload = Omit<ApiSidePayload, "playerView"> & {
+  playerView: PlayerView;
+};
 export type AiTurnPresentationState = ApiAiTurnPresentationState;
 export type LobbyPayload = ApiLobbyPayload;
-export type ServicePayload = ApiServicePayload;
+export type ServicePayload = SidePayload | LobbyPayload;
 
 export type { ReplayPerspective } from "./event-projection";
 
@@ -1041,6 +1045,7 @@ export type AiDecisionPreview = {
   side: Side;
   generatedAt: string;
   actionId: string;
+  actionOfferId: number;
   actionType: LegalAction["type"];
   actionLabel: string;
   reasonCode: string;
@@ -3259,7 +3264,15 @@ export class MultiplayerService {
     });
   }
 
-  async submitAction(input: {
+  submitActionOffer(
+    input: MatchActionSubmission & { sessionToken: string },
+  ): Promise<SubmitActionResult> {
+    return this.applySubmittedAction(input, (state) =>
+      bindMatchActionOffer(state, input),
+    );
+  }
+
+  submitAction(input: {
     matchId: string;
     side: Side;
     sessionToken: string;
@@ -3270,6 +3283,20 @@ export class MultiplayerService {
     selectedTargets?: Record<string, string>;
     selectedChoices?: Record<string, unknown>;
   }): Promise<SubmitActionResult> {
+    return this.applySubmittedAction(input, () => {
+      const { sessionToken: _sessionToken, clientKnownMatchVersion: _version, ...action } = input;
+      return { action };
+    });
+  }
+
+  private applySubmittedAction(
+    input: Omit<MatchActionSubmission, "actionId" | "selectedChoices" | "selectedTargets"> & {
+      sessionToken: string;
+    },
+    bind: (state: GameState) =>
+      | { action: PlayerAction }
+      | { errorCode: "ERR_UNKNOWN_ACTION" | "ERR_INVALID_CHOICE" },
+  ): Promise<SubmitActionResult> {
     return this.withMatchLock(input.matchId, async () => {
       const record = await this.mustLoadForAction(input.matchId, {
         side: input.side,
@@ -3399,19 +3426,29 @@ export class MultiplayerService {
         };
       }
 
-      const action: PlayerAction = {
-        matchId: input.matchId,
-        side: input.side,
-        actionId: input.actionId,
-        clientKnownStateVersion: input.clientKnownStateVersion,
-        idempotencyKey: input.idempotencyKey,
-        ...(input.selectedTargets
-          ? { selectedTargets: input.selectedTargets }
-          : {}),
-        ...(input.selectedChoices
-          ? { selectedChoices: input.selectedChoices }
-          : {}),
-      };
+      const bound = bind(record.gameState);
+      if ("errorCode" in bound) {
+        const receipt = this.receiptFor(
+          record,
+          input.side,
+          input.idempotencyKey,
+          false,
+          bound.errorCode,
+        );
+        record.actionReceipts.push(receipt);
+        await this.persistAction(record);
+        return {
+          ok: false,
+          receipt,
+          error: safeError(
+            bound.errorCode,
+            "Diese Aktion ist nicht legal.",
+            record.gameState,
+            input.side,
+          ),
+          payload: this.payloadFor(record, input.side),
+        };
+      }
       const snapshot = this.snapshotFor(
         input.matchId,
         record.gameState,
@@ -3419,7 +3456,7 @@ export class MultiplayerService {
         preActionStateSnapshotId(record.gameState.stateVersion + 1),
         false,
       );
-      const result = applyAction(record.gameState, action, {
+      const result = applyAction(record.gameState, bound.action, {
         publicEventsMode: "latest",
       });
       if (!result.ok) {
@@ -4172,6 +4209,9 @@ export class MultiplayerService {
         side: input.targetSide,
         generatedAt: this.now(),
         actionId: legalAction.actionId,
+        actionOfferId: getLegalActions(record.gameState, input.targetSide).findIndex(
+          (candidate) => candidate.actionId === legalAction.actionId,
+        ) + 1,
         actionType: legalAction.type,
         actionLabel: legalAction.label,
         reasonCode: decision.reasonCode,
@@ -10288,7 +10328,7 @@ function serverForEvent(
   if (serverId === "rd") return "R&D";
   if (serverId === "hq") return "HQ";
   if (serverId === "archives") return "Archives";
-  return serverId.replace("_", " ").replace(/^remote /, "Remote ");
+  return isRemoteServerId(serverId) ? `Remote ${serverId.slice(1)}` : serverId;
 }
 
 function installedPosition(

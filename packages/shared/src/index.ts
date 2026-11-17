@@ -15,6 +15,7 @@ export {
   type AbilityPayloadDiscriminatorField,
   type AbilityPayloadDiscriminators,
 } from "./ability-payload";
+export * from "./match-offer-contracts";
 import type { AbilityPayloadDiscriminators } from "./ability-payload";
 export type {
   ApiAccountActivePublicMatchIds,
@@ -202,11 +203,21 @@ export type VariableXPlayCostDefinition = {
 export type PlayCostDefinition =
   | FixedPlayCostDefinition
   | VariableXPlayCostDefinition;
+export type RemoteServerId = `r${number}`;
+
+export function isRemoteServerId(value: unknown): value is RemoteServerId {
+  return (
+    typeof value === "string" &&
+    /^r[1-9]\d*$/.test(value) &&
+    Number.isSafeInteger(Number(value.slice(1)))
+  );
+}
+
 export type ServerId =
   | "hq"
   | "rd"
   | "archives"
-  | `remote_${number}`
+  | RemoteServerId
   | "new_remote";
 export type StateHash = string;
 export type Winner = Side | "draw";

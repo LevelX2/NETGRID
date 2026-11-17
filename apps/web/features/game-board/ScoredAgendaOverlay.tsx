@@ -3,7 +3,8 @@
 import { Move, X } from "lucide-react";
 import { useMemo, useRef } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
-import type { LegalAction, Side, VisibleCard } from "@netgrid/shared";
+import type { Side, VisibleCard } from "@netgrid/shared";
+import type { LegalAction } from "../../lib/presented-player-view";
 import { useTranslations } from "use-intl/react";
 
 import {

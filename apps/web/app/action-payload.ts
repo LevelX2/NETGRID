@@ -1,8 +1,5 @@
-import {
-  ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
-  type LegalAction,
-  type PublicGameEvent,
-} from "@netgrid/shared";
+import { ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS, type PublicGameEvent } from "@netgrid/shared";
+import type { LegalAction } from "../lib/presented-player-view";
 
 type PayloadLike = Record<string, unknown> | undefined;
 

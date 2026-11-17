@@ -1,5 +1,6 @@
 "use client";
 
+import { type SelectionId } from "../lib/presented-player-view";
 import {
   nextChronicleWidth,
   type ChronicleWidth,
@@ -56,34 +57,9 @@ import type {
   MouseEvent as ReactMouseEvent,
   ReactNode,
 } from "react";
-import type {
-  ApiClientGameMode,
-  ApiCreateMatchResponse,
-  ApiGameResultSummary,
-  ApiJoinMatchResponse,
-  ApiLifecycleResultSummary,
-  ApiLobbyParticipantPayload,
-  ApiLobbyPayload,
-  ApiMatchCardPool,
-  ApiMatchStartLobbyPayload,
-  ApiMatchStatus,
-  ApiPlayerClockSnapshot,
-  ApiRecentResultEntry,
-  ApiSeriesResultSummary,
-  ApiServerMessage,
-  ApiSidePayload,
-  ApiUserErrorPayload,
-  LegalAction,
-  MatchEventId,
-  PlayerView,
-  PublicGameEvent,
-  Side,
-  TraceRulesProfile,
-  VisibleCard,
-  VisibleRunnerPaymentSupportAbility,
-  Winner,
-} from "@netgrid/shared";
-import { isApiUserErrorCode } from "@netgrid/shared";
+import type { ApiClientGameMode, ApiCreateMatchResponse, ApiGameResultSummary, ApiJoinMatchResponse, ApiLifecycleResultSummary, ApiLobbyParticipantPayload, ApiLobbyPayload, ApiMatchCardPool, ApiMatchStartLobbyPayload, ApiMatchStatus, ApiPlayerClockSnapshot, ApiRecentResultEntry, ApiSeriesResultSummary, ApiServerMessage, ApiSidePayload, ApiUserErrorPayload, MatchEventId, PublicGameEvent, Side, TraceRulesProfile, VisibleCard, VisibleRunnerPaymentSupportAbility, Winner } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../lib/presented-player-view";
+import { isApiUserErrorCode, isMatchOfferId } from "@netgrid/shared";
 import { formatChronicleEvent, type ChronicleTranslate } from "./chronicle";
 import {
   deckAgendaStatusForEditor,
@@ -964,12 +940,12 @@ export default function Page() {
   const [statusPanelsVisible, setStatusPanelsVisible] = useState(true);
   const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
   const [discardChoiceSelection, setDiscardChoiceSelection] = useState<{
-    choiceId: string;
-    selectedOptionIds: string[];
+    choiceId: SelectionId;
+    selectedOptionIds: SelectionId[];
   } | null>(null);
   const [fieldCardChoiceSelection, setFieldCardChoiceSelection] = useState<{
-    choiceId: string;
-    selectedOptionIds: string[];
+    choiceId: SelectionId;
+    selectedOptionIds: SelectionId[];
   } | null>(null);
   const [cuePosition, setCuePosition] =
     useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
@@ -2071,7 +2047,7 @@ export default function Page() {
       : null;
   const activeDiscardOptionIds = useMemo(
     () =>
-      new Set(activeDiscardChoice?.options.map((option) => option.id) ?? []),
+      new Set<SelectionId>(activeDiscardChoice?.options.map((option) => option.id) ?? []),
     [activeDiscardChoice],
   );
   const currentDiscardChoiceSelection = discardChoiceSelection;
@@ -2093,7 +2069,7 @@ export default function Page() {
       : null;
   const activeFieldCardChoiceOptionIds = useMemo(
     () =>
-      new Set(
+      new Set<SelectionId>(
         activeFieldCardChoice?.options
           .filter((option) => option.selectable !== false)
           .map((option) => option.id) ?? [],
@@ -2809,7 +2785,7 @@ export default function Page() {
       ? fieldCardChoiceOptionsForCard(activeFieldCardChoice, activeView, card)
       : [];
   };
-  const toggleDiscardOption = (optionId: string) => {
+  const toggleDiscardOption = (optionId: SelectionId) => {
     if (!activeDiscardChoice) return;
     const required = activeDiscardChoice.maxSelections;
     setDiscardChoiceSelection((current) => {
@@ -2830,7 +2806,7 @@ export default function Page() {
       };
     });
   };
-  const toggleFieldCardChoiceCardOptions = (optionIds: string[]) => {
+  const toggleFieldCardChoiceCardOptions = (optionIds: SelectionId[]) => {
     if (!activeFieldCardChoice || optionIds.length === 0) return;
     const minSelections = Math.max(
       0,
@@ -3530,7 +3506,7 @@ export default function Page() {
       const preview = await fetchAiDecisionPreview(session, payload);
       if (aiDecisionDebugPreviewRequestKeyRef.current !== requestKey) return;
       const legalAction = payload.playerView.legalActions.find(
-        (action) => action.actionId === preview.actionId,
+        (action) => action.actionId === preview.actionOfferId,
       );
       if (
         !humanAiDecisionProbeMatchesPayload(preview, session, payload) ||
@@ -5006,7 +4982,14 @@ export default function Page() {
     action: LegalAction,
     options: { immediateAudio?: boolean; confirmed?: boolean } = {},
   ): boolean => {
-    if (!session || !payload || !ensureSocketConnected()) return false;
+    if (
+      !session ||
+      !payload ||
+      !isMatchOfferId(action.actionId) ||
+      !payload.playerView.legalActions.some((candidate) => candidate === action) ||
+      !ensureSocketConnected()
+    )
+      return false;
     if (
       !options.confirmed &&
       actionNeedsRegionReplacementConfirmation(action)
@@ -5330,30 +5313,27 @@ export default function Page() {
 
   const submitChoiceOption = (
     action: LegalAction,
-    choiceId: string,
-    selectedOptionId: string,
-  ) => {
-    if (!session || !payload || !ensureSocketConnected()) return;
-    const stateVersion = payload.playerView.stateVersion;
-    playImmediateActionAudio(action, stateVersion);
-    sendSocketMessage("submit_action", {
-      matchId: session.matchId,
-      side: session.side,
-      actionId: action.actionId,
-      clientKnownStateVersion: stateVersion,
-      clientKnownMatchVersion: payload.matchVersion,
-      selectedChoices: { choiceId, selectedOptionIds: [selectedOptionId] },
-      idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${selectedOptionId}-${runtimeRandomId()}`,
-    });
-  };
+    choiceId: SelectionId,
+    selectedOptionId: SelectionId,
+  ) => submitChoiceOptions(action, choiceId, [selectedOptionId]);
 
   const submitChoiceOptions = (
     action: LegalAction,
-    choiceId: string,
-    selectedOptionIds: string[],
+    choiceId: SelectionId,
+    selectedOptionIds: SelectionId[],
     options: { immediateAudio?: boolean } = {},
   ): boolean => {
-    if (!session || !payload || !ensureSocketConnected()) return false;
+    if (
+      !session ||
+      !payload ||
+      !isMatchOfferId(action.actionId) ||
+      !isMatchOfferId(choiceId) ||
+      !selectedOptionIds.every(isMatchOfferId) ||
+      payload.playerView.pendingChoice?.choiceId !== choiceId ||
+      !payload.playerView.legalActions.some((candidate) => candidate === action) ||
+      !ensureSocketConnected()
+    )
+      return false;
     const stateVersion = payload.playerView.stateVersion;
     if (options.immediateAudio !== false)
       playImmediateActionAudio(action, stateVersion);

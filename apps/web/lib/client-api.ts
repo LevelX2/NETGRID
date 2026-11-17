@@ -1,13 +1,5 @@
-import type {
-  ApiCreateMatchResponse,
-  ApiJoinMatchResponse,
-  ApiLobbyPayload,
-  ApiPersonalRecentResults,
-  ApiPublicMatchListEntry,
-  ApiSidePayload,
-  LegalAction,
-  Side,
-} from "@netgrid/shared";
+import type { ApiCreateMatchResponse, ApiJoinMatchResponse, ApiLobbyPayload, ApiPersonalRecentResults, ApiPublicMatchListEntry, ApiSidePayload, Side } from "@netgrid/shared";
+import type { LegalAction } from "./presented-player-view";
 
 import {
   buildMaintenanceAiTraceDetailPath,
@@ -36,6 +28,7 @@ export type AiDecisionPreview = {
   side: Side;
   generatedAt: string;
   actionId: string;
+  actionOfferId: number;
   actionType: LegalAction["type"];
   actionLabel: string;
   reasonCode: string;

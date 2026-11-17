@@ -1,4 +1,5 @@
-import { isCanonicalCapabilityId, type CanonicalCapabilityId, type LegalAction } from "@netgrid/shared";
+import { isCanonicalCapabilityId, type CanonicalCapabilityId } from "@netgrid/shared";
+import type { LegalAction } from "../lib/presented-player-view";
 
 import type { AppLocale } from "./locale";
 

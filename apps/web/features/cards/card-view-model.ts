@@ -1,10 +1,6 @@
 import { type CardDefinitionId } from "@netgrid/shared";
-import type {
-  PlayerView,
-  PublicGameEvent,
-  Side,
-  VisibleCard,
-} from "@netgrid/shared";
+import type { PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
+import type { PlayerView } from "../../lib/presented-player-view";
 
 import {
   catalogSetDetailLabel,

@@ -1,13 +1,8 @@
+import { optionPresentation } from "../../lib/presented-player-view";
 import type { AccessPresentationId } from "../../app/access-reveal-ui";
 import { cardDefinitionIdValue, cardDefinitionIdsFromCsv } from "../../app/card-definition-id";
-import type {
-  CardDefinitionId,
-  LegalAction,
-  MatchEventId,
-  PlayerView,
-  PublicGameEvent,
-  Side,
-} from "@netgrid/shared";
+import type { CardDefinitionId, MatchEventId, PublicGameEvent, Side } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../../lib/presented-player-view";
 
 import {
   accessRevealStatusLabel,
@@ -436,7 +431,7 @@ export function gypsyScheduleAnalyzerRevealFromPendingChoice(
       : visibleCardFromPublicEvent(revealEvent!, definitionId, title);
   });
   const revealNextAvailable = choice.options.some(
-    (option) => option.id === "reveal_next",
+    (option) => optionPresentation(option) === "reveal_next",
   );
   const agendaRevealed = cards.some((card) => card.type === "agenda");
   return {

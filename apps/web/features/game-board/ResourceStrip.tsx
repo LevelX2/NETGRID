@@ -4,7 +4,8 @@ import { Award, Brain, Goal, PanelTopClose, PanelTopOpen } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties, ReactNode, Ref } from "react";
-import type { PlayerView, Side } from "@netgrid/shared";
+import type { Side } from "@netgrid/shared";
+import type { PlayerView } from "../../lib/presented-player-view";
 import { useTranslations } from "use-intl/react";
 import { actionSlotDisplay } from "../../app/action-board-ui";
 

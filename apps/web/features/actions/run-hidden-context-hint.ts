@@ -1,4 +1,4 @@
-import type { LegalAction, PlayerView } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../../lib/presented-player-view";
 
 import {
   encounterBreakerActions,

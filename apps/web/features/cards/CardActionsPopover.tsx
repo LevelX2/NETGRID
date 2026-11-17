@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import type { LegalAction } from "@netgrid/shared";
+import type { LegalAction } from "../../lib/presented-player-view";
 
 import { OverflowAwareActionButton } from "../actions/ActionControls";
 

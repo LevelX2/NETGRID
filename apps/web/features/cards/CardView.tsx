@@ -10,7 +10,8 @@ import {
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
-import type { LegalAction, Side } from "@netgrid/shared";
+import type { Side } from "@netgrid/shared";
+import type { LegalAction } from "../../lib/presented-player-view";
 import { useLocale, useTranslations } from "use-intl/react";
 import { tooltipCardRulesText } from "../../i18n/card-rule-translations";
 
@@ -89,7 +90,7 @@ type CardChoiceShortcut = {
 };
 
 export type PaymentSupportShortcut = {
-  identityKey: string;
+  identityKey: string | number;
   selected: boolean;
   disabled: boolean;
   label: string;

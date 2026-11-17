@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ApiSidePayload, LegalAction, PlayerView } from "@netgrid/shared";
+import type { ApiSidePayload, OfferedLegalAction, OfferedPlayerView } from "@netgrid/shared";
 
 import { latestSideUpdate } from "./client-payload-helpers";
 
@@ -9,9 +9,10 @@ function update(
   clicks: number,
 ): ApiSidePayload {
   const action = {
+    actionId: 1,
     type: clicks ? "gain_credit" : "end_turn",
     side: "corp",
-  } as LegalAction;
+  } as OfferedLegalAction;
   return {
     matchId: "match_credit",
     side: "corp",
@@ -20,7 +21,7 @@ function update(
       stateVersion,
       own: { clicks },
       legalActions: [action],
-    } as PlayerView,
+    } as OfferedPlayerView,
   } as ApiSidePayload;
 }
 

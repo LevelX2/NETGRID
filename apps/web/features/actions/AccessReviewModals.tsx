@@ -1,10 +1,7 @@
+import { optionPresentation, type SelectionId } from "../../lib/presented-player-view";
 import { Award as AgendaIcon, Check, Eye, Trash2, X } from "lucide-react";
-import type {
-  LegalAction,
-  MatchEventId,
-  Side,
-  VisibleChoiceRequest,
-} from "@netgrid/shared";
+import type { MatchEventId, Side } from "@netgrid/shared";
+import type { LegalAction, VisibleChoiceRequest } from "../../lib/presented-player-view";
 import type { DamageImpactCue } from "../../app/action-cues";
 import { useLocale, useTranslations } from "use-intl/react";
 import type { AccessPresentationOutcomeKind } from "../../app/access-presentation";
@@ -89,8 +86,8 @@ export function AccessRevealModal({
   onAction(action: LegalAction): boolean | void;
   onChoiceOption?: (
     action: LegalAction,
-    choiceId: string,
-    selectedOptionId: string,
+    choiceId: SelectionId,
+    selectedOptionId: SelectionId,
   ) => void;
   onDamageDismiss?(): void;
   onDismiss(): void;
@@ -123,7 +120,7 @@ export function AccessRevealModal({
       return;
     onDismiss();
   };
-  const runChoiceOption = (selectedOptionId: string) => {
+  const runChoiceOption = (selectedOptionId: SelectionId) => {
     if (!reveal.choice || !reveal.choiceAction || !onChoiceOption) return;
     onChoiceOption(
       reveal.choiceAction,
@@ -283,7 +280,7 @@ export function AccessRevealModal({
                           type="button"
                           data-testid={`gypsy-rd-reveal-choice-${option.id}`}
                         >
-                          {option.id === "reveal_next" ? (
+                          {optionPresentation(option) === "reveal_next" ? (
                             <Eye size={15} />
                           ) : (
                             <Check size={15} />

@@ -1,4 +1,5 @@
-import type { LegalAction, MatchEventId, PlayerView } from "@netgrid/shared";
+import type { MatchEventId } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../lib/presented-player-view";
 import {
   normalizeVisibleTerms,
   stealCostPaymentLabel,

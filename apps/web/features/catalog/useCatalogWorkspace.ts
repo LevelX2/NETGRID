@@ -1,7 +1,8 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import type { PlayerView, Side } from "@netgrid/shared";
+import type { Side } from "@netgrid/shared";
+import type { PlayerView } from "../../lib/presented-player-view";
 
 import { revealedEventCardIds } from "../actions/access-review-derivation";
 import { visibleKnownCardIds } from "../cards/card-view-model";

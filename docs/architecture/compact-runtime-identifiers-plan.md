@@ -286,6 +286,20 @@ Undo und erneut erreichter StateVersion wird abgelehnt. Idempotenz,
 Reconnect, Join, offene Choice, Beobachtermodus und Spielende
 funktionieren aus dem neuen Update-Vertrag.
 
+Das Multiplayer-Angebot nummeriert die fertigen Engine-Aktionen einer Seite
+ab `1`. Eine offene Choice erhält ihre StateVersion plus eins und behält die
+von der Engine vorgegebene Optionsreihenfolge. WebSocket und HTTP geben
+denselben Angebotsvertrag aus. Die Anzeige erhält bei Bedarf einen
+Optionszweck, etwa `keep`, `pay` oder `bid`.
+
+Der WebSocket nimmt Ganzzahlen an. Nach Authentifizierung und Prüfung der
+MatchVersion und StateVersion bindet die Engine die Nummern unter dem
+Match-Lock an genau die angebotene Aktion und ihre Optionen. `applyAction`
+prüft anschließend wie beim Replay Timing, Kosten, Ziele und Auswahl. Die
+internen Engine-Schlüssel und KI-Quotes verbleiben im Regel- und Replaypfad.
+Eine automatische Zahlungsfortsetzung verwendet das gemeinsame Engine-Fenster
+und genau eine dafür angebotene Fortsetzungsaktion.
+
 ### 6. SQLite und wiederholte Listen kompakt speichern
 
 1. `game_states` ist die einzige Speicherquelle für den aktuellen
