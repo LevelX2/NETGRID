@@ -766,7 +766,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "subroutine_trash_program",
+                      "id": "0",
                       "type": "trash_installed_program",
                       "sourceDefinitionId": 16,
                       "sourceTitle": "Imperial Guard",
@@ -775,7 +775,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_end_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 16,
                       "sourceTitle": "Imperial Guard"
@@ -831,7 +831,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_paid_deflect_to_data_fort",
+                    "id": "0",
                     "type": "deflect_run",
                     "deflectorTarget": "any_data_fort",
                     "deflectorCost": 2,
@@ -901,7 +901,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_net_damage_4",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 4,
                     "damageType": "net",
@@ -912,7 +912,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 10,
                     "sourceTitle": "Bolter Swarm",
@@ -964,7 +964,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "subroutine_paid_deflect_to_data_fort",
+                      "id": "0",
                       "type": "deflect_run",
                       "deflectorTarget": "any_data_fort",
                       "deflectorCost": 2,
@@ -1299,7 +1299,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "subroutine_paid_deflect_to_data_fort",
+                      "id": "0",
                       "type": "deflect_run",
                       "deflectorTarget": "any_data_fort",
                       "deflectorCost": 2,
@@ -1367,7 +1367,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "subroutine_net_damage_4",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 4,
                       "damageType": "net",
@@ -1378,7 +1378,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_prohibit_break_next_ice",
+                      "id": "1",
                       "type": "set_next_encounter_no_break_subroutines",
                       "sourceDefinitionId": 10,
                       "sourceTitle": "Bolter Swarm",
@@ -6727,7 +6727,7 @@
             "postInstallRezQuoteCardId": "c25",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_net_damage_2\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trace_baskerville_counter\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 199,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6764,7 +6764,7 @@
             "postInstallRezQuoteCardId": "c25",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_net_damage_2\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trace_baskerville_counter\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 199,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6801,7 +6801,7 @@
             "postInstallRezQuoteCardId": "c25",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_net_damage_2\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trace_baskerville_counter\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 199,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6839,7 +6839,7 @@
             "postInstallRezQuoteCardId": "c25",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_net_damage_2\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trace_baskerville_counter\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 199,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -6876,7 +6876,7 @@
             "postInstallRezQuoteCardId": "c25",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_net_damage_2\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trace_baskerville_counter\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 199,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -9190,7 +9190,7 @@
           "postInstallRezQuoteCardId": "c25",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_net_damage_2\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trace_baskerville_counter\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 199,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9227,7 +9227,7 @@
           "postInstallRezQuoteCardId": "c25",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_net_damage_2\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trace_baskerville_counter\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 199,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9264,7 +9264,7 @@
           "postInstallRezQuoteCardId": "c25",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_net_damage_2\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trace_baskerville_counter\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 199,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9302,7 +9302,7 @@
           "postInstallRezQuoteCardId": "c25",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_net_damage_2\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trace_baskerville_counter\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 199,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9339,7 +9339,7 @@
           "postInstallRezQuoteCardId": "c25",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_net_damage_2\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_trace_baskerville_counter\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c25\",\"iceDefinitionId\":9,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":2,\"damageType\":\"net\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"initiate_trace\",\"traceLimit\":5,\"traceSuccessEffect\":{\"type\":\"add_counter\",\"counterType\":\"baskerville\",\"amount\":1},\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"},{\"id\":\"2\",\"type\":\"end_the_run\",\"sourceDefinitionId\":9,\"sourceTitle\":\"Baskerville\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 199,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -9498,7 +9498,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 199,
-      "sideSafePlanningFingerprint": "fnv1a:13681fe4"
+      "sideSafePlanningFingerprint": "fnv1a:689d9193"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_corp_remote_lab_deflection_2026_07_01_1.2.0",

@@ -379,7 +379,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "net",
@@ -390,7 +390,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 79,
                     "sourceTitle": "Dog Pile"
@@ -441,7 +441,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -452,7 +452,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 70,
                     "sourceTitle": "Bug Zapper"
@@ -482,7 +482,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 75,
                     "sourceTitle": "Credit Blocks"
@@ -11750,7 +11750,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 328,
-      "sideSafePlanningFingerprint": "fnv1a:3aca3248"
+      "sideSafePlanningFingerprint": "fnv1a:6dcff360"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",

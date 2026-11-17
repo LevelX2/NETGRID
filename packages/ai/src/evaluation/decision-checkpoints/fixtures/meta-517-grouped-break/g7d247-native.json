@@ -584,7 +584,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -595,7 +595,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 70,
                     "sourceTitle": "Bug Zapper"
@@ -626,13 +626,13 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_trash_source_a",
+                    "id": "0",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
                   },
                   {
-                    "id": "subroutine_end_run_trash_source_b",
+                    "id": "1",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
@@ -690,7 +690,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "runFutureStrengthCancelPaymentAmount": 2,
@@ -9746,7 +9746,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 246,
-      "sideSafePlanningFingerprint": "fnv1a:2d97c4a6"
+      "sideSafePlanningFingerprint": "fnv1a:426e8edd"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rd_express_v2_2.0.0",

@@ -578,7 +578,7 @@
                 "effectiveStrength": 6,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program_a",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -587,7 +587,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_trash_program_b",
+                    "id": "1",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -596,7 +596,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_trash_program_c",
+                    "id": "2",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -605,13 +605,13 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run_a",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure"
                   },
                   {
-                    "id": "subroutine_end_run_b",
+                    "id": "4",
                     "type": "end_the_run",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure"
@@ -8280,7 +8280,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 156,
-      "sideSafePlanningFingerprint": "fnv1a:e9c84c28"
+      "sideSafePlanningFingerprint": "fnv1a:42bb14a2"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_skivviss_mill_pressure_1.0.0",

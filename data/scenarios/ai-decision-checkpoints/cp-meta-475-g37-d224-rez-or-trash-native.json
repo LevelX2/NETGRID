@@ -735,7 +735,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_paid_deflect_to_data_fort",
+                    "id": "0",
                     "type": "deflect_run",
                     "deflectorTarget": "any_data_fort",
                     "deflectorCost": 2,
@@ -786,7 +786,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "subroutine_paid_deflect_to_data_fort",
+                      "id": "0",
                       "type": "deflect_run",
                       "deflectorTarget": "any_data_fort",
                       "deflectorCost": 2,
@@ -852,7 +852,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "subroutine_deflect_to_archives",
+                      "id": "0",
                       "type": "deflect_run",
                       "deflectorTarget": "archives",
                       "sourceDefinitionId": 13,
@@ -917,7 +917,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye",
@@ -926,7 +926,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye"
@@ -1148,13 +1148,13 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_a",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 15,
                       "sourceTitle": "Glacier"
                     },
                     {
-                      "id": "subroutine_end_run_b",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 15,
                       "sourceTitle": "Glacier"
@@ -1218,7 +1218,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 16,
                     "sourceTitle": "Imperial Guard",
@@ -1227,7 +1227,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 16,
                     "sourceTitle": "Imperial Guard"
@@ -1275,13 +1275,13 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_trash_source_a",
+                      "id": "0",
                       "type": "end_the_run_and_trash_source_at_end_of_turn",
                       "sourceDefinitionId": 17,
                       "sourceTitle": "Puzzle"
                     },
                     {
-                      "id": "subroutine_end_run_trash_source_b",
+                      "id": "1",
                       "type": "end_the_run_and_trash_source_at_end_of_turn",
                       "sourceDefinitionId": 17,
                       "sourceTitle": "Puzzle"
@@ -9347,7 +9347,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 223,
-      "sideSafePlanningFingerprint": "fnv1a:6d210a67"
+      "sideSafePlanningFingerprint": "fnv1a:75d64ec9"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_corp_remote_lab_deflection_2026_07_01_1.2.0",

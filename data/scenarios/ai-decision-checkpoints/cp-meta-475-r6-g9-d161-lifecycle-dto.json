@@ -425,7 +425,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_deflect_to_subsidiary_fort",
+                    "id": "0",
                     "type": "deflect_run",
                     "deflectorTarget": "subsidiary_data_fort",
                     "deflectorAutoBreakIfNoTarget": true,
@@ -467,7 +467,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye",
@@ -476,7 +476,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye"
@@ -636,13 +636,13 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_a",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 15,
                     "sourceTitle": "Glacier"
                   },
                   {
-                    "id": "subroutine_end_run_b",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 15,
                     "sourceTitle": "Glacier"
@@ -7294,7 +7294,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 160,
-      "sideSafePlanningFingerprint": "fnv1a:8c04f8b1"
+      "sideSafePlanningFingerprint": "fnv1a:48fd2430"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

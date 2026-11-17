@@ -282,7 +282,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 96,
@@ -327,7 +327,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 90,
@@ -3140,7 +3140,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 36,
-      "sideSafePlanningFingerprint": "fnv1a:d1727259"
+      "sideSafePlanningFingerprint": "fnv1a:20143f23"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

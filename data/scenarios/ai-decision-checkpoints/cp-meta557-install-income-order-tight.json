@@ -266,7 +266,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 96,
@@ -2296,7 +2296,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 24,
-      "sideSafePlanningFingerprint": "fnv1a:a5c39080"
+      "sideSafePlanningFingerprint": "fnv1a:a86c4e03"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_last_call_at_rd_1.0.0",

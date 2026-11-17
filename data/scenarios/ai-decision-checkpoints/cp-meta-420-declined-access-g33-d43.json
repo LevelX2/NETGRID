@@ -218,7 +218,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 75,
                     "sourceTitle": "Credit Blocks"
@@ -255,7 +255,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 96,
@@ -3711,7 +3711,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 42,
-      "sideSafePlanningFingerprint": "fnv1a:38907bba"
+      "sideSafePlanningFingerprint": "fnv1a:58b21b55"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rd_express_1.1.0",

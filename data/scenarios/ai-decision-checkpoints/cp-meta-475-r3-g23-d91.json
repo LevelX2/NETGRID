@@ -371,7 +371,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "subroutine_deflect_to_archives",
+                      "id": "0",
                       "type": "deflect_run",
                       "deflectorTarget": "archives",
                       "sourceDefinitionId": 13,
@@ -4947,7 +4947,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 90,
-      "sideSafePlanningFingerprint": "fnv1a:cb1a2c76"
+      "sideSafePlanningFingerprint": "fnv1a:f9c0c0ae"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_corp_remote_lab_deflection_2026_07_01_1.2.0",

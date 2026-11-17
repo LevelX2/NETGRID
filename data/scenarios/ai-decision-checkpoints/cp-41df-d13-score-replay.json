@@ -344,13 +344,13 @@
                   "effectiveStrength": 5,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_trash_source_a",
+                      "id": "0",
                       "type": "end_the_run_and_trash_source_at_end_of_turn",
                       "sourceDefinitionId": 17,
                       "sourceTitle": "Puzzle"
                     },
                     {
-                      "id": "subroutine_end_run_trash_source_b",
+                      "id": "1",
                       "type": "end_the_run_and_trash_source_at_end_of_turn",
                       "sourceDefinitionId": 17,
                       "sourceTitle": "Puzzle"
@@ -419,13 +419,13 @@
                   "effectiveStrength": 5,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_trash_source_a",
+                      "id": "0",
                       "type": "end_the_run_and_trash_source_at_end_of_turn",
                       "sourceDefinitionId": 17,
                       "sourceTitle": "Puzzle"
                     },
                     {
-                      "id": "subroutine_end_run_trash_source_b",
+                      "id": "1",
                       "type": "end_the_run_and_trash_source_at_end_of_turn",
                       "sourceDefinitionId": 17,
                       "sourceTitle": "Puzzle"
@@ -488,7 +488,7 @@
                   "effectiveStrength": 6,
                   "subroutines": [
                     {
-                      "id": "subroutine_trash_program_a",
+                      "id": "0",
                       "type": "trash_installed_program",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure",
@@ -497,7 +497,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_trash_program_b",
+                      "id": "1",
                       "type": "trash_installed_program",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure",
@@ -506,7 +506,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_trash_program_c",
+                      "id": "2",
                       "type": "trash_installed_program",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure",
@@ -515,13 +515,13 @@
                       }
                     },
                     {
-                      "id": "subroutine_end_run_a",
+                      "id": "3",
                       "type": "end_the_run",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure"
                     },
                     {
-                      "id": "subroutine_end_run_b",
+                      "id": "4",
                       "type": "end_the_run",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure"
@@ -2095,7 +2095,7 @@
             "postInstallRezQuoteCardId": "cfq",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 23,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -2132,7 +2132,7 @@
             "postInstallRezQuoteCardId": "cfq",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 23,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -2169,7 +2169,7 @@
             "postInstallRezQuoteCardId": "cfq",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 23,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -2205,7 +2205,7 @@
             "postInstallRezQuoteCardId": "cfq",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 23,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -2242,7 +2242,7 @@
             "postInstallRezQuoteCardId": "cfq",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 23,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -3800,7 +3800,7 @@
           "postInstallRezQuoteCardId": "cfq",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 23,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -3837,7 +3837,7 @@
           "postInstallRezQuoteCardId": "cfq",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 23,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -3874,7 +3874,7 @@
           "postInstallRezQuoteCardId": "cfq",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 23,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -3910,7 +3910,7 @@
           "postInstallRezQuoteCardId": "cfq",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 23,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -3947,7 +3947,7 @@
           "postInstallRezQuoteCardId": "cfq",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 23,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -4187,7 +4187,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 23,
-      "sideSafePlanningFingerprint": "fnv1a:3710fb7a"
+      "sideSafePlanningFingerprint": "fnv1a:c0db32d6"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_syds_ice_pfandhaus_2026_07_09_1.1.0",

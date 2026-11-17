@@ -422,7 +422,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_unless_runner_pays_one",
+                      "id": "0",
                       "type": "end_the_run_unless_runner_pays",
                       "amount": 1,
                       "sourceDefinitionId": 96,
@@ -454,7 +454,7 @@
                   "encounterStrength": 3,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 75,
                       "sourceTitle": "Credit Blocks"
@@ -504,7 +504,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 97,
                       "sourceTitle": "Sphinx 2006"
@@ -5190,7 +5190,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 61,
-        "sideSafePlanningFingerprint": "fnv1a:f6c9d915"
+        "sideSafePlanningFingerprint": "fnv1a:1c2cca10"
       },
       "observedTurnPlanAction": {
         "matchId": "match_dc0dcfdf7bf554f7",

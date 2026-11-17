@@ -3102,7 +3102,7 @@
                   "postInstallRezQuoteBaseCredits": 6,
                   "postInstallRezQuoteFinalCredits": 6,
                   "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                  "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
+                  "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cfq\",\"iceDefinitionId\":70,\"effectiveStrength\":2,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":70,\"sourceTitle\":\"Bug Zapper\"}]}",
                   "effectKind": "install_card"
                 }
               }
@@ -6494,7 +6494,7 @@
                   "postInstallRezQuoteBaseCredits": 5,
                   "postInstallRezQuoteFinalCredits": 5,
                   "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                  "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chq\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"subroutine_relative_net_damage\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
+                  "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"chq\",\"iceDefinitionId\":79,\"effectiveStrength\":0,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":0,\"damageType\":\"net\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":79,\"sourceTitle\":\"Dog Pile\"}]}",
                   "effectKind": "install_card"
                 }
               }
@@ -7184,12 +7184,12 @@
               "action": {
                 "matchId": "selfplay:meta-357-final-034",
                 "side": "runner",
-                "actionId": "runner.continue_run.subroutine_relative_net_damage,subroutine_end_run",
+                "actionId": "runner.continue_run.0,1",
                 "clientKnownStateVersion": 65,
                 "idempotencyKey": "ai-sim-65"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.subroutine_relative_net_damage,subroutine_end_run",
+                "actionId": "runner.continue_run.0,1",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen (Run endet)",
@@ -7205,7 +7205,7 @@
                   "unbrokenSubroutineCount": 2,
                   "encounterWillEndRun": true,
                   "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": "subroutine_relative_net_damage,subroutine_end_run",
+                  "encounterSubroutineIds": "0,1",
                   "abilityFamily": "run-access"
                 },
                 "resolvedEffects": [
@@ -8504,7 +8504,7 @@
                   "postInstallRezQuoteBaseCredits": 6,
                   "postInstallRezQuoteFinalCredits": 6,
                   "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                  "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"ckd\",\"iceDefinitionId\":91,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"subroutine_net_damage_one\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":91,\"sourceTitle\":\"Mobile Barricade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":91,\"sourceTitle\":\"Mobile Barricade\"}]}",
+                  "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"ckd\",\"iceDefinitionId\":91,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":91,\"sourceTitle\":\"Mobile Barricade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":91,\"sourceTitle\":\"Mobile Barricade\"}]}",
                   "effectKind": "install_card"
                 }
               }
@@ -9998,7 +9998,7 @@
                   "postInstallRezQuoteBaseCredits": 6,
                   "postInstallRezQuoteFinalCredits": 6,
                   "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                  "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cke\",\"iceDefinitionId\":91,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"subroutine_net_damage_one\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":91,\"sourceTitle\":\"Mobile Barricade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"subroutine_end_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":91,\"sourceTitle\":\"Mobile Barricade\"}]}",
+                  "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"cke\",\"iceDefinitionId\":91,\"effectiveStrength\":3,\"subroutines\":[{\"id\":\"0\",\"type\":\"do_damage\",\"amount\":1,\"damageType\":\"net\",\"sourceDefinitionId\":91,\"sourceTitle\":\"Mobile Barricade\",\"unbrokenRunEffect\":{\"causesDamageOrProgramTrash\":true}},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":91,\"sourceTitle\":\"Mobile Barricade\"}]}",
                   "effectKind": "install_card"
                 }
               }

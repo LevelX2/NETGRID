@@ -654,7 +654,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trace_one_net_damage",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 1,
                     "traceSuccessEffect": {
@@ -697,7 +697,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program_a",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -706,7 +706,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_trash_program_b",
+                    "id": "1",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -715,7 +715,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_trash_program_c",
+                    "id": "2",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -724,13 +724,13 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run_a",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure"
                   },
                   {
-                    "id": "subroutine_end_run_b",
+                    "id": "4",
                     "type": "end_the_run",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure"
@@ -801,7 +801,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trace_one_net_damage",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 1,
                     "traceSuccessEffect": {
@@ -846,7 +846,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trace_one_net_damage",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 1,
                     "traceSuccessEffect": {
@@ -951,13 +951,13 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_trash_source_a",
+                    "id": "0",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
                   },
                   {
-                    "id": "subroutine_end_run_trash_source_b",
+                    "id": "1",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
@@ -1024,13 +1024,13 @@
             "encounterStrength": 5,
             "subroutines": [
               {
-                "id": "subroutine_end_run_trash_source_a",
+                "id": "0",
                 "type": "end_the_run_and_trash_source_at_end_of_turn",
                 "sourceDefinitionId": 17,
                 "sourceTitle": "Puzzle"
               },
               {
-                "id": "subroutine_end_run_trash_source_b",
+                "id": "1",
                 "type": "end_the_run_and_trash_source_at_end_of_turn",
                 "sourceDefinitionId": 17,
                 "sourceTitle": "Puzzle"
@@ -7968,7 +7968,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.subroutine_end_run_trash_source_a,subroutine_end_run_trash_source_b",
+          "actionId": "runner.continue_run.0,1",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -7981,7 +7981,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 2,
-            "encounterSubroutineIds": "subroutine_end_run_trash_source_a,subroutine_end_run_trash_source_b",
+            "encounterSubroutineIds": "0,1",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": true,
@@ -10304,7 +10304,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.subroutine_end_run_trash_source_a,subroutine_end_run_trash_source_b",
+        "actionId": "runner.continue_run.0,1",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -10317,7 +10317,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 2,
-          "encounterSubroutineIds": "subroutine_end_run_trash_source_a,subroutine_end_run_trash_source_b",
+          "encounterSubroutineIds": "0,1",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": true,
@@ -10368,7 +10368,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 261,
-      "sideSafePlanningFingerprint": "fnv1a:2f48db47"
+      "sideSafePlanningFingerprint": "fnv1a:fbdc1236"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_prep_economy_pressure_2026_07_01_1.0.0",
@@ -16903,7 +16903,7 @@
           "sideSafePlanningFingerprint": "fnv1a:00b27d05"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.subroutine_end_run_trash_source_a,subroutine_end_run_trash_source_b",
+          "actionId": "runner.continue_run.0,1",
           "stateVersion": 261,
           "semanticActionSetFingerprint": "fnv1a:22543534",
           "invocationKey": "fnv1a:7545dc8f"
@@ -16917,7 +16917,7 @@
         "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A259",
         "sourceStepId": "plan:runner.convert_run_window:run%3A259:convert",
-        "originalActionId": "runner.continue_run.subroutine_end_run_trash_source_a,subroutine_end_run_trash_source_b",
+        "originalActionId": "runner.continue_run.0,1",
         "selectedAtStateVersion": 261
       }
     }

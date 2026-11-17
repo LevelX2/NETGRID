@@ -32,13 +32,13 @@
             "encounterStrength": 4,
             "subroutines": [
               {
-                "id": "subroutine_end_run_trash_source_a",
+                "id": "0",
                 "type": "end_the_run_and_trash_source_at_end_of_turn",
                 "sourceDefinitionId": 17,
                 "sourceTitle": "Puzzle"
               },
               {
-                "id": "subroutine_end_run_trash_source_b",
+                "id": "1",
                 "type": "end_the_run_and_trash_source_at_end_of_turn",
                 "sourceDefinitionId": 17,
                 "sourceTitle": "Puzzle"
@@ -89,13 +89,13 @@
             "encounterStrength": 4,
             "subroutines": [
               {
-                "id": "subroutine_end_run_trash_source_a",
+                "id": "0",
                 "type": "end_the_run_and_trash_source_at_end_of_turn",
                 "sourceDefinitionId": 17,
                 "sourceTitle": "Puzzle"
               },
               {
-                "id": "subroutine_end_run_trash_source_b",
+                "id": "1",
                 "type": "end_the_run_and_trash_source_at_end_of_turn",
                 "sourceDefinitionId": 17,
                 "sourceTitle": "Puzzle"
@@ -146,13 +146,13 @@
             "encounterStrength": 4,
             "subroutines": [
               {
-                "id": "subroutine_end_run_trash_source_a",
+                "id": "0",
                 "type": "end_the_run_and_trash_source_at_end_of_turn",
                 "sourceDefinitionId": 17,
                 "sourceTitle": "Puzzle"
               },
               {
-                "id": "subroutine_end_run_trash_source_b",
+                "id": "1",
                 "type": "end_the_run_and_trash_source_at_end_of_turn",
                 "sourceDefinitionId": 17,
                 "sourceTitle": "Puzzle"
@@ -192,13 +192,13 @@
             "encounterStrength": 4,
             "subroutines": [
               {
-                "id": "subroutine_end_run_trash_source_a",
+                "id": "0",
                 "type": "end_the_run_and_trash_source_at_end_of_turn",
                 "sourceDefinitionId": 17,
                 "sourceTitle": "Puzzle"
               },
               {
-                "id": "subroutine_end_run_trash_source_b",
+                "id": "1",
                 "type": "end_the_run_and_trash_source_at_end_of_turn",
                 "sourceDefinitionId": 17,
                 "sourceTitle": "Puzzle"

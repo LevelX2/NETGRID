@@ -585,7 +585,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_random_brain_damage",
+                    "id": "0",
                     "type": "random_damage",
                     "amount": 3,
                     "damageType": "core",
@@ -656,7 +656,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_paid_deflect_to_data_fort",
+                    "id": "0",
                     "type": "deflect_run",
                     "deflectorTarget": "any_data_fort",
                     "deflectorCost": 2,
@@ -708,13 +708,13 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_a",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 15,
                     "sourceTitle": "Glacier"
                   },
                   {
-                    "id": "subroutine_end_run_b",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 15,
                     "sourceTitle": "Glacier"
@@ -923,7 +923,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_paid_deflect_to_data_fort",
+                    "id": "0",
                     "type": "deflect_run",
                     "deflectorTarget": "any_data_fort",
                     "deflectorCost": 2,
@@ -957,7 +957,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_paid_deflect_to_data_fort",
+                    "id": "0",
                     "type": "deflect_run",
                     "deflectorTarget": "any_data_fort",
                     "deflectorCost": 2,
@@ -11169,7 +11169,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 270,
-      "sideSafePlanningFingerprint": "fnv1a:1a0a7726"
+      "sideSafePlanningFingerprint": "fnv1a:0862cf41"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_ice_destruction_runner_1.0.0",

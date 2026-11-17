@@ -662,7 +662,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_net_damage_one",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -673,7 +673,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 91,
                     "sourceTitle": "Mobile Barricade"
@@ -752,7 +752,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "net",
@@ -763,7 +763,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 70,
                     "sourceTitle": "Bug Zapper"
@@ -1056,7 +1056,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_net_damage_one",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -1067,7 +1067,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 91,
                     "sourceTitle": "Mobile Barricade"
@@ -12267,7 +12267,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 328,
-      "sideSafePlanningFingerprint": "fnv1a:22ec0766"
+      "sideSafePlanningFingerprint": "fnv1a:8d7a4f9e"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_krashkurs_clown_kreditmaschine_2026_07_11_1.0.0",

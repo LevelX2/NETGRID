@@ -304,7 +304,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 90,
@@ -346,7 +346,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "runFutureStrengthCancelPaymentAmount": 2,
@@ -431,7 +431,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 96,
@@ -473,7 +473,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "net",
@@ -484,7 +484,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 79,
                     "sourceTitle": "Dog Pile"
@@ -597,7 +597,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "subroutine_trash_program_unless_runner_pays_one",
+                      "id": "0",
                       "type": "trash_installed_program_unless_runner_pays",
                       "amount": 1,
                       "sourceDefinitionId": 103,
@@ -6570,7 +6570,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 79,
-      "sideSafePlanningFingerprint": "fnv1a:e36142bc"
+      "sideSafePlanningFingerprint": "fnv1a:b6e9adea"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_salazar_toll_road_1.1.0",

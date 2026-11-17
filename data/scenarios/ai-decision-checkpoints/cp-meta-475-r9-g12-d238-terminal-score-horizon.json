@@ -996,7 +996,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_deflect_to_subsidiary_fort",
+                    "id": "0",
                     "type": "deflect_run",
                     "deflectorTarget": "subsidiary_data_fort",
                     "deflectorAutoBreakIfNoTarget": true,
@@ -1047,7 +1047,7 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "subroutine_deflect_to_archives",
+                      "id": "0",
                       "type": "deflect_run",
                       "deflectorTarget": "archives",
                       "sourceDefinitionId": 13,
@@ -1113,7 +1113,7 @@
                   "encounterStrength": 0,
                   "subroutines": [
                     {
-                      "id": "subroutine_trash_program",
+                      "id": "0",
                       "type": "trash_installed_program",
                       "sourceDefinitionId": 12,
                       "sourceTitle": "Deadeye",
@@ -1122,7 +1122,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_end_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 12,
                       "sourceTitle": "Deadeye"
@@ -1203,7 +1203,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_paid_deflect_to_data_fort",
+                    "id": "0",
                     "type": "deflect_run",
                     "deflectorTarget": "any_data_fort",
                     "deflectorCost": 2,
@@ -1254,7 +1254,7 @@
                   "encounterStrength": 4,
                   "subroutines": [
                     {
-                      "id": "subroutine_paid_deflect_to_data_fort",
+                      "id": "0",
                       "type": "deflect_run",
                       "deflectorTarget": "any_data_fort",
                       "deflectorCost": 2,
@@ -1650,7 +1650,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "subroutine_paid_deflect_to_data_fort",
+                      "id": "0",
                       "type": "deflect_run",
                       "deflectorTarget": "any_data_fort",
                       "deflectorCost": 2,
@@ -1715,13 +1715,13 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_a",
+                      "id": "0",
                       "type": "end_the_run",
                       "sourceDefinitionId": 15,
                       "sourceTitle": "Glacier"
                     },
                     {
-                      "id": "subroutine_end_run_b",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 15,
                       "sourceTitle": "Glacier"
@@ -1776,13 +1776,13 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_trash_source_a",
+                    "id": "0",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
                   },
                   {
-                    "id": "subroutine_end_run_trash_source_b",
+                    "id": "1",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
@@ -8424,7 +8424,7 @@
             "postInstallRezQuoteCardId": "c3h",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 237,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8462,7 +8462,7 @@
             "postInstallRezQuoteCardId": "c3h",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 237,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8500,7 +8500,7 @@
             "postInstallRezQuoteCardId": "c3h",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 237,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8537,7 +8537,7 @@
             "postInstallRezQuoteCardId": "c3h",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 237,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8575,7 +8575,7 @@
             "postInstallRezQuoteCardId": "c3h",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 237,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8608,7 +8608,7 @@
             "postInstallRezQuoteCardId": "c3b",
             "postInstallRezQuoteTargetServerId": "new_remote",
             "postInstallRezQuoteProjectedServerId": "r2",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_paid_deflect_to_data_fort\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 237,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8645,7 +8645,7 @@
             "postInstallRezQuoteCardId": "c3b",
             "postInstallRezQuoteTargetServerId": "hq",
             "postInstallRezQuoteProjectedServerId": "hq",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_paid_deflect_to_data_fort\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 237,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8682,7 +8682,7 @@
             "postInstallRezQuoteCardId": "c3b",
             "postInstallRezQuoteTargetServerId": "rd",
             "postInstallRezQuoteProjectedServerId": "rd",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_paid_deflect_to_data_fort\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 237,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8718,7 +8718,7 @@
             "postInstallRezQuoteCardId": "c3b",
             "postInstallRezQuoteTargetServerId": "archives",
             "postInstallRezQuoteProjectedServerId": "archives",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_paid_deflect_to_data_fort\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 237,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -8755,7 +8755,7 @@
             "postInstallRezQuoteCardId": "c3b",
             "postInstallRezQuoteTargetServerId": "r1",
             "postInstallRezQuoteProjectedServerId": "r1",
-            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_paid_deflect_to_data_fort\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
+            "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
             "postInstallRezQuoteExpiresAtStateVersion": 237,
             "postInstallRezQuoteComplete": true,
             "postInstallRezQuoteCostKind": "fixed",
@@ -11292,7 +11292,7 @@
           "postInstallRezQuoteCardId": "c3h",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 237,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11330,7 +11330,7 @@
           "postInstallRezQuoteCardId": "c3h",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 237,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11368,7 +11368,7 @@
           "postInstallRezQuoteCardId": "c3h",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 237,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11405,7 +11405,7 @@
           "postInstallRezQuoteCardId": "c3h",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 237,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11443,7 +11443,7 @@
           "postInstallRezQuoteCardId": "c3h",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"subroutine_end_run_a\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"subroutine_end_run_b\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3h\",\"iceDefinitionId\":15,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"0\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"},{\"id\":\"1\",\"type\":\"end_the_run\",\"sourceDefinitionId\":15,\"sourceTitle\":\"Glacier\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 237,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11476,7 +11476,7 @@
           "postInstallRezQuoteCardId": "c3b",
           "postInstallRezQuoteTargetServerId": "new_remote",
           "postInstallRezQuoteProjectedServerId": "r2",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_paid_deflect_to_data_fort\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 237,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11513,7 +11513,7 @@
           "postInstallRezQuoteCardId": "c3b",
           "postInstallRezQuoteTargetServerId": "hq",
           "postInstallRezQuoteProjectedServerId": "hq",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_paid_deflect_to_data_fort\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 237,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11550,7 +11550,7 @@
           "postInstallRezQuoteCardId": "c3b",
           "postInstallRezQuoteTargetServerId": "rd",
           "postInstallRezQuoteProjectedServerId": "rd",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_paid_deflect_to_data_fort\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 237,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11586,7 +11586,7 @@
           "postInstallRezQuoteCardId": "c3b",
           "postInstallRezQuoteTargetServerId": "archives",
           "postInstallRezQuoteProjectedServerId": "archives",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_paid_deflect_to_data_fort\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 237,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11623,7 +11623,7 @@
           "postInstallRezQuoteCardId": "c3b",
           "postInstallRezQuoteTargetServerId": "r1",
           "postInstallRezQuoteProjectedServerId": "r1",
-          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"subroutine_paid_deflect_to_data_fort\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
+          "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c3b\",\"iceDefinitionId\":14,\"effectiveStrength\":4,\"encounterStrength\":4,\"subroutines\":[{\"id\":\"0\",\"type\":\"deflect_run\",\"deflectorTarget\":\"any_data_fort\",\"deflectorCost\":2,\"sourceDefinitionId\":14,\"sourceTitle\":\"Entrapment\"}]}",
           "postInstallRezQuoteExpiresAtStateVersion": 237,
           "postInstallRezQuoteComplete": true,
           "postInstallRezQuoteCostKind": "fixed",
@@ -11816,7 +11816,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 237,
-      "sideSafePlanningFingerprint": "fnv1a:118e9d36"
+      "sideSafePlanningFingerprint": "fnv1a:6dd59341"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_corp_remote_lab_deflection_2026_07_01_1.2.0",

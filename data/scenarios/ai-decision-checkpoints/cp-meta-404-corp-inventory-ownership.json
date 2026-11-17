@@ -728,7 +728,7 @@
                   "effectiveStrength": 5,
                   "subroutines": [
                     {
-                      "id": "subroutine_deflect_to_archives",
+                      "id": "0",
                       "type": "deflect_run",
                       "deflectorTarget": "archives",
                       "sourceDefinitionId": 13,
@@ -1117,7 +1117,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye",
@@ -1126,7 +1126,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye"
@@ -10875,7 +10875,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 320,
-      "sideSafePlanningFingerprint": "fnv1a:a6c45a24"
+      "sideSafePlanningFingerprint": "fnv1a:0a48f05d"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_corp_remote_lab_deflection_2026_07_01_1.1.0",

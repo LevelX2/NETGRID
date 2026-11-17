@@ -363,7 +363,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 75,
                     "sourceTitle": "Credit Blocks"
@@ -400,7 +400,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 75,
                     "sourceTitle": "Credit Blocks"
@@ -5499,7 +5499,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 83,
-      "sideSafePlanningFingerprint": "fnv1a:35b4c278"
+      "sideSafePlanningFingerprint": "fnv1a:82f3d23c"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rd_express_1.1.0",

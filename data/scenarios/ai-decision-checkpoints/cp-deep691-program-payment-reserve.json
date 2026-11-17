@@ -692,7 +692,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "subroutine_trash_program_unless_runner_pays_one",
+                        "id": "0",
                         "type": "trash_installed_program_unless_runner_pays",
                         "amount": 1,
                         "sourceDefinitionId": 103,
@@ -737,7 +737,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "subroutine_trash_program_unless_runner_pays_one",
+                        "id": "0",
                         "type": "trash_installed_program_unless_runner_pays",
                         "amount": 1,
                         "sourceDefinitionId": 103,
@@ -861,7 +861,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "subroutine_relative_net_damage",
+                        "id": "0",
                         "type": "do_damage",
                         "amount": 0,
                         "damageType": "net",
@@ -872,7 +872,7 @@
                         }
                       },
                       {
-                        "id": "subroutine_end_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 79,
                         "sourceTitle": "Dog Pile"
@@ -1179,7 +1179,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program_unless_runner_pays_one",
+                    "id": "0",
                     "type": "trash_installed_program_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 103,
@@ -7527,7 +7527,7 @@
               }
             },
             {
-              "actionId": "runner.break_subroutine.c1pt.c1pt.c1pt.cn2.0.subroutine_trash_program_unless_runner_pays_one.361",
+              "actionId": "runner.break_subroutine.c1pt.c1pt.c1pt.cn2.0.0.361",
               "side": "runner",
               "type": "break_subroutine",
               "label": "Snowball: Subroutine brechen",
@@ -7569,7 +7569,7 @@
               }
             },
             {
-              "actionId": "runner.continue_run.subroutine_trash_program_unless_runner_pays_one.0",
+              "actionId": "runner.continue_run.0.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen (Runner zahlt 1 Credit)",
@@ -7586,8 +7586,8 @@
               "payload": {
                 "encounterContinue": true,
                 "unbrokenSubroutineCount": 1,
-                "encounterSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
-                "encounterRemainingSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
+                "encounterSubroutineIds": "0",
+                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "encounterWillEndRun": false,
@@ -7601,7 +7601,7 @@
               }
             },
             {
-              "actionId": "runner.continue_run.subroutine_trash_program_unless_runner_pays_one",
+              "actionId": "runner.continue_run.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen",
@@ -7614,8 +7614,8 @@
               "payload": {
                 "encounterContinue": true,
                 "unbrokenSubroutineCount": 1,
-                "encounterSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
-                "encounterRemainingSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
+                "encounterSubroutineIds": "0",
+                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "encounterWillEndRun": false,
@@ -9897,7 +9897,7 @@
             }
           },
           {
-            "actionId": "runner.break_subroutine.c1pt.c1pt.c1pt.cn2.0.subroutine_trash_program_unless_runner_pays_one.361",
+            "actionId": "runner.break_subroutine.c1pt.c1pt.c1pt.cn2.0.0.361",
             "side": "runner",
             "type": "break_subroutine",
             "label": "Snowball: Subroutine brechen",
@@ -9939,7 +9939,7 @@
             }
           },
           {
-            "actionId": "runner.continue_run.subroutine_trash_program_unless_runner_pays_one.0",
+            "actionId": "runner.continue_run.0.0",
             "side": "runner",
             "type": "continue_run",
             "label": "Subroutinen auslösen (Runner zahlt 1 Credit)",
@@ -9956,8 +9956,8 @@
             "payload": {
               "encounterContinue": true,
               "unbrokenSubroutineCount": 1,
-              "encounterSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
-              "encounterRemainingSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
+              "encounterSubroutineIds": "0",
+              "encounterRemainingSubroutineIds": "0",
               "encounterRemainingSubroutineCount": 1,
               "encounterFullBreakDamage": 0,
               "encounterWillEndRun": false,
@@ -9971,7 +9971,7 @@
             }
           },
           {
-            "actionId": "runner.continue_run.subroutine_trash_program_unless_runner_pays_one",
+            "actionId": "runner.continue_run.0",
             "side": "runner",
             "type": "continue_run",
             "label": "Subroutinen auslösen",
@@ -9984,8 +9984,8 @@
             "payload": {
               "encounterContinue": true,
               "unbrokenSubroutineCount": 1,
-              "encounterSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
-              "encounterRemainingSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
+              "encounterSubroutineIds": "0",
+              "encounterRemainingSubroutineIds": "0",
               "encounterRemainingSubroutineCount": 1,
               "encounterFullBreakDamage": 0,
               "encounterWillEndRun": false,
@@ -10037,7 +10037,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 228,
-          "sideSafePlanningFingerprint": "fnv1a:30deb321"
+          "sideSafePlanningFingerprint": "fnv1a:885601fe"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_mp48400s_1.0.0",
@@ -16714,7 +16714,7 @@
               "sideSafePlanningFingerprint": "fnv1a:3617c7e0"
             },
             "currentBinding": {
-              "actionId": "runner.continue_run.subroutine_trash_program_unless_runner_pays_one.0",
+              "actionId": "runner.continue_run.0.0",
               "stateVersion": 228,
               "semanticActionSetFingerprint": "fnv1a:c8f68aaf",
               "invocationKey": "fnv1a:18f94959"
@@ -16728,7 +16728,7 @@
             "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ahq",
             "executorInstanceId": "plan:runner.convert_run_window:run%3A226",
             "sourceStepId": "plan:runner.convert_run_window:run%3A226:convert",
-            "originalActionId": "runner.continue_run.subroutine_trash_program_unless_runner_pays_one.0",
+            "originalActionId": "runner.continue_run.0.0",
             "selectedAtStateVersion": 228
           }
         }
@@ -17425,7 +17425,7 @@
                     "encounterStrength": 1,
                     "subroutines": [
                       {
-                        "id": "subroutine_trash_program_unless_runner_pays_one",
+                        "id": "0",
                         "type": "trash_installed_program_unless_runner_pays",
                         "amount": 1,
                         "sourceDefinitionId": 103,
@@ -17471,7 +17471,7 @@
                     "encounterStrength": 1,
                     "subroutines": [
                       {
-                        "id": "subroutine_trash_program_unless_runner_pays_one",
+                        "id": "0",
                         "type": "trash_installed_program_unless_runner_pays",
                         "amount": 1,
                         "sourceDefinitionId": 103,
@@ -17504,7 +17504,7 @@
                     "encounterStrength": 4,
                     "subroutines": [
                       {
-                        "id": "subroutine_run_duration_ice_strength",
+                        "id": "0",
                         "type": "set_run_future_strength_bonus",
                         "amount": 1,
                         "runFutureStrengthCancelPaymentAmount": 2,
@@ -17632,7 +17632,7 @@
                     "encounterStrength": 0,
                     "subroutines": [
                       {
-                        "id": "subroutine_relative_net_damage",
+                        "id": "0",
                         "type": "do_damage",
                         "amount": 0,
                         "damageType": "net",
@@ -17643,7 +17643,7 @@
                         }
                       },
                       {
-                        "id": "subroutine_end_run",
+                        "id": "1",
                         "type": "end_the_run",
                         "sourceDefinitionId": 79,
                         "sourceTitle": "Dog Pile"
@@ -17951,7 +17951,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program_unless_runner_pays_one",
+                    "id": "0",
                     "type": "trash_installed_program_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 103,
@@ -24797,7 +24797,7 @@
               }
             },
             {
-              "actionId": "runner.continue_run.subroutine_trash_program_unless_runner_pays_one.0",
+              "actionId": "runner.continue_run.0.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen (Runner zahlt 1 Credit)",
@@ -24814,8 +24814,8 @@
               "payload": {
                 "encounterContinue": true,
                 "unbrokenSubroutineCount": 1,
-                "encounterSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
-                "encounterRemainingSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
+                "encounterSubroutineIds": "0",
+                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "encounterWillEndRun": false,
@@ -24829,7 +24829,7 @@
               }
             },
             {
-              "actionId": "runner.continue_run.subroutine_trash_program_unless_runner_pays_one",
+              "actionId": "runner.continue_run.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen",
@@ -24842,8 +24842,8 @@
               "payload": {
                 "encounterContinue": true,
                 "unbrokenSubroutineCount": 1,
-                "encounterSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
-                "encounterRemainingSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
+                "encounterSubroutineIds": "0",
+                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "encounterWillEndRun": false,
@@ -27070,7 +27070,7 @@
             }
           },
           {
-            "actionId": "runner.continue_run.subroutine_trash_program_unless_runner_pays_one.0",
+            "actionId": "runner.continue_run.0.0",
             "side": "runner",
             "type": "continue_run",
             "label": "Subroutinen auslösen (Runner zahlt 1 Credit)",
@@ -27087,8 +27087,8 @@
             "payload": {
               "encounterContinue": true,
               "unbrokenSubroutineCount": 1,
-              "encounterSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
-              "encounterRemainingSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
+              "encounterSubroutineIds": "0",
+              "encounterRemainingSubroutineIds": "0",
               "encounterRemainingSubroutineCount": 1,
               "encounterFullBreakDamage": 0,
               "encounterWillEndRun": false,
@@ -27102,7 +27102,7 @@
             }
           },
           {
-            "actionId": "runner.continue_run.subroutine_trash_program_unless_runner_pays_one",
+            "actionId": "runner.continue_run.0",
             "side": "runner",
             "type": "continue_run",
             "label": "Subroutinen auslösen",
@@ -27115,8 +27115,8 @@
             "payload": {
               "encounterContinue": true,
               "unbrokenSubroutineCount": 1,
-              "encounterSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
-              "encounterRemainingSubroutineIds": "subroutine_trash_program_unless_runner_pays_one",
+              "encounterSubroutineIds": "0",
+              "encounterRemainingSubroutineIds": "0",
               "encounterRemainingSubroutineCount": 1,
               "encounterFullBreakDamage": 0,
               "encounterWillEndRun": false,
@@ -27168,7 +27168,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 246,
-          "sideSafePlanningFingerprint": "fnv1a:7a4078c8"
+          "sideSafePlanningFingerprint": "fnv1a:2c80d222"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_mp48400s_1.0.0",
@@ -33801,7 +33801,7 @@
               "sideSafePlanningFingerprint": "fnv1a:183e680e"
             },
             "currentBinding": {
-              "actionId": "runner.continue_run.subroutine_trash_program_unless_runner_pays_one.0",
+              "actionId": "runner.continue_run.0.0",
               "stateVersion": 246,
               "semanticActionSetFingerprint": "fnv1a:336e6469",
               "invocationKey": "fnv1a:d8e6f203"
@@ -33813,7 +33813,7 @@
             "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ahq",
             "executorInstanceId": "plan:runner.convert_run_window:run%3A239",
             "sourceStepId": "plan:runner.convert_run_window:run%3A239:convert",
-            "originalActionId": "runner.continue_run.subroutine_trash_program_unless_runner_pays_one.0",
+            "originalActionId": "runner.continue_run.0.0",
             "selectedAtStateVersion": 246
           },
           "rootForegroundInstanceId": "plan:runner.pressure_central:central%3Ahq",

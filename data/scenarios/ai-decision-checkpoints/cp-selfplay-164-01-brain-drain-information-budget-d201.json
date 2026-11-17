@@ -661,7 +661,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_random_brain_damage",
+                    "id": "0",
                     "type": "random_damage",
                     "amount": 3,
                     "damageType": "core",
@@ -740,7 +740,7 @@
             "effectiveStrength": 3,
             "subroutines": [
               {
-                "id": "subroutine_random_brain_damage",
+                "id": "0",
                 "type": "random_damage",
                 "amount": 3,
                 "damageType": "core",
@@ -6035,7 +6035,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.subroutine_random_brain_damage",
+          "actionId": "runner.continue_run.0",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen",
@@ -6051,7 +6051,10 @@
             "encounterWillEndRun": false,
             "encounterSourceWillTrashAtEndOfTurn": false,
             "abilityFamily": "run-access",
-            "sourceDefinitionId": 11
+            "sourceDefinitionId": 11,
+            "encounterSubroutineIds": "0",
+            "encounterRemainingSubroutineIds": "0",
+            "encounterRemainingSubroutineCount": 1
           }
         }
       ]
@@ -8171,7 +8174,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.subroutine_random_brain_damage",
+        "actionId": "runner.continue_run.0",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen",
@@ -8187,7 +8190,10 @@
           "encounterWillEndRun": false,
           "encounterSourceWillTrashAtEndOfTurn": false,
           "abilityFamily": "run-access",
-          "sourceDefinitionId": 11
+          "sourceDefinitionId": 11,
+          "encounterSubroutineIds": "0",
+          "encounterRemainingSubroutineIds": "0",
+          "encounterRemainingSubroutineCount": 1
         }
       }
     ],
@@ -8233,7 +8239,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 200,
-      "sideSafePlanningFingerprint": "fnv1a:a4948bdb"
+      "sideSafePlanningFingerprint": "fnv1a:9f9616c2"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_last_call_at_rd_1.0.0",
@@ -14751,7 +14757,7 @@
           "sideSafePlanningFingerprint": "fnv1a:cbaca230"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.subroutine_random_brain_damage",
+          "actionId": "runner.continue_run.0",
           "stateVersion": 200,
           "semanticActionSetFingerprint": "fnv1a:4da49be5",
           "invocationKey": "fnv1a:5529c8f6"

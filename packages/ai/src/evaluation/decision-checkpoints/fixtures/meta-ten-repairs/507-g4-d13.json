@@ -224,13 +224,13 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_trash_source_a",
+                    "id": "0",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
                   },
                   {
-                    "id": "subroutine_end_run_trash_source_b",
+                    "id": "1",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
@@ -1613,7 +1613,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 12,
-      "sideSafePlanningFingerprint": "fnv1a:bff3ac48"
+      "sideSafePlanningFingerprint": "fnv1a:8f3fd5c8"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_cybernetics_risk_rig_2026_07_01_1.0.0",

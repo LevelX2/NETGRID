@@ -248,7 +248,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_brain_damage_one",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -2151,7 +2151,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 17,
-      "sideSafePlanningFingerprint": "fnv1a:a6921d04"
+      "sideSafePlanningFingerprint": "fnv1a:f564fe04"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_krashkurs_clown_kreditmaschine_2026_07_11_1.0.0",

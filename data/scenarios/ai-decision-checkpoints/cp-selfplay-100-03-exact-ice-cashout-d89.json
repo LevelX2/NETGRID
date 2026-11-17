@@ -295,7 +295,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trace_one_net_damage",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 1,
                     "traceSuccessEffect": {
@@ -348,7 +348,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trace_one_net_damage",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 1,
                     "traceSuccessEffect": {
@@ -405,13 +405,13 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_trash_source_a",
+                    "id": "0",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
                   },
                   {
-                    "id": "subroutine_end_run_trash_source_b",
+                    "id": "1",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
@@ -457,13 +457,13 @@
                 "effectiveStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_trash_source_a",
+                    "id": "0",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
                   },
                   {
-                    "id": "subroutine_end_run_trash_source_b",
+                    "id": "1",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
@@ -511,7 +511,7 @@
                   "effectiveStrength": 6,
                   "subroutines": [
                     {
-                      "id": "subroutine_trash_program_a",
+                      "id": "0",
                       "type": "trash_installed_program",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure",
@@ -520,7 +520,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_trash_program_b",
+                      "id": "1",
                       "type": "trash_installed_program",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure",
@@ -529,7 +529,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_trash_program_c",
+                      "id": "2",
                       "type": "trash_installed_program",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure",
@@ -538,13 +538,13 @@
                       }
                     },
                     {
-                      "id": "subroutine_end_run_a",
+                      "id": "3",
                       "type": "end_the_run",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure"
                     },
                     {
-                      "id": "subroutine_end_run_b",
+                      "id": "4",
                       "type": "end_the_run",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure"
@@ -5910,7 +5910,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 88,
-      "sideSafePlanningFingerprint": "fnv1a:e1befc17"
+      "sideSafePlanningFingerprint": "fnv1a:f600cd11"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_syds_ice_pfandhaus_2026_07_09_1.1.0",

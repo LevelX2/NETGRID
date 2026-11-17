@@ -395,7 +395,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_brain_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -406,7 +406,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 88,
                     "sourceTitle": "Mastermind"
@@ -438,7 +438,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program_unless_runner_pays_one",
+                    "id": "0",
                     "type": "trash_installed_program_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 103,
@@ -489,7 +489,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 90,
@@ -521,7 +521,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 90,
@@ -7129,7 +7129,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 104,
-      "sideSafePlanningFingerprint": "fnv1a:4bc50d94"
+      "sideSafePlanningFingerprint": "fnv1a:8c80e6c0"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_last_call_at_rd_1.0.0",

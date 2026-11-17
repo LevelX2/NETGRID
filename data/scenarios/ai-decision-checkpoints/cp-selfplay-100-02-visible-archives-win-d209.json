@@ -357,7 +357,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "runFutureStrengthCancelPaymentAmount": 2,
@@ -394,7 +394,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "net",
@@ -405,7 +405,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 70,
                     "sourceTitle": "Bug Zapper"
@@ -444,7 +444,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trace_one_net_damage",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 1,
                     "traceSuccessEffect": {
@@ -646,7 +646,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "net",
@@ -657,7 +657,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 70,
                     "sourceTitle": "Bug Zapper"
@@ -8840,7 +8840,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 208,
-      "sideSafePlanningFingerprint": "fnv1a:e3aff928"
+      "sideSafePlanningFingerprint": "fnv1a:5b9f5ec2"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rnd_interface_dig_1.0.0",

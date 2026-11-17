@@ -351,7 +351,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 75,
                     "sourceTitle": "Credit Blocks"
@@ -381,7 +381,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_net_damage_one",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -392,7 +392,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 91,
                     "sourceTitle": "Mobile Barricade"
@@ -438,7 +438,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_brain_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "core",
@@ -449,7 +449,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 88,
                     "sourceTitle": "Mastermind"
@@ -7913,7 +7913,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 189,
-      "sideSafePlanningFingerprint": "fnv1a:c8d50f08"
+      "sideSafePlanningFingerprint": "fnv1a:737663af"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",

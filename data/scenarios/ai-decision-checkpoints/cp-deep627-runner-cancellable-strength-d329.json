@@ -734,7 +734,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 96,
@@ -767,7 +767,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "runFutureStrengthCancelPaymentAmount": 2,
@@ -803,13 +803,13 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_trash_source_a",
+                    "id": "0",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
                   },
                   {
-                    "id": "subroutine_end_run_trash_source_b",
+                    "id": "1",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
@@ -866,13 +866,13 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_trash_source_a",
+                    "id": "0",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
                   },
                   {
-                    "id": "subroutine_end_run_trash_source_b",
+                    "id": "1",
                     "type": "end_the_run_and_trash_source_at_end_of_turn",
                     "sourceDefinitionId": 17,
                     "sourceTitle": "Puzzle"
@@ -1102,7 +1102,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program_a",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -1111,7 +1111,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_trash_program_b",
+                    "id": "1",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -1120,7 +1120,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_trash_program_c",
+                    "id": "2",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -1129,13 +1129,13 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run_a",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure"
                   },
                   {
-                    "id": "subroutine_end_run_b",
+                    "id": "4",
                     "type": "end_the_run",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure"
@@ -1217,7 +1217,7 @@
             "encounterStrength": 3,
             "subroutines": [
               {
-                "id": "subroutine_run_duration_ice_strength",
+                "id": "0",
                 "type": "set_run_future_strength_bonus",
                 "amount": 1,
                 "runFutureStrengthCancelPaymentAmount": 2,
@@ -10027,7 +10027,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.subroutine_run_duration_ice_strength",
+          "actionId": "runner.continue_run.0",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen",
@@ -10040,8 +10040,8 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "subroutine_run_duration_ice_strength",
-            "encounterRemainingSubroutineIds": "subroutine_run_duration_ice_strength",
+            "encounterSubroutineIds": "0",
+            "encounterRemainingSubroutineIds": "0",
             "encounterRemainingSubroutineCount": 1,
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": false,
@@ -12114,7 +12114,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.subroutine_run_duration_ice_strength",
+        "actionId": "runner.continue_run.0",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen",
@@ -12127,8 +12127,8 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "subroutine_run_duration_ice_strength",
-          "encounterRemainingSubroutineIds": "subroutine_run_duration_ice_strength",
+          "encounterSubroutineIds": "0",
+          "encounterRemainingSubroutineIds": "0",
           "encounterRemainingSubroutineCount": 1,
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": false,
@@ -12180,7 +12180,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 328,
-      "sideSafePlanningFingerprint": "fnv1a:631ca1c6"
+      "sideSafePlanningFingerprint": "fnv1a:08bf8537"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",

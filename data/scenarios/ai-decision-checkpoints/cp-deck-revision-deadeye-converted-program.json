@@ -424,7 +424,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye",
@@ -433,7 +433,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye"
@@ -559,7 +559,7 @@
             "effectiveStrength": 0,
             "subroutines": [
               {
-                "id": "subroutine_trash_program",
+                "id": "0",
                 "type": "trash_installed_program",
                 "sourceDefinitionId": 12,
                 "sourceTitle": "Deadeye",
@@ -568,7 +568,7 @@
                 }
               },
               {
-                "id": "subroutine_end_run",
+                "id": "1",
                 "type": "end_the_run",
                 "sourceDefinitionId": 12,
                 "sourceTitle": "Deadeye"
@@ -604,7 +604,7 @@
       "pendingChoice": {
         "choiceId": "trash_installed_program_42",
         "side": "corp",
-        "source": "card_implementation.trash_installed_program:39:c2t:0:12:subroutine_trash_program:trash_installed_program:encounter",
+        "source": "card_implementation.trash_installed_program:39:c2t:0:12:0:trash_installed_program:encounter",
         "prompt": "Deadeye: installiertes Programm zum Trashing wählen.",
         "kind": "select_cards",
         "options": [

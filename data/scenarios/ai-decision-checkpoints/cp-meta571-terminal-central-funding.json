@@ -574,7 +574,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 96,
@@ -606,7 +606,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 75,
                     "sourceTitle": "Credit Blocks"
@@ -637,7 +637,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 75,
                     "sourceTitle": "Credit Blocks"
@@ -681,7 +681,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 97,
                     "sourceTitle": "Sphinx 2006"
@@ -8682,7 +8682,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 179,
-      "sideSafePlanningFingerprint": "fnv1a:0c985791"
+      "sideSafePlanningFingerprint": "fnv1a:0f0b5e1c"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

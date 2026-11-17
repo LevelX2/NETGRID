@@ -321,7 +321,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 96,
@@ -391,7 +391,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "net",
@@ -402,7 +402,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 79,
                     "sourceTitle": "Dog Pile"
@@ -6951,7 +6951,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 121,
-      "sideSafePlanningFingerprint": "fnv1a:452235ff"
+      "sideSafePlanningFingerprint": "fnv1a:24be677e"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_ice_destruction_runner_1.0.0",

@@ -612,7 +612,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 96,
@@ -645,7 +645,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trace_one_net_damage",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 1,
                     "traceSuccessEffect": {
@@ -693,7 +693,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 96,
@@ -810,7 +810,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 96,
@@ -842,7 +842,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "runFutureStrengthCancelPaymentAmount": 2,
@@ -879,7 +879,7 @@
                 "effectiveStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -890,7 +890,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 70,
                     "sourceTitle": "Bug Zapper"
@@ -921,7 +921,7 @@
                 "effectiveStrength": 6,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program_a",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -930,7 +930,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_trash_program_b",
+                    "id": "1",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -939,7 +939,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_trash_program_c",
+                    "id": "2",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -948,13 +948,13 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run_a",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure"
                   },
                   {
-                    "id": "subroutine_end_run_b",
+                    "id": "4",
                     "type": "end_the_run",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure"
@@ -993,7 +993,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trace_one_net_damage",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 1,
                     "traceSuccessEffect": {
@@ -1029,7 +1029,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "runFutureStrengthCancelPaymentAmount": 2,
@@ -1073,7 +1073,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trace_one_net_damage",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 1,
                     "traceSuccessEffect": {
@@ -1109,7 +1109,7 @@
                 "effectiveStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "runFutureStrengthCancelPaymentAmount": 2,
@@ -4190,7 +4190,7 @@
             "targetIceDefinitionId": 96,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 109,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cli.0.subroutine_end_run_unless_runner_pays_one.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cli.0.0.48",
             "targets": {
               "targetIceDefinitionId": 96
             },
@@ -4402,7 +4402,7 @@
             "serverLabel": "R&D",
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 117,
-            "runnerCostPenaltySupportOriginalActionId": "runner.continue_run.subroutine_end_run_unless_runner_pays_one.0.1",
+            "runnerCostPenaltySupportOriginalActionId": "runner.continue_run.0.0.1",
             "abilityFamily": "run-access",
             "targets": {
               "sourceDefinitionId": 96,
@@ -5975,7 +5975,7 @@
             "targetIceDefinitionId": 73,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 176,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cgf.1.subroutine_trash_program_b.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cgf.1.1.48",
             "targets": {
               "targetIceDefinitionId": 73
             },
@@ -6024,7 +6024,7 @@
             "targetIceDefinitionId": 73,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 178,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cgf.2.subroutine_trash_program_c.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cgf.2.2.48",
             "targets": {
               "targetIceDefinitionId": 73
             },
@@ -6073,7 +6073,7 @@
             "targetIceDefinitionId": 73,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 180,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cgf.0.subroutine_trash_program_a.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cgf.0.0.48",
             "targets": {
               "targetIceDefinitionId": 73
             },
@@ -6122,7 +6122,7 @@
             "targetIceDefinitionId": 73,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 182,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cgf.3.subroutine_end_run_a.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cgf.3.3.48",
             "targets": {
               "targetIceDefinitionId": 73
             },
@@ -6171,7 +6171,7 @@
             "targetIceDefinitionId": 73,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 184,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cgf.4.subroutine_end_run_b.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cgf.4.4.48",
             "targets": {
               "targetIceDefinitionId": 73
             },
@@ -6294,7 +6294,7 @@
             "targetIceDefinitionId": 70,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 189,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cfq.0.subroutine_relative_net_damage.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cfq.0.0.48",
             "targets": {
               "targetIceDefinitionId": 70
             },
@@ -6343,7 +6343,7 @@
             "targetIceDefinitionId": 70,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 191,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cfq.1.subroutine_end_run.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cfq.1.1.48",
             "targets": {
               "targetIceDefinitionId": 70
             },
@@ -6619,7 +6619,7 @@
             "targetIceDefinitionId": 96,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 200,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.clj.0.subroutine_end_run_unless_runner_pays_one.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.clj.0.0.48",
             "targets": {
               "targetIceDefinitionId": 96
             },
@@ -8318,7 +8318,7 @@
             "targetIceDefinitionId": 96,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 258,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cli.0.subroutine_end_run_unless_runner_pays_one.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cli.0.0.48",
             "targets": {
               "targetIceDefinitionId": 96
             },
@@ -8697,7 +8697,7 @@
             "targetIceDefinitionId": 72,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 272,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.cg5.0.subroutine_trace_one_net_damage.48",
+            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.cg5.0.0.48",
             "targets": {
               "targetIceDefinitionId": 72
             },
@@ -10824,7 +10824,7 @@
           "targetIceDefinitionId": 96,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 258,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cli.0.subroutine_end_run_unless_runner_pays_one.48",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.cli.0.0.48",
           "targets": {
             "targetIceDefinitionId": 96
           },
@@ -11203,7 +11203,7 @@
           "targetIceDefinitionId": 72,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 272,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.cg5.0.subroutine_trace_one_net_damage.48",
+          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.cg5.0.0.48",
           "targets": {
             "targetIceDefinitionId": 72
           },
@@ -12447,7 +12447,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 308,
-      "sideSafePlanningFingerprint": "fnv1a:3551b1b9"
+      "sideSafePlanningFingerprint": "fnv1a:aedb30f9"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",

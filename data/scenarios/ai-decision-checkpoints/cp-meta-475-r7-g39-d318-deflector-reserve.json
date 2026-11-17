@@ -801,7 +801,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye",
@@ -810,7 +810,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye"
@@ -851,7 +851,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_deflect_to_subsidiary_fort",
+                    "id": "0",
                     "type": "deflect_run",
                     "deflectorTarget": "subsidiary_data_fort",
                     "deflectorAutoBreakIfNoTarget": true,
@@ -971,7 +971,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye",
@@ -980,7 +980,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye"
@@ -1369,7 +1369,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_paid_deflect_to_data_fort",
+                    "id": "0",
                     "type": "deflect_run",
                     "deflectorTarget": "any_data_fort",
                     "deflectorCost": 2,
@@ -1413,7 +1413,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 16,
                     "sourceTitle": "Imperial Guard",
@@ -1422,7 +1422,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 16,
                     "sourceTitle": "Imperial Guard"
@@ -1571,7 +1571,7 @@
             "encounterStrength": 4,
             "subroutines": [
               {
-                "id": "subroutine_paid_deflect_to_data_fort",
+                "id": "0",
                 "type": "deflect_run",
                 "deflectorTarget": "any_data_fort",
                 "deflectorCost": 2,
@@ -1587,7 +1587,7 @@
       "pendingChoice": {
         "choiceId": "classic_deflector_317",
         "side": "corp",
-        "source": "card_implementation.classic_deflector:304:c3a:0:14:subroutine_paid_deflect_to_data_fort:any_data_fort:2:0",
+        "source": "card_implementation.classic_deflector:304:c3a:0:14:0:any_data_fort:2:0",
         "prompt": "Deflector-Ziel wählen (2 Credits) oder nicht zahlen",
         "presentationKey": "generic_select_option",
         "kind": "select_option",
@@ -12123,7 +12123,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 317,
-      "sideSafePlanningFingerprint": "fnv1a:3148cb8b"
+      "sideSafePlanningFingerprint": "fnv1a:9596d760"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_corp_remote_lab_deflection_2026_07_01_1.2.0",
@@ -19458,7 +19458,7 @@
                   "sourceIceInstanceId": "c3a",
                   "sourceDefinitionId": 14,
                   "subroutineIndex": 0,
-                  "subroutineId": "subroutine_paid_deflect_to_data_fort",
+                  "subroutineId": "0",
                   "targetProfile": "any_data_fort",
                   "creditCost": 2,
                   "autoBreakIfNoTarget": false,

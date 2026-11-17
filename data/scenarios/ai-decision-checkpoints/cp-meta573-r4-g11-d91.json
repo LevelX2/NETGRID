@@ -366,7 +366,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_brain_damage_one",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -418,7 +418,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_brain_damage_one",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "core",
@@ -6123,7 +6123,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 90,
-      "sideSafePlanningFingerprint": "fnv1a:9ff397fa"
+      "sideSafePlanningFingerprint": "fnv1a:5f141e12"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_adb10896_1.1.0",

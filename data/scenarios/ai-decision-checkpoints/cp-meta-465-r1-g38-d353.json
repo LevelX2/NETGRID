@@ -1055,7 +1055,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trace_one_net_damage",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 1,
                     "traceSuccessEffect": {
@@ -1109,7 +1109,7 @@
                   "encounterStrength": 6,
                   "subroutines": [
                     {
-                      "id": "subroutine_trash_program_a",
+                      "id": "0",
                       "type": "trash_installed_program",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure",
@@ -1118,7 +1118,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_trash_program_b",
+                      "id": "1",
                       "type": "trash_installed_program",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure",
@@ -1127,7 +1127,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_trash_program_c",
+                      "id": "2",
                       "type": "trash_installed_program",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure",
@@ -1136,13 +1136,13 @@
                       }
                     },
                     {
-                      "id": "subroutine_end_run_a",
+                      "id": "3",
                       "type": "end_the_run",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure"
                     },
                     {
-                      "id": "subroutine_end_run_b",
+                      "id": "4",
                       "type": "end_the_run",
                       "sourceDefinitionId": 73,
                       "sourceTitle": "Colonel Failure"
@@ -1198,7 +1198,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "runFutureStrengthCancelPaymentAmount": 2,
@@ -1303,7 +1303,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "subroutine_relative_net_damage",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 0,
                       "damageType": "net",
@@ -1314,7 +1314,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_end_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 70,
                       "sourceTitle": "Bug Zapper"
@@ -1413,7 +1413,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -1424,7 +1424,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 70,
                     "sourceTitle": "Bug Zapper"
@@ -1465,7 +1465,7 @@
                 "encounterStrength": 6,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program_a",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -1474,7 +1474,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_trash_program_b",
+                    "id": "1",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -1483,7 +1483,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_trash_program_c",
+                    "id": "2",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure",
@@ -1492,13 +1492,13 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run_a",
+                    "id": "3",
                     "type": "end_the_run",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure"
                   },
                   {
-                    "id": "subroutine_end_run_b",
+                    "id": "4",
                     "type": "end_the_run",
                     "sourceDefinitionId": 73,
                     "sourceTitle": "Colonel Failure"
@@ -1902,7 +1902,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "subroutine_relative_net_damage",
+                      "id": "0",
                       "type": "do_damage",
                       "amount": 0,
                       "damageType": "net",
@@ -1913,7 +1913,7 @@
                       }
                     },
                     {
-                      "id": "subroutine_end_run",
+                      "id": "1",
                       "type": "end_the_run",
                       "sourceDefinitionId": 70,
                       "sourceTitle": "Bug Zapper"
@@ -2028,13 +2028,13 @@
                   "encounterStrength": 5,
                   "subroutines": [
                     {
-                      "id": "subroutine_end_run_trash_source_a",
+                      "id": "0",
                       "type": "end_the_run_and_trash_source_at_end_of_turn",
                       "sourceDefinitionId": 17,
                       "sourceTitle": "Puzzle"
                     },
                     {
-                      "id": "subroutine_end_run_trash_source_b",
+                      "id": "1",
                       "type": "end_the_run_and_trash_source_at_end_of_turn",
                       "sourceDefinitionId": 17,
                       "sourceTitle": "Puzzle"
@@ -13556,7 +13556,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 352,
-      "sideSafePlanningFingerprint": "fnv1a:7daef496"
+      "sideSafePlanningFingerprint": "fnv1a:69c32e0c"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_syds_ice_pfandhaus_2026_07_09_1.1.0",

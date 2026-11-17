@@ -277,7 +277,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program_unless_runner_pays_one",
+                    "id": "0",
                     "type": "trash_installed_program_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 103,
@@ -343,7 +343,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 96,
@@ -5036,7 +5036,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 54,
-      "sideSafePlanningFingerprint": "fnv1a:53f827e4"
+      "sideSafePlanningFingerprint": "fnv1a:0cc06be8"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_salazar_toll_road_1.1.0",

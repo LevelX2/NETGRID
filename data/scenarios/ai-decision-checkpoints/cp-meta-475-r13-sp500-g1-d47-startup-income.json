@@ -216,7 +216,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_paid_deflect_to_data_fort",
+                    "id": "0",
                     "type": "deflect_run",
                     "deflectorTarget": "any_data_fort",
                     "deflectorCost": 2,
@@ -257,7 +257,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_paid_deflect_to_data_fort",
+                    "id": "0",
                     "type": "deflect_run",
                     "deflectorTarget": "any_data_fort",
                     "deflectorCost": 2,
@@ -3655,7 +3655,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 46,
-      "sideSafePlanningFingerprint": "fnv1a:f529226b"
+      "sideSafePlanningFingerprint": "fnv1a:8d697675"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

@@ -408,7 +408,7 @@
                   "encounterStrength": 2,
                   "subroutines": [
                     {
-                      "id": "subroutine_paid_deflect_to_data_fort",
+                      "id": "0",
                       "type": "deflect_run",
                       "deflectorTarget": "any_data_fort",
                       "deflectorCost": 2,
@@ -474,7 +474,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
                     "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye",
@@ -483,7 +483,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye"
@@ -4262,7 +4262,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 70,
-      "sideSafePlanningFingerprint": "fnv1a:60960564"
+      "sideSafePlanningFingerprint": "fnv1a:0e8391c1"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_corp_remote_lab_deflection_2026_07_01_1.2.0",

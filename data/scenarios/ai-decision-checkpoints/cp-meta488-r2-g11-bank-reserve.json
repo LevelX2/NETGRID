@@ -724,7 +724,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_trace_x_end_run_and_run_lock",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 1,
                     "traceSuccessEffect": {
@@ -770,7 +770,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 71,
                     "sourceTitle": "Caryatid"
@@ -1007,7 +1007,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 81,
                     "sourceTitle": "Galatea"
@@ -1038,7 +1038,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 71,
                     "sourceTitle": "Caryatid"
@@ -13961,7 +13961,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 349,
-      "sideSafePlanningFingerprint": "fnv1a:9534d047"
+      "sideSafePlanningFingerprint": "fnv1a:0c80b9a2"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_mp48400s_1.0.0",

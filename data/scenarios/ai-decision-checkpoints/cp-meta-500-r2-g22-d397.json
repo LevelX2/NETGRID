@@ -741,7 +741,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "variable_ice_paid_end_the_1",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 82,
                     "sourceTitle": "Gatekeeper"
@@ -772,7 +772,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 81,
                     "sourceTitle": "Galatea"
@@ -805,7 +805,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "net_damage_subroutine",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -816,7 +816,7 @@
                     }
                   },
                   {
-                    "id": "end_the_run_subroutine",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 78,
                     "sourceTitle": "Digiconda"
@@ -854,7 +854,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 75,
                     "sourceTitle": "Credit Blocks"
@@ -885,7 +885,7 @@
                 "encounterStrength": 5,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 71,
                     "sourceTitle": "Caryatid"
@@ -1289,7 +1289,7 @@
                 "encounterStrength": 1,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_net_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 1,
                     "damageType": "net",
@@ -1300,7 +1300,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 79,
                     "sourceTitle": "Dog Pile"
@@ -1331,7 +1331,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 102,
                     "sourceTitle": "Walking Wall"
@@ -1400,7 +1400,7 @@
             "encounterStrength": 1,
             "subroutines": [
               {
-                "id": "subroutine_relative_net_damage",
+                "id": "0",
                 "type": "do_damage",
                 "amount": 1,
                 "damageType": "net",
@@ -1411,7 +1411,7 @@
                 }
               },
               {
-                "id": "subroutine_end_run",
+                "id": "1",
                 "type": "end_the_run",
                 "sourceDefinitionId": 79,
                 "sourceTitle": "Dog Pile"
@@ -12107,7 +12107,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.chq.0.subroutine_relative_net_damage.328",
+          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.chq.0.0.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine 1 brechen",
@@ -12149,7 +12149,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.chq.1.subroutine_end_run.328",
+          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.chq.1.1.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine 2 brechen",
@@ -12191,7 +12191,7 @@
           }
         },
         {
-          "actionId": "runner.continue_run.subroutine_relative_net_damage,subroutine_end_run",
+          "actionId": "runner.continue_run.0,1",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -12204,7 +12204,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 2,
-            "encounterSubroutineIds": "subroutine_relative_net_damage,subroutine_end_run",
+            "encounterSubroutineIds": "0,1",
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
@@ -14464,7 +14464,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.chq.0.subroutine_relative_net_damage.328",
+        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.chq.0.0.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine 1 brechen",
@@ -14506,7 +14506,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.chq.1.subroutine_end_run.328",
+        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.chq.1.1.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine 2 brechen",
@@ -14548,7 +14548,7 @@
         }
       },
       {
-        "actionId": "runner.continue_run.subroutine_relative_net_damage,subroutine_end_run",
+        "actionId": "runner.continue_run.0,1",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -14561,7 +14561,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 2,
-          "encounterSubroutineIds": "subroutine_relative_net_damage,subroutine_end_run",
+          "encounterSubroutineIds": "0,1",
           "encounterFullBreakDamage": 0,
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
@@ -14612,7 +14612,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 396,
-      "sideSafePlanningFingerprint": "fnv1a:d8fe0fc3"
+      "sideSafePlanningFingerprint": "fnv1a:39768433"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_inside_forgery_loop_1.0.0",
@@ -20378,7 +20378,7 @@
           "sideSafePlanningFingerprint": "fnv1a:6bd36968"
         },
         "currentBinding": {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.chq.0.subroutine_relative_net_damage.328",
+          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.chq.0.0.328",
           "stateVersion": 396,
           "semanticActionSetFingerprint": "fnv1a:2bcf6165",
           "invocationKey": "fnv1a:02a2b606"
@@ -20390,7 +20390,7 @@
         "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
         "executorInstanceId": "plan:runner.convert_run_window:run%3A387",
         "sourceStepId": "plan:runner.convert_run_window:run%3A387:convert",
-        "originalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.chq.0.subroutine_relative_net_damage.328",
+        "originalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.chq.0.0.328",
         "selectedAtStateVersion": 396
       },
       "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Ar1",

@@ -793,7 +793,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_random_brain_damage",
+                    "id": "0",
                     "type": "random_damage",
                     "amount": 3,
                     "damageType": "core",
@@ -882,7 +882,7 @@
                 "encounterStrength": 2,
                 "subroutines": [
                   {
-                    "id": "subroutine_paid_deflect_to_data_fort",
+                    "id": "0",
                     "type": "deflect_run",
                     "deflectorTarget": "any_data_fort",
                     "deflectorCost": 2,
@@ -1233,7 +1233,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_net_damage_2",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 2,
                     "damageType": "net",
@@ -1244,7 +1244,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_trace_baskerville_counter",
+                    "id": "1",
                     "type": "initiate_trace",
                     "traceLimit": 5,
                     "traceSuccessEffect": {
@@ -1256,7 +1256,7 @@
                     "sourceTitle": "Baskerville"
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "2",
                     "type": "end_the_run",
                     "sourceDefinitionId": 9,
                     "sourceTitle": "Baskerville"
@@ -1315,7 +1315,7 @@
                 "encounterStrength": 4,
                 "subroutines": [
                   {
-                    "id": "subroutine_net_damage_4",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 4,
                     "damageType": "net",
@@ -1326,7 +1326,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_prohibit_break_next_ice",
+                    "id": "1",
                     "type": "set_next_encounter_no_break_subroutines",
                     "sourceDefinitionId": 10,
                     "sourceTitle": "Bolter Swarm",
@@ -18061,7 +18061,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 533,
-      "sideSafePlanningFingerprint": "fnv1a:437d58c6"
+      "sideSafePlanningFingerprint": "fnv1a:b0e77665"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_blink_pressure_rig_1.0.0",

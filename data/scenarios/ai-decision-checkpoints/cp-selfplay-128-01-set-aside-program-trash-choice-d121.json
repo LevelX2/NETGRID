@@ -417,7 +417,7 @@
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run_unless_runner_pays_one",
+                    "id": "0",
                     "type": "end_the_run_unless_runner_pays",
                     "amount": 1,
                     "sourceDefinitionId": 96,
@@ -904,7 +904,7 @@
             "effectiveStrength": 6,
             "subroutines": [
               {
-                "id": "subroutine_trash_program_a",
+                "id": "0",
                 "type": "trash_installed_program",
                 "sourceDefinitionId": 73,
                 "sourceTitle": "Colonel Failure",
@@ -913,7 +913,7 @@
                 }
               },
               {
-                "id": "subroutine_trash_program_b",
+                "id": "1",
                 "type": "trash_installed_program",
                 "sourceDefinitionId": 73,
                 "sourceTitle": "Colonel Failure",
@@ -922,7 +922,7 @@
                 }
               },
               {
-                "id": "subroutine_trash_program_c",
+                "id": "2",
                 "type": "trash_installed_program",
                 "sourceDefinitionId": 73,
                 "sourceTitle": "Colonel Failure",
@@ -931,13 +931,13 @@
                 }
               },
               {
-                "id": "subroutine_end_run_a",
+                "id": "3",
                 "type": "end_the_run",
                 "sourceDefinitionId": 73,
                 "sourceTitle": "Colonel Failure"
               },
               {
-                "id": "subroutine_end_run_b",
+                "id": "4",
                 "type": "end_the_run",
                 "sourceDefinitionId": 73,
                 "sourceTitle": "Colonel Failure"
@@ -951,7 +951,7 @@
       "pendingChoice": {
         "choiceId": "trash_installed_program_120",
         "side": "corp",
-        "source": "card_implementation.trash_installed_program:113:cgf:0:73:subroutine_trash_program_a:trash_installed_program:encounter",
+        "source": "card_implementation.trash_installed_program:113:cgf:0:73:0:trash_installed_program:encounter",
         "prompt": "Colonel Failure: installiertes Programm zum Trashing wählen.",
         "kind": "select_cards",
         "options": [
@@ -5920,7 +5920,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 120,
-      "sideSafePlanningFingerprint": "fnv1a:d74c0d2a"
+      "sideSafePlanningFingerprint": "fnv1a:fa85cb55"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_syds_ice_pfandhaus_2026_07_09_1.1.0",

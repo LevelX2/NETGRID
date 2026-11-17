@@ -369,7 +369,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trace_one_net_damage",
+                    "id": "0",
                     "type": "initiate_trace",
                     "traceLimit": 1,
                     "traceSuccessEffect": {
@@ -483,7 +483,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_end_run",
+                    "id": "0",
                     "type": "end_the_run",
                     "sourceDefinitionId": 75,
                     "sourceTitle": "Credit Blocks"
@@ -5783,7 +5783,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 95,
-      "sideSafePlanningFingerprint": "fnv1a:c36b0dc2"
+      "sideSafePlanningFingerprint": "fnv1a:7865cd75"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_corp_variable_ice_gauntlet_2026_05_25_1.1.0",

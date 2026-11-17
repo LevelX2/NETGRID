@@ -496,7 +496,7 @@
                 "encounterStrength": 3,
                 "subroutines": [
                   {
-                    "id": "subroutine_run_duration_ice_strength",
+                    "id": "0",
                     "type": "set_run_future_strength_bonus",
                     "amount": 1,
                     "runFutureStrengthCancelPaymentAmount": 2,
@@ -535,7 +535,7 @@
                 "encounterStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_relative_brain_damage",
+                    "id": "0",
                     "type": "do_damage",
                     "amount": 0,
                     "damageType": "core",
@@ -546,7 +546,7 @@
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
                     "sourceDefinitionId": 88,
                     "sourceTitle": "Mastermind"
@@ -8444,7 +8444,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 174,
-      "sideSafePlanningFingerprint": "fnv1a:d523dd0b"
+      "sideSafePlanningFingerprint": "fnv1a:96455e4f"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_last_call_at_rd_1.0.0",
