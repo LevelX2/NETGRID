@@ -1,4 +1,5 @@
 import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
+import { runnerFundingRouteCandidateIsMaterializable } from "../../plans/runner-funding-candidates";
 import {
   actionClickCost,
   nonNegativeActionCreditCost,
@@ -91,6 +92,27 @@ export function runnerCoverageGapIsTerminalRemoteThreat(
   return runnerTargetHasTerminalContestThreat(input, evaluation.targetServerId);
 }
 
+export function runnerCoverageTraceContext(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+) {
+  const maximumFundingStep = candidates.reduce(
+    (maximum, candidate) =>
+      runnerFundingRouteCandidateIsMaterializable(candidate)
+        ? Math.max(maximum, candidate.economyProjection!.netLiquidCreditGain!)
+        : maximum,
+    0,
+  );
+  // A price comparison may quote breaker payments beyond current liquidity.
+  // Trace abilities only spend credits possible before this turn's run.
+  const maxFundingSteps = Math.max(1, input.playerView.own.clicks);
+  return {
+    ...visibleRunnerPathTraceContext(input),
+    runnerTraceCreditLimit:
+      input.playerView.own.credits + maximumFundingStep * maxFundingSteps,
+  };
+}
+
 export function runnerUrgentRemoteCoverageConversionQuote(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -159,7 +181,7 @@ export function runnerUrgentRemoteCoverageConversionQuote(
     ),
     server.root,
     input.playerView.opponent.credits,
-    visibleRunnerPathTraceContext(input),
+    runnerCoverageTraceContext(input, candidates),
   );
   const projectedKnownPathCost = projectedPath.visibleBreakCost;
   if (

@@ -62,6 +62,8 @@ export type VisibleDeflectorContext = {
   prohibitBreakingIceInstanceIds?: readonly string[];
   /** Runner-private Engine quote for trace base-link and credit support. */
   runnerTraceSupportQuote?: VisibleRunnerTraceSupportQuote;
+  /** Same-turn liquidity bound for Trace inside a hypothetical path price. */
+  runnerTraceCreditLimit?: number;
   /** Active trace rules profile used by run-path trace projections. */
   traceRulesProfile?: TraceRulesProfile;
   /** Fail closed when the bound quote includes a visible Trace and lacks its rules profile. */

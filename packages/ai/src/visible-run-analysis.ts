@@ -1003,6 +1003,9 @@ function assessKnownRezzedIcePathInternal(
       breakerStrengths,
       additionalBreakCostPerSubroutine,
       ...(runnerTraceSupportQuote ? { runnerTraceSupportQuote } : {}),
+      ...(deflectorContext.runnerTraceCreditLimit !== undefined
+        ? { runnerTraceCreditLimit: deflectorContext.runnerTraceCreditLimit }
+        : {}),
       ...(deflectorContext.traceRulesProfile
         ? { traceRulesProfile: deflectorContext.traceRulesProfile }
         : {}),
@@ -1139,7 +1142,10 @@ function assessKnownRezzedIcePathInternal(
         : unbrokenEffectIsUnavoidableTraceRunLock(
             effect,
             sourceSubroutine,
-            creditBudget.traceEligibleCredits,
+            Math.min(
+              creditBudget.traceEligibleCredits,
+              deflectorContext.runnerTraceCreditLimit ?? Infinity,
+            ),
             {
               ...(deflectorContext.traceRulesProfile
                 ? { traceRulesProfile: deflectorContext.traceRulesProfile }

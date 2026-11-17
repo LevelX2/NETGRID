@@ -137,6 +137,7 @@ export function visibleIceRunHazardsForQuote(params: {
   breakerStrengths: Map<string, number>;
   additionalBreakCostPerSubroutine: number;
   runnerTraceSupportQuote?: VisibleRunnerTraceSupportQuote;
+  runnerTraceCreditLimit?: number;
   traceRulesProfile?: TraceRulesProfile;
   runTraceLinkBonus?: number;
   excludeStealthTraceCredits?: boolean;
@@ -164,7 +165,10 @@ export function visibleIceRunHazardsForQuote(params: {
         params.runnerTraceSupportQuote,
         consumedTraceSupportSourceIds,
       ),
-      remainingCreditBudget.traceEligibleCredits,
+      Math.min(
+        remainingCreditBudget.traceEligibleCredits,
+        params.runnerTraceCreditLimit ?? Infinity,
+      ),
       params.runTraceLinkBonus,
       {
         traceCreditPool: remainingTraceCreditPool,
@@ -200,7 +204,7 @@ export function visibleIceRunHazardsForQuote(params: {
           );
     const traceSuccessCancel = cheapestTraceSuccessCancel(
       traceSupport,
-      remainingCreditBudget.traceEligibleCredits,
+      traceSupport.availableCredits,
     );
     const traceAvoidanceCandidate =
       visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe?.creditCost;

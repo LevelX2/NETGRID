@@ -1,4 +1,4 @@
-import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
+import { runnerCoverageTraceContext } from "./coverage-support";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { actionClickCost, actionCreditCost } from "../../runtime/action-cost";
@@ -81,7 +81,7 @@ export function runnerSameTurnBreakerPreparation(
     return undefined;
   const rig = input.playerView.own.rig ?? [];
   const pathTraceContext = {
-    ...visibleRunnerPathTraceContext(input),
+    ...runnerCoverageTraceContext(input, candidates),
     excludeStealthTraceCredits: serverBlocksStealthBitPayments(server),
   };
   const currentPath = assessKnownRezzedIcePath(
