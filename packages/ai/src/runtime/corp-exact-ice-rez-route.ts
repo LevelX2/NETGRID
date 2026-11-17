@@ -1020,7 +1020,7 @@ function readExactCurrentRunResourceExchange(params: {
       consumed.cardId !== quote.runnerBreak.breakerCardId ||
       consumed.definitionId !== quote.runnerBreak.breakerDefinitionId ||
       !nonBlankString(consumed.cardId) ||
-      !nonBlankString(consumed.definitionId)
+      !isCardDefinitionId(consumed.definitionId)
     ) {
       return undefined;
     }
