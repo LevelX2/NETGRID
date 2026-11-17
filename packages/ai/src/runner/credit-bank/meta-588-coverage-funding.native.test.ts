@@ -91,7 +91,7 @@ it("funds the current Sentry answer with one sufficient bank and preserves P4, p
   const a = f.input.legalActions.find((a) => a.actionId === d.actionId)!;
   expect(a).toMatchObject({
     type: "activated_card_ability",
-    source: "runner_366_2",
+    source: "c29e",
     payload: { cardImplementationAbilityKey: "withdraw_credits" },
   });
   expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
@@ -189,7 +189,7 @@ it("funds the full native install with one payout and lets the next normal decis
     )!;
   expect(a).toMatchObject({
     type: "install_card",
-    source: "runner_214_2",
+    source: "c1bm",
   });
   expect(next).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
   expect(next.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
@@ -207,7 +207,7 @@ it("funds the full native install with one payout and lets the next normal decis
   expect(own.credits).toBe(6);
   expect(own.clicks).toBe(2);
   expect(
-    own.rig!.find((c) => c.instanceId === "runner_366_3")
+    own.rig!.find((c) => c.instanceId === "c29f")
       ?.counters?.bit,
   ).toBe(3);
 });

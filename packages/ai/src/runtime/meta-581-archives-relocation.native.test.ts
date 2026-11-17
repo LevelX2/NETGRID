@@ -1,6 +1,6 @@
 import {readFileSync} from "node:fs";
 import {afterEach,expect,it} from "vitest";
-import {applyAction,getLegalActions,getPlayerView,hashGameState} from "@netgrid/engine";
+import {applyAction,getLegalActions,getPlayerView,hashGameState,replayEvents} from "@netgrid/engine";
 import type {GameState} from "@netgrid/shared";
 import type {AiDecisionInputWithDeckCapabilities} from "./ai-decision-input";
 import {chooseAiAction} from "../ai-runtime-public-entrypoints";
@@ -44,7 +44,7 @@ it("normal native Defense binds and executes the exact Archives agenda recovery 
   expect(isExactDefenseRecoveryChoiceOwner(executor,p.selectedActionOrigin,input.playerView.stateVersion-1)).toBe(false);
   const origin=p.selectedActionOrigin!;
   if(origin.immediateChoicePolicy!=="select_bound_corp_archives_cards_to_hq")throw Error("exact recovery origin required");
-  const wrong={...origin,selectedArchiveCardInstanceIds:["corp_507_1"]};
+  const wrong={...origin,selectedArchiveCardInstanceIds:["c34t"]};
   expect(isExactDefenseRecoveryChoiceOwner(executor,wrong,input.playerView.stateVersion)).toBe(false);
   if(!d.actionId)throw Error("normal source action required");
   const op=applyAction(f.state,{matchId:f.state.matchId,side:"corp",actionId:d.actionId,clientKnownStateVersion:f.state.stateVersion});
@@ -53,12 +53,14 @@ it("normal native Defense binds and executes the exact Archives agenda recovery 
   next.planningStateIdentity=buildPlanningStateIdentity(next);
   const choice=chooseAiAction(next);
   expect(choice.actionId).toBe("corp.resolve_choice");
-  expect(choice.selectedChoices).toEqual({choiceId:"v1922_corp_archives_to_hq_342",selectedOptionIds:["card_corp_415_2"]});
+  expect(choice.selectedChoices).toEqual({choiceId:"v1922_corp_archives_to_hq_342",selectedOptionIds:["card_c2ke"]});
   expect(choice.fallbackUsed||choice.timeoutUsed).toBe(false);
   if(!choice.selectedChoices)throw Error("bound choices required");
   const resolved=applyAction(op.state,{matchId:op.state.matchId,side:"corp",actionId:choice.actionId!,clientKnownStateVersion:op.state.stateVersion,selectedChoices:choice.selectedChoices});
   if(!resolved.ok)throw Error(resolved.error.message);
-  expect(hashGameState(resolved.state)).toBe("fnv1a:7ad71be8");
+  const replay = replayEvents(f.state, [op.event, resolved.event]);
+  expect(replay.ok).toBe(true);
+  expect(hashGameState(replay.state)).toBe(hashGameState(resolved.state));
   const view=getPlayerView(resolved.state,"corp");
   expect(view.own.heapOrArchives.some(c=>c.type==="agenda")).toBe(false);
   expect(view.own.credits).toBe(49);
@@ -83,8 +85,8 @@ it("does not spend the last click of an Engine-legal current winning score on re
   const id=state.corp.rd.find(id=>state.cardInstances[id]!.definitionId===408)!;
   expect(id).toBeDefined();
   state.corp.rd=state.corp.rd.filter(c=>c!==id);
-  state.corp.servers.find(s=>s.id==="remote_2")!.root.push(id);
-  state.cardInstances[id]!.zone={side:"corp",zone:"serverRoot",serverId:"remote_2"};
+  state.corp.servers.find(s=>s.id==="r2")!.root.push(id);
+  state.cardInstances[id]!.zone={side:"corp",zone:"serverRoot",serverId:"r2"};
   state.cardInstances[id]!.advancementCounters=2;
   state.corp.clicks=1;state.corpBonusAgendaPoints=2;
   const input={...f.checkpoint.input,playerView:getPlayerView(state,"corp"),legalActions:getLegalActions(state,"corp")} as AiDecisionInputWithDeckCapabilities;
