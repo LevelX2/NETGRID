@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import {
   resetResidentPlanPortfolioMemory,
@@ -42,11 +44,10 @@ it.each([
   "does not open native G%s/D%s with an unpayable install or unbound memory loss",
   (game, decision) => {
     const { input, cp } = native(game, decision);
-    const source = input.legalActions.find(
-      (a) =>
-        a.payload?.cardId &&
-        (String(a.payload.cardId).includes("airport-locker") ||
-          String(a.payload.cardId).includes("sneak-preview")),
+    const definitions = visibleSourceDefinitionsByInstanceId(input.playerView);
+    const source = input.legalActions.find((a) =>
+      typeof a.payload?.cardId === "string" &&
+      (definitions[a.payload.cardId] === 186 || definitions[a.payload.cardId] === 322),
     )!;
     expect(source).toBeDefined();
     const result = chooseAiAction(input);
@@ -70,7 +71,6 @@ it.each([
 );
 
 it.each([
-  [21, 105],
   [31, 104],
   [32, 59],
 ])(
@@ -79,11 +79,7 @@ it.each([
     const { input, cp } = native(game, decision);
     expect(input.playerView.own.gripOrHq).toHaveLength(3);
     const result = chooseAiAction(input);
-    expect(result.actionId).toBe(
-      game === 21
-        ? "runner.play_event.runner_291_2.runner_291_2.onr_v1_079_bodyweight-synthetic-blood:abilities_on_play_draw_cards"
-        : "runner.draw_card",
-    );
+    expect(result.actionId).toBe("runner.draw_card");
     expect(result.fallbackUsed).toBe(false);
     expect(
       result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
@@ -102,6 +98,29 @@ it.each([
     ).toBe(cp.stateVersion);
   },
 );
+
+it("keeps the funded basic HQ reserve separate from the blocked paid event at G21/D105", () => {
+  const { input } = native(21, 105);
+  const offers = evaluateRunnerRunTargets({ input });
+  expect(offers.find((offer) => offer.actionId === "runner.start_run.hq")).toMatchObject({
+    prerunReserveQuote: { status: "satisfied", handBufferGap: 0 },
+  });
+  const definitions = visibleSourceDefinitionsByInstanceId(input.playerView);
+  const paid = input.legalActions.find((action) =>
+    action.type === "play_event" && definitions[action.source] === 47 && action.payload?.serverId === "hq",
+  );
+  expect(paid).toBeDefined();
+  expect(offers.find((offer) => offer.actionId === paid?.actionId)).toMatchObject({
+    recommendation: "gain_credits_first",
+    prerunReserveQuote: { status: "blocked", handBufferGap: 1 },
+  });
+  const result = chooseAiAction(input);
+  const action = input.legalActions.find((a) => a.actionId === result.actionId)!;
+  expect(action).toMatchObject({ type: "install_card", expiresAtStateVersion: input.playerView.stateVersion });
+  expect(visibleSourceDefinitionsByInstanceId(input.playerView)[action.source]).toBe(388);
+  expect(result.fallbackUsed).toBe(false);
+  expect(result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
+});
 
 it.each([
   [2, 64],

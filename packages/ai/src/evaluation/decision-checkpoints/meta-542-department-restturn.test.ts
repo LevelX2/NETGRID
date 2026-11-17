@@ -6,6 +6,7 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
 import type { EconomyState } from "../../corp/economy/economy-types";
+import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
@@ -159,11 +160,11 @@ describe("SP-611 native Department rest-turn comparison", () => {
         canCarryAcrossTurn: false,
       },
     });
-    const score = portfolio.instances.find(
-      (p) =>
-        p.moduleId === "corp.score_agenda" &&
-        p.dedupeKey.includes("security-net-optimization_2:remote_1"),
-    )!;
+    const score = portfolio.instances.find((p) => {
+      if (p.moduleId !== "corp.score_agenda") return false;
+      const { signal } = p.moduleState as { signal: CorpScoreProjectSignal };
+      return signal.agendaDefinitionId === 427 && signal.serverId === "r1";
+    })!;
     expect(score.moduleState).toMatchObject({
       signal: {
         feasible: false,
@@ -225,13 +226,14 @@ describe("SP-611 native Department rest-turn comparison", () => {
       observed.push(result);
       return result;
     });
-    const { selected } = replay(2, 95);
+    const { f, selected } = replay(2, 95);
     expect(selected.payload?.hostedCreditTakeAmount).toBe(3);
-    expect(
-      observed
-        .flatMap((x) => x.actionIds)
-        .some((x) => x.includes("crystal-wall") && x.includes(".rd.")),
-    ).toBe(true);
+    const definitions = visibleSourceDefinitionsByInstanceId(f.input.playerView);
+    const installation = f.input.legalActions.find((action) =>
+      action.type === "install_card" && definitions[action.source] === 444 && action.payload?.serverId === "rd",
+    );
+    expect(installation).toBeDefined();
+    expect(observed.flatMap((window) => window.actionIds)).toContain(installation?.actionId);
   });
   it.each([
     [4, 273],
