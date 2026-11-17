@@ -1,16 +1,39 @@
 import { runnerCandidateSourceDefinitionId } from "./runner-action-source-facts";
-import { type AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 export function runnerCandidateExecutesProgramSearch(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  if (
+    !actionMatchesCurrentDecision(input, action) ||
+    input.side !== "runner" ||
+    candidate.actionType !== action.type
+  ) {
+    return false;
+  }
   return (
     (candidate.actionType === "play_event" ||
       candidate.actionType === "activated_card_ability" ||
       candidate.actionType === "trigger_ability") &&
-    runnerCandidateSourceSupportsProgramSearch(input, candidate)
+    (candidate.semanticActionType === "search.program_to_grip" ||
+      candidate.actionTacticSignals.includes("setup.program_search") ||
+      candidate.functionalEffects?.some(isProgramSearchEffect) === true)
+  );
+}
+
+function isProgramSearchEffect(
+  effect: NonNullable<ActionSemanticCandidate["functionalEffects"]>[number],
+): boolean {
+  return (
+    effect.kind === "search" &&
+    effect.scope === "stack" &&
+    effect.target === "program"
   );
 }
 
@@ -27,12 +50,7 @@ export function runnerCandidateSourceSupportsProgramSearch(
     ? AI_HINTS_BY_CARD.get(sourceDefinitionId)
     : undefined;
   return (
-    candidate.functionalEffects?.some(
-      (effect) =>
-        effect.kind === "search" &&
-        effect.scope === "stack" &&
-        effect.target === "program",
-    ) === true ||
+    candidate.functionalEffects?.some(isProgramSearchEffect) === true ||
     effectTargets.has("setup.program_search") ||
     effectTargets.has("program_search") ||
     hint?.functionSignals?.includes("setup.program_search") === true ||

@@ -53,10 +53,6 @@ import { runnerHasInstalledPrograms } from "./runtime/runner-installed-program";
 import { runnerKnownIcePathReason as semanticRuntimeKnownIcePathReason } from "./runtime/runner-known-ice-path-score";
 import { runnerMultiRunEventScoreValue } from "./runtime/runner-multi-run-event-score";
 import {
-  corpVisibleRunnerHardwareTrashTarget,
-  corpVisibleRunnerRigTrashTarget,
-} from "./runtime/runner-rig-trash-target";
-import {
   rndFreshRepeatRunBoost,
   staleKnownRndRepeatRunPenalty,
 } from "./runtime/runner-rnd-repeat-run-score";
@@ -208,11 +204,9 @@ export const aiLiveRuntimeDependencies = {
   installedEconomyCreditAmount: corpInstalledEconomyCreditAmount,
   visibleCardStoredCredits: corpVisibleCardStoredCredits,
   visibleMeatDamagePayoff: corpVisibleMeatDamagePayoff,
-  runnerRigTrashTarget: corpVisibleRunnerRigTrashTarget,
   runnerResourceTrashEvidence: corpVisibleRunnerResourceTrashEvidence,
   payoffProfileForDefinition: classifyTagPunishPayoffFromOntology,
   runnerDamagePreventionEvidence: corpVisibleRunnerDamagePreventionEvidence,
-  runnerHardwareTrashTarget: corpVisibleRunnerHardwareTrashTarget,
   runnerSurvivalCounterContextForInput,
   applyTagPunishOntologyDiagnostics,
   applyCorpVisibleTagPunishTakenWindowDiagnostics,

@@ -28,9 +28,12 @@ export function assessFundingOnlyIceStaging(params: {
   | { admissible: false; reasonCode: string } {
   const route = params.signal.installRoute;
   if (
+    params.input.side !== "corp" ||
     params.signal.phase !== "install_ice" ||
     route?.disposition !== "funding_only" ||
-    route.projection.knowledge !== "known"
+    route.projection.knowledge !== "known" ||
+    route.projection.funded ||
+    route.projection.targetServerId !== params.signal.serverId
   ) {
     return { admissible: false, reasonCode: "not_funding_only_defense" };
   }
@@ -65,6 +68,10 @@ export function assessFundingOnlyIceStaging(params: {
     !Number.isSafeInteger(gap) ||
     gap <= 0 ||
     gap > 3 ||
+    !Number.isSafeInteger(projection.installCredits) ||
+    projection.installCredits < 0 ||
+    !Number.isSafeInteger(projection.installClicks) ||
+    projection.installClicks < 0 ||
     projection.installClicks > params.input.playerView.own.clicks ||
     projection.installCredits > params.input.playerView.own.credits
   ) {

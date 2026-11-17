@@ -5,6 +5,7 @@ import type {
   VisibleCorpIcePostRezRunQuote,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 
@@ -102,18 +103,16 @@ export function corpIceRezSupportEmptyTargetDispositionEvidence(
     (a) => a.actionId === candidate.actionId,
   );
   if (
-    action?.type !== "play_operation" ||
+    !actionMatchesCurrentDecision(input, action) ||
+    action.type !== "play_operation" ||
     action.side !== "corp" ||
     action.source !== candidate.sourceCardInstanceId ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
-    action.timingPoint !== input.playerView.timingPoint ||
     typeof action.payload?.targetCardId !== "string"
   )
     return undefined;
+  const targetCardId = action.payload.targetCardId;
   for (const server of input.playerView.servers) {
-    const ice = server.ice.find(
-      (i) => i.instanceId === action.payload!.targetCardId,
-    );
+    const ice = server.ice.find((i) => i.instanceId === targetCardId);
     if (
       ice?.known &&
       ice.type === "ice" &&
@@ -183,8 +182,7 @@ function boundOperationFreeRezQuote(
     source.type !== "operation" ||
     action.side !== "corp" ||
     action.type !== "play_operation" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
-    action.timingPoint !== input.playerView.timingPoint ||
+    !actionMatchesCurrentDecision(input, action) ||
     quote.operationActionId !== action.actionId ||
     quote.sourceCardId !== action.source ||
     quote.sourceDefinitionId !== source?.definitionId ||

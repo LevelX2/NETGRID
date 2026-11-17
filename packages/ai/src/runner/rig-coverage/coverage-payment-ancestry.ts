@@ -26,18 +26,28 @@ export function preserveCoveragePaymentAncestry(
         "Preserve the original coverage payment ancestry only while every exact parent and support need remains resident and intact.",
     });
   };
+  const beforeById = new Map(
+    previous.instances.map((instance) => [instance.instanceId, instance]),
+  );
+  const afterById = new Map(
+    next.instances.map((instance) => [instance.instanceId, instance]),
+  );
+  if (
+    input.side !== "runner" ||
+    previous.side !== "runner" ||
+    next.side !== "runner" ||
+    beforeById.size !== previous.instances.length ||
+    afterById.size !== next.instances.length
+  )
+    fail();
   const edges: Array<{ before: PlanInstance; after: PlanInstance }> = [];
   const visited = new Set<string>();
   let currentId = pending.executorInstanceId;
   while (true) {
     if (visited.has(currentId)) fail();
     visited.add(currentId);
-    const before = previous.instances.find(
-      (instance) => instance.instanceId === currentId,
-    );
-    const after = next.instances.find(
-      (instance) => instance.instanceId === currentId,
-    );
+    const before = beforeById.get(currentId);
+    const after = afterById.get(currentId);
     if (
       !before ||
       !after ||
@@ -55,12 +65,8 @@ export function preserveCoveragePaymentAncestry(
         fail();
       break;
     }
-    const oldParent = previous.instances.find(
-      (instance) => instance.instanceId === before.parentInstanceId,
-    );
-    const nextParent = next.instances.find(
-      (instance) => instance.instanceId === before.parentInstanceId,
-    );
+    const oldParent = beforeById.get(before.parentInstanceId);
+    const nextParent = afterById.get(before.parentInstanceId);
     if (
       !oldParent ||
       !nextParent ||

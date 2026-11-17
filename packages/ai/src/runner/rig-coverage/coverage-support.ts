@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import { runnerPartialProgramSearchIsPayable } from "../../runtime/runner-partial-program-search-facts";
 import { runnerCandidateExecutesProgramSearch } from "../../runtime/runner-program-search-facts";
@@ -156,6 +157,7 @@ export function runnerUrgentRemoteCoverageConversionQuote(
     ),
     server.root,
     input.playerView.opponent.credits,
+    visibleRunnerPathTraceContext(input),
   );
   const projectedKnownPathCost = projectedPath.visibleBreakCost;
   if (

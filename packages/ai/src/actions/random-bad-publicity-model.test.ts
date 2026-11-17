@@ -79,6 +79,25 @@ describe("projectRandomBadPublicityModel", () => {
     expect(model).toBeUndefined();
   });
 
+  it("treats removing bad publicity as a benefit for the Corp", () => {
+    const model = projectRandomBadPublicityModel(
+      candidate({ actorSide: "corp" }),
+      action({ badPublicityDelta: -1, badPublicityBefore: 3 }, "corp"),
+    );
+    expect(model?.badPublicity).toMatchObject({
+      after: 2,
+      actorRelevance: "payoff",
+    });
+  });
+
+  it("does not combine isolated words into a bad-publicity effect", () => {
+    const model = projectRandomBadPublicityModel(
+      candidate({ actionTacticSignals: ["bad_route", "publicity_campaign"] }),
+      action({}),
+    );
+    expect(model).toBeUndefined();
+  });
+
   it("classifies bad-publicity gain as a Corp risk", () => {
     const model = projectRandomBadPublicityModel(
       candidate({ actorSide: "corp" }),

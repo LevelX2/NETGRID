@@ -148,7 +148,6 @@ export function createRunnerSimulationDiagnosticsComposition(
       runnerMissingCoverageTypesForInput:
         dependencies.runnerMissingCoverageTypesForInput,
       definitionForSimulationAction: dependencies.definitionForSimulationAction,
-      runnerRunKnownPathCost: dependencies.runnerRunKnownPathCost,
       runnerSetupChosenFamilyForEntry:
         dependencies.runnerSetupChosenFamilyForEntry,
     });

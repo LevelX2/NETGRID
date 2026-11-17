@@ -35,6 +35,36 @@ export type CorpIceCardFacts = {
   evidence: string[];
 };
 
+export function corpCentralIceProfile(card: VisibleCard | undefined): {
+  hasAccessStop: boolean;
+  hasTaxOrDamage: boolean;
+  positionDependent: boolean;
+  modeChoice: boolean;
+  alternateWallMode: boolean;
+  definitionId?: string;
+} {
+  const profile = buildCorpIceCardFacts(card);
+  const hint = profile.iceDefinitionId
+    ? AI_HINTS_BY_CARD.get(profile.iceDefinitionId)
+    : undefined;
+  return {
+    hasAccessStop: profile.immediateStop,
+    hasTaxOrDamage:
+      profile.tax ||
+      profile.damage ||
+      profile.programTrash ||
+      profile.tagTrace ||
+      profile.runLock,
+    positionDependent: profile.positionDependent,
+    modeChoice: profile.modeChoice,
+    alternateWallMode:
+      hint?.requiredMechanics?.includes("alternate_subtype_wall") === true,
+    ...(profile.iceDefinitionId
+      ? { definitionId: profile.iceDefinitionId }
+      : {}),
+  };
+}
+
 export function buildCorpIceCardFacts(
   card: VisibleCard | undefined,
 ): CorpIceCardFacts {

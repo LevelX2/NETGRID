@@ -1,3 +1,4 @@
+import { BAD_PUBLICITY_LOSS_THRESHOLD } from "@netgrid/engine";
 import type { LegalAction } from "@netgrid/shared";
 import type {
   ActionBadPublicityDecisionModel,
@@ -6,7 +7,6 @@ import type {
   ActionSemanticCandidate,
 } from "../action-semantic-candidate-types";
 
-const BAD_PUBLICITY_LOSS_THRESHOLD = 7;
 const RANDOM_PURPOSE_KEYS = [
   "randomDrawRecordPurpose",
   "randomPurpose",
@@ -37,7 +37,9 @@ function projectRandomOutcome(
   action: LegalAction,
 ): ActionRandomOutcomeModel | undefined {
   const purpose = firstStringPayload(action, RANDOM_PURPOSE_KEYS);
-  const counterAfter = finiteNumberPayload(action, "randomCounterAfter");
+  const counter = safeIntegerPayload(action, "randomCounterAfter");
+  const counterAfter =
+    counter !== undefined && counter >= 0 ? counter : undefined;
   const signalsRandomness =
     purpose !== undefined ||
     counterAfter !== undefined ||
@@ -69,15 +71,15 @@ function projectBadPublicity(
   candidate: ActionSemanticCandidate,
   action: LegalAction,
 ): ActionBadPublicityDecisionModel | undefined {
-  const delta = firstFiniteNumberPayload(action, [
+  const delta = firstSafeIntegerPayload(action, [
     "badPublicityAdded",
     "badPublicityDelta",
   ]);
-  const current = firstFiniteNumberPayload(action, [
+  const current = firstSafeIntegerPayload(action, [
     "badPublicityBefore",
     "currentBadPublicity",
   ]);
-  const explicitAfter = firstFiniteNumberPayload(action, [
+  const explicitAfter = firstSafeIntegerPayload(action, [
     "badPublicityAfter",
     "resultingBadPublicity",
   ]);
@@ -86,8 +88,7 @@ function projectBadPublicity(
     (current !== undefined && delta !== undefined
       ? current + delta
       : undefined);
-  const semantics = semanticTerms(candidate);
-  const semanticSupport = hasPhrase(semantics, "bad", "publicity");
+  const semanticSupport = hasBadPublicitySemantics(candidate);
   if (
     delta === undefined &&
     current === undefined &&
@@ -106,7 +107,7 @@ function projectBadPublicity(
   const actorRelevance =
     delta === undefined || delta === 0
       ? "support"
-      : action.side === "runner"
+      : delta > 0 === (action.side === "runner")
         ? "payoff"
         : "risk";
   const source =
@@ -135,7 +136,7 @@ function projectBadPublicity(
   };
 }
 
-function semanticTerms(candidate: ActionSemanticCandidate): Set<string> {
+function hasBadPublicitySemantics(candidate: ActionSemanticCandidate): boolean {
   const values = [
     ...candidate.cardContextSignals,
     ...candidate.actionTacticSignals,
@@ -143,18 +144,15 @@ function semanticTerms(candidate: ActionSemanticCandidate): Set<string> {
     ...candidate.risks.map((risk) => risk.kind),
     ...candidate.constraints.map((constraint) => constraint.kind),
   ];
-  return new Set(
-    values.flatMap((value) =>
-      value
-        .toLowerCase()
-        .split(/[^a-z0-9]+/)
-        .filter(Boolean),
-    ),
-  );
-}
-
-function hasPhrase(terms: ReadonlySet<string>, ...phrase: string[]): boolean {
-  return phrase.every((term) => terms.has(term));
+  return values.some((value) => {
+    const tokens = value
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter(Boolean);
+    return tokens.some(
+      (token, index) => token === "bad" && tokens[index + 1] === "publicity",
+    );
+  });
 }
 
 function firstStringPayload(
@@ -168,23 +166,23 @@ function firstStringPayload(
   return undefined;
 }
 
-function firstFiniteNumberPayload(
+function firstSafeIntegerPayload(
   action: LegalAction,
   keys: readonly string[],
 ): number | undefined {
   for (const key of keys) {
-    const value = finiteNumberPayload(action, key);
+    const value = safeIntegerPayload(action, key);
     if (value !== undefined) return value;
   }
   return undefined;
 }
 
-function finiteNumberPayload(
+function safeIntegerPayload(
   action: LegalAction,
   key: string,
 ): number | undefined {
   const value = action.payload?.[key];
-  return typeof value === "number" && Number.isFinite(value)
+  return typeof value === "number" && Number.isSafeInteger(value)
     ? value
     : undefined;
 }

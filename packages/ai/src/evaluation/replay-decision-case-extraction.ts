@@ -389,12 +389,12 @@ function countBy<T>(
   values: readonly T[],
   keyFor: (value: T) => string,
 ): Record<string, number> {
-  const counts: Record<string, number> = {};
+  const counts = new Map<string, number>();
   for (const value of values) {
     const key = keyFor(value);
-    counts[key] = (counts[key] ?? 0) + 1;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   return Object.fromEntries(
-    Object.entries(counts).sort(([left], [right]) => left.localeCompare(right)),
+    [...counts].sort(([left], [right]) => left.localeCompare(right)),
   );
 }

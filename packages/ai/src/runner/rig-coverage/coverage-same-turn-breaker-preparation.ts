@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
@@ -78,6 +79,7 @@ export function runnerSameTurnBreakerPreparation(
     Number.MAX_SAFE_INTEGER,
     server.root,
     input.playerView.opponent.credits,
+    visibleRunnerPathTraceContext(input),
   );
   const currentCost = currentPath.visibleBreakCost;
   if (
@@ -127,6 +129,7 @@ export function runnerSameTurnBreakerPreparation(
         Number.MAX_SAFE_INTEGER,
         server.root,
         input.playerView.opponent.credits,
+        visibleRunnerPathTraceContext(input),
       );
       const cost = path.visibleBreakCost;
       if (

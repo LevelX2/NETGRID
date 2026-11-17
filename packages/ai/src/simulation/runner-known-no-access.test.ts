@@ -22,6 +22,19 @@ describe("runnerCoverageRepairDiagnostic", () => {
     });
   });
 
+  it("does not count an unrelated choice as a search", () => {
+    expect(
+      runnerCoverageRepairDiagnostic(
+        coverageInput(2),
+        baseAction("resolve_choice"),
+        coverageDependencies(4),
+      ),
+    ).toEqual({
+      runnerCoverageRepairIntentCandidates: true,
+      runnerCoverageRepairIntentNoFollowup: true,
+    });
+  });
+
   it("does not call rich basic credits a coverage repair", () => {
     expect(
       runnerCoverageRepairDiagnostic(
@@ -139,13 +152,23 @@ function pathDiagnosticForRoles(roles: string[]) {
     "remote_1",
     0,
     {
-      assessKnownRezzedIcePath: () =>
-        ({
+      assessKnownRezzedIcePath: (
+        _ice,
+        _rig,
+        _credits,
+        _root,
+        corpCredits,
+        context,
+      ) => {
+        expect(corpCredits).toBe(7);
+        expect(context?.traceRulesProfile).toBe("classic_blind_corp_ties");
+        return {
           assessedKnownIceCount: 1,
           blocked: true,
           canReachAccess: false,
           visibleBreakCost: 5,
-        }) as never,
+        } as never;
+      },
       remoteServerHasScoreThreat: () => false,
       rolesForAction: () => roles,
       rolesForCardId: () => [],
@@ -168,6 +191,8 @@ function pathInput(): AiDecisionInput {
         credits: 0,
         rig: [],
       },
+      opponent: { credits: 7 },
+      traceRulesProfile: "classic_blind_corp_ties",
       servers: [
         {
           id: "remote_1",

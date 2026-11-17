@@ -4,6 +4,7 @@
  * This facade intentionally contains no gameplay or runtime implementation.
  * Runtime internals live below game/ and engine-runtime-internal.
  */
+export { BAD_PUBLICITY_LOSS_THRESHOLD } from "./game/win-conditions";
 export { quoteCorpRestrictedCreditRoute } from "./game/view/corp-restricted-credit-route-quote";
 export { projectVisibleIceAfterPassiveRunnerInstall } from "./ability-engine/ice-strength-modifiers";
 export { quoteAgendaDefinitionSelfStealCreditCost } from "./ability-engine/steal-cost-modifiers";

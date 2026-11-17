@@ -45,7 +45,6 @@ export type RunnerAiDiagnosticsCompositionDependencies =
       | "runnerVisibleMissingBreakerCoverage"
       | "runnerHasKnownBlockedPathByCoverage"
       | "runnerMissingCoverageTypesForInput"
-      | "runnerRunKnownPathCost"
     >;
 
 export function createRunnerAiDiagnosticsComposition(
@@ -100,7 +99,6 @@ export function createRunnerAiDiagnosticsComposition(
       knownPath.runnerHasKnownBlockedPathByCoverage,
     runnerMissingCoverageTypesForInput:
       knownPath.runnerMissingCoverageTypesForInput,
-    runnerRunKnownPathCost: knownPath.runnerRunKnownPathCost,
   });
 
   return {

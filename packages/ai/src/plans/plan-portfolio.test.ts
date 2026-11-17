@@ -608,7 +608,7 @@ describe("plan portfolio", () => {
       input: nextInput,
       tacticalPlans: [scorePlan],
       previous: first,
-      candidates: [],
+      candidates: [economyCandidate("bbs-credit")],
     });
 
     expect(first.foreground?.selectedFundingRoute?.status).toBe(

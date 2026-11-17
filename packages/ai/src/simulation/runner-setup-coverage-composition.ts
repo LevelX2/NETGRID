@@ -24,7 +24,7 @@ export type RunnerSetupCoverageCompositionDependencies = {
 export function createRunnerSetupCoverageComposition(
   dependencies: RunnerSetupCoverageCompositionDependencies,
 ) {
-  const { runnerRunKnownPathCost, runnerHasKnownUnaffordableLegalRun } =
+  const { runnerHasKnownUnaffordableLegalRun } =
     createRunnerKnownPathCostContext({
       assessKnownRezzedIcePath: dependencies.assessKnownRezzedIcePath,
     });
@@ -47,7 +47,6 @@ export function createRunnerSetupCoverageComposition(
   });
 
   return {
-    runnerRunKnownPathCost,
     runnerHasKnownUnaffordableLegalRun,
     runnerVisibleMissingBreakerCoverage,
     runnerMissingCoverageTypesForInput,

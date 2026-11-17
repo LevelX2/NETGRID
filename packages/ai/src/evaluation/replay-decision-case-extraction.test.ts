@@ -139,6 +139,19 @@ describe("ReplayDecisionCaseExtraction", () => {
     expect(JSON.stringify(report)).not.toContain("sessionToken leak");
   });
 
+  it("counts source labels that match built-in object keys", () => {
+    const report = buildReplayDecisionCaseExtractionReport([
+      traceRow({ status: "constructor" }),
+      traceRow({ status: "constructor", traceId: "trace-2" }),
+      traceRow({ status: "__proto__", traceId: "trace-3" }),
+    ]);
+
+    expect(report.aggregate.byStatus).toEqual({
+      ["__proto__"]: 1,
+      constructor: 2,
+    });
+  });
+
   it("keeps extraction deterministic for the same trace anchor", () => {
     const first = extractReplayDecisionCaseFromTrace(traceRow());
     const second = extractReplayDecisionCaseFromTrace(traceRow());

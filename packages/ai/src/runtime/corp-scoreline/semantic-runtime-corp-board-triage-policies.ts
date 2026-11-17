@@ -14,7 +14,7 @@ import {
 } from "../runner-visible-breaker-coverage";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
 import { semanticRuntimeCorpEffectiveDefenseContext } from "../semantic-runtime-corp-effective-defense";
-import { semanticRuntimeCorpCentralIceProfile } from "../semantic-runtime-corp-remote-score";
+import { corpCentralIceProfile } from "../corp-ice-placement/corp-ice-placement";
 import {
   corpIcePlacementActionCreditCostFact,
   corpIcePlacementPostInstallRezCostFact,
@@ -1930,7 +1930,7 @@ export function centralIceIsEffectiveAccessStop(
   ice: VisibleCard,
 ): boolean {
   if (ice.known === false) return true;
-  const profile = semanticRuntimeCorpCentralIceProfile(ice);
+  const profile = corpCentralIceProfile(ice);
   if (!profile.hasAccessStop || profile.positionDependent) return false;
   if (ice.rezzed === true && runnerHasVisibleCoverageForIce(input, ice)) {
     return false;
@@ -2210,7 +2210,7 @@ function visibleIceForExactAccessAssessment(
 
 export function installedIceHasPunishTaxOrDamagePotential(
   source: VisibleCard,
-  profile: ReturnType<typeof semanticRuntimeCorpCentralIceProfile>,
+  profile: ReturnType<typeof corpCentralIceProfile>,
 ): boolean {
   if (profile.hasTaxOrDamage) return true;
   const tokens = corpBoardTriageRulesTextTokens(

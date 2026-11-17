@@ -62,8 +62,20 @@ const BACKGROUND_CONTRIBUTION_CAP = 600;
 const MULTI_PLAN_ACTION_BONUS = 80;
 
 export function buildPlanPortfolio(
-  params: BuildPlanPortfolioParams,
+  supplied: BuildPlanPortfolioParams,
 ): PlanPortfolioSnapshot {
+  const currentActionIds = new Set(
+    supplied.input.legalActions
+      .filter((action) => action.side === supplied.input.side)
+      .map((action) => action.actionId),
+  );
+  const params: BuildPlanPortfolioParams = {
+    ...supplied,
+    candidates:
+      supplied.candidates?.filter((candidate) =>
+        currentActionIds.has(candidate.actionId),
+      ) ?? [],
+  };
   const turnKey = params.turnKey ?? planPortfolioTurnKey(params.input);
   const previous = validPreviousPortfolio(params.input, params.previous);
   const currentEntries = params.tacticalPlans

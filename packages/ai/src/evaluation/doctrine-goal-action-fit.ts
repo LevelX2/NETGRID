@@ -80,11 +80,7 @@ export function buildDoctrineGoalActionFitReport(
             legalActionIds,
           }),
         )
-        .sort(
-          (left, right) =>
-            right.score - left.score ||
-            left.actionId.localeCompare(right.actionId),
-        );
+        .sort(compareGoalFits);
       const relevantFits = fits.filter(
         (fit) => fit.fitStatus === "fit" || fit.fitStatus === "partial",
       );
@@ -114,7 +110,7 @@ export function buildDoctrineGoalActionFitReport(
       const top = relevantFits[0] ?? fits[0];
       if (!top) continue;
       const existing = topFitByFamily[utility.family];
-      if (!existing || top.score > existing.score) {
+      if (!existing || compareGoalFits(top, existing) < 0) {
         topFitByFamily[utility.family] = {
           goalId: utility.goalId,
           actionId: top.actionId,
@@ -156,6 +152,25 @@ export function buildDoctrineGoalActionFitReport(
   };
   assertSemanticObjectSideSafe(report, "DoctrineGoalActionFitReport");
   return report;
+}
+
+const FIT_STATUS_RANK: Record<ActionGoalFit["fitStatus"], number> = {
+  fit: 2,
+  partial: 2,
+  blocked: 1,
+  irrelevant: 0,
+};
+
+function compareGoalFits(
+  left: Pick<ActionGoalFit, "fitStatus" | "score" | "actionId" | "goalId">,
+  right: Pick<ActionGoalFit, "fitStatus" | "score" | "actionId" | "goalId">,
+): number {
+  return (
+    FIT_STATUS_RANK[right.fitStatus] - FIT_STATUS_RANK[left.fitStatus] ||
+    right.score - left.score ||
+    left.goalId.localeCompare(right.goalId) ||
+    left.actionId.localeCompare(right.actionId)
+  );
 }
 
 function worklistCandidateForGoal(params: {

@@ -1,3 +1,4 @@
+import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 import {
   type AiDecisionInput,
   type GameState,
@@ -76,10 +77,6 @@ export type RunnerEconomySetupDiagnosticsDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => RunnerEconomySetupDefinition | undefined;
-  runnerRunKnownPathCost: (
-    input: AiDecisionInput,
-    targetServerId: string | undefined,
-  ) => number;
   runnerSetupChosenFamilyForEntry: (entry: {
     actionType: string;
     runnerEconomyTaken?: boolean;
@@ -158,7 +155,12 @@ export function createRunnerEconomySetupDiagnosticsForSimulationAction(
     ).draw;
     const runBelowKnownPathCost =
       runStarted &&
-      dependencies.runnerRunKnownPathCost(input, targetServerId) > creditsBefore;
+      evaluateRunnerRunTargets({ input }).some(
+        (target) =>
+          target.actionId === action.actionId &&
+          target.targetServerId === targetServerId &&
+          target.pathPassability === "blocked_unpayable",
+      );
     const installsBreaker =
       action.type === "install_card" &&
       rolesMatch(dependencies.rolesForAction(input, action), ["breaker_"]);

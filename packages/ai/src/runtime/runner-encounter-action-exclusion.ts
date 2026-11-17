@@ -3,7 +3,6 @@ import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import {
   currentEncounteredIceCard,
   currentEncounterNextOnlySubroutineHasNoTarget,
-  currentEncounterRequiresFullBreak,
 } from "./current-encounter";
 import { encounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
 import { isUnacceptableImmediateSafetyThreatSubroutine } from "./encounter-subroutine";

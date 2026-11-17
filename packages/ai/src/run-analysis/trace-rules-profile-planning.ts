@@ -75,6 +75,19 @@ export function visibleIcePathTraceContext(
   };
 }
 
+export function visibleRunnerPathTraceContext(
+  input: AiDecisionInput,
+): Pick<
+  VisibleDeflectorContext,
+  "traceRulesProfile" | "onMissingTraceRulesProfile" | "runnerTraceSupportQuote"
+> {
+  const support = input.playerView.own.runnerTraceSupportQuote;
+  return {
+    ...visibleIcePathTraceContext(input),
+    ...(support ? { runnerTraceSupportQuote: support } : {}),
+  };
+}
+
 export function planningTraceCorpBaseStrength(
   subroutine: VisibleEffectiveSubroutine,
   profile: TraceRulesProfile | undefined,
