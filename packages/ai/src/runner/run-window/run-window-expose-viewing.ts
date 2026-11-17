@@ -159,8 +159,8 @@ function runnerExposedIceReentryFacts(
     opponent: input.playerView.opponent,
     root: server.root,
     statuses: server.statuses,
-    ice: server.ice.map(({ instanceId, rezzed, advancementCounters }) => ({
-      instanceId,
+    // After the exact jack-out transition, the exposed slot becomes concealed again.
+    ice: server.ice.map(({ rezzed, advancementCounters }) => ({
       rezzed,
       advancementCounters,
     })),
@@ -297,8 +297,7 @@ export function runnerImmediateExposedIceSafetyExit(
   const repeatedRun = input.legalActions.find(
     (action) =>
       action.actionId === exit.runActionId &&
-      action.expiresAtStateVersion === stateVersion &&
-      action.side === "runner" &&
+      actionMatchesCurrentDecision(input, action) &&
       action.type === "start_run" &&
       action.source === "basic_action" &&
       action.payload?.serverId === server?.id,
