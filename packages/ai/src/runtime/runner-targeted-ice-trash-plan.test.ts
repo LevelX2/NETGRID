@@ -30,7 +30,7 @@ import {
   type RunnerTargetedIceTrashChoiceContinuation,
 } from "./runner-targeted-ice-trash-plan";
 import { runnerActionDispositions } from "./plan-first-live-runtime";
-import { bindSelectedRunnerTargetedIceTrashChoiceContinuation } from "../run-analysis/runner-run-preparation-choice-binding";
+import { bindSelectedRunnerTargetedPreparationChoiceContinuation } from "../run-analysis/runner-run-preparation-choice-binding";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 import { centralPressureModule } from "../runner/central-pressure/central-pressure-plan-module";
 
@@ -265,10 +265,10 @@ describe("Runner targeted ICE disruption plan", () => {
       portfolio,
       diagnostics: [],
     } as unknown as Parameters<
-      typeof bindSelectedRunnerTargetedIceTrashChoiceContinuation
+      typeof bindSelectedRunnerTargetedPreparationChoiceContinuation
     >[1];
 
-    bindSelectedRunnerTargetedIceTrashChoiceContinuation(input, result, [
+    bindSelectedRunnerTargetedPreparationChoiceContinuation(input, result, [
       candidate,
     ]);
     expect(candidate.actionId).toBe("runner.play.jettison-1");
@@ -360,9 +360,9 @@ describe("Runner targeted ICE disruption plan", () => {
       portfolio,
       diagnostics: [],
     } as unknown as Parameters<
-      typeof bindSelectedRunnerTargetedIceTrashChoiceContinuation
+      typeof bindSelectedRunnerTargetedPreparationChoiceContinuation
     >[1];
-    bindSelectedRunnerTargetedIceTrashChoiceContinuation(input, result, [
+    bindSelectedRunnerTargetedPreparationChoiceContinuation(input, result, [
       candidate,
     ]);
     rememberResidentPlanPortfolio(input, portfolio);
@@ -532,9 +532,9 @@ describe("Runner targeted ICE disruption plan", () => {
       portfolio,
       diagnostics: [],
     } as unknown as Parameters<
-      typeof bindSelectedRunnerTargetedIceTrashChoiceContinuation
+      typeof bindSelectedRunnerTargetedPreparationChoiceContinuation
     >[1];
-    bindSelectedRunnerTargetedIceTrashChoiceContinuation(input, result, [
+    bindSelectedRunnerTargetedPreparationChoiceContinuation(input, result, [
       candidate,
     ]);
     rememberResidentPlanPortfolio(input, portfolio);
@@ -570,7 +570,7 @@ describe("Runner targeted ICE disruption plan", () => {
       transitions: [],
     } as unknown as ResidentPlanPortfolio;
     expect(() =>
-      bindSelectedRunnerTargetedIceTrashChoiceContinuation(
+      bindSelectedRunnerTargetedPreparationChoiceContinuation(
         input,
         {
           lane: "plan",
@@ -589,7 +589,7 @@ describe("Runner targeted ICE disruption plan", () => {
           portfolio: genericPortfolio,
           diagnostics: [],
         } as unknown as Parameters<
-          typeof bindSelectedRunnerTargetedIceTrashChoiceContinuation
+          typeof bindSelectedRunnerTargetedPreparationChoiceContinuation
         >[1],
         [candidate],
       ),

@@ -3699,6 +3699,15 @@ function sanitizeResolvedGameEffect(
     ...(effect.sourceDefinitionId
       ? { sourceDefinitionId: effect.sourceDefinitionId }
       : {}),
+    // Start-of-turn income from the public Runner rig belongs to one copy.
+    ...(effect.kind === "gain_credits" &&
+    effect.side === "runner" &&
+    effect.visibility === "public" &&
+    effect.reason === "start_of_turn" &&
+    typeof effect.sourceCardInstanceId === "string" &&
+    effect.sourceCardInstanceId.length > 0
+      ? { sourceCardInstanceId: effect.sourceCardInstanceId }
+      : {}),
     ...(effect.sourceTitle ? { sourceTitle: effect.sourceTitle } : {}),
     ...(effect.cardDefinitionId
       ? { cardDefinitionId: effect.cardDefinitionId }

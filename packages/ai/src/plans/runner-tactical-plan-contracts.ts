@@ -1,4 +1,4 @@
-import { type RunnerCorePlanDomain } from "./runner-core-plan-contracts";
+import type { RunnerCorePlanDomain } from "./runner-core-plan-contracts";
 import type { RunnerAccessFacts } from "../access/runner-access-facts";
 import type {
   RunnerFortIceTrashObjective,
@@ -6,7 +6,7 @@ import type {
   RunnerRunTargetEvaluation,
 } from "../run-analysis/runner-run-target-types";
 import type { RunnerExposeInformationSignal } from "../runner/expose-information/expose-information-types";
-import { RunnerDevelopmentSignal } from "../runner/hand-development/development-types";
+import type { RunnerDevelopmentSignal } from "../runner/hand-development/development-types";
 import type { RunnerTerminalWinSignal } from "../runner/terminal-win/terminal-win-types";
 import type { RunnerTargetedBypassCommitment } from "../runner/run-window/runner-targeted-bypass-plan";
 import type { RunnerTargetedIceTrashCommitment } from "../runtime/runner-targeted-ice-trash-plan";

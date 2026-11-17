@@ -2,7 +2,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { projectAccessWindowChoice } from "../access/access-window-choice";
 import {
   remoteTrashActionTotalCost,
-  remoteTrashDedicatedCreditsForMetrics,
+  remoteTrashQuotedDedicatedCredits,
 } from "../runtime/remote-trash-cost";
 import {
   remoteTrashTargetTypeForVisibleCard,
@@ -120,7 +120,7 @@ export function buildRunnerRemoteTrashAccessContext(
     ((role !== "low_value" && role !== "unknown") || finitePoolEconomy);
   const dedicatedTrashCredits =
     trashAction !== undefined
-      ? remoteTrashDedicatedCreditsForMetrics(input, trashAction, accessed)
+      ? remoteTrashQuotedDedicatedCredits(trashAction, accessed)
       : 0;
   const generalCreditCost = Math.max(0, trashCost - dedicatedTrashCredits);
   const creditsAfterGeneralTrash =

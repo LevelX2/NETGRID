@@ -93,6 +93,7 @@ export type AiGameSimulatorDependencies = {
     action: LegalAction,
     targetServerId: string | undefined,
     stateAfterAction: GameState,
+    runStarted: boolean,
   ) => ActionSequenceEntryDiagnostics;
   runnerCentralPressureDiagnosticsForSimulationAction: (
     input: AiDecisionInput,
@@ -499,6 +500,7 @@ export function createAiGameSimulator(
         action,
         targetServerId,
         result.state,
+        runnerRunStarted === true,
       );
       const runnerCentralPressure =
         runnerCentralPressureDiagnosticsForSimulationAction(

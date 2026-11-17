@@ -44,6 +44,8 @@ export function readCorpCentralAgendaExposure(
   serverId: CorpCentralDefenseServerId,
   leavingHqCardId?: string,
 ): { expectedPoints: number; maximumPoints: number } | undefined {
+  if (input.side !== "corp" || input.playerView.side !== "corp")
+    return undefined;
   const quote = quotesForCurrentView(input)?.[serverId];
   const cards =
     serverId === "hq"
@@ -292,6 +294,8 @@ function centralInventory(
 export function knownCorpRdDefinitionCounts(
   input: AiDecisionInput,
 ): ReadonlyMap<CardDefinitionId, number> | undefined {
+  if (input.side !== "corp" || input.playerView.side !== "corp")
+    return undefined;
   const snapshot = (input as AiDecisionInputWithDeckCapabilities)
     .ownDeckSnapshot;
   if (!snapshot || snapshot.side !== "corp" || !Array.isArray(snapshot.cards))

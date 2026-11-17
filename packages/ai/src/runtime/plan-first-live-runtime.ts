@@ -193,10 +193,7 @@ import {
 } from "../run-analysis/runner-plan-run-funding";
 import { runnerRunLockReleaseRoutes } from "../run-analysis/runner-run-lock-release-routes";
 import { runnerSameTurnAccessPreparationSourceDefinitionId } from "../run-analysis/runner-run-preparation";
-import {
-  bindSelectedRunnerTargetedBypassChoiceContinuation,
-  bindSelectedRunnerTargetedIceTrashChoiceContinuation,
-} from "../run-analysis/runner-run-preparation-choice-binding";
+import { bindSelectedRunnerTargetedPreparationChoiceContinuation } from "../run-analysis/runner-run-preparation-choice-binding";
 import { runnerEffectsProvideTopTrashRecovery } from "../runner-canonical-hint-semantics";
 import { runnerRecoveryActionContract } from "../runner/hand-development/development-search-targets";
 import { runnerRecentFutureEncounterDamageSafetyAbort } from "../runner-damage-threat-assessment";
@@ -796,8 +793,7 @@ export function choosePlanFirstLiveAction(
     dependencies.runnerProgramInstallTrashAssessmentForAction,
   );
   bindSelectedRunnerEventInstallChoiceContinuation(input, result);
-  bindSelectedRunnerTargetedBypassChoiceContinuation(input, result, candidates);
-  bindSelectedRunnerTargetedIceTrashChoiceContinuation(
+  bindSelectedRunnerTargetedPreparationChoiceContinuation(
     input,
     result,
     candidates,

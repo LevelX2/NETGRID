@@ -1,6 +1,7 @@
 import { corpEconomyPriorityClass } from "../economy/economy-plan-module";
 import { corpGenericDefensePriorityClass } from "../../plans/corp-defense-funding-contract";
 import { corpScorePriorityClass } from "../score/corp-score-priority";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 
@@ -194,7 +195,8 @@ export function arbitrateCorpHandConversionBeforeDraw(
       .map((card) => card.instanceId),
   );
   const knownNonAgendaCount = input.playerView.own.gripOrHq.filter(
-    (card) => card.known === true && card.type !== "agenda",
+    (card) =>
+      card.known === true && card.type !== undefined && card.type !== "agenda",
   ).length;
   const consequenceFacts = {
     knownAgendaCount: knownAgendaInstanceIds.size,
@@ -240,12 +242,7 @@ export function arbitrateCorpHandConversionBeforeDraw(
         params.parentProvidesExactSameTurnCapacityRelease ?? false,
       consequenceFacts: {
         ...consequenceFacts,
-        safeDiscardCandidateCount: Math.max(
-          knownNonAgendaCleanupCandidates,
-          facts.cleanupProjection.discardCandidateInstanceIds.filter(
-            (instanceId) => !knownAgendaInstanceIds.has(instanceId),
-          ).length,
-        ),
+        safeDiscardCandidateCount: knownNonAgendaCleanupCandidates,
         terminalNeedBeforeMandatoryDraw:
           params.terminalNeedBeforeMandatoryDraw ?? false,
       },
@@ -374,7 +371,7 @@ function corpPunishDrawCompetingActions(
   return input.legalActions
     .filter(
       (action) =>
-        action.expiresAtStateVersion === input.playerView.stateVersion &&
+        actionMatchesCurrentDecision(input, action) &&
         (domain.scoreProjects.some(
           (signal) =>
             signal.feasible &&
@@ -464,7 +461,7 @@ function corpExactHandCapacityReleaseRoutes(
       const legalActionCurrent = input.legalActions.some(
         (action) =>
           action.actionId === delta.actionId &&
-          action.expiresAtStateVersion === input.playerView.stateVersion,
+          actionMatchesCurrentDecision(input, action),
       );
       if (
         !route ||

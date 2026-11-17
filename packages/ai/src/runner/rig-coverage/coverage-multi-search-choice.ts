@@ -15,6 +15,7 @@ import {
 } from "./coverage-types";
 import { extractAiFeatures } from "../../runtime/ai-features";
 import { selectableChoiceOptions } from "../../runtime/choice-option";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import { runnerPartialProgramSearchProfile } from "../../runtime/runner-partial-program-search-facts";
 import {
   selectedSearchChoiceOptionIds,
@@ -94,9 +95,7 @@ export function resolvePlanBoundRunnerCoverageMultiSearchChoice(
       b.sourceCardInstanceId === choice.sourceCardInstanceId &&
       b.sourceDefinitionId === choice.sourceCardDefinitionId,
   );
-  const actions = input.legalActions.filter((a) => a.type === "resolve_choice");
-  const action = actions.length === 1 ? actions[0] : undefined;
-  const requirement = action?.choiceRequirements?.[0];
+  const action = exactCurrentChoiceAction(input, choice);
   const options = selectableChoiceOptions(choice.options);
   const lastEvent = input.eventTail?.at(-1);
   const owned =
@@ -124,19 +123,10 @@ export function resolvePlanBoundRunnerCoverageMultiSearchChoice(
     lastEvent.publicPayload.actor === "runner" &&
     lastEvent.publicPayload.sourceDefinitionId ===
       choice.sourceCardDefinitionId &&
-    action?.side === "runner" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === choice.minSelections &&
-    requirement.maxSelections === choice.maxSelections &&
-    requirement.optionIds.length === options.length &&
+    action !== undefined &&
+    options.length >= choice.minSelections &&
     options.every(
-      (o) =>
-        requirement.optionIds.includes(o.id) &&
-        o.card?.known !== false &&
-        o.card?.definitionId,
+      (option) => option.card?.known === true && option.card.definitionId,
     );
   if (!exact || !action || !root) throw failure(input, executor.instanceId);
   return {
@@ -171,6 +161,7 @@ export function bindSelectedRunnerCoverageMultiSearchChoice(
   );
   if (
     !isMultiGripSearch(choice) ||
+    exactCurrentChoiceAction(input, choice)?.actionId !== result.actionId ||
     executor?.moduleId !== "runner.rig_and_coverage" ||
     !result.portfolio
   )
@@ -188,10 +179,11 @@ export function bindSelectedRunnerCoverageMultiSearchChoice(
   if (!binding || !state.gap) throw failure(input, executor.instanceId);
   const targetOptions = selectableChoiceOptions(choice.options).filter(
     (option) =>
-      (binding.targetCardInstanceId !== undefined
-        ? option.card?.instanceId === binding.targetCardInstanceId
-        : binding.targetDefinitionId !== undefined) &&
-      option.card?.definitionId === binding.targetDefinitionId,
+      option.card?.known === true &&
+      binding.targetDefinitionId !== undefined &&
+      option.card.definitionId === binding.targetDefinitionId &&
+      (binding.targetCardInstanceId === undefined ||
+        option.card.instanceId === binding.targetCardInstanceId),
   );
   if (targetOptions.length === 0) throw failure(input, executor.instanceId);
   const rolesForCardId = (id: string | undefined) =>
@@ -205,12 +197,6 @@ export function bindSelectedRunnerCoverageMultiSearchChoice(
     effectsForCardId: (id) =>
       id ? (AI_HINTS_BY_CARD.get(id)?.effects ?? []) : [],
     requiredCoverage: state.gap.requiredRole,
-    ...(binding.targetCardInstanceId
-      ? { preferredCardInstanceId: binding.targetCardInstanceId }
-      : {}),
-    ...(binding.targetDefinitionId
-      ? { preferredCardDefinitionId: binding.targetDefinitionId }
-      : {}),
     ...(state.gap.targetServerId
       ? { preferredServerId: state.gap.targetServerId }
       : {}),
@@ -219,13 +205,16 @@ export function bindSelectedRunnerCoverageMultiSearchChoice(
   const selectedOptionIds: string[] = [];
   const count = Math.min(choice.maxSelections, remaining.length);
   while (selectedOptionIds.length < count) {
+    const eligible = selectedOptionIds.length === 0 ? targetOptions : remaining;
     const ids = selectedSearchChoiceOptionIds(
       { ...choice, minSelections: 1, maxSelections: 1 },
-      remaining,
+      eligible,
       scoring,
     );
     const pick =
-      ids?.length === 1 ? remaining.find((o) => o.id === ids[0]) : undefined;
+      ids?.length === 1
+        ? eligible.find((option) => option.id === ids[0])
+        : undefined;
     if (
       !pick?.card?.definitionId ||
       (selectedOptionIds.length === 0 &&
@@ -288,24 +277,19 @@ export function selectedBoundRunnerCoverageMultiSearchChoiceOptionIds(
     throw failure(input, executor.instanceId);
   if (hasBoundPartialProgramSearch(input, state)) return undefined;
   const bound = state.multiSearchChoiceBinding;
-  const requirement = action.choiceRequirements?.[0];
+  const currentAction = exactCurrentChoiceAction(input, choice);
   const ids = selectableChoiceOptions(choice.options).map((o) => o.id);
   const exact =
-    portfolio?.stateVersion === input.playerView.stateVersion &&
+    portfolio?.side === "runner" &&
+    portfolio.stateVersion === input.playerView.stateVersion &&
     state.selectedSearchStateVersion === portfolio.stateVersion &&
     bound?.stateVersion === input.playerView.stateVersion &&
     choice.stateVersion === bound.stateVersion &&
     bound.actionId === action.actionId &&
     bound.choiceId === choice.choiceId &&
-    action.expiresAtStateVersion === bound.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === bound.choiceId &&
-    requirement.minSelections === choice.minSelections &&
-    requirement.maxSelections === choice.maxSelections &&
+    currentAction === action &&
     bound.allowedOptionIds.length === ids.length &&
     ids.every((id) => bound.allowedOptionIds.includes(id)) &&
-    requirement.optionIds.length === ids.length &&
-    ids.every((id) => requirement.optionIds.includes(id)) &&
     bound.selectedOptionIds.length >= choice.minSelections &&
     bound.selectedOptionIds.length <= choice.maxSelections &&
     new Set(bound.selectedOptionIds).size === bound.selectedOptionIds.length &&

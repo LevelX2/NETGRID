@@ -162,6 +162,43 @@ it("lets the Run parent release a native persistent lock after two actual payout
     release = releaseFor(input),
     before = JSON.stringify(input);
   expect(input.legalActions.some((a) => a.type === "start_run")).toBe(false);
+  const conference = input.playerView.own.rig?.find(
+    (card) => card.definitionId === CONFERENCE,
+  );
+  expect(conference).toBeDefined();
+  const income = input.eventTail.flatMap((event) =>
+    Array.isArray(event.publicPayload.resolvedEffects)
+      ? event.publicPayload.resolvedEffects.filter(
+          (effect) =>
+            effect.sourceDefinitionId === CONFERENCE &&
+            effect.kind === "gain_credits",
+        )
+      : [],
+  );
+  expect(income).toMatchObject([
+    { sourceCardInstanceId: conference!.instanceId, side: "runner", amount: 2 },
+    { sourceCardInstanceId: conference!.instanceId, side: "runner", amount: 2 },
+  ]);
+  expect(
+    runnerRecurringEconomySignals(
+      input,
+      [],
+      [],
+      {} as RunnerEconomyPosture,
+      [],
+      buildRunnerStrategicIntentProfile({}),
+      () => false,
+      [],
+    ),
+  ).toContainEqual(
+    expect.objectContaining({
+      commitmentId: conference!.instanceId,
+      investmentHorizon: expect.objectContaining({
+        realizedPayoutCount: 2,
+        realizedValue: 4,
+      }),
+    }),
+  );
   expect(runnerRunLockReleaseProjection(input, release)?.status).toBe("ready");
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(release.actionId);

@@ -103,7 +103,7 @@ export function projectKnownRemoteTrashCommitment(
 ): KnownRemoteTrashCommitmentProjection {
   const reserveQuote = quoteAccessReserve({
     input,
-    fallbackReserve: knownRemoteTrashCreditReserve(input),
+    remotePhaseReserve: () => knownRemoteTrashCreditReserve(input),
     ...(params.economyPosture ? { economyPosture: params.economyPosture } : {}),
   });
   const desiredCreditReserve = reserveQuote.desiredCreditReserve;
@@ -498,13 +498,7 @@ export function knownRemoteRootHasHighImpactRole(
 
 function knownRemoteTrashCreditReserve(input: AiDecisionInput): number {
   const phaseReserve = input.playerView.stateVersion <= 8 ? 4 : 5;
-  const emergencyReserve = input.playerView.own.tags > 0 ? 3 : 0;
-  return Math.max(
-    2,
-    phaseReserve,
-    knownRemoteContestReserve(input),
-    emergencyReserve,
-  );
+  return Math.max(phaseReserve, knownRemoteContestReserve(input));
 }
 
 function knownRemoteContestReserve(input: AiDecisionInput): number {

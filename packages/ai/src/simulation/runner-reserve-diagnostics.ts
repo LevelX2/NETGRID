@@ -63,6 +63,7 @@ export function createRunnerReserveDiagnosticsForSimulationAction(
     action: LegalAction,
     targetServerId: string | undefined,
     stateAfterAction: GameState,
+    runStarted: boolean,
   ): Partial<AiSimulationSummary["actionSequence"][number]> {
     if (input.side !== "runner" || action.side !== "runner") return {};
     const creditsBefore = input.playerView.own.credits;
@@ -75,12 +76,17 @@ export function createRunnerReserveDiagnosticsForSimulationAction(
     const economyGain = economyAction && creditDelta > 0 ? creditDelta : 0;
     const economySpend =
       economyAction && creditDelta < 0 ? Math.abs(creditDelta) : 0;
-    const runDiagnostics = dependencies.runnerKnownPathDiagnosticsForAction(
-      input,
-      action,
-      targetServerId,
-      reserveTarget,
-    );
+    // Nonbasic run starts use their exact action route in setup diagnostics.
+    // The basic-run quote cannot measure a modified event or ability run.
+    const runDiagnostics: RunnerActionDiagnostics =
+      runStarted && action.type !== "start_run"
+        ? {}
+        : dependencies.runnerKnownPathDiagnosticsForAction(
+            input,
+            action,
+            targetServerId,
+            reserveTarget,
+          );
     const remoteThreatTargeting =
       dependencies.runnerRemoteThreatTargetingDiagnosticsForAction(
         input,

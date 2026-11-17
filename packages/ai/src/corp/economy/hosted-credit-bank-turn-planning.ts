@@ -1,8 +1,10 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { CorpEconomyNeedSignal } from "./economy-types";
 import { currentCorpHostedBankCycleQuotes } from "./hosted-credit-bank-cycle";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
+  canonicalTurnPlanningSerialize,
   turnPlanningFingerprint,
   type CampaignMilestoneQuote,
   type CampaignValueClaim,
@@ -63,14 +65,15 @@ export function corpHostedBankTurnPlanningQuote(params: {
     return fail();
   const action = input.legalActions.find((a) => a.actionId === params.actionId);
   if (
-    !action ||
-    action.source !== source ||
-    action.expiresAtStateVersion !== params.stateIdentity.stateVersion
+    input.side !== "corp" ||
+    !actionMatchesCurrentDecision(input, action) ||
+    action.source !== source
   )
     return fail();
   if (
     cycle &&
-    (JSON.stringify(cycle) !== JSON.stringify(quote) ||
+    (canonicalTurnPlanningSerialize(cycle) !==
+      canonicalTurnPlanningSerialize(quote) ||
       quote.actionId !== action.actionId)
   )
     return fail();

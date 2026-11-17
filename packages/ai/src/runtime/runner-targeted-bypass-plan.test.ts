@@ -24,7 +24,7 @@ import {
   runnerTargetedBypassPlanCommitment,
   type RunnerTargetedBypassChoiceContinuation,
 } from "../runner/run-window/runner-targeted-bypass-plan";
-import { bindSelectedRunnerTargetedBypassChoiceContinuation } from "../run-analysis/runner-run-preparation-choice-binding";
+import { bindSelectedRunnerTargetedPreparationChoiceContinuation } from "../run-analysis/runner-run-preparation-choice-binding";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 
 afterEach(() => {
@@ -412,7 +412,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     });
     const candidate = socialEngineeringCandidate(1);
     expect(() =>
-      bindSelectedRunnerTargetedBypassChoiceContinuation(
+      bindSelectedRunnerTargetedPreparationChoiceContinuation(
         input,
         {
           lane: "plan",
@@ -446,7 +446,7 @@ describe("Runner targeted-bypass resident continuation", () => {
           },
           diagnostics: [],
         } as unknown as Parameters<
-          typeof bindSelectedRunnerTargetedBypassChoiceContinuation
+          typeof bindSelectedRunnerTargetedPreparationChoiceContinuation
         >[1],
         [candidate],
       ),

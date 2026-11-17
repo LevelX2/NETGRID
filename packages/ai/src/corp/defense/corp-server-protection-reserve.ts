@@ -1,7 +1,9 @@
 import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
-import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
+import {
+  visibleRunnerNextTurnPreparationCreditGain,
+  visibleRunnerPreparationIncomePerClick,
+} from "@netgrid/engine";
 import type { AiDecisionInput } from "@netgrid/shared";
-import { visibleRunnerPreparationIncomePerClick } from "@netgrid/engine";
 import type { CorpExactIceRezRouteProjection } from "../../runtime/corp-exact-ice-rez-route";
 import { assessBestFundedCorpScoreProtection } from "../../runtime/corp-funded-score-protection";
 import {

@@ -10,14 +10,14 @@ export type AccessReserveEconomyPosture = {
 
 export type AccessReserveQuote = {
   desiredCreditReserve: number;
-  source: "runner_economy_posture" | "fallback";
+  source: "runner_economy_posture" | "remote_phase_policy";
   evidence: string[];
 };
 
 export function quoteAccessReserve(params: {
   input: AiDecisionInput;
   economyPosture?: AccessReserveEconomyPosture;
-  fallbackReserve: number;
+  remotePhaseReserve: () => number;
 }): AccessReserveQuote {
   if (params.economyPosture) {
     const desiredCreditReserve = Math.max(
@@ -40,13 +40,16 @@ export function quoteAccessReserve(params: {
     };
   }
 
-  const fallbackReserve = Math.max(0, Math.floor(params.fallbackReserve));
+  const remotePhaseReserve = Math.max(
+    0,
+    Math.floor(params.remotePhaseReserve()),
+  );
   return {
-    desiredCreditReserve: fallbackReserve,
-    source: "fallback",
+    desiredCreditReserve: remotePhaseReserve,
+    source: "remote_phase_policy",
     evidence: [
-      "access_reserve_source:fallback",
-      `access_reserve_desired:${fallbackReserve}`,
+      "access_reserve_source:remote_phase_policy",
+      `access_reserve_desired:${remotePhaseReserve}`,
       `access_reserve_input_state_version:${params.input.playerView.stateVersion}`,
     ],
   };

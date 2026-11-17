@@ -107,9 +107,6 @@ function mutableSubroutineDefinition(
     ...(subroutine.traceLimit === undefined
       ? {}
       : { traceLimit: subroutine.traceLimit }),
-    ...(subroutine.traceLimit === undefined
-      ? {}
-      : { traceLimit: subroutine.traceLimit }),
     ...(subroutine.traceSuccessEffect === undefined
       ? {}
       : { traceSuccessEffect: structuredClone(subroutine.traceSuccessEffect) }),

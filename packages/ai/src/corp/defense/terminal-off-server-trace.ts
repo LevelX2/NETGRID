@@ -22,6 +22,7 @@ export function terminalOffServerTraceBudget(
 ): TerminalOffServerTraceBudget | undefined {
   const { opponent, runnerNextTurnCreditClicks } = view;
   if (
+    view.side !== "corp" ||
     view.traceRulesProfile !== "modern_open" ||
     view.phase !== "corp_action_phase" ||
     view.run !== undefined ||

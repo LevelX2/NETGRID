@@ -1,5 +1,6 @@
 import { quoteLastCentralCounterConversion } from "@netgrid/engine";
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { RunnerRunTargetEvaluation } from "../../runner-run-target-evaluation";
 
 /** One missing central counter, with a currently legal, zero-credit,
@@ -21,13 +22,14 @@ export function runnerLastCentralCounterConversion(
     evaluation.pathPassability !== "reachable" ||
     evaluation.pathCost !== 0 ||
     evaluation.prerunReserveQuote?.status === "blocked" ||
-    !action ||
+    input.side !== "runner" ||
+    !actionMatchesCurrentDecision(input, action) ||
     action.type !== "start_run" ||
     action.source !== "basic_action" ||
-    action.costs.some(
-      (c) =>
-        (c.credits ?? 0) > 0 || (c.clicks ?? 0) > input.playerView.own.clicks,
-    )
+    action.payload?.serverId !== server.id ||
+    action.costs.some((cost) => (cost.credits ?? 0) !== 0) ||
+    action.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) >
+      input.playerView.own.clicks
   )
     return undefined;
   for (const card of input.playerView.own.rig ?? []) {

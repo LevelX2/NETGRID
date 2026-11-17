@@ -1,4 +1,5 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { runnerCandidateIsCardAbility } from "../../runtime/runner-information-action-facts";
 import { runnerCandidateHasVisibleAdditionalAccessEffect } from "./runner-run-window-additional-access";
@@ -15,17 +16,15 @@ export function runnerFreeAgendaStealForCurrentAccess(
     run?.phase !== "access" ||
     card?.known !== true ||
     card.type !== "agenda" ||
-    !Number.isFinite(card.agendaPoints) ||
+    !Number.isSafeInteger(card.agendaPoints) ||
     Number(card.agendaPoints) <= 0
   )
     return undefined;
   return input.legalActions.find(
     (action) =>
       action.type === "steal_agenda" &&
-      action.side === "runner" &&
+      actionMatchesCurrentDecision(input, action) &&
       action.source === card.instanceId &&
-      action.timingPoint === input.playerView.timingPoint &&
-      action.expiresAtStateVersion === input.playerView.stateVersion &&
       action.costs.length === 0 &&
       action.targetRequirements.length === 0 &&
       !action.choiceRequirements?.length &&
@@ -50,11 +49,17 @@ function runWindowLegalAction(
   candidate: ActionSemanticCandidate,
   actionsById: ReadonlyMap<string, LegalAction> | undefined,
 ): LegalAction | undefined {
-  return actionsById
+  const action = actionsById
     ? actionsById.get(candidate.actionId)
     : input.legalActions.find(
         (action) => action.actionId === candidate.actionId,
       );
+  return input.side === "runner" &&
+    actionMatchesCurrentDecision(input, action) &&
+    candidate.actorSide === action.side &&
+    candidate.actionType === action.type
+    ? action
+    : undefined;
 }
 
 export function isRunnerRunWindowCandidate(

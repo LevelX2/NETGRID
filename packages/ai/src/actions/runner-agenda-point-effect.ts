@@ -1,5 +1,6 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "./current-legal-action";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 export function runnerImmediateAgendaPointGain(
@@ -7,7 +8,8 @@ export function runnerImmediateAgendaPointGain(
   input: AiDecisionInput,
 ): number | undefined {
   if (
-    candidate.actorSide !== "runner" ||
+    input.side !== "runner" ||
+    candidate.actorSide !== input.side ||
     candidate.sourceKind !== "card" ||
     candidate.actionType !== "play_event"
   ) {
@@ -19,24 +21,26 @@ export function runnerImmediateAgendaPointGain(
       entry.scope === "runner" &&
       entry.resource === "agenda_points" &&
       typeof entry.amount === "number" &&
+      Number.isSafeInteger(entry.amount) &&
       entry.amount > 0,
   );
   if (!effect) return undefined;
-  if (
-    !candidate.conditions.some(
-      (condition) => condition.kind === "requires_liberated_black_ops_agenda",
-    )
-  )
-    return effect.amount;
   const action = input.legalActions.find(
-      (entry) => entry.actionId === candidate.actionId,
-    ),
-    quote = action?.payload;
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  const currentSource =
+    actionMatchesCurrentDecision(input, action) &&
+    action.type === "play_event" &&
+    typeof candidate.sourceCardInstanceId === "string" &&
+    action.source === candidate.sourceCardInstanceId;
+  const conditional = candidate.conditions.some(
+    (condition) => condition.kind === "requires_liberated_black_ops_agenda",
+  );
+  if (currentSource && !conditional) return effect.amount;
+  const quote = action?.payload;
   if (
-    action?.side !== "runner" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
-    typeof candidate.sourceCardInstanceId !== "string" ||
-    typeof action.abilityRef?.sourceAbilityId !== "string" ||
+    !currentSource ||
+    typeof action?.abilityRef?.sourceAbilityId !== "string" ||
     quote?.runnerConditionalAgendaPointQuoteSchema !==
       "runner-conditional-agenda-point-v1" ||
     quote.runnerConditionalAgendaPointQuoteStateVersion !==
@@ -56,7 +60,7 @@ export function runnerImmediateAgendaPointGain(
       unresolvedActionIds: [candidate.actionId],
       owner: "action_semantics",
       removalCondition:
-        "Project a current source- and capability-bound Engine quote for the conditional Runner agenda-point effect.",
+        "Bind the Runner agenda-point effect to its current source action and, when conditional, the Engine's capability-bound point quote.",
     });
   }
   return quote.runnerConditionalAgendaPointQuoteAmount === 0
