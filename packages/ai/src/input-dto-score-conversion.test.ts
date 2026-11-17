@@ -775,7 +775,16 @@ describe("AI input DTO score-conversion contract", () => {
         publicPayload: {
           resolvedEffects: [
             {
-              effectId: "conference-credit",
+              effectId: 0,
+              kind: "draw_cards",
+              visibility: "private_to_side",
+              side: "corp",
+              amount: 1,
+              cardDefinitionId: syntheticCardDefinitionId("must-not-cross-dto"),
+              cardTitle: "Must not cross DTO",
+            },
+            {
+              effectId: 1,
               kind: "gain_credits",
               visibility: "public",
               side: "runner",
@@ -783,15 +792,6 @@ describe("AI input DTO score-conversion contract", () => {
               reason: "start_of_turn",
               sourceDefinitionId: 396,
               sourceTitle: "Top Runners' Conference",
-            },
-            {
-              effectId: "private-probe",
-              kind: "draw_cards",
-              visibility: "private_to_side",
-              side: "corp",
-              amount: 1,
-              cardDefinitionId: syntheticCardDefinitionId("must-not-cross-dto"),
-              cardTitle: "Must not cross DTO",
             },
           ],
         },
@@ -813,7 +813,7 @@ describe("AI input DTO score-conversion contract", () => {
       input.playerView.publicEvents[0]?.publicPayload.resolvedEffects,
     ).toEqual([
       expect.objectContaining({
-        effectId: "conference-credit",
+        effectId: 1,
         kind: "gain_credits",
         visibility: "public",
         sourceDefinitionId: 396,
@@ -823,6 +823,13 @@ describe("AI input DTO score-conversion contract", () => {
       input.playerView.publicEvents[0]?.publicPayload.resolvedEffects,
     );
     expect(JSON.stringify(input)).not.toContain("must-not-cross-dto");
+    const staleEvent = structuredClone(view.publicEvents[0]!);
+    Object.assign(staleEvent.publicPayload.resolvedEffects![1]!, {
+      effectId: "old-source-effect-id",
+    });
+    expect(() =>
+      buildAiDecisionInputDto({ ...input, eventTail: [staleEvent] }),
+    ).toThrow("invalid_public_resolved_game_effect_id");
   });
 
   it("preserves exact public score-conversion capabilities and drops unknown payload data", () => {

@@ -10,7 +10,7 @@ it("counts an actual event run and distinguishes a Runner draw from a Corp draw"
     actor: "runner",
     resolvedEffects: [
       {
-        effectId: "1.start",
+        effectId: 0,
         kind: "start_run",
         visibility: "public",
         side: "runner",

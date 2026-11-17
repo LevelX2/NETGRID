@@ -2,7 +2,7 @@ import { cardDefinitionIdValue, cardDefinitionIdsFromCsv } from "./card-definiti
 import type { CardDefinitionId } from "@netgrid/shared";
 import type {
   PublicGameEvent,
-  ResolvedGameEffect,
+  PublicResolvedGameEffect,
   Side,
 } from "@netgrid/shared";
 import {
@@ -1141,7 +1141,7 @@ export function chronicleEventSupplement(
   event: PublicGameEvent,
   item: ChronicleItem,
   context: Omit<ChronicleContext, "side">,
-  mergedEffects: ResolvedGameEffect[],
+  mergedEffects: PublicResolvedGameEffect[],
 ): ChronicleItem {
   const t = context.translate!;
   const p = event.publicPayload;
@@ -1431,7 +1431,7 @@ function publicTitles(value: unknown): string[] {
 
 export function chronicleEffectDetail(
   event: PublicGameEvent,
-  effect: ResolvedGameEffect,
+  effect: PublicResolvedGameEffect,
   base: ChronicleItem,
   side: Side,
   t: ChronicleTranslate,

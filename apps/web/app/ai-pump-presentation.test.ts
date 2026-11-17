@@ -42,7 +42,7 @@ describe("coalesceAiPumpPresentationEvents", () => {
         ...pumpEvent(23, 3, 1).publicPayload,
         resolvedEffects: [
           {
-            effectId: "public-effect",
+            effectId: 0,
             kind: "add_tags" as const,
             visibility: "public" as const,
           },

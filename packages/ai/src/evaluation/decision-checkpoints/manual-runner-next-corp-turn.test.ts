@@ -385,7 +385,7 @@ it("detects a second run from an observed event-started attempt, and counts it o
               resolvedEffects: [
                 {
                   kind: "start_run",
-                  effectId: "synthetic-event-run",
+                  effectId: 0,
                   side: "runner",
                   visibility: "public",
                 },

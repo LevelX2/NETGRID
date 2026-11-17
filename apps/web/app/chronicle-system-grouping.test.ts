@@ -14,7 +14,7 @@ describe("chronicle system and start-turn grouping", () => {
       actor: "corp",
       resolvedEffects: [
         {
-          effectId: "runner.start.public-system-kind",
+          effectId: 0,
           kind: "public_start_effect",
           visibility: "public",
           side: "runner",

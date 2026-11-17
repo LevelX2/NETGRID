@@ -13,7 +13,7 @@ import {
 
 const messages = { de, en, fr };
 const source = {
-  effectId: "subroutine_1",
+  effectId: 0,
   kind: "resolve_subroutine",
   visibility: "public",
   side: "runner",
@@ -138,7 +138,6 @@ describe("program-trash chronicle", () => {
       ].entries()) {
         const effect = {
           ...source,
-          effectId: `subroutine_${index + 1}`,
           subroutineIndex: index,
         };
         events.push(
@@ -170,7 +169,6 @@ describe("program-trash chronicle", () => {
           resolvedEffects: [
             {
               ...source,
-              effectId: "subroutine_4",
               subroutineIndex: 3,
               subroutineType: "end_the_run",
               endedRun: true,

@@ -69,6 +69,23 @@ describe("game event builder", () => {
         type,
         side: "runner",
       };
+      const internalEffectId = "private.debug.effect";
+      if (type !== "start_run") {
+        action.resolvedEffects = [
+          {
+            effectId: internalEffectId,
+            kind: "gain_credits",
+            visibility: "public",
+            amount: 1,
+          },
+          {
+            effectId: internalEffectId,
+            kind: "gain_credits",
+            visibility: "public",
+            amount: 2,
+          },
+        ];
+      }
       const event = buildEventWithHost(
         testBuildEventHost({ damageResolved: true, damageAmount: 0 }),
         previous.stateVersion,
@@ -90,7 +107,19 @@ describe("game event builder", () => {
       else {
         expect(event.publicPayload.resolvedEffects).toEqual([
           {
-            effectId: "441226.start",
+            effectId: 0,
+            kind: "gain_credits",
+            visibility: "public",
+            amount: 1,
+          },
+          {
+            effectId: 1,
+            kind: "gain_credits",
+            visibility: "public",
+            amount: 2,
+          },
+          {
+            effectId: 2,
             kind: "start_run",
             visibility: "public",
             side: "runner",
@@ -104,6 +133,11 @@ describe("game event builder", () => {
             toPublicEventForSide(event, side).publicPayload.resolvedEffects,
           ).toEqual(event.publicPayload.resolvedEffects);
         }
+        expect(JSON.stringify(event.publicPayload)).not.toContain(internalEffectId);
+        expect(action.resolvedEffects?.map((effect) => effect.effectId)).toEqual([
+          internalEffectId,
+          internalEffectId,
+        ]);
       }
       expect(event.privatePayload?.runner).toEqual({
         action: playerActionFor(previous, action),
@@ -170,12 +204,12 @@ describe("game event builder", () => {
         label: "Rent-I-Con: Subroutine brechen",
         payload: {
           runnerCostPenaltySupportWindowOpened: true,
-          runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.1",
+          runnerCostPenaltySupportWindowId: 1,
         },
       } satisfies LegalAction;
 
       next.runnerCostPenaltySupportWindow = {
-        windowId: "runner_cost_penalty_support.1",
+        windowId: 1,
         originalActionId:
           origin === "same_action"
             ? legalAction.actionId
@@ -200,7 +234,7 @@ describe("game event builder", () => {
         actionType: "break_subroutine",
         label: "Kostenfenster geöffnet.",
         runnerCostPenaltySupportWindowOpened: true,
-        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.1",
+        runnerCostPenaltySupportWindowId: 1,
         runnerCostPenaltySupportOriginalActionId:
           next.runnerCostPenaltySupportWindow.originalActionId,
       });

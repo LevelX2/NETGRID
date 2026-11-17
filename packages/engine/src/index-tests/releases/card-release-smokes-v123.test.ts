@@ -1810,9 +1810,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           .flatMap((event) => event.publicPayload.resolvedEffects ?? [])
           .find(
             (candidate) =>
-              (candidate as { effectId?: string }).effectId?.startsWith(
-                "runner.start.random_effect_table.",
-              ) === true,
+              candidate.sourceDefinitionId === 384 &&
+              candidate.reason === "start_of_turn" &&
+              candidate.randomEffectOutcome !== undefined,
           ) as Record<string, unknown> | undefined;
         if (effect && targetRolls.includes(Number(effect.dieRoll)))
           return { state, effect, questId, randomBefore };

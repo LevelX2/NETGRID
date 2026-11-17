@@ -608,9 +608,6 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(state.corp.archives).not.toContain(firmId);
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
       expect.objectContaining({
-        effectId: expect.stringContaining(
-          "corp.start.installed_economy_credit",
-        ),
         kind: "gain_credits",
         amount: 1,
         reason: "installed_economy_start_of_corp_turn",
@@ -620,9 +617,6 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     );
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
       expect.objectContaining({
-        effectId: expect.stringContaining(
-          "corp.start.installed_economy_credit.counter",
-        ),
         kind: "counter_change",
         counterType: "recurring_credit",
         removedCounterAmount: 1,
@@ -647,9 +641,6 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(cardCounterAmount(state, firmId, "recurring_credit")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
       expect.objectContaining({
-        effectId: expect.stringContaining(
-          "corp.start.installed_economy_credit.counter",
-        ),
         kind: "counter_change",
         counterType: "recurring_credit",
         removedCounterAmount: 1,

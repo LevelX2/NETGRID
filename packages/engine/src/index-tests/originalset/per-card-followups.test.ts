@@ -1645,7 +1645,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       runnerCreditsAfter: runnerState.runner.credits,
       resolvedEffects: [
         expect.objectContaining({
-          effectId: "309.effect.0.gain_credits",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "runner",
@@ -1727,7 +1727,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       corpCreditsAfter: corpState.corp.credits,
       resolvedEffects: [
         expect.objectContaining({
-          effectId: "502.effect.0.gain_credits",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "corp",
@@ -1814,8 +1814,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         runnerGripAfter: state.runner.grip.length,
         resolvedEffects: [
           expect.objectContaining({
-            effectId:
-              "291.effect.0.draw_cards",
+            effectId: 0,
             kind: "draw_cards",
             visibility: "public",
             side: "runner",
@@ -1854,7 +1853,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
             runnerCreditsAfter: 0,
             resolvedEffects: [
               expect.objectContaining({
-                effectId: "497.effect.0.lose_credits",
+                effectId: 0,
                 kind: "lose_credits",
                 visibility: "public",
                 side: "runner",
@@ -1877,7 +1876,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
             runnerTagsAfter: 3,
             resolvedEffects: [
               expect.objectContaining({
-                effectId: "499.effect.0.add_tags",
+                effectId: 0,
                 kind: "add_tags",
                 visibility: "public",
                 side: "runner",
@@ -2016,8 +2015,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
             corpCreditsAfter: creditsBefore + 1,
             resolvedEffects: [
               expect.objectContaining({
-                effectId:
-                  "505.effect.0.add_tags",
+                effectId: 0,
                 kind: "add_tags",
                 visibility: "public",
                 side: "runner",
@@ -2028,8 +2026,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
                 sourceTitle: "Netwatch Credit Voucher",
               }),
               expect.objectContaining({
-                effectId:
-                  "505.effect.1.gain_credits",
+                effectId: 1,
                 kind: "gain_credits",
                 visibility: "public",
                 side: "corp",
@@ -2151,7 +2148,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
           flatline: false,
           resolvedEffects: [
             expect.objectContaining({
-              effectId: `${spec.definitionId}.effect.0.damage`,
+              effectId: 0,
               kind: "damage",
               visibility: "public",
               side: "runner",
@@ -2297,7 +2294,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       cardsTrashed: 1,
       resolvedEffects: [
         expect.objectContaining({
-          effectId: "554.effect.0.damage",
+          effectId: 0,
           kind: "damage",
           side: "runner",
           amount: 1,
@@ -2418,7 +2415,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         cardsTrashed: expectedDamage,
         resolvedEffects: [
           expect.objectContaining({
-            effectId: `${definitionId}.effect.0.damage`,
+            effectId: 0,
             kind: "damage",
             side: "runner",
             amount: expectedDamage,

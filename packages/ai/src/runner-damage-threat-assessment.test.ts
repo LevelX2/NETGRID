@@ -446,7 +446,7 @@ describe("runnerDamageThreatAssessment", () => {
           unbrokenSubroutineCount: 1,
           resolvedEffects: [
             {
-              effectId: "fatal-attractor-subroutine",
+              effectId: 0,
               kind: "resolve_subroutine",
               visibility: "public",
               side: "runner",
@@ -787,7 +787,7 @@ describe("runnerDamageThreatAssessment", () => {
         unbrokenSubroutineCount: 1,
         resolvedEffects: [
           {
-            effectId: "fatal-attractor-subroutine",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",

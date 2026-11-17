@@ -50,14 +50,14 @@ describe("semantic chronicle localization", () => {
         serverId: "rd",
         resolvedEffects: [
           {
-            effectId: "rd.start",
+            effectId: 0,
             kind: "start_run",
             visibility: "public",
             side: "runner",
             serverId: "rd",
           },
           {
-            effectId: "hq.start",
+            effectId: 1,
             kind: "start_run",
             visibility: "public",
             side: "runner",
@@ -89,7 +89,7 @@ describe("semantic chronicle localization", () => {
         const outcome = event("end_turn", {
           resolvedEffects: [
             {
-              effectId: kind,
+              effectId: 0,
               kind,
               visibility: "public",
               side: "runner",
@@ -474,7 +474,7 @@ describe("semantic chronicle localization", () => {
       const targets = ["Simple Fracter", "Simple Decoder"];
       const targetDefinitionIds = [597, 591];
       const resolvedEffects = targets.map((cardTitle, index) => ({
-        effectId: `shell-removal-${index}`,
+        effectId: index,
         kind: "counter_change",
         visibility: "public",
         side: "runner",
@@ -542,7 +542,7 @@ describe("semantic chronicle localization", () => {
         result: "ended",
         resolvedEffects: [
           {
-            effectId: "puzzle-subroutine-0",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -714,7 +714,7 @@ describe("semantic chronicle localization", () => {
         encounterContinue: true,
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -817,7 +817,7 @@ describe("semantic chronicle localization", () => {
       actor: "runner",
       resolvedEffects: [
         {
-          effectId: "gain",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "corp",
@@ -828,7 +828,7 @@ describe("semantic chronicle localization", () => {
           sourceTitle: "Investment Firm",
         },
         {
-          effectId: "counter",
+          effectId: 1,
           kind: "counter_change",
           visibility: "public",
           side: "corp",
@@ -937,7 +937,7 @@ describe("semantic chronicle localization", () => {
             : "runner_credit_bank_build",
           resolvedEffects: [
             {
-              effectId: "broker.hosted-credits",
+              effectId: 0,
               kind: take ? "take_hosted_credits" : "add_hosted_credits",
               visibility: "public",
               side: "runner",
@@ -995,7 +995,7 @@ describe("semantic chronicle localization", () => {
       aiReasonCode: "runner_credit_bank_cash_out",
       resolvedEffects: [
         {
-          effectId: "short-term-contract.take-hosted-credits",
+          effectId: 0,
           kind: "take_hosted_credits",
           visibility: "public",
           side: "runner",
@@ -1204,7 +1204,7 @@ describe("semantic chronicle localization", () => {
       actor: "corp",
       resolvedEffects: [
         {
-          effectId: "runner.start.streetware.streetware_1",
+          effectId: 0,
           kind: "take_hosted_credits",
           visibility: "public",
           side: "runner",
@@ -1475,7 +1475,7 @@ describe("semantic chronicle localization", () => {
       publicRevealDefinitionId: 11020,
       resolvedEffects: [
         {
-          effectId: "fetal-ai-damage",
+          effectId: 0,
           kind: "damage",
           visibility: "hidden_info_barrier",
           side: "runner",
@@ -1529,7 +1529,7 @@ describe("semantic chronicle localization", () => {
       encounterContinue: true,
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
@@ -1578,7 +1578,7 @@ describe("semantic chronicle localization", () => {
       serverLabel: "R&D",
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
@@ -1641,7 +1641,7 @@ describe("semantic chronicle localization", () => {
       sourceDefinitionId: 11022,
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
@@ -1775,7 +1775,7 @@ describe("semantic chronicle localization", () => {
       flatline: false,
       resolvedEffects: [
         {
-          effectId: "fetal-ai-remote-damage",
+          effectId: 0,
           kind: "damage",
           visibility: "hidden_info_barrier",
           side: "runner",
@@ -1825,7 +1825,7 @@ describe("semantic chronicle localization", () => {
     const hidden = event("resolve_choice", {
       resolvedEffects: [
         {
-          effectId: "hidden-effect",
+          effectId: 0,
           kind: "trash_card",
           visibility: "private_to_side",
           side: "corp",

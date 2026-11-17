@@ -169,7 +169,7 @@ describe("central information admission after an observed free stop", () => {
         if (condition === "unquoted_event") delete p.resolvedEffects;
         else
           p.resolvedEffects.push({
-            effectId: "mixed-draw",
+            effectId: p.resolvedEffects.length,
             visibility: "public",
             kind: "draw_cards",
             side: "runner",

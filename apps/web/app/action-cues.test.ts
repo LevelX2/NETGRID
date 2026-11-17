@@ -170,7 +170,7 @@ describe("deriveOpponentActionCues", () => {
           runApproachRootRezPass: true,
           resolvedEffects: [
             {
-              effectId: "test.encounter.damage",
+              effectId: 0,
               kind: "damage",
               visibility: "hidden_info_barrier",
               side: "runner",
@@ -204,7 +204,7 @@ describe("deriveOpponentActionCues", () => {
           runApproachRootRezPass: true,
           resolvedEffects: [
             {
-              effectId: "test.localized.damage",
+              effectId: 0,
               kind: "damage",
               visibility: "hidden_info_barrier",
               side: "runner",
@@ -425,7 +425,7 @@ describe("deriveOpponentActionCues", () => {
       sourceDefinitionId: 9110,
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
@@ -506,7 +506,7 @@ describe("deriveOpponentActionCues", () => {
       actor: "corp",
       resolvedEffects: [
         {
-          effectId: "bel_digmo.access.damage",
+          effectId: 0,
           kind: "damage",
           visibility: "hidden_info_barrier",
           side: "runner",
@@ -1741,7 +1741,7 @@ describe("deriveOpponentActionCues", () => {
         turnActionOrdinalEnd: 4,
         resolvedEffects: [
           {
-            effectId: "test.paid-action.damage",
+            effectId: 0,
             kind: "damage",
             visibility: "hidden_info_barrier",
             side: "runner",

@@ -3,7 +3,7 @@ import type {
   CardInstanceId,
   DeckDefinition,
   GameState,
-  ResolvedGameEffect,
+  PublicResolvedGameEffect,
 } from "@netgrid/shared";
 import {
   createGameAfterSetup,
@@ -189,8 +189,8 @@ function latestPayload(
 
 function latestResolvedEffect(
   state: GameState,
-  predicate: (effect: ResolvedGameEffect) => boolean,
-): ResolvedGameEffect | undefined {
+  predicate: (effect: PublicResolvedGameEffect) => boolean,
+): PublicResolvedGameEffect | undefined {
   for (const entry of state.eventLog.slice().reverse()) {
     const effects = entry.publicPayload?.resolvedEffects;
     if (!Array.isArray(effects)) continue;

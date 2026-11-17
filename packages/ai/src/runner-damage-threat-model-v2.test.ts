@@ -52,7 +52,7 @@ describe("runner damage threat model v2 red evidence", () => {
             damageResolved: true,
             resolvedEffects: [
               {
-                effectId: "virus-test-site-access-damage-effect",
+                effectId: 0,
                 kind: "damage",
                 visibility: "public",
                 side: "runner",

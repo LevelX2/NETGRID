@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PublicGameEvent, ResolvedGameEffect } from "@netgrid/shared";
+import type { PublicGameEvent, PublicResolvedGameEffect } from "@netgrid/shared";
 
 import { publicEventsAfter, resourceEffectSounds } from "./local-action-sounds";
 
@@ -139,11 +139,10 @@ describe("confirmed resource effect sounds", () => {
 });
 
 function effect(
-  kind: ResolvedGameEffect["kind"],
+  kind: PublicResolvedGameEffect["kind"],
   amount?: number,
-): ResolvedGameEffect {
+): Omit<PublicResolvedGameEffect, "effectId"> {
   return {
-    effectId: `test.${kind}`,
     kind,
     ...(amount !== undefined ? { amount } : {}),
     visibility: "public",
@@ -152,7 +151,7 @@ function effect(
 
 function event(
   type: string,
-  resolvedEffects?: ResolvedGameEffect[],
+  resolvedEffects?: Array<Omit<PublicResolvedGameEffect, "effectId">>,
 ): PublicGameEvent {
   return {
     eventId: 3,
@@ -162,7 +161,14 @@ function event(
     stateHashAfter: "fnv1a:test",
     publicPayload: {
       actionType: type,
-      ...(resolvedEffects ? { resolvedEffects } : {}),
+      ...(resolvedEffects
+        ? {
+            resolvedEffects: resolvedEffects.map((effect, effectId) => ({
+              ...effect,
+              effectId,
+            })),
+          }
+        : {}),
     },
   };
 }

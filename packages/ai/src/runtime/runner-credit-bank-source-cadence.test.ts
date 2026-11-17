@@ -472,7 +472,7 @@ function bankLoadEvent(
       sourceDefinitionId: BROKER,
       resolvedEffects: [
         {
-          effectId: "broker-load",
+          effectId: 0,
           kind: "add_hosted_credits",
           visibility: "public",
           amount: 3,

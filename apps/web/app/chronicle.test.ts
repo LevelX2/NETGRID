@@ -714,7 +714,7 @@ describe("formatChronicleEvent", () => {
       corpCreditsAfter: 3,
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
@@ -769,7 +769,7 @@ describe("formatChronicleEvent", () => {
         sourceDefinitionId: 19,
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -813,7 +813,7 @@ describe("formatChronicleEvent", () => {
       paidCredits: 0,
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
@@ -838,7 +838,7 @@ describe("formatChronicleEvent", () => {
       paidCredits: 0,
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
@@ -894,7 +894,7 @@ describe("formatChronicleEvent", () => {
 
   it("distinguishes Entrapment redirects without rezzed ICE and declined payment", () => {
     const resolvedEffect = {
-      effectId: "subroutine_1",
+      effectId: 0,
       kind: "resolve_subroutine",
       visibility: "public",
       side: "runner",
@@ -1398,7 +1398,7 @@ describe("formatChronicleEvent", () => {
         hostedCreditsAfter: 9,
         resolvedEffects: [
           {
-            effectId: "onr_v1_209_political-coup.effect.0.take_hosted_credits",
+            effectId: 0,
             kind: "take_hosted_credits",
             visibility: "public",
             side: "corp",
@@ -2703,7 +2703,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "doppelganger_counter",
+            effectId: 0,
             kind: "counter_change",
             visibility: "hidden_info_barrier",
             side: "runner",
@@ -2738,7 +2738,7 @@ describe("formatChronicleEvent", () => {
       ambushPaidCost: 2,
       resolvedEffects: [
         {
-          effectId: "doppelganger_counter",
+          effectId: 0,
           kind: "counter_change",
           visibility: "hidden_info_barrier",
           side: "runner",
@@ -2777,7 +2777,7 @@ describe("formatChronicleEvent", () => {
       trashedCardDefinitionIds: "219",
       resolvedEffects: [
         {
-          effectId: "experimental_ai_trash",
+          effectId: 0,
           kind: "trash_card",
           visibility: "hidden_info_barrier",
           side: "runner",
@@ -2798,7 +2798,7 @@ describe("formatChronicleEvent", () => {
       trashedCount: 1,
       resolvedEffects: [
         {
-          effectId: "experimental_ai_trash_unknown",
+          effectId: 0,
           kind: "trash_card",
           visibility: "hidden_info_barrier",
           side: "runner",
@@ -3462,7 +3462,7 @@ describe("formatChronicleEvent", () => {
         cardsTrashed: 4,
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -3475,7 +3475,7 @@ describe("formatChronicleEvent", () => {
             cardsTrashed: 2,
           },
           {
-            effectId: "subroutine_2",
+            effectId: 1,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -3488,7 +3488,7 @@ describe("formatChronicleEvent", () => {
             cardsTrashed: 2,
           },
           {
-            effectId: "subroutine_3",
+            effectId: 2,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -3526,7 +3526,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -3551,7 +3551,7 @@ describe("formatChronicleEvent", () => {
         cardsTrashed: 3,
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -3612,7 +3612,7 @@ describe("formatChronicleEvent", () => {
         cardsTrashed: 0,
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -3625,7 +3625,7 @@ describe("formatChronicleEvent", () => {
             cardsTrashed: 0,
           },
           {
-            effectId: "subroutine_2",
+            effectId: 1,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -3675,7 +3675,7 @@ describe("formatChronicleEvent", () => {
         cardsTrashed: 1,
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -3708,7 +3708,7 @@ describe("formatChronicleEvent", () => {
         result: "ended",
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -3721,7 +3721,7 @@ describe("formatChronicleEvent", () => {
             cardsTrashed: 1,
           },
           {
-            effectId: "subroutine_2",
+            effectId: 1,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -3761,7 +3761,7 @@ describe("formatChronicleEvent", () => {
         result: "ended",
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -3799,7 +3799,7 @@ describe("formatChronicleEvent", () => {
         encounterContinue: true,
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -3811,7 +3811,7 @@ describe("formatChronicleEvent", () => {
             runnerForgoneActionOrdinal: 2,
           },
           {
-            effectId: "subroutine_2",
+            effectId: 1,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
@@ -3846,7 +3846,7 @@ describe("formatChronicleEvent", () => {
       trashedCount: 1,
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
@@ -3859,7 +3859,7 @@ describe("formatChronicleEvent", () => {
           cardsTrashed: 1,
         },
         {
-          effectId: "subroutine_2",
+          effectId: 1,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
@@ -4232,7 +4232,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "run_1.cockroach.successful_run.cockroach",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "corp",
@@ -4597,7 +4597,7 @@ describe("formatChronicleEvent", () => {
       unbrokenSubroutineCount: 1,
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
@@ -4937,7 +4937,7 @@ describe("formatChronicleEvent", () => {
       aiReasonCode: "corp.draw.operation",
       resolvedEffects: [
         {
-          effectId: "play_operation.effect.1",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
@@ -4967,7 +4967,7 @@ describe("formatChronicleEvent", () => {
       actor: "runner",
       resolvedEffects: [
         {
-          effectId: "corp.start.skivviss",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
@@ -5008,7 +5008,7 @@ describe("formatChronicleEvent", () => {
       cardDefinitionId: 309,
       resolvedEffects: [
         {
-          effectId: "play_event.effect.1",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "runner",
@@ -5081,7 +5081,7 @@ describe("formatChronicleEvent", () => {
       runnerCreditsAfter: 0,
       resolvedEffects: [
         {
-          effectId: "onr_v1_285_closed-accounts.effect.0.lose_credits",
+          effectId: 0,
           kind: "lose_credits",
           visibility: "public",
           side: "runner",
@@ -5117,7 +5117,7 @@ describe("formatChronicleEvent", () => {
       runnerTagsAfter: 3,
       resolvedEffects: [
         {
-          effectId: "onr_v1_287_datapool-by-zetatech.effect.0.add_tags",
+          effectId: 0,
           kind: "add_tags",
           visibility: "public",
           side: "runner",
@@ -5160,7 +5160,7 @@ describe("formatChronicleEvent", () => {
       corpCreditsAfter: 6,
       resolvedEffects: [
         {
-          effectId: "onr_v1_293_netwatch-credit-voucher.effect.0.add_tags",
+          effectId: 0,
           kind: "add_tags",
           visibility: "public",
           side: "runner",
@@ -5171,7 +5171,7 @@ describe("formatChronicleEvent", () => {
           reason: "card_resolver",
         },
         {
-          effectId: "onr_v1_293_netwatch-credit-voucher.effect.1.gain_credits",
+          effectId: 1,
           kind: "gain_credits",
           visibility: "public",
           side: "corp",
@@ -5221,7 +5221,7 @@ describe("formatChronicleEvent", () => {
         cardsTrashed: amount,
         resolvedEffects: [
           {
-            effectId: `${cardDefinitionId}.effect.0.damage`,
+            effectId: 0,
             kind: "damage",
             visibility: "public",
             side: "runner",
@@ -5269,7 +5269,7 @@ describe("formatChronicleEvent", () => {
         cardsTrashed: amount,
         resolvedEffects: [
           {
-            effectId: `${cardDefinitionId}.effect.0.damage`,
+            effectId: 0,
             kind: "damage",
             visibility: "public",
             side: "runner",
@@ -5310,7 +5310,7 @@ describe("formatChronicleEvent", () => {
       gainedCredits: 1,
       resolvedEffects: [
         {
-          effectId: "onr_v1_288_day-shift.effect.0.draw_cards",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
@@ -5320,7 +5320,7 @@ describe("formatChronicleEvent", () => {
           reason: "card_resolver",
         },
         {
-          effectId: "onr_v1_288_day-shift.effect.1.gain_credits",
+          effectId: 1,
           kind: "gain_credits",
           visibility: "public",
           side: "corp",
@@ -5357,7 +5357,7 @@ describe("formatChronicleEvent", () => {
       gainedActions: 2,
       resolvedEffects: [
         {
-          effectId: "onr_v1_297_overtime-incentives.effect.0.gain_actions",
+          effectId: 0,
           kind: "gain_actions",
           visibility: "public",
           side: "corp",
@@ -5391,7 +5391,7 @@ describe("formatChronicleEvent", () => {
       drawnCards: 1,
       resolvedEffects: [
         {
-          effectId: "onr_v1_295_night-shift.effect.0.gain_credits",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "corp",
@@ -5401,7 +5401,7 @@ describe("formatChronicleEvent", () => {
           reason: "card_resolver",
         },
         {
-          effectId: "onr_v1_295_night-shift.effect.1.draw_cards",
+          effectId: 1,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
@@ -5435,7 +5435,7 @@ describe("formatChronicleEvent", () => {
       drawnCount: 3,
       resolvedEffects: [
         {
-          effectId: "onr_v1_095_jack-n-joe.effect.0.draw_cards",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "runner",
@@ -5474,7 +5474,7 @@ describe("formatChronicleEvent", () => {
       runnerTagsAfter: 1,
       resolvedEffects: [
         {
-          effectId: "onr_v1_095_jack-n-joe.effect.0.draw_cards",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "runner",
@@ -5522,7 +5522,7 @@ describe("formatChronicleEvent", () => {
       runnerTagsAfter: 0,
       resolvedEffects: [
         {
-          effectId: "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "runner",
@@ -5559,7 +5559,7 @@ describe("formatChronicleEvent", () => {
       drawTaxTagsAdded: 0,
       resolvedEffects: [
         {
-          effectId: "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "runner",
@@ -5664,7 +5664,7 @@ describe("formatChronicleEvent", () => {
       gameEndReason: "flatline",
       resolvedEffects: [
         {
-          effectId: "onr_v1_302_scorched-earth.effect.0.damage",
+          effectId: 0,
           kind: "damage",
           visibility: "public",
           side: "runner",
@@ -5697,7 +5697,7 @@ describe("formatChronicleEvent", () => {
       runnerCreditsAfter: 7,
       resolvedEffects: [
         {
-          effectId: "onr_v1_045_newsgroup-filter.effect.0.gain_credits",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "runner",
@@ -5731,7 +5731,7 @@ describe("formatChronicleEvent", () => {
       drawnCards: 2,
       resolvedEffects: [
         {
-          effectId: "onr_v1_321_esa-contract.effect.0.draw_cards",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
@@ -5765,7 +5765,7 @@ describe("formatChronicleEvent", () => {
       drawnCards: 1,
       resolvedEffects: [
         {
-          effectId: "corp.start.employee_empowerment.employee_1",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
@@ -5790,7 +5790,7 @@ describe("formatChronicleEvent", () => {
       drawnCards: 2,
       resolvedEffects: [
         {
-          effectId: "onr_v1_199_employee-empowerment.effect.0.draw_cards",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
@@ -5831,7 +5831,7 @@ describe("formatChronicleEvent", () => {
         corpCreditsAfter: 10 + amount,
         resolvedEffects: [
           {
-            effectId: `${cardDefinitionId}.effect.0.gain_credits`,
+            effectId: 0,
             kind: "gain_credits",
             visibility: "public",
             side: "corp",
@@ -5899,7 +5899,7 @@ describe("formatChronicleEvent", () => {
       runnerGripAfter: 5,
       resolvedEffects: [
         {
-          effectId: "onr_v1_179_silicon-saloon-franchise.effect.0.gain_credits",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "runner",
@@ -5909,7 +5909,7 @@ describe("formatChronicleEvent", () => {
           reason: "card_resolver",
         },
         {
-          effectId: "onr_v1_179_silicon-saloon-franchise.effect.1.draw_cards",
+          effectId: 1,
           kind: "draw_cards",
           visibility: "public",
           side: "runner",
@@ -6025,7 +6025,7 @@ describe("formatChronicleEvent", () => {
         hostedCreditsAfter: amount,
         resolvedEffects: [
           {
-            effectId: `${cardDefinitionId}.lifecycle.add_hosted_credits`,
+            effectId: 0,
             kind: "add_hosted_credits",
             visibility: "public",
             side: actor,
@@ -6060,7 +6060,7 @@ describe("formatChronicleEvent", () => {
       rezCostPaid: 5,
       resolvedEffects: [
         {
-          effectId: "onr_v1_335_remote-facility.on_rez.gain_actions",
+          effectId: 0,
           kind: "gain_actions",
           visibility: "public",
           side: "corp",
@@ -6161,7 +6161,7 @@ describe("formatChronicleEvent", () => {
       cardDefinitionId: 415,
       resolvedEffects: [
         {
-          effectId: "onr_v1_203_hostile-takeover.score.gain_credits",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "corp",
@@ -6262,7 +6262,7 @@ describe("formatChronicleEvent", () => {
         gainedCredits: amount,
         resolvedEffects: [
           {
-            effectId: `${cardDefinitionId}.effect.0.take_hosted_credits`,
+            effectId: 0,
             kind: "take_hosted_credits",
             visibility: "public",
             side: actor,
@@ -6299,10 +6299,10 @@ describe("formatChronicleEvent", () => {
       cardDefinitionId: 210,
       cardImplementationAbility: "activated",
       cardImplementationAbilityTiming: "runner_cost_penalty_support",
-      costPenaltySupportWindowId: "runner_cost_penalty_support.217",
+      costPenaltySupportWindowId: 217,
       resolvedEffects: [
         {
-          effectId: "swiss-bank.effect.0.gain_credits",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "hidden_info_barrier",
           side: "runner",
@@ -6334,7 +6334,7 @@ describe("formatChronicleEvent", () => {
       resolvedEffects: [
         {
           effectId:
-            "onr_v1_344_spinn-public-relations.effect.0.add_hosted_credits",
+            0,
           kind: "add_hosted_credits",
           visibility: "public",
           side: "corp",
@@ -6386,7 +6386,7 @@ describe("formatChronicleEvent", () => {
         hostedCreditsAfter: 3,
         resolvedEffects: [
           {
-            effectId: `${cardDefinitionId}.effect.0.add_hosted_credits`,
+            effectId: 0,
             kind: "add_hosted_credits",
             visibility: "public",
             side: actor,
@@ -6424,7 +6424,7 @@ describe("formatChronicleEvent", () => {
       resolvedEffects: [
         {
           effectId:
-            "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
+            0,
           kind: "take_hosted_credits",
           visibility: "public",
           side: "runner",
@@ -6436,7 +6436,7 @@ describe("formatChronicleEvent", () => {
         },
         {
           effectId:
-            "onr_v1_178_short-term-contract.effect.1.trash_source_when_empty",
+            1,
           kind: "trash_source_when_empty",
           visibility: "public",
           side: "runner",
@@ -6474,7 +6474,7 @@ describe("formatChronicleEvent", () => {
         cardDefinitionId: 380,
         resolvedEffects: [
           {
-            effectId: "runner.install.loan_from_chiba.card_123",
+            effectId: 0,
             kind: "gain_credits",
             visibility: "public",
             side: "runner",
@@ -6505,7 +6505,7 @@ describe("formatChronicleEvent", () => {
         title: "Loan from Chiba",
         resolvedEffects: [
           {
-            effectId: "loan.leave.pay",
+            effectId: 0,
             kind: "pay_credits_or_lose_game",
             visibility: "public",
             side: "runner",
@@ -6534,7 +6534,7 @@ describe("formatChronicleEvent", () => {
         title: "Loan from Chiba",
         resolvedEffects: [
           {
-            effectId: "loan.leave.lose",
+            effectId: 0,
             kind: "pay_credits_or_lose_game",
             visibility: "public",
             side: "runner",
@@ -7520,7 +7520,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "corp.start.scored_agenda.credit.pro013_zurich",
+            effectId: 0,
             kind: "gain_credits",
             visibility: "public",
             side: "corp",
@@ -7889,7 +7889,7 @@ describe("formatChronicleEvent", () => {
       hiddenZoneAction: "discard_phase",
       resolvedEffects: [
         {
-          effectId: "corp.start.skivviss",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
@@ -7919,7 +7919,7 @@ describe("formatChronicleEvent", () => {
         result: "ended",
         resolvedEffects: [
           {
-            effectId: "tokyo-bonus",
+            effectId: 0,
             kind: "gain_credits",
             visibility: "public",
             side: "corp",
@@ -7952,7 +7952,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "quest-noop",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "runner",
@@ -7964,7 +7964,7 @@ describe("formatChronicleEvent", () => {
             randomEffectOutcome: "no_effect",
           },
           {
-            effectId: "quest-core",
+            effectId: 1,
             kind: "damage",
             visibility: "public",
             side: "runner",
@@ -7978,7 +7978,7 @@ describe("formatChronicleEvent", () => {
             damageType: "core",
           },
           {
-            effectId: "quest-net",
+            effectId: 2,
             kind: "damage",
             visibility: "public",
             side: "runner",
@@ -7992,7 +7992,7 @@ describe("formatChronicleEvent", () => {
             damageType: "net",
           },
           {
-            effectId: "quest-action",
+            effectId: 3,
             kind: "gain_actions",
             visibility: "public",
             side: "runner",
@@ -8035,7 +8035,7 @@ describe("formatChronicleEvent", () => {
       eventId: 122,
       resolvedEffects: [
         {
-          effectId: "spinal.damage",
+          effectId: 0,
           kind: "damage",
           visibility: "public",
           side: "runner",
@@ -8055,7 +8055,7 @@ describe("formatChronicleEvent", () => {
       eventId: 123,
       resolvedEffects: [
         {
-          effectId: "spinal.no_effect",
+          effectId: 0,
           kind: "counter_change",
           visibility: "public",
           side: "runner",
@@ -8109,7 +8109,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "region-rez",
+            effectId: 0,
             kind: "rez_card",
             visibility: "public",
             side: "corp",
@@ -8137,7 +8137,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "install-rez",
+            effectId: 0,
             kind: "rez_card",
             visibility: "public",
             side: "corp",
@@ -8166,7 +8166,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "region-replace-visible",
+            effectId: 0,
             kind: "trash_card",
             visibility: "public",
             side: "corp",
@@ -8191,7 +8191,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "region-replace-hidden",
+            effectId: 0,
             kind: "trash_card",
             visibility: "public",
             side: "corp",
@@ -8222,7 +8222,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "top-runners-trash",
+            effectId: 0,
             kind: "trash_source",
             visibility: "public",
             side: "runner",
@@ -8247,7 +8247,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "region-replacement",
+            effectId: 0,
             kind: "trash_card",
             visibility: "hidden_info_barrier",
             side: "corp",
@@ -8266,7 +8266,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "runner-private-trash",
+            effectId: 0,
             kind: "trash_card",
             visibility: "private_to_side",
             side: "runner",
@@ -8305,7 +8305,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "runner.start.top_runners_conference.card_123",
+            effectId: 0,
             kind: "gain_credits",
             visibility: "public",
             side: "runner",
@@ -8338,7 +8338,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "corp.start.polymer.card_211",
+            effectId: 0,
             kind: "gain_credits",
             visibility: "public",
             side: "corp",
@@ -8348,7 +8348,7 @@ describe("formatChronicleEvent", () => {
             reason: "start_of_turn",
           },
           {
-            effectId: "corp.start.remote.card_335",
+            effectId: 1,
             kind: "gain_actions",
             visibility: "public",
             side: "corp",
@@ -8358,7 +8358,7 @@ describe("formatChronicleEvent", () => {
             reason: "start_of_turn",
           },
           {
-            effectId: "corp.start.subsidiary.card_218",
+            effectId: 2,
             kind: "gain_actions",
             visibility: "public",
             side: "corp",
@@ -8385,7 +8385,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "runner.start.floating.card_163",
+            effectId: 0,
             kind: "gain_credits",
             visibility: "public",
             side: "runner",
@@ -8395,7 +8395,7 @@ describe("formatChronicleEvent", () => {
             reason: "start_of_turn",
           },
           {
-            effectId: "runner.start.rigged.card_174",
+            effectId: 1,
             kind: "take_hosted_credits",
             visibility: "public",
             side: "runner",
@@ -8432,7 +8432,7 @@ describe("formatChronicleEvent", () => {
       actor: "corp",
       resolvedEffects: [
         {
-          effectId: "runner.start.forced_action.viacox_1",
+          effectId: 0,
           kind: "gain_actions",
           visibility: "public",
           side: "runner",
@@ -8470,7 +8470,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "runner.start.forced_action.viacox_1",
+            effectId: 0,
             kind: "gain_actions",
             visibility: "public",
             side: "runner",
@@ -8505,7 +8505,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "runner.start.recurring_credit.card_456",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "runner",
@@ -8541,7 +8541,7 @@ describe("formatChronicleEvent", () => {
       actor: "runner",
       resolvedEffects: [
         {
-          effectId: "gain-technical-id-must-not-matter",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "corp",
@@ -8552,7 +8552,7 @@ describe("formatChronicleEvent", () => {
           sourceTitle: "Investment Firm",
         },
         {
-          effectId: "counter-another-unrelated-technical-id",
+          effectId: 1,
           kind: "counter_change",
           visibility: "public",
           side: "corp",
@@ -8588,7 +8588,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "runner.start.shell_traders.shell_1.simple_fracter_1",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "runner",
@@ -8629,7 +8629,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "corp.start.braindance_campaign.card_311",
+            effectId: 0,
             kind: "take_hosted_credits",
             visibility: "public",
             side: "corp",
@@ -8669,7 +8669,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "corp.start.holovid_campaign.card_326",
+            effectId: 0,
             kind: "take_hosted_credits",
             visibility: "public",
             side: "corp",
@@ -8682,7 +8682,7 @@ describe("formatChronicleEvent", () => {
             reason: "start_of_turn",
           },
           {
-            effectId: "corp.start.holovid_campaign.trash.card_326",
+            effectId: 1,
             kind: "trash_source_when_empty",
             visibility: "public",
             side: "corp",
@@ -8725,7 +8725,7 @@ describe("formatChronicleEvent", () => {
           actor: "runner",
           resolvedEffects: [
             {
-              effectId: `${definitionId}.start.take_hosted_credits`,
+              effectId: 0,
               kind: "take_hosted_credits",
               visibility: "public",
               side: "corp",
@@ -8755,7 +8755,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "runner.start.bizarre_encryption.card_789",
+            effectId: 0,
             kind: "score_agenda",
             visibility: "public",
             side: "runner",
@@ -8786,7 +8786,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "bel_digmo.access.damage",
+            effectId: 0,
             kind: "damage",
             visibility: "hidden_info_barrier",
             side: "runner",
@@ -8884,7 +8884,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "run_rd.highlighter.successful_run.highlighter",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "corp",
@@ -8897,7 +8897,7 @@ describe("formatChronicleEvent", () => {
             sourceTitle: "Highlighter",
           },
           {
-            effectId: "run_rd.viral_pipeline.successful_run.socket_rd",
+            effectId: 1,
             kind: "counter_change",
             visibility: "public",
             side: "corp",
@@ -8911,7 +8911,7 @@ describe("formatChronicleEvent", () => {
             serverLabel: "R&D",
           },
           {
-            effectId: "run_rd.cascade.successful_run.cascade",
+            effectId: 2,
             kind: "counter_change",
             visibility: "public",
             side: "corp",
@@ -8948,7 +8948,7 @@ describe("formatChronicleEvent", () => {
           "217,286",
         resolvedEffects: [
           {
-            effectId: "pattel.access.counters",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "runner",
@@ -8971,7 +8971,7 @@ describe("formatChronicleEvent", () => {
         targetCardDefinitionIds: "",
         resolvedEffects: [
           {
-            effectId: "pattel.access.no_counters",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "runner",
@@ -8993,7 +8993,7 @@ describe("formatChronicleEvent", () => {
         targetCount: 1,
         resolvedEffects: [
           {
-            effectId: "unbound.breaker.penalty",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "runner",
@@ -9029,7 +9029,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "pattel.access.counters",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "runner",

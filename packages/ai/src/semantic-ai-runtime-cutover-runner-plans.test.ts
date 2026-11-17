@@ -2494,7 +2494,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         publicPayload: {
           resolvedEffects: [
             {
-              effectId: "conference-start-credit",
+              effectId: 0,
               kind: "gain_credits",
               side: "runner",
               amount: 2,
@@ -2556,7 +2556,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         publicPayload: {
           resolvedEffects: [
             {
-              effectId: "conference-start-credit",
+              effectId: 0,
               kind: "gain_credits",
               side: "runner",
               amount: 2,

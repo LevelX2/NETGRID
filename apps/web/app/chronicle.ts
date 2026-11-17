@@ -1,11 +1,12 @@
 import { cardDefinitionIdValue, cardDefinitionIdsFromCsv } from "./card-definition-id";
 import {
   isCardDefinitionId,
+  isPublicResolvedGameEffectId,
   isRemoteServerId,
   type CardDefinitionId,
   type MatchEventId,
   type PublicGameEvent,
-  type ResolvedGameEffect,
+  type PublicResolvedGameEffect,
   type Side,
 } from "@netgrid/shared";
 import {
@@ -917,7 +918,6 @@ function formatSemanticChronicleEvent(
         const endRunItem = formatSemanticChronicleEffect(
           event,
           endRunEffect,
-          endRunEffectIndex,
           side,
           translate,
           context.cardPresentationsById,
@@ -5438,8 +5438,7 @@ export function formatChronicleEvent(
 
 function formatSemanticChronicleEffect(
   event: PublicGameEvent,
-  effect: ResolvedGameEffect,
-  index: number,
+  effect: PublicResolvedGameEffect,
   side: Side,
   translate: ChronicleTranslate,
   cardPresentationsById?: PublicCardPresentationsById,
@@ -5504,7 +5503,7 @@ function formatSemanticChronicleEffect(
       translate,
     );
     return {
-      id: `${event.eventId}:effect:${effect.effectId || index}`,
+      id: `${event.eventId}:effect:${effect.effectId}`,
       category: "run",
       importance: "normal",
       visibility,
@@ -5531,7 +5530,7 @@ function formatSemanticChronicleEffect(
       translate("card.unknown");
     const remainingCounters = numberValue(effect.remainingCounters);
     return {
-      id: `${event.eventId}:effect:${effect.effectId || index}`,
+      id: `${event.eventId}:effect:${effect.effectId}`,
       category: "card",
       importance: "normal",
       visibility,
@@ -5613,7 +5612,7 @@ function formatSemanticChronicleEffect(
           })
         : translate("effect.subroutineChip");
     return {
-      id: `${event.eventId}:effect:${effect.effectId || index}`,
+      id: `${event.eventId}:effect:${effect.effectId}`,
       category,
       importance: "important",
       visibility,
@@ -5664,7 +5663,7 @@ function formatSemanticChronicleEffect(
       : sourceDefinitionId;
     const displayedTitle = targetTrashed ? targetTitle : sourceTitle;
     return {
-      id: `${event.eventId}:effect:${effect.effectId || index}`,
+      id: `${event.eventId}:effect:${effect.effectId}`,
       category,
       importance: targetTrashed ? "important" : "normal",
       visibility,
@@ -5721,7 +5720,7 @@ function formatSemanticChronicleEffect(
         ? "effect.namedCardTrashedBySource"
         : "event.cardTrashed";
   return {
-    id: `${event.eventId}:effect:${effect.effectId || index}`,
+    id: `${event.eventId}:effect:${effect.effectId}`,
     category,
     importance: flatline
       ? "critical"
@@ -5867,11 +5866,10 @@ export function formatChronicleEffectItems(
       cardPresentationsById,
       translate,
     );
-    const effectItems = displayedEffects.map((effect, index) => {
+    const effectItems = displayedEffects.map((effect) => {
       const item = formatSemanticChronicleEffect(
         event,
         effect,
-        index,
         side,
         translate,
         cardPresentationsById,
@@ -5906,8 +5904,8 @@ export function formatChronicleEffectItems(
       ...(terminalItem ? [terminalItem] : []),
     ];
   }
-  const effectItems = displayedEffects.map((effect, index) =>
-    formatChronicleEffect(event, effect, index, side, cardPresentationsById),
+  const effectItems = displayedEffects.map((effect) =>
+    formatChronicleEffect(event, effect, side, cardPresentationsById),
   );
   const payloadItem = endTurnCreditPayoutChronicleItem(
     event,
@@ -6045,11 +6043,11 @@ function successfulRunCreditGainChronicleItem(
 }
 
 function recurringCreditPayoutCounterEffects(
-  effects: ResolvedGameEffect[],
-): Set<ResolvedGameEffect> {
+  effects: PublicResolvedGameEffect[],
+): Set<PublicResolvedGameEffect> {
   const payoutReason = "installed_economy_start_of_corp_turn";
-  const matchedGains = new Set<ResolvedGameEffect>();
-  const countersToMerge = new Set<ResolvedGameEffect>();
+  const matchedGains = new Set<PublicResolvedGameEffect>();
+  const countersToMerge = new Set<PublicResolvedGameEffect>();
 
   for (const counterEffect of effects) {
     const sourceCardInstanceId = stringValue(
@@ -6111,7 +6109,7 @@ function terminalFlatlineChronicleItem(
 
 function runnerForgoneActionChronicleItem(
   event: PublicGameEvent,
-  effects: ResolvedGameEffect[],
+  effects: PublicResolvedGameEffect[],
   translate?: ChronicleTranslate,
 ): ChronicleItem | undefined {
   const effect = effects.find(
@@ -6154,7 +6152,7 @@ function runnerForgoneActionChronicleItem(
 
 function shouldSuppressPaymentSupportCreditEffect(
   event: PublicGameEvent,
-  effect: ResolvedGameEffect,
+  effect: PublicResolvedGameEffect,
 ): boolean {
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
@@ -6347,7 +6345,7 @@ function aiBoonRunStrengthChronicleItem(
 function tagGainChronicleItem(
   event: PublicGameEvent,
   side: Side,
-  effects: ResolvedGameEffect[],
+  effects: PublicResolvedGameEffect[],
   cardPresentationsById?: PublicCardPresentationsById,
   translate?: ChronicleTranslate,
 ): ChronicleItem | undefined {
@@ -6807,8 +6805,7 @@ function singleCardExposeSourceKey(
 
 function formatChronicleEffect(
   event: PublicGameEvent,
-  effect: ResolvedGameEffect,
-  index: number,
+  effect: PublicResolvedGameEffect,
   side: Side,
   cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem {
@@ -6835,7 +6832,6 @@ function formatChronicleEffect(
     const accessDamage = accessEffectDamageChronicleItem(
       event,
       effect,
-      index,
       actor,
       subject,
       sourceTitle,
@@ -6847,7 +6843,6 @@ function formatChronicleEffect(
     const accessAmbushTrash = accessAmbushTrashInstalledChronicleItem(
       event,
       effect,
-      index,
       actor,
       cardPresentationsById,
     );
@@ -6856,7 +6851,6 @@ function formatChronicleEffect(
       redactedAccessAmbushCounterChronicleItem(
         event,
         effect,
-        index,
         actor,
         subject,
         cardPresentationsById,
@@ -6865,7 +6859,6 @@ function formatChronicleEffect(
     return redactedChronicleEffectItem(
       event,
       effect,
-      index,
       actor,
       subject,
       amount,
@@ -6933,7 +6926,7 @@ function formatChronicleEffect(
       );
     }
     return {
-      id: `${event.eventId}:effect:${effect.effectId || index}`,
+      id: `${event.eventId}:effect:${effect.effectId}`,
       category,
       importance,
       visibility,
@@ -7482,7 +7475,7 @@ function formatChronicleEffect(
   }
 
   return {
-    id: `${event.eventId}:effect:${effect.effectId || index}`,
+    id: `${event.eventId}:effect:${effect.effectId}`,
     category,
     importance,
     visibility,
@@ -7508,7 +7501,7 @@ function formatChronicleEffect(
 function resolvedSubroutineOutcomeText(
   subroutineType: string | undefined,
   amount: number,
-  effect: ResolvedGameEffect,
+  effect: PublicResolvedGameEffect,
   payload: Record<string, unknown>,
 ): string {
   const normalizedAmount = Math.max(0, Math.floor(amount));
@@ -7590,8 +7583,7 @@ function resolvedSubroutineOutcomeText(
 
 function accessEffectDamageChronicleItem(
   event: PublicGameEvent,
-  effect: ResolvedGameEffect,
-  index: number,
+  effect: PublicResolvedGameEffect,
   actor: Side | undefined,
   subject: string,
   sourceTitle: string | undefined,
@@ -7608,7 +7600,7 @@ function accessEffectDamageChronicleItem(
   const damageType = damageTypeLabel(stringValue(effect.damageType));
   const cardsTrashed = numberValue(effect.cardsTrashed) ?? 0;
   return {
-    id: `${event.eventId}:effect:${effect.effectId || index}`,
+    id: `${event.eventId}:effect:${effect.effectId}`,
     category: "danger",
     importance: "critical",
     visibility: "public",
@@ -7645,8 +7637,7 @@ function accessEffectDamageChronicleItem(
 
 function accessAmbushTrashInstalledChronicleItem(
   event: PublicGameEvent,
-  effect: ResolvedGameEffect,
-  index: number,
+  effect: PublicResolvedGameEffect,
   actor: Side | undefined,
   cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | null {
@@ -7695,7 +7686,7 @@ function accessAmbushTrashInstalledChronicleItem(
       : `${source} wurde beim Zugriff ausgelöst: ${counterText} trashte kein Programm`;
   const serverLabel = displayServerLabel(effect.serverLabel);
   return {
-    id: `${event.eventId}:effect:${effect.effectId || index}`,
+    id: `${event.eventId}:effect:${effect.effectId}`,
     category: "run",
     importance: trashedCount > 0 ? "important" : "normal",
     visibility: "public",
@@ -7721,7 +7712,7 @@ function accessAmbushTrashInstalledChronicleItem(
 
 function pattelAccessCounterChronicleText(
   event: PublicGameEvent,
-  effect: ResolvedGameEffect,
+  effect: PublicResolvedGameEffect,
   cardPresentationsById?: PublicCardPresentationsById,
 ): { title: string; description?: string; targetChips?: string[] } | null {
   if (
@@ -7840,7 +7831,7 @@ function endTurnCreditPayoutChronicleItem(
 }
 
 function chronicleEffectVisibility(
-  effect: ResolvedGameEffect,
+  effect: PublicResolvedGameEffect,
   viewerSide: Side,
 ): ChronicleVisibility {
   if (effect.visibility === "public") return "public";
@@ -7851,8 +7842,7 @@ function chronicleEffectVisibility(
 
 function redactedAccessAmbushCounterChronicleItem(
   event: PublicGameEvent,
-  effect: ResolvedGameEffect,
-  index: number,
+  effect: PublicResolvedGameEffect,
   actor: Side | undefined,
   subject: string,
   cardPresentationsById?: PublicCardPresentationsById,
@@ -7878,7 +7868,7 @@ function redactedAccessAmbushCounterChronicleItem(
       ? `Du hast ${added} ${counterText} durch ${source} erhalten`
       : `${subject} hat ${added} ${counterText} durch ${source} erhalten`;
   return {
-    id: `${event.eventId}:effect:${effect.effectId || index}`,
+    id: `${event.eventId}:effect:${effect.effectId}`,
     category: "card",
     importance: "important",
     visibility: "public",
@@ -7906,8 +7896,7 @@ function redactedAccessAmbushCounterChronicleItem(
 
 function redactedChronicleEffectItem(
   event: PublicGameEvent,
-  effect: ResolvedGameEffect,
-  index: number,
+  effect: PublicResolvedGameEffect,
   actor: Side | undefined,
   subject: string,
   amount: number,
@@ -7947,7 +7936,7 @@ function redactedChronicleEffectItem(
   }
 
   return {
-    id: `${event.eventId}:effect:${effect.effectId || index}`,
+    id: `${event.eventId}:effect:${effect.effectId}`,
     category,
     importance,
     visibility: "redacted",
@@ -8014,15 +8003,15 @@ function chronicleItemIsStartTurnEffectFromEvent(
   const effectPrefix = `${event.eventId}:effect:`;
   if (!item.id.startsWith(effectPrefix)) return false;
   return resolvedEffectsFromPayload(event.publicPayload.resolvedEffects).some(
-    (effect, index) =>
-      item.id === `${effectPrefix}${effect.effectId || index}` &&
+    (effect) =>
+      item.id === `${effectPrefix}${effect.effectId}` &&
       effect.reason === "start_of_turn" &&
       sideValue(effect.side) === item.actor,
   );
 }
 
 function startTurnRandomEffectOutcome(
-  effect: ResolvedGameEffect,
+  effect: PublicResolvedGameEffect,
 ): string | undefined {
   const outcome = stringValue(effect.randomEffectOutcome);
   if (
@@ -8253,7 +8242,7 @@ function mergedCardResolverEventEffect(
 }
 
 function cardResolverPlayEffectPart(
-  effect: ResolvedGameEffect,
+  effect: PublicResolvedGameEffect,
   options: {
     includeSideForGainCredits?: boolean;
     requestedDrawCount?: number;
@@ -8603,7 +8592,7 @@ function securityPurgeChronicleSummary(
 
 function shouldMergeCardResolverEffect(
   event: PublicGameEvent,
-  effect: ResolvedGameEffect | undefined,
+  effect: PublicResolvedGameEffect | undefined,
 ): boolean {
   if (!effect) return false;
   const payload = event.publicPayload ?? {};
@@ -9324,7 +9313,7 @@ function displayServerLabel(label: string | undefined): string | undefined {
 }
 
 function forcedRandomActionChronicleText(
-  effect: ResolvedGameEffect,
+  effect: PublicResolvedGameEffect,
 ): { title: string; chip: string } | undefined {
   const restriction = effect.restrictedActionFamily;
   if (restriction === "draw_card")
@@ -9754,13 +9743,13 @@ function uniqueChips(chips: string[]): string[] {
   return Array.from(new Set(chips));
 }
 
-function resolvedEffectsFromPayload(value: unknown): ResolvedGameEffect[] {
+function resolvedEffectsFromPayload(value: unknown): PublicResolvedGameEffect[] {
   if (!Array.isArray(value)) return [];
-  return value.filter((effect): effect is ResolvedGameEffect => {
+  return value.filter((effect): effect is PublicResolvedGameEffect => {
     if (!effect || typeof effect !== "object") return false;
-    const candidate = effect as Partial<ResolvedGameEffect>;
+    const candidate = effect as Partial<PublicResolvedGameEffect>;
     return (
-      typeof candidate.effectId === "string" &&
+      isPublicResolvedGameEffectId(candidate.effectId) &&
       typeof candidate.kind === "string" &&
       typeof candidate.visibility === "string"
     );
