@@ -55,6 +55,7 @@ export function discoverCorpDirectScoreProjects({
   centralDefenseAllocation: CorpCentralDefenseAllocation;
 }): {
   directScoreProjects: CorpScoreProjectSignal[];
+  nextTurnScoreContinuationProjects: CorpScoreProjectSignal[];
   recentlyCompromisedRemoteIds: Set<string>;
   residentScoreDefenseBinding: ReturnType<
     typeof corpResidentScoreDefenseBinding
@@ -73,8 +74,10 @@ export function discoverCorpDirectScoreProjects({
   );
   const preferredDeckoutAgendaRecycleRouteAvailable =
     corpPreferredDeckoutAgendaRecycleRouteAvailable(input, candidates);
+  const nextTurnScoreContinuationProjects =
+    corpNextTurnScoreContinuationProjects(input, candidates);
   const preparedScoreContinuationAvailable =
-    corpNextTurnScoreContinuationProjects(input, candidates).some((project) => {
+    nextTurnScoreContinuationProjects.some((project) => {
       // An installed agenda that can finish now also dominates opening an
       // unfunded emergency project, even below the winning point threshold.
       // The producer has already quoted every advance and funding click.
@@ -108,6 +111,7 @@ export function discoverCorpDirectScoreProjects({
   );
   return {
     directScoreProjects,
+    nextTurnScoreContinuationProjects,
     recentlyCompromisedRemoteIds,
     residentScoreDefenseBinding,
     residentScoreAgendaInstanceId,
@@ -119,6 +123,7 @@ export function reconcileCorpScoreProjects({
   candidates,
   proposedAmbushes,
   directScoreProjects,
+  nextTurnScoreContinuationProjects,
   recentlyCompromisedRemoteIds,
   residentScoreDefenseBinding,
   residentScoreAgendaInstanceId,
@@ -128,6 +133,7 @@ export function reconcileCorpScoreProjects({
   candidates: readonly ActionSemanticCandidate[];
   proposedAmbushes: CorpPlanDomain["ambushes"];
   directScoreProjects: CorpScoreProjectSignal[];
+  nextTurnScoreContinuationProjects: CorpScoreProjectSignal[];
   recentlyCompromisedRemoteIds: ReadonlySet<string>;
   residentScoreDefenseBinding: ReturnType<
     typeof corpResidentScoreDefenseBinding
@@ -151,8 +157,6 @@ export function reconcileCorpScoreProjects({
   const remoteCreationUnlockScoreProjects = candidates.flatMap((candidate) =>
     corpRemoteCreationUnlockScoreProjects(input, candidate),
   );
-  const nextTurnScoreContinuationProjects =
-    corpNextTurnScoreContinuationProjects(input, candidates);
   const currentInstalledScore = nextTurnScoreContinuationProjects.find(
     (project) => project.sameTurnCloseout,
   );

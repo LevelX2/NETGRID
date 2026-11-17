@@ -21,7 +21,7 @@ import {
   corpHostedCreditBankProfile,
   corpImmediateEconomyGainFromHint,
   corpRezHostedCreditPayoutProfile,
-} from "../../runtime/corp-canonical-card-facts";
+} from "../../runtime/corp-canonical-credit-facts";
 import { corpDefenseReserveNeeds } from "../defense/corp-defense-funding-facts";
 import { corpCandidatePreservesVoluntaryDrawHorizon } from "../../runtime/corp-draw-action-facts";
 import { corpVoluntaryDrawLeavesUnsafeMandatoryHorizon } from "../../runtime/corp-draw-admission";

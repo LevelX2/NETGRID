@@ -141,6 +141,17 @@ it("funds the exact installed decoy ICE before committing the last credit elsewh
   ).toContain("plan:corp.ambush_and_bluff:");
   expect(next.state.corp.credits).toBe(5);
 });
+it("does not count next-run Bad Publicity as cash extracted by bait ICE", () => {
+  const state = fixture(DOG, 6);
+  state.corp.badPublicity = 5;
+  const decisionInput = input(state);
+  expect(decisionInput.playerView.runnerNextRunBadPublicityCredits).toBe(5);
+  const server = decisionInput.playerView.servers.find((entry) => entry.id === "remote_1")!;
+  expect(
+    corpBluffDefenseNeed(decisionInput, server.id, server.root[0]!.instanceId, 0),
+  ).toBeUndefined();
+});
+
 it("rezzes funded bait ICE, charges an actual break and only then recycles the bait", () => {
   let state = startRun(fixture());
   const first = chooseAndApply(state, "corp");

@@ -3356,6 +3356,21 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
+  it("does not treat a non-credit action amount as immediate income", () => {
+    const base = gainCreditAction("ordinary-gain");
+    const action: LegalAction = {
+      ...base,
+      actionId: "other-event",
+      type: "play_event",
+      payload: { effectKind: "damage", amount: 4 },
+    };
+    const input = aiInput({ credits: 4, stateVersion: 2, servers: [server("hq")], legalActions: [base, action] });
+    expect(buildRunnerEconomyPosture({ input }).preferredEconomyRoute).toBe("basic_credit_fallback");
+    action.payload = { gainCreditsAmount: 4 };
+    const withQuotedGain = { ...input, legalActions: [base, action] };
+    expect(buildRunnerEconomyPosture({ input: withQuotedGain }).preferredEconomyRoute).toBe("burst_event");
+  });
+
   it("uses structured hosted-credit payloads and ignores label-only bank cashout text", () => {
     const labelOnlyInput = aiInput({
       credits: 0,

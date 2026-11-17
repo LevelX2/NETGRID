@@ -3661,6 +3661,7 @@ function buildCorpDomain(
   const scorelineFeasibility = corpScorelineFeasibilityForDecisionInput(input);
   const {
     directScoreProjects,
+    nextTurnScoreContinuationProjects,
     recentlyCompromisedRemoteIds,
     residentScoreDefenseBinding,
     residentScoreAgendaInstanceId,
@@ -3703,6 +3704,7 @@ function buildCorpDomain(
     candidates,
     proposedAmbushes,
     directScoreProjects,
+    nextTurnScoreContinuationProjects,
     recentlyCompromisedRemoteIds,
     residentScoreDefenseBinding,
     residentScoreAgendaInstanceId,

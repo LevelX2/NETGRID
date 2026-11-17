@@ -4,7 +4,7 @@ import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import {
   corpConditionalScoreCreditProfile,
   corpUnconditionalScoreCreditGain,
-} from "../../runtime/corp-canonical-card-facts";
+} from "../../runtime/corp-canonical-credit-facts";
 import { corpFundedCentralProtectionReserve } from "../defense/corp-server-protection-reserve";
 import { corpSpendConsumesKnownCentralRezReserve } from "../defense/corp-defense-domain-signals";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";

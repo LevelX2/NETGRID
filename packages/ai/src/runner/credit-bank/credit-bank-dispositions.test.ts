@@ -3,6 +3,14 @@ import { runnerCreditBankActionDispositions } from "./credit-bank-dispositions";
 import type { RunnerCreditBankSignal } from "./credit-bank-types";
 
 describe("credit-bank dispositions", () => {
+  it("does not reject an action admitted by a sibling bank route", () => {
+    const rejected = signal({ rejectedActionIds: ["cashout", "hold", "hold"] });
+    const admitted = signal({ phase: "cash_out", actionIds: ["cashout"] });
+    expect(
+      runnerCreditBankActionDispositions([rejected, admitted], []),
+    ).toEqual([expect.objectContaining({ actionId: "hold" })]);
+  });
+
   it("rejects only the bound bank alternatives and preserves active routes of other economy owners", () => {
     const bank = signal({
       actionIds: ["load:broker-1"],

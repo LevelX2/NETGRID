@@ -10,6 +10,8 @@ const checkpointJson: unknown = JSON.parse(
   ),
 );
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
+import { corpOptionalStartDrawSignal } from "../../corp/hand-management/hand-start-draw";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -123,3 +125,17 @@ it.each(["funded", "unfunded", "agenda_in_hq", "occupied"] as const)(
     ]);
   },
 );
+
+
+it("refuses a stale optional start-draw choice before publishing its route", () => {
+  const { input } = fixture();
+  const choice = input.playerView.pendingChoice!;
+  const candidates = buildActionSemanticCandidates({
+    legalActions: input.legalActions,
+    observerSide: "corp",
+    stateVersion: input.playerView.stateVersion,
+  });
+  expect(corpOptionalStartDrawSignal(input, candidates)?.actionIds).toHaveLength(1);
+  choice.stateVersion -= 1;
+  expect(() => corpOptionalStartDrawSignal(input, candidates)).toThrow(/window_origin_missing/);
+});

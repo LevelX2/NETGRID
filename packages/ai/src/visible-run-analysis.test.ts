@@ -2238,7 +2238,10 @@ describe("shared runner run route quote", () => {
     });
   });
 
-  it("keeps lethal visible trace damage conditional before access", () => {
+  it.each([
+    { grip: 2, lethal: true, reachability: "conditional_access" },
+    { grip: 3, lethal: false, reachability: "guaranteed_access" },
+  ])("uses the exact flatline threshold for trace damage with $grip cards", ({ grip, lethal, reachability }) => {
     const path = assessKnownRezzedIcePath(
       [traceDamageIce("rd-trace-damage", 3)],
       [],
@@ -2247,14 +2250,14 @@ describe("shared runner run route quote", () => {
     const route = quoteRunnerRunRoute({
       path,
       availableCredits: 0,
-      runnerGripCount: 3,
+      runnerGripCount: grip,
     });
 
-    expect(route.reachability).toBe("conditional_access");
+    expect(route.reachability).toBe(reachability);
     expect(route.effects[0]).toMatchObject({
       kind: "damage",
       timing: "before_access",
-      canEndGameBeforeAccess: true,
+      canEndGameBeforeAccess: lethal,
     });
   });
 

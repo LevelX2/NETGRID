@@ -209,8 +209,9 @@ function routeEffectsForHazard(
       "damage",
       hazard.expectedDamage,
       false,
-      hazard.canCauseFlatlineBeforeAccess &&
-        hazard.expectedDamage >= runnerGripCount,
+      hazard.effectTiming === "before_access" &&
+        hazard.canCauseFlatlineBeforeAccess &&
+        hazard.expectedDamage > runnerGripCount,
     );
   }
   if (hazard.kind === "trace_trash") add("trash", undefined);

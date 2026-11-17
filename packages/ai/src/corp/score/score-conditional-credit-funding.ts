@@ -3,11 +3,13 @@ import { actionMatchesCurrentDecision } from "../../actions/current-legal-action
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import {
-  corpConditionalScoreCreditProfile,
-  corpScoreHostedCreditPayoutProfile,
   corpDefinitionIsMainPhasePassive,
   corpOperationCannotFundWithLastClick,
 } from "../../runtime/corp-canonical-card-facts";
+import {
+  corpConditionalScoreCreditProfile,
+  corpScoreHostedCreditPayoutProfile,
+} from "../../runtime/corp-canonical-credit-facts";
 import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-domain-signals";
 import { immediateCorpLiquidCreditGain } from "../economy/economy-routes";
 

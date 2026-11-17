@@ -3,14 +3,10 @@ import { describe, expect, it } from "vitest";
 import { createAiHintsByCard } from "../ai-hints";
 import {
   corpArchivesToHqOperationProfile,
-  corpConditionalScoreCreditProfile,
   corpDirectTagOperationProfile,
   corpDefinitionHasTraceSource,
   corpDefinitionHasTagSource,
   corpDefinitionHasTraceTagSource,
-  corpHostedCreditBankProfile,
-  corpScoreHostedCreditPayoutProfile,
-  corpImmediateEconomyGainFromHint,
   corpScoreConversionProfile,
   corpTaggedDamagePayoffProfile,
   corpTaggedCreditDenialOperationProfile,
@@ -18,6 +14,12 @@ import {
   corpTraceTagSourceProfile,
   corpPublicFixedOffServerRunProfiles,
 } from "./corp-canonical-card-facts";
+import {
+  corpConditionalScoreCreditProfile,
+  corpHostedCreditBankProfile,
+  corpScoreHostedCreditPayoutProfile,
+  corpImmediateEconomyGainFromHint,
+} from "./corp-canonical-credit-facts";
 
 const hints = createAiHintsByCard();
 

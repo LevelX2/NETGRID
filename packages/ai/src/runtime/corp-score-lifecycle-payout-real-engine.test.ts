@@ -8,7 +8,7 @@ import {
 } from "@netgrid/engine";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "./ai-decision-input";
-import { corpUnconditionalScoreCreditGain } from "./corp-canonical-card-facts";
+import { corpUnconditionalScoreCreditGain } from "./corp-canonical-credit-facts";
 import { corpScoreRestoresRezReserveBeforeRunnerTurn } from "../corp/score/score-reserve-restoration";
 import { createAiHintsByCard } from "../ai-hints";
 import type { DeckDefinition } from "@netgrid/shared";

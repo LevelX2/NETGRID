@@ -7,6 +7,7 @@ import {
   rolesForDeckDoctrineCard,
 } from "./deck-doctrine-card-roles";
 import { rolesMatch } from "./role-match";
+import type { AiDecisionInputWithDeckCapabilities } from "./runtime/ai-decision-input";
 
 export type OpeningHandEvaluation = {
   decision: "keep" | "mulligan";
@@ -470,30 +471,10 @@ type OpeningSemanticContext = {
   capabilityConfidence?: string;
 };
 
-type RunnerOpeningCapabilities = {
-  economyBankTools?: readonly unknown[];
-  breakerInventory?: ReadonlyArray<{
-    cardId?: string;
-    coverage?: readonly string[];
-    locations?: readonly string[];
-    confidence?: string;
-  }>;
-  searchAccess?: {
-    tools?: ReadonlyArray<{
-      cardId: string;
-      status?: string;
-      canSearchBreakers?: boolean;
-      confidence?: string;
-    }>;
-  };
-};
-
 function runnerOpeningCapabilityBreakerDefinitionIds(
   input: AiDecisionInput,
 ): Set<string> {
-  const semanticInput = input as AiDecisionInput & {
-    ownDeckCapabilities?: { runner?: RunnerOpeningCapabilities };
-  };
+  const semanticInput = input as AiDecisionInputWithDeckCapabilities;
   return new Set(
     (semanticInput.ownDeckCapabilities?.runner?.breakerInventory ?? [])
       .filter(
@@ -510,22 +491,7 @@ function runnerOpeningCapabilityBreakerDefinitionIds(
 function openingSemanticContext(
   input: AiDecisionInput,
 ): OpeningSemanticContext {
-  const semanticInput = input as AiDecisionInput & {
-    ownDeckStrategyProfile?: {
-      primaryStrategies: string[];
-      secondaryStrategies: string[];
-      warnings: string[];
-    };
-    ownDeckCapabilities?: {
-      confidence?: string;
-      runner?: RunnerOpeningCapabilities;
-      corp?: {
-        remotePlanProfile?: {
-          remoteProtectionToolsKnown?: number;
-        };
-      };
-    };
-  };
+  const semanticInput = input as AiDecisionInputWithDeckCapabilities;
   const strategyProfile = semanticInput.ownDeckStrategyProfile;
   const strategies = sortedUnique([
     ...(strategyProfile?.primaryStrategies ?? []),
@@ -559,9 +525,7 @@ function openingSemanticContext(
 
 function openingExecutableBreakerSearchToolCount(
   input: AiDecisionInput,
-  semanticInput: AiDecisionInput & {
-    ownDeckCapabilities?: { runner?: RunnerOpeningCapabilities };
-  },
+  semanticInput: AiDecisionInputWithDeckCapabilities,
 ): number {
   const runnerCapabilities = semanticInput.ownDeckCapabilities?.runner;
   const hasKnownStandardCoverage =

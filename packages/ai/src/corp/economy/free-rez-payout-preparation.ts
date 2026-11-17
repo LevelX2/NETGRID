@@ -4,7 +4,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import {
   corpImmediateEconomyGainFromHint,
   corpRezHostedCreditPayoutProfile,
-} from "../../runtime/corp-canonical-card-facts";
+} from "../../runtime/corp-canonical-credit-facts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";

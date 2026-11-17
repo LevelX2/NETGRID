@@ -12,7 +12,7 @@ import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { uniqueBy } from "../../runtime/collection";
-import { corpHostedCreditBankProfile } from "../../runtime/corp-canonical-card-facts";
+import { corpHostedCreditBankProfile } from "../../runtime/corp-canonical-credit-facts";
 import { corpCandidateProjectsCardDraw } from "../../runtime/corp-draw-action-facts";
 import { corpDrawHorizonPreservationSignals } from "./hand-draw-horizon";
 import {

@@ -194,7 +194,7 @@ it("retains the complete cost certificate after installing the score target", ()
 });
 
 import { corpInstalledScoreResourceCost } from "../../corp/score/score-reserve-restoration";
-import { corpConditionalScoreCreditProfile } from "../../runtime/corp-canonical-card-facts";
+import { corpConditionalScoreCreditProfile } from "../../runtime/corp-canonical-credit-facts";
 it("uses real conditional-card semantics in the payout contrast", () => {
   expect(
     corpConditionalScoreCreditProfile("onr_v1_196_corporate-war"),

@@ -6,7 +6,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
-import { corpConditionalScoreCreditProfile } from "../../runtime/corp-canonical-card-facts";
+import { corpConditionalScoreCreditProfile } from "../../runtime/corp-canonical-credit-facts";
 import {
   assessBestFundedCorpScoreProtection,
   corpFundedScoreProtectionCertifiesBinding,

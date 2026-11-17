@@ -5,7 +5,7 @@ import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
-import { corpConditionalScoreCreditProfile } from "../../runtime/corp-canonical-card-facts";
+import { corpConditionalScoreCreditProfile } from "../../runtime/corp-canonical-credit-facts";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   restoreAiRuntimeCheckpoint,

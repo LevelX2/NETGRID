@@ -8,7 +8,7 @@ import {
 } from "../../plans/tactical-plan-corp-score-conversion";
 import { corpVisibleCardEconomyWithdrawals } from "../economy/economy-signals";
 import { corpRemoteContestabilityAssessment } from "../defense/corp-remote-contestability";
-import { corpRezHostedCreditPayoutProfile } from "../../runtime/corp-canonical-card-facts";
+import { corpRezHostedCreditPayoutProfile } from "../../runtime/corp-canonical-credit-facts";
 import { corpAgendaInstallHasCertifiedNearTermScoreHorizon } from "./score-project-signals";
 import { corpScorePriorityClass } from "./corp-score-priority";
 import { canonicalTurnPlanningSerialize } from "../../plans/turn-planning-contracts";
