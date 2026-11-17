@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { afterEach, describe, expect, it } from "vitest";
 import { bindSyntheticAgendaStealQuotes } from "./agenda-steal-quotes.test-support";
 import { chooseRunnerAction } from "./index";
@@ -830,7 +831,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       expect.arrayContaining([
         "plan_module:runner.economy",
         "plan_step_capability:gain_general_liquid_credits",
-        "plan_priority_delegated_from:plan:runner.develop_board_and_hand:card%3Aonr_v1_108_score",
+        "plan_priority_delegated_from:plan:runner.develop_board_and_hand:card%3A320",
       ]),
     );
   });
@@ -857,7 +858,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         actionType: "net_damage",
         damageType: "net",
         sourceTitle: "Dedicated Response Team",
-        sourceDefinitionId: "onr_v1_076_dedicated-response-team",
+        sourceDefinitionId: syntheticCardDefinitionId("onr_v1_076_dedicated-response-team"),
       }),
     ];
 
@@ -971,7 +972,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     input.playerView.own.gripOrHq = [];
     input.playerView.own.rig = [
       visibleCard("seeya-instance", "runner", "hardware", {
-        definitionId: "onr_v1_151_seeya",
+        definitionId: syntheticCardDefinitionId("onr_v1_151_seeya"),
         title: "SeeYa",
       }),
     ];

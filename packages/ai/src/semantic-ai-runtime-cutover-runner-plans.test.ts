@@ -48,7 +48,7 @@ function wallOfStatic(instanceId: string) {
 
 function brokerAbilityPayload(
   route: "build" | "cash_out",
-  sourceCardInstanceId = 366,
+  sourceCardInstanceId = "366",
 ) {
   const capabilityKey =
     route === "build" ? "store_credits" : "withdraw_credits";
@@ -57,7 +57,7 @@ function brokerAbilityPayload(
     sourceDefinitionId: 366,
     cardImplementationCapabilityBindingKind:
       "card_spec_capability_key" as const,
-    cardImplementationAbilityId: `onr_v1_154_broker:${capabilityKey}`,
+    cardImplementationAbilityId: `366:${capabilityKey}`,
     cardImplementationAbilityKey: capabilityKey,
     ...(route === "build"
       ? { cardImplementationAddsHostedCredits: true, hostedCreditAddAmount: 3 }
@@ -302,7 +302,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("archives"),
       server(
         "remote_1",
-        [wallOfStatic(491)],
+        [wallOfStatic("491")],
         [visibleCard(588, "corp", "agenda")],
       ),
     ];
@@ -559,7 +559,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "3 Credits auf Broker legen",
         { credits: 0 },
         {
-          source: 366,
+          source: "366",
           payload: brokerAbilityPayload("build"),
         },
       ),
@@ -609,7 +609,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "3 Credits auf Broker legen",
         { credits: 0 },
         {
-          source: 366,
+          source: "366",
           payload: brokerAbilityPayload("build"),
         },
       ),
@@ -660,9 +660,9 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "Install Broker",
         { credits: 3, clicks: 1 },
         {
-          source: 366,
+          source: "366",
           payload: {
-            cardId: 366,
+            cardId: "366",
             sourceDefinitionId: 366,
           },
         },
@@ -828,7 +828,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "Broker: 3 Credits auf Broker legen",
         { credits: 0 },
         {
-          source: 366,
+          source: "366",
           payload: brokerAbilityPayload("build"),
         },
       ),
@@ -839,7 +839,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "Broker: Credits von Broker nehmen",
         { credits: 0 },
         {
-          source: 366,
+          source: "366",
           payload: brokerAbilityPayload("cash_out"),
         },
       ),
@@ -903,7 +903,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "Broker: Credits von Broker nehmen",
         { credits: 0 },
         {
-          source: 366,
+          source: "366",
           payload: brokerAbilityPayload("cash_out"),
         },
       ),
@@ -941,7 +941,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "Credits von Broker nehmen",
         { credits: 0 },
         {
-          source: 366,
+          source: "366",
           payload: brokerAbilityPayload("cash_out"),
         },
       ),
@@ -987,7 +987,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "Broker: 3 Credits auf Broker legen",
         { credits: 0 },
         {
-          source: 366,
+          source: "366",
           payload: brokerAbilityPayload("build"),
         },
       ),
@@ -998,7 +998,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "Broker: Credits von Broker nehmen",
         { credits: 0 },
         {
-          source: 366,
+          source: "366",
           payload: brokerAbilityPayload("cash_out"),
         },
       ),
@@ -1008,7 +1008,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "install_card",
         "The Short Circuit installieren",
         { credits: 1 },
-        { source: 389 },
+        { source: "389" },
       ),
     ]);
     input.playerView.own.credits = 13;
@@ -1610,7 +1610,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "install_card",
         "Install Broker",
         { credits: 3 },
-        { source: 366 },
+        { source: "366" },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -1635,7 +1635,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     });
     expect(decision.actionId).not.toContain("store_credits");
     expect(JSON.stringify(decision.decisionDebug)).not.toContain(
-      '"actionId":"onr_v1_154_broker:store_credits"',
+      '"actionId":"366:store_credits"',
     );
   });
 
@@ -1980,12 +1980,12 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expect(planFirst?.leafExecutorInstanceId).toBe(firstRoot);
     expect(planFirst?.route).toMatchObject({
       actionId: "install-interface",
-      capabilityId: "develop_onr_v1_139_r-and-d-interface",
+      capabilityId: "develop_351",
     });
     expect(planFirst?.turnPlanning?.commitment?.continuation).toMatchObject({
       status: "retained",
       previousOwnerRootPlanInstanceId: firstRoot,
-      intendedNextMilestoneId: "develop_onr_v1_139_r-and-d-interface",
+      intendedNextMilestoneId: "develop_351",
       boundaryKind: "plan_internal_continuation",
       evidenceCodes: expect.arrayContaining([
         "continuation_action_id:install-interface",
@@ -2382,7 +2382,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "install_card",
         "Install Top Runners' Conference",
         { credits: 0 },
-        { source: 396 },
+        { source: "396" },
       ),
       legalAction(
         "run-rd",
@@ -2488,7 +2488,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ];
     input.eventTail = [
       {
-        eventId: "conference-start-credit",
+        eventId: 3,
         type: "automatic_effects_resolved",
         stateVersionBefore: 1,
         stateVersionAfter: 2,
@@ -2550,7 +2550,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     input.eventTail = [
       {
-        eventId: "conference-start-credit",
+        eventId: 3,
         type: "automatic_effects_resolved",
         stateVersionBefore: 1,
         stateVersionAfter: 2,

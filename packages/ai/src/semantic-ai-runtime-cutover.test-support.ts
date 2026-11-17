@@ -1,9 +1,11 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { chooseRunnerAction } from "./index";
 import type { AiDeckStrategyProfile } from "./deck-doctrine-strategy";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import type { SemanticRuntimeChoice } from "./runtime/semantic-runtime-types";
 import {
   CURRENT_RULES_BASELINE,
+  ORIGINALSET_DEFAULT_DECKS,
   CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
   type AiDifficulty,
@@ -243,7 +245,7 @@ export function bindSyntheticAgendaInstallQuotes(
 export function identityCard(side: Side): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: ORIGINALSET_DEFAULT_DECKS[side].identity,
     title: `${side} identity`,
     owner: side,
     controller: side,
@@ -253,7 +255,7 @@ export function identityCard(side: Side): VisibleCard {
 }
 
 export function visibleCard(
-  instanceId: string,
+  source: number | string,
   side: Side,
   type: NonNullable<VisibleCard["type"]>,
   overrides: Omit<
@@ -261,9 +263,10 @@ export function visibleCard(
     "instanceId" | "owner" | "controller" | "type" | "known"
   > = {},
 ): VisibleCard {
+  const instanceId = String(source);
   return {
     instanceId,
-    definitionId: instanceId,
+    definitionId: typeof source === "number" ? source : syntheticCardDefinitionId(source),
     title: instanceId,
     owner: side,
     controller: side,
@@ -505,16 +508,16 @@ export function tacticalDebugItems(
 }
 
 export function rdAccessEvent(
-  eventId: string,
+  eventLabel: string,
   stateVersionBefore: number,
   cardDefinitionId: number,
 ): PublicGameEvent {
   return {
-    eventId,
+    eventId: stateVersionBefore + 2,
     type: "access_card",
     stateVersionBefore,
     stateVersionAfter: stateVersionBefore + 1,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateHashAfter: `fnv1a:${eventLabel}`,
     visibilityClass: "public",
     publicPayload: {
       actor: "runner",
@@ -526,17 +529,17 @@ export function rdAccessEvent(
 }
 
 export function publicEvent(
-  eventId: string,
+  eventLabel: string,
   actionType: string,
   stateVersionBefore: number,
   publicPayload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
-    eventId,
+    eventId: stateVersionBefore + 2,
     type: actionType,
     stateVersionBefore,
     stateVersionAfter: stateVersionBefore + 1,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateHashAfter: `fnv1a:${eventLabel}`,
     visibilityClass: "public",
     publicPayload,
   };
