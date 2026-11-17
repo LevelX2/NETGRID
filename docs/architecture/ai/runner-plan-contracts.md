@@ -639,6 +639,11 @@ Siegagenda ihren Steal finanziert. Der Zentraldruck bindet den Anspruch an
 die konkrete Archiv-Action. Normale und spekulative Zugriffe behalten ihre
 jeweiligen Prioritätsklassen.
 
+Die Aktionsdiagnostik jeder Zentralroute führt den ausgewerteten Belief-Stand.
+Ein öffentlich beobachteter Corp-Draw invalidiert die bekannte R&D-Spitze
+und verändert die Zugriffsbewertung. Die D112-Gegenprobe hält die LegalActions
+fest und prüft den Wechsel des tatsächlichen Zugriffsziels von R&D zu HQ.
+
 Die Informationsroute bewertet ein öffentlich beobachtetes kostenloses
 Run-Ende im laufenden Zug: Folgt auf den Basisrun ausschließlich kostenloses
 ICE-Rezzen und ein von der Engine bestätigtes End-the-Run-Fenster ohne

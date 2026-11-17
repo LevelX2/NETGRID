@@ -446,6 +446,100 @@ describe("Runner contest recovery", () => {
     });
   });
 
+  it("revalues the same legal accesses when Corp draws the known R&D top", () => {
+    function decide(corpAction: "gain_credit" | "mandatory_draw") {
+      resetResidentPlanPortfolioMemory();
+      const input = capturedInput(terminalSpendReplay);
+      const view = input.playerView;
+      const before = view.stateVersion;
+      const beforeTurn = view.turnSerial!;
+      view.stateVersion += 2;
+      view.turnSerial = beforeTurn + 2;
+      input.legalActions = input.legalActions.map((action) => ({
+        ...action,
+        expiresAtStateVersion: view.stateVersion,
+      }));
+      for (const server of view.servers) {
+        if (server.runnerAgendaStealCostQuote)
+          server.runnerAgendaStealCostQuote.stateVersion = view.stateVersion;
+      }
+      const agenda = view.opponent.scoreArea!.find(
+        (card) => card.agendaPoints === 3,
+      )!;
+      const events: PublicGameEvent[] = [
+        {
+          eventId: "evt_observed_rd_top",
+          type: "access_card",
+          stateVersionBefore: before,
+          stateVersionAfter: before + 1,
+          turnSerial: beforeTurn,
+          stateHashAfter: "fnv1a:ab000001",
+          visibilityClass: "hidden_info_barrier",
+          publicPayload: {
+            actor: "runner",
+            actionType: "access_card",
+            serverId: "rd",
+            serverLabel: "R&D",
+            accessIndex: 0,
+            baseAccessCount: 1,
+            effectiveAccessCount: 1,
+            cardDefinitionId: agenda.definitionId!,
+          },
+        },
+        {
+          eventId: "evt_corp_after_rd_access",
+          type: corpAction,
+          stateVersionBefore: before + 1,
+          stateVersionAfter: view.stateVersion,
+          turnSerial: beforeTurn + 1,
+          stateHashAfter: "fnv1a:ab000002",
+          visibilityClass: "public",
+          publicPayload: { actor: "corp", actionType: corpAction },
+        },
+      ];
+      view.publicEvents.push(...events);
+      input.eventTail.push(...events);
+      const sideSafe = { ...input, ...buildAiDecisionInputDto(input) };
+      const targets = evaluateRunnerRunTargets({ input: sideSafe });
+      const decision = chooseAiAction(sideSafe);
+      const selected = targets.find(
+        (target) => target.actionId === decision.actionId,
+      );
+      const rd = targets.find(
+        (target) => target.actionId === "runner.start_run.rd",
+      );
+      const rdDebug = decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === rd?.actionId,
+      );
+      return {
+        legalActions: sideSafe.legalActions,
+        selected,
+        rd,
+        rdDebug,
+        decision,
+      };
+    }
+    const stillKnown = decide("gain_credit");
+    const afterDraw = decide("mandatory_draw");
+
+    expect(stillKnown.legalActions).toEqual(afterDraw.legalActions);
+    expect(stillKnown.selected).toMatchObject({
+      accessServerId: "rd",
+      accessPayoff: "agenda",
+    });
+    expect(afterDraw.selected).toMatchObject({ accessServerId: "hq" });
+    expect(stillKnown.rd?.score).toBeGreaterThan(afterDraw.rd!.score);
+    expect(stillKnown.rd?.evidence).toContain(
+      "rnd_freshness:stale_known_same_top",
+    );
+    expect(afterDraw.rd?.evidence).toContain(
+      "rd_known_top_drawn_by_corp:evt_corp_after_rd_access",
+    );
+    expect(afterDraw.rdDebug?.whyNot).toContain(
+      "central_memory_payoff:invalidated",
+    );
+  });
+
   it("keeps the reserve when the remote can be contested in the last click", () => {
     const input = capturedInput(terminalSpendReplay);
     const blocked = centralAndRemoteRoutes(input);

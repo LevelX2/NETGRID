@@ -1506,6 +1506,13 @@ export function buildRunnerCentralPressureSignals({
                       `run_route_opportunity_cost:${opportunityQuote?.opportunityCost ?? 0}`,
                       `run_route_effective_score:${candidate.score}`,
                       `run_route_relative_value:${candidate.score - evaluation.score}`,
+                      ...candidate.evidence.filter(
+                        (code) =>
+                          code.startsWith("central_memory_payoff:") ||
+                          code.startsWith("rnd_freshness:") ||
+                          code.startsWith("rd_known_top_drawn_by_corp:") ||
+                          code.startsWith("hq_knownness_payoff:"),
+                      ),
                       ...(opportunityQuote?.evidence ?? []),
                       ...(multiRunRoute?.evidence ?? []),
                       ...(multiRunRoute

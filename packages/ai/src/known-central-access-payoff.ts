@@ -101,7 +101,10 @@ export function evaluateKnownCentralAccessPayoff(
     return applyRdAgendaDistributionPressure(
       input,
       beliefState,
-      unknownCentralPayoff("rd", ["central_memory_payoff:invalidated"]),
+      unknownCentralPayoff("rd", [
+        "central_memory_payoff:invalidated",
+        ...(freshness?.invalidationReasons ?? []),
+      ]),
     );
   if (freshness.freshness === "fresh_after_top_removed") {
     return {
