@@ -44,7 +44,7 @@ import { SIDE_PAYLOAD_EVENT_TAIL_LIMIT } from "./multiplayer-payload";
 import { preserveStoppedSqliteTarget } from "./storage-restore-snapshot";
 import { isStateSnapshotId, type StateSnapshotId } from "./state-snapshot-id";
 
-export const SQLITE_STORAGE_SCHEMA_VERSION = 7;
+export const SQLITE_STORAGE_SCHEMA_VERSION = 8;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
 export const DEFAULT_SQLITE_STORAGE_PATH =
   "data/runtime/multiplayer/netgrid.sqlite";

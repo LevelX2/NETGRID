@@ -17,7 +17,7 @@ describe("public counter mutations", () => {
       publicCounterMutation({
         operation: "remove",
         counterType: "spy",
-        scope: { kind: "server", serverId: "remote_1" },
+        scope: { kind: "server", serverId: "r1" },
         before: 2,
         after: 1,
       }),
@@ -27,7 +27,7 @@ describe("public counter mutations", () => {
       publicCounterMutation({
         operation: "remove",
         counterType: "spy",
-        scope: { kind: "server", serverId: "remote_1" },
+        scope: { kind: "server", serverId: "r1" },
         before: 1,
         after: 2,
       }),
@@ -38,7 +38,7 @@ describe("public counter mutations", () => {
     const remote = publicCounterMutation({
       operation: "purge",
       counterType: "virus",
-      scope: { kind: "server", serverId: "remote_2" },
+      scope: { kind: "server", serverId: "r2" },
       before: 3,
       after: 0,
     });
@@ -73,7 +73,7 @@ describe("public counter mutations", () => {
     const mutation = publicCounterMutation({
       operation: "remove",
       counterType: "spy",
-      scope: { kind: "server", serverId: "remote_1" },
+      scope: { kind: "server", serverId: "r1" },
       before: 1,
       after: 0,
     });
@@ -97,7 +97,7 @@ describe("public counter mutations", () => {
       visibility: "public",
       expiresAtStateVersion: 1,
       payload: {
-        serverId: "remote_1",
+        serverId: "r1",
         counterType: "spy",
         removedCounterAmount: 1,
         remainingCounters: 1,
@@ -106,7 +106,7 @@ describe("public counter mutations", () => {
 
     expect(publicCounterMutationsForEvent(state, state, publicAction)).toEqual([
       expect.objectContaining({
-        scope: { kind: "server", serverId: "remote_1" },
+        scope: { kind: "server", serverId: "r1" },
         before: 2,
         amount: 1,
         after: 1,
@@ -125,13 +125,13 @@ describe("public counter mutations", () => {
       cardInstances: {},
       corp: { servers: [] },
       purgeableRunnerVirusCounters: {
-        servers: { remote_1: { garbage: 2 } },
+        servers: { r1: { garbage: 2 } },
         effects: {
-          first: { counterType: "garbage", amount: 1, serverId: "remote_1" },
+          first: { counterType: "garbage", amount: 1, serverId: "r1" },
           second: {
             counterType: "garbage",
             amount: 2,
-            serverId: "remote_1",
+            serverId: "r1",
           },
           global: { counterType: "thought", amount: 1 },
         },
@@ -164,7 +164,7 @@ describe("public counter mutations", () => {
       }),
       expect.objectContaining({
         counterType: "garbage",
-        scope: { kind: "server", serverId: "remote_1" },
+        scope: { kind: "server", serverId: "r1" },
         before: 5,
         amount: 5,
         after: 0,

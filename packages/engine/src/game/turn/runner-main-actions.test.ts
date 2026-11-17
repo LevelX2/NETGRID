@@ -388,7 +388,7 @@ describe("runner main action generation", () => {
     expect(action?.costs).toEqual([{ clicks: 2, credits: 0 }]);
     expect(action?.abilityRef).toMatchObject({
       sourceCardInstanceId: eventCardId,
-      sourceAbilityId: expect.stringContaining("45:"),
+      sourceAbilityId: 59,
     });
   });
 
@@ -403,7 +403,7 @@ describe("runner main action generation", () => {
           sourceCardId: "pirate_1",
           sourceDefinitionId: 174,
           sourceTitle: "Pirate Broadcast",
-          pendingServerIds: ["remote_99"],
+          pendingServerIds: ["r99"],
           successfulServerIds: ["hq"],
           anyUnsuccessful: false,
           onAllSuccessful: "gain_runner_event_agenda_point",

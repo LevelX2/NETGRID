@@ -82,7 +82,7 @@ describe("Classic Silent Impact v2.2b", () => {
     const sourceId = addRezzedCorpRootForTest(
       state,
       PROTECTED_RESOURCES,
-      "remote_1",
+      "r1",
       "protected",
     );
 

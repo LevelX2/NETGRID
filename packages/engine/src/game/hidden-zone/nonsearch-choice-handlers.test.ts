@@ -659,7 +659,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     const ice = "ice_1" as CardInstanceId;
     const calls: Array<{ serverId: string; iceId: CardInstanceId }> = [];
     const server = {
-      id: "remote_1" as Exclude<ServerId, "new_remote">,
+      id: "r1" as Exclude<ServerId, "new_remote">,
       kind: "remote",
       label: "Remote 1",
       ice: [ice],
@@ -688,10 +688,10 @@ describe("hidden-zone nonsearch choice handlers", () => {
     host.playerAction = playerAction([`ice_${ice}`]);
     const result = handleHiddenZoneNonSearchChoice(host);
     expect(result.handled).toBe(true);
-    expect(calls).toEqual([{ serverId: "remote_1", iceId: ice }]);
+    expect(calls).toEqual([{ serverId: "r1", iceId: ice }]);
     expect(host.legalAction.payload).toMatchObject({
       autoPassChosenIce: true,
-      serverId: "remote_1",
+      serverId: "r1",
       chosenIcePosition: 0,
     });
   });

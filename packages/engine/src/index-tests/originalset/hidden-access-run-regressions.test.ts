@@ -210,7 +210,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       remoteState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     remoteState = passRootRezWindowBeforeAccessIfOpen(remoteState);
     remoteState = apply(
@@ -252,7 +252,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       rezzedRemoteState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     rezzedRemoteState = apply(
       rezzedRemoteState,
@@ -623,7 +623,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     };
     const blackIceId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       443,
     );
     const nonBlackIceId = putCorpIceOnServer(
@@ -638,7 +638,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       blackRunState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     const blackRez = mustAction(
       blackRunState,
@@ -686,12 +686,12 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     putCorpRootInRemote(exposeState, 606);
     const firstIceId = putCorpIceOnServer(
       exposeState,
-      "remote_1",
+      "r1",
       589,
     );
     const secondIceId = putCorpIceOnServer(
       exposeState,
-      "remote_1",
+      "r1",
       590,
     );
     exposeState.cardInstances[firstIceId] = {
@@ -707,7 +707,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     exposeState.runnerTurnFlags = {
       ...exposeState.runnerTurnFlags!,
       successfulRunThisTurn: true,
-      lastSuccessfulRunServerId: "remote_1",
+      lastSuccessfulRunServerId: "r1",
     };
     const exposeAction = mustAction(
       exposeState,
@@ -777,8 +777,8 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     );
     putCorpIceOnServer(revealState, "hq", 589);
     putCorpRootInRemote(revealState, 606);
-    putCorpIceOnServer(revealState, "remote_1", 590);
-    putCorpIceOnServer(revealState, "remote_1", 601);
+    putCorpIceOnServer(revealState, "r1", 590);
+    putCorpIceOnServer(revealState, "r1", 601);
     const revealAction = mustAction(
       revealState,
       "runner",
@@ -819,7 +819,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       publicRevealKind: "expose",
       revealedCount: 2,
       publicRevealDefinitionIds: "589,601",
-      exposedServerIds: "hq,remote_1",
+      exposedServerIds: "hq,r1",
       exposedPositionKeys: "ice:0,ice:1",
     });
     expect(
@@ -1182,11 +1182,9 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
   });
 
   it("keeps Vacuum Link and Pacifica Regional AI deterministic and revalidated", () => {
-    for (const scenario of [
-      { seed: "spotcheck-vacuum-3", die: 1, rewind: true },
-      { seed: "spotcheck-vacuum-1", die: 4, rewind: false },
-    ] as const) {
-      let state = toRunnerTurn(v190CardReleaseGame(scenario.seed));
+    const rewindOutcomes = new Set<boolean>();
+    for (let seedIndex = 0; seedIndex < 8 && rewindOutcomes.size < 2; seedIndex += 1) {
+      let state = toRunnerTurn(v190CardReleaseGame(`spotcheck-vacuum-${seedIndex}`));
       state.runner.credits = 40;
       state.corp.credits = 20;
       moveRunnerCardToGrip(state, 217);
@@ -1275,11 +1273,16 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
           (action) => action.type === "continue_run",
         );
       }
+      const value = state.randomDrawRecords.at(-1)?.value;
+      expect(value).toEqual(expect.any(Number));
+      const die = Math.floor(value! * 6) + 1;
+      const shouldRewind = die <= 3;
+      rewindOutcomes.add(shouldRewind);
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "continue_run",
-        rezzedIceRewindDieRoll: scenario.die,
+        rezzedIceRewindDieRoll: die,
       });
-      if (scenario.rewind) {
+      if (shouldRewind) {
         expect(state.pendingChoice).toMatchObject({
           side: "runner",
           source: "card_implementation.vacuum_link_rewind",
@@ -1288,12 +1291,13 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
         state = applyChoice(state, "runner", "resume_from_rezzed_ice_back");
       }
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-        rezzedIceRewindApplied: scenario.rewind,
+        rezzedIceRewindApplied: shouldRewind,
       });
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));
     }
+    expect(rewindOutcomes).toEqual(new Set([true, false]));
     let pacificaState = apply(
       createGameAfterSetup({
         seed: "spotcheck-pacifica",
@@ -1889,7 +1893,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     const trash = mustAction(
@@ -1953,7 +1957,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       assetState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     assetState = apply(
       assetState,
@@ -2020,7 +2024,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
@@ -2083,7 +2087,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       upgradeState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     upgradeState = passRootRezWindowBeforeAccessIfOpen(upgradeState);
     upgradeState = apply(
@@ -2299,7 +2303,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         action.payload?.placement === "root",
     );
     const hiddenRunnerRoot = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )?.root[0];
     expect(hiddenRunnerRoot?.known).toBe(false);
     expect(hiddenRunnerRoot?.counterDisplays).toBeUndefined();
@@ -3136,7 +3140,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(
@@ -3183,7 +3187,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(
@@ -3342,8 +3346,8 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         rezzed: true,
       };
     }
-    putCorpIceOnServer(state, "remote_1", 436);
-    state = encounterIce(state, "remote_1", 436);
+    putCorpIceOnServer(state, "r1", 436);
+    state = encounterIce(state, "r1", 436);
 
     const continueAction = mustAction(
       state,
@@ -3490,7 +3494,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         "runner",
         (action) =>
           action.type === "start_run" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       );
       state = apply(
         state,
@@ -3551,7 +3555,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(
@@ -3612,7 +3616,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
@@ -4074,7 +4078,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     };
     const installedIceId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       589,
     );
     const hqIceId = moveCorpCardToHq(state, 590);
@@ -4086,7 +4090,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     const swapAction = mustAction(
       state,
@@ -4151,7 +4155,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 
     state = applyChoice(state, "corp", `card_${hqIceId}`);
     const remote = state.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(remote?.ice[0]).toBe(hqIceId);
     expect(state.corp.hq).toContain(installedIceId);
@@ -4159,7 +4163,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(state.cardInstances[hqIceId]).toMatchObject({
       faceup: false,
       rezzed: false,
-      zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverIce", serverId: "r1" },
     });
     expect(state.cardInstances[installedIceId]).toMatchObject({
       faceup: false,
@@ -4167,7 +4171,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       zone: { side: "corp", zone: "hq" },
     });
     const runnerServer = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(runnerServer?.ice[0]?.known).toBe(false);
     expect(serializedDefinitionReferences(JSON.stringify(runnerServer))).not.toContain(590);
@@ -4230,7 +4234,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     };
     const installedIceId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       589,
     );
     const hqIceId = moveCorpCardToHq(state, 590);
@@ -4242,7 +4246,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     expect(
       getLegalActions(state, "corp").some(
@@ -4270,7 +4274,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 
     state = applyChoice(state, "corp", `card_${hqIceId}`);
     const remote = state.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(remote?.ice[0]).toBe(hqIceId);
     expect(state.corp.hq).toContain(installedIceId);
@@ -4924,7 +4928,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
 
     const vaporAction = getLegalActions(state, "corp").find(
@@ -4953,7 +4957,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     state.corp.credits = 20;
     const vaporId = putCorpRootInRemote(state, 559);
     state.cardInstances[vaporId]!.advancementCounters = 1;
-    const iceId = putCorpIceOnServer(state, "remote_1", 590);
+    const iceId = putCorpIceOnServer(state, "r1", 590);
     state.cardInstances[iceId]!.definitionId =
       90;
     state = toRunnerTurnFromCorpMain(state);
@@ -4962,7 +4966,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "corp", (action) => action.type === "rez_ice");
     state = apply(

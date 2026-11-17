@@ -71,7 +71,7 @@ function makeState(): GameState {
       root: [],
     } as CorpServer,
     {
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Data Fort 1",
       ice: [OUTER_ICE_ID],
@@ -261,7 +261,7 @@ describe("run-core-execution", () => {
   it.each([
     ["hq" as const, 1],
     ["rd" as const, 0],
-    ["remote_1" as Exclude<ServerId, "new_remote">, 0],
+    ["r1" as Exclude<ServerId, "new_remote">, 0],
   ])("starts a run against %s at the outermost ICE", (serverId, iceIndex) => {
     const state = makeState();
     const { host, calls } = hostFor(state);

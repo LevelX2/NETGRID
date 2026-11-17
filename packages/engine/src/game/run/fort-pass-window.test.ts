@@ -526,14 +526,14 @@ describe("fort pass window", () => {
     state.cardInstances.ice_inner!.definitionId = 449;
     state.cardInstances.hq_ice!.definitionId = 449;
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: ["glacier" as CardInstanceId],
       root: [],
     });
     state.cardInstances.glacier = instance("glacier", 15, {
-      zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverIce", serverId: "r1" },
       faceup: false,
       rezzed: false,
     });
@@ -556,7 +556,7 @@ describe("fort pass window", () => {
     expect(glacierAction?.payload).toMatchObject({
       cardId: "glacier",
       sourceDefinitionId: 15,
-      sourceServerId: "remote_1",
+      sourceServerId: "r1",
       targetServerId: "rd",
       sourceIceIndex: 0,
       targetIceIndex: 2,
@@ -572,7 +572,7 @@ describe("fort pass window", () => {
       sourceDefinitionId: 15,
       serverId: "rd",
     });
-    expect(host.servers.mustServer("remote_1").ice).toEqual([]);
+    expect(host.servers.mustServer("r1").ice).toEqual([]);
     expect(host.servers.mustServer("rd").ice).toEqual([
       "ice_inner",
       "ice_outer",
@@ -603,12 +603,12 @@ describe("fort pass window", () => {
     ).find(
       (candidate) =>
         candidate.payload?.cardId === "glacier" &&
-        candidate.payload?.targetServerId === "remote_1",
+        candidate.payload?.targetServerId === "r1",
     );
     expect(returnAction).toBeDefined();
     resolveStartRunIceRepositionWindow(host, returnAction!);
     expect(state.corp.credits).toBe(6);
     expect(state.run?.iceRepositionUsedSourceIdsThisRun).toBeUndefined();
-    expect(host.servers.mustServer("remote_1").ice).toEqual(["glacier"]);
+    expect(host.servers.mustServer("r1").ice).toEqual(["glacier"]);
   });
 });

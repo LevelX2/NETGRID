@@ -401,7 +401,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       accessState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     accessState = apply(
       accessState,
@@ -741,7 +741,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       hardwareState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     hardwareState = apply(
       hardwareState,
@@ -785,7 +785,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       coreDamageState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     coreDamageState = apply(
       coreDamageState,
@@ -824,7 +824,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       netDamageState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     netDamageState = passRootRezWindowBeforeAccessIfOpen(netDamageState);
     netDamageState = apply(
@@ -972,7 +972,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     };
     const iceId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       444,
     );
     const initial = structuredClone(state);
@@ -983,7 +983,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     const actions = getLegalActions(state, "corp").filter(
       (action) => action.type === "rez_ice",
@@ -1110,7 +1110,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     };
     const iceId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       440,
     );
 
@@ -1119,7 +1119,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     const oliviaRez = mustAction(
       state,
@@ -1136,7 +1136,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       (action) => action.actionId === oliviaRez.actionId,
     );
     const visibleIce = getPlayerView(state, "runner")
-      .servers.find((server) => server.id === "remote_1")
+      .servers.find((server) => server.id === "r1")
       ?.ice.find((ice) => ice.instanceId === iceId);
     expect(visibleIce?.strength).toBe(8);
     expect(visibleIce?.strengthModifier).toBe(2);
@@ -1171,7 +1171,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     };
     const iceId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       444,
     );
 
@@ -1180,7 +1180,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     const actions = getLegalActions(state, "corp").filter(
       (action) => action.type === "rez_ice" && action.payload?.cardId === iceId,
@@ -1241,7 +1241,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     };
     const iceId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       444,
     );
     state = toRunnerTurnFromCorpMain(state);
@@ -1249,7 +1249,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
 
     const beforeHash = hashState(state);
@@ -1285,9 +1285,9 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     installRunnerProgramForTest(state, 237);
     putCorpRootInRemote(state, 575);
     const remoteOne = state.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
-    if (!remoteOne) throw new Error("remote_1 missing");
+    if (!remoteOne) throw new Error("r1 missing");
 
     const makeSuccessfulRemoteRun = (input: GameState): GameState => {
       let next = apply(
@@ -1295,7 +1295,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
         "runner",
         (action) =>
           action.type === "start_run" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       );
       next = passRootRezWindowBeforeAccessIfOpen(next);
       if (
@@ -1319,14 +1319,14 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
 
     state = makeSuccessfulRemoteRun(state);
     state = makeSuccessfulRemoteRun(state);
-    expect(state.serverAgendaCostCountersByServer?.remote_1).toBe(2);
+    expect(state.serverAgendaCostCountersByServer?.r1).toBe(2);
 
     const agendaId = findCard(state, 588);
     removeEverywhere(state, agendaId);
     remoteOne.root.push(agendaId);
     state.cardInstances[agendaId] = {
       ...state.cardInstances[agendaId]!,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
       advancementCounters: 3,
       faceup: false,
       rezzed: false,
@@ -1338,7 +1338,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(state.cardInstances[agendaId]?.zone).toMatchObject({
       side: "corp",
       zone: "serverRoot",
-      serverId: "remote_1",
+      serverId: "r1",
     });
   });
 });
@@ -2153,7 +2153,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       (action) =>
         action.type === "install_card" &&
         action.source === regionId &&
-        action.payload?.serverId === "remote_1",
+        action.payload?.serverId === "r1",
     );
     expect(regionInstall.costs[0]?.credits).toBe(2);
     expect(regionInstall.payload?.iceInstallReduction).toBeUndefined();
@@ -2968,7 +2968,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
   it("keeps Jerusalem City Grid wall modifiers server-bound", () => {
     const approachIce = (
       seed: string,
-      iceServerId: "rd" | "remote_1",
+      iceServerId: "rd" | "r1",
       iceDefinitionId = 444,
     ): GameState => {
       let state = apply(
@@ -3011,7 +3011,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     };
     const ownServerState = approachIce(
       "spotcheck-jerusalem-city-grid-own",
-      "remote_1",
+      "r1",
     );
     const otherServerState = approachIce(
       "spotcheck-jerusalem-city-grid-other",
@@ -3019,7 +3019,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     const sameServerNonWallState = approachIce(
       "spotcheck-jerusalem-city-grid-non-wall",
-      "remote_1",
+      "r1",
       590,
     );
     const ownServerRez = mustAction(
@@ -3079,10 +3079,10 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     ).toBe(CARD_DEFINITIONS_BY_ID[590]?.strength);
     const unrezzedGrid = approachIce(
       "spotcheck-jerusalem-city-grid-unrezzed",
-      "remote_1",
+      "r1",
     );
     const gridId = unrezzedGrid.corp.servers
-      .find((server) => server.id === "remote_1")
+      .find((server) => server.id === "r1")
       ?.root.find(
         (cardId) =>
           unrezzedGrid.cardInstances[cardId]?.definitionId ===
@@ -3352,8 +3352,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
   });
 
   it.each([
-    { seed: "rio-visible-4", expectedRoll: 1, expectedRunEnded: true },
-    { seed: "rio-visible-6", expectedRoll: 4, expectedRunEnded: false },
+    { seed: "rio-visible-6", expectedRoll: 1, expectedRunEnded: true },
+    { seed: "rio-visible-4", expectedRoll: 2, expectedRunEnded: false },
   ])(
     "rolls Rio de Janeiro City Grid visibly after passed ICE on roll $expectedRoll",
     ({ seed, expectedRoll, expectedRunEnded }) => {
@@ -3384,7 +3384,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         state,
         579,
       );
-      const iceId = putCorpIceOnServer(state, "remote_1", 589);
+      const iceId = putCorpIceOnServer(state, "r1", 589);
       state.cardInstances[upgradeId] = {
         ...state.cardInstances[upgradeId]!,
         faceup: true,
@@ -3401,7 +3401,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         "runner",
         (action) =>
           action.type === "start_run" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       );
       expect(state.run?.encounteredIceId).toBe(iceId);
       state.run = {

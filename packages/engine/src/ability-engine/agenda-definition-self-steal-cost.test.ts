@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import { quoteAgendaDefinitionSelfStealCreditCost } from "./steal-cost-modifiers";
 
-it.each(["hq", "rd", "archives", "remote_1"])(
+it.each(["hq", "rd", "archives", "r1"])(
   "quotes Fetal AI's canonical two-credit self-cost in %s",
   (serverId) => {
     expect(

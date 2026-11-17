@@ -348,7 +348,7 @@ describe("encounter entry", () => {
         {
           sourceBreakerInstanceId: "bulldozer",
           sourceAbilityId:
-            "140:break_wall_with_stealth_tradeoff_and_sentry_reward",
+            190,
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -368,7 +368,7 @@ describe("encounter entry", () => {
         {
           sourceBreakerInstanceId: "bulldozer",
           sourceAbilityId:
-            "140:break_wall_with_stealth_tradeoff_and_sentry_reward",
+            190,
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -386,7 +386,7 @@ describe("encounter entry", () => {
         {
           sourceBreakerInstanceId: "bulldozer",
           sourceAbilityId:
-            "140:break_wall_with_stealth_tradeoff_and_sentry_reward",
+            190,
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,

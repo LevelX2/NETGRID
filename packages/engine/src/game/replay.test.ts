@@ -107,7 +107,7 @@ describe("game replay facade", () => {
       replayAction(initial, "corp", "unused"),
       nextReplayState(initial, 1),
     );
-    for (const invalidId of ["evt_1", 0, 3]) {
+    for (const invalidId of ["2", 0, 3]) {
       const replay = replayGameEvents(initial, [
         { ...event, eventId: invalidId } as GameEvent,
       ]);

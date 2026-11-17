@@ -204,7 +204,7 @@ describe("effective ICE run subroutines", () => {
             zone: {
               side: "corp",
               zone: "serverIce",
-              serverId: "remote_1",
+              serverId: "r1",
             },
           },
           [encoderId]: {
@@ -217,14 +217,14 @@ describe("effective ICE run subroutines", () => {
             zone: {
               side: "corp",
               zone: "serverRoot",
-              serverId: "remote_1",
+              serverId: "r1",
             },
           },
         },
         corp: {
           servers: [
             {
-              id: "remote_1",
+              id: "r1",
               label: "Remote 1",
               kind: "remote",
               ice: [targetId],

@@ -28,7 +28,7 @@ function instance(
   zone: CardInstance["zone"] = {
     side: "corp",
     zone: "serverRoot",
-    serverId: "remote_1",
+    serverId: "r1",
   },
 ): CardInstance {
   return {

@@ -387,7 +387,7 @@ describe("Classic Agenda Implementation Smokes", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(
@@ -404,7 +404,7 @@ describe("Classic Agenda Implementation Smokes", () => {
     expect(state.delayedAccessEffects).toEqual([
       expect.objectContaining({
         agendaId: theoremId,
-        serverId: "remote_1",
+        serverId: "r1",
         sourceDefinitionId: THEOREM_PROOF,
         resolveAt: "runner_start_turn",
       }),

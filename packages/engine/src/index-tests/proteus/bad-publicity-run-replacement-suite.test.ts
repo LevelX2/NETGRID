@@ -643,13 +643,13 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
       state,
       ADVERTISEMENT,
       "advertisement_remote",
-      "remote_1",
+      "r1",
       true,
     );
     state.runner.credits = 30;
     const before = structuredClone(state);
 
-    state = playRunnerEvent(state, sourceId, "remote_1");
+    state = playRunnerEvent(state, sourceId, "r1");
     expect(state.run?.badPublicityRunAftermath).toMatchObject({
       kind: "trashed_card_subtype_during_run",
       badPublicityPerTrashedCardSubtype: {

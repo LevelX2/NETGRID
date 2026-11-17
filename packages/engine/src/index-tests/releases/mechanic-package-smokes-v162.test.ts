@@ -290,7 +290,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     );
     expect(
       hiddenRunnerView.servers
-        .find((server) => server.id === "remote_1")
+        .find((server) => server.id === "r1")
         ?.root.find((card) => card.instanceId === departmentId)
         ?.counterDisplays,
     ).toBeUndefined();
@@ -308,7 +308,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     );
 
     const loadedCard = getPlayerView(state, "corp")
-      .servers.find((server) => server.id === "remote_1")
+      .servers.find((server) => server.id === "r1")
       ?.root.find((card) => card.instanceId === departmentId);
     expect(loadedCard?.counterDisplays).toEqual([
       expect.objectContaining({
@@ -335,7 +335,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
           "abilities_activated_corp_main_take_hosted_credits",
     );
     const emptiedCard = getPlayerView(state, "corp")
-      .servers.find((server) => server.id === "remote_1")
+      .servers.find((server) => server.id === "r1")
       ?.root.find((card) => card.instanceId === departmentId);
     expect(emptiedCard?.counterDisplays ?? []).toEqual([]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1803,7 +1803,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
   it("adds Tesseract pay-or-end-the-run subroutines only to ICE on its fort", () => {
     const approachIce = (
       seed: string,
-      targetServerId: "remote_1" | "rd",
+      targetServerId: "r1" | "rd",
       rezzedTesseract: boolean,
     ): GameState => {
       let state = createGameAfterSetup({
@@ -1890,7 +1890,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     };
 
     const withTesseract = pumpAndBreakPrinted(
-      approachIce("p310-tesseract-pay", "remote_1", true),
+      approachIce("p310-tesseract-pay", "r1", true),
     );
     const breakActions = getLegalActions(withTesseract, "runner").filter(
       (action) =>
@@ -1950,7 +1950,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     ]);
 
     const refusing = pumpAndBreakPrinted(
-      approachIce("p310-tesseract-refuse", "remote_1", true),
+      approachIce("p310-tesseract-refuse", "r1", true),
     );
     const refuseContinue = mustAction(
       refusing,
@@ -1993,7 +1993,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     ).toBe(0);
 
     const unrezzed = pumpAndBreakPrinted(
-      approachIce("p310-tesseract-unrezzed", "remote_1", false),
+      approachIce("p310-tesseract-unrezzed", "r1", false),
     );
     expect(
       mustAction(unrezzed, "runner", (action) => action.type === "continue_run")
@@ -2057,7 +2057,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     }
     const crystalWallId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       444,
     );
     state.cardInstances[crystalWallId] = {
@@ -2074,7 +2074,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     expect(state.timingPoint).toBe("run.encounter_ice");
     state = apply(state, "runner", (action) => action.type === "continue_run");

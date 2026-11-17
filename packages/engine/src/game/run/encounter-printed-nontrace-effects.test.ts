@@ -787,7 +787,7 @@ describe("encounter printed non-trace effects boundary", () => {
     state.cardInstances.ice_1!.definitionId = 14;
     const entrapmentDefinition = definition(14, "Entrapment", "ice");
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: ["remote_outer" as CardInstanceId],
@@ -796,7 +796,7 @@ describe("encounter printed non-trace effects boundary", () => {
     state.cardInstances.remote_outer = instance(
       "remote_outer",
       685917163,
-      { side: "corp", zone: "serverIce", serverId: "remote_1" },
+      { side: "corp", zone: "serverIce", serverId: "r1" },
       { rezzed: true, faceup: true },
     );
     const legalAction = { payload: {} } as LegalAction;
@@ -827,7 +827,7 @@ describe("encounter printed non-trace effects boundary", () => {
         { id: "server_rd", label: "RD (2 Credits)" },
         { id: "server_hq", label: "HQ (2 Credits)" },
         { id: "server_archives", label: "ARCHIVES (2 Credits)" },
-        { id: "server_remote_1", label: "REMOTE_1 (2 Credits)" },
+        { id: "server_r1", label: "R1 (2 Credits)" },
       ],
     });
 
@@ -839,14 +839,14 @@ describe("encounter printed non-trace effects boundary", () => {
         side: "corp",
         actionId: "choice",
         clientKnownStateVersion: 10,
-        selectedChoices: { optionIds: ["server_remote_1"] },
+        selectedChoices: { optionIds: ["server_r1"] },
       } as PlayerAction,
     );
 
     expect(state.corp.credits).toBe(2);
     expect(state.pendingChoice).toBeUndefined();
     expect(state.run).toMatchObject({
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "encounter_ice",
       encounteredIceId: "remote_outer",
       jackOutLockedUntilEncounterEnds: true,

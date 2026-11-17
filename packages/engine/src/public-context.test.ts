@@ -268,7 +268,7 @@ describe("publicContextForAction", () => {
       source: "hidden_ice",
       payload: {
         cardId: "hidden_ice",
-        serverId: "remote_1",
+        serverId: "r1",
         placement: "ice",
       },
     } as unknown as LegalAction;
@@ -350,7 +350,7 @@ describe("publicContextForAction", () => {
 
   it("binds hidden installs and later rez events to opaque stable positions", () => {
     const beforeInstall = {
-      corp: { servers: [{ id: "remote_1", ice: [], root: [] }] },
+      corp: { servers: [{ id: "r1", ice: [], root: [] }] },
       cardInstances: {
         hidden_ice_a: { zone: { side: "corp", zone: "hand" } },
         hidden_ice_b: { zone: { side: "corp", zone: "hand" } },
@@ -360,7 +360,7 @@ describe("publicContextForAction", () => {
       corp: {
         servers: [
           {
-            id: "remote_1",
+            id: "r1",
             ice: ["hidden_ice_a", "hidden_ice_b"],
             root: [],
           },
@@ -368,10 +368,10 @@ describe("publicContextForAction", () => {
       },
       cardInstances: {
         hidden_ice_a: {
-          zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+          zone: { side: "corp", zone: "serverIce", serverId: "r1" },
         },
         hidden_ice_b: {
-          zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+          zone: { side: "corp", zone: "serverIce", serverId: "r1" },
         },
       },
     } as unknown as GameState;
@@ -425,7 +425,7 @@ describe("publicContextForAction", () => {
     );
 
     expect(installed).toMatchObject({
-      serverId: "remote_1",
+      serverId: "r1",
       installPlacement: "ice",
       installedPositionKey: expect.stringMatching(/^installed-position-v1:/),
     });
@@ -519,7 +519,7 @@ describe("publicContextForAction", () => {
       corp: {
         servers: [
           {
-            id: "remote_1",
+            id: "r1",
             kind: "remote",
             label: "Remote 1",
             ice: ["outer_rezzed_ice"],
@@ -537,7 +537,7 @@ describe("publicContextForAction", () => {
         classicDeflector: true,
         sourceDefinitionId: 14,
         deflectedRun: true,
-        redirectedServerId: "remote_1",
+        redirectedServerId: "r1",
         redirectedToIceId: "outer_rezzed_ice",
         redirectedToRezzedIce: true,
         lastPassedIceId: "hidden_inner_ice",
@@ -563,7 +563,7 @@ describe("publicContextForAction", () => {
       classicDeflector: true,
       sourceDefinitionId: 14,
       deflectedRun: true,
-      selectedServerId: "remote_1",
+      selectedServerId: "r1",
       selectedServerLabel: "Remote 1",
       redirectedToRezzedIce: true,
       paidCredits: 2,
@@ -588,7 +588,7 @@ describe("publicContextForAction", () => {
         publicRevealKind: "expose",
         publicRevealDefinitionId: 606,
         sourceDefinitionId: 270,
-        exposedServerId: "remote_2",
+        exposedServerId: "r2",
         exposedServerLabel: "Remote 2",
         exposedArea: "root",
         exposedIndex: 1,
@@ -617,7 +617,7 @@ describe("publicContextForAction", () => {
       publicRevealKind: "expose",
       publicRevealDefinitionId: 606,
       sourceDefinitionId: 270,
-      exposedServerId: "remote_2",
+      exposedServerId: "r2",
       exposedServerLabel: "Remote 2",
       exposedArea: "root",
       exposedIndex: 1,

@@ -250,7 +250,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     const remote = state.corp.servers.find((server) =>
       server.root.includes(assetId),
     );
-    expect(remote?.id).toBe("remote_1");
+    expect(remote?.id).toBe("r1");
     expect(state.cardInstances[assetId]?.rezzed).toBe(true);
     expect(
       getPlayerView(state, "runner")
@@ -331,7 +331,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       accessState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     accessState = apply(
       accessState,
@@ -579,7 +579,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(state.pendingChoice).toBeUndefined();
     expect(
       getPlayerView(state, "runner")
-        .servers.find((server) => server.id === "remote_1")
+        .servers.find((server) => server.id === "r1")
         ?.root.find((card) => card.instanceId === firmId)?.counters
         ?.recurring_credit,
     ).toBe(2);
@@ -687,7 +687,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     const firstFirmServerId =
       firstFirmZone?.zone === "serverRoot"
         ? firstFirmZone.serverId
-        : "remote_1";
+        : "r1";
     multi.cardInstances[secondFirm] = {
       ...multi.cardInstances[firstFirm]!,
       instanceId: secondFirm,
@@ -1019,7 +1019,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.run?.accessedCardId).toBe(hostId);
@@ -1278,7 +1278,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(centerIds).toHaveLength(2);
     for (const [index, centerId] of centerIds.entries()) {
       removeEverywhere(state, centerId);
-      const serverId = `remote_${index + 1}` as `remote_${number}`;
+      const serverId = `r${index + 1}` as `r${number}`;
       state.corp.servers.push({
         id: serverId,
         kind: "remote",
@@ -1362,7 +1362,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     addRezzedCorpRootForTest(
       reorderState,
       29,
-      "remote_2",
+      "r2",
       "rescheduler_spg",
     );
     const hqAgendaId = moveCorpCardToHq(reorderState, 588);
@@ -1636,7 +1636,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         "runner",
         (action) =>
           action.type === "start_run" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       );
       state = apply(
         state,
@@ -1729,7 +1729,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     const remote = state.corp.servers.find((server) =>
       server.root.includes(upgradeId),
     );
-    expect(remote?.id).toBe("remote_1");
+    expect(remote?.id).toBe("r1");
     expect(state.cardInstances[upgradeId]?.rezzed).toBe(true);
     expect(
       getPlayerView(state, "runner")
@@ -1756,7 +1756,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       accessState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     accessState = apply(
       accessState,
@@ -1804,7 +1804,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(cardCounterAmount(state, state.runner.identity, "crying")).toBe(1);
@@ -1835,7 +1835,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       traceState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     traceState = apply(
       traceState,
@@ -1917,7 +1917,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         "runner",
         (action) =>
           action.type === "start_run" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       );
       state = apply(state, "runner", (action) => action.type === "access_card");
 
@@ -1969,7 +1969,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
 
@@ -2007,7 +2007,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
 
@@ -2073,7 +2073,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(state, "runner", (action) => action.type === "decline_trash");
@@ -2111,7 +2111,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(declined.runner.credits).toBe(7);
     expect(declined.runner.scoreArea).not.toContain(agendaId);
     expect(
-      declined.corp.servers.find((server) => server.id === "remote_1")?.root,
+      declined.corp.servers.find((server) => server.id === "r1")?.root,
     ).toContain(agendaId);
     expect(declined.run).toBeUndefined();
     expect(validateGameState(declined).ok).toBe(true);
@@ -2179,7 +2179,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(state, "runner", (action) => action.type === "decline_trash");
@@ -2211,7 +2211,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       unrezzed,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     unrezzed = passRootRezWindowBeforeAccessIfOpen(unrezzed);
     unrezzed = apply(
@@ -2294,7 +2294,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       (action) =>
         action.type === "install_card" &&
         action.payload?.cardId === secondGridId &&
-        action.payload?.serverId === "remote_1" &&
+        action.payload?.serverId === "r1" &&
         action.payload?.placement === "root",
     );
     expect(replacementAction.payload?.regionReplacementWarning).toBe(true);
@@ -2304,12 +2304,12 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       (action) =>
         action.type === "install_card" &&
         action.payload?.cardId === secondGridId &&
-        action.payload?.serverId === "remote_1" &&
+        action.payload?.serverId === "r1" &&
         action.payload?.placement === "root",
     );
 
     const remote = state.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(remote?.root).toContain(secondGridId);
     expect(remote?.root).not.toContain(firstGridId);
@@ -2369,7 +2369,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       (action) =>
         action.type === "install_card" &&
         action.payload?.cardId === secondGridId &&
-        action.payload?.serverId === "remote_1" &&
+        action.payload?.serverId === "r1" &&
         action.payload?.placement === "root",
     );
     expect(replacementAction.payload?.regionReplacementWarning).toBe(true);
@@ -2456,7 +2456,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(state.cardInstances[jerusalemId]).toMatchObject({
       faceup: true,
       rezzed: true,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     });
 
     const nonRegionId = moveCorpCardToHq(state, 606);
@@ -2467,7 +2467,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         (action) =>
           action.type === "install_card" &&
           action.payload?.cardId === nonRegionId &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       ).costs,
     ).toEqual([{ clicks: 1 }]);
 
@@ -2482,7 +2482,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       (action) =>
         action.type === "install_card" &&
         action.payload?.cardId === washingtonId &&
-        action.payload?.serverId === "remote_1",
+        action.payload?.serverId === "r1",
     );
     expect(replaceWithWashington.costs).toEqual([{ clicks: 1, credits: 7 }]);
     expect(replaceWithWashington.payload?.regionReplacementWarning).toBe(true);
@@ -2495,7 +2495,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(state.cardInstances[washingtonId]).toMatchObject({
       faceup: true,
       rezzed: true,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     });
 
     state.corp.credits = 1;
@@ -2581,7 +2581,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
   it("applies Crystal Palace Station Grid break_subroutine_cost only on its fort", () => {
     const approachIce = (
       seed: string,
-      targetServerId: "remote_1" | "rd",
+      targetServerId: "r1" | "rd",
       rezzedCrystal: boolean,
       withTesseract = false,
     ): { state: GameState; crystalId: CardInstanceId } => {
@@ -2674,7 +2674,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
     const { state: sameFort, crystalId } = approachIce(
       "p316-crystal-break-cost",
-      "remote_1",
+      "r1",
       true,
     );
     const breakActions = getLegalActions(sameFort, "runner").filter(
@@ -2741,7 +2741,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
     const { state: unrezzed } = approachIce(
       "p316-crystal-unrezzed",
-      "remote_1",
+      "r1",
       false,
     );
     expect(
@@ -2756,7 +2756,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
     let tesseractState = approachIce(
       "p316-crystal-tesseract",
-      "remote_1",
+      "r1",
       true,
       true,
     ).state;
@@ -2832,7 +2832,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(state.cardInstances[jerusalemId]).toMatchObject({
       faceup: true,
       rezzed: true,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     });
 
     state.corp.credits = 5;
@@ -2842,7 +2842,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       (action) =>
         action.type === "install_card" &&
         action.payload?.cardId === crystalId &&
-        action.payload?.serverId === "remote_1",
+        action.payload?.serverId === "r1",
     );
     expect(installCrystal.costs).toEqual([{ clicks: 1, credits: 5 }]);
     expect(installCrystal.payload?.regionReplacementWarning).toBe(true);
@@ -2854,7 +2854,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(state.cardInstances[crystalId]).toMatchObject({
       faceup: true,
       rezzed: true,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     });
     expect(state.corp.archives).toContain(jerusalemId);
   });
@@ -2906,7 +2906,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     setCardCounterForTest(state, cloakId, "bit", 3);
     const iceId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       490,
     );
 
@@ -2914,7 +2914,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(
       state,
@@ -3033,20 +3033,20 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
     const otherFort = structuredClone(state);
     otherFort.corp.servers.push({
-      id: "remote_2",
+      id: "r2",
       kind: "remote",
       label: "Remote 2",
       ice: [],
       root: [agendaId],
     });
     const remoteOne = otherFort.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
-    if (!remoteOne) throw new Error("remote_1 missing");
+    if (!remoteOne) throw new Error("r1 missing");
     remoteOne.root = remoteOne.root.filter((id) => id !== agendaId);
     otherFort.cardInstances[agendaId] = {
       ...otherFort.cardInstances[agendaId]!,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r2" },
     };
     expect(
       getLegalActions(otherFort, "corp").some(
@@ -3082,7 +3082,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       rezzed: true,
     };
     const traceServer = traceState.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     if (traceServer) traceServer.root = [turbeauId, parisId];
     const traceInitial = structuredClone(traceState);
@@ -3092,7 +3092,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       traceState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     traceState = apply(
       traceState,
@@ -3105,7 +3105,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       corpBidMax: 8,
       sourceDefinitionId: 584,
       fortTraceBitPoolSourceCardInstanceId: parisId,
-      fortTraceBitPoolServerId: "remote_1",
+      fortTraceBitPoolServerId: "r1",
     });
     traceState = applyChoice(traceState, "corp", "bid_6");
     expect(cardCounterAmount(traceState, parisId, "bit")).toBe(0);
@@ -3116,7 +3116,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       corpCreditBid: 3,
       fortTraceBitPoolSpent: 3,
       fortTraceBitPoolRemaining: 0,
-      fortTraceBitPoolServerId: "remote_1",
+      fortTraceBitPoolServerId: "r1",
     });
     traceState = applyChoice(traceState, "runner", "bid_0");
     expect(traceState.runner.tags).toBe(1);
@@ -3154,7 +3154,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     addRezzedCorpIceForTest(
       runState,
       473,
-      "remote_1",
+      "r1",
       "stealth_block_quandary",
     );
     runState.cardInstances[stealthId] = {
@@ -3165,7 +3165,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
     const runAction = getLegalActions(runState, "runner").find(
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     expect(runAction?.payload?.v1918UpgradeAbility).toBeUndefined();
     expect(runAction?.costs).toEqual([{ clicks: 1 }]);

@@ -99,7 +99,7 @@ describe("corp install main actions", () => {
     const action = buildCorpNewRemoteIceInstallAction(state, cardId);
     expect(action.payload).toMatchObject({
       postInstallRezQuoteComplete: true,
-      postInstallRezQuoteProjectedServerId: "remote_1",
+      postInstallRezQuoteProjectedServerId: "r1",
     });
     expect(
       JSON.parse(action.payload?.postInstallEffectiveRunQuoteJson as string),
@@ -142,12 +142,12 @@ describe("corp install main actions", () => {
       buildCorpServerRootInstallAction(
         state,
         cardId,
-        { id: "remote_1", label: "Remote 1" },
+        { id: "r1", label: "Remote 1" },
         0,
         { replacesRootAsset: true, replacesRegion: true },
       ),
     ).toMatchObject({
-      actionId: "corp.install_card.corp_root_test.remote_1.corp_root_test",
+      actionId: "corp.install_card.corp_root_test.r1.corp_root_test",
       side: "corp",
       type: "install_card",
       label: "Karte in Remote 1 installieren",
@@ -155,7 +155,7 @@ describe("corp install main actions", () => {
       costs: [{ clicks: 1 }],
       payload: {
         cardId,
-        serverId: "remote_1",
+        serverId: "r1",
         placement: "root",
         rootReplacement: "asset_to_agenda",
         regionReplacementWarning: true,
@@ -182,7 +182,7 @@ describe("corp install main actions", () => {
       CARD_DEFINITIONS_BY_ID[state.cardInstances[agendaId]!.definitionId]!
         .advancementRequirement!;
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
@@ -195,7 +195,7 @@ describe("corp install main actions", () => {
     const unbounded = buildCorpServerRootInstallAction(
       state,
       agendaId,
-      { id: "remote_1", label: "Remote 1" },
+      { id: "r1", label: "Remote 1" },
       0,
     );
     expect(unbounded.payload).toMatchObject({
@@ -203,7 +203,7 @@ describe("corp install main actions", () => {
         CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
       agendaInstallScoreHorizonQuoteComplete: false,
       agendaInstallScoreHorizonQuoteCardId: agendaId,
-      agendaInstallScoreHorizonQuoteTargetServerId: "remote_1",
+      agendaInstallScoreHorizonQuoteTargetServerId: "r1",
       agendaInstallScoreHorizonQuoteAdvancementRequirement: requirement,
       agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: 0,
       agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn:
@@ -217,7 +217,7 @@ describe("corp install main actions", () => {
     const bounded = buildCorpServerRootInstallAction(
       state,
       agendaId,
-      { id: "remote_1", label: "Remote 1" },
+      { id: "r1", label: "Remote 1" },
       0,
     );
     expect(bounded.payload).toMatchObject({

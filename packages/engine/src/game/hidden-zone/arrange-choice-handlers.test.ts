@@ -159,7 +159,7 @@ function makeHost(
     callbacks: {
       runnerTurnFlags: () => ({
         successfulRunThisTurn: true,
-        lastSuccessfulRunServerId: "remote_1",
+        lastSuccessfulRunServerId: "r1",
       }),
     },
   };
@@ -299,7 +299,7 @@ describe("hidden-zone arrange choice handlers", () => {
     const ice2 = "ice_2" as CardInstanceId;
     const source = "fortress_source" as CardInstanceId;
     const server: CorpServer = {
-      id: "remote_1" as Exclude<ServerId, "new_remote">,
+      id: "r1" as Exclude<ServerId, "new_remote">,
       kind: "remote",
       label: "Remote 1",
       ice: [ice1, ice2],
@@ -339,7 +339,7 @@ describe("hidden-zone arrange choice handlers", () => {
     const ice2 = "ice_2" as CardInstanceId;
     const source = "new_blood_source" as CardInstanceId;
     const server: CorpServer = {
-      id: "remote_1" as Exclude<ServerId, "new_remote">,
+      id: "r1" as Exclude<ServerId, "new_remote">,
       kind: "remote",
       label: "Remote 1",
       ice: [ice1, ice2],

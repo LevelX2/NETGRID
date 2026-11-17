@@ -44,11 +44,11 @@ function fixture(outer: boolean, rezzedSource = true) {
     (c) => c.definitionId === 15,
   )!;
   removeEverywhere(state, glacier.instanceId);
-  glacier.zone = { side: "corp", zone: "serverIce", serverId: "remote_1" };
+  glacier.zone = { side: "corp", zone: "serverIce", serverId: "r1" };
   glacier.rezzed = rezzedSource;
   glacier.faceup = rezzedSource;
   state.corp.servers.push({
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     ice: [glacier.instanceId],
@@ -113,7 +113,7 @@ describe("current Engine start-run ICE movement", () => {
         iceIndex: outer ? 1 : 0,
       });
       expect(state.corp.credits).toBe(2);
-      expect(state.corp.servers.find((s) => s.id === "remote_1")!.ice).toEqual(
+      expect(state.corp.servers.find((s) => s.id === "r1")!.ice).toEqual(
         [],
       );
       expect(
@@ -164,9 +164,9 @@ describe("current Engine start-run ICE movement", () => {
       (c) => c.definitionId === 29,
     )!;
     removeEverywhere(state, root.instanceId);
-    root.zone = { side: "corp", zone: "serverRoot", serverId: "remote_1" };
+    root.zone = { side: "corp", zone: "serverRoot", serverId: "r1" };
     state.corp.servers
-      .find((s) => s.id === "remote_1")!
+      .find((s) => s.id === "r1")!
       .root.push(root.instanceId);
     start(state);
     execute(

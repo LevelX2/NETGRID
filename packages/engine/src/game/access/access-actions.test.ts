@@ -58,7 +58,7 @@ function makeHost(
     >["corp"];
   } = {},
 ): RunnerAccessActionHost {
-  const serverId = overrides.serverId ?? "remote_1";
+  const serverId = overrides.serverId ?? "r1";
   const cardType = overrides.cardType ?? "asset";
   const definitions: Record<string, CardDefinition> = {
     agenda: demoDefinition("agenda"),
@@ -87,7 +87,7 @@ function makeHost(
     ),
   };
   const servers: CorpServer[] = [
-    { id: "remote_1", ice: [], root: [cardId] } as unknown as CorpServer,
+    { id: "r1", ice: [], root: [cardId] } as unknown as CorpServer,
     { id: "rd", ice: [], root: [] } as unknown as CorpServer,
     { id: "hq", ice: [], root: [] } as unknown as CorpServer,
     { id: "archives", ice: [], root: [] } as unknown as CorpServer,

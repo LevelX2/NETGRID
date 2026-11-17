@@ -35,7 +35,7 @@ function setup(definitionId = MARIONETTE) {
   const state = toRunnerTurn(onrV1Game(`dreff-return-${definitionId}`));
   state.corp.credits = 20;
   state.runner.credits = 20;
-  addRezzedCorpRootForTest(state, 570, "remote_1", "dreff");
+  addRezzedCorpRootForTest(state, 570, "r1", "dreff");
   const iceId = addCorpCardToHqForTest(state, definitionId, "temporary");
   const secretId = addCorpCardToHqForTest(state, 435, "secret");
   return { state, iceId, secretId };
@@ -45,7 +45,7 @@ function encounter(state: GameState, iceId: string) {
   state = apply(
     state,
     "runner",
-    (a) => a.type === "start_run" && a.payload?.serverId === "remote_1",
+    (a) => a.type === "start_run" && a.payload?.serverId === "r1",
   );
   const option = state.pendingChoice!.options.find((o) => o.value === iceId)!;
   return applyChoice(state, "corp", option.id);

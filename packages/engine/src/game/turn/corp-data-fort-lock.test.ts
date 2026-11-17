@@ -86,7 +86,7 @@ function proteus9dFixture(withLock = true): GameState {
   state.corp.clicks = 3;
   state.corp.credits = 10;
 
-  const remoteId = "remote_1" as Exclude<ServerId, "new_remote">;
+  const remoteId = "r1" as Exclude<ServerId, "new_remote">;
   if (!state.corp.servers.some((server) => server.id === remoteId)) {
     state.corp.servers.push({
       id: remoteId,
@@ -148,7 +148,7 @@ describe("Proteus Phase 9d data-fort creation lock", () => {
       actions.some(
         (action) =>
           action.type === "install_card" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       ),
     ).toBe(true);
     expect(

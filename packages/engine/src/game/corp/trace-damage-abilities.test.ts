@@ -158,22 +158,22 @@ function makeHost(input: HostInput = {}) {
     blood_cat: instance(
       "blood_cat" as CardInstanceId,
       definitions.blood_cat!.id,
-      { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      { side: "corp", zone: "serverRoot", serverId: "r1" },
     ),
     solo_squad: instance(
       "solo_squad" as CardInstanceId,
       definitions.solo_squad!.id,
-      { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      { side: "corp", zone: "serverRoot", serverId: "r1" },
     ),
     i_got_a_rock: instance(
       "i_got_a_rock" as CardInstanceId,
       definitions.i_got_a_rock!.id,
-      { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      { side: "corp", zone: "serverRoot", serverId: "r1" },
     ),
     schlaghund: instance(
       "schlaghund" as CardInstanceId,
       definitions.schlaghund!.id,
-      { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      { side: "corp", zone: "serverRoot", serverId: "r1" },
     ),
   };
   const state = {

@@ -562,18 +562,18 @@ describe("run rez window", () => {
     const remoteRootId = "remote_root" as CardInstanceId;
     const rezzedRemoteRootId = "remote_root_rezzed" as CardInstanceId;
     state.cardInstances[remoteRootId] = instance(remoteRootId, 594, {
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     });
     state.cardInstances[rezzedRemoteRootId] = instance(
       rezzedRemoteRootId,
       594,
       {
-        zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+        zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
         rezzed: true,
       },
     );
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
@@ -594,12 +594,12 @@ describe("run rez window", () => {
         cardId: remoteRootId,
         rootRez: true,
         rezInterruptJackOutEligible: true,
-        serverId: "remote_1",
+        serverId: "r1",
         rootRezCreditOutcomeQuoteSchemaVersion:
           "corp-root-rez-credit-outcome-quote-v1",
         rootRezCreditOutcomeQuoteComplete: true,
         rootRezCreditOutcomeQuoteSourceCardInstanceId: remoteRootId,
-        rootRezCreditOutcomeQuoteTargetServerId: "remote_1",
+        rootRezCreditOutcomeQuoteTargetServerId: "r1",
         rootRezCreditOutcomeQuoteStateVersion: state.stateVersion,
         rootRezCreditOutcomeQuoteTimingPoint: state.timingPoint,
         rootRezCreditOutcomeQuoteActionId: actions[0]?.actionId,

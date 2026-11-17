@@ -102,7 +102,7 @@ describe("PublicContext golden payload gate", () => {
 
   it("pins card source, target, access, breach, steal and trash context fields", () => {
     const state = goldenState("public-context-access");
-    addCorpRootCard(state, "corp_root_agenda", 588, "remote_1");
+    addCorpRootCard(state, "corp_root_agenda", 588, "r1");
     const context = goldenContext(
       state,
       goldenAction({
@@ -119,7 +119,7 @@ describe("PublicContext golden payload gate", () => {
           installedAccessBonus: 1,
           publicRevealDefinitionId: 588,
           publicRevealKind: "breach",
-          serverId: "remote_1",
+          serverId: "r1",
           sourceDefinitionId: 595,
           stealCost: 2,
           targetCardDefinitionId: 588,
@@ -151,7 +151,7 @@ describe("PublicContext golden payload gate", () => {
 
   it("exposes runner event runs as public chronicle context", () => {
     const state = goldenState("public-context-runner-event-run");
-    addCorpRootCard(state, "corp_root_remote_1", 588, "remote_1");
+    addCorpRootCard(state, "corp_root_r1", 588, "r1");
     const context = goldenContext(
       state,
       goldenAction({
@@ -163,7 +163,7 @@ describe("PublicContext golden payload gate", () => {
         payload: {
           cardId: "runner_event",
           runnerEventRun: true,
-          serverId: "remote_1",
+          serverId: "r1",
         },
       }),
     );
@@ -326,7 +326,7 @@ describe("PublicContext golden payload gate", () => {
           searchDestination: "grip",
           searchReveal: "public",
           selectedCount: 1,
-          shownCardDefinitionIds: "simple_economy_event|simple_agenda",
+          shownCardDefinitionIds: "595|588",
           temporaryCreditsProvided: 9,
           temporaryCreditsRemaining: 5,
           temporaryCreditsSpent: 4,
@@ -348,7 +348,7 @@ describe("PublicContext golden payload gate", () => {
       searchDestination: "grip",
       searchReveal: "public",
       selectedCount: 1,
-      shownCardDefinitionIds: "simple_economy_event|simple_agenda",
+      shownCardDefinitionIds: "595|588",
       temporaryCreditsProvided: 9,
       temporaryCreditsRemaining: 5,
       temporaryCreditsSpent: 4,
@@ -755,7 +755,7 @@ function addCorpRootCard(
   state: GameState,
   cardId: CardInstanceId,
   definitionId: number,
-  serverId: "remote_1",
+  serverId: "r1",
 ): void {
   state.cardInstances[cardId] = {
     instanceId: cardId,

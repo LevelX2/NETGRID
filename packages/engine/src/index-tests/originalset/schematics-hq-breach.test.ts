@@ -68,7 +68,7 @@ describe("Schematics Search Engine HQ breach", () => {
     const remoteAssetId = putCorpRootInRemote(state, 594);
     const remoteIceId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       589,
     );
     state.runner.credits = 20;
@@ -149,7 +149,7 @@ describe("Schematics Search Engine HQ breach", () => {
     });
     const runnerViewAfterReview = getPlayerView(state, "runner");
     const remoteAfterReview = runnerViewAfterReview.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(remoteAfterReview?.root[0]).toMatchObject({ known: false });
     expect(remoteAfterReview?.ice[0]).toMatchObject({ known: false });
@@ -271,7 +271,7 @@ function createSchematicsMultiaccessState(seed: string) {
   installRunnerHardwareForTest(state, HQ_INTERFACE);
   installCorpRootOnHq(state, 606);
   putCorpRootInRemote(state, 594);
-  putCorpIceOnServer(state, "remote_1", 589);
+  putCorpIceOnServer(state, "r1", 589);
   state.runner.credits = 20;
   return state;
 }

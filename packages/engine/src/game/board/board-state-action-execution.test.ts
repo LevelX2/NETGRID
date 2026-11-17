@@ -20,7 +20,7 @@ const RESOURCE_DEFINITION_ID = 363;
 
 function baseState(): GameState {
   const remote: CorpServer = {
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     ice: [],
@@ -61,7 +61,7 @@ function baseState(): GameState {
         {
           owner: "corp",
           controller: "corp",
-          zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+          zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
         },
       ),
       [RESOURCE_ID]: instance(RESOURCE_ID, RESOURCE_DEFINITION_ID, {
@@ -217,7 +217,7 @@ describe("board-state-action-execution", () => {
     expect(calls).toEqual([
       "click:corp",
       "credits:corp:1",
-      "fortRunGate:remote_1:advance_card",
+      "fortRunGate:r1:advance_card",
     ]);
   });
 
@@ -254,7 +254,7 @@ describe("board-state-action-execution", () => {
     targetState.cardInstances[ADVANCED_CARD_ID]!.zone = {
       side: "corp",
       zone: "serverIce",
-      serverId: "remote_1",
+      serverId: "r1",
     };
 
     handleBoardStateActionExecution(
@@ -262,7 +262,7 @@ describe("board-state-action-execution", () => {
       legalAction("advance_card", { cardId: ADVANCED_CARD_ID }),
     );
 
-    expect(calls).toContain("fortRunGate:remote_1:advance_card");
+    expect(calls).toContain("fortRunGate:r1:advance_card");
   });
 
   it("trashes a hidden runner resource through the stable payload contract", () => {

@@ -374,24 +374,24 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       537,
     );
     const hackerTrackerServer = state.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     if (!hackerTrackerServer) throw new Error("Missing Hacker Tracker server.");
-    hackerTrackerServer.id = "remote_2";
+    hackerTrackerServer.id = "r2";
     hackerTrackerServer.label = "Remote 2";
     state.cardInstances[hackerTrackerId] = {
       ...state.cardInstances[hackerTrackerId]!,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r2" },
       counters: { bit: 2 },
     };
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
       root: [],
     });
-    const fangId = putCorpIceOnServer(state, "remote_1", 453);
+    const fangId = putCorpIceOnServer(state, "r1", 453);
     state.corp.credits = 10;
     state.runner.credits = 10;
     const initial = structuredClone(state);
@@ -401,7 +401,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(state, "runner")))).not.toContain(
       537,
@@ -419,7 +419,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       payload: {
         cardId: hackerTrackerId,
         rootRez: true,
-        serverId: "remote_2",
+        serverId: "r2",
       },
     });
     state = apply(
@@ -430,7 +430,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(state.cardInstances[hackerTrackerId]).toMatchObject({
       faceup: true,
       rezzed: true,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r2" },
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "rez_card",

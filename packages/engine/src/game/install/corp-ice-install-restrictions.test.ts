@@ -10,7 +10,7 @@ describe("Classic Corp ICE install restrictions", () => {
   const hq = server("hq", "hq");
   const rd = server("rd", "rd");
   const archives = server("archives", "archives");
-  const remote = server("remote_1", "remote");
+  const remote = server("r1", "remote");
   const newRemote = { id: "new_remote", kind: "remote" } as const;
 
   it("prevents Dumpster from being installed on Archives", () => {

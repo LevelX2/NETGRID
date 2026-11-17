@@ -673,7 +673,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
 
   function p344PutCorpIceOnServer(
     state: GameState,
-    serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+    serverId: "hq" | "rd" | "archives" | `r${number}`,
     definitionId: CardDefinitionId,
   ): CardInstanceId {
     if (
@@ -1578,16 +1578,16 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state.corp.credits = 10;
     const iSpyId = installRunnerProgramForTest(state, 244);
     const rootId = putCorpRootInRemote(state, 594);
-    const iceId = putCorpIceOnServer(state, "remote_1", 589);
+    const iceId = putCorpIceOnServer(state, "r1", 589);
 
     state.phase = "run";
     state.timingPoint = "access.resolve_card";
     state.activeSide = "runner";
     state.run = {
       runId: 811657,
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "access",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
       successful: true,
@@ -1601,7 +1601,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           "successful_run_fort_counter_expose" &&
         action.payload?.cardId === iSpyId,
     );
-    expect(state.spyCountersByServer?.remote_1).toBe(1);
+    expect(state.spyCountersByServer?.r1).toBe(1);
     expect(state.runner.heap).toContain(iSpyId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       addedCounterAmount: 1,
@@ -1611,7 +1611,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       counterMutations: [
         expect.objectContaining({
           operation: "add",
-          scope: { kind: "server", serverId: "remote_1" },
+          scope: { kind: "server", serverId: "r1" },
           before: 0,
           amount: 1,
           after: 1,
@@ -1619,7 +1619,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       ],
     });
     const runnerSpyServerView = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(runnerSpyServerView?.counterDisplays).toContainEqual({
       id: "spy",
@@ -1656,15 +1656,15 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       (action) =>
         action.type === "trigger_ability" &&
         action.payload?.corpAbility === "remove_spy_counter" &&
-        action.payload?.serverId === "remote_1",
+        action.payload?.serverId === "r1",
     );
-    expect(state.spyCountersByServer?.remote_1).toBe(0);
+    expect(state.spyCountersByServer?.r1).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       counterMutations: [
         expect.objectContaining({
           operation: "remove",
           counterType: "spy",
-          scope: { kind: "server", serverId: "remote_1" },
+          scope: { kind: "server", serverId: "r1" },
           before: 1,
           amount: 1,
           after: 0,
@@ -1674,20 +1674,20 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         {
           kind: "counter_threshold_identity_visibility_ended",
           counterType: "spy",
-          scope: { kind: "server", serverId: "remote_1" },
+          scope: { kind: "server", serverId: "r1" },
           activeAtOrAbove: 1,
           before: 1,
           after: 0,
           cards: [
             {
               definitionId: 589,
-              serverId: "remote_1",
+              serverId: "r1",
               area: "ice",
               positionKey: "ice:0",
             },
             {
               definitionId: 594,
-              serverId: "remote_1",
+              serverId: "r1",
               area: "root",
               positionKey: "root:0",
             },
@@ -1698,7 +1698,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     const runnerAfterRemovalServerView = getPlayerView(
       state,
       "runner",
-    ).servers.find((server) => server.id === "remote_1");
+    ).servers.find((server) => server.id === "r1");
     expect(runnerAfterRemovalServerView?.counterDisplays).toBeUndefined();
     expect(
       runnerAfterRemovalServerView?.ice.find(
@@ -2323,13 +2323,13 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       addRezzedCorpRootForTest(
         disinfectant,
         531,
-        "remote_1",
+        "r1",
         "disinfectant_first",
       ),
       addRezzedCorpRootForTest(
         disinfectant,
         531,
-        "remote_2",
+        "r2",
         "disinfectant_second",
       ),
     ];
@@ -2662,7 +2662,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.pendingChoice).toBeUndefined();

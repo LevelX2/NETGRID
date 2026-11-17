@@ -623,7 +623,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
       seed: string,
       definitionId: 435 | 447,
       options: {
-        serverId?: "rd" | "remote_1";
+        serverId?: "rd" | "r1";
         crystal?: boolean;
         tesseract?: boolean;
       } = {},
@@ -849,7 +849,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
     let crystal = setupTrashProgramIce(
       "p326-crystal-break-trash-program",
       435,
-      { serverId: "remote_1", crystal: true },
+      { serverId: "r1", crystal: true },
     );
     installRunnerProgramForTest(crystal, 598);
     const crystalBreaks = getLegalActions(crystal, "runner").filter(
@@ -868,7 +868,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
     let tesseract = setupTrashProgramIce(
       "p326-tesseract-after-trash-program",
       435,
-      { serverId: "remote_1", tesseract: true },
+      { serverId: "r1", tesseract: true },
     );
     installRunnerProgramForTest(tesseract, 598);
     const tesseractContinue = mustAction(

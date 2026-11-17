@@ -380,7 +380,7 @@ describe("encounter special windows boundary", () => {
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
       actionId:
-        "runner.trigger_ability.startup_1.startup_1.280:runner_utility_longtail_trash_fully_broken_passed_ice_after_passing_fully_broken_ice",
+        "runner.trigger_ability.startup_1.startup_1.364",
       side: "runner",
       type: "trigger_ability",
       source: "startup_1",
@@ -477,7 +477,7 @@ describe("encounter special windows boundary", () => {
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
       actionId:
-        "runner.trigger_ability.superglue_1.superglue_1.37:derez_fully_broken_passed_ice",
+        "runner.trigger_ability.superglue_1.superglue_1.51",
       side: "runner",
       type: "trigger_ability",
       source: "superglue_1",

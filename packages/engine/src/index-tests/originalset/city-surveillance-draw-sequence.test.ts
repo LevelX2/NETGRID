@@ -566,7 +566,7 @@ function addSecondRezzedCityForTest(
     instanceId: secondCardId,
   };
   const server = state.corp.servers.find(
-    (candidate) => candidate.id === "remote_1",
+    (candidate) => candidate.id === "r1",
   );
   if (!server) throw new Error("Missing City Surveillance test server");
   server.root.push(secondCardId);

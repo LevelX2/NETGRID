@@ -14,7 +14,7 @@ describe("run window sequence payload patches", () => {
       sequenceKind: "ordered_fort_rebuild_sequence",
       hiddenZoneBarrier: true,
       sourceDefinitionId: 127,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       removedCardCount: 2,
       replacementCardCount: 2,
     });
@@ -24,7 +24,7 @@ describe("run window sequence payload patches", () => {
       sequenceKind: "ordered_fort_rebuild_sequence",
       hiddenZoneBarrier: true,
       sourceDefinitionId: 127,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       removedCardCount: 2,
       replacementCardCount: 2,
     });

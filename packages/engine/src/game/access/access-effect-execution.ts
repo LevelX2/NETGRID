@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -260,7 +261,7 @@ export function resolveCardImplementationAccessEffects(
       sourceZone.side !== "corp" ||
       sourceZone.zone !== "serverRoot" ||
       sourceZone.serverId !== serverId ||
-      !serverId.startsWith("remote_")
+      !isRemoteServerId(serverId)
     )
       throw new Error(
         "Der verzögerte Agenda-Access-Effekt stammt nicht aus dem angegriffenen Remote.",

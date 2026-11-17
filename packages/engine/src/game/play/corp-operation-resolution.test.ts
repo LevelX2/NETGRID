@@ -543,7 +543,7 @@ describe("corp-operation-resolution", () => {
     );
     targetState.corp.servers = [
       {
-        id: "remote_1",
+        id: "r1",
         kind: "remote",
         label: "Remote 1",
         ice: [],
@@ -553,7 +553,7 @@ describe("corp-operation-resolution", () => {
     targetState.cardInstances[OPERATION_ID] = instance(OPERATION_ID, 21);
     targetState.cardInstances[spgId] = instance(spgId, 29, {
       rezzed: true,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     });
     const [action] = cardImplementationOperationLegalActions(
       hostFor(targetState),

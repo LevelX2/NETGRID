@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
@@ -284,7 +285,7 @@ function actionMatchesRestrictedGrant(
     return (
       legalAction.type === "start_run" &&
       typeof legalAction.payload?.serverId === "string" &&
-      legalAction.payload.serverId.startsWith("remote_")
+      isRemoteServerId(legalAction.payload.serverId)
     );
   }
   if (grant.restriction === "play_or_install_card") {

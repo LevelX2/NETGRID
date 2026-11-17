@@ -61,11 +61,11 @@ describe("agenda difficulty follows declared modifiers", () => {
       const { state, agendaId } = prepare(region);
       const before = hashState(state);
       const card = getPlayerView(state, "corp")
-        .servers.find((s) => s.id === "remote_1")!
+        .servers.find((s) => s.id === "r1")!
         .root.find((c) => c.instanceId === agendaId);
       expect(card?.advancementRequirement).toBe(requirement);
       expect(
-        visibleCorpScoreContinuationQuote(state, agendaId, "remote_1"),
+        visibleCorpScoreContinuationQuote(state, agendaId, "r1"),
       ).toMatchObject({
         complete: true,
         remainingAdvancementCounters: remaining,
@@ -76,7 +76,7 @@ describe("agenda difficulty follows declared modifiers", () => {
       expect(hashState(state)).toBe(before);
       expect(
         getPlayerView(state, "runner")
-          .servers.find((s) => s.id === "remote_1")!
+          .servers.find((s) => s.id === "r1")!
           .root.find((c) => !c.known),
       ).not.toHaveProperty("advancementRequirement");
     },
@@ -86,7 +86,7 @@ describe("agenda difficulty follows declared modifiers", () => {
     const { state, agendaId } = prepare(washington, corporateWar, 3);
     const agenda = state.cardInstances[agendaId]!;
     const remoteRoot = (side: "corp" | "runner") =>
-      getPlayerView(state, side).servers.find((s) => s.id === "remote_1")!.root;
+      getPlayerView(state, side).servers.find((s) => s.id === "r1")!.root;
     const visibleAgenda = (side: "corp" | "runner") =>
       remoteRoot(side).find((card) => card.instanceId === agendaId);
 
@@ -104,12 +104,12 @@ describe("agenda difficulty follows declared modifiers", () => {
       agendaDifficultyModifier: -2,
     });
 
-    state.serverAgendaCostCountersByServer = { remote_1: 4 };
+    state.serverAgendaCostCountersByServer = { r1: 4 };
     expect(visibleAgenda("corp")?.advancementRequirement).toBe(3);
     expect(visibleAgenda("corp")).not.toHaveProperty(
       "agendaDifficultyModifier",
     );
-    state.serverAgendaCostCountersByServer = { remote_1: 6 };
+    state.serverAgendaCostCountersByServer = { r1: 6 };
     expect(visibleAgenda("corp")).toMatchObject({
       advancementRequirement: 4,
       agendaDifficultyModifier: 1,
@@ -137,7 +137,7 @@ describe("agenda difficulty follows declared modifiers", () => {
     )!;
     expect(score).toBeDefined();
     const regionId = state.corp.servers
-      .find((s) => s.id === "remote_1")!
+      .find((s) => s.id === "r1")!
       .root.find((id) => id !== agendaId)!;
     state.cardInstances[regionId]!.rezzed = false;
     state.cardInstances[regionId]!.faceup = false;

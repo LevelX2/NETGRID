@@ -21,7 +21,7 @@ const fixture = JSON.parse(
   stateHash: string;
   checkedStates: number;
 };
-const rent = "runner_35_2" as CardInstanceId;
+const rent = "c7u" as CardInstanceId;
 function bid(state: GameState) {
   const result = applyAction(state, fixture.action);
   expect(result.ok).toBe(true);
@@ -31,8 +31,8 @@ function bid(state: GameState) {
 }
 describe("trace-triggered run end retains the executing action", () => {
   it.each([
-    "runner_192_1",
-    "runner_351_1",
+    "c16p",
+    "c261",
   ] as const)(
     "finishes the native Cinderella trace and the Corp hardware choice for %s",
     (hardware) => {

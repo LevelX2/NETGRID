@@ -90,7 +90,7 @@ function makeHost(
       {
         side: "corp",
         zone: "serverIce",
-        serverId: "remote_1",
+        serverId: "r1",
       } as CardInstance["zone"],
       { rezzed: true, faceup: true },
     ),
@@ -98,7 +98,7 @@ function makeHost(
       "dupre",
       232,
       { side: "runner", zone: "rig" },
-      { counters: { power: 2 }, selectedServerId: "remote_0" },
+      { counters: { power: 2 }, selectedServerId: "r0" },
     ),
     tokyo: instance(
       "tokyo",
@@ -106,7 +106,7 @@ function makeHost(
       {
         side: "corp",
         zone: "serverRoot",
-        serverId: "remote_1",
+        serverId: "r1",
       } as CardInstance["zone"],
       { rezzed: true, faceup: true },
     ),
@@ -114,7 +114,7 @@ function makeHost(
   };
   const servers = [
     {
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: ["ice_1"],
@@ -151,9 +151,9 @@ function makeHost(
       options.run ??
       ({
         runId: 1,
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         phase: "movement",
-        position: { kind: "server", serverId: "remote_1" },
+        position: { kind: "server", serverId: "r1" },
       } as unknown as NonNullable<GameState["run"]>),
   } as unknown as GameState;
   let resetBreakerStrengthCount = 0;
@@ -500,9 +500,9 @@ describe("run end cleanup", () => {
     const fixture = makeHost({
       run: {
         runId: 428980,
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         phase: "movement",
-        position: { kind: "server", serverId: "remote_1" },
+        position: { kind: "server", serverId: "r1" },
         runnerRunTemporaryCredits: {
           amount: 9,
           remaining: 4,
@@ -552,9 +552,9 @@ describe("run end cleanup", () => {
       const fixture = makeHost({
         run: {
           runId: `run_all_nighter_${successful}`,
-          attackedServerId: "remote_1",
+          attackedServerId: "r1",
           phase: "movement",
-          position: { kind: "server", serverId: "remote_1" },
+          position: { kind: "server", serverId: "r1" },
           grantBonusRunOnFinish: true,
         } as unknown as NonNullable<GameState["run"]>,
       });
@@ -1026,9 +1026,9 @@ describe("run end cleanup", () => {
     const fixture = makeHost({
       run: {
         runId: 707261,
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         phase: "movement",
-        position: { kind: "server", serverId: "remote_1" },
+        position: { kind: "server", serverId: "r1" },
         temporaryDiscountedRezzedIceIds: ["ice_1"],
       } as unknown as NonNullable<GameState["run"]>,
     });
@@ -1052,16 +1052,16 @@ describe("run end cleanup", () => {
     const fixture = makeHost({
       run: {
         runId: 742965,
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         phase: "movement",
-        position: { kind: "server", serverId: "remote_1" },
+        position: { kind: "server", serverId: "r1" },
         runEndCounterAwardBreakerIds: ["dupre"],
       } as unknown as NonNullable<GameState["run"]>,
     });
 
     recordFortBoundBreakerUsage(fixture.host, "dupre", false);
     expect(fixture.state.cardInstances.dupre?.selectedServerId).toBe(
-      "remote_1",
+      "r1",
     );
     expect(fixture.state.cardInstances.dupre?.counters?.power).toBe(0);
 
@@ -1073,7 +1073,7 @@ describe("run end cleanup", () => {
 
     expect(result.placedCounters).toBe(1);
     expect(fixture.state.cardInstances.dupre?.selectedServerId).toBe(
-      "remote_1",
+      "r1",
     );
     expect(fixture.state.cardInstances.dupre?.counters?.power).toBe(1);
   });
@@ -1082,9 +1082,9 @@ describe("run end cleanup", () => {
     const fixture = makeHost({
       run: {
         runId: 734383,
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         phase: "encounter_ice",
-        position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+        position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       } as unknown as NonNullable<GameState["run"]>,
     });
 
@@ -1097,7 +1097,7 @@ describe("run end cleanup", () => {
 
     expect(result.placedCounters).toBeUndefined();
     expect(fixture.state.cardInstances.dupre?.selectedServerId).toBe(
-      "remote_1",
+      "r1",
     );
     expect(fixture.state.cardInstances.dupre?.counters?.power).toBe(0);
   });
@@ -1115,9 +1115,9 @@ describe("run end cleanup", () => {
       },
       run: {
         runId: 190055,
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         phase: "encounter_ice",
-        position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+        position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       } as unknown as NonNullable<GameState["run"]>,
     });
 
@@ -1139,9 +1139,9 @@ describe("run end cleanup", () => {
     const fixture = makeHost({
       run: {
         runId: 419019,
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         phase: "encounter_ice",
-        position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+        position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       } as unknown as NonNullable<GameState["run"]>,
     });
 
@@ -1273,9 +1273,9 @@ describe("run end cleanup", () => {
     const fixture = makeHost({
       run: {
         runId: 836004,
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         phase: "movement",
-        position: { kind: "server", serverId: "remote_1" },
+        position: { kind: "server", serverId: "r1" },
       } as unknown as NonNullable<GameState["run"]>,
       runnerPrograms: ["rent" as CardInstanceId],
       definitions: {
@@ -1316,9 +1316,9 @@ describe("run end cleanup", () => {
     const fixture = makeHost({
       run: {
         runId: 436879,
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         phase: "movement",
-        position: { kind: "server", serverId: "remote_1" },
+        position: { kind: "server", serverId: "r1" },
       } as unknown as NonNullable<GameState["run"]>,
       runnerPrograms: ["rent" as CardInstanceId],
       definitions: {
@@ -1409,7 +1409,7 @@ describe("run end cleanup", () => {
     expect(fixture.legalAction.payload).toMatchObject({
       unsuccessfulRunCorpCreditBonus: true,
       sourceDefinitionId: 1433344137,
-      serverId: "remote_1",
+      serverId: "r1",
       corpCreditsGained: 3,
       corpCreditsAfter: 7,
       sourceCardId: "tokyo",
@@ -1423,7 +1423,7 @@ describe("run end cleanup", () => {
         reason: "unsuccessful_run",
         sourceDefinitionId: 1433344137,
         sourceTitle: "tokyo_def",
-        serverId: "remote_1",
+        serverId: "r1",
         serverLabel: "Remote 1",
       }),
     );
@@ -1432,7 +1432,7 @@ describe("run end cleanup", () => {
   it("clears encounter temporary trace credits with the existing payload fields", () => {
     const run = {
       runId: 773228,
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       encounterTemporaryTraceCredits: {
         remaining: 2,
         sourceDefinitionId: 3532417201,
@@ -1454,7 +1454,7 @@ describe("run end cleanup", () => {
     (remaining) => {
       const run = {
         runId: 773228,
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         encounterTemporaryTraceCredits: {
           remaining,
           sourceDefinitionId: 3532417201,

@@ -218,7 +218,7 @@ describe("game event builder", () => {
       type: "trigger_ability",
       visibility: "public",
       payload: {
-        serverId: "remote_1",
+        serverId: "r1",
         counterType: "spy",
         removedCounterAmount: 1,
         remainingCounters: 0,
@@ -227,7 +227,7 @@ describe("game event builder", () => {
         publicCounterMutation({
           operation: "remove",
           counterType: "spy",
-          scope: { kind: "server", serverId: "remote_1" },
+          scope: { kind: "server", serverId: "r1" },
           before: 1,
           after: 0,
         }),
@@ -236,14 +236,14 @@ describe("game event builder", () => {
         {
           kind: "counter_threshold_identity_visibility_ended",
           counterType: "spy",
-          scope: { kind: "server", serverId: "remote_1" },
+          scope: { kind: "server", serverId: "r1" },
           activeAtOrAbove: 1,
           before: 1,
           after: 0,
           cards: [
             {
               definitionId: 342907630,
-              serverId: "remote_1",
+              serverId: "r1",
               area: "root",
               positionKey: "root:0",
             },
@@ -266,7 +266,7 @@ describe("game event builder", () => {
     expect(event.publicPayload.counterMutations).toEqual([
       expect.objectContaining({
         counterType: "spy",
-        scope: { kind: "server", serverId: "remote_1" },
+        scope: { kind: "server", serverId: "r1" },
         before: 1,
         amount: 1,
         after: 0,
@@ -275,7 +275,7 @@ describe("game event builder", () => {
     expect(event.publicPayload.publicVisibilityTransitions).toEqual([
       expect.objectContaining({
         kind: "counter_threshold_identity_visibility_ended",
-        scope: { kind: "server", serverId: "remote_1" },
+        scope: { kind: "server", serverId: "r1" },
         before: 1,
         after: 0,
         cards: [

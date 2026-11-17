@@ -226,7 +226,7 @@ describe("Proteus Public Fort Pass Windows", () => {
       toRunnerTurnFromCorpMain(state),
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     return apply(state, "corp", (action) => action.type === "decline_rez");
   }
@@ -237,7 +237,7 @@ describe("Proteus Public Fort Pass Windows", () => {
     state.corp.credits = 10;
     const lesleyId = putCorpRootInRemote(state, LESLEY);
     const agendaId = putCorpRootInRemote(state, AGENDA);
-    putCorpIceOnServer(state, "remote_1", ICE);
+    putCorpIceOnServer(state, "r1", ICE);
     setRezzed(state, lesleyId);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -255,7 +255,7 @@ describe("Proteus Public Fort Pass Windows", () => {
     expect(lesleyAction.payload).toMatchObject({
       fortRunWindowAbility:
         "add_advancement_counters_after_passing_last_ice_on_this_fort",
-      serverId: "remote_1",
+      serverId: "r1",
       targetCardDefinitionId: AGENDA,
     });
     expect(
@@ -322,7 +322,7 @@ describe("Proteus Public Fort Pass Windows", () => {
     state.runner.credits = 2;
     state.corp.credits = 10;
     const rasminId = putCorpRootInRemote(state, RASMIN);
-    putCorpIceOnServer(state, "remote_1", ICE);
+    putCorpIceOnServer(state, "r1", ICE);
     setRezzed(state, rasminId);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -341,7 +341,7 @@ describe("Proteus Public Fort Pass Windows", () => {
     expect(payAction.costs).toEqual([{ credits: 1 }]);
     expect(payAction.payload).toMatchObject({
       sourceDefinitionIds: String(RASMIN),
-      serverId: "remote_1",
+      serverId: "r1",
       paymentAmount: 1,
     });
     expect(

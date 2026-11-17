@@ -1334,11 +1334,11 @@ describe("PlayerView projection", () => {
     putCorpRootInRemote(state, 559);
     state.cardInstances[vaporId]!.advancementCounters = 3;
     const rootVapor = getPlayerView(state, "corp")
-      .servers.find((server) => server.id === "remote_1")
+      .servers.find((server) => server.id === "r1")
       ?.root.find((card) => card.instanceId === vaporId);
     expect(rootVapor?.counterBankPreparationQuote).toMatchObject({
       sourceCardId: vaporId,
-      location: { kind: "installed_root", serverId: "remote_1" },
+      location: { kind: "installed_root", serverId: "r1" },
       advancementCounters: 3,
     });
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
@@ -1365,7 +1365,7 @@ describe("PlayerView projection", () => {
     expect(corpAgenda?.scoreContinuationQuote).toEqual({
       context: "installed_agenda",
       agendaCardId: agendaId,
-      serverId: "remote_1",
+      serverId: "r1",
       expiresAtStateVersion: state.stateVersion,
       complete: true,
       remainingAdvancementCounters: 1,
@@ -1605,18 +1605,18 @@ describe("PlayerView projection", () => {
     roving.counters = {};
 
     const lockedRunnerServer = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     const lockedCorpServer = getPlayerView(state, "corp").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(lockedRunnerServer?.statuses).toEqual([
       {
-        id: `server_status:remote_1:run_prohibited:${rovingId}:fort_activity_gate`,
+        id: `server_status:r1:run_prohibited:${rovingId}:fort_activity_gate`,
         kind: "run_prohibited",
         scope: "target_server",
         reason: "required_corp_activity_during_latest_corp_turn_missing",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: rovingId,
         sourceAbilityId: "fort_activity_gate",
         sourceTitle: "Roving Submarine",
@@ -1628,10 +1628,10 @@ describe("PlayerView projection", () => {
     state.corpTurnFlags = {
       scoredBlackOpsAgendaThisTurn: false,
       scoredBlackOpsAgendaLastTurn: false,
-      fortActivityServerIdsSinceCorpTurnStart: ["remote_1"],
+      fortActivityServerIdsSinceCorpTurnStart: ["r1"],
     };
     const allowedRunnerServer = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(allowedRunnerServer?.statuses).toBeUndefined();
 
@@ -1639,13 +1639,13 @@ describe("PlayerView projection", () => {
     roving.faceup = false;
     roving.counters = {};
     const hiddenRunnerCard = getPlayerView(state, "runner")
-      .servers.find((server) => server.id === "remote_1")
+      .servers.find((server) => server.id === "r1")
       ?.root.at(0);
     expect(hiddenRunnerCard).toMatchObject({ known: false, rezzed: false });
     expect(hiddenRunnerCard).not.toHaveProperty("title");
     expect(
       getPlayerView(state, "runner").servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       )?.statuses,
     ).toBeUndefined();
   });
@@ -1659,7 +1659,7 @@ describe("PlayerView projection", () => {
     state.cardInstances[surveillanceId]!.faceup = true;
 
     const server = getPlayerView(state, "runner").servers.find(
-      (candidate) => candidate.id === "remote_1",
+      (candidate) => candidate.id === "r1",
     );
 
     expect(server?.statuses).toContainEqual(
@@ -1699,10 +1699,10 @@ describe("PlayerView projection", () => {
     const firstUpgradeId = moveCorpCardToHq(state, 606);
     const secondUpgradeId = moveCorpCardCopyToHq(state, 606);
     const rezzedNodeId = moveCorpCardToHq(state, 594);
-    let remote = state.corp.servers.find((server) => server.id === "remote_1");
+    let remote = state.corp.servers.find((server) => server.id === "r1");
     if (!remote) {
       remote = {
-        id: "remote_1",
+        id: "r1",
         kind: "remote",
         label: "Remote 1",
         ice: [],
@@ -1716,7 +1716,7 @@ describe("PlayerView projection", () => {
       remoteServer.root.push(cardId);
       state.cardInstances[cardId] = {
         ...state.cardInstances[cardId]!,
-        zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+        zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
         faceup: rezzed,
         rezzed,
       };
@@ -1728,7 +1728,7 @@ describe("PlayerView projection", () => {
     const replayStart = state.eventLog.length;
 
     const runnerRemoteBefore = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(runnerRemoteBefore?.root).toHaveLength(3);
     expect(runnerRemoteBefore?.root[0]).toMatchObject({
@@ -1757,7 +1757,7 @@ describe("PlayerView projection", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     expect(getPlayerView(state, "runner").run?.runId).toBe(state.run?.runId);
     expect(getPlayerView(state, "corp").run?.runId).toBe(state.run?.runId);
@@ -1773,7 +1773,7 @@ describe("PlayerView projection", () => {
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(
       getPlayerView(state, "runner").servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       )?.root[0],
     ).toMatchObject({
       instanceId: firstUpgradeId,
@@ -1786,7 +1786,7 @@ describe("PlayerView projection", () => {
     const runnerRemoteBetweenAccesses = getPlayerView(
       state,
       "runner",
-    ).servers.find((server) => server.id === "remote_1");
+    ).servers.find((server) => server.id === "r1");
     expect(runnerRemoteBetweenAccesses?.root[0]).toMatchObject({
       instanceId: firstUpgradeId,
       known: true,
@@ -1817,7 +1817,7 @@ describe("PlayerView projection", () => {
 
     expect(state.run).toBeUndefined();
     const runnerRemoteAfter = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(runnerRemoteAfter?.root[0]).toMatchObject({
       known: false,

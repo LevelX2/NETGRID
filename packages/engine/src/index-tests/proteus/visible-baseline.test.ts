@@ -437,20 +437,20 @@ describe("Proteus Visible Baseline", () => {
 
       const otherFort = structuredClone(state);
       otherFort.corp.servers.push({
-        id: "remote_2",
+        id: "r2",
         kind: "remote",
         label: "Remote 2",
         ice: [],
         root: [agendaInstanceId],
       });
       const remoteOne = otherFort.corp.servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       );
-      if (!remoteOne) throw new Error("remote_1 missing");
+      if (!remoteOne) throw new Error("r1 missing");
       remoteOne.root = remoteOne.root.filter((id) => id !== agendaInstanceId);
       otherFort.cardInstances[agendaInstanceId] = {
         ...otherFort.cardInstances[agendaInstanceId]!,
-        zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
+        zone: { side: "corp", zone: "serverRoot", serverId: "r2" },
       };
       expect(
         getLegalActions(otherFort, "corp").some(

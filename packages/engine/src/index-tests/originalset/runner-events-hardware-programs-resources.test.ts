@@ -1702,7 +1702,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
     };
     const iceId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       451,
     );
     const initial = structuredClone(state);
@@ -1712,7 +1712,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(
       state,

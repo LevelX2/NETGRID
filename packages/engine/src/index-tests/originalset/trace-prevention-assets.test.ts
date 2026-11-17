@@ -931,14 +931,14 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     putCorpIceOnServer(state, "hq", 590);
     putCorpIceCopyOnServer(state, "hq", 590);
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
       root: [],
     });
-    putCorpIceOnServer(state, "remote_1", 601);
-    putCorpIceOnServer(state, "remote_1", 603);
+    putCorpIceOnServer(state, "r1", 601);
+    putCorpIceOnServer(state, "r1", 603);
     moveRunnerCardToGrip(state, 298);
     state = apply(
       state,

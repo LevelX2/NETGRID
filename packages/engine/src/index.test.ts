@@ -571,7 +571,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
     const hiddenResourceSlotId = String(
       legal[0]?.payload?.hiddenResourceSlotId ?? "",
     );
-    expect(hiddenResourceSlotId).toMatch(/^hidden_runner_resource_/);
+    expect(hiddenResourceSlotId).toMatch(/^s[a-z0-9]{1,7}$/);
     expect(legal[0]?.payload).toMatchObject({
       traceSuccessTargetCardId: hiddenResourceSlotId,
       traceSuccessTargetResourceSlotId: hiddenResourceSlotId,
@@ -1002,7 +1002,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     const rootId = addRezzedCorpRootForTest(
       state,
       524,
-      "remote_1",
+      "r1",
       "removed_successful_fort",
     );
     const eventId = addRunnerCardToGripForTest(
@@ -1022,7 +1022,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(
@@ -1031,12 +1031,12 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       (action) => action.type === "trash_accessed_card",
     );
     expect(state.corp.archives).toContain(rootId);
-    expect(state.corp.servers.some((server) => server.id === "remote_1")).toBe(
+    expect(state.corp.servers.some((server) => server.id === "r1")).toBe(
       false,
     );
     expect(state.runnerTurnFlags).toMatchObject({
       successfulRunThisTurn: true,
-      lastSuccessfulRunServerId: "remote_1",
+      lastSuccessfulRunServerId: "r1",
     });
     state = apply(state, "runner", (action) => action.type === "draw_card");
     expect(state.runner.grip).toContain(eventId);
@@ -1600,7 +1600,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       {
         sourceBreakerInstanceId: bulldozerId,
         sourceAbilityId:
-          "140:break_wall_with_stealth_tradeoff_and_sentry_reward",
+          190,
         iceSubtype: "sentry",
         remainingUses: 1,
         mustBeNextEncounteredIce: true,
@@ -1613,7 +1613,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
         {
           sourceBreakerInstanceId: bulldozerId,
           sourceAbilityId:
-            "140:break_wall_with_stealth_tradeoff_and_sentry_reward",
+            190,
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -1635,7 +1635,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       cardImplementationAbilityKey:
         "break_wall_with_stealth_tradeoff_and_sentry_reward",
       cardImplementationAbilityId:
-        "140:break_wall_with_stealth_tradeoff_and_sentry_reward",
+        190,
     });
     expect(freeBreak.payload).not.toHaveProperty(
       "cardImplementationAbilityIndex",
@@ -2746,20 +2746,20 @@ describe("MVP 0.1 runs, access and scoring", () => {
       createMechanicFixtureGameAfterSetup({ seed: "empty-remote-access" }),
     );
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
       root: [],
     });
-    putCorpIceOnServer(state, "remote_1", 589);
+    putCorpIceOnServer(state, "r1", 589);
     const randomDrawsBefore = state.randomDrawRecords.length;
 
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
 
@@ -2789,7 +2789,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
 
     expect(
@@ -3012,7 +3012,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     const banpeiId = addRezzedCorpIceForTest(
       state,
       435,
-      "remote_1",
+      "r1",
       "banpei",
     );
     const initial = structuredClone(state);
@@ -3022,7 +3022,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
 
     expect(state.timingPoint).toBe("run.approach_ice");
@@ -3109,7 +3109,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     );
     const scannerId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       442,
     );
     const initial = structuredClone(state);
@@ -3119,7 +3119,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
 
     expect(state.timingPoint).toBe("run.approach_ice");
@@ -3231,7 +3231,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     };
     const crystalWallId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       444,
     );
     state.cardInstances[crystalWallId] = {
@@ -3248,7 +3248,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(
       state,
@@ -4102,7 +4102,7 @@ describe("MVP 0.4 controlled card pool and tags", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(

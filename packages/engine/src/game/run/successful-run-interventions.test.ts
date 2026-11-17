@@ -113,7 +113,7 @@ function makeHost(
   );
   const servers = [
     {
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       ice: existingIceIds.slice(),
       root: ["source_upgrade" as CardInstanceId],
@@ -129,7 +129,7 @@ function makeHost(
       {
         side: "corp",
         zone: "serverRoot",
-        serverId: "remote_1",
+        serverId: "r1",
       } as CardInstance["zone"],
       { faceup: true, rezzed: true },
     ),
@@ -167,7 +167,7 @@ function makeHost(
     cardInstances[iceId] = instance(iceId, 3582045320, {
       side: "corp",
       zone: "serverIce",
-      serverId: "remote_1",
+      serverId: "r1",
     } as CardInstance["zone"]);
   }
   const state = {
@@ -195,9 +195,9 @@ function makeHost(
     cardInstances,
     run: {
       runId: 1,
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "access",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
       successful: true,
     },
   } as unknown as GameState;
@@ -517,7 +517,7 @@ function delayedChoice(
   return {
     choiceId: "p3_54_delayed_success_4",
     side: "corp",
-    source: `p3_54.delayed_success:source_upgrade:${kind}:remote_1:4`,
+    source: `p3_54.delayed_success:source_upgrade:${kind}:r1:4`,
     prompt: "Delayed success",
     kind: "select_option",
     options: [
@@ -651,7 +651,7 @@ describe("successful run interventions", () => {
     fixture.state.run = {
       ...(fixture.state.run as NonNullable<GameState["run"]>),
       delayedSuccessfulRun: {
-        originalServerId: "remote_1",
+        originalServerId: "r1",
         interventionSourceId: "source_upgrade",
         pendingMode: "temporary_hq_ice_encounter",
         temporaryIceId: "hq_ice",
@@ -683,7 +683,7 @@ describe("successful run interventions", () => {
       temporaryEncounterTrashed: true,
       temporaryIceDefinitionId: 2966027182,
       sourceDefinitionId: 570,
-      serverId: "remote_1",
+      serverId: "r1",
       successfulRunFinalizedAfterIntervention: true,
       delayedSuccessfulRun: false,
     });
@@ -779,12 +779,12 @@ describe("successful run interventions", () => {
     )!;
     resolveSuccessfulRunFollowupAbility(fixture.host, iSpyAction);
     expect(fixture.trashedRunnerIds).toEqual(["i_spy"]);
-    expect(fixture.state.spyCountersByServer?.remote_1).toBe(1);
+    expect(fixture.state.spyCountersByServer?.r1).toBe(1);
     expect(iSpyAction.payload).toMatchObject({
       counterType: "spy",
       addedCounterAmount: 1,
       remainingCounters: 1,
-      exposedServerId: "remote_1",
+      exposedServerId: "r1",
       exposureTarget: "all_cards_inside_or_on_fort",
       exposureDuration: "while_counter_present",
       exposureThreshold: 1,
@@ -795,7 +795,7 @@ describe("successful run interventions", () => {
       expect.objectContaining({
         operation: "add",
         counterType: "spy",
-        scope: { kind: "server", serverId: "remote_1" },
+        scope: { kind: "server", serverId: "r1" },
         before: 0,
         amount: 1,
         after: 1,
@@ -819,7 +819,7 @@ describe("successful run interventions", () => {
     );
     expect(action?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "194:hq_success_reveal_trash_source_corp_lose_three",
+        257,
       cardImplementationAbilityKey:
         "hq_success_reveal_trash_source_corp_lose_three",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
@@ -828,9 +828,9 @@ describe("successful run interventions", () => {
     expect(action).toMatchObject({
       abilityRef: {
         sourceCardInstanceId: "credit_subversion",
-        sourceAbilityId: "194:hq_success_reveal_trash_source_corp_lose_three",
+        sourceAbilityId: 257,
       },
-      effectRef: "effect.194:hq_success_reveal_trash_source_corp_lose_three",
+      effectRef: "effect.257",
     });
     if (!action) throw new Error("Missing Credit Subversion action");
 

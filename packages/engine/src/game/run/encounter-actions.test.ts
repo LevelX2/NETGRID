@@ -396,7 +396,7 @@ describe("runner encounter action generation", () => {
     ]);
     const pump = result.legalActions[0]!;
     expect(pump.actionId).toBe(
-      "runner.pump_breaker.breaker_1.breaker_1.breaker_1.ice_1.598:simple_killer_pump",
+      "runner.pump_breaker.breaker_1.breaker_1.breaker_1.ice_1.701",
     );
     expect(pump.payload).toMatchObject({
       cardId: "breaker_1",
@@ -405,7 +405,7 @@ describe("runner encounter action generation", () => {
       pumpStrengthAmount: 1,
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationAbilityKey: "simple_killer_pump",
-      cardImplementationAbilityId: "598:simple_killer_pump",
+      cardImplementationAbilityId: 701,
     });
     expect(pump.payload).not.toHaveProperty("cardImplementationAbilityIndex");
     expect(pump.payload).not.toHaveProperty(
@@ -413,11 +413,11 @@ describe("runner encounter action generation", () => {
     );
     expect(pump.abilityRef).toEqual({
       sourceCardInstanceId: "breaker_1",
-      sourceAbilityId: "598:simple_killer_pump",
+      sourceAbilityId: 701,
     });
     const breaker = result.legalActions[1]!;
     expect(breaker.actionId).toBe(
-      "runner.break_subroutine.breaker_1.breaker_1.breaker_1.ice_1.0.test_sentry_etr.598:simple_killer_break_sentry",
+      "runner.break_subroutine.breaker_1.breaker_1.breaker_1.ice_1.0.test_sentry_etr.700",
     );
     expect(breaker.costs).toEqual([{ credits: 1 }]);
     expect(breaker.payload).toMatchObject({
@@ -431,11 +431,11 @@ describe("runner encounter action generation", () => {
       breakSubroutineBaseCost: 1,
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationAbilityKey: "simple_killer_break_sentry",
-      cardImplementationAbilityId: "598:simple_killer_break_sentry",
+      cardImplementationAbilityId: 700,
     });
     expect(breaker.abilityRef).toEqual({
       sourceCardInstanceId: "breaker_1",
-      sourceAbilityId: "598:simple_killer_break_sentry",
+      sourceAbilityId: 700,
     });
     expect(result.legalActions[2]!.payload).toMatchObject({
       encounterContinue: true,

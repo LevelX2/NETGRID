@@ -1,6 +1,6 @@
 import type { CorpServer, ServerId } from "@netgrid/shared";
 
-const CANONICAL_REMOTE_SERVER_ID = /^remote_([1-9]\d*)$/;
+const CANONICAL_REMOTE_SERVER_ID = /^r([1-9]\d*)$/;
 
 export function canonicalRemoteServerNumber(
   serverId: string,
@@ -47,5 +47,5 @@ export function nextCanonicalRemoteServerId(
     maximum = Math.max(maximum, value);
   }
   if (maximum >= Number.MAX_SAFE_INTEGER) return undefined;
-  return `remote_${maximum + 1}`;
+  return `r${maximum + 1}`;
 }

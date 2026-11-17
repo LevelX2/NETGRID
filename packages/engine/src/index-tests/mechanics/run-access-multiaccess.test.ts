@@ -730,14 +730,14 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       state,
       563,
     );
-    putCorpIceOnServer(state, "remote_1", 491);
+    putCorpIceOnServer(state, "r1", 491);
     const initial = structuredClone(state);
 
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(
       state,
@@ -845,7 +845,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     const iceId = addRezzedCorpIceForTest(
       state,
       589,
-      "remote_1",
+      "r1",
       "post_jack_out_setup",
     );
     state.cardInstances[iceId]!.rezzed = false;
@@ -857,7 +857,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
 

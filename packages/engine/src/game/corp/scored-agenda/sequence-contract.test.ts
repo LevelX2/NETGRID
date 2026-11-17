@@ -191,7 +191,7 @@ describe("scored agenda sequence contract matrix", () => {
       },
       {
         source:
-          "card_implementation.hq_to_new_remote_rez:data_fort_agenda:remote_1:4:8",
+          "card_implementation.hq_to_new_remote_rez:data_fort_agenda:r1:4:8",
         resolverId: "hq_to_new_remote_rez_choice",
       },
       {
@@ -259,7 +259,7 @@ describe("scored agenda sequence contract matrix", () => {
     const sources = [
       "card_implementation.scored_agenda_free_rez:priority_agenda:8",
       "card_implementation.hq_to_new_remote_install_rez:data_fort_agenda:8",
-      "card_implementation.hq_to_new_remote_rez:data_fort_agenda:remote_1:4:8",
+      "card_implementation.hq_to_new_remote_rez:data_fort_agenda:r1:4:8",
       "card_implementation.agenda_purge_install_targets:agenda_purge_agenda:ice_1:8",
       "scored_agenda.rezzed_ice_mark_modifier:transmutation_agenda:8",
     ];
@@ -350,7 +350,7 @@ describe("scored agenda sequence contract matrix", () => {
 
     const orderedFortPayload = orderedFortRebuildPublicPayload({
       sourceDefinitionId: 127,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       removedCardCount: 2,
       replacementCardCount: 2,
       installedIceCount: 1,

@@ -78,7 +78,7 @@ function makeHost(
   const servers =
     options.servers ??
     ([
-      { id: "remote_1", ice: [], root: ["asset"] },
+      { id: "r1", ice: [], root: ["asset"] },
       { id: "rd", ice: [], root: [] },
       { id: "hq", ice: [], root: [] },
       { id: "archives", ice: [], root: [] },
@@ -89,17 +89,17 @@ function makeHost(
       asset: instance("asset", 1151438755, {
         side: "corp",
         zone: "serverRoot",
-        serverId: "remote_1",
+        serverId: "r1",
       } as CardInstance["zone"]),
       agenda: instance("agenda", 2855245605, {
         side: "corp",
         zone: "serverRoot",
-        serverId: "remote_1",
+        serverId: "r1",
       } as CardInstance["zone"]),
       ice: instance("ice", 1663273972, {
         side: "corp",
         zone: "serverRoot",
-        serverId: "remote_1",
+        serverId: "r1",
       } as CardInstance["zone"]),
     } satisfies Record<string, CardInstance>);
   const state = {
@@ -124,7 +124,7 @@ function makeHost(
   if (options.run === undefined) {
     state.run = {
       runId: 1,
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     } as unknown as NonNullable<GameState["run"]>;
   } else if (options.run) {
     state.run = options.run;
@@ -333,7 +333,7 @@ describe("access flow execution", () => {
     expect(result).toMatchObject({
       handled: true,
       accessedCardId: "asset",
-      serverId: "remote_1",
+      serverId: "r1",
       stateChanged: true,
     });
     expect(state.run?.accessedCardId).toBe("asset");
@@ -341,7 +341,7 @@ describe("access flow execution", () => {
     expect(effects).toEqual(["asset"]);
     expect(legalAction.payload).toMatchObject({
       accessedCardId: "asset",
-      serverId: "remote_1",
+      serverId: "r1",
       accessOrigin: "remote_root",
     });
   });
@@ -460,12 +460,12 @@ describe("access flow execution", () => {
         asset: instance("asset", 1151438755, {
           side: "corp",
           zone: "serverRoot",
-          serverId: "remote_1",
+          serverId: "r1",
         } as CardInstance["zone"]),
         ice: instance("ice", 1663273972, {
           side: "corp",
           zone: "serverIce",
-          serverId: "remote_1",
+          serverId: "r1",
         } as CardInstance["zone"]),
         schematics: {
           id: "schematics" as CardInstanceId,
@@ -481,7 +481,7 @@ describe("access flow execution", () => {
       },
       corpHq: ["hq_card"],
       servers: [
-        { id: "remote_1", ice: ["ice"], root: ["asset"] },
+        { id: "r1", ice: ["ice"], root: ["asset"] },
         { id: "rd", ice: [], root: [] },
         { id: "hq", ice: [], root: [] },
         { id: "archives", ice: [], root: [] },
@@ -516,7 +516,7 @@ describe("access flow execution", () => {
       revealedCount: 2,
       publicRevealDefinitionIds: "1151438755,1663273972",
       publicRevealTitles: "1151438755||1663273972",
-      exposedServerLabels: "remote_1 root,remote_1 ICE 1",
+      exposedServerLabels: "r1 root,r1 ICE 1",
       exposedCardInstanceIds: "asset,ice",
     });
     expect(state.pendingChoice).toMatchObject({
@@ -540,11 +540,11 @@ describe("access flow execution", () => {
     const { host, state, spentRunnerCredits, finishedRuns } = makeHost({
       run: {
         runId: 1,
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         accessedCardId: "agenda",
       } as unknown as NonNullable<GameState["run"]>,
       servers: [
-        { id: "remote_1", ice: [], root: ["agenda"] },
+        { id: "r1", ice: [], root: ["agenda"] },
         { id: "rd", ice: [], root: [] },
         { id: "hq", ice: [], root: [] },
         { id: "archives", ice: [], root: [] },
@@ -637,7 +637,7 @@ describe("access flow execution", () => {
       {
         run: {
           runId: 1,
-          attackedServerId: "remote_1",
+          attackedServerId: "r1",
           accessedCardId: "asset",
         } as unknown as NonNullable<GameState["run"]>,
       },
@@ -1186,13 +1186,13 @@ describe("access flow execution", () => {
   it("advances breach queue on decline without finishing the run", () => {
     const breach = {
       breachId: "1.breach",
-      serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+      serverId: "r1" as Exclude<ServerId, "new_remote">,
       accessMode: "multi" as const,
       queue: [
         {
           entryId: "entry_0",
           cardInstanceId: "asset" as CardInstanceId,
-          serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+          serverId: "r1" as Exclude<ServerId, "new_remote">,
           zone: "remote_root" as const,
           status: "accessed" as const,
           hiddenInfo: false,
@@ -1200,7 +1200,7 @@ describe("access flow execution", () => {
         {
           entryId: "entry_1",
           cardInstanceId: "agenda" as CardInstanceId,
-          serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+          serverId: "r1" as Exclude<ServerId, "new_remote">,
           zone: "remote_root" as const,
           status: "pending" as const,
           hiddenInfo: false,
@@ -1213,7 +1213,7 @@ describe("access flow execution", () => {
     const { host, state, finishedRuns } = makeHost({
       run: {
         runId: 1,
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         accessedCardId: "asset",
         breach,
       } as unknown as NonNullable<GameState["run"]>,

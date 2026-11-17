@@ -43,7 +43,7 @@ function setup(eventDefinitionId: number, target: "hq" | "rd") {
   );
   state.corp.hq = state.corp.hq.filter((id) => id !== agendaId);
   state.corp.servers.push({
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     ice: [],
@@ -52,7 +52,7 @@ function setup(eventDefinitionId: number, target: "hq" | "rd") {
   state.cardInstances[agendaId]!.zone = {
     side: "corp",
     zone: "serverRoot",
-    serverId: "remote_1",
+    serverId: "r1",
   };
   addRezzedCorpIceForTest(
     state,
@@ -79,7 +79,7 @@ function redirect(
   expect(state.run?.phase).toBe("encounter_ice");
   state = apply(state, "runner", (a) => a.type === "continue_run");
   expect(state.run).toMatchObject({
-    attackedServerId: "remote_1",
+    attackedServerId: "r1",
     phase: "movement",
   });
   return state;
@@ -115,7 +115,7 @@ describe("fixed-fort run-event benefits after deflection", () => {
       state = apply(state, "runner", (a) => a.type === "continue_run");
       expect(state.pendingChoice).toBeUndefined();
       expect(state.run).toMatchObject({
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         successful: true,
         accessCount: 1,
         phase: "access",
@@ -129,7 +129,7 @@ describe("fixed-fort run-event benefits after deflection", () => {
       state = apply(state, "runner", (a) => a.type === "steal_agenda");
       expect(state.runner.scoreArea).toContain(fixture.agendaId);
       expect(state.run).toBeUndefined();
-      expect(state.runnerTurnFlags?.lastSuccessfulRunServerId).toBe("remote_1");
+      expect(state.runnerTurnFlags?.lastSuccessfulRunServerId).toBe("r1");
       assertReplay(initial, state);
     },
   );
@@ -143,7 +143,7 @@ describe("fixed-fort run-event benefits after deflection", () => {
     expect(state.run).toBeUndefined();
     expect(state.runner.tags).toBe(3);
     expect(state.runner.credits).toBe(16);
-    expect(state.runnerTurnFlags?.lastSuccessfulRunServerId).toBe("remote_1");
+    expect(state.runnerTurnFlags?.lastSuccessfulRunServerId).toBe("r1");
     expect(state.runner.scoreArea).not.toContain(fixture.agendaId);
     assertReplay(initial, state);
   });

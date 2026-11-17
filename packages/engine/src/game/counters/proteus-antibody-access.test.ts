@@ -129,7 +129,7 @@ function installedAccessFixture(
     seed: `proteus-8b-${definitionId}-installed-${rezzed}`,
     setupMode: "completed",
   });
-  const serverId = "remote_1";
+  const serverId = "r1";
   const cardId = `${definitionId}_installed_test` as CardInstanceId;
   state.corp.servers.push({
     id: serverId,
@@ -309,7 +309,7 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
       seed: "proteus-8b-shuffle-antibodies",
       setupMode: "completed",
     });
-    const serverId = "remote_1";
+    const serverId = "r1";
     state.corp.servers.push({
       id: serverId,
       kind: "remote",

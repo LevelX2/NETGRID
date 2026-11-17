@@ -293,12 +293,12 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       state,
       ROADBLOCK,
       "roadblock_strength",
-      "remote_1",
+      "r1",
       true,
     );
     expect(
       getPlayerView(state, "runner")
-        .servers.find((server) => server.id === "remote_1")
+        .servers.find((server) => server.id === "r1")
         ?.ice.find((ice) => ice.instanceId === roadblock)?.effectiveRunQuote,
     ).toMatchObject({
       conditionalEncounterEffects: [
@@ -310,7 +310,7 @@ describe("Proteus PRO016 random dice encounter suite", () => {
         },
       ],
     });
-    state = encounterIce(state, "remote_1", roadblock);
+    state = encounterIce(state, "r1", roadblock);
     const payload = state.eventLog.at(-1)?.publicPayload;
     const dieRoll = payloadNumber(payload, "dieRoll");
     expect(dieRoll).toBeGreaterThanOrEqual(1);
@@ -334,11 +334,11 @@ describe("Proteus PRO016 random dice encounter suite", () => {
         candidate,
         ROADBLOCK,
         `roadblock_six_${index}`,
-        "remote_1",
+        "r1",
         true,
       );
       const candidateBefore = structuredClone(candidate);
-      const next = encounterIce(candidate, "remote_1", candidateRoadblock);
+      const next = encounterIce(candidate, "r1", candidateRoadblock);
       const roadblockPayload = next.eventLog
         .slice()
         .reverse()
@@ -374,7 +374,7 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       state,
       EXECUTIVE_BOOT_CAMP,
       "boot_camp_1",
-      "remote_1",
+      "r1",
       true,
     );
     addCorpHq(state, SCORCHED_EARTH, "boot_hq_1");
@@ -389,7 +389,7 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state.timingPoint = "run.jack_out_window";
     const action = mustAction(
@@ -419,14 +419,14 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       state,
       EXECUTIVE_BOOT_CAMP,
       "boot_camp_2",
-      "remote_1",
+      "r1",
       true,
     );
-    const lisa = addCorpRoot(state, LISA_BLIGHT, "boot_lisa", "remote_1", true);
-    const wall = addCorpIce(state, WALL, "boot_wall", "remote_1", true);
+    const lisa = addCorpRoot(state, LISA_BLIGHT, "boot_lisa", "r1", true);
+    const wall = addCorpIce(state, WALL, "boot_wall", "r1", true);
     addCorpHq(state, SCORCHED_EARTH, "boot_spend_hq_1");
     addCorpHq(state, SCORCHED_EARTH, "boot_spend_hq_2");
-    state = encounterIce(state, "remote_1", wall);
+    state = encounterIce(state, "r1", wall);
     state.timingPoint = "run.jack_out_window";
     const bootAction = mustAction(
       state,
@@ -464,17 +464,17 @@ describe("Proteus PRO016 random dice encounter suite", () => {
         state,
         EXECUTIVE_BOOT_CAMP,
         "boot_rez",
-        "remote_1",
+        "r1",
         true,
       );
-      const wall = addCorpIce(state, WALL, "boot_rez_wall", "remote_1", false);
+      const wall = addCorpIce(state, WALL, "boot_rez_wall", "r1", false);
       addCorpHq(state, SCORCHED_EARTH, "boot_rez_hq");
       state = apply(
         state,
         "runner",
         (action) =>
           action.type === "start_run" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       );
       const before = state;
       for (let i = 0; i < grants; i++)
@@ -512,7 +512,7 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       state,
       EXECUTIVE_BOOT_CAMP,
       "boot_camp_3",
-      "remote_1",
+      "r1",
       true,
     );
     addCorpHq(state, SCORCHED_EARTH, "boot_unspent_hq_1");
@@ -520,7 +520,7 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state.timingPoint = "run.jack_out_window";
     state = applyLegal(
@@ -549,10 +549,10 @@ describe("Proteus PRO016 random dice encounter suite", () => {
 
   it("copies a same-fort subroutine directly after the original with Lisa Blight and rejects empty-HQ costs", () => {
     let state = baseState("pro016-lisa");
-    const lisa = addCorpRoot(state, LISA_BLIGHT, "lisa_1", "remote_1", true);
-    const wall = addCorpIce(state, WALL, "lisa_wall", "remote_1", true);
+    const lisa = addCorpRoot(state, LISA_BLIGHT, "lisa_1", "r1", true);
+    const wall = addCorpIce(state, WALL, "lisa_wall", "r1", true);
     addCorpHq(state, SCORCHED_EARTH, "lisa_hq_1");
-    state = encounterIce(state, "remote_1", wall);
+    state = encounterIce(state, "r1", wall);
     state.timingPoint = "run.jack_out_window";
     const action = mustAction(
       state,
@@ -577,7 +577,7 @@ describe("Proteus PRO016 random dice encounter suite", () => {
     state.run!.phase = "encounter_ice";
     const subroutines =
       getPlayerView(state, "runner")
-        .servers.find((server) => server.id === "remote_1")
+        .servers.find((server) => server.id === "r1")
         ?.ice.find((ice) => ice.instanceId === wall)?.effectiveRunQuote
         ?.subroutines ?? [];
     const originalIndex = subroutines.findIndex(
@@ -587,17 +587,17 @@ describe("Proteus PRO016 random dice encounter suite", () => {
     expect(subroutines[originalIndex + 1]?.id).toContain("copied_subroutine");
 
     let emptyHq = baseState("pro016-lisa-empty");
-    addCorpRoot(emptyHq, LISA_BLIGHT, "lisa_empty", "remote_1", true);
+    addCorpRoot(emptyHq, LISA_BLIGHT, "lisa_empty", "r1", true);
     const emptyWall = addCorpIce(
       emptyHq,
       WALL,
       "lisa_empty_wall",
-      "remote_1",
+      "r1",
       true,
     );
     for (const cardId of emptyHq.corp.hq) delete emptyHq.cardInstances[cardId];
     emptyHq.corp.hq = [];
-    emptyHq = encounterIce(emptyHq, "remote_1", emptyWall);
+    emptyHq = encounterIce(emptyHq, "r1", emptyWall);
     emptyHq.timingPoint = "run.jack_out_window";
     expect(
       getLegalActions(emptyHq, "corp").some(
@@ -612,18 +612,18 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       state,
       LISA_BLIGHT,
       "lisa_current",
-      "remote_1",
+      "r1",
       true,
     );
     const tagIce = addCorpIce(
       state,
       SIMPLE_TAG_ICE,
       "lisa_tag_ice",
-      "remote_1",
+      "r1",
       true,
     );
     addCorpHq(state, SCORCHED_EARTH, "lisa_current_hq_1");
-    state = encounterIce(state, "remote_1", tagIce);
+    state = encounterIce(state, "r1", tagIce);
     state.timingPoint = "run.jack_out_window";
     const action = mustAction(
       state,
@@ -647,7 +647,7 @@ describe("Proteus PRO016 random dice encounter suite", () => {
 
     const effectiveSubroutines =
       getPlayerView(state, "runner")
-        .servers.find((server) => server.id === "remote_1")
+        .servers.find((server) => server.id === "r1")
         ?.ice.find((ice) => ice.instanceId === tagIce)?.effectiveRunQuote
         ?.subroutines ?? [];
     expect(
@@ -669,19 +669,19 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       state,
       LISA_BLIGHT,
       "lisa_duplicate",
-      "remote_1",
+      "r1",
       true,
     );
     const wall = addCorpIce(
       state,
       WALL,
       "lisa_duplicate_wall",
-      "remote_1",
+      "r1",
       true,
     );
     addCorpHq(state, SCORCHED_EARTH, "lisa_duplicate_hq_1");
     addCorpHq(state, SCORCHED_EARTH, "lisa_duplicate_hq_2");
-    state = encounterIce(state, "remote_1", wall);
+    state = encounterIce(state, "r1", wall);
     state.timingPoint = "run.jack_out_window";
     const firstAction = mustAction(
       state,
@@ -733,7 +733,7 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     expect(state.run?.encounterAdditionalSubroutines).toBeUndefined();
   });
@@ -744,12 +744,12 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       state,
       LISA_BLIGHT,
       "lisa_wrong_fort",
-      "remote_2",
+      "r2",
       true,
     );
-    const wall = addCorpIce(state, WALL, "lisa_wrong_wall", "remote_1", true);
+    const wall = addCorpIce(state, WALL, "lisa_wrong_wall", "r1", true);
     addCorpHq(state, SCORCHED_EARTH, "lisa_wrong_hq_1");
-    state = encounterIce(state, "remote_1", wall);
+    state = encounterIce(state, "r1", wall);
     state.timingPoint = "run.jack_out_window";
     expect(
       getLegalActions(state, "corp").some(

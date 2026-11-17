@@ -145,7 +145,7 @@ function addCorpServerCard(
   state: GameState,
   definitionId: CardDefinitionId,
   id: string,
-  serverId: "remote_1" | "rd" | "hq",
+  serverId: "r1" | "rd" | "hq",
   slot: "root" | "ice",
 ): CardInstanceId {
   let server = state.corp.servers.find(
@@ -154,7 +154,7 @@ function addCorpServerCard(
   if (!server) {
     server = {
       id: serverId,
-      kind: serverId === "remote_1" ? "remote" : serverId,
+      kind: serverId === "r1" ? "remote" : serverId,
       label: serverId,
       ice: [],
       root: [],
@@ -329,7 +329,7 @@ describe("PRO011 hidden resource timing hardening", () => {
         state,
         450,
         "bank_path_wall",
-        "remote_1",
+        "r1",
         "ice",
       );
       Object.assign(state.cardInstances[wall]!, { faceup: true, rezzed: true });
@@ -338,7 +338,7 @@ describe("PRO011 hidden resource timing hardening", () => {
         "runner",
         (action) =>
           action.type === "start_run" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       );
       for (
         let step = 0;
@@ -748,7 +748,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     ).toEqual([
       {
         sourceAbilityId:
-          "191:pay_and_trash_source_gain_four_credits",
+          255,
         capabilityKey: "pay_and_trash_source_gain_four_credits",
         timing: "runner_cost_penalty_support",
         label: "Chiba Bank Account: 4 Credits nehmen",
@@ -763,7 +763,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     ).toEqual([
       {
         sourceAbilityId:
-          "210:trash_source_gain_two_credits",
+          273,
         capabilityKey: "trash_source_gain_two_credits",
         timing: "runner_cost_penalty_support",
         label: "Swiss Bank Account: 2 Credits nehmen",
@@ -773,7 +773,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       },
       {
         sourceAbilityId:
-          "210:pay_three_trash_source_gain_six",
+          272,
         capabilityKey: "pay_three_trash_source_gain_six",
         timing: "runner_cost_penalty_support",
         label: "Swiss Bank Account: 6 Credits nehmen",
@@ -1184,14 +1184,14 @@ describe("PRO011 hidden resource timing hardening", () => {
       state,
       521,
       "pro011_bbs_campaign",
-      "remote_1",
+      "r1",
       "root",
     );
     state.run = {
       runId: 903955,
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "access",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
       accessedCardId: assetId,
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
@@ -1906,7 +1906,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       state,
       525,
       "deep667_city",
-      "remote_1",
+      "r1",
       "root",
     );
     const ice = [
@@ -1914,22 +1914,22 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
         state,
         473,
         "deep667_quandary",
-        "remote_1",
+        "r1",
         "ice",
       ),
       addCorpServerCard(
         state,
         491,
         "deep667_wall",
-        "remote_1",
+        "r1",
         "ice",
       ),
     ];
     state.run = {
       runId: 580136,
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "access",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
       successful: true,
@@ -1948,7 +1948,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(result.ok).toBe(true);
     expect(result.state.corp.archives).toContain(target);
     expect(
-      result.state.corp.servers.find((server) => server.id === "remote_1")!.ice,
+      result.state.corp.servers.find((server) => server.id === "r1")!.ice,
     ).toEqual(ice);
     expect(result.state.eventLog.at(-1)?.publicPayload.trashedCount).toBe(
       action!.payload?.targetCount,
@@ -1967,14 +1967,14 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       state,
       473,
       "deep667_empty_quandary",
-      "remote_1",
+      "r1",
       "ice",
     );
     state.run = {
       runId: 559110,
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "access",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
       successful: true,
@@ -2027,7 +2027,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     );
     expect(runnerCreditAction?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "194:hq_success_reveal_trash_source_corp_lose_three",
+        257,
       cardImplementationAbilityKey:
         "hq_success_reveal_trash_source_corp_lose_three",
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
@@ -2039,11 +2039,11 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(runnerCreditAction?.abilityRef).toEqual({
       sourceCardInstanceId: creditSourceId,
       sourceAbilityId:
-        "194:hq_success_reveal_trash_source_corp_lose_three",
+        257,
     });
     expect(creditAction?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "194:hq_success_reveal_trash_source_corp_lose_three",
+        257,
       cardImplementationAbilityKey:
         "hq_success_reveal_trash_source_corp_lose_three",
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
@@ -2166,28 +2166,28 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       deathState,
       521,
       "pro012_remote_asset",
-      "remote_1",
+      "r1",
       "root",
     );
     const upgradeId = addCorpServerCard(
       deathState,
       562,
       "pro012_remote_upgrade",
-      "remote_1",
+      "r1",
       "root",
     );
     const iceId = addCorpServerCard(
       deathState,
       433,
       "pro012_remote_ice",
-      "remote_1",
+      "r1",
       "ice",
     );
     deathState.run = {
       runId: 698738,
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "access",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
       successful: true,
@@ -2203,7 +2203,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(deathAction).toBeDefined();
     expect(deathAction?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "195:remote_success_reveal_trash_source_and_fort",
+        258,
       cardImplementationAbilityKey:
         "remote_success_reveal_trash_source_and_fort",
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
@@ -2236,13 +2236,13 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     );
     expect(deathState.corp.archives).not.toContain(iceId);
     expect(
-      deathState.corp.servers.find((server) => server.id === "remote_1")?.ice,
+      deathState.corp.servers.find((server) => server.id === "r1")?.ice,
     ).toContain(iceId);
     expect(deathState.cardInstances[assetId]?.faceup).toBe(true);
     expect(deathState.cardInstances[upgradeId]?.faceup).toBe(true);
     expect(deathState.cardInstances[iceId]?.zone).toMatchObject({
       zone: "serverIce",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     expect(deathState.run).toBeUndefined();
     expect(deathState.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -2281,20 +2281,20 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       "pro012_death_empty",
     );
     emptyDeathState.corp.servers = emptyDeathState.corp.servers.filter(
-      (server) => server.id !== "remote_1",
+      (server) => server.id !== "r1",
     );
     emptyDeathState.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
-      label: "remote_1",
+      label: "r1",
       ice: [],
       root: [],
     });
     emptyDeathState.run = {
       runId: 425268,
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "access",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
       successful: true,

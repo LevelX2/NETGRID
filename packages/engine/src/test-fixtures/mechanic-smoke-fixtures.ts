@@ -2065,7 +2065,7 @@ export function originalsetReorderCounterRunlockGame(seed: string): GameState {
 
 export function encounterIce(
   state: GameState,
-  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  serverId: "hq" | "rd" | "archives" | `r${number}`,
   definitionId: number,
 ): GameState {
   let next = apply(
@@ -2533,7 +2533,7 @@ export function putCorpCardOnTopOfRd(
 
 export function putCorpIceOnServer(
   state: GameState,
-  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  serverId: "hq" | "rd" | "archives" | `r${number}`,
   definitionId: number,
 ): CardInstanceId {
   const id = findCard(state, definitionId);
@@ -2554,7 +2554,7 @@ export function putCorpIceOnServer(
 
 export function putCorpIceCopyOnServer(
   state: GameState,
-  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  serverId: "hq" | "rd" | "archives" | `r${number}`,
   definitionId: number,
 ): CardInstanceId {
   const server = state.corp.servers.find(
@@ -2585,11 +2585,11 @@ export function putCorpRootInRemote(
 ): CardInstanceId {
   const id = findCard(state, definitionId);
   let server = state.corp.servers.find(
-    (candidate) => candidate.id === "remote_1",
+    (candidate) => candidate.id === "r1",
   );
   if (!server) {
     server = {
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
@@ -2601,7 +2601,7 @@ export function putCorpRootInRemote(
   server.root.push(id);
   state.cardInstances[id] = {
     ...state.cardInstances[id]!,
-    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     faceup: false,
     rezzed: false,
   };

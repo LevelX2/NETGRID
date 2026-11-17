@@ -20,7 +20,7 @@ import {
 const TRACE_UPGRADE = 584;
 
 describe("installed access source zones (SP-781, P637 D10 regression)", () => {
-  it.each(["hq", "rd", "remote_1"] as const)(
+  it.each(["hq", "rd", "r1"] as const)(
     "executes the canonical installed trace from the %s root",
     (serverId) => {
       let state = toRunnerTurn(

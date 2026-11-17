@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
@@ -359,7 +360,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     const aardvarkId = putCorpRootInRemote(state, 561);
     const wallId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       491,
     );
     state.cardInstances[wallId] = {
@@ -374,7 +375,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(
       state,
@@ -415,7 +416,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
 
   it("does not rez Coyote or pay its rez income during Dr. Dreff's encounter", () => {
     let state = toRunnerTurn(onrV1Game("dreff-coyote"));
-    addRezzedCorpRootForTest(state, 570, "remote_1", "dr");
+    addRezzedCorpRootForTest(state, 570, "r1", "dr");
     const iceId = addCorpCardToHqForTest(
       state,
       74,
@@ -433,7 +434,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     const option = state.pendingChoice!.options.find(
       (candidate) => candidate.value === iceId,
@@ -480,7 +481,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       285,
       "wizard",
     );
-    addRezzedCorpRootForTest(state, 570, "remote_1", "dr");
+    addRezzedCorpRootForTest(state, 570, "r1", "dr");
     const hqIceId = addCorpCardToHqForTest(
       state,
       473,
@@ -493,7 +494,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     expect(state.pendingChoice?.source).toContain("p3_54.delayed_success");
     expect(state.run?.successful).toBe(false);
@@ -536,7 +537,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     const jennyId = addRezzedCorpRootForTest(
       state,
       571,
-      "remote_1",
+      "r1",
       "jenny",
     );
     state.cardInstances[jennyId] = {
@@ -556,7 +557,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     const jennyRez = mustAction(
@@ -571,7 +572,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
         "install_hq_ice_innermost_after_successful_run",
       cardImplementationFortRunRezSupportQuoteComplete: true,
       cardImplementationFortRunRezSupportQuoteSourceCardInstanceId: jennyId,
-      cardImplementationFortRunRezSupportQuoteTargetServerId: "remote_1",
+      cardImplementationFortRunRezSupportQuoteTargetServerId: "r1",
       cardImplementationFortRunRezSupportQuoteStateVersion: state.stateVersion,
       cardImplementationFortRunRezSupportQuoteActionId: jennyRez.actionId,
       cardImplementationFortRunRezSupportQuoteRezCredits: 1,
@@ -629,7 +630,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(state.corp.credits).toBe(19);
     expect(state.corp.hq).not.toContain(hqIceId);
     expect(
-      state.corp.servers.find((server) => server.id === "remote_1")?.ice[0],
+      state.corp.servers.find((server) => server.id === "r1")?.ice[0],
     ).toBe(hqIceId);
 
     state = apply(state, "corp", (action) => action.type === "decline_rez");
@@ -638,7 +639,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(state.run).toMatchObject({ phase: "access", successful: true });
     expect(state.corp.archives).not.toContain(hqIceId);
     expect(
-      state.corp.servers.find((server) => server.id === "remote_1")?.ice,
+      state.corp.servers.find((server) => server.id === "r1")?.ice,
     ).toContain(hqIceId);
     expect(validateGameState(state).ok).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -670,7 +671,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
           rezzed: true,
         };
         state.corp.servers
-          .find((server) => server.id === "remote_1")!
+          .find((server) => server.id === "r1")!
           .root.push(redId);
       }
 
@@ -679,7 +680,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
         "runner",
         (action) =>
           action.type === "start_run" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       );
       if (state.timingPoint === "run.jack_out_window") {
         state = apply(
@@ -705,7 +706,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
         expect.objectContaining({
           kind: "delayed_agenda_access_replacement",
           sourceDefinitionId: 563,
-          serverId: "remote_1",
+          serverId: "r1",
           replacementWindow: "agenda_access",
           delayUntil: "runner_next_turn_start",
         }),
@@ -740,7 +741,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
         {
           kind: "delayed_agenda_access_replacement",
           agendaId,
-          serverId: "remote_1",
+          serverId: "r1",
           sourceDefinitionId: 563,
           sourceCardInstanceId: expect.any(String),
           resolveAt: "runner_start_turn",
@@ -812,7 +813,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(
       installActions.every((action) => {
         const serverId = String(action.payload?.serverId ?? "");
-        return serverId === "new_remote" || serverId.startsWith("remote_");
+        return serverId === "new_remote" || isRemoteServerId(serverId);
       }),
     ).toBe(true);
 
@@ -855,7 +856,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       faceup: true,
       rezzed: true,
     };
-    putCorpIceOnServer(state, "remote_1", 491);
+    putCorpIceOnServer(state, "r1", 491);
     const iceId = moveCorpCardToHq(state, 590);
 
     const install = mustAction(
@@ -864,7 +865,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       (action) =>
         action.type === "install_card" &&
         action.source === iceId &&
-        action.payload?.serverId === "remote_1" &&
+        action.payload?.serverId === "r1" &&
         action.payload?.placement === "ice",
     );
     expect(install.payload?.iceInstallBaseCost).toBe(1);
@@ -906,8 +907,8 @@ describe("V1.9.9 Mechanikpaket R", () => {
       faceup: true,
       rezzed: true,
     };
-    putCorpIceOnServer(state, "remote_1", 491);
-    putCorpIceOnServer(state, "remote_1", 589);
+    putCorpIceOnServer(state, "r1", 491);
+    putCorpIceOnServer(state, "r1", 589);
     putCorpIceOnServer(state, "rd", 601);
     const iceId = moveCorpCardToHq(state, 590);
 
@@ -917,7 +918,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       (action) =>
         action.type === "install_card" &&
         action.source === iceId &&
-        action.payload?.serverId === "remote_1" &&
+        action.payload?.serverId === "r1" &&
         action.payload?.placement === "ice",
     );
     expect(sameFortInstall.payload).toMatchObject({
@@ -953,7 +954,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     });
     expect(
       getPlayerView(state, "corp").servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       )?.statuses,
     ).toEqual([
       expect.objectContaining({
@@ -961,7 +962,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
         costKind: "corp_ice_install",
         operation: "reduce",
         amount: 2,
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: chesterId,
         sourceTitle: "Chester Mix",
         sourceSide: "corp",
@@ -1000,7 +1001,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(

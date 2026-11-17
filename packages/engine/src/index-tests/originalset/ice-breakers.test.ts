@@ -741,7 +741,7 @@ describe("Originalset Spotcheck 2026-05-16 Breaker/Ice Subtype Mix hardening", (
     expect(seeya.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "expose_installed_card_review",
       cardDefinitionId: 606,
-      exposedServerId: "remote_1",
+      exposedServerId: "r1",
       exposedServerLabel: "Remote 1",
       exposedArea: "root",
       exposedIndex: 0,

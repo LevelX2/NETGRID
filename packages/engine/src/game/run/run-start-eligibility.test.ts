@@ -28,12 +28,12 @@ describe("run-start eligibility", () => {
     source.rezzed = true;
     source.faceup = true;
 
-    expect(evaluateRunStartEligibility(state, "remote_1")).toMatchObject({
+    expect(evaluateRunStartEligibility(state, "r1")).toMatchObject({
       allowed: false,
       serverRestrictions: [
         {
           kind: "run_prohibited",
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           sourceCardInstanceId,
           sourceAbilityId: "fort_activity_gate",
         },
@@ -43,19 +43,19 @@ describe("run-start eligibility", () => {
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "start_run" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       ),
     ).toBe(false);
 
-    markFortActivitySinceCorpTurnStart(state, "remote_1");
+    markFortActivitySinceCorpTurnStart(state, "r1");
 
-    expect(serverRunStartRestrictions(state, "remote_1")).toEqual([]);
-    expect(evaluateRunStartEligibility(state, "remote_1").allowed).toBe(true);
+    expect(serverRunStartRestrictions(state, "r1")).toEqual([]);
+    expect(evaluateRunStartEligibility(state, "r1").allowed).toBe(true);
     expect(
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "start_run" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       ),
     ).toBe(true);
   });
@@ -85,7 +85,7 @@ describe("run-start eligibility", () => {
 
     expect(
       resolveRunStartRestrictionTargetServerId(source, "source_fort"),
-    ).toBe("remote_1");
+    ).toBe("r1");
     expect(
       resolveRunStartRestrictionTargetServerId(source, "selected_server"),
     ).toBe("rd");

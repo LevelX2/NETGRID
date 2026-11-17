@@ -273,13 +273,13 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     let state = toRunnerClassic08Game("classic-08-street-enforcer");
     state.runner.tags = 3;
     state.runner.credits = 2;
-    addRezzedCorpRootForTest(state, STREET_ENFORCER, "remote_1", "street");
+    addRezzedCorpRootForTest(state, STREET_ENFORCER, "r1", "street");
 
     const legal = mustAction(
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     expect(legal.costs[0]?.credits).toBeUndefined();
     expect(legal.payload).toMatchObject({
@@ -306,11 +306,11 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
 
   it("adds London City Grid's extra cost once to each noisy breaker ability use on its fort", () => {
     let state = toRunnerClassic08Game("classic-08-london-city-grid");
-    addRezzedCorpRootForTest(state, LONDON_CITY_GRID, "remote_1", "london");
+    addRezzedCorpRootForTest(state, LONDON_CITY_GRID, "r1", "london");
     const dataWallId = addRezzedCorpIceForTest(
       state,
       449,
-      "remote_1",
+      "r1",
       "wall",
     );
     const hammerId = addInstalledRunnerProgramForTest(
@@ -327,7 +327,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = enterEncounterFromMovementWindow(state);
     expect(state.run?.encounteredIceId).toBe(dataWallId);
@@ -363,11 +363,11 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     let state = toRunnerClassic08Game(
       "classic-08-london-city-grid-multi-break",
     );
-    addRezzedCorpRootForTest(state, LONDON_CITY_GRID, "remote_1", "london");
+    addRezzedCorpRootForTest(state, LONDON_CITY_GRID, "r1", "london");
     const laserWireId = addRezzedCorpIceForTest(
       state,
       465,
-      "remote_1",
+      "r1",
       "laser_wire",
     );
     const pileDriverId = addInstalledRunnerProgramForTest(
@@ -384,7 +384,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = enterEncounterFromMovementWindow(state);
     expect(state.run?.encounteredIceId).toBe(laserWireId);
@@ -424,7 +424,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     addRezzedCorpRootForTest(
       state,
       SATELLITE_MONITORS,
-      "remote_1",
+      "r1",
       "satellite",
     );
     state = toRunnerTurnFromCorpMain(state);
@@ -482,7 +482,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       addRezzedCorpRootForTest(
         candidate,
         SATELLITE_MONITORS,
-        "remote_1",
+        "r1",
         "satellite",
       );
       candidate = toRunnerTurnFromCorpMain(candidate);
@@ -546,19 +546,19 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     const selfId = addRezzedCorpRootForTest(
       state,
       SELF_DESTRUCT,
-      "remote_1",
+      "r1",
       "self",
     );
     const otherRootId = addRezzedCorpRootForTest(
       state,
       606,
-      "remote_1",
+      "r1",
       "other",
     );
     const remote = state.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
-    if (!remote) throw new Error("Missing remote_1");
+    if (!remote) throw new Error("Missing r1");
     remote.root = [selfId, otherRootId];
     const gripBefore = state.runner.grip.length;
 
@@ -566,7 +566,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
@@ -600,13 +600,13 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       state,
       591,
     );
-    addRezzedCorpRootForTest(state, SHOCK_TREATMENT, "remote_1", "shock");
+    addRezzedCorpRootForTest(state, SHOCK_TREATMENT, "r1", "shock");
 
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
@@ -646,13 +646,13 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       faceup: true,
       rezzed: true,
     };
-    addRezzedCorpRootForTest(state, SHOCK_TREATMENT, "remote_1", "shock");
+    addRezzedCorpRootForTest(state, SHOCK_TREATMENT, "r1", "shock");
 
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
@@ -683,7 +683,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     const sterdroidId = addRezzedCorpRootForTest(
       state,
       STERDROID,
-      "remote_1",
+      "r1",
       "sterdroid",
     );
     const iceId = addRezzedCorpIceForTest(
@@ -737,7 +737,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     addRezzedCorpRootForTest(
       state,
       STRATEGIC_PLANNING_GROUP,
-      "remote_1",
+      "r1",
       "strategic",
     );
     const baseDrawId = putCorpCardOnTopOfRd(state, 588);
@@ -843,7 +843,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     addRezzedCorpRootForTest(
       state,
       STRATEGIC_PLANNING_GROUP,
-      "remote_1",
+      "r1",
       "strategic",
     );
     state = toRunnerTurnFromCorpMain(state);
@@ -917,7 +917,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     addRezzedCorpRootForTest(
       state,
       STRATEGIC_PLANNING_GROUP,
-      "remote_1",
+      "r1",
       "strategic_aggregate_start",
     );
     addScoredCorpAgendaForTest(
@@ -1065,7 +1065,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     addRezzedCorpRootForTest(
       state,
       STRATEGIC_PLANNING_GROUP,
-      "remote_1",
+      "r1",
       "strategic",
     );
     const hqBefore = state.corp.hq.length;
@@ -1145,7 +1145,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       addRezzedCorpRootForTest(
         state,
         STRATEGIC_PLANNING_GROUP,
-        "remote_1",
+        "r1",
         `spg_matrix_${definitionId}`,
       );
       const sourceId =
@@ -1164,7 +1164,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
             : addRezzedCorpRootForTest(
                 state,
                 definitionId,
-                "remote_2",
+                "r2",
                 `matrix_${definitionId}`,
               );
       const hqBefore = state.corp.hq.length;
@@ -1213,7 +1213,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     addRezzedCorpRootForTest(
       state,
       STRATEGIC_PLANNING_GROUP,
-      "remote_1",
+      "r1",
       "spg_corporate_shuffle",
     );
     const operationId = addCorpCardToHqForTest(
@@ -1270,7 +1270,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     addRezzedCorpRootForTest(
       state,
       STRATEGIC_PLANNING_GROUP,
-      "remote_1",
+      "r1",
       "spg_effect_commands",
     );
     for (const definitionId of [
@@ -1314,7 +1314,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     addRezzedCorpRootForTest(
       state,
       STRATEGIC_PLANNING_GROUP,
-      "remote_1",
+      "r1",
       "spg_day_shift",
     );
     const operationId = addCorpCardToHqForTest(state, DAY_SHIFT, "day_shift");
@@ -1365,7 +1365,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     addRezzedCorpRootForTest(
       state,
       STRATEGIC_PLANNING_GROUP,
-      "remote_1",
+      "r1",
       "strategic",
     );
     const onlyCardId = putCorpCardOnTopOfRd(state, 588);
@@ -1396,7 +1396,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     let state = toRunnerClassic08Game(
       "classic-08-indiscriminate-response-team",
     );
-    addRezzedCorpRootForTest(state, IRT, "remote_1", "irt");
+    addRezzedCorpRootForTest(state, IRT, "r1", "irt");
     emptyRunnerGripForTest(state);
     moveRunnerCardCopyToGrip(state, 595);
     moveRunnerCardCopyToGrip(state, 600);

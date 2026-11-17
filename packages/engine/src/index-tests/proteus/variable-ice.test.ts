@@ -2656,7 +2656,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     state.corp.credits = 30;
     state.runner.credits = 20;
     const rasminId = putCorpRootInRemote(state, RASMIN_BRIDGER);
-    const iceId = putCorpIceOnServer(state, "remote_1", DATACOMB);
+    const iceId = putCorpIceOnServer(state, "r1", DATACOMB);
     setRezzed(state, rasminId);
     setRezzed(state, iceId);
     state = enterEncounterFromMovementWindow(
@@ -2665,7 +2665,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
         "runner",
         (action) =>
           action.type === "start_run" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       ),
     );
     state.run!.brokenSubroutineIndexes = [0];

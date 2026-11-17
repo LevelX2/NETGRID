@@ -18,6 +18,7 @@ import {
 } from "@netgrid/shared";
 import { cardPoolVersionForDecks, metadataForDeck } from "../card-pool";
 import { hashStateSnapshot } from "../state-hash";
+import { cardInstanceIdForCopy } from "./state/card-instance-id";
 
 const STANDARD_AGENDA_POINTS_TO_WIN = 7;
 const INITIAL_HAND_SIZE = 5;
@@ -285,7 +286,7 @@ function createInstance(
   zone: CardInstance["zone"],
 ): CardInstance {
   return {
-    instanceId: `${side}_${definitionId}_${copy}`,
+    instanceId: cardInstanceIdForCopy(side, definitionId, copy),
     definitionId,
     owner: side,
     controller: side,

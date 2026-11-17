@@ -406,14 +406,14 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
     state.runner.credits = 20;
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
       root: [],
     });
     moveRunnerCardToGrip(state, 265);
-    const iceId = putCorpIceOnServer(state, "remote_1", 449);
+    const iceId = putCorpIceOnServer(state, "r1", 449);
     state = apply(
       state,
       "runner",
@@ -430,7 +430,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(
       state,
@@ -1175,13 +1175,13 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
 
     expect(state.timingPoint).toBe("run.jack_out_window");
     expect(state.run?.position).toEqual({
       kind: "server",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     expect(
       getLegalActions(state, "runner").map((action) => action.type),
@@ -1201,7 +1201,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
           payload: expect.objectContaining({
             cardId: programTrashByAdvancementAssetId,
             rootRez: true,
-            serverId: "remote_1",
+            serverId: "r1",
           }),
         }),
         expect.objectContaining({
@@ -1265,7 +1265,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(
@@ -1322,7 +1322,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(
@@ -1372,7 +1372,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       574,
     );
     const server = state.corp.servers.find(
-      (candidate) => candidate.id === "remote_1",
+      (candidate) => candidate.id === "r1",
     );
     expect(server).toBeDefined();
     if (!server) throw new Error("Missing remote");
@@ -1391,7 +1391,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     const trashAction = mustAction(
@@ -1451,7 +1451,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       574,
     );
     const server = upgradeState.corp.servers.find(
-      (candidate) => candidate.id === "remote_1",
+      (candidate) => candidate.id === "r1",
     );
     if (!server) throw new Error("remote missing");
     server.root = [upgradeId, gridId];
@@ -1469,7 +1469,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       upgradeState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     upgradeState = apply(
       upgradeState,
@@ -1517,7 +1517,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       rezzed: true,
     };
     otherFort.corp.servers.push({
-      id: "remote_2",
+      id: "r2",
       kind: "remote",
       label: "Remote 2",
       ice: [],
@@ -1526,11 +1526,11 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     const otherUpgradeId = findCard(otherFort, 606);
     removeEverywhere(otherFort, otherUpgradeId);
     otherFort.corp.servers
-      .find((candidate) => candidate.id === "remote_2")
+      .find((candidate) => candidate.id === "r2")
       ?.root.push(otherUpgradeId);
     otherFort.cardInstances[otherUpgradeId] = {
       ...otherFort.cardInstances[otherUpgradeId]!,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r2" },
       faceup: true,
       rezzed: true,
     };
@@ -1538,7 +1538,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       otherFort,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_2",
+        action.type === "start_run" && action.payload?.serverId === "r2",
     );
     otherFort = apply(
       otherFort,
@@ -1561,7 +1561,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
     const agendaId = putCorpRootInRemote(agendaAccess, 588);
     const agendaServer = agendaAccess.corp.servers.find(
-      (candidate) => candidate.id === "remote_1",
+      (candidate) => candidate.id === "r1",
     );
     if (!agendaServer) throw new Error("agenda remote missing");
     agendaServer.root = [agendaId, agendaGridId];
@@ -1574,7 +1574,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       agendaAccess,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     agendaAccess = apply(
       agendaAccess,
@@ -2739,7 +2739,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
     state.corp.clicks = 3;
     state.corp.maxHandSize = 100;
     putCorpRootInRemote(state, 562);
-    putCorpIceOnServer(state, "remote_1", 444);
+    putCorpIceOnServer(state, "r1", 444);
     putCorpIceOnServer(state, "rd", 445);
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "Antiquated Interface Routines",
@@ -2786,7 +2786,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(
       state,
@@ -2849,12 +2849,12 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
     );
     const dataWallId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       449,
     );
     const endlessCorridorId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       451,
     );
     state.cardInstances[dataWallId] = {
@@ -2867,7 +2867,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     expect(
       mustAction(
@@ -3044,7 +3044,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     addRezzedCorpRootForTest(
       state,
       29,
-      "remote_1",
+      "r1",
       "ai_cfo_spg",
     );
     keepOnlyCorpHqCards(state, [
@@ -4053,7 +4053,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       access,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     access = apply(
       access,
@@ -4153,7 +4153,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(
@@ -4363,7 +4363,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       tokyo,
       583,
     );
-    putCorpIceOnServer(tokyo, "remote_1", 444);
+    putCorpIceOnServer(tokyo, "r1", 444);
     tokyo.cardInstances[tokyoId] = {
       ...tokyo.cardInstances[tokyoId]!,
       faceup: true,
@@ -4374,7 +4374,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       tokyo,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     tokyo = apply(
       tokyo,

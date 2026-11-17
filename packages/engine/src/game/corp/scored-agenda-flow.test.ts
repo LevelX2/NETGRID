@@ -98,7 +98,7 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
       ...instance("agenda_1" as CardInstanceId, definitions.agenda_1!.id, {
         side: "corp",
         zone: "serverRoot",
-        serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+        serverId: "r1" as Exclude<ServerId, "new_remote">,
       }),
       advancementCounters: 3,
     },
@@ -106,7 +106,7 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
       ...instance("babylon" as CardInstanceId, definitions.babylon!.id, {
         side: "corp",
         zone: "serverRoot",
-        serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+        serverId: "r1" as Exclude<ServerId, "new_remote">,
       }),
       advancementCounters: 7,
     },
@@ -117,7 +117,7 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
         {
           side: "corp",
           zone: "serverIce",
-          serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+          serverId: "r1" as Exclude<ServerId, "new_remote">,
         },
       ),
       faceup: false,
@@ -127,7 +127,7 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
       ...instance("ice_1" as CardInstanceId, definitions.ice_1!.id, {
         side: "corp",
         zone: "serverIce",
-        serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+        serverId: "r1" as Exclude<ServerId, "new_remote">,
       }),
       faceup: true,
       rezzed: true,
@@ -298,7 +298,7 @@ describe("scored agenda flow", () => {
             {
               side: "corp",
               zone: "serverRoot",
-              serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+              serverId: "r1" as Exclude<ServerId, "new_remote">,
             },
           ),
           advancementCounters: 3,
@@ -335,7 +335,7 @@ describe("scored agenda flow", () => {
             {
               side: "corp",
               zone: "serverRoot",
-              serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+              serverId: "r1" as Exclude<ServerId, "new_remote">,
             },
           ),
           advancementCounters: 3,
@@ -391,7 +391,7 @@ describe("scored agenda flow", () => {
               {
                 side: "corp",
                 zone: "serverRoot",
-                serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+                serverId: "r1" as Exclude<ServerId, "new_remote">,
               },
             ),
             advancementCounters: 3,
@@ -449,7 +449,7 @@ describe("scored agenda flow", () => {
             {
               side: "corp",
               zone: "serverRoot",
-              serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+              serverId: "r1" as Exclude<ServerId, "new_remote">,
             },
           ),
           advancementCounters: 3,
@@ -528,7 +528,7 @@ describe("scored agenda flow", () => {
             {
               side: "corp",
               zone: "serverIce",
-              serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+              serverId: "r1" as Exclude<ServerId, "new_remote">,
             },
           ),
           rezzed: false,
@@ -541,7 +541,7 @@ describe("scored agenda flow", () => {
             {
               side: "corp",
               zone: "serverRoot",
-              serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+              serverId: "r1" as Exclude<ServerId, "new_remote">,
             },
           ),
           advancementCounters: 3,

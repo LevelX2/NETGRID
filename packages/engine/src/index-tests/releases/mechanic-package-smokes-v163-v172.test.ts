@@ -453,7 +453,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
       strengthState,
       562,
     );
-    putCorpIceOnServer(strengthState, "remote_1", 444);
+    putCorpIceOnServer(strengthState, "r1", 444);
     putCorpIceOnServer(strengthState, "rd", 445);
     strengthState = apply(
       strengthState,
@@ -472,7 +472,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
       strengthState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     strengthState = apply(
       strengthState,
@@ -525,7 +525,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
           583,
     );
     const firstRegionId = tokyoState.corp.servers
-      .find((server) => server.id === "remote_1")
+      .find((server) => server.id === "r1")
       ?.root.find(
         (id) =>
           tokyoState.cardInstances[id]?.definitionId ===
@@ -560,20 +560,20 @@ describe("V1.6.3 Mechanikpaket C", () => {
         action.type === "install_card" &&
         sourceDefinition(tokyoState, action) ===
           583 &&
-        action.payload?.serverId === "remote_1",
+        action.payload?.serverId === "r1",
     );
     if (firstRegionId) {
       expect(tokyoState.corp.archives).toContain(firstRegionId);
     }
     const regionCountInRemote = tokyoState.corp.servers
-      .find((server) => server.id === "remote_1")
+      .find((server) => server.id === "r1")
       ?.root.filter(
         (id) =>
           tokyoState.cardInstances[id]?.definitionId ===
           583,
       ).length;
     expect(regionCountInRemote).toBe(1);
-    putCorpIceOnServer(tokyoState, "remote_1", 445);
+    putCorpIceOnServer(tokyoState, "r1", 445);
     tokyoState = apply(
       tokyoState,
       "corp",
@@ -583,7 +583,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
       tokyoState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     tokyoState = apply(
       tokyoState,
@@ -610,7 +610,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
           reason: "unsuccessful_run",
           sourceDefinitionId: 583,
           sourceTitle: "Tokyo-Chiba Infighting",
-          serverId: "remote_1",
+          serverId: "r1",
           serverLabel: "Remote 1",
         }),
       ]),

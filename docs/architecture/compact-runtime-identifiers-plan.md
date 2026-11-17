@@ -4,7 +4,7 @@
 des lokalen `main` und wird als ein zusammenhängender Stand integriert.
 
 Karten, Kartenexemplare, Aktionsangebote und häufig wiederholte Spielreferenzen
-erhalten kurze numerische IDs. Fachliche Daten wie Rez-Variante, Ziel,
+erhalten kompakte IDs. Fachliche Daten wie Rez-Variante, Ziel,
 Zahlungsquelle und Auswahlwert bekommen eigene typisierte Felder. Vollständige
 Spielupdates und der aktuelle Spielstand werden jeweils einmal übertragen oder
 gespeichert. Der Schnitt beginnt mit frischen Matchdaten und Eingaben im neuen
@@ -27,29 +27,33 @@ Werte aus Engine-Daten. Die Engine verwendet im öffentlichen Verlauf
 die Nummer des Übergangs plus eins und der Server für terminalen
 Zeitablauf die nächste Nummer.
 
-Run-IDs werden aus der StateVersion des eröffnenden Übergangs vergeben.
-Engine, Spieleransicht, KI und SQLite führen diese Referenz als Zahl.
-Der gemeinsame Worktree verwendet SQLite-Schema 7. Kartenlisten
-referenzieren die Position der zugehörigen Instanzzeile.
+Die Run-ID ist die StateVersion des eröffnenden Übergangs. Kartenexemplare
+verwenden einen kurzen Base36-Schlüssel. SQLite-Schema 8 speichert
+Kartenlisten als Positionen in der Instanztabelle. Verdeckte Slots und
+adressierbare verdeckte Ressourcen haben jeweils einen eigenen kurzen
+Schlüsseltyp. Remotes werden als `r1`, `r2` und entsprechend ihrer
+fortlaufenden Nummer adressiert.
 
-Die Abnahme umfasst noch die KI-Regressionen und ihre aktiven
-Aufzeichnungen. Die weiteren Schritte betreffen insbesondere
-Kartenexemplare in der Engine, Slotbezüge, Fähigkeiten, Aktionen,
-Choices, Server, Spiel-Traces, Fenster, Effekte und Subroutinen.
-Für Zufallsaufzeichnungen stehen die numerisch typisierten
-Zufallszwecke aus.
+Das Fähigkeitsregister vergibt stabile globale Nummern. Der Spieltransport
+verwendet laufende Nummern für Aktionen und Optionen im aktuellen Angebot
+sowie die StateVersion für geöffnete Choices. Die Engine bindet diese Nummern
+an das Angebot einer Seite. Der Server prüft zusätzlich die MatchVersion.
+
+Die integrierte Abnahme umfasst die KI-Regressionen mit aktualisierten
+Testaufzeichnungen. Spiel-Traces, Fenster, Effekt- und Subroutinenreferenzen
+sowie numerische Zufallszwecke sind weitere Schritte des Plans.
 
 ## Umfang und Vergabe der Schlüssel
 
 | Bezeichner                                  | Zielformat und Gültigkeitsbereich                                                                                                                                                                    |
 | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `CardDefinitionId`                          | Feste positive Ganzzahl pro Regelkarte. In der CardSpec verankert, über alle Sets einschließlich System-, Katalog- und Testkarten eindeutig. Releasefilter behalten dieselben Nummern.               |
-| `CardInstanceId`                            | Dichte positive Ganzzahl pro Partie. Gilt für genau ein Exemplar einschließlich Identitäten, gehosteter und aus dem Spiel entfernter Karten.                                                         |
-| Verdeckter Kartenslot                       | Kurze Zahl in der jeweiligen side-sicheren Projektion. Bereich und Position binden die Referenz. Bekannte Karten führen eine `CardInstanceId`, verdeckte Slots eine eigene Slotreferenz.             |
-| Adressierbare Fähigkeit                     | Feste positive Nummer innerhalb einer CardSpec. Ein Register-Lookup verwendet Kartendefinition und Fähigkeitsnummer. Eine Instanzbindung verwendet Quelleninstanz und Fähigkeitsnummer.              |
+| `CardInstanceId`                            | Kompakter Base36-Schlüssel pro Kartenexemplar einer Partie. In SQLite referenzieren Kartenlisten die Zeilenposition.                                                                                |
+| Verdeckter Kartenslot                       | Kurzer Base36-Schlüssel mit eigenem Präfix in der jeweiligen Projektion. Bereich und Position binden die Referenz.                                                                                   |
+| Adressierbare Fähigkeit                     | Feste positive Nummer im Fähigkeitsregister. Eine Instanzbindung verwendet Quelleninstanz und Fähigkeitsnummer.                                                                                    |
 | `ActionId`                                  | Laufende positive Nummer im deterministisch erzeugten LegalAction-Satz einer Seite und StateVersion. Die Einreichung beim Server bindet auch Match und MatchVersion.                                 |
 | `ChoiceId`, `ChoiceOptionId`                | Nummer der geöffneten Choice innerhalb der Partie und Nummer einer Option innerhalb dieser Choice. Reihenfolge und fachlicher Wert der Option sind eigene Eigenschaften.                             |
-| Server, Run, Trace und Fenster              | Partielokale Ganzzahlen mit je eigenem Typ. Feste Nummern für HQ, R&D und Archives, laufende Nummern für Remotes. „Neuer Remote“ ist ein eigenes Installationsziel.                                  |
+| Server, Run, Trace und Fenster              | Remotes heißen `rN`; Run-IDs sind Zahlen. Partielokale Nummern für Traces und Fenster bleiben Ziel des Plans. „Neuer Remote“ ist ein eigenes Installationsziel.                                    |
 | Ereignis, Snapshot, KI-Trace                | Nummern in der jeweiligen Match-Tabelle. Historienreferenzen enthalten den Matchkontext. Eine Diagnosekennung für einen fehlgeschlagenen KI-Versuch bleibt eine Fehlerreferenz.                      |
 | Aufgelöster Effekt, Subroutine              | Effektposition innerhalb des Ereignisses. Subroutinen werden innerhalb des konkreten Encounters adressiert; gedruckte Herkunft, zusätzliche Beiträge und Ausführungsreihenfolge haben eigene Felder. |
 | Zufallszweck und wiederholte Speicherfelder | Numerischer Zweckcode mit typisierten Argumenten. In SQLite verwenden die Karteninstanzliste und die Zufallsprotokolle kompakte, fest definierte Zeilen.                                             |
@@ -76,17 +80,16 @@ herstellt. [CardSpec und Drucke](central-card-specification-and-registry-target-
 
 ## Bedingungen für den Schnitt
 
-- **Ein Zahlenformat pro ID-Domäne.** Shared definiert getrennte Typen,
-  damit beispielsweise die ID einer Definition und die einer Instanz
-  auch im Typecheck auseinandergehalten werden. IDs sind
-  sichere Ganzzahlen im festgelegten Bereich, gewöhnlich größer als null.
-  StateVersion, Positionen und vorhandene Zähler dürfen null sein. JSON trägt
-  IDs als Zahlenwerte, SQLite verwendet für die betreffenden ID-Spalten
-  `INTEGER`. Textpfade und DOM-Werte werden einmal an ihrer konkreten Grenze
+- **Ein Format pro ID-Domäne.** Shared definiert getrennte Typen für
+  die beteiligten Domänen. Numerische IDs sind sichere positive Ganzzahlen.
+  StateVersion, Positionen und vorhandene Zähler dürfen null sein.
+  SQLite verwendet für numerische ID-Spalten `INTEGER`. Textpfade und
+  DOM-Werte werden einmal an ihrer konkreten Grenze
   in den typisierten Wert übersetzt. Unbekannte, doppelte oder falsch
   gebundene IDs liefern eine strukturierte Ablehnung.
-- **Stabilität über die fachliche Lebensdauer.** Definitionen und Fähigkeiten
-  tragen ihre Nummer explizit in der CardSpec. Reihenfolge der Imports,
+- **Stabilität über die fachliche Lebensdauer.** Die Definition trägt
+  ihre Nummer in der CardSpec und die Fähigkeit erhält sie im Register.
+  Reihenfolge der Imports,
   neue Karten und der Releasefilter ändern vorhandene Zuordnungen nicht.
   Vergabe, Sortierung und Bindung im Match sind deterministisch. Bei
   `Object.keys`, lexikografischen Sortierungen und früheren String-Sentinels
@@ -206,27 +209,23 @@ laden, speichern und zum Matchstart verwenden.
 
 ### 4. Instanzen, Ziele und Spielreferenzen nummerieren
 
-1. Beim Matchaufbau eine dichte Tabelle verwenden. Instanz-ID `n`
-   adressiert Eintrag `n − 1`; dadurch entfällt der wiederholte
-   Instanzschlüssel im Tabellenobjekt. Karten werden beim Wechsel der Zone
-   referenziert und behalten ihren Tabellenplatz bis Matchende. Die
-   anfängliche Nummernzuordnung erfolgt per eigener deterministischer
-   Permutation im Setup mit erfasstem Zufallszweck, unabhängig von
-   Kartenart und Startposition im gemischten Deck. Schleifen mit
-   fachlicher Reihenfolge erhalten einen expliziten Ordnungsvertrag.
-   [Matchaufbau](../../packages/engine/src/game/create-game.ts) · [Zufallsaufzeichnung](../../packages/engine/src/game/state/draw-random.ts)
+1. Beim Matchaufbau jedes Exemplar deterministisch adressieren.
+   Der Base36-Schlüssel bleibt beim Zonenwechsel gleich. Die SQLite-Zonen
+   verweisen auf die Tabellenposition der jeweiligen Instanz. Schleifen
+   mit fachlicher Reihenfolge erhalten einen expliziten Ordnungsvertrag.
+   [Matchaufbau](../../packages/engine/src/game/create-game.ts) · [Instanzvergabe](../../packages/engine/src/game/state/card-instance-id.ts)
 2. Zonen, Hosting, Access, Install, Zielanforderungen und Kostenquellen
-   auf Zahlenreferenzen umstellen. Verdeckte Ansichten projizieren
+   mit denselben kompakten Instanzreferenzen verknüpfen. Verdeckte Ansichten projizieren
    Slots je Bereich und sichtbarer Position. Eine Slotreferenz gilt
    für den Zustand, in dem die Auswahl angeboten wurde. Options- und
    Zieldaten geben an, ob die Engine eine Instanz oder einen Slot
    auflösen soll. Runtime-Grenzen wie
    `runtime-shared.ts`, Input-DTO, Sanitizer, Replay und Chronicle
    verwenden dieselben Typen. [Runtime-Vertrag](../../packages/engine/src/game/engine-runtime-internal/runtime-shared.ts) · [KI-Input](../../packages/ai/src/input-dto.ts)
-3. Server-IDs als feste Nummern für Zentralen sowie fortlaufende Nummern
-   für Remotes führen. Der Serverzustand trägt seinen fachlichen Typ.
-   Run, Spiel-Trace, Fenster und Sequenz erhalten beim Öffnen ihre Nummer
-   aus Engine-Zustand oder einer bereits eindeutigen Ereignis-/Zustandsfolge.
+3. Zentralen über ihre festen Kürzel und Remotes als `rN` adressieren.
+   Der Serverzustand trägt seinen fachlichen Typ. Die Run-ID stammt aus
+   der StateVersion beim Öffnen. Für Spiel-Traces, Fenster und Sequenzen
+   ist dieselbe Art der Vergabe vorgesehen.
    Für Encounter-Subroutinen stehen Bindung an Encounter und Reihenfolge
    als Werte zur Verfügung. Chronicle adressiert Effekte über Ereignis
    und Effektposition. [Remote-Vergabe](../../packages/engine/src/game/state/remote-server-id.ts) · [Chronicle](../../apps/web/app/chronicle.ts)

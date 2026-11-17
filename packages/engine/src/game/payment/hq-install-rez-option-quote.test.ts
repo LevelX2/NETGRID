@@ -11,7 +11,7 @@ describe("Data Fort Reclamation sequence rez payment projection", () => {
     const cardId = state.corp.hq[0] as CardInstanceId;
     state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [cardId],
@@ -24,7 +24,7 @@ describe("Data Fort Reclamation sequence rez payment projection", () => {
       controller: "corp",
       faceup: false,
       rezzed: false,
-      zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverIce", serverId: "r1" },
     };
 
     expect(projectInstalledCorpSequenceRezPayment(state, cardId, 10)).toEqual({

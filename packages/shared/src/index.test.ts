@@ -84,7 +84,7 @@ describe("public counter mutation contract", () => {
       schemaVersion: PUBLIC_COUNTER_MUTATION_SCHEMA_VERSION,
       operation: "remove",
       counterType: "spy",
-      scope: { kind: "server", serverId: "remote_1" },
+      scope: { kind: "server", serverId: "r1" },
       before: 2,
       amount: 1,
       after: 1,
@@ -96,14 +96,14 @@ describe("public counter mutation contract", () => {
         {
           kind: "counter_threshold_identity_visibility_ended",
           counterType: "spy",
-          scope: { kind: "server", serverId: "remote_1" },
+          scope: { kind: "server", serverId: "r1" },
           activeAtOrAbove: 1,
           before: 1,
           after: 0,
           cards: [
             {
               definitionId: 9112,
-              serverId: "remote_1",
+              serverId: "r1",
               area: "root",
               positionKey: "root:0",
             },
@@ -118,7 +118,7 @@ describe("public counter mutation contract", () => {
     expect(payload.counterMutations).toEqual([
       expect.objectContaining({
         operation: "remove",
-        scope: { kind: "server", serverId: "remote_1" },
+        scope: { kind: "server", serverId: "r1" },
         before: 2,
         amount: 1,
         after: 1,
@@ -139,7 +139,7 @@ describe("public counter mutation contract", () => {
       counterType: "power",
       scope: {
         kind: "installed_corp_card",
-        serverId: "remote_2",
+        serverId: "r2",
         area: "ice",
         positionKey: "ice:1",
       },
@@ -150,7 +150,7 @@ describe("public counter mutation contract", () => {
 
     expect(mutation.scope).toEqual({
       kind: "installed_corp_card",
-      serverId: "remote_2",
+      serverId: "r2",
       area: "ice",
       positionKey: "ice:1",
     });
@@ -467,7 +467,7 @@ describe("AI decision debug sanitizing", () => {
               optionalityMaximum: 1,
             },
             agendaComparison: {
-              opportunityKey: "opening-rush:2:agenda-1:remote_1",
+              opportunityKey: "opening-rush:2:agenda-1:r1",
               selectedFamily: agendaFamily,
               selectionReason: "best_expected_value",
               randomizationEligible: false,
@@ -512,15 +512,15 @@ describe("AI decision debug sanitizing", () => {
             },
             campaigns: [
               {
-                campaignId: "campaign:agenda:agenda-1:remote_1",
+                campaignId: "campaign:agenda:agenda-1:r1",
                 kind: "opening_rush",
                 status: "awaiting_opponent_outcome",
                 rootPlanInstanceId: "plan:corp.score_agenda:general",
                 moduleId: "corp.score_agenda",
                 milestoneId: "agenda_installed",
-                targetServerId: "remote_1",
+                targetServerId: "r1",
                 targetCardInstanceId: "agenda-1",
-                openingRushOpportunityKey: "opening-rush:2:agenda-1:remote_1",
+                openingRushOpportunityKey: "opening-rush:2:agenda-1:r1",
                 requoteStatus: "awaiting_next_own_turn",
                 requoteReasonCode:
                   "campaign_waits_for_public_opponent_outcomes",
@@ -539,7 +539,7 @@ describe("AI decision debug sanitizing", () => {
                     kind: "run_declared",
                     milestoneId: "opponent_run_observed",
                     origin: "public_event",
-                    targetServerId: "remote_1",
+                    targetServerId: "r1",
                     evidenceCode: "campaign_public_run",
                   },
                 ],
@@ -574,7 +574,7 @@ describe("AI decision debug sanitizing", () => {
                   planInstanceId: "plan:corp.score_agenda:general",
                   blocked: true,
                   blockerCode: "remote_protection_below_target",
-                  needId: "score-protection:general:remote_1",
+                  needId: "score-protection:general:r1",
                   witnessKind: "support_head",
                   providerInstanceId:
                     "plan:corp.defend_servers:server-defense-portfolio",

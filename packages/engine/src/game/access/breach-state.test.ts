@@ -52,7 +52,7 @@ function makeHost(): BreachStateHost {
     { id: "rd", ice: [], root: [] },
     { id: "hq", ice: [], root: ["hq_upgrade"] },
     { id: "archives", ice: [], root: [] },
-    { id: "remote_1", ice: [], root: ["remote_asset", "remote_upgrade"] },
+    { id: "r1", ice: [], root: ["remote_asset", "remote_upgrade"] },
   ] as unknown as CorpServer[];
   const cardInstances: Record<string, CardInstance> = {
     rd_top: instance("rd_top", 3983278954, { side: "corp", zone: "rd" }),
@@ -92,7 +92,7 @@ function makeHost(): BreachStateHost {
     remote_asset: instance("remote_asset", 1151438755, {
       side: "corp",
       zone: "serverRoot",
-      serverId: "remote_1",
+      serverId: "r1",
     } as CardInstance["zone"]),
     remote_upgrade: instance(
       "remote_upgrade",
@@ -100,7 +100,7 @@ function makeHost(): BreachStateHost {
       {
         side: "corp",
         zone: "serverRoot",
-        serverId: "remote_1",
+        serverId: "r1",
       } as CardInstance["zone"],
       true,
       true,
@@ -266,7 +266,7 @@ describe("breach state builder", () => {
     } as NonNullable<GameState["run"]>);
     const remote = buildBreachState(host, {
       runId: 342749,
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     } as unknown as NonNullable<GameState["run"]>);
 
     expect(archives.queue.map((entry) => entry.cardInstanceId)).toEqual([

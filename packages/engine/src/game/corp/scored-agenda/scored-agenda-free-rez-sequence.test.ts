@@ -84,7 +84,7 @@ function makeScoredAgendaFreeRezHost(
   input: ScoredAgendaFreeRezHostInput = {},
 ): CorpInstallRezSequenceHandlerHost {
   const server = {
-    id: "remote_1",
+    id: "r1",
     label: "Remote 1",
     kind: "remote",
     ice: ["ice_1" as CardInstanceId],
@@ -110,7 +110,7 @@ function makeScoredAgendaFreeRezHost(
     controller: "corp",
     faceup: false,
     rezzed: false,
-    zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+    zone: { side: "corp", zone: "serverIce", serverId: "r1" },
   } as unknown as CardInstance;
   const instances: Record<string, CardInstance> = { ice_1: iceInstance };
   const state = {

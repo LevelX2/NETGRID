@@ -30,10 +30,10 @@ function fixture() {
 it("quotes only public active server modifiers before any agenda is known", () => {
   const { state, tax, agenda } = fixture();
   const quote = () =>
-    getPlayerView(state, "runner").servers.find((s) => s.id === "remote_1")!;
+    getPlayerView(state, "runner").servers.find((s) => s.id === "r1")!;
   expect(quote().runnerAgendaStealCostQuote).toMatchObject({
     stateVersion: state.stateVersion,
-    serverId: "remote_1",
+    serverId: "r1",
     minimumCreditCost: 0,
     complete: true,
   });
@@ -46,7 +46,7 @@ it("quotes only public active server modifiers before any agenda is known", () =
   state.cardInstances[agenda]!.definitionId = 578;
   expect(quote().runnerAgendaStealCostQuote).toEqual(original);
   expect(
-    getPlayerView(state, "corp").servers.find((s) => s.id === "remote_1"),
+    getPlayerView(state, "corp").servers.find((s) => s.id === "r1"),
   ).not.toHaveProperty("runnerAgendaStealCostQuote");
   expect(
     getPlayerView(state, "runner").servers.find((s) => s.id === "hq")!
@@ -61,12 +61,12 @@ it("keeps the complete known agenda cost distinct from the public lower bound", 
   state.cardInstances[tax]!.faceup = true;
   state.cardInstances[agenda]!.faceup = true;
   const view = getPlayerView(state, "runner"),
-    server = view.servers.find((s) => s.id === "remote_1")!;
+    server = view.servers.find((s) => s.id === "r1")!;
   expect(
     server.root.find((c) => c.instanceId === agenda)?.effectiveStealCostQuote,
   ).toEqual({
     stateVersion: state.stateVersion,
-    serverId: "remote_1",
+    serverId: "r1",
     agendaInstanceId: agenda,
     creditCost: 5,
     complete: true,
@@ -77,14 +77,14 @@ it("counts a public access snapshot once and preserves it after its active sourc
   state.cardInstances[tax]!.rezzed = true;
   state.run = {
     runId: 201431,
-    attackedServerId: "remote_1",
+    attackedServerId: "r1",
     phase: "access",
-    position: { kind: "server", serverId: "remote_1" },
+    position: { kind: "server", serverId: "r1" },
     brokenSubroutineIndexes: [],
     resolvedSubroutineIndexes: [],
     successful: true,
     accessStealCostModifierSnapshotsByServer: {
-      remote_1: [
+      r1: [
         {
           sourceCardInstanceId: tax,
           sourceDefinitionId: 578,
@@ -96,8 +96,8 @@ it("counts a public access snapshot once and preserves it after its active sourc
       ],
     },
   };
-  expect(quotePublicServerAgendaStealCost(state, "remote_1")).toBe(5);
+  expect(quotePublicServerAgendaStealCost(state, "r1")).toBe(5);
   state.cardInstances[tax]!.rezzed = false;
-  expect(quotePublicServerAgendaStealCost(state, "remote_1")).toBe(5);
+  expect(quotePublicServerAgendaStealCost(state, "r1")).toBe(5);
   expect(quotePublicServerAgendaStealCost(state, "hq")).toBe(0);
 });

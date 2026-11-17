@@ -709,7 +709,7 @@ describe("V1.0.5K Card Release", () => {
         (action) =>
           action.type === "install_card" &&
           sourceDefinition(state, action) === 588 &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       ),
     ).toBe(false);
     expect(
@@ -717,7 +717,7 @@ describe("V1.0.5K Card Release", () => {
         (action) =>
           action.type === "install_card" &&
           sourceDefinition(state, action) === 594 &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       ),
     ).toBe(false);
     expect(
@@ -725,7 +725,7 @@ describe("V1.0.5K Card Release", () => {
         (action) =>
           action.type === "install_card" &&
           sourceDefinition(state, action) === 606 &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       ),
     ).toBe(true);
     expect(
@@ -778,7 +778,7 @@ describe("V1.0.5K Card Release", () => {
       (action) =>
         action.type === "install_card" &&
         action.payload?.cardId === agendaId &&
-        action.payload?.serverId === "remote_1" &&
+        action.payload?.serverId === "r1" &&
         action.payload?.rootReplacement === "asset_to_agenda",
     );
     expect(
@@ -786,7 +786,7 @@ describe("V1.0.5K Card Release", () => {
         (action) =>
           action.type === "install_card" &&
           sourceDefinition(state, action) === 594 &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       ),
     ).toBe(false);
 
@@ -798,7 +798,7 @@ describe("V1.0.5K Card Release", () => {
       (action) => action.actionId === installAgenda.actionId,
     );
     const remote = state.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(remote?.root).toContain(agendaId);
     expect(remote?.root).not.toContain(assetId);
@@ -812,7 +812,7 @@ describe("V1.0.5K Card Release", () => {
     expect(state.cardInstances[agendaId]?.zone).toEqual({
       side: "corp",
       zone: "serverRoot",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",

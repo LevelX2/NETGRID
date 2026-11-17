@@ -2909,7 +2909,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       nevinyrral,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     nevinyrral = apply(
       nevinyrral,

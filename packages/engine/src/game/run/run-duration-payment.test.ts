@@ -64,7 +64,7 @@ function makeState(): GameState {
         { id: "rd", kind: "rd", ice: [], root: [] },
         { id: "hq", kind: "hq", ice: [], root: [] },
         { id: "archives", kind: "archives", ice: [], root: [] },
-        { id: "remote_1", kind: "remote", ice: [], root: [] },
+        { id: "r1", kind: "remote", ice: [], root: [] },
       ],
     },
     cardInstances: {

@@ -29,7 +29,7 @@ function instance(
   zone: CardInstance["zone"] = {
     side: "corp",
     zone: "serverRoot",
-    serverId: "remote_1",
+    serverId: "r1",
   },
 ): CardInstance {
   return {
@@ -406,12 +406,12 @@ describe("access effect handlers", () => {
   });
 
   it("dispatches Setup damage through the damage callback", () => {
-    const action = accessAction("setup", "remote_1");
+    const action = accessAction("setup", "r1");
     const { host, calls, state } = makeHost(action);
     state.run = {
       ...state.run!,
       accessedCardId: "setup",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
 
     const result = handleAccessEffectsForCard(host, "setup" as CardInstanceId);
@@ -426,12 +426,12 @@ describe("access effect handlers", () => {
   });
 
   it("does not dispatch an installed access effect from an unrezzed source", () => {
-    const action = accessAction("setup", "remote_1");
+    const action = accessAction("setup", "r1");
     const { host, calls, state } = makeHost(action);
     state.run = {
       ...state.run!,
       accessedCardId: "setup",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
     state.cardInstances.setup = {
       ...state.cardInstances.setup!,
@@ -442,7 +442,7 @@ describe("access effect handlers", () => {
 
     expect(result.handled).toBe(false);
     expect(calls.damages).toEqual([]);
-    expect(action.payload).toEqual({ serverId: "remote_1" });
+    expect(action.payload).toEqual({ serverId: "r1" });
   });
 
   it("keeps TRAP! access payment choice and pay path stable", () => {
@@ -503,17 +503,17 @@ describe("access effect handlers", () => {
   });
 
   it("revalidates the installed source rez state before resolving payment", () => {
-    const action = accessAction("trap", "remote_1");
+    const action = accessAction("trap", "r1");
     const { host, state } = makeHost(action);
     state.run = {
       ...state.run!,
       accessedCardId: "trap",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
     state.cardInstances.trap = {
       ...state.cardInstances.trap!,
       rezzed: true,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     };
     state.corp.rd = [];
 
@@ -531,21 +531,21 @@ describe("access effect handlers", () => {
   });
 
   it("runs Dedicated Response Team and Dieter through access damage callbacks", () => {
-    const dedicatedAction = accessAction("dedicated", "remote_1");
+    const dedicatedAction = accessAction("dedicated", "r1");
     const dedicated = makeHost(dedicatedAction);
     dedicated.state.run = {
       ...dedicated.state.run!,
       accessedCardId: "dedicated",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
     handleAccessEffectsForCard(dedicated.host, "dedicated" as CardInstanceId);
 
-    const dieterAction = accessAction("dieter", "remote_1");
+    const dieterAction = accessAction("dieter", "r1");
     const dieter = makeHost(dieterAction);
     dieter.state.run = {
       ...dieter.state.run!,
       accessedCardId: "dieter",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
     handleAccessEffectsForCard(dieter.host, "dieter" as CardInstanceId);
 
@@ -558,30 +558,30 @@ describe("access effect handlers", () => {
   });
 
   it("dispatches trace, counter, and installed-trash steps through callbacks", () => {
-    const traceAction = accessAction("turbeau", "remote_1");
+    const traceAction = accessAction("turbeau", "r1");
     const trace = makeHost(traceAction);
     trace.state.run = {
       ...trace.state.run!,
       accessedCardId: "turbeau",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
     handleAccessEffectsForCard(trace.host, "turbeau" as CardInstanceId);
 
-    const counterAction = accessAction("crybaby", "remote_1");
+    const counterAction = accessAction("crybaby", "r1");
     const counter = makeHost(counterAction);
     counter.state.run = {
       ...counter.state.run!,
       accessedCardId: "crybaby",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
     handleAccessEffectsForCard(counter.host, "crybaby" as CardInstanceId);
 
-    const trashAction = accessAction("remains", "remote_1");
+    const trashAction = accessAction("remains", "r1");
     const trash = makeHost(trashAction);
     trash.state.run = {
       ...trash.state.run!,
       accessedCardId: "remains",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
     handleAccessEffectsForCard(trash.host, "remains" as CardInstanceId);
 

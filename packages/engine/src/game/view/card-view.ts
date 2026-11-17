@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 // ARCH-6 read-only View-Helfer.
 // Keine State-Mutation, keine LegalAction-Erzeugung, kein Import aus index.ts,
@@ -1232,10 +1233,7 @@ export function isConcealedRunnerResource(
 }
 
 export function hiddenRunnerResourceSlotId(id: CardInstanceId): CardInstanceId {
-  return `hidden_runner_resource_${hiddenVisibleCardId(id).replace(
-    /^hidden_/,
-    "",
-  )}`;
+  return `s${hiddenCardReference(id)}`;
 }
 
 export function resolveHiddenRunnerResourceSlot(
@@ -1336,7 +1334,7 @@ export function visibleCorpCard(
     area === "root" &&
     instance.zone.side === "corp" &&
     instance.zone.zone === "serverRoot" &&
-    serverId?.startsWith("remote_") &&
+    isRemoteServerId(serverId) &&
     definition.type === "agenda" &&
     printedRequirement !== undefined &&
     effectiveRequirement !== undefined
@@ -1467,12 +1465,16 @@ function cardCounter(
 }
 
 function hiddenVisibleCardId(id: CardInstanceId): CardInstanceId {
+  return `h${hiddenCardReference(id)}`;
+}
+
+function hiddenCardReference(id: CardInstanceId): string {
   let hash = 0x811c9dc5;
   for (let index = 0; index < id.length; index += 1) {
     hash ^= id.charCodeAt(index);
     hash = Math.imul(hash, 0x01000193);
   }
-  return `hidden_${(hash >>> 0).toString(16).padStart(8, "0")}`;
+  return (hash >>> 0).toString(36);
 }
 
 export function serverDifficultyIncreaseFromRunCounters(

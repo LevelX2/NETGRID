@@ -188,7 +188,7 @@ export function quoteAgendaDefinitionSelfStealCreditCost(
   const accessZone: CardAccessZone | undefined =
     serverId === "hq" || serverId === "rd" || serverId === "archives"
       ? serverId
-      : /^remote_\d+$/.test(serverId)
+      : /^r\d+$/.test(serverId)
         ? "installed"
         : undefined;
   if (!accessZone) return undefined;

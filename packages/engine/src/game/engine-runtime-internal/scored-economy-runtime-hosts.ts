@@ -1133,7 +1133,7 @@ export function createScoredEconomyRuntimeHosts(
           const server =
             serverId === "new_remote"
               ? ({
-                  id: "remote_0",
+                  id: "r0",
                   label: "Neues Remote",
                   kind: "remote",
                   ice: [],

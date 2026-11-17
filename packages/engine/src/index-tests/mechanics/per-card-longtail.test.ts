@@ -3524,12 +3524,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     putCorpRootInRemote(state, 594);
     const innerIce = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       589,
     );
     const outerIce = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       590,
     );
 
@@ -3537,7 +3537,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
     state = apply(state, "runner", (action) => action.type === "continue_run");
@@ -3619,7 +3619,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) => action.actionId === reverse.actionId,
     );
     expect(
-      reverseState.corp.servers.find((server) => server.id === "remote_1")?.ice,
+      reverseState.corp.servers.find((server) => server.id === "r1")?.ice,
     ).toEqual([outerIce, innerIce]);
     expect(reverseState.eventLog.at(-1)?.publicPayload).toMatchObject({
       abilityId: "successful_run_reverse_ice",
@@ -4155,7 +4155,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.corp.credits = 10;
     installRunnerProgramForTest(state, 279);
     const upgradeId = putCorpRootInRemote(state, 606);
-    putCorpIceOnServer(state, "remote_1", 589);
+    putCorpIceOnServer(state, "r1", 589);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
@@ -4163,7 +4163,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
     expect(state.timingPoint).toBe("run.jack_out_window");
@@ -4234,13 +4234,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.corp.credits = 10;
     installRunnerProgramForTest(state, 279);
     const upgradeId = putCorpRootInRemote(state, 606);
-    putCorpIceOnServer(state, "remote_1", 589);
+    putCorpIceOnServer(state, "r1", 589);
 
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
     state = apply(state, "runner", (action) => action.type === "continue_run");
@@ -5203,7 +5203,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       known: true,
     });
     expect(assetRezOption?.hqInstallRezOptionQuote).toMatchObject({
-      sourceAgendaId: "corp_409_1",
+      sourceAgendaId: "c2j1",
       cardId: assetId,
       cardDefinitionId: 520,
       targetServerId: remote?.id,

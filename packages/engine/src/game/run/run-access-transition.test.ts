@@ -72,7 +72,7 @@ function makeHost(
     { id: "rd", ice: [], root: [] },
     { id: "hq", ice: [], root: [] },
     { id: "archives", ice: [], root: [] },
-    { id: "remote_1", ice: [], root: ["remote_agenda"] },
+    { id: "r1", ice: [], root: ["remote_agenda"] },
   ] as unknown as CorpServer[];
   const cardInstances: Record<string, CardInstance> = {
     rd_operation: instance("rd_operation", 3983278954, {
@@ -82,7 +82,7 @@ function makeHost(
     remote_agenda: instance("remote_agenda", 2855245605, {
       side: "corp",
       zone: "serverRoot",
-      serverId: "remote_1",
+      serverId: "r1",
     } as CardInstance["zone"]),
     archive_face_up: instance(
       "archive_face_up",
@@ -254,9 +254,9 @@ describe("run access transition", () => {
     const fixture = makeHost({ corpCredits: 5 });
     fixture.state.run = {
       runId: 510288,
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "movement",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
       successful: true,
       accessCount: 1,
     } as unknown as NonNullable<GameState["run"]>;

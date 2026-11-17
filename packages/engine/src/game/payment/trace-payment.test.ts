@@ -147,14 +147,14 @@ describe("trace payment pools", () => {
     const trace = corpBidTrace({
       traceLimit: 5,
       fortTraceBitPoolSourceCardInstanceId: fortPoolId,
-      fortTraceBitPoolServerId: "remote_1",
+      fortTraceBitPoolServerId: "r1",
     });
     const state = stateForTrace(trace, { corpCredits: 2 });
     const deps = corpDeps({
       fortTraceBitPoolTotal: () => fortBits,
       spendFortTraceBitPool: (_state, sourceCardId, serverId, amount) => {
         expect(sourceCardId).toBe(fortPoolId);
-        expect(serverId).toBe("remote_1");
+        expect(serverId).toBe("r1");
         fortBits -= amount;
         return amount;
       },
@@ -201,7 +201,7 @@ describe("trace payment pools", () => {
       corpCreditBid: 2,
       fortTraceBitPoolSpent: 2,
       fortTraceBitPoolRemaining: 0,
-      fortTraceBitPoolServerId: "remote_1",
+      fortTraceBitPoolServerId: "r1",
       recurringTraceCreditPoolSpent: 1,
       hackerTrackerCountersSpent: 1,
       traceLimitAndValueBoost: 1,
@@ -215,7 +215,7 @@ describe("trace payment pools", () => {
   it("rejects stale Corp trace pool quotes when source availability changes", () => {
     const trace = corpBidTrace({
       fortTraceBitPoolSourceCardInstanceId: "fort_pool_1" as CardInstanceId,
-      fortTraceBitPoolServerId: "remote_1",
+      fortTraceBitPoolServerId: "r1",
     });
     const state = stateForTrace(trace, { corpCredits: 1 });
     let fortBits = 2;
@@ -424,7 +424,7 @@ describe("trace payment pools", () => {
     const invalid = 1.5;
     const trace = corpBidTrace({
       fortTraceBitPoolSourceCardInstanceId: "fort_pool" as CardInstanceId,
-      fortTraceBitPoolServerId: "remote_1",
+      fortTraceBitPoolServerId: "r1",
     });
     const state = stateForTrace(trace, { corpCredits: 1, runnerCredits: 1 });
 

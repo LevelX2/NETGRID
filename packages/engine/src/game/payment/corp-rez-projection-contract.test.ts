@@ -154,7 +154,7 @@ describe("Corp ICE rez projection contract", () => {
   it("projects new_remote through the exact next concrete remote position", () => {
     const { state, cardId } = stateWithHandIce();
     state.corp.servers.push({
-      id: "remote_4",
+      id: "r4",
       kind: "remote",
       label: "Remote 4",
       ice: [],
@@ -166,12 +166,12 @@ describe("Corp ICE rez projection contract", () => {
       cardId,
       serverId: "new_remote",
       postInstallRezQuoteTargetServerId: "new_remote",
-      postInstallRezQuoteProjectedServerId: "remote_5",
+      postInstallRezQuoteProjectedServerId: "r5",
       postInstallRezQuoteExpiresAtStateVersion: 17,
       postInstallRezQuoteComplete: true,
       postInstallRezQuoteFinalCredits: 3,
     });
-    expect(createRemote(state).id).toBe("remote_5");
+    expect(createRemote(state).id).toBe("r5");
   });
 
   it("exposes mandatory agenda-point rez cost without folding it into credits", () => {
@@ -245,7 +245,7 @@ describe("Corp ICE rez projection contract", () => {
       context: "post_install",
       cardId,
       targetServerId: "new_remote",
-      projectedServerId: "remote_1",
+      projectedServerId: "r1",
       expiresAtStateVersion: 17,
       complete: true,
       costKind: "variable",
@@ -504,7 +504,7 @@ describe("Corp ICE rez projection contract", () => {
   it("shares one fail-closed canonical next-remote rule with createRemote", () => {
     const { state, cardId } = stateWithHandIce();
     state.corp.servers.push({
-      id: "remote_01" as "remote_1",
+      id: "r01" as "r1",
       kind: "remote",
       label: "Invalid Remote",
       ice: [],

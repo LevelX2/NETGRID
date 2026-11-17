@@ -118,7 +118,7 @@ describe("surface policy", () => {
       sanitizePayloadForSurface(
         {
           sourceDefinitionId: 127,
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           removedCardCount: 2,
           replacementCardCount: 2,
         },
@@ -126,7 +126,7 @@ describe("surface policy", () => {
       ),
     ).toEqual({
       sourceDefinitionId: 127,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       removedCardCount: 2,
       replacementCardCount: 2,
     });

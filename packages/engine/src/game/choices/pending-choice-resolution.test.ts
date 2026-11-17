@@ -132,7 +132,7 @@ describe("pending choice resolution", () => {
   it("dispatches Schematics multi-expose review choices through the expose resolver", () => {
     const state = stateWithChoice(
       "schematics_review",
-      "p3_36.expose_installed_cards_review:ice_1|asset_1:schematics:onr_classic_032_schematics-search-engine:2",
+      "p3_36.expose_installed_cards_review:ice_1|asset_1:schematics:36:2",
     );
     const resolveExposeInstalledCorpCardsChoice = vi.fn();
 
@@ -195,7 +195,7 @@ describe("pending choice resolution", () => {
     );
     const sourceId = "schlaghund_1" as CardInstanceId;
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
@@ -206,7 +206,7 @@ describe("pending choice resolution", () => {
       definitionId: 551,
       owner: "corp",
       controller: "corp",
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
       faceup: true,
       rezzed: true,
       advancementCounters: 0,

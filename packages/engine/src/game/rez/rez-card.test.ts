@@ -357,7 +357,7 @@ function instance(
     controller: "corp",
     faceup: false,
     rezzed: false,
-    zone: { side: "corp", zone, serverId: "remote_1" },
+    zone: { side: "corp", zone, serverId: "r1" },
   } as unknown as CardInstance;
 }
 
@@ -392,7 +392,7 @@ function minimalState(input: {
       badPublicity: 0,
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           kind: "remote",
           label: "Remote 1",
           ice: [],
@@ -470,7 +470,7 @@ function testHost(
       mustRun: () => {
         state.run ??= {
           runId: 1,
-          attackedServerId: "remote_1",
+          attackedServerId: "r1",
           phase: "encounter_ice",
           approachedIceId: undefined,
           encounteredIceId: undefined,

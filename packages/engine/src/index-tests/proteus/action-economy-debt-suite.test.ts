@@ -220,16 +220,16 @@ function installCorpAgendaInRemote(
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
   removeEverywhere(state, cardId);
-  addRemote(state, "remote_1");
+  addRemote(state, "r1");
   const server = state.corp.servers.find(
-    (candidate) => candidate.id === "remote_1",
+    (candidate) => candidate.id === "r1",
   )!;
   server.root.push(cardId);
   state.cardInstances[cardId] = {
     ...cardInstance(cardId, definitionId, "corp", {
       side: "corp",
       zone: "serverRoot",
-      serverId: "remote_1",
+      serverId: "r1",
     }),
     advancementCounters: counters,
   };
@@ -351,7 +351,7 @@ function aiBoardStateForRoll(roll: number): GameState {
 function viacoxStateForRoll(
   roll: number,
   gripDefinitionId = RUNNER_INSTALLABLE_HARDWARE,
-  remoteIds: readonly Exclude<ServerId, "new_remote">[] = ["remote_1"],
+  remoteIds: readonly Exclude<ServerId, "new_remote">[] = ["r1"],
 ): GameState {
   for (let index = 0; index < 500; index += 1) {
     const state = baseState(`pro017-viacox-${roll}-${index}`);
@@ -451,7 +451,7 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     addRezzedCorpRootForTest(
       state,
       STRATEGIC_PLANNING_GROUP,
-      "remote_1",
+      "r1",
       "ai_board_spg",
     );
     state = apply(
@@ -564,7 +564,7 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       state,
       CYBERTECH_THINK_TANK,
       "cybertech_pdca_partial",
-      "remote_1",
+      "r1",
     );
     state.cardInstances[cybertechId]!.advancementCounters = 1;
     scoreCorpAgenda(state, CORPORATE_HEADHUNTERS, "headhunter_partial");
@@ -748,7 +748,7 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       state,
       CYBERTECH_THINK_TANK,
       "cybertech_pdca",
-      "remote_1",
+      "r1",
     );
     state.cardInstances[cybertechId]!.advancementCounters = 1;
     scoreCorpAgenda(
@@ -913,16 +913,16 @@ describe("Proteus PRO017 action economy and debt suite", () => {
 
   it("Bargain with Viacox roll 5 lets the Runner choose among all subsidiary data forts", () => {
     const state = viacoxStateForRoll(5, RUNNER_INSTALLABLE_HARDWARE, [
-      "remote_1",
-      "remote_2",
+      "r1",
+      "r2",
     ]);
 
     const actions = getLegalActions(state, "runner").filter(
       (action) => action.type === "start_run",
     );
     expect(actions.map((action) => action.payload?.serverId).sort()).toEqual([
-      "remote_1",
-      "remote_2",
+      "r1",
+      "r2",
     ]);
 
     for (const action of actions) {
@@ -952,8 +952,8 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     "Bargain with Viacox roll %i keeps its fixed central target",
     (roll, serverId) => {
       const state = viacoxStateForRoll(roll, RUNNER_INSTALLABLE_HARDWARE, [
-        "remote_1",
-        "remote_2",
+        "r1",
+        "r2",
       ]);
 
       const actions = getLegalActions(state, "runner").filter(
@@ -974,7 +974,7 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       "viacox_real_install",
     );
     addRunnerGrip(state, RUNNER_INSTALLABLE_HARDWARE, "viacox_real_grip");
-    addRemote(state, "remote_1");
+    addRemote(state, "r1");
     const before = structuredClone(state) as GameState;
 
     state = apply(

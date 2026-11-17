@@ -52,7 +52,7 @@ describe("runner payment support", () => {
             abilities: [
               {
                 kind: "activated",
-                capabilityKey: "support_credit",
+                capabilityKey: "trash_source_gain_two_credits",
                 addressability: ["action"],
                 timing: "runner_cost_penalty_support",
                 costs: [],

@@ -38,7 +38,7 @@ describe("visible Corp score continuation quote", () => {
       seed: "effective-terminal-score",
       setupMode: "completed",
     });
-    const remoteId = "remote_1" as const;
+    const remoteId = "r1" as const;
     state.corp.servers.push({
       id: remoteId,
       label: "Remote 1",

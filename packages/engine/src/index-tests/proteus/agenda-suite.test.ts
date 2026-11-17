@@ -82,7 +82,7 @@ function addCorpCard(
   state: GameState,
   definitionId: number,
   id: string,
-  zone: "hq" | "rd" | "archives" | "remote_1",
+  zone: "hq" | "rd" | "archives" | "r1",
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
   removeEverywhereForTest(state, cardId);
@@ -110,7 +110,7 @@ function addCorpCard(
     owner: "corp",
     controller: "corp",
     zone:
-      zone === "remote_1"
+      zone === "r1"
         ? { side: "corp", zone: "serverRoot", serverId: zone }
         : { side: "corp", zone },
     faceup: false,
@@ -440,12 +440,12 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       fetal,
       FETAL_AI,
       "pro013_fetal_installed",
-      "remote_1",
+      "r1",
     );
     addRunnerGripCard(fetal, 222, "pro013_fetal_installed_1");
     addRunnerGripCard(fetal, 223, "pro013_fetal_installed_2");
     const heapBefore = fetal.runner.heap.length;
-    openAccess(fetal, "remote_1");
+    openAccess(fetal, "r1");
     fetal = apply(fetal, "runner", (action) => action.type === "access_card");
     expect(fetal.run?.accessedCardId).toBe(fetalId);
     expect(fetal.runner.heap).toHaveLength(heapBefore + 2);
@@ -455,9 +455,9 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       marked,
       MARKED_ACCOUNTS,
       "pro013_marked_installed",
-      "remote_1",
+      "r1",
     );
-    openAccess(marked, "remote_1");
+    openAccess(marked, "r1");
     marked = apply(marked, "runner", (action) => action.type === "access_card");
     expect(marked.run?.accessedCardId).toBe(markedId);
     expect(marked.runner.tags).toBe(1);
@@ -482,9 +482,9 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       298,
       "pro013_lethal_only_grip_card",
     );
-    addCorpCard(state, FETAL_AI, "pro013_lethal_fetal_installed", "remote_1");
+    addCorpCard(state, FETAL_AI, "pro013_lethal_fetal_installed", "r1");
     const creditsBeforeAccess = state.runner.credits;
-    openAccess(state, "remote_1");
+    openAccess(state, "r1");
 
     state = apply(state, "runner", (action) => action.type === "access_card");
 
@@ -507,7 +507,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       state,
       578,
       "pro013_combined_red_herrings",
-      "remote_1",
+      "r1",
     );
     state.cardInstances[redHerringsId] = {
       ...state.cardInstances[redHerringsId]!,
@@ -518,11 +518,11 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       state,
       FETAL_AI,
       "pro013_combined_fetal_ai",
-      "remote_1",
+      "r1",
     );
     addRunnerGripCard(state, 222, "pro013_combined_net_1");
     addRunnerGripCard(state, 223, "pro013_combined_net_2");
-    openAccess(state, "remote_1");
+    openAccess(state, "r1");
     const before = structuredClone(state);
 
     state = apply(state, "runner", (action) => action.type === "access_card");
@@ -558,7 +558,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     expect(state.runner.credits).toBe(7);
     expect(state.runner.scoreArea).not.toContain(fetalId);
     expect(
-      state.corp.servers.find((server) => server.id === "remote_1")?.root,
+      state.corp.servers.find((server) => server.id === "r1")?.root,
     ).toContain(fetalId);
     expect(state.run).toBeUndefined();
     expectReplayStable(before, state);
@@ -791,7 +791,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       zurich,
       PROJECT_ZURICH,
       "pro013_zurich",
-      "remote_1",
+      "r1",
     );
     zurich.cardInstances[zurichId]!.advancementCounters = 7;
     const before = structuredClone(zurich);
@@ -829,7 +829,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       world,
       WORLD_DOMINATION,
       "pro013_world",
-      "remote_1",
+      "r1",
     );
     world.cardInstances[worldId]!.advancementCounters = 12;
     world = apply(
@@ -961,7 +961,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
         sourceCardId: "pro013_pirate_failed" as CardInstanceId,
         sourceDefinitionId: PIRATE_BROADCAST,
         sourceTitle: "Pirate Broadcast",
-        pendingServerIds: ["remote_99"],
+        pendingServerIds: ["r99"],
         successfulServerIds: ["hq"],
         anyUnsuccessful: false,
         onAllSuccessful: "gain_runner_event_agenda_point",
@@ -988,7 +988,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     });
   });
 
-  it.each(["rd", "remote_1"] as const)(
+  it.each(["rd", "r1"] as const)(
     "preserves Promises bonuses when stealing from %s",
     (serverId) => {
       let state = baseState("promises-zone-" + serverId);
@@ -1031,7 +1031,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
         state,
         MARKED_ACCOUNTS,
         "promised_debt_agenda",
-        "remote_1",
+        "r1",
       );
       state.cardInstances[agendaId]!.counters = { agenda: 7 };
       state.runnerAgendaPointsToForfeit = debt;
@@ -1048,7 +1048,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
             action.type === "play_event" && action.payload?.cardId === id,
         );
       }
-      state = accessTopCard(state, "remote_1");
+      state = accessTopCard(state, "r1");
       const before = structuredClone(state);
       state = apply(
         state,
@@ -1081,7 +1081,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       state,
       NON_AGENDA_ASSET,
       "pro013_non_agenda",
-      "remote_1",
+      "r1",
     );
     const agendaId = addCorpCard(
       state,
@@ -1115,7 +1115,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       ),
     ).toBe(true);
 
-    state = accessTopCard(state, "remote_1");
+    state = accessTopCard(state, "r1");
     expect(state.run?.accessedCardId).toBe(assetId);
     expect(
       state.runnerDelayedEffectInstances?.every(

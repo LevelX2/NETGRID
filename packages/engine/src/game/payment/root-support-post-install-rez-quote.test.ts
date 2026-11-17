@@ -57,7 +57,7 @@ describe("global root support installation payment facts", () => {
       postInstallRezQuoteComplete: true,
       postInstallRezQuoteCardId: id,
       postInstallRezQuoteTargetServerId: "new_remote",
-      postInstallRezQuoteProjectedServerId: "remote_1",
+      postInstallRezQuoteProjectedServerId: "r1",
       postInstallRezQuoteExpiresAtStateVersion: state.stateVersion,
       postInstallRezQuoteFinalCredits: 0,
       postInstallRezQuoteMandatoryAgendaPointCost: 0,

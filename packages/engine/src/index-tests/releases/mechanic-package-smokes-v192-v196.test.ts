@@ -1005,7 +1005,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     state.corp.maxHandSize = 100;
     moveCorpCardToHq(state, 431);
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
@@ -1023,22 +1023,22 @@ describe("V1.9.5 Mechanikpaket N", () => {
     );
     const rezzedWallId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       449,
     );
     const codeGateId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       590,
     );
     const printedWallAsCodeGateId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       71,
     );
     const printedSentryAsWallId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       98,
     );
     state.cardInstances[rezzedWallId] = {
@@ -1111,13 +1111,13 @@ describe("V1.9.5 Mechanikpaket N", () => {
     ]);
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     const rezzedWallView = getPlayerView(state, "runner")
-      .servers.find((server) => server.id === "remote_1")
+      .servers.find((server) => server.id === "r1")
       ?.ice.find((ice) => ice.instanceId === rezzedWallId);
     expect(rezzedWallView?.strength).toBe(
       (CARD_DEFINITIONS_BY_ID[449]?.strength ?? 0) + 1,
     );
     const remoteIce = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )?.ice;
     expect(
       remoteIce?.find((ice) => ice.instanceId === printedWallAsCodeGateId)
@@ -1217,7 +1217,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     );
     const iceId = putCorpIceOnServer(
       state,
-      "remote_1",
+      "r1",
       491,
     );
     state.cardInstances[iceId] = {
@@ -1230,7 +1230,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
 
     expect(state).toMatchObject({

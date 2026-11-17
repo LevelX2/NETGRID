@@ -305,7 +305,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       faceup: true,
       rezzed: true,
     };
-    putCorpIceOnServer(state, "remote_1", 491);
+    putCorpIceOnServer(state, "r1", 491);
     putCorpIceOnServer(state, "rd", 491);
     const discountedIceId = moveCorpCardToHq(state, 590);
     const fullCostIceId = moveCorpCardCopyToHq(state, 590);
@@ -316,7 +316,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       (action) =>
         action.type === "install_card" &&
         action.source === discountedIceId &&
-        action.payload?.serverId === "remote_1" &&
+        action.payload?.serverId === "r1" &&
         action.payload?.placement === "ice",
     );
     expect(discounted.payload).toMatchObject({
@@ -355,7 +355,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       accessState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     accessState = apply(
       accessState,
@@ -426,7 +426,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     expect(state.cardInstances[namatokiId]).toMatchObject({
       faceup: true,
       rezzed: true,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     });
     expect(state.eventLog.at(-1)?.publicPayload).not.toMatchObject({
       regionReplacementWarning: true,
@@ -443,7 +443,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       (action) =>
         action.type === "install_card" &&
         action.source === agendaId &&
-        action.payload?.serverId === "remote_1" &&
+        action.payload?.serverId === "r1" &&
         action.payload?.placement === "root",
     );
     const assetId = addCorpCardToHqForTest(
@@ -457,7 +457,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       (action) =>
         action.type === "install_card" &&
         action.source === assetId &&
-        action.payload?.serverId === "remote_1" &&
+        action.payload?.serverId === "r1" &&
         action.payload?.placement === "root",
     );
     expect(assetInstall.payload?.rootReplacement).toBeUndefined();
@@ -467,9 +467,9 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       (action) => action.actionId === assetInstall.actionId,
     );
     const remote = state.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
-    if (!remote) throw new Error("remote_1 missing");
+    if (!remote) throw new Error("r1 missing");
     expect(remote.root).toEqual(
       expect.arrayContaining([namatokiId, agendaId, assetId]),
     );
@@ -483,7 +483,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
@@ -532,7 +532,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     expect(state.corp.archives).not.toContain(agendaId);
     expect(
       state.corp.servers
-        .find((server) => server.id === "remote_1")
+        .find((server) => server.id === "r1")
         ?.root.filter((id) => [agendaId, assetId].includes(id)),
     ).toHaveLength(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -568,7 +568,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     const access = mustAction(
       state,
@@ -959,7 +959,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       department,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     department = apply(
       department,

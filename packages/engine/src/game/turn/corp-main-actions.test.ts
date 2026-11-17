@@ -173,14 +173,14 @@ describe("corp main action generation", () => {
       abilityRef: {
         sourceCardInstanceId: cardId,
         sourceAbilityId:
-          "496:abilities_on_play_trace",
+          610,
       },
       payload: {
         cardId,
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
         cardImplementationAbilityKey: "abilities_on_play_trace",
         cardImplementationAbilityId:
-          "496:abilities_on_play_trace",
+          610,
       },
     });
   });
@@ -194,7 +194,7 @@ describe("corp main action generation", () => {
       definitionId: definition.id,
       owner: "corp",
       controller: "corp",
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
       installed: true,
       rezzed: true,
       advancementCounters: 0,

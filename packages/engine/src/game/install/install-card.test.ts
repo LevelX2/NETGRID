@@ -161,7 +161,7 @@ describe("install card execution", () => {
     const calls = testCalls();
     const action = installAction("corp", regionId, {
       placement: "root",
-      serverId: "remote_1",
+      serverId: "r1",
     });
 
     installCard(
@@ -202,11 +202,11 @@ describe("install card execution", () => {
     host.servers.rootInstallRezzesOnInstall = () => true;
     const regionAction = installAction("corp", regionId, {
       placement: "root",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     const forcedRezAction = installAction("corp", forcedRezId, {
       placement: "root",
-      serverId: "remote_1",
+      serverId: "r1",
     });
 
     installCard(host, regionAction);
@@ -258,7 +258,7 @@ describe("install card execution", () => {
     const calls = testCalls({ rolls: [6] });
     const action = installAction("corp", assetId, {
       placement: "root",
-      serverId: "remote_1",
+      serverId: "r1",
     });
 
     installCard(
@@ -368,7 +368,7 @@ function minimalState(input: {
       servers: [
         { id: "hq", kind: "hq", label: "HQ", ice: [], root: [] },
         {
-          id: "remote_1",
+          id: "r1",
           kind: "remote",
           label: "Remote 1",
           ice: [],
@@ -470,7 +470,7 @@ function testHost(
       },
       createRemote: () => {
         const server: CorpServer = {
-          id: "remote_2",
+          id: "r2",
           kind: "remote",
           label: "Remote 2",
           ice: [],

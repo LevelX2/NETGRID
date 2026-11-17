@@ -96,7 +96,7 @@ describe("Proteus Phase 8c Viral Breeding Ground", () => {
       seed: "proteus-8c-vbg-score",
       setupMode: "completed",
     });
-    const serverId = "remote_1";
+    const serverId = "r1";
     installRemote(state, serverId);
     const server = state.corp.servers.find(
       (candidate) => candidate.id === serverId,
@@ -161,7 +161,7 @@ describe("Proteus Phase 8c Viral Breeding Ground", () => {
       seed: "proteus-8c-vbg-access",
       setupMode: "completed",
     });
-    const serverId = "remote_1";
+    const serverId = "r1";
     installRemote(state, serverId);
     const server = state.corp.servers.find(
       (candidate) => candidate.id === serverId,
