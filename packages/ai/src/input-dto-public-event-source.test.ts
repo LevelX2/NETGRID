@@ -28,8 +28,8 @@ describe("AI input DTO public event source binding", () => {
       publicPayload: {
         actor: "runner",
         actionType: "resolve_choice",
-        traceId: "run_173.ice.0.trace",
-        choiceId: "run_173.ice.0.trace.runner.bid.184",
+        traceId: "173.ice.0.trace",
+        choiceId: "173.ice.0.trace.runner.bid.184",
         traceStep: "runner_bid",
         traceSuccessful: false,
         unapprovedTraceAlias: "discard",
@@ -49,8 +49,8 @@ describe("AI input DTO public event source binding", () => {
       profileId: "public-trace",
     });
     expect(input.eventTail[0]?.publicPayload).toMatchObject({
-      traceId: "run_173.ice.0.trace",
-      choiceId: "run_173.ice.0.trace.runner.bid.184",
+      traceId: "173.ice.0.trace",
+      choiceId: "173.ice.0.trace.runner.bid.184",
       traceSuccessful: false,
     });
     expect(input.eventTail[0]?.publicPayload).not.toHaveProperty(
@@ -153,10 +153,8 @@ describe("AI input DTO public event source binding", () => {
   });
 
   it("preserves exact actor-side canonical capability binding and rejects hybrid AbilityRef", () => {
-    const sourceAbilityId = canonicalCapabilityId(
-      syntheticCardDefinitionId("test_card"),
-      capabilityKey("gain"),
-    );
+    const key = capabilityKey("store_credits");
+    const sourceAbilityId = canonicalCapabilityId(366, key);
     const action = legalAction(
       "canonical-action",
       "runner",
@@ -169,7 +167,7 @@ describe("AI input DTO public event source binding", () => {
       cardId: "source",
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationAbilityId: sourceAbilityId,
-      cardImplementationAbilityKey: "gain",
+      cardImplementationAbilityKey: key,
     };
     action.abilityRef = {
       sourceCardInstanceId: "source",
@@ -196,7 +194,7 @@ describe("AI input DTO public event source binding", () => {
       payload: {
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
         cardImplementationAbilityId: sourceAbilityId,
-        cardImplementationAbilityKey: "gain",
+        cardImplementationAbilityKey: key,
       },
     });
     action.payload.cardImplementationAbilityIndex = 0;
@@ -358,7 +356,7 @@ describe("AI input DTO public event source binding", () => {
       publicPayload: {
         actor: "runner",
         actionType: "decline_trash",
-        serverId: "remote_1",
+        serverId: "r1",
         stealCost: 2,
         stealAdditionalCost: 2,
         stealCostSourceDefinitionIds: String(syntheticCardDefinitionId("agenda-with-access-cost")),

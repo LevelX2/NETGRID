@@ -97,10 +97,10 @@ describe("match series 70BE real Engine regressions", () => {
     const selected = input.legalActions.find(
       (action) => action.actionId === decision.actionId,
     );
+    const decoder = state.runner.grip.find((id) => state.cardInstances[id]?.definitionId === 591);
+    expect(decoder).toBeDefined();
     expect(selected?.type).toBe("install_card");
-    expect(selected?.payload).toMatchObject({
-      cardId: "runner_591_1",
-    });
+    expect(selected?.payload).toMatchObject({ cardId: decoder });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:runner.rig_and_coverage",
@@ -114,7 +114,7 @@ describe("match series 70BE real Engine regressions", () => {
     RealEngineFixtureBuilder.forState(state)
       .withRunnerGripSize(1)
       .withRunnerCredits(3)
-      .withCorpRemoteRoot("remote_1", CITY_SURVEILLANCE, 0, {
+      .withCorpRemoteRoot("r1", CITY_SURVEILLANCE, 0, {
         faceup: true,
         rezzed: true,
       });
@@ -153,7 +153,7 @@ describe("match series 70BE real Engine regressions", () => {
       .withRunnerGripSize(1)
       .withRunnerCredits(3)
       .withCorpCredits(1)
-      .withCorpRemoteRoot("remote_1", CITY_SURVEILLANCE, 0, {
+      .withCorpRemoteRoot("r1", CITY_SURVEILLANCE, 0, {
         faceup: false,
         rezzed: false,
       });
@@ -242,7 +242,7 @@ describe("match series 70BE real Engine regressions", () => {
     RealEngineFixtureBuilder.forState(state)
       .withRunnerGripSize(1)
       .withRunnerCredits(10)
-      .withCorpRemoteAgenda("remote_1", 2);
+      .withCorpRemoteAgenda("r1", 2);
     const input = decisionInput(state, "runner", RUNNER_DECK);
     const decision = chooseRunnerAction(input);
     const selected = input.legalActions.find(
@@ -251,7 +251,7 @@ describe("match series 70BE real Engine regressions", () => {
 
     expect(selected).toMatchObject({
       type: "start_run",
-      payload: { serverId: "remote_1" },
+      payload: { serverId: "r1" },
     });
   });
 });

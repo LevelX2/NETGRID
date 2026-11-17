@@ -69,7 +69,7 @@ it("keeps the native run root, executor, route and input while retaining the las
     "plan:runner.pressure_central:central%3Ard",
   );
   expect(plan.leafExecutorInstanceId).toBe(
-    "plan:runner.convert_run_window:run%3Arun_212",
+    `plan:runner.convert_run_window:run%3A${input.playerView.run.runId}`,
   );
   expect(plan.route).toMatchObject({
     actionId: cheap.actionId,

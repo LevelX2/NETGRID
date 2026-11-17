@@ -16,14 +16,16 @@ function original() {
   expect(Object.values(checkpoint.validation)).toEqual(Array(9).fill(true));
   const input = checkpoint.input as AiDecisionInput;
   expect(input.playerView.opponent).not.toHaveProperty("gripOrHq");
-  return input;
+  const snowball = input.playerView.own.rig?.find((card) => card.definitionId === 278);
+  if (!snowball) throw new Error("Der native Runner-Rig enthält keinen Snowball.");
+  return { input, snowballId: snowball.instanceId };
 }
 
 describe("Paarung 576: getrennte Begegnungs- und Runstärke", () => {
   it("bezahlt den Encounter-Pump an beiden bekannten Shock.r statt ihn mit Snowballs Breakbonus zu übertragen", () => {
-    const input = original();
+    const { input, snowballId } = original();
     const server = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!;
     const path = assessKnownRezzedIcePath(
       server.ice,
@@ -38,13 +40,13 @@ describe("Paarung 576: getrennte Begegnungs- und Runstärke", () => {
       creditsAfterPath: 6,
     });
     expect(
-      path.carriedBreakerStrengthAfterPath?.runner_278_1,
+      path.carriedBreakerStrengthAfterPath?.[snowballId],
     ).toBe(2);
   });
   it("erhält nur den echten Runbonus nach dem einzelnen äußeren ICE", () => {
-    const input = original();
+    const { input, snowballId } = original();
     const server = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!;
     const path = assessKnownRezzedIcePath(
       server.ice.slice(2),
@@ -59,7 +61,7 @@ describe("Paarung 576: getrennte Begegnungs- und Runstärke", () => {
       creditsAfterPath: 9,
     });
     expect(
-      path.carriedBreakerStrengthAfterPath?.runner_278_1,
+      path.carriedBreakerStrengthAfterPath?.[snowballId],
     ).toBe(1);
   });
 });
