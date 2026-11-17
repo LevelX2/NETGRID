@@ -642,7 +642,6 @@ function variableRezKindForAction(
 ): string | undefined {
   return (
     payloadString(action, "variableRezKind") ??
-    variableRezFromActionId(action)?.kind ??
     actionSemanticCandidate?.costProfile.variableCost?.kind
   );
 }
@@ -659,8 +658,7 @@ function variableRezChosenValue(
       : undefined) ??
     (typeof actionSemanticCandidate?.costProfile.xValue === "number"
       ? actionSemanticCandidate.costProfile.xValue
-      : undefined) ??
-    variableRezFromActionId(action)?.value
+      : undefined)
   );
 }
 
@@ -677,27 +675,6 @@ function minimumUsefulVariableRezValue(
     )
   ) {
     return 1;
-  }
-  return undefined;
-}
-
-function variableRezFromActionId(
-  action: LegalAction,
-): { kind: string; value: number } | undefined {
-  const actionIdParts = action.actionId.split(".");
-  for (let index = 0; index < actionIdParts.length - 1; index += 1) {
-    const kind = actionIdParts[index];
-    if (
-      kind !== "x_strength" &&
-      kind !== "trace_boost" &&
-      kind !== "paid_end_the_run_subroutines"
-    ) {
-      continue;
-    }
-    const value = Number(actionIdParts[index + 1]);
-    if (Number.isFinite(value)) {
-      return { kind, value };
-    }
   }
   return undefined;
 }

@@ -178,10 +178,13 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     });
   });
 
-  it("flags zero-effect X-strength rez actions encoded in the legal action id", () => {
+  it("flags zero-effect X-strength rez actions using their Engine payload", () => {
     const context = semanticRuntimeCorpEffectiveDefenseContext(
       corpInput(6),
-      rezAction("corp.rez_ice.test_ice.test_ice.x_strength.0.0", 6),
+      rezAction("17", 6, {
+        variableRezKind: "x_strength",
+        variableRezValue: 0,
+      }),
       undefined,
       { actionCreditCost },
     );

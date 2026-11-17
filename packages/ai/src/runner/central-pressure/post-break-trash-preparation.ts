@@ -210,7 +210,7 @@ export function runnerPostBreakTrashPreparationSignals(
                 a.type === "install_card" &&
                 actionMatchesCurrentDecision(input, a) &&
                 a.source === card.instanceId &&
-                !a.actionId.includes("trash_before") &&
+                a.payload?.runnerProgramTrashBeforeInstall !== true &&
                 !a.choiceRequirements?.length &&
                 candidates.some((c) => c.actionId === a.actionId),
             );

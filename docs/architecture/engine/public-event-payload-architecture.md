@@ -63,6 +63,13 @@ Die für Action-IDs relevante Teilmenge heißt
 `ACTION_ID_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS`. Ihre Reihenfolge bleibt
 deterministisch, enthält aber ebenfalls nur aktuelle Producer.
 
+Variable Rez-Varianten und der Pflichttrash vor einer Runner-Installation
+werden anhand der LegalAction-Felder `variableRezKind`, `variableRezValue`
+und `runnerProgramTrashBeforeInstall` ausgewertet. Bei Playful AI bindet die
+Engine die Aufteilung an den numerischen Optionswert und
+`metadata.secondaryAmount`. Falsch oder unvollständig gebundene Werte
+scheitern bei der Auflösung.
+
 ## ResolvedGameEffect
 
 Die Start-of-Turn-Resolver hatten sieben Effektobjekte über
