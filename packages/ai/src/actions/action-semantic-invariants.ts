@@ -95,56 +95,43 @@ function profileInvariantIssues(
     );
   }
 
-  issues.push(
-    ...signalIssues(`${basePath}.tacticSignals`, profile.tacticSignals),
-    ...strategySupportIssues(
-      `${basePath}.strategySupport`,
-      profile.strategySupport ?? [],
-    ),
-    ...broadSignalStrategySupportIssues(
-      `${basePath}.strategySupport`,
-      profile.tacticSignals,
-      profile.strategySupport ?? [],
-    ),
-    ...supportOnlyStrategyIssues(
-      `${basePath}.strategySupport`,
-      profile.tacticSignals,
-      profile.strategySupport ?? [],
-    ),
-    ...targetProfileIssues(
-      `${basePath}.targetProfileMatches`,
-      profile.targetProfileMatches ?? [],
-    ),
-  );
-
+  issues.push(...semanticScopeIssues(basePath, profile));
   for (const [abilityIndex, ability] of (
     profile.abilitySemantics ?? []
   ).entries()) {
-    const abilityPath = `${basePath}.abilitySemantics[${abilityIndex}]`;
     issues.push(
-      ...signalIssues(`${abilityPath}.tacticSignals`, ability.tacticSignals),
-      ...strategySupportIssues(
-        `${abilityPath}.strategySupport`,
-        ability.strategySupport ?? [],
-      ),
-      ...broadSignalStrategySupportIssues(
-        `${abilityPath}.strategySupport`,
-        ability.tacticSignals,
-        ability.strategySupport ?? [],
-      ),
-      ...supportOnlyStrategyIssues(
-        `${abilityPath}.strategySupport`,
-        ability.tacticSignals,
-        ability.strategySupport ?? [],
-      ),
-      ...targetProfileIssues(
-        `${abilityPath}.targetProfileMatches`,
-        ability.targetProfileMatches ?? [],
+      ...semanticScopeIssues(
+        basePath + ".abilitySemantics[" + abilityIndex + "]",
+        ability,
       ),
     );
   }
-
   return issues;
+}
+
+function semanticScopeIssues(
+  path: string,
+  scope: Pick<
+    ActionCardSemanticProfile,
+    "tacticSignals" | "strategySupport" | "targetProfileMatches"
+  >,
+): ActionSemanticInvariantIssue[] {
+  const strategyPath = path + ".strategySupport";
+  const support = scope.strategySupport ?? [];
+  return [
+    ...signalIssues(path + ".tacticSignals", scope.tacticSignals),
+    ...strategySupportIssues(strategyPath, support),
+    ...broadSignalStrategySupportIssues(
+      strategyPath,
+      scope.tacticSignals,
+      support,
+    ),
+    ...supportOnlyStrategyIssues(strategyPath, scope.tacticSignals, support),
+    ...targetProfileIssues(
+      path + ".targetProfileMatches",
+      scope.targetProfileMatches ?? [],
+    ),
+  ];
 }
 
 function signalIssues(

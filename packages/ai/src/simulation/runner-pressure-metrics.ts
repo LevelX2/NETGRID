@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -8,8 +9,7 @@ import type { KnownPositionMemory } from "../belief-state";
 import { centralServerId } from "../runtime/server-target";
 import {
   runnerRunPathCreditBudgetWithVisiblePools,
-  type KnownRezzedIcePathAssessment,
-  type RunnerRunPathCreditBudget,
+  type assessKnownRezzedIcePath,
 } from "../visible-run-analysis";
 import { centralPressureTargetIsGoodForMetrics } from "./central-pressure-card";
 import type {
@@ -22,12 +22,7 @@ export type RunnerPressureMetricDependencies = {
   runnerStrategicBreakerTargetForMetrics: (
     server: AiDecisionInput["playerView"]["servers"][number],
   ) => boolean;
-  assessKnownRezzedIcePath: (
-    iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
-    rigCards: NonNullable<AiDecisionInput["playerView"]["own"]["rig"]>,
-    runnerCredits: number | RunnerRunPathCreditBudget,
-    rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
-  ) => KnownRezzedIcePathAssessment;
+  assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
   knownPositionMemoryForInput: (
     input: AiDecisionInput,
   ) => KnownPositionMemory[];
@@ -126,6 +121,8 @@ export function createRunnerPressureMetricContext(
           input.playerView.own.rig ?? [],
         ),
         server.root,
+        input.playerView.opponent.credits,
+        visibleRunnerPathTraceContext(input),
       );
       const creditsAfterPath = assessment.creditsAfterPath;
       if (!assessment.blocked) broadReady = true;
@@ -196,6 +193,8 @@ export function createRunnerPressureMetricContext(
           rigCards,
         ),
         server.root,
+        input.playerView.opponent.credits,
+        visibleRunnerPathTraceContext(input),
       );
       const rezzedMissing = assessment.blocked
         ? server.ice

@@ -69,18 +69,20 @@ function candidateRunServers(candidate: ActionSemanticCandidate): {
       source: candidate.runProjectionSummary?.source ?? "run_action_projection",
     };
   }
-  const fromTargets = [
-    ...(candidate.targetContext?.selectedTargets ?? []),
-    ...(candidate.targetContext?.availableTargets ?? []),
-  ]
-    .filter((target) => target.targetKind === "server")
-    .map((target) => normalizeServerId(target.targetId))
-    .filter((targetId): targetId is string => targetId !== undefined);
-  if (fromTargets.length > 0) {
-    return {
-      serverIds: uniqueStrings(fromTargets),
-      source: "target_context",
-    };
+  const selected =
+    candidate.targetContext?.selectedTargets.filter(
+      (target) => target.targetKind === "server",
+    ) ?? [];
+  const available =
+    candidate.targetContext?.availableTargets?.filter(
+      (target) => target.targetKind === "server",
+    ) ?? [];
+  const targets = selected.length > 0 ? selected : available;
+  if (targets.length > 0) {
+    const serverIds = targets
+      .map((target) => normalizeServerId(target.targetId))
+      .filter((serverId): serverId is string => serverId !== undefined);
+    return { serverIds: uniqueStrings(serverIds), source: "target_context" };
   }
   const fromEvidence = candidate.evidence
     .flatMap((entry) => [

@@ -3,7 +3,7 @@ import type { CorpDefenseScoreReserveAssessment } from "../corp/defense/corp-def
 import { type CorpExactIceRezRouteProjection } from "../runtime/corp-exact-ice-rez-route";
 import { type KnownCorpFundedIceInstallRouteProjection } from "../runtime/corp-funded-score-protection";
 import { type ExactProbability } from "../runtime/corp-score-protection-assessment";
-import { CorpScorePriorityClass } from "./corp-score-contracts";
+import type { CorpScorePriorityClass } from "./corp-score-contracts";
 
 export type CorpDefenseSignalBase = {
   defenseId: string;

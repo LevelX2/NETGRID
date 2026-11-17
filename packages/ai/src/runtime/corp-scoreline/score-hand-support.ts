@@ -6,6 +6,7 @@ export function corpReservedScoreServerIds(
   input: AiDecisionInput,
   scoreProjects: readonly CorpScoreProjectSignal[],
 ): ReadonlySet<string> {
+  if (input.side !== "corp") return new Set();
   const scoreline = corpScorelineFeasibilityForDecisionInput(input);
   return new Set(
     scoreProjects.flatMap((project) => {
@@ -25,7 +26,8 @@ export function corpReservedScoreServerIds(
       const exactLastClickContinuation =
         project.routeAssessment === "corp_last_click_score_install_deferred";
       const preparedScoreServer = (server?.ice.length ?? 0) > 0;
-      return project.agendaInstanceId !== undefined &&
+      return server !== undefined &&
+        project.agendaInstanceId !== undefined &&
         project.phase === "install_agenda" &&
         project.serverId?.startsWith("remote_") === true &&
         (exactLastClickContinuation || preparedScoreServer)

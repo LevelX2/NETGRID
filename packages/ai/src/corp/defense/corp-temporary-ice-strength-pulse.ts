@@ -1,3 +1,4 @@
+import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
 import type {
   AiDecisionInput,
   CorpTemporaryIceStrengthPulseQuote,
@@ -174,6 +175,7 @@ export function assessCorpTemporaryIceStrengthPulse(
       budget(),
       root,
       input.playerView.own.credits - q.sourceRezCredits - q.iceRezCredits,
+      currentRunPathContext(input),
     ),
     expectedKnownIceCount: 1,
     runnerCreditBudgetBefore: budget(),
@@ -184,6 +186,7 @@ export function assessCorpTemporaryIceStrengthPulse(
     budget(),
     root,
     q.corpCreditsAfterDefense,
+    currentRunPathContext(input),
   );
   if (
     before.accessStatus !== "reachable" ||

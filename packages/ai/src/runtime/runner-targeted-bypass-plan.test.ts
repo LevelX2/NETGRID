@@ -490,6 +490,8 @@ function planningInput(params: {
         credits: params.credits ?? 5,
         rig: params.rig,
       },
+      opponent: { credits: 4 },
+      traceRulesProfile: "modern_open",
       servers: [{ id: "hq", ice: params.ice, root: [] }],
     },
   } as unknown as AiDecisionInput;

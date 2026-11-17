@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "./run-analysis/trace-rules-profile-planning";
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
 import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
 import { type AiDecisionInput } from "@netgrid/shared";
@@ -1049,6 +1050,8 @@ function knownCentralPathCost(
     input.playerView.own.rig ?? [],
     input.playerView.own.credits,
     server.root,
+    input.playerView.opponent.credits,
+    visibleRunnerPathTraceContext(input),
   );
   return {
     visibleBreakCost: assessment.visibleBreakCost ?? 0,

@@ -27,7 +27,7 @@ export function runnerSafeAccessDecision(
       ? [`target_server:${targetServerId}`]
       : []),
   ];
-  if (frame.side !== "runner") {
+  if (frame.side !== "runner" || action.side !== "runner") {
     return block(
       RUNNER_SAFE_ACCESS_PILOT_MODE,
       "runner_safe_access_wrong_side",
@@ -38,6 +38,13 @@ export function runnerSafeAccessDecision(
     return block(
       RUNNER_SAFE_ACCESS_PILOT_MODE,
       "runner_safe_access_action_type_blocked",
+      evidence,
+    );
+  }
+  if (top.actionId !== action.actionId) {
+    return block(
+      RUNNER_SAFE_ACCESS_PILOT_MODE,
+      "runner_safe_access_action_binding_mismatch",
       evidence,
     );
   }

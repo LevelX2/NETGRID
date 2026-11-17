@@ -43,6 +43,30 @@ describe("selectedSearchChoiceOptionIds", () => {
       expect(selected).toEqual(hasTarget ? ["target"] : []);
     },
   );
+  it("leaves an optional exact-instance search empty when only another copy is offered", () => {
+    const choice = searchChoice([
+      option("target", "Another copy", "program", {
+        instanceId: "other-copy",
+      }),
+    ]);
+    choice.minSelections = 0;
+    expect(
+      selectedSearchChoiceOptionIds(choice, choice.options, {
+        features: {
+          credits: 2,
+          memoryRemaining: 2,
+          hasInstalledNonNoisyIcebreaker: false,
+          rigRoles: new Set(),
+          rigDefinitionIds: new Set(),
+        },
+        preferredCardInstanceId: "specific-copy",
+        preferredCardDefinitionId: "target",
+        optionalExactTargetOnly: true,
+        effectsForCardId: () => [],
+        rolesForCardId: () => [],
+      }),
+    ).toEqual([]);
+  });
   it("matches search choices by bounded source tokens", () => {
     expect(isSearchChoice(sourceOnlyChoice("stack search"))).toBe(true);
     expect(isSearchChoice(sourceOnlyChoice("searchlight stackish"))).toBe(

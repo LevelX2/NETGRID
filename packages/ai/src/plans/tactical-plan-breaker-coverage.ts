@@ -3,6 +3,7 @@ import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../visible-run-analysis";
+import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import { cardProvidesBreakerCoverage } from "./tactical-plan-breaker-cards";
 import { coverageKindForAssessment } from "./tactical-plan-coverage-kinds";
 import type { RequiredCapabilityKind } from "./tactical-plan-types";
@@ -24,6 +25,12 @@ export function missingBreakerCoverageKind(
       playerView.own.rig ?? [],
     ),
     server.root,
+    playerView.opponent.credits,
+    visibleRunnerPathTraceContext({
+      side: playerView.side,
+      playerView,
+      legalActions: playerView.legalActions,
+    }),
   );
   const preciseMissingCoverage = coverageKindForAssessment(assessment);
   if (

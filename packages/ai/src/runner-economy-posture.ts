@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "./run-analysis/trace-rules-profile-planning";
 import {
   hasRiskyUniversalPressure,
   runnerCreditReservePhase,
@@ -615,6 +616,8 @@ function runnerCanContestRemoteIfFunded(
       input.playerView.own.rig ?? [],
       input.playerView.own.credits,
       server.root,
+      input.playerView.opponent.credits,
+      visibleRunnerPathTraceContext(input),
     );
     return (
       !path.knownPathBlockedByMissingCoverage &&
@@ -920,6 +923,8 @@ function runnerRemotePressureReserveAssessment(params: {
         params.input.playerView.own.rig ?? [],
       ),
       server.root,
+      params.input.playerView.opponent.credits,
+      visibleRunnerPathTraceContext(params.input),
     );
     if (
       path.knownPathBlockedByMissingCoverage ||
@@ -993,6 +998,8 @@ function runnerRdPressureSpendTarget(input: AiDecisionInput): number {
       input.playerView.own.rig ?? [],
     ),
     rd.root,
+    input.playerView.opponent.credits,
+    visibleRunnerPathTraceContext(input),
   );
   if (
     path.knownPathBlockedByMissingCoverage ||

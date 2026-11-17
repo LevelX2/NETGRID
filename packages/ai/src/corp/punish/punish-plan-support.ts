@@ -8,12 +8,13 @@ import type {
   PlanMaterialization,
   PlanSchedulerContext,
 } from "../../plans/plan-scheduler";
-import { CorpPunishCampaignSignal, PunishState } from "./punish-types";
+import type { CorpPunishCampaignSignal, PunishState } from "./punish-types";
 
 export function corpPunishCampaignOwnsCandidate(
   signal: CorpPunishCampaignSignal,
   candidate: ActionSemanticCandidate,
 ): boolean {
+  if (candidate.actorSide !== "corp") return false;
   if (signal.routeContract) {
     return (
       signal.routeContract.quoteStatus === "complete" &&

@@ -8,6 +8,7 @@ import type {
 } from "@netgrid/shared";
 import { parseCanonicalCapabilityId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import type {
@@ -64,15 +65,13 @@ export function currentCorpHostedBankCycleQuotes(
       !q ||
       q.schemaVersion !== "corp-hosted-credit-bank-cycle-quote-v1" ||
       input.side !== "corp" ||
-      action.side !== "corp" ||
-      action.timingPoint !== "corp_action.main" ||
+      !actionMatchesCurrentDecision(input, action) ||
       input.playerView.timingPoint !== "corp_action.main" ||
       input.playerView.run ||
       !numbers?.every((n) => Number.isSafeInteger(n) && n >= 0) ||
       q.actionId !== action.actionId ||
       q.sourceCardInstanceId !== action.source ||
       q.stateVersion !== input.playerView.stateVersion ||
-      action.expiresAtStateVersion !== q.stateVersion ||
       q.currentCredits !== input.playerView.own.credits ||
       q.currentClicks !== input.playerView.own.clicks ||
       q.currentClicks < 2 ||
@@ -90,7 +89,7 @@ export function currentCorpHostedBankCycleQuotes(
       q.extraLiquidCredits !==
         q.netLiquidCreditGain - q.baselineLiquidCreditGain ||
       q.extraLiquidCredits <= 0 ||
-      !card ||
+      card?.known !== true ||
       card.owner !== "corp" ||
       card.controller !== "corp" ||
       card.definitionId !== q.sourceDefinitionId ||
@@ -190,7 +189,7 @@ function admitsIncrementalInstallFunding(
       a.payload.serverId === reserve.serverId &&
       signal.parentNeedId ===
         "install:" + reserve.serverId + ":" + a.actionId &&
-      a.expiresAtStateVersion === input.playerView.stateVersion,
+      actionMatchesCurrentDecision(input, a),
   );
   if (
     !install ||

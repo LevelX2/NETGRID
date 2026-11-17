@@ -52,8 +52,13 @@ export function runnerInvestmentTraceContext(
 }
 
 /** Bind visible and hypothetical path quotes to the active game's trace rules. */
+type TraceDecisionContext = Pick<
+  AiDecisionInput,
+  "side" | "playerView" | "legalActions"
+>;
+
 export function visibleIcePathTraceContext(
-  input: AiDecisionInput,
+  input: TraceDecisionContext,
 ): Pick<
   VisibleDeflectorContext,
   "traceRulesProfile" | "onMissingTraceRulesProfile"
@@ -76,7 +81,7 @@ export function visibleIcePathTraceContext(
 }
 
 export function visibleRunnerPathTraceContext(
-  input: AiDecisionInput,
+  input: TraceDecisionContext,
 ): Pick<
   VisibleDeflectorContext,
   "traceRulesProfile" | "onMissingTraceRulesProfile" | "runnerTraceSupportQuote"

@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
   assessKnownRezzedIcePath,
@@ -27,6 +28,8 @@ export function runnerRunActionSpendingCapAssessment(
       input.playerView.own.rig ?? [],
     ),
     server.root,
+    input.playerView.opponent.credits,
+    visibleRunnerPathTraceContext(input),
   );
   const visibleBreakCost = assessment.visibleBreakCost ?? 0;
   if (assessment.assessedKnownIceCount > 0 && !assessment.canReachAccess) {

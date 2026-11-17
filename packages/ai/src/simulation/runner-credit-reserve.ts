@@ -1,4 +1,9 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";
+import {
+  currentEncounteredIceCard,
+  currentRunRemainingIce,
+} from "../runtime/current-encounter";
 import { rolesMatch } from "../role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import {
@@ -14,20 +19,32 @@ export function runnerCreditReserveTargetForInput(
 ): number {
   if (input.side !== "runner") return 0;
   let target = 4;
-  const activeRunServerId = input.playerView.run?.attackedServerId;
+  const run = input.playerView.run;
+  const activeRunServerId = run?.attackedServerId;
   if (!activeRunServerId) return target;
   for (const server of input.playerView.servers) {
     if (server.id !== activeRunServerId) continue;
     if (!isRemoteServerTarget(server.id)) continue;
+    const remaining = currentRunRemainingIce(input);
+    const current =
+      run.position?.kind === "ice" && run.phase !== "movement"
+        ? currentEncounteredIceCard(input)
+        : undefined;
+    const path =
+      current && current.instanceId !== run.pendingAutoPassIceId
+        ? [...remaining, current]
+        : remaining;
     const pathCost =
       assessKnownRezzedIcePath(
-        server.ice,
+        path,
         input.playerView.own.rig ?? [],
         runnerRunPathCreditBudgetWithVisiblePools(
           input.playerView.own.credits,
           input.playerView.own.rig ?? [],
         ),
         server.root,
+        input.playerView.opponent.credits,
+        currentRunPathContext(input),
       ).visibleBreakCost ?? 0;
     const hasThreat = server.root.some(
       (card) =>

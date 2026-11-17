@@ -45,9 +45,9 @@ export type TagPunishWindowDiagnosticsContextDependencies = {
     opportunities: CorpVisibleTagPunishOpportunity[],
     survivalContext: RunnerSurvivalCounterContext,
   ) => void;
-  strongestCorpTagSourceOpportunity: (
+  corpTagSourceOpportunities: (
     input: AiDecisionInput,
-  ) => { action: LegalAction; traceTag: boolean } | undefined;
+  ) => { action: LegalAction; traceTag: boolean }[];
   corpOntologyPayoffAvailableForTagSource: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -216,8 +216,14 @@ export function createTagPunishWindowDiagnosticsContext(
             diagnostics.corpPunishSkippedDespiteOntologyOpportunity = true;
         }
       }
-      const tagSourceOpportunity =
-        dependencies.strongestCorpTagSourceOpportunity(input);
+      const tagSources = dependencies.corpTagSourceOpportunities(input);
+      const chosenTagSource = tagSources.find(
+        (source) => source.action.actionId === action.actionId,
+      );
+      const tagSourceOpportunity = chosenTagSource ?? tagSources[0];
+      const traceTagSource = chosenTagSource?.traceTag
+        ? chosenTagSource
+        : tagSources.find((source) => source.traceTag);
       if (tagSourceOpportunity) {
         const tagSourceOntology =
           dependencies.corpTagPunishOntologyAssessmentForAction(
@@ -240,9 +246,9 @@ export function createTagPunishWindowDiagnosticsContext(
           diagnostics.runnerSurvivalCounterContextAvailable = true;
         if (survivalContext.trace)
           diagnostics.runnerTraceDefenseVisibleAtTagSource = true;
-        if (tagSourceOpportunity.traceTag && survivalContext.link)
+        if (traceTagSource && survivalContext.link)
           diagnostics.runnerLinkDefenseVisibleAtTrace = true;
-        if (action.actionId === tagSourceOpportunity.action.actionId) {
+        if (chosenTagSource) {
           diagnostics.corpTagSourceTaken = true;
           if (diagnostics.corpFunnelSourcePayoffPairSeenInDeck === true)
             diagnostics.corpFunnelSourceActionTakenWithPayoffInDeck = true;
@@ -260,18 +266,19 @@ export function createTagPunishWindowDiagnosticsContext(
               diagnostics.corpFunnelSourceActionTakenWithoutVisiblePayoff = true;
             }
           }
-        } else {
-          diagnostics.corpTraceTagSkippedReason = corpTagPunishSkipReason(
-            action,
-            decision,
-          );
         }
-        if (tagSourceOpportunity.traceTag) {
+        if (traceTagSource) {
           diagnostics.corpTraceTagOpportunity = true;
           diagnostics.corpTraceTagExpectedSuccess =
             traceTagExpectedSuccessEstimate(input);
-          if (action.actionId === tagSourceOpportunity.action.actionId)
+          if (chosenTagSource?.traceTag) {
             diagnostics.corpTraceTagTaken = true;
+          } else {
+            diagnostics.corpTraceTagSkippedReason = corpTagPunishSkipReason(
+              action,
+              decision,
+            );
+          }
         }
       } else if (decision.reasonCode === "corp.trace.bid_visible_amount") {
         diagnostics.corpTagSourceOpportunity = true;
@@ -282,8 +289,13 @@ export function createTagPunishWindowDiagnosticsContext(
           traceTagExpectedSuccessEstimate(input);
       }
     }
-    if (input.side === "runner" && action.type === "end_turn")
+    if (
+      stateBeforeAction.activeSide === "runner" &&
+      stateAfterAction.activeSide === "corp" &&
+      stateAfterAction.phase !== "game_over"
+    ) {
       diagnostics.runnerTaggedAtEndOfRunnerTurn = runnerTagsAfter > 0;
+    }
     if (runnerTagsAfter > runnerTagsBefore) {
       diagnostics.runnerTagAddedByAction = true;
       dependencies.applyActualTagCreationDiagnostics(
@@ -308,7 +320,8 @@ function isCorpTurnStartDecision(
 ): boolean {
   return (
     action.side === "corp" &&
-    (action.type === "mandatory_draw" ||
-      stateBeforeAction.activeSide === "corp")
+    action.type === "mandatory_draw" &&
+    stateBeforeAction.activeSide === "corp" &&
+    stateBeforeAction.timingPoint === "corp_draw.mandatory_draw"
   );
 }

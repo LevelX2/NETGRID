@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -128,6 +129,8 @@ export function runnerTargetedBypassPlanCommitment(params: {
         rig,
       ),
       server.root,
+      input.playerView.opponent.credits,
+      visibleRunnerPathTraceContext(input),
     );
     return server.ice.flatMap((ice, icePosition) => {
       const remainingIce = server.ice.filter(
@@ -145,6 +148,8 @@ export function runnerTargetedBypassPlanCommitment(params: {
         rig,
         runnerRunPathCreditBudgetWithVisiblePools(projectedCredits, rig),
         server.root,
+        input.playerView.opponent.credits,
+        visibleRunnerPathTraceContext(input),
       );
       if (
         !remainingPath.canReachAccess ||

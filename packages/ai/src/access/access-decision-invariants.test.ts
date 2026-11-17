@@ -67,19 +67,22 @@ describe("access decision invariants", () => {
     ).toEqual(["steal_cost_requires_steal_intent"]);
   });
 
-  it("keeps target-choice dry runs from materializing selections", () => {
-    expect(
-      accessDecisionInvariantViolations({
-        target: "asset",
-        intendedAccessAction: "decline",
-        targetChoiceWouldSelect: {
-          selectedChoicesCreated: true,
-          selectedTargetsCreated: true,
-        },
-      }),
-    ).toEqual([
-      "dry_run_must_not_create_selected_choices",
-      "dry_run_must_not_create_selected_targets",
-    ]);
-  });
+  it.each(["decline", "access_only", "trash"] as const)(
+    "keeps target-choice %s dry runs from materializing selections",
+    (intent) => {
+      expect(
+        accessDecisionInvariantViolations({
+          target: "asset",
+          intendedAccessAction: intent,
+          targetChoiceWouldSelect: {
+            selectedChoicesCreated: true,
+            selectedTargetsCreated: true,
+          },
+        }),
+      ).toEqual([
+        "dry_run_must_not_create_selected_choices",
+        "dry_run_must_not_create_selected_targets",
+      ]);
+    },
+  );
 });

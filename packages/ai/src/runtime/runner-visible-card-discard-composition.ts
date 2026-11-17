@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
@@ -37,6 +38,8 @@ export function createRunnerVisibleCardDiscardComposition(
         runtimeInput.playerView.own.rig ?? [],
         runtimeInput.playerView.own.credits,
         server.root,
+        runtimeInput.playerView.opponent.credits,
+        visibleRunnerPathTraceContext(runtimeInput),
       ),
     visibleBreakerRoles: dependencies.visibleBreakerRolesForAi,
   });

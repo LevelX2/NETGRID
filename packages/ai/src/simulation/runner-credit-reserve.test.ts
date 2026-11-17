@@ -34,6 +34,8 @@ function input(activeRun = false): AiDecisionInput {
         credits: 6,
         rig: [],
       },
+      opponent: { credits: 4 },
+      traceRulesProfile: "modern_open",
       servers: [
         {
           id: "remote_1",

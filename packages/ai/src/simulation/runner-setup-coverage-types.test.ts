@@ -21,6 +21,8 @@ describe("runner coverage action metrics", () => {
       playerView: {
         ...input().playerView,
         own: { credits: 1, rig: [] },
+        opponent: { credits: 4 },
+        traceRulesProfile: "modern_open",
         servers: [{ id: "rd", ice: [], root: [] }],
       },
     } as unknown as AiDecisionInput;

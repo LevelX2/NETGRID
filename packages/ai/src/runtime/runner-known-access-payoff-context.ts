@@ -1,6 +1,7 @@
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput } from "@netgrid/shared";
 
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import { evaluateKnownRemoteAccessPayoff } from "../known-remote-access-payoff";
 import { projectKnownCorpCardAccessEffect } from "./known-corp-card-access-effect-projection";
 
@@ -10,6 +11,7 @@ export function runnerCurrentRunHasSafeCompletionReward(
 ): boolean {
   const run = input.playerView.run;
   if (
+    input.side !== "runner" ||
     run?.phase !== "movement" ||
     run.position?.kind !== "server" ||
     run.successful
@@ -19,14 +21,16 @@ export function runnerCurrentRunHasSafeCompletionReward(
     (action) => action.type === "continue_run",
   );
   if (
-    !continuation ||
+    !actionMatchesCurrentDecision(input, continuation) ||
     continuation.costs.some(
       (cost) => (cost.credits ?? 0) !== 0 || (cost.clicks ?? 0) !== 0,
     )
   )
     return false;
+  const accessServerId =
+    run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
   const server = input.playerView.servers.find(
-    (server) => server.id === run.attackedServerId,
+    (server) => server.id === accessServerId,
   );
   if (
     !server ||

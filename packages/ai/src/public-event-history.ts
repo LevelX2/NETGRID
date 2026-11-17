@@ -94,18 +94,21 @@ export function eventRefreshesCentralTarget(
     return true;
   if (target === "hq")
     return (
-      actionType === "draw_card" ||
-      actionType === "mandatory_draw" ||
-      actionType === "install_card" ||
-      actionType === "play_operation"
+      event.publicPayload.actor === "corp" &&
+      (actionType === "draw_card" ||
+        actionType === "mandatory_draw" ||
+        actionType === "install_card" ||
+        actionType === "play_operation")
     );
-  if (target === "rd")
+  if (target === "rd") {
+    const changesCorpDeck = event.publicPayload.actor === "corp";
     return (
-      actionType === "draw_card" ||
-      actionType === "mandatory_draw" ||
-      actionType === "shuffle_stack" ||
-      actionType === "reorder_cards"
+      (changesCorpDeck &&
+        (actionType === "draw_card" || actionType === "mandatory_draw")) ||
+      ((changesCorpDeck || serverIdFromEvent(event) === "rd") &&
+        (actionType === "shuffle_stack" || actionType === "reorder_cards"))
     );
+  }
   return actionType === "trash_card";
 }
 
@@ -117,6 +120,26 @@ export function serverIdFromEvent(event: PublicGameEvent): string | undefined {
   if (typeof payload.attackedServerId === "string")
     return payload.attackedServerId;
   return undefined;
+}
+
+/** The Engine tags a nonbasic run start with a structured effect. */
+export function runStartServerIdFromEvent(
+  event: PublicGameEvent,
+): string | undefined {
+  const starts = event.publicPayload.resolvedEffects?.filter(
+    (effect) =>
+      effect.kind === "start_run" &&
+      effect.visibility === "public" &&
+      effect.side === "runner" &&
+      typeof effect.serverId === "string",
+  );
+  if (starts?.length === 1) return starts[0]?.serverId;
+  if (starts && starts.length > 1) return undefined;
+  return event.publicPayload.actionType === "start_run" ||
+    event.type === "start_run" ||
+    event.type === "run_started"
+    ? serverIdFromEvent(event)
+    : undefined;
 }
 
 export function eventVersion(event: PublicGameEvent): number {

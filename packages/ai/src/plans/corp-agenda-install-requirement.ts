@@ -3,6 +3,7 @@ import {
   type LegalAction,
   type PlayerView,
 } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
 
 /** Destination-bound Engine difficulty; HQ difficulty does not include a region. */
@@ -16,13 +17,13 @@ export function corpAgendaInstallRequirement(
   const requirement =
     payload?.agendaInstallScoreHorizonQuoteAdvancementRequirement;
   if (
-    action.side !== "corp" ||
+    view.side !== "corp" ||
+    !actionMatchesCurrentDecision({ side: "corp", playerView: view }, action) ||
     action.type !== "install_card" ||
     payload?.placement !== "root" ||
     action.source !== agendaCardId ||
     payload.cardId !== agendaCardId ||
     payload.serverId !== serverId ||
-    action.expiresAtStateVersion !== view.stateVersion ||
     payload.agendaInstallScoreHorizonQuoteSchemaVersion !==
       CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION ||
     payload.agendaInstallScoreHorizonQuoteCardId !== agendaCardId ||

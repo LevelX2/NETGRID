@@ -399,6 +399,37 @@ describe("turn planning contracts", () => {
     ).toThrowError(/invalid_deferred_obligation|violated_priority_obligation/);
   });
 
+  it("requires real coverage for every required priority obligation", () => {
+    const plan = turnPlan();
+    plan.priorityObligations = [
+      {
+        obligationId: "protect-rd",
+        priorityClass: "P3",
+        activatedAtFrameKey: "frame-1",
+        deadline: "turn_end",
+        satisfactionCondition: { code: "rd_protected" },
+        deferrable: false,
+        witnessId: "defense-assessment",
+        guarantee: "guaranteed",
+      },
+    ];
+    plan.priorityCoverage.requiredObligationIds = ["protect-rd"];
+
+    expect(() => assertTurnPlan(plan, rulesContext(), stateIdentity())).toThrow(
+      /uncovered_required_obligation/,
+    );
+
+    plan.priorityCoverage.satisfiedObligationIds = ["protect-rd"];
+    expect(() =>
+      assertTurnPlan(plan, rulesContext(), stateIdentity()),
+    ).not.toThrow();
+
+    plan.priorityCoverage.satisfiedObligationIds.push("unknown-obligation");
+    expect(() => assertTurnPlan(plan, rulesContext(), stateIdentity())).toThrow(
+      /unknown_satisfied_obligation/,
+    );
+  });
+
   it("rejects exclusive cross-campaign double counting and numerical priority", () => {
     const plan = turnPlan();
     plan.campaignValueClaims = [

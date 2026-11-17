@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import type { CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import type {
@@ -627,6 +628,9 @@ export function corpOrderedRemoteInstallPathAssessment(
       stagedIce,
       runnerRig,
       runnerCreditBudget,
+      [],
+      input.playerView.own.credits,
+      visibleIcePathTraceContext(input),
     ),
     expectedKnownIceCount: stagedIce.length,
     runnerCreditBudgetBefore: runnerCreditBudget,
@@ -643,6 +647,9 @@ export function corpOrderedRemoteInstallPathAssessment(
       ],
       runnerRig,
       runnerCreditBudget,
+      [],
+      input.playerView.own.credits,
+      visibleIcePathTraceContext(input),
     ),
     expectedKnownIceCount: stagedIce.length + 1,
     runnerCreditBudgetBefore: runnerCreditBudget,

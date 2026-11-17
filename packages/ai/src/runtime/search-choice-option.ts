@@ -48,11 +48,15 @@ export function selectedSearchChoiceOptionIds(
   );
   if (count <= 0) return [];
   const preferredOption = context.preferredCardInstanceId
-    ? selectableOptions.find(
-        (option) =>
-          option.card?.instanceId === context.preferredCardInstanceId ||
-          option.value === context.preferredCardInstanceId,
-      )
+    ? selectableOptions.find((option) => {
+        const instanceId = option.card?.instanceId ?? option.value;
+        return (
+          instanceId === context.preferredCardInstanceId &&
+          (option.card?.definitionId === undefined ||
+            context.preferredCardDefinitionId === undefined ||
+            option.card.definitionId === context.preferredCardDefinitionId)
+        );
+      })
     : undefined;
   const preferredDefinitionOption = context.preferredCardDefinitionId
     ? selectableOptions.find(
@@ -60,9 +64,13 @@ export function selectedSearchChoiceOptionIds(
           option.card?.definitionId === context.preferredCardDefinitionId,
       )
     : undefined;
-  const exactPreferredOption = preferredOption ?? preferredDefinitionOption;
-  if (context.optionalExactTargetOnly)
-    return exactPreferredOption ? [exactPreferredOption.id] : [];
+  if (context.optionalExactTargetOnly) {
+    const bound = context.preferredCardInstanceId
+      ? preferredOption
+      : preferredDefinitionOption;
+    return bound ? [bound.id] : [];
+  }
+  const preferred = preferredOption ?? preferredDefinitionOption;
   const hasDirectCoverageAnswer = Boolean(
     context.requiredCoverage &&
     selectableOptions.some(
@@ -81,11 +89,8 @@ export function selectedSearchChoiceOptionIds(
     context,
     hasDirectCoverageAnswer,
   );
-  if (exactPreferredOption) {
-    return [
-      exactPreferredOption,
-      ...ranked.filter((option) => option.id !== exactPreferredOption.id),
-    ]
+  if (preferred) {
+    return [preferred, ...ranked.filter((option) => option.id !== preferred.id)]
       .slice(0, count)
       .map((option) => option.id);
   }
@@ -137,16 +142,23 @@ function rankSearchChoiceOptions(
   context: SearchChoiceScoringContext,
   hasDirectCoverageAnswer: boolean,
 ): PendingChoiceOption[] {
-  return options.slice().sort((left, right) => {
-    const scoreDelta =
-      scoreSearchChoiceOption(choice, right, context, hasDirectCoverageAnswer) -
-      scoreSearchChoiceOption(choice, left, context, hasDirectCoverageAnswer);
-    return (
-      scoreDelta ||
-      left.label.localeCompare(right.label, "de") ||
-      left.id.localeCompare(right.id)
-    );
-  });
+  return options
+    .map((option) => ({
+      option,
+      score: scoreSearchChoiceOption(
+        choice,
+        option,
+        context,
+        hasDirectCoverageAnswer,
+      ),
+    }))
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        left.option.label.localeCompare(right.option.label, "de") ||
+        left.option.id.localeCompare(right.option.id),
+    )
+    .map(({ option }) => option);
 }
 
 function projectFirstPickIntoGrip(
@@ -216,7 +228,7 @@ function scoreSearchChoiceOption(
       memoryCost <= features.memoryRemaining
         ? 180
         : -260 - (memoryCost - features.memoryRemaining) * 40;
-    const installCost = visibleSearchCardCreditCost(card);
+    const installCost = visibleCreditCost;
     if (installCost !== undefined) {
       score +=
         installCost <= features.credits
@@ -230,7 +242,7 @@ function scoreSearchChoiceOption(
       memoryCost <= features.memoryRemaining
         ? 90
         : -220 - (memoryCost - features.memoryRemaining) * 40;
-    const installCost = visibleSearchCardCreditCost(card);
+    const installCost = visibleCreditCost;
     if (installCost !== undefined) {
       score +=
         installCost <= features.credits
@@ -239,7 +251,7 @@ function scoreSearchChoiceOption(
     }
   }
   if (destination === "grip" && card.type !== "program") {
-    const playOrInstallCost = visibleSearchCardCreditCost(card);
+    const playOrInstallCost = visibleCreditCost;
     if (playOrInstallCost !== undefined) {
       score +=
         playOrInstallCost <= features.credits

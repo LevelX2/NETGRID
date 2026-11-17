@@ -19,9 +19,9 @@ export type CorpTagPunishActionContextDependencies = {
 export function createCorpTagPunishActionContext(
   dependencies: CorpTagPunishActionContextDependencies,
 ): {
-  strongestCorpTagSourceOpportunity: (
+  corpTagSourceOpportunities: (
     input: AiDecisionInput,
-  ) => { action: LegalAction; traceTag: boolean } | undefined;
+  ) => { action: LegalAction; traceTag: boolean }[];
   corpPunishKindForAction: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -39,18 +39,16 @@ export function createCorpTagPunishActionContext(
     action: LegalAction,
   ) => StructuredTagPunishLegalActionAssessment | undefined;
 } {
-  function strongestCorpTagSourceOpportunity(
+  function corpTagSourceOpportunities(
     input: AiDecisionInput,
-  ): { action: LegalAction; traceTag: boolean } | undefined {
-    if (input.side !== "corp") return undefined;
-    const opportunity = input.legalActions.find((action) =>
-      isCorpTagSourceAction(input, action),
-    );
-    if (!opportunity) return undefined;
-    return {
-      action: opportunity,
-      traceTag: isCorpTraceTagSourceAction(input, opportunity),
-    };
+  ): { action: LegalAction; traceTag: boolean }[] {
+    if (input.side !== "corp") return [];
+    return input.legalActions
+      .filter((action) => isCorpTagSourceAction(input, action))
+      .map((action) => ({
+        action,
+        traceTag: isCorpTraceTagSourceAction(input, action),
+      }));
   }
 
   function corpPunishKindForAction(
@@ -104,7 +102,7 @@ export function createCorpTagPunishActionContext(
   }
 
   return {
-    strongestCorpTagSourceOpportunity,
+    corpTagSourceOpportunities,
     corpPunishKindForAction,
     isCorpTagSourceAction,
     isCorpTraceTagSourceAction,

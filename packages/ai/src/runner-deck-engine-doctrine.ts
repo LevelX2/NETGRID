@@ -121,7 +121,14 @@ export function buildRunnerDeckEngineDoctrine(
   snapshot: AiDeckStrategyDeckSnapshot,
 ): RunnerDeckEngineDoctrine | undefined {
   if (snapshot.side !== "runner") return undefined;
+  const definitionIds = new Set<string>();
   for (const entry of snapshot.cards) {
+    if (definitionIds.has(entry.cardId)) {
+      throw new RangeError(
+        "Duplicate runner deck doctrine definition: " + entry.cardId,
+      );
+    }
+    definitionIds.add(entry.cardId);
     if (!Number.isSafeInteger(entry.quantity) || entry.quantity < 0) {
       throw new RangeError(
         `runner deck engine doctrine quantity must be a non-negative safe integer: ${entry.cardId}:${entry.quantity}`,

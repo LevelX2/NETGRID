@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
   type AiDecisionInput,
@@ -8,7 +9,7 @@ import { RUNTIME_CARDS } from "../ai-hints";
 import { rolesMatch } from "../role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import { iceHasEndTheRun } from "../visible-run-analysis";
-import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
+import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
 
 export type RunnerSetupMissingCoverageType =
   | "wall"
@@ -19,12 +20,7 @@ export type RunnerSetupMissingCoverageType =
 
 type RunnerSetupCoverageDependencies = {
   rolesForCardId: (definitionId: string | undefined) => string[];
-  assessKnownRezzedIcePath: (
-    iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
-    rigCards: NonNullable<AiDecisionInput["playerView"]["own"]["rig"]>,
-    runnerCredits: number,
-    rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
-  ) => KnownRezzedIcePathAssessment;
+  assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
 };
 
 type RunnerCoverageActionDependencies = {
@@ -105,6 +101,8 @@ export function runnerHasKnownBlockedPathByCoverage(
         input.playerView.own.rig ?? [],
         input.playerView.own.credits,
         server.root,
+        input.playerView.opponent.credits,
+        visibleRunnerPathTraceContext(input),
       ).knownPathBlockedByMissingCoverage,
   );
 }

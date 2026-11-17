@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, PlayerView, VisibleCard } from "@netgrid/shared";
 import { cardProvidesBreakerCoverage } from "../../plans/tactical-plan-breaker-cards";
 import { missingBreakerCoverageKind } from "../../plans/tactical-plan-breaker-coverage";
@@ -48,6 +49,8 @@ export function runnerVisibleSearchCoverageNeed(
         playerView.own.rig ?? [],
       ),
       server.root ?? [],
+      input.playerView.opponent.credits,
+      visibleRunnerPathTraceContext(input),
     );
     if (!runnerKnownPathAssessmentIsUnbreakableNoAccess(assessment)) continue;
     const requiredCoverage = missingBreakerCoverageKind(

@@ -6,7 +6,10 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import { runnerSurvivalCounterContextForInput } from "./runner-survival-counter-context";
-import { createTagPunishWindowDiagnosticsContext } from "./tag-punish-window-diagnostics-context";
+import {
+  createTagPunishWindowDiagnosticsContext,
+  type TagPunishWindowDiagnosticsContextDependencies,
+} from "./tag-punish-window-diagnostics-context";
 
 describe("tag punish window diagnostics", () => {
   it("distinguishes trace limit reduction from a link ability", () => {
@@ -32,9 +35,47 @@ describe("tag punish window diagnostics", () => {
     expect(diagnostics.runnerTagAddedByAction).toBe(true);
     expect(received).toEqual([{ traceSuccessful: true }]);
   });
+  it("samples Corp turn start once and records a chosen source after another offered source", () => {
+    const first = { ...action(), actionId: "first" };
+    const chosen = { ...action(), actionId: "chosen" };
+    const diagnose = diagnosticsContext({
+      corpTagSourceOpportunities: () => [
+        { action: first, traceTag: false },
+        { action: chosen, traceTag: true },
+      ],
+    });
+    const basic = {
+      ...state(1),
+      activeSide: "corp",
+      timingPoint: "corp_action.main",
+    } as GameState;
+    const decision = { reasonCode: "test" } as AiDecision;
+    const corpInput = {
+      side: "corp",
+      playerView: { own: { credits: 5, clicks: 3 }, opponent: { credits: 2 } },
+    } as AiDecisionInput;
+    const actionRow = diagnose(corpInput, chosen, decision, basic, basic, {});
+    expect(actionRow).toMatchObject({
+      corpTagSourceTaken: true,
+      corpTraceTagTaken: true,
+    });
+    expect(actionRow.runnerTaggedAtStartOfCorpTurn).toBeUndefined();
+
+    const turnStart = {
+      ...basic,
+      timingPoint: "corp_draw.mandatory_draw",
+    } as GameState;
+    const draw = { ...chosen, type: "mandatory_draw" } as LegalAction;
+    expect(
+      diagnose(corpInput, draw, decision, turnStart, basic, {})
+        .runnerTaggedAtStartOfCorpTurn,
+    ).toBe(true);
+  });
 });
 
-function diagnosticsForTag(record: (...args: unknown[]) => void) {
+function diagnosticsContext(
+  overrides: Partial<TagPunishWindowDiagnosticsContextDependencies> = {},
+) {
   return createTagPunishWindowDiagnosticsContext({
     corpVisibleTagPunishOpportunities: () => [],
     runnerSurvivalCounterContextForInput: () => ({
@@ -48,10 +89,15 @@ function diagnosticsForTag(record: (...args: unknown[]) => void) {
     applyTagPunishOntologyDiagnostics: () => undefined,
     applyCorpVisibleTagPunishTakenWindowDiagnostics: () => undefined,
     applyCorpVisibleTagPunishUnknownSkipDiagnostics: () => undefined,
-    strongestCorpTagSourceOpportunity: () => undefined,
+    corpTagSourceOpportunities: () => [],
     corpOntologyPayoffAvailableForTagSource: () => false,
-    applyActualTagCreationDiagnostics: record,
-  }).tagPunishWindowDiagnosticsForSimulationAction(
+    applyActualTagCreationDiagnostics: () => undefined,
+    ...overrides,
+  }).tagPunishWindowDiagnosticsForSimulationAction;
+}
+
+function diagnosticsForTag(record: (...args: unknown[]) => void) {
+  return diagnosticsContext({ applyActualTagCreationDiagnostics: record })(
     input(),
     action(),
     { reasonCode: "any" } as AiDecision,

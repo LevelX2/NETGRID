@@ -1,3 +1,7 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
+import { selectableChoiceOptions } from "../../runtime/choice-option";
+import { corpCurrentRunAccessServerId } from "../defense/corp-central-defense-facts-adapter";
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { accessInstalledTrashChoiceSignal } from "./corp-access-installed-trash-choice";
 import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
@@ -176,31 +180,10 @@ function accessProgramBounceChoiceSignal(
       candidate.actionType === "resolve_choice",
   );
   if (resolveCandidates.length !== 1) return undefined;
-  const resolveCandidate = resolveCandidates[0]!;
-  const resolveAction = input.legalActions.find(
-    (action) => action.actionId === resolveCandidate.actionId,
-  );
-  const requirement = resolveAction?.choiceRequirements?.[0];
-  const selectableOptions = choice.options.filter(
-    (option) => option.selectable !== false,
-  );
-  const optionIds = selectableOptions.map((option) => option.id);
-  if (
-    !resolveAction ||
-    resolveAction.side !== "corp" ||
-    resolveAction.type !== "resolve_choice" ||
-    resolveAction.source !== "game_rule" ||
-    resolveAction.timingPoint !== input.playerView.timingPoint ||
-    resolveAction.expiresAtStateVersion !== input.playerView.stateVersion ||
-    resolveAction.choiceRequirements?.length !== 1 ||
-    requirement?.choiceId !== choice.choiceId ||
-    requirement.minSelections !== choice.minSelections ||
-    requirement.maxSelections !== choice.maxSelections ||
-    requirement.optionIds.length !== optionIds.length ||
-    !optionIds.every((optionId) => requirement.optionIds.includes(optionId))
-  ) {
+  const resolveAction = exactCurrentChoiceAction(input, choice);
+  if (resolveAction?.actionId !== resolveCandidates[0]!.actionId)
     return undefined;
-  }
+  const selectableOptions = selectableChoiceOptions(choice.options);
   const visiblePrograms = new Map(
     (input.playerView.opponent.rig ?? [])
       .filter(
@@ -627,7 +610,7 @@ function currentInstalledAccessRezSignals(
   },
   continuedSourceIds: ReadonlySet<string>,
 ): CorpAmbushSignal[] {
-  const serverId = params.input.playerView.run?.attackedServerId;
+  const serverId = corpCurrentRunAccessServerId(params.input);
   const server = params.input.playerView.servers.find((s) => s.id === serverId);
   if (!server || server.id === "archives") return [];
   return server.root.flatMap((source): CorpAmbushSignal[] => {
@@ -688,8 +671,8 @@ function accessWindowRezRoutes(
     input.playerView.timingPoint !== "run.movement_rez_window" ||
     run?.phase !== "movement" ||
     run.position?.kind !== "server" ||
-    run.position.serverId !== location.serverId ||
-    run.attackedServerId !== location.serverId
+    run.position.serverId !== run.attackedServerId ||
+    corpCurrentRunAccessServerId(input) !== location.serverId
   )
     return [];
   return params.candidates.flatMap((candidate) => {
@@ -703,13 +686,10 @@ function accessWindowRezRoutes(
       (a) => a.actionId === candidate.actionId,
     );
     if (
-      !action ||
-      action.side !== "corp" ||
+      !actionMatchesCurrentDecision(input, action) ||
       action.type !== "rez_card" ||
       action.source !== location.card.instanceId ||
-      action.payload?.serverId !== location.serverId ||
-      action.timingPoint !== input.playerView.timingPoint ||
-      action.expiresAtStateVersion !== input.playerView.stateVersion
+      action.payload?.serverId !== location.serverId
     )
       return [];
     const rezCredits = exactLegalActionCreditCost(action);
@@ -765,12 +745,7 @@ function continuedAmbushSignals(params: {
       signal?: Partial<CorpAmbushSignal>;
     };
     if (moduleState.kind !== "ambush") return [];
-    const signal = (
-      instance.moduleState as {
-        kind?: string;
-        signal?: Partial<CorpAmbushSignal>;
-      }
-    ).signal;
+    const signal = moduleState.signal;
     if (!signal || signal.commitmentVersion !== CORP_AMBUSH_COMMITMENT_VERSION)
       return [];
     if (

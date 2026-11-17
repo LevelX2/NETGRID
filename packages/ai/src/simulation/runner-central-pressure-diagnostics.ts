@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 
 import {
@@ -5,7 +6,7 @@ import {
   type CentralServerId,
 } from "../runtime/server-target";
 import { rolesMatch } from "../role-match";
-import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
+import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import type {
   BestTrueCentralCloseoutProfile,
   NoFreshCentralSubstitutionType,
@@ -47,12 +48,7 @@ export type RunnerCentralPressureDiagnosticsDependencies = {
     action: LegalAction,
   ) => NoFreshCentralSubstitutionType | undefined;
   runnerCreditReserveTargetForInput: (input: AiDecisionInput) => number;
-  assessKnownRezzedIcePath: (
-    iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
-    rigCards: NonNullable<AiDecisionInput["playerView"]["own"]["rig"]>,
-    runnerCredits: number,
-    rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
-  ) => KnownRezzedIcePathAssessment;
+  assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
 };
 
 export function createRunnerCentralPressureDiagnosticsForSimulationAction(
@@ -166,6 +162,8 @@ export function createRunnerCentralPressureDiagnosticsForSimulationAction(
             input.playerView.own.rig ?? [],
             input.playerView.own.credits,
             server.root,
+            input.playerView.opponent.credits,
+            visibleRunnerPathTraceContext(input),
           ).visibleBreakCost ?? 0)
         : 0;
     const insufficientReserve =

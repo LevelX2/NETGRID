@@ -92,6 +92,24 @@ describe("run target action alignment", () => {
     });
   });
 
+  it("uses the selected server instead of a different offered server", () => {
+    const candidate = runCandidate("run-hq", "hq");
+    candidate.targetContext!.availableTargets = [
+      {
+        targetKind: "server",
+        targetId: "rd",
+        targetSide: "corp",
+        evidence: [],
+      },
+    ];
+    expect(
+      alignRunTargetAction(candidate, { targetServerId: "hq" }).aligned,
+    ).toBe(true);
+    expect(
+      alignRunTargetAction(candidate, { targetServerId: "rd" }).aligned,
+    ).toBe(false);
+  });
+
   it("prefers structured run projection summary over target context", () => {
     const candidate = {
       ...runCandidate("run-hq-summary", "remote_1"),

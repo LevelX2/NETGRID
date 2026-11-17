@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { RunnerPressureSignal } from "../../plans/runner-tactical-plan-contracts";
@@ -163,6 +164,7 @@ export function runnerPostBreakTrashPreparationSignals(
         view.own.credits - startCredits - target.trashCredits,
         server.root,
         view.opponent.credits,
+        visibleRunnerPathTraceContext(input),
       );
       if (
         path.canReachAccess &&
@@ -232,6 +234,7 @@ export function runnerPostBreakTrashPreparationSignals(
             target.trashCredits,
           server.root,
           view.opponent.credits,
+          visibleRunnerPathTraceContext(input),
         );
         if (
           !path.canReachAccess ||

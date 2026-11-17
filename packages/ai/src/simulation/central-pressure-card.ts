@@ -1,3 +1,4 @@
+import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import { createAiHintsByCard } from "../ai-hints";
 import { cardRolesForId } from "../runtime/card-role-lookup";
 import { rolesMatch } from "../role-match";
@@ -75,6 +76,8 @@ export function centralPressureTargetIsGoodForMetrics(
       input.playerView.own.rig ?? [],
     ),
     server.root,
+    input.playerView.opponent.credits,
+    visibleRunnerPathTraceContext(input),
   );
   if (assessment.blocked) return false;
   const cheap =

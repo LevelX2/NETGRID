@@ -27,7 +27,7 @@ import { assessDecisionOpportunity } from "../runtime/decision-opportunity";
 import { releaseAiMatchRuntime } from "../runtime/match-runtime-memory";
 import { fnv1a } from "../runtime/stable-hash";
 import { sortedUniqueProgressionCardTargetTypes } from "../runtime/progression-card-target";
-import { advancementCountersAddedForSimulationAction } from "../runtime/simulation-action-event";
+import { advancementChangesForSimulationAction } from "../runtime/simulation-action-event";
 import {
   advancedAgendaStealSourceForAction,
   cardTargetTypeForInstance,
@@ -443,16 +443,13 @@ export function createAiGameSimulator(
       const targetCardType = targetCardIds[0]
         ? cardTargetTypeForInstance(stateBeforeAction, targetCardIds[0])
         : undefined;
-      const advancementCountersAdded =
-        advancementCountersAddedForSimulationAction(action, result.event);
-      const advancementTargetTypes =
-        action.type === "advance_card" || advancementCountersAdded > 0
-          ? sortedUniqueProgressionCardTargetTypes(
-              targetCardIds.map((cardId) =>
-                cardTargetTypeForInstance(stateBeforeAction, cardId),
-              ),
-            )
-          : [];
+      const { added: advancementCountersAdded, advancedCardIds } =
+        advancementChangesForSimulationAction(stateBeforeAction, result.state);
+      const advancementTargetTypes = sortedUniqueProgressionCardTargetTypes(
+        advancedCardIds.map((cardId) =>
+          cardTargetTypeForInstance(result.state, cardId),
+        ),
+      );
       const scoreActionsAvailable =
         side === "corp"
           ? input.legalActions.filter(
@@ -470,7 +467,7 @@ export function createAiGameSimulator(
         input,
         action,
         targetServerId,
-        targetCardIds,
+        advancedCardIds,
         advancementCountersAdded,
       );
       agendaProgression.observe({

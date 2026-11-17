@@ -91,6 +91,7 @@ it.each([
   "server",
   "version",
   "action-version",
+  "action-timing",
   "negative",
   "fraction",
   "nonfinite",
@@ -115,6 +116,8 @@ it.each([
   if (kind === "version")
     p.agendaInstallScoreHorizonQuoteExpiresAtStateVersion = 498;
   if (kind === "action-version") action.expiresAtStateVersion = 498;
+  if (kind === "action-timing")
+    action.timingPoint = "corp_discard.select_cards";
   if (kind === "negative")
     p.agendaInstallScoreHorizonQuoteAdvancementRequirement = -1;
   if (kind === "fraction")

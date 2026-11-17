@@ -1,3 +1,4 @@
+import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -165,6 +166,7 @@ export function assessMobileIceRunDefense(
     budget(),
     target.root,
     input.playerView.own.credits,
+    currentRunPathContext(input),
   );
   const before = quoteCorpRemotePath({
     assessment: beforeAssessment,
@@ -177,6 +179,7 @@ export function assessMobileIceRunDefense(
     budget(),
     target.root,
     payment.corpCreditsAfterDefense,
+    currentRunPathContext(input),
   );
   // The path assessor stops at a proven unaffordable ETR. Its assessed prefix
   // therefore need not contain inner ICE, whose complete Engine quotes were

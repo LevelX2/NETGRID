@@ -51,7 +51,7 @@ export function createAiFacadeFoundationContext(
     findVisibleCard: dependencies.findVisibleCard,
   });
   const {
-    strongestCorpTagSourceOpportunity,
+    corpTagSourceOpportunities,
     corpPunishKindForAction,
     isCorpTagSourceAction,
     isCorpTraceTagSourceAction,
@@ -89,7 +89,7 @@ export function createAiFacadeFoundationContext(
     sourceDefinitionIdForSimulationAction,
     corpFutureRunIceDiagnosticsForSimulationAction,
     definitionForSimulationAction,
-    strongestCorpTagSourceOpportunity,
+    corpTagSourceOpportunities,
     corpTagPunishOntologyAssessmentForAction,
     applyCorpVisibleTagPunishUnknownSkipDiagnostics,
     corpVisibleTagPunishOpportunities,
