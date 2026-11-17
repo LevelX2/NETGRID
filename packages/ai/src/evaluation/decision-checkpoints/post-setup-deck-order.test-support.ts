@@ -25,13 +25,13 @@ export function applyPostSetupDeckOrder(
   state.runner.stack = [...order.runnerStack];
   state.corp.hq = [...order.corpHq];
   state.corp.rd = [...order.corpRd];
-  for (const [side, zone, ids] of [
-    ["runner", "grip", state.runner.grip],
-    ["runner", "stack", state.runner.stack],
-    ["corp", "hq", state.corp.hq],
-    ["corp", "rd", state.corp.rd],
+  for (const [zone, ids] of [
+    [{ side: "runner", zone: "grip" }, state.runner.grip],
+    [{ side: "runner", zone: "stack" }, state.runner.stack],
+    [{ side: "corp", zone: "hq" }, state.corp.hq],
+    [{ side: "corp", zone: "rd" }, state.corp.rd],
   ] as const) {
-    for (const id of ids) state.cardInstances[id]!.zone = { side, zone };
+    for (const id of ids) state.cardInstances[id]!.zone = { ...zone };
   }
   const valid = validateGameState(state);
   if (!valid.ok) throw new Error(valid.errors.join("\n"));

@@ -209,9 +209,7 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
   expect(after.state.randomCounter).toBe(before.state.randomCounter + 1);
   expect(after.state.randomDrawRecords.at(-1)).toMatchObject({
     counter: before.state.randomCounter,
-    purpose: expect.stringContaining(
-      "icebreaker.random_break_or_damage.219",
-    ),
+    purpose: [20, 219, 75, "cgn", "c1cr", 0],
   });
   expect(after.steps.some((step) =>
     step.actionId.startsWith("runner.break_subroutine.") &&
