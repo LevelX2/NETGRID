@@ -3,102 +3,102 @@
     "id": "sp332-runner",
     "name": "Run til End",
     "side": "runner",
-    "identity": "runner_identity_001",
+    "identity": 587,
     "cards": [
       {
-        "id": "onr_v1_011_cloak",
+        "id": 223,
         "quantity": 1
       },
       {
-        "id": "onr_v1_012_clown",
+        "id": 224,
         "quantity": 3
       },
       {
-        "id": "onr_v1_016_cyfermaster",
+        "id": 228,
         "quantity": 2
       },
       {
-        "id": "onr_v1_021_dwarf",
+        "id": 233,
         "quantity": 2
       },
       {
-        "id": "onr_v1_024_expert-schedule-analyzer",
+        "id": 236,
         "quantity": 1
       },
       {
-        "id": "onr_v1_056_replicator",
+        "id": 268,
         "quantity": 1
       },
       {
-        "id": "onr_v1_066_snowball",
+        "id": 278,
         "quantity": 1
       },
       {
-        "id": "onr_v1_073_wizards-book",
+        "id": 285,
         "quantity": 1
       },
       {
-        "id": "onr_v1_074_worm",
+        "id": 286,
         "quantity": 2
       },
       {
-        "id": "onr_v1_079_bodyweight-synthetic-blood",
+        "id": 291,
         "quantity": 3
       },
       {
-        "id": "onr_v1_091_hunt-club-bbs",
+        "id": 303,
         "quantity": 1
       },
       {
-        "id": "onr_v1_095_jack-n-joe",
+        "id": 307,
         "quantity": 3
       },
       {
-        "id": "onr_v1_097_livewires-contacts",
+        "id": 309,
         "quantity": 3
       },
       {
-        "id": "onr_v1_099_mantis-fixer-at-large",
+        "id": 311,
         "quantity": 1
       },
       {
-        "id": "onr_v1_101_mit-west-tier",
+        "id": 313,
         "quantity": 1
       },
       {
-        "id": "onr_v1_104_playful-ai",
+        "id": 316,
         "quantity": 1
       },
       {
-        "id": "onr_v1_108_score",
+        "id": 320,
         "quantity": 3
       },
       {
-        "id": "onr_v1_114_temple-microcode-outlet",
+        "id": 326,
         "quantity": 3
       },
       {
-        "id": "onr_v1_121_armored-fridge",
+        "id": 333,
         "quantity": 1
       },
       {
-        "id": "onr_v1_129_hq-interface",
+        "id": 341,
         "quantity": 3
       },
       {
-        "id": "onr_v1_146_zetatech-mem-chip",
+        "id": 358,
         "quantity": 1
       },
       {
-        "id": "onr_v1_151_aujourdoui",
+        "id": 363,
         "quantity": 1
       },
       {
-        "id": "onr_v1_154_broker",
+        "id": 366,
         "quantity": 3
       },
       {
-        "id": "onr_v1_161_fall-guy",
+        "id": 373,
         "quantity": 3
       }
     ]
@@ -107,122 +107,122 @@
     "id": "sp332-corp",
     "name": "Ivory Bastion",
     "side": "corp",
-    "identity": "corp_identity_001",
+    "identity": 3,
     "cards": [
       {
-        "id": "onr_v1_193_corporate-coup",
+        "id": 405,
         "quantity": 1
       },
       {
-        "id": "onr_v1_212_priority-requisition",
+        "id": 424,
         "quantity": 2
       },
       {
-        "id": "onr_v1_215_security-net-optimization",
+        "id": 427,
         "quantity": 1
       },
       {
-        "id": "onr_v1_219_superior-net-barriers",
+        "id": 431,
         "quantity": 1
       },
       {
-        "id": "onr_v1_220_tycho-extension",
+        "id": 432,
         "quantity": 2
       },
       {
-        "id": "onr_v1_230_cortical-scanner",
+        "id": 442,
         "quantity": 1
       },
       {
-        "id": "onr_v1_232_crystal-wall",
+        "id": 444,
         "quantity": 2
       },
       {
-        "id": "onr_v1_237_data-wall",
+        "id": 449,
         "quantity": 2
       },
       {
-        "id": "onr_v1_238_data-wall-2-0",
+        "id": 450,
         "quantity": 2
       },
       {
-        "id": "onr_v1_239_endless-corridor",
+        "id": 451,
         "quantity": 2
       },
       {
-        "id": "onr_v1_245_fire-wall",
+        "id": 457,
         "quantity": 2
       },
       {
-        "id": "onr_v1_263_reinforced-wall",
+        "id": 475,
         "quantity": 2
       },
       {
-        "id": "onr_v1_265_rock-is-strong",
+        "id": 477,
         "quantity": 2
       },
       {
-        "id": "onr_v1_278_wall-of-ice",
+        "id": 490,
         "quantity": 1
       },
       {
-        "id": "onr_v1_279_wall-of-static",
+        "id": 491,
         "quantity": 2
       },
       {
-        "id": "onr_v1_281_accounts-receivable",
+        "id": 493,
         "quantity": 3
       },
       {
-        "id": "onr_v1_282_annual-reviews",
+        "id": 494,
         "quantity": 2
       },
       {
-        "id": "onr_v1_290_efficiency-experts",
+        "id": 502,
         "quantity": 3
       },
       {
-        "id": "onr_v1_297_overtime-incentives",
+        "id": 509,
         "quantity": 2
       },
       {
-        "id": "onr_v1_309_bbs-whispering-campaign",
+        "id": 521,
         "quantity": 2
       },
       {
-        "id": "onr_v1_311_braindance-campaign",
+        "id": 523,
         "quantity": 2
       },
       {
-        "id": "onr_v1_317_data-masons",
+        "id": 529,
         "quantity": 2
       },
       {
-        "id": "onr_v1_324_fortress-architects",
+        "id": 536,
         "quantity": 2
       },
       {
-        "id": "onr_v1_329_investment-firm",
+        "id": 541,
         "quantity": 2
       },
       {
-        "id": "onr_v1_350_antiquated-interface-routines",
+        "id": 562,
         "quantity": 2
       },
       {
-        "id": "onr_v1_355_crystal-palace-station-grid",
+        "id": 567,
         "quantity": 1
       },
       {
-        "id": "onr_v1_360_jerusalem-city-grid",
+        "id": 572,
         "quantity": 1
       },
       {
-        "id": "onr_v1_366_red-herrings",
+        "id": 578,
         "quantity": 2
       },
       {
-        "id": "onr_v1_370_tesseract-fort-construction",
+        "id": 582,
         "quantity": 1
       }
     ]

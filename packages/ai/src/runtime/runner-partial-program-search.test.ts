@@ -1,9 +1,10 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { afterEach, expect, it } from "vitest";
 import checkpoint from "../../../../data/scenarios/ai-decision-checkpoints/cp-meta-485-sp332-g1-d70.json";
 import positiveCheckpoint from "../../../../data/scenarios/ai-decision-checkpoints/cp-meta-485-sp332-g1-d83.json";
 import decks from "../../../../data/scenarios/ai-decision-checkpoints/cp-meta-485-sp332-decks.json";
 import { applyAction, createGameAfterSetup } from "@netgrid/engine";
-import type { DeckDefinition } from "@netgrid/shared";
+import type { DeckDefinition, LegalAction } from "@netgrid/shared";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { buildDeckCapabilityProfileFromInput } from "../deck-capabilities";
@@ -19,6 +20,11 @@ import {
   type AiDecisionInputWithDeckCapabilities,
 } from "./ai-decision-input";
 import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
+
+function isOwnStackSearch(action: LegalAction): boolean {
+  return action.type === "activated_card_ability" &&
+    action.payload?.cardImplementationAbilityKey === "abilities_activated_runner_main_look_top_stack_take_matching";
+}
 
 function fixture(source: unknown = checkpoint) {
   const cp = structuredClone(source) as unknown as {
@@ -121,6 +127,7 @@ it.each([
       .withRezzedCorpIceOnServer("rd", 451);
     state.runner.memoryUsed = 1;
     const actions: string[] = [];
+    let searchActionId: string | undefined;
     let targetDefinitionId: number | undefined;
     let ownerInstanceId: string | undefined;
     let creditsBeforeChoice: number | undefined;
@@ -142,7 +149,9 @@ it.each([
       const decision = chooseAiAction(input);
       if (!decision.actionId)
         throw Error("The real Engine path requires a selected legal action.");
-      if (decision.actionId.includes("look_top_stack_take_matching")) {
+      const legal = input.legalActions.find((action) => action.actionId === decision.actionId)!;
+      if (isOwnStackSearch(legal)) {
+        searchActionId = legal.actionId;
         const portfolio = residentPlanPortfolioSnapshot(input)!;
         ownerInstanceId = portfolio.executorInstanceId;
         const moduleState = portfolio.instances.find(
@@ -207,16 +216,10 @@ it.each([
       });
       if (!result.ok) throw Error(result.error.message);
       state = result.state;
-      if (
-        actions.some((a) => a.includes("look_top_stack_take_matching")) &&
-        !state.pendingChoice
-      )
-        break;
+      if (searchActionId && !state.pendingChoice) break;
     }
     expect(actions[0]).toContain("install_card");
-    expect(
-      actions.some((a) => a.includes("look_top_stack_take_matching")),
-    ).toBe(true);
+    expect(searchActionId).toBeDefined();
     expect(state.pendingChoice).toBeUndefined();
     expect(state.runner.credits).toBe(
       creditsBeforeChoice! - (hasTarget ? 1 : 0),
@@ -262,14 +265,9 @@ it.each(["no_credit", "full_hand"])(
       ownDeckSnapshot: snapshot,
       eventTail: state.eventLog,
     });
-    expect(
-      input.legalActions.some((a) =>
-        a.actionId.includes("look_top_stack_take_matching"),
-      ),
-    ).toBe(true);
-    expect(chooseAiAction(input).actionId).not.toContain(
-      "look_top_stack_take_matching",
-    );
+    const search = input.legalActions.find(isOwnStackSearch);
+    expect(search).toBeDefined();
+    expect(chooseAiAction(input).actionId).not.toBe(search?.actionId);
   },
 );
 
@@ -282,7 +280,7 @@ it("does not route the own-stack ability through an R&D-information parent", () 
   );
   const decision = chooseAiAction(input);
   const ownSearch = decision.decisionDebug?.actionAlternatives?.find((a) =>
-    a.actionId.includes("aujourdoui"),
+    referencesDefaultDeckCard(a.actionId, 363),
   )!;
   expect(ownSearch).toBeDefined();
   expect(

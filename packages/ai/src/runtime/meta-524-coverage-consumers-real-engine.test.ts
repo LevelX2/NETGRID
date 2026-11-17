@@ -1,14 +1,19 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
   applyAction,
   applyRandomizedIceInstallSelection,
   createGame,
+  createGameAfterSetup,
+  getLegalActions,
   hashGameState,
   quoteRandomizedIceInstallSelection,
 } from "@netgrid/engine";
 import type { PlayerAction, Side, ServerId } from "@netgrid/shared";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
+import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
+import { putRunnerCardOnTopOfStack, removeEverywhere } from "../../../engine/src/test-fixtures/mechanic-smoke-fixtures";
 import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
@@ -166,9 +171,9 @@ it("executes the ready Inside Job without borrowing the normal run's Wall suppor
   )!;
   expect(action).toMatchObject({
     type: "play_event",
-    payload: { serverId: "remote_1", bypassFirstIce: true },
+    payload: { serverId: "r1", bypassFirstIce: true },
   });
-  expect(action.source).toContain("inside-job");
+  expect(referencesDefaultDeckCard(action.source, 306)).toBe(true);
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("runner.contest_remote");
@@ -181,7 +186,7 @@ it("executes the ready Inside Job without borrowing the normal run's Wall suppor
   if (!result.ok) throw Error(result.error.message);
   expect(result.state.runner.credits).toBe(20);
   expect(result.state.runner.clicks).toBe(1);
-  expect(result.state.run?.attackedServerId).toBe("remote_1");
+  expect(result.state.run?.attackedServerId).toBe("r1");
 });
 
 it("retains the unique just-drawn Gate answer for its exact coverage executor (G18 D33, 32 original commands)", () => {
@@ -189,7 +194,7 @@ it("retains the unique just-drawn Gate answer for its exact coverage executor (G
   const decision = chooseAiAction(input);
   expect(decision.selectedChoices).toEqual({
     choiceId: "p3_61_crash_draw_32",
-    selectedOptionIds: ["trash_runner_396_1"],
+    selectedOptionIds: ["trash_c2g1"],
   });
   const result = applyAction(state, {
     matchId: state.matchId,
@@ -199,23 +204,72 @@ it("retains the unique just-drawn Gate answer for its exact coverage executor (G
     selectedChoices: decision.selectedChoices!,
   });
   if (!result.ok) throw Error(result.error.message);
-  expect(result.state.runner.grip).toContain("runner_226_2");
+  expect(result.state.runner.grip).toContain("c1ea");
   expect(result.state.runner.heap).toContain(
-    "runner_396_1",
+    "c2g1",
   );
 });
 
-it("still discards the duplicate Gate breaker when one is already installed (G35 D124, 123 original commands)", () => {
-  const { input } = replay(35);
-  expect(
-    input.playerView.own.rig!.some(
-      (c) => c.definitionId === 226,
-    ),
-  ).toBe(true);
-  expect(chooseAiAction(input).selectedChoices).toEqual({
-    choiceId: "p3_61_crash_draw_123",
-    selectedOptionIds: ["trash_runner_226_2"],
+it("discards the newly drawn duplicate Gate breaker when another copy is installed", () => {
+  const fixture = fixtures.find((candidate) => candidate.gameNumber === 18)!;
+  let state = createGameAfterSetup({ ...fixture.options, seed: "coverage-duplicate-gate-draw" });
+  for (const type of ["mandatory_draw", "end_turn"] as const) {
+    if (type === "end_turn") RealEngineFixtureBuilder.forState(state).withCorpHqSize(0);
+    const action = getLegalActions(state, "corp").find((candidate) => candidate.type === type)!;
+    const applied = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: action.actionId,
+      clientKnownStateVersion: state.stateVersion,
+    });
+    if (!applied.ok) throw Error(applied.error.message);
+    state = applied.state;
+  }
+  RealEngineFixtureBuilder.forState(state)
+    .withRunnerGripSize(0)
+    .withRunnerCredits(4)
+    .withRunnerClicks(1)
+    .withRunnerProgramInstalled(226)
+    .withRunnerResourceInstalled(369);
+  state.runner.memoryUsed = 1;
+  state.runnerTurnFlags!.runLockActionsPending = 1;
+  state.runnerTurnFlags!.runnerRunLockCreditCost = 10;
+  const installed = state.runner.rig.programs[0]!;
+  const duplicate = Object.values(state.cardInstances).find((card) =>
+    card.definitionId === 226 && card.instanceId !== installed,
+  )!;
+  removeEverywhere(state, duplicate.instanceId);
+  duplicate.zone = { side: "runner", zone: "stack" };
+  state.runner.stack.unshift(duplicate.instanceId);
+  putRunnerCardOnTopOfStack(state, 396);
+  const decide = (current: typeof state) => chooseAiAction(buildAiDecisionInput(current, "runner", {
+    difficulty: "hard",
+    ownDeckSnapshot: fixture.checkpoint.ownDeckSnapshot,
+  }));
+  const draw = decide(state);
+  expect(draw.actionId).toBe("runner.draw_card");
+  const drawn = applyAction(state, {
+    matchId: state.matchId,
+    side: "runner",
+    actionId: draw.actionId!,
+    clientKnownStateVersion: state.stateVersion,
   });
+  if (!drawn.ok) throw Error(drawn.error.message);
+  const decision = decide(drawn.state);
+  expect(decision.selectedChoices).toEqual({
+    choiceId: drawn.state.pendingChoice?.choiceId,
+    selectedOptionIds: ["trash_" + duplicate.instanceId],
+  });
+  const applied = applyAction(drawn.state, {
+    matchId: state.matchId,
+    side: "runner",
+    actionId: decision.actionId!,
+    clientKnownStateVersion: drawn.state.stateVersion,
+    selectedChoices: decision.selectedChoices,
+  });
+  if (!applied.ok) throw Error(applied.error.message);
+  expect(applied.state.runner.heap).toContain(duplicate.instanceId);
+  expect(applied.state.runner.rig.programs).toContain(installed);
 });
 
 it("rejects a changed hidden-draw origin instead of protecting or choosing an unbound card", () => {

@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { beforeEach, expect, it } from "vitest";
 import {
@@ -85,7 +86,7 @@ function fixture(credits = 9, clicks = 4, advanced = 1) {
     .withRunnerProgramInstalled(270)
     .withRunnerProgramInstalled(251)
     .withRunnerCardInGrip(373)
-    .withCorpRemoteRoot("remote_1", 535, advanced);
+    .withCorpRemoteRoot("r1", 535, advanced);
   state.runner.memoryUsed = 2;
   state.corp.credits = 8;
   return state;
@@ -123,10 +124,10 @@ it("replaces the original blind run with exact Remote information preparation", 
   );
   const before = JSON.stringify([cp.input.playerView, cp.input.legalActions]),
     decision = chooseAiAction(cp.input);
-  expect(decision.actionId).toContain("seeya");
+  expect(referencesDefaultDeckCard(decision.actionId, 270)).toBe(true);
   expect(decision.reasonCode).toBe("plan_first.runner.contest_remote");
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_1",
+    "plan:runner.contest_remote:remote%3Ar1",
   );
   expect(decision.fallbackUsed).toBe(false);
   expect(
@@ -140,18 +141,18 @@ it.each([5, 9])(
     const initial = structuredClone(state),
       eventStart = state.eventLog.length;
     const first = chooseAiAction(input(state));
-    expect(first.actionId).toContain("seeya");
+    expect(referencesDefaultDeckCard(first.actionId, 270)).toBe(true);
     state = apply(state, first.actionId!);
     const choice = input(state);
     expect(choice.playerView.pendingChoice?.kind).toBe("select_cards");
     const decision = chooseAiAction(choice);
     expect(decision.selectedChoices?.selectedOptionIds).toEqual([
-      `card_${choice.playerView.servers.find((s) => s.id === "remote_1")!.root[0]!.instanceId}`,
+      `card_${choice.playerView.servers.find((s) => s.id === "r1")!.root[0]!.instanceId}`,
     ]);
     expect(decision.fallbackUsed).toBe(false);
     state = apply(state, decision.actionId!, decision.selectedChoices);
     expect(
-      input(state).playerView.servers.find((s) => s.id === "remote_1")!.root[0]!
+      input(state).playerView.servers.find((s) => s.id === "r1")!.root[0]!
         .definitionId,
     ).toBe(535);
     for (let i = 0; i < 3 && input(state).playerView.pendingChoice; i++) {
@@ -168,7 +169,7 @@ it.each([5, 9])(
       (a) => a.actionId === afterInformation.actionId,
     )!;
     expect(
-      next.type === "start_run" && next.payload?.serverId === "remote_1",
+      next.type === "start_run" && next.payload?.serverId === "r1",
     ).toBe(false);
     expect(
       state.runner.rig.programs.some(
@@ -195,31 +196,31 @@ it.each([
         credits === 9 && clicks === 4 ? 0 : 1,
       ),
       decision = chooseAiAction(input(state));
-    expect(decision.actionId?.includes("seeya")).toBe(false);
+    expect(referencesDefaultDeckCard(decision.actionId, 270)).toBe(false);
     expect(decision.fallbackUsed).toBe(false);
   },
 );
 it("does not expose a known root repeatedly", () => {
   const state = fixture();
-  const root = state.corp.servers.find((s) => s.id === "remote_1")!.root[0]!;
+  const root = state.corp.servers.find((s) => s.id === "r1")!.root[0]!;
   state.cardInstances[root]!.faceup = true;
-  expect(chooseAiAction(input(state)).actionId?.includes("seeya")).toBe(false);
+  expect(referencesDefaultDeckCard(chooseAiAction(input(state)).actionId, 270)).toBe(false);
 });
 it("keeps a financed root preparation when a more advanced remote lacks a funded path", () => {
   const state = fixture();
   RealEngineFixtureBuilder.forState(state)
-    .withCorpRemoteRoot("remote_2", 429, 3)
-    .withRezzedCorpIceOnServer("remote_2", 490);
+    .withCorpRemoteRoot("r2", 429, 3)
+    .withRezzedCorpIceOnServer("r2", 490);
   const first = chooseAiAction(input(state));
-  expect(first.actionId).toContain("seeya");
+  expect(referencesDefaultDeckCard(first.actionId, 270)).toBe(true);
   expect(first.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_1",
+    "plan:runner.contest_remote:remote%3Ar1",
   );
   const after = apply(state, first.actionId!),
     choice = input(after),
     decision = chooseAiAction(choice);
   expect(decision.selectedChoices?.selectedOptionIds).toEqual([
-    `card_${choice.playerView.servers.find((s) => s.id === "remote_1")!.root[0]!.instanceId}`,
+    `card_${choice.playerView.servers.find((s) => s.id === "r1")!.root[0]!.instanceId}`,
   ]);
 });
 it.each(["source", "version", "target", "option", "origin"] as const)(
@@ -234,12 +235,12 @@ it.each(["source", "version", "target", "option", "origin"] as const)(
     let options = choice.options;
     if (variant === "source")
       choice.source = choice.source.replace(
-        "runner_270_1",
+        "c1o1",
         "wrong_source",
       );
     if (variant === "version") current.playerView.stateVersion += 1;
     if (variant === "target")
-      current.playerView.servers.find((s) => s.id === "remote_1")!.root = [];
+      current.playerView.servers.find((s) => s.id === "r1")!.root = [];
     if (variant === "option") options = [];
     if (variant === "origin") resetResidentPlanPortfolioMemory();
     expect(() =>
@@ -277,11 +278,11 @@ it("keeps the native G14/D49 financed information head despite the general econo
   const before = JSON.stringify([cp.input.playerView, cp.input.legalActions]);
   const decision = chooseAiAction(cp.input);
   expect(cp.input.playerView.own.credits).toBe(5);
-  expect(decision.actionId).toContain("seeya");
+  expect(referencesDefaultDeckCard(decision.actionId, 270)).toBe(true);
   expect(decision.reasonCode).toBe("plan_first.runner.contest_remote");
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_1",
+    "plan:runner.contest_remote:remote%3Ar1",
   );
   expect(plan.route?.actionId).toBe(decision.actionId);
   expect(plan.route?.stateVersion).toBe(cp.input.playerView.stateVersion);

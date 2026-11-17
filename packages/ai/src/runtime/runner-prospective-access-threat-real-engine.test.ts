@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { beforeEach, expect, it } from "vitest";
 import {
   applyAction,
@@ -75,7 +76,7 @@ function fixture(credits = 9, clicks = 4, advanced = 1) {
     .withRunnerProgramInstalled(270)
     .withRunnerProgramInstalled(251)
     .withRunnerCardInGrip(373)
-    .withCorpRemoteRoot("remote_1", 535, advanced);
+    .withCorpRemoteRoot("r1", 535, advanced);
   state.runner.memoryUsed = 2;
   state.corp.credits = 8;
   return state;
@@ -101,13 +102,13 @@ function afterNativeExpose(corpCredits = 2, advanced = 1) {
   let state = fixture(9, 4, 1);
   state.corp.credits = corpCredits;
   const source = chooseAiAction(input(state));
-  expect(source.actionId).toContain("seeya");
+  expect(referencesDefaultDeckCard(source.actionId, 270)).toBe(true);
   state = apply(state, source.actionId!);
   for (let step = 0; step < 2; step++) {
     const decision = chooseAiAction(input(state));
     state = apply(state, decision.actionId!, decision.selectedChoices);
   }
-  const root = state.corp.servers.find((s) => s.id === "remote_1")!.root[0]!;
+  const root = state.corp.servers.find((s) => s.id === "r1")!.root[0]!;
   state.cardInstances[root]!.advancementCounters = advanced;
   return state;
 }
@@ -115,7 +116,7 @@ it("uses observed expose knowledge to reject sacrificing sole coverage to a paya
   const state = afterNativeExpose(),
     i = input(state),
     before = JSON.stringify([i.playerView, i.legalActions]),
-    payoff = evaluateKnownRemoteAccessPayoff(i, "remote_1");
+    payoff = evaluateKnownRemoteAccessPayoff(i, "r1");
   expect(payoff).toMatchObject({
     accessDecision: "defer_until_safe",
     declineReason: "unsafe_access_coverage",
@@ -130,20 +131,20 @@ it("uses observed expose knowledge to reject sacrificing sole coverage to a paya
     "known_access_effect_prospective_rez_cost:2",
   );
   const unsafeTarget = evaluateRunnerRunTargets({ input: i }).find(
-    (target) => target.actionId === "runner.start_run.remote_1",
+    (target) => target.actionId === "runner.start_run.r1",
   )!;
   expect(unsafeTarget).toBeDefined();
   expect(unsafeTarget.accessPayoffContestable).toBe(false);
   expect(unsafeTarget.accessPayoffRequiresFunding).toBeUndefined();
   const decision = chooseAiAction(i);
-  expect(decision.actionId).not.toBe("runner.start_run.remote_1");
+  expect(decision.actionId).not.toBe("runner.start_run.r1");
   expect(i.legalActions.some((a) => a.actionId === decision.actionId)).toBe(
     true,
   );
   expect(decision.fallbackUsed).toBe(false);
   expect(
     decision.decisionDebug?.actionAlternatives?.find(
-      (a) => a.actionId === "runner.start_run.remote_1",
+      (a) => a.actionId === "runner.start_run.r1",
     )?.excluded,
   ).toBe(true);
   expect(JSON.stringify([i.playerView, i.legalActions])).toBe(before);
@@ -153,7 +154,7 @@ it.each([1, 0])(
   (corpCredits) => {
     const payoff = evaluateKnownRemoteAccessPayoff(
       input(afterNativeExpose(corpCredits)),
-      "remote_1",
+      "r1",
     );
     expect(payoff.contestable).toBe(true);
     expect(payoff.knownAccessThreatProjection).toBeUndefined();
@@ -162,7 +163,7 @@ it.each([1, 0])(
 it("does not invent program trash from zero advancement counters", () => {
   const payoff = evaluateKnownRemoteAccessPayoff(
     input(afterNativeExpose(2, 0)),
-    "remote_1",
+    "r1",
   );
   expect(payoff.contestable).toBe(true);
   expect(payoff.knownAccessThreatProjection?.installedProgramTrash ?? 0).toBe(
@@ -174,7 +175,7 @@ it("keeps missing installed program identity explicitly unknown", () => {
   delete i.playerView.own.rig!.find(
     (card) => card.definitionId === 251,
   )!.definitionId;
-  const payoff = evaluateKnownRemoteAccessPayoff(i, "remote_1");
+  const payoff = evaluateKnownRemoteAccessPayoff(i, "r1");
   expect(payoff.knownAccessThreatProjection?.status).toBe("unknown");
   expect(payoff.contestable).toBe(false);
   expect(payoff.evidence).toContain(
@@ -184,7 +185,7 @@ it("keeps missing installed program identity explicitly unknown", () => {
 it("retains the factual current-state projection for the existing Corp consumers", () => {
   const state = afterNativeExpose(),
     i = input(state),
-    root = i.playerView.servers.find((s) => s.id === "remote_1")!.root[0]!;
+    root = i.playerView.servers.find((s) => s.id === "r1")!.root[0]!;
   expect(
     projectKnownCorpCardAccessEffect({
       input: i,
@@ -207,15 +208,15 @@ it("retains the factual current-state projection for the existing Corp consumers
 it("does not infer an ambush identity from an unexposed root", () => {
   const i = input(fixture());
   expect(
-    evaluateKnownRemoteAccessPayoff(i, "remote_1").knownAccessThreatProjection,
+    evaluateKnownRemoteAccessPayoff(i, "r1").knownAccessThreatProjection,
   ).toBeUndefined();
 });
 it("does not erase installed coverage when the only legal trash targets are utility programs", () => {
   const i = input(afterNativeExpose());
   i.playerView.own.rig = i.playerView.own.rig!.filter(
-    (c) => !c.definitionId?.endsWith("_krash"),
+    (c) => c.definitionId !== 251,
   );
-  const payoff = evaluateKnownRemoteAccessPayoff(i, "remote_1");
+  const payoff = evaluateKnownRemoteAccessPayoff(i, "r1");
   expect(
     payoff.knownAccessThreatProjection?.runnerCoverageAtRisk ?? [],
   ).toEqual([]);
@@ -224,13 +225,13 @@ it("does not erase installed coverage when the only legal trash targets are util
 it("counts two real canonical universal providers separately against one program trash", () => {
   const i = input(afterNativeExpose()),
     original = i.playerView.own.rig!.find((c) =>
-      c.definitionId?.endsWith("_krash"),
+      c.definitionId === 251,
     )!;
   i.playerView.own.rig!.push({
     ...original,
     instanceId: "second-visible-canonical-provider",
   });
-  const payoff = evaluateKnownRemoteAccessPayoff(i, "remote_1");
+  const payoff = evaluateKnownRemoteAccessPayoff(i, "r1");
   expect(payoff.knownAccessThreatProjection?.installedProgramTrash).toBe(1);
   expect(
     payoff.knownAccessThreatProjection?.runnerCoverageAtRisk ?? [],
@@ -255,12 +256,12 @@ it("does not retain the observed identity after an actual root replacement", () 
   const install = getLegalActions(state, "corp").find(
     (a) =>
       a.type === "install_card" &&
-      a.source.includes("strike-force-kali") &&
-      a.payload?.serverId === "remote_1",
+      referencesDefaultDeckCard(a.source, 429) &&
+      a.payload?.serverId === "r1",
   )!;
   state = apply(state, install.actionId);
   const i = input(state);
   expect(
-    evaluateKnownRemoteAccessPayoff(i, "remote_1").knownAccessThreatProjection,
+    evaluateKnownRemoteAccessPayoff(i, "r1").knownAccessThreatProjection,
   ).toBeUndefined();
 });
