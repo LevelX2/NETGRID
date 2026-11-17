@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import {
   sanitizeAiDecisionDebug,
@@ -31,7 +32,7 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Run terminal Remote without Wall coverage",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const endTurn = legalAction(
       "runner-end-turn-after-no-access-quote",
@@ -40,7 +41,7 @@ describe("plan-first Remote contest continuation", () => {
       "End turn",
       { credits: 0, clicks: 0 },
     );
-    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "remote_1");
+    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "r1");
     const target = {
       ...baseTarget,
       targetKind: "remote" as const,
@@ -87,7 +88,7 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [hiddenAdvancedRoot]),
+      server("r1", [], [hiddenAdvancedRoot]),
     ];
 
     const decision = context.chooseSemanticRuntimeAction(input, {});
@@ -126,9 +127,9 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Probe terminal Remote",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
-    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "remote_1");
+    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "r1");
     const target = {
       ...baseTarget,
       targetKind: "remote" as const,
@@ -204,7 +205,7 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [hiddenInnerIce, dataWall], [hiddenAdvancedRoot]),
+      server("r1", [hiddenInnerIce, dataWall], [hiddenAdvancedRoot]),
     ];
 
     const startDecision = context.chooseSemanticRuntimeAction(startInput, {});
@@ -216,7 +217,7 @@ describe("plan-first Remote contest continuation", () => {
       reasonCode: "plan_first.runner.contest_remote",
     });
     expect(root).toMatchObject({
-      instanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      instanceId: "plan:runner.contest_remote:remote%3Ar1",
       moduleState: { signal: { purpose: "information" } },
     });
 
@@ -268,13 +269,13 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [hiddenInnerIce, dataWall], [hiddenAdvancedRoot]),
+      server("r1", [hiddenInnerIce, dataWall], [hiddenAdvancedRoot]),
     ];
     encounterInput.playerView.run = {
-      runId: "terminal-information-run",
-      attackedServerId: "remote_1",
+      runId: startInput.playerView.stateVersion + 1,
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 1 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 1 },
       encounteredIce: dataWall,
       successful: false,
     };
@@ -325,7 +326,7 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Run Remote 1 again",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const endTurn = legalAction(
       "runner-end-turn-after-puzzle",
@@ -335,13 +336,13 @@ describe("plan-first Remote contest continuation", () => {
       { credits: 0, clicks: 0 },
     );
     const target = {
-      ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(startRun.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       scoreThreat: true,
       recommendation: "run_now" as const,
       score: 1_400,
-      evidence: ["runner_direct_run_converts_now:remote_1"],
+      evidence: ["runner_direct_run_converts_now:r1"],
     };
     const context = liveContext({
       evaluateRunnerRunTargets: () => [target],
@@ -383,7 +384,7 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [puzzle], []),
+      server("r1", [puzzle], []),
     ];
 
     const decision = context.chooseSemanticRuntimeAction(input, {});
@@ -399,7 +400,7 @@ describe("plan-first Remote contest continuation", () => {
         actionId: startRun.actionId,
         ownerModuleId: "runner.contest_remote",
         evidenceCode:
-          "runner_remote_direct_run_waits_for_scheduled_ice_trash:remote_1",
+          "runner_remote_direct_run_waits_for_scheduled_ice_trash:r1",
       }),
     );
   });
@@ -412,7 +413,7 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Run Remote 1 after funding",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const gainCredit = legalAction(
       "runner-gain-credit-after-puzzle",
@@ -429,7 +430,7 @@ describe("plan-first Remote contest continuation", () => {
       { credits: 0, clicks: 0 },
     );
     const target = {
-      ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(startRun.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       scoreThreat: true,
@@ -442,7 +443,7 @@ describe("plan-first Remote contest continuation", () => {
         postRunFloorGap: 2,
         protectedLiquidReserve: 4,
       },
-      evidence: ["runner_remote_contest_waits_for_credit_reserve:remote_1"],
+      evidence: ["runner_remote_contest_waits_for_credit_reserve:r1"],
     };
     const context = liveContext({
       evaluateRunnerRunTargets: () => [target],
@@ -485,7 +486,7 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [puzzle], []),
+      server("r1", [puzzle], []),
     ];
 
     const decision = context.chooseSemanticRuntimeAction(input, {});
@@ -498,7 +499,7 @@ describe("plan-first Remote contest continuation", () => {
       residentPlanPortfolioSnapshot(input)?.instances.some(
         (instance) =>
           instance.instanceId ===
-          "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+          "plan:runner.economy:run-support%3Aremote%3Ar1",
       ),
     ).toBe(false);
     expect(
@@ -508,7 +509,7 @@ describe("plan-first Remote contest continuation", () => {
         actionId: startRun.actionId,
         ownerModuleId: "runner.contest_remote",
         evidenceCode:
-          "runner_remote_direct_run_waits_for_scheduled_ice_trash:remote_1",
+          "runner_remote_direct_run_waits_for_scheduled_ice_trash:r1",
       }),
     );
   });
@@ -521,7 +522,7 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Run Remote 1 again",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const rdRun = legalAction(
       "run-rd-after-puzzle",
@@ -545,21 +546,21 @@ describe("plan-first Remote contest continuation", () => {
         },
       },
     );
-    const blockedTarget = (actionId: string, serverId: "remote_1" | "rd") => ({
+    const blockedTarget = (actionId: string, serverId: "r1" | "rd") => ({
       ...safeRuntimeRunTarget(actionId, serverId),
       targetKind:
-        serverId === "remote_1" ? ("remote" as const) : ("rd" as const),
+        serverId === "r1" ? ("remote" as const) : ("rd" as const),
       accessTargetKind:
-        serverId === "remote_1" ? ("remote" as const) : ("rd" as const),
+        serverId === "r1" ? ("remote" as const) : ("rd" as const),
       pathPassability: "blocked_missing_coverage" as const,
       recommendation: "find_breaker_first" as const,
-      scoreThreat: serverId === "remote_1",
-      score: serverId === "remote_1" ? 1_400 : 300,
+      scoreThreat: serverId === "r1",
+      score: serverId === "r1" ? 1_400 : 300,
       evidence: ["missing_coverage:breaker_code_gate"],
     });
     const context = liveContext({
       evaluateRunnerRunTargets: () => [
-        blockedTarget(remoteRun.actionId, "remote_1"),
+        blockedTarget(remoteRun.actionId, "r1"),
         blockedTarget(rdRun.actionId, "rd"),
       ],
     });
@@ -615,7 +616,7 @@ describe("plan-first Remote contest continuation", () => {
         ),
       ]),
       server("archives"),
-      server("remote_1", [puzzle], []),
+      server("r1", [puzzle], []),
     ];
 
     const decision = context.chooseSemanticRuntimeAction(input, {});
@@ -667,10 +668,10 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Run Remote 1",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const target = {
-      ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(startRun.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       knownAccessState: "known_payoff" as const,
@@ -710,7 +711,7 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [vaporOps]),
+      server("r1", [], [vaporOps]),
     ];
 
     expect(context.chooseSemanticRuntimeAction(startInput, {})).toMatchObject({
@@ -830,13 +831,13 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [keeper, neuralBlade], [vaporOps]),
+      server("r1", [keeper, neuralBlade], [vaporOps]),
     ];
     encounterInput.playerView.run = {
-      runId: "match-df965-remote-1",
-      attackedServerId: "remote_1",
+      runId: startInput.playerView.stateVersion + 1,
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 1 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 1 },
       encounteredIce: neuralBlade,
       successful: false,
     };
@@ -885,10 +886,10 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Run Remote 1",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const target = {
-      ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(startRun.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       knownAccessState: "known_payoff" as const,
@@ -981,7 +982,7 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [filter], [chicagoBranch]),
+      server("r1", [filter], [chicagoBranch]),
     ];
 
     expect(context.chooseSemanticRuntimeAction(startInput, {})).toMatchObject({
@@ -1054,13 +1055,13 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [filter], [chicagoBranch]),
+      server("r1", [filter], [chicagoBranch]),
     ];
     encounterInput.playerView.run = {
-      runId: "match-979-known-filter",
-      attackedServerId: "remote_1",
+      runId: startInput.playerView.stateVersion + 1,
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       encounteredIce: filter,
       successful: false,
     };
@@ -1109,9 +1110,9 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Run Remote 1",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
-    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "remote_1");
+    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "r1");
     const target = {
       ...baseTarget,
       targetKind: "remote" as const,
@@ -1204,7 +1205,7 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [hiddenInnerIce, snowbank], [advancedRoot]),
+      server("r1", [hiddenInnerIce, snowbank], [advancedRoot]),
     ];
 
     expect(context.chooseSemanticRuntimeAction(startInput, {})).toMatchObject({
@@ -1264,6 +1265,7 @@ describe("plan-first Remote contest continuation", () => {
         },
       },
     );
+    const runId = startInput.playerView.stateVersion + 1;
     const encounterInput = aiInput("runner", [
       breakSnowbank,
       paySnowbank,
@@ -1294,13 +1296,13 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [hiddenInnerIce, snowbank], [advancedRoot]),
+      server("r1", [hiddenInnerIce, snowbank], [advancedRoot]),
     ];
     encounterInput.playerView.run = {
-      runId: "match-f5f54fac-remote-1-run",
-      attackedServerId: "remote_1",
+      runId,
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 1 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 1 },
       encounteredIce: snowbank,
       successful: false,
     };
@@ -1353,7 +1355,7 @@ describe("plan-first Remote contest continuation", () => {
       "continue_run",
       "Run fortsetzen",
       { credits: 0, clicks: 0 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const jackOut = legalAction(
       "match-f5f54fac-jack-out-before-inner-ice",
@@ -1382,13 +1384,13 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [hiddenInnerIce, snowbank], [advancedRoot]),
+      server("r1", [hiddenInnerIce, snowbank], [advancedRoot]),
     ];
     movementInput.playerView.run = {
-      runId: "match-f5f54fac-remote-1-run",
-      attackedServerId: "remote_1",
+      runId,
+      attackedServerId: "r1",
       phase: "movement",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       successful: false,
     };
 
@@ -1439,7 +1441,7 @@ describe("plan-first Remote contest continuation", () => {
       selectedRunQuote: {
         schemaVersion: "ai-selected-run-quote-v1",
         actionId: "run-remote-1-risk-contract",
-        serverId: "remote_1",
+        serverId: "r1",
         purpose: "contest",
         pathCost: 0,
         creditsBeforeRun: 4,
@@ -1536,7 +1538,7 @@ describe("plan-first Remote contest continuation", () => {
       moduleState: {
         signal: {
           safetyIntent: "jack_out",
-          safetyEvidenceCode: "runner_run_risk_contract_degraded:remote_1",
+          safetyEvidenceCode: "runner_run_risk_contract_degraded:r1",
           runRiskReassessment: {
             decision: "prefer_jack_out",
             baselineReserveQuote: { creditGap: 0 },
@@ -1657,16 +1659,16 @@ function runRiskContractScenario(params: {
     "start_run",
     "Run Remote 1",
     { credits: 0, clicks: 1 },
-    { payload: { serverId: "remote_1" } },
+    { payload: { serverId: "r1" } },
   );
   const target = {
-    ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+    ...safeRuntimeRunTarget(startRun.actionId, "r1"),
     targetKind: "remote" as const,
     accessTargetKind: "remote" as const,
     knownAccessState: "known_payoff" as const,
     accessPayoff: "trash_affordable" as const,
     accessFacts: {
-      knownTargetDefinitionIds: ["onr_v1_294_investment-firm"],
+      knownTargetDefinitionIds: [syntheticCardDefinitionId("onr_v1_294_investment-firm")],
       trashBudget: 2,
     },
     runCommitment: "probe_only" as const,
@@ -1713,7 +1715,7 @@ function runRiskContractScenario(params: {
     "corp",
     "asset",
     {
-      definitionId: "onr_v1_294_investment-firm",
+      definitionId: syntheticCardDefinitionId("onr_v1_294_investment-firm"),
       title: "Investment Firm",
       rezzed: true,
       trashCost: 2,
@@ -1728,7 +1730,7 @@ function runRiskContractScenario(params: {
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1", [unknownInnerIce], [valuableRemote]),
+    server("r1", [unknownInnerIce], [valuableRemote]),
   ];
 
   const startDecision = context.chooseSemanticRuntimeAction(startInput, {});
@@ -1746,7 +1748,7 @@ function runRiskContractScenario(params: {
     "continue_run",
     "Continue Remote 1 run",
     { credits: 0, clicks: 0 },
-    { payload: { serverId: "remote_1" } },
+    { payload: { serverId: "r1" } },
   );
   const jackOut = legalAction(
     "jack-out-remote-1-risk-contract",
@@ -1770,7 +1772,7 @@ function runRiskContractScenario(params: {
   );
   continuationInput.playerView.opponent.credits =
     params.currentCorpCredits ?? 14;
-  const currentRemote = server("remote_1", [unknownInnerIce], [valuableRemote]);
+  const currentRemote = server("r1", [unknownInnerIce], [valuableRemote]);
   if (params.currentVisibleRezSupport) {
     currentRemote.statuses = [
       {
@@ -1780,7 +1782,7 @@ function runRiskContractScenario(params: {
         costModel: "half_rez_cost_rounded_down",
         target: "unrezzed_ice_on_this_fort",
         limit: "once_per_run_per_source",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: "remote-1-rez-support",
         sourceTitle: "Visible rez support",
         sourceSide: "corp",
@@ -1794,10 +1796,10 @@ function runRiskContractScenario(params: {
     currentRemote,
   ];
   continuationInput.playerView.run = {
-    runId: "remote-1-risk-contract-run",
-    attackedServerId: "remote_1",
+    runId: startInput.playerView.stateVersion + 1,
+    attackedServerId: "r1",
     phase: "movement",
-    position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+    position: { kind: "ice", serverId: "r1", iceIndex: 0 },
     successful: false,
   };
 

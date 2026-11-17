@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type {
   AiDecisionInput,
+  CardDefinitionId,
   EngineRandomizedIceInstallSelectionQuoteResult,
   EngineRandomizedIceInstallSelectionRequest,
   LegalAction,
@@ -294,8 +295,8 @@ describe("plan-first live Corp central-defense allocation contract", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [dataMasonsOne]),
-      server("remote_2", [], [dataMasonsTwo]),
+      server("r1", [], [dataMasonsOne]),
+      server("r2", [], [dataMasonsTwo]),
     ];
     attachOwnDeckSnapshot(first.input, {
       deckSnapshotId: "central-defense-runtime-contract-deck",
@@ -347,8 +348,8 @@ describe("plan-first live Corp central-defense allocation contract", () => {
         }),
       ]),
       server("archives"),
-      server("remote_1", [], [dataMasonsOne]),
-      server("remote_2", [], [dataMasonsTwo]),
+      server("r1", [], [dataMasonsOne]),
+      server("r2", [], [dataMasonsTwo]),
     ];
     second.playerView.corpCentralAccessQuotes =
       second.playerView.corpCentralAccessQuotes!.map((quote) => ({
@@ -394,8 +395,8 @@ describe("plan-first live Corp central-defense allocation contract", () => {
     third.playerView.own.gripOrHq.push(filler("drawn-filler"));
     third.playerView.own.stackOrRdCount -= 1;
     third.playerView.servers = third.playerView.servers.map((currentServer) =>
-      currentServer.id === "remote_1"
-        ? server("remote_1", [], [{ ...dataMasonsOne, rezzed: true }])
+      currentServer.id === "r1"
+        ? server("r1", [], [{ ...dataMasonsOne, rezzed: true }])
         : currentServer,
     );
     third.playerView.corpCentralAccessQuotes =
@@ -877,8 +878,8 @@ function filler(instanceId: string): VisibleCard {
   });
 }
 
-function definitionCounts(definitionIds: number[]) {
-  const counts = new Map<string, number>();
+function definitionCounts(definitionIds: readonly CardDefinitionId[]) {
+  const counts = new Map<CardDefinitionId, number>();
   for (const definitionId of definitionIds) {
     counts.set(definitionId, (counts.get(definitionId) ?? 0) + 1);
   }

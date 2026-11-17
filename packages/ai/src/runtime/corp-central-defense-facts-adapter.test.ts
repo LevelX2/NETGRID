@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, StateHash, VisibleCard } from "@netgrid/shared";
 import { buildAiDecisionInputDto } from "../input-dto.js";
 import { allocateCorpCentralDefenseFromAiFacts } from "../corp/defense/corp-central-defense-facts-adapter.js";
+import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 
 const agenda = (id: string): VisibleCard => ({
   instanceId: id,
@@ -94,13 +95,13 @@ function input(): AiDecisionInput {
     profileId: "p",
   } as unknown as AiDecisionInput;
 }
-function withSnapshot(value: AiDecisionInput): AiDecisionInput {
-  (value as AiDecisionInput & { ownDeckSnapshot: unknown }).ownDeckSnapshot = {
+function withSnapshot(value: AiDecisionInput) {
+  const ownDeckSnapshot: AiDeckStrategyDeckSnapshot = {
     deckSnapshotId: "deck",
     side: "corp",
     cards: [{ cardId: 408, quantity: 2 }],
   };
-  return value;
+  return Object.assign(value, { ownDeckSnapshot });
 }
 describe("allocateCorpCentralDefenseFromAiFacts", () => {
   it("does not subtract Runner-owned scored cards from the Corp snapshot", () => {
@@ -121,11 +122,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
     "subtracts Corp-owned cards in the Runner %s exactly once",
     (zone) => {
       const value = withSnapshot(input());
-      (
-        value as AiDecisionInput & {
-          ownDeckSnapshot: { cards: Array<{ quantity: number }> };
-        }
-      ).ownDeckSnapshot.cards[0]!.quantity = 3;
+      value.ownDeckSnapshot.cards[0]!.quantity = 3;
       value.playerView.opponent[zone]!.push({
         ...agenda("transferred"),
         owner: "corp",
@@ -214,11 +211,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
         controller: "corp",
         rezzed: false,
       });
-    (
-      value as AiDecisionInput & {
-        ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
-      }
-    ).ownDeckSnapshot.cards.push({
+    value.ownDeckSnapshot.cards.push({
       cardId: 449,
       quantity: 1,
     });
@@ -242,11 +235,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
     value.playerView.servers
       .find((server) => server.id === "archives")!
       .root.push(archived);
-    (
-      value as AiDecisionInput & {
-        ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
-      }
-    ).ownDeckSnapshot.cards.push({
+    value.ownDeckSnapshot.cards.push({
       cardId: 594,
       quantity: 1,
     });
@@ -277,11 +266,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
       owner: "corp",
     });
     value.playerView.specialZones!.setAsideCount = 1;
-    (
-      value as AiDecisionInput & {
-        ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
-      }
-    ).ownDeckSnapshot.cards[0]!.quantity = 3;
+    value.ownDeckSnapshot.cards[0]!.quantity = 3;
 
     expect(
       allocateCorpCentralDefenseFromAiFacts({ input: value }),
@@ -293,11 +278,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
     value.playerView.servers
       .find((server) => server.id === "archives")!
       .root.push(asset("archived-b"));
-    (
-      value as AiDecisionInput & {
-        ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
-      }
-    ).ownDeckSnapshot.cards.push({
+    value.ownDeckSnapshot.cards.push({
       cardId: 594,
       quantity: 2,
     });
@@ -309,11 +290,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
   it("fails closed when an Archives instance is missing from the server mirror", () => {
     const value = withSnapshot(input());
     value.playerView.own.heapOrArchives.push(asset("archived"));
-    (
-      value as AiDecisionInput & {
-        ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
-      }
-    ).ownDeckSnapshot.cards.push({
+    value.ownDeckSnapshot.cards.push({
       cardId: 594,
       quantity: 1,
     });
@@ -393,11 +370,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
     const value = withSnapshot(input());
     value.playerView.own.gripOrHq.push(asset("critical-asset"));
     value.playerView.own.stackOrRdCount = 1;
-    (
-      value as AiDecisionInput & {
-        ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
-      }
-    ).ownDeckSnapshot.cards.push({
+    value.ownDeckSnapshot.cards.push({
       cardId: 594,
       quantity: 1,
     });
@@ -427,11 +400,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
       twoPointAgenda("two-b"),
     ];
     value.playerView.opponent.agendaPoints = 4;
-    (
-      value as AiDecisionInput & {
-        ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
-      }
-    ).ownDeckSnapshot.cards = [
+    value.ownDeckSnapshot.cards = [
       { cardId: 406, quantity: 3 },
     ];
     expect(
@@ -478,7 +447,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
     const value = withSnapshot(input());
     value.eventTail = [
       {
-        eventId: "future",
+        eventId: 10,
         stateVersionBefore: 8,
         stateVersionAfter: 9,
         turnSerial: 3,
@@ -497,7 +466,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
       "R&D";
     value.eventTail = [
       {
-        eventId: "rd-access",
+        eventId: 8,
         stateVersionBefore: 6,
         stateVersionAfter: 7,
         turnSerial: 2,

@@ -4,7 +4,7 @@ import {
   createGameAfterSetup,
   getLegalActions,
 } from "@netgrid/engine";
-import type { DeckDefinition } from "@netgrid/shared";
+import type { CardDefinitionId, DeckDefinition } from "@netgrid/shared";
 import { metaTenStandardDecks as catalog } from "../evaluation/meta-ten-standard-decks.test-support";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "./ai-decision-input";
@@ -15,7 +15,7 @@ import { selectedForcedChoiceOptionIds } from "./select-card-choice-option";
 
 afterEach(resetResidentPlanPortfolioMemory);
 
-function reorderWindow(definitions: string[]) {
+function reorderWindow(definitions: readonly CardDefinitionId[]) {
   const runner = catalog.decks.find(
     (d) =>
       d.standardDeckId === "standard_runner_rent_i_con_shellspiel_2026_07_17",
