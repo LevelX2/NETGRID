@@ -1,4 +1,5 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 export function currentEncounteredIceCard(
@@ -17,10 +18,14 @@ export function currentEncounteredIceCard(
 export function encounterHasImmediateUnbrokenThreat(
   input: AiDecisionInput,
 ): boolean {
+  if (input.playerView.run?.phase !== "encounter_ice") return false;
   const quote = currentEncounteredIceCard(input)?.effectiveRunQuote;
+  if (!quote) return false;
   if (currentEncounterRequiresFullBreak(input)) return true;
+  const unbroken = currentEncounterUnbrokenSubroutineIndexes(input);
   return Boolean(
-    quote?.subroutines.some((subroutine) => {
+    quote.subroutines.some((subroutine, index) => {
+      if (!unbroken.has(index)) return false;
       if (currentEncounterNextOnlySubroutineHasNoTarget(input, subroutine.type))
         return false;
       // This obligation belongs to the following encounter and is assessed
@@ -93,6 +98,7 @@ export function currentEncounterRequiresFullBreak(
     input.playerView.run?.phase === "encounter_ice" &&
     input.legalActions.some(
       (action) =>
+        actionMatchesCurrentDecision(input, action) &&
         action.type === "continue_run" &&
         action.payload?.encounterContinue === true &&
         typeof action.payload.encounterFullBreakDamage === "number" &&
@@ -117,6 +123,7 @@ export function currentEncounterUnbrokenSubroutineIndexes(
   const subroutines =
     currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines;
   if (
+    !actionMatchesCurrentDecision(input, action) ||
     !subroutines ||
     typeof quotedIds !== "string" ||
     new Set(ids).size !== ids.length ||

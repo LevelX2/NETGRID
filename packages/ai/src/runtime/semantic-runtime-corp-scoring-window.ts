@@ -196,7 +196,7 @@ function buildSemanticRuntimeCorpScoringWindowAssessment<
   });
 
   const windowKind = scoringWindowKind({
-    action,
+    iceInstall: action.type === "install_card" && action.payload?.placement === "ice",
     access,
     centralPressure,
     delayedExposureRisk,

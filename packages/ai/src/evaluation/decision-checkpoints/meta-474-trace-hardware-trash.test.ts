@@ -31,6 +31,17 @@ function checkpoint(file = "cp-meta-474-r8-g4-d299.json") {
     validation: Record<string, boolean>;
   };
   expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
+  if (file === "cp-meta-474-r8-g4-d299.json") {
+    // The capture predates projection of these two event fields. The native
+    // pending Choice is created only by the successful hardware-wrecker Trace
+    // and contains its exact id.
+    const payload = cp.input.eventTail.at(-1)!.publicPayload;
+    const source = cp.input.playerView.pendingChoice!.source;
+    expect(payload.traceStep).toBe("runner_bid");
+    expect(source.startsWith("trace_success.hardware_wrecker:")).toBe(true);
+    payload.traceId = source.slice("trace_success.hardware_wrecker:".length);
+    payload.traceSuccessful = true;
+  }
   const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
   restoreAiRuntimeCheckpoint(
     input,
@@ -170,6 +181,8 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
     "quote_source",
     "effect",
     "event",
+    "trace_id",
+    "trace_outcome",
     "cost",
     "duplicate",
     "option_binding",
@@ -196,6 +209,10 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
       };
     if (kind === "event")
       input.eventTail.at(-1)!.publicPayload.traceStep = "corp_bid";
+    if (kind === "trace_id")
+      input.eventTail.at(-1)!.publicPayload.traceId = "unrelated.trace";
+    if (kind === "trace_outcome")
+      input.eventTail.at(-1)!.publicPayload.traceSuccessful = false;
     if (kind === "cost")
       delete input.playerView.opponent.rig!.find(
         (card) => card.type === "hardware",

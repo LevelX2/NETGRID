@@ -559,7 +559,14 @@ export function corpAction(
     side: "corp",
     type,
     label: actionId,
-    costs: [],
+    costs:
+      type === "install_card" ||
+      type === "advance_card" ||
+      type === "play_operation" ||
+      type === "gain_credit" ||
+      type === "draw_card"
+        ? [{ clicks: 1 }]
+        : [],
     source,
     payload,
   } as unknown as LegalAction;

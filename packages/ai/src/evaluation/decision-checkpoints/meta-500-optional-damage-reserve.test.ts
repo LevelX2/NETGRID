@@ -94,6 +94,23 @@ it("quotes the native optional and complete current mandatory break together", (
   expect(input.playerView.own.credits).toBe(5);
 });
 
+it("includes mandatory payments outside the next resolution group", () => {
+  const input = inputFixture();
+  const action = input.legalActions.find(
+    (a) => a.type === "break_subroutine" && a.payload?.subroutineIndex === 0,
+  )!;
+  const continuation = input.legalActions.find((a) => a.type === "continue_run")!;
+  const quote = input.playerView.run!.encounteredIce!.effectiveRunQuote!;
+  continuation.payload!.encounterRemainingSubroutineIds =
+    quote.subroutines.map(({ id }) => id).join(",");
+  continuation.payload!.encounterRemainingSubroutineCount = quote.subroutines.length;
+  continuation.payload!.encounterSubroutineIds = quote.subroutines[0]!.id;
+  continuation.payload!.unbrokenSubroutineCount = 1;
+  expect(optionalDamageBreakContinuationPayments(input, action)).toMatchObject([
+    { cost: 4 },
+  ]);
+});
+
 it("does not certify an exhaustive veto when a native mandatory quote disagrees with its action cost", () => {
   const input = inputFixture();
   const optional = input.legalActions.find(

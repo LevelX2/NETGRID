@@ -236,6 +236,25 @@ describe("action economy projection", () => {
     });
   });
 
+  it("does not certify a basic draw when the supplied Engine projection contradicts itself", () => {
+    const projection = project(legalAction("invalid-draw", "draw_card", {
+      side: "runner",
+      source: "basic_action",
+      payload: {
+        runnerDrawProjectionSchemaVersion: RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+        projectedGrossDrawCount: 2,
+        projectedPostDrawDispositionCount: 1,
+        projectedNetHandDelta: 2,
+        visibleDrawTaxSourceCount: 0,
+      },
+    }));
+    expect(projection).toMatchObject({
+      reliability: "unknown",
+      confidence: "none",
+      source: "unknown",
+    });
+  });
+
   it("projects a guaranteed draw event as immediate payload-backed hand progress", () => {
     const projection = project(
       legalAction("draw-three", "play_event", {

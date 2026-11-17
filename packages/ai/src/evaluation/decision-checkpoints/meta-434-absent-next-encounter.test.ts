@@ -90,5 +90,24 @@ it("preserves current damage when only the next-encounter lock lacks a target", 
     amount: 1,
     damageType: "net",
   });
+  const continuation = input.legalActions.find((a) => a.type === "continue_run")!;
+  const ids = [
+    ...String(continuation.payload!.encounterSubroutineIds).split(",").filter(Boolean),
+    "current-damage-boundary",
+  ];
+  continuation.payload!.encounterSubroutineIds = ids.join(",");
+  continuation.payload!.unbrokenSubroutineCount = ids.length;
   expect(encounterHasImmediateUnbrokenThreat(input)).toBe(true);
+});
+
+it("does not treat a broken encounter subroutine as a reason to pump", () => {
+  const input = restoredInput();
+  const quote = input.playerView.run!.encounteredIce!.effectiveRunQuote!;
+  quote.subroutines.push({
+    id: "already-broken-damage",
+    type: "do_damage",
+    amount: 2,
+    damageType: "net",
+  });
+  expect(encounterHasImmediateUnbrokenThreat(input)).toBe(false);
 });

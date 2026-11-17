@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { FundingRoute } from "../plans/funding-route";
 import { runnerStrategicExchangeKinds } from "./runner-strategic-exchange";
@@ -71,8 +72,10 @@ export function runnerFundingHandQuote(
       step.kind !== "legal_action" ||
       step.ownTurnOffset !== 0 ||
       !candidate ||
-      !action ||
-      action.expiresAtStateVersion !== input.playerView.stateVersion ||
+      candidate.actorSide !== "runner" ||
+      candidate.stateVersion !== input.playerView.stateVersion ||
+      !actionMatchesCurrentDecision(input, action) ||
+      action.type !== candidate.actionType ||
       !projection ||
       projection.reliability !== "guaranteed" ||
       projection.kind !== "immediate_liquid" ||

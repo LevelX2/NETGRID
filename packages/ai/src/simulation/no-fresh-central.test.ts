@@ -21,6 +21,16 @@ describe("no-fresh central diagnostics", () => {
     });
   });
 
+  it("does not count HQ-only multiaccess as an R&D closeout", () => {
+    const hqOnly = input();
+    hqOnly.playerView.own.rig = [card("onr_v1_129_hq-interface")];
+    expect(closeoutForRoles(["multiaccess"], hqOnly).opportunity).toBe(false);
+
+    const emptyRd = input();
+    emptyRd.playerView.opponent.deckCount = 0;
+    expect(closeoutForRoles(["multiaccess"], emptyRd).opportunity).toBe(false);
+  });
+
   it("matches setup search substitutions by bounded role terms", () => {
     expect(substitutionForRoles(["program_search"])).toBe("setup_search");
     expect(substitutionForRoles(["research_noise"])).toBeUndefined();
@@ -71,8 +81,8 @@ describe("no-fresh central diagnostics", () => {
   });
 });
 
-function closeoutForRoles(roles: string[]) {
-  return trueCentralCloseoutProfile(input(), "rd", {
+function closeoutForRoles(roles: string[], position = input()) {
+  return trueCentralCloseoutProfile(position, "rd", {
     assessKnownRezzedIcePath: () =>
       ({ blocked: false, visibleBreakCost: 0 }) as never,
     rolesForCardId: () => roles,

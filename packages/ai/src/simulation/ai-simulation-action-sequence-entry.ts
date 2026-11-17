@@ -150,8 +150,8 @@ export type AiSimulationActionSequenceEntry = {
   runnerDrawWhileHoldingRunnablePressureCard?: boolean;
   runnerDrawWhileRemoteTrashAvailable?: boolean;
   runnerDiscardChoice?: boolean;
-  runnerDiscardedPlayableEconomy?: boolean;
-  runnerDiscardedInstallableBreaker?: boolean;
+  runnerDiscardedEconomyCard?: boolean;
+  runnerDiscardedBreaker?: boolean;
   runnerDiscardedRunPressureCard?: boolean;
   runnerInstallAction?: boolean;
   runnerDuplicateInstallAction?: boolean;

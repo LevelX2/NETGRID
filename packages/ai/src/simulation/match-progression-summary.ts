@@ -1006,11 +1006,11 @@ export function summarizeMatchProgressionMetrics(
       (entry) => entry.runnerDrawWhileRemoteTrashAvailable === true,
     ).length,
     drawThenDiscardSameTurn: countRunnerDrawThenDiscardSameTurn(summaries),
-    discardedPlayableEconomy: actionSequence.filter(
-      (entry) => entry.runnerDiscardedPlayableEconomy === true,
+    discardedEconomyCard: actionSequence.filter(
+      (entry) => entry.runnerDiscardedEconomyCard === true,
     ).length,
-    discardedInstallableBreaker: actionSequence.filter(
-      (entry) => entry.runnerDiscardedInstallableBreaker === true,
+    discardedBreaker: actionSequence.filter(
+      (entry) => entry.runnerDiscardedBreaker === true,
     ).length,
     discardedRunPressureCard: actionSequence.filter(
       (entry) => entry.runnerDiscardedRunPressureCard === true,

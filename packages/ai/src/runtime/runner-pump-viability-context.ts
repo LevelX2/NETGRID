@@ -163,16 +163,18 @@ export function createRunnerPumpViabilityContext(
         evidence: ["pump_strength_already_sufficient:true"],
       };
 
-    const endTheRunCount = currentQuote.subroutines.filter(
-      isVisibleHardEndRunSubroutine,
-    ).length;
+    const currentIndexes = currentEncounterUnbrokenSubroutineIndexes(input);
+    const currentSubroutines = currentQuote.subroutines.filter(
+      (_, index) => currentIndexes.has(index),
+    );
+    const endTheRunCount = currentSubroutines.filter(isVisibleHardEndRunSubroutine).length;
     const deflectorContext = {
       visibleRemoteServerCount: input.playerView.servers.filter((candidate) =>
         candidate.id.startsWith("remote_"),
       ).length,
       visibleCorpCredits: input.playerView.opponent.credits,
     };
-    const accessRedirectCount = currentQuote.subroutines.filter((subroutine) =>
+    const accessRedirectCount = currentSubroutines.filter((subroutine) =>
       visibleDeflectorSubroutineCanResolve(subroutine, deflectorContext),
     ).length;
     const runEffect = dependencies.encounterRunRemainderEffectAssessment(input);
@@ -183,7 +185,6 @@ export function createRunnerPumpViabilityContext(
         runEffect.futureCostDelta > 0);
     const hasImmediateThreat =
       dependencies.encounterHasImmediateUnbrokenThreat(input);
-    const currentIndexes = currentEncounterUnbrokenSubroutineIndexes(input);
     const programProtectionIndexes = new Set(
       currentQuote.subroutines.flatMap((subroutine, index) => {
         if (

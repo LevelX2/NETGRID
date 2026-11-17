@@ -132,7 +132,12 @@ export function createRunnerHandUseDiagnosticsForSimulationAction(
       action.actionId,
     );
     const remoteTrashAvailable = dependencies.hasRunnerRemoteTrashAction(input);
-    const discardRoles = dependencies.runnerDiscardChoiceRoles(input, decision);
+    const discardChoice =
+      action.type === "resolve_choice" &&
+      input.playerView.pendingChoice?.source === "discard_phase";
+    const discardRoles = discardChoice
+      ? dependencies.runnerDiscardChoiceRoles(input, decision)
+      : [];
     const installAction = action.type === "install_card";
     const duplicateInstall =
       installAction && dependencies.isRunnerDuplicateInstall(input, action);
@@ -191,12 +196,12 @@ export function createRunnerHandUseDiagnosticsForSimulationAction(
       ...(draw.draw && remoteTrashAvailable
         ? { runnerDrawWhileRemoteTrashAvailable: true }
         : {}),
-      ...(discardRoles.length > 0 ? { runnerDiscardChoice: true } : {}),
+      ...(discardChoice ? { runnerDiscardChoice: true } : {}),
       ...(discardRoles.some((role) => isRunnerEconomyRole(role))
-        ? { runnerDiscardedPlayableEconomy: true }
+        ? { runnerDiscardedEconomyCard: true }
         : {}),
       ...(rolesMatch(discardRoles, ["breaker_"])
-        ? { runnerDiscardedInstallableBreaker: true }
+        ? { runnerDiscardedBreaker: true }
         : {}),
       ...(discardRoles.some((role) => isRunnerPressureRole(role))
         ? { runnerDiscardedRunPressureCard: true }

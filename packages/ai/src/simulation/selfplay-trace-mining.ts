@@ -1585,8 +1585,8 @@ function selfplayEntryDetectorFindings(
     enabled.has("overdraw_without_urgency") &&
     entry.side === "runner" &&
     entry.runnerDiscardChoice === true &&
-    (entry.runnerDiscardedPlayableEconomy === true ||
-      entry.runnerDiscardedInstallableBreaker === true ||
+    (entry.runnerDiscardedEconomyCard === true ||
+      entry.runnerDiscardedBreaker === true ||
       entry.runnerDiscardedRunPressureCard === true) &&
     recentRunnerDrawBefore(summary.actionSequence, actionIndex)
   ) {
@@ -1597,7 +1597,7 @@ function selfplayEntryDetectorFindings(
         actionIndex,
         "overdraw_without_urgency",
         "medium",
-        "Runner discarded useful cards shortly after draw pressure.",
+        "Runner discarded economy, breaker or pressure cards shortly after drawing.",
       ),
     );
   }

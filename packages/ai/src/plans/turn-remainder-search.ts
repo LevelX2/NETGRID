@@ -605,7 +605,7 @@ function applyOffer(params: {
   );
   const scalarValue = scalarEvaluation(evaluationValues, params.registry);
   const upperBoundValue =
-    steps.length >= params.maximumDepth || params.offer.boundaryAfter
+    steps.length >= params.maximumDepth || boundary !== undefined
       ? scalarValue
       : scalarValue + Math.max(0, params.remainingUpperBoundValue);
   const lineId = turnPlanningFingerprint("turn-remainder-line", {
@@ -615,7 +615,7 @@ function applyOffer(params: {
     coverage: mergedCoverage,
   });
   const stopReason =
-    params.offer.boundaryAfter !== undefined
+    boundary !== undefined
       ? ("observation_boundary" as const)
       : steps.length >= params.maximumDepth
         ? ("depth_limit" as const)

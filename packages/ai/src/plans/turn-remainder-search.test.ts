@@ -748,6 +748,36 @@ describe("deterministic remainder-turn search", () => {
     expect(drawLines[0]?.stopReason).toBe("observation_boundary");
   });
 
+  it("stops after an exact current payment that opens an Engine boundary", () => {
+    const setup = searchSetup();
+    const bounded = offer(setup, "bound-payment", {
+      root: "root:bound-payment",
+      milestone: "payment-observed",
+      economy: 1,
+    });
+    bounded.currentStepProjection = {
+      liquidCreditCost: 0,
+      boundaryKind: "engine_continuation",
+    };
+    const followup = offer(setup, "bound-followup", {
+      root: "root:followup",
+      milestone: "install-after-payment",
+      flexibility: 8,
+    });
+    const result = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers: [bounded, followup],
+    });
+    const boundLines = result.lines.filter(
+      (line) => line.steps[0]?.candidateId === bounded.head.candidateId,
+    );
+
+    expect(boundLines).toHaveLength(1);
+    expect(boundLines[0]?.steps).toHaveLength(1);
+    expect(boundLines[0]?.stopReason).toBe("observation_boundary");
+    expect(boundLines[0]?.upperBoundValue).toBe(boundLines[0]?.scalarValue);
+  });
+
   it("also stops at a public random outcome before choosing the remainder", () => {
     const setup = searchSetup();
     const randomEconomy = offer(setup, "random-economy", {

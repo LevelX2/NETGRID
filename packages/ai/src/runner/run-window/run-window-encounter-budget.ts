@@ -1,3 +1,4 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { runnerRunPathCreditBudgetAfterEncounter } from "../../run-analysis/visible-run-credit-budget";
 import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import { breakSubroutineIndexesForAction } from "../../runtime/subroutine-indexes";
@@ -10,7 +11,7 @@ import { creditsToBreakVisibleSubroutinesWithBreaker } from "../../visible-run-a
 import {
   currentEncounteredIceCard,
   currentEncounterRequiresFullBreak,
-  currentEncounterUnbrokenSubroutineIndexes,
+  currentEncounterCompleteSubroutineIndexes,
 } from "../../runtime/current-encounter";
 import {
   runnerEncounterCreditBudgetForInput,
@@ -29,6 +30,7 @@ export function optionalDamageBreakContinuationPayments(
 ): RunnerRunContinuationPayment[] {
   if (
     input.playerView.run?.phase !== "encounter_ice" ||
+    !actionMatchesCurrentDecision(input, action) ||
     action.type !== "break_subroutine" ||
     action.choiceRequirements?.length ||
     action.payload?.runnerCostPenaltySupportContinuation === true ||
@@ -40,7 +42,8 @@ export function optionalDamageBreakContinuationPayments(
   const ice = currentEncounteredIceCard(input);
   if (!ice?.effectiveRunQuote) return [];
   const quote = ice.effectiveRunQuote;
-  const unbroken = currentEncounterUnbrokenSubroutineIndexes(input);
+  const unbroken = currentEncounterCompleteSubroutineIndexes(input);
+  if (!unbroken) return [];
   const targets = breakSubroutineIndexesForAction(action);
   const optionalDamage = (index: number) => {
     const subroutine = quote.subroutines[index];
@@ -109,7 +112,7 @@ export function optionalDamageBreakContinuationPayments(
     | { uncertified: true }
     | { uncertified: false; candidate: LegalAction; indexes: Set<number> }
   >((candidate) => {
-    if (candidate.type !== "break_subroutine") return [];
+    if (!actionMatchesCurrentDecision(input, candidate) || candidate.type !== "break_subroutine") return [];
     const indexes = breakSubroutineIndexesForAction(candidate);
     if (!indexes.size || [...indexes].some((i) => !remaining.has(i))) return [];
     if (

@@ -830,8 +830,8 @@ export type AiMatchProgressionMetrics = {
   drawWhileHoldingRunnablePressureCard: number;
   drawWhileRemoteTrashAvailable: number;
   drawThenDiscardSameTurn: number;
-  discardedPlayableEconomy: number;
-  discardedInstallableBreaker: number;
+  discardedEconomyCard: number;
+  discardedBreaker: number;
   discardedRunPressureCard: number;
   runnerInstallActions: number;
   runnerDuplicateInstallActions: number;

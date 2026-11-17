@@ -4,6 +4,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import {
+  exactCurrentChoiceAction,
   unresolvedChoiceFailure,
   type PendingChoice,
   type PendingChoiceOptions,
@@ -34,18 +35,9 @@ export function corpTraceHardwareTrashChoiceFacts(
     choice.kind !== "select_cards" ||
     choice.visibility !== "hidden_info_barrier" ||
     !choice.source.startsWith(TRACE_HARDWARE_TRASH_SOURCE) ||
-    choice.stateVersion !== version ||
     choice.minSelections !== 1 ||
     choice.maxSelections !== 1 ||
-    action.side !== "corp" ||
-    action.type !== "resolve_choice" ||
-    action.source !== "game_rule" ||
-    action.timingPoint !== input.playerView.timingPoint ||
-    action.expiresAtStateVersion !== version ||
-    action.choiceRequirements?.length !== 1 ||
-    requirement?.choiceId !== choice.choiceId ||
-    requirement.minSelections !== 1 ||
-    requirement.maxSelections !== 1
+    exactCurrentChoiceAction(input, choice) !== action
   )
     fail(
       "Preserve the current Engine hardware Choice, LegalAction, cardinality and state version.",
@@ -118,10 +110,9 @@ export function corpTraceHardwareTrashChoiceFacts(
   const event = input.eventTail.at(-1);
   const payload = event?.publicPayload;
   const hardwareTraceCompleted =
-    payload?.traceStep === "runner_bid" ||
-    (payload?.traceStep === "post_bid_link" &&
-      payload.traceId === traceId &&
-      payload.traceSuccessful === true);
+    (payload?.traceStep === "runner_bid" || payload?.traceStep === "post_bid_link") &&
+    payload.traceId === traceId &&
+    payload.traceSuccessful === true;
   if (
     event?.type !== "resolve_choice" ||
     event?.stateVersionAfter !== version ||

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   scoringWindowHorizon,
   scoringWindowRezBudget,
+  scoringWindowRunnerExposureCreditActions,
 } from "./semantic-runtime-corp-scoring-window-projection";
 import {
   agendaCard,
@@ -78,6 +79,34 @@ describe("scoringWindowHorizon", () => {
     expect(scoringWindowHorizon(input, action, testDependencies())).toBe(
       "immediate",
     );
+  });
+
+  it("prices a zero-click Engine install at its listed cost and reserves advancement credits", () => {
+    const agenda = agendaCard("no-click-install-agenda", {
+      advancementRequirement: 3,
+    });
+    const action = corpAction(
+      "install-no-click-agenda",
+      "install_card",
+      { cardType: "agenda", placement: "root", serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    action.costs = [{ clicks: 0 }];
+    const input = corpInput({
+      ownClicks: 3,
+      hq: [agenda],
+      servers: protectedCentralServers([remoteServer("remote_1", [])]),
+    });
+    expect(scoringWindowHorizon(input, action, testDependencies())).toBe("immediate");
+    input.playerView.own.credits = 2;
+    input.playerView.own.installRezOnlyCredits = 1;
+    expect(scoringWindowHorizon(input, action, testDependencies())).toBe("next_turn");
+  });
+
+  it("preserves the Engine's exact reserved-run credit capacity", () => {
+    const input = corpInput({ ownClicks: 2, hq: [], servers: [] });
+    input.playerView.runnerNextTurnCreditClicks = 0;
+    expect(scoringWindowRunnerExposureCreditActions(input, "next_turn", true)).toBe(0);
   });
 
   it("uses an explicit operation play cost for an in-turn advancement burst", () => {
