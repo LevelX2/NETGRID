@@ -1,5 +1,7 @@
 import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { runnerInstalledProgramTrashLoss } from "../../runtime/runner-installed-program";
 import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 
@@ -30,10 +32,9 @@ export function assessShellTradersAccess(
   );
   const run = input.legalActions.find(
     (action) =>
-      action.side === "runner" &&
+      actionMatchesCurrentDecision(input, action) &&
       action.type === "start_run" &&
-      action.payload?.serverId === targetServerId &&
-      action.expiresAtStateVersion === base.stateVersion,
+      action.payload?.serverId === targetServerId,
   );
   if (
     !server ||
@@ -70,10 +71,9 @@ export function assessShellTradersAccess(
         return [];
       const action = input.legalActions.find(
         (entry) =>
-          entry.side === "runner" &&
+          actionMatchesCurrentDecision(input, entry) &&
           entry.type === "trigger_ability" &&
           entry.source === sourceCardInstanceId &&
-          entry.expiresAtStateVersion === base.stateVersion &&
           entry.payload?.delayedInstallAbility === "remove_shell_counter" &&
           entry.payload.targetCardId === card.instanceId &&
           entry.payload.targetCardDefinitionId === card.definitionId &&
@@ -124,13 +124,26 @@ export function assessShellTradersAccess(
       neededMemory > 0
         ? rig.filter((card) => allowedReplacementIds.includes(card.instanceId))
         : [];
+    const replacementLosses = replacements.map((card) =>
+      runnerInstalledProgramTrashLoss(
+        input,
+        card,
+        ({ memoryCost }) => memoryCost ?? NaN,
+      ),
+    );
     if (
-      replacements.some((card) => card.memoryCost === undefined) ||
       neededMemory >
-        replacements.reduce((sum, card) => sum + card.memoryCost!, 0)
+      replacementLosses.reduce((sum, loss) => sum + loss.memoryCost, 0)
     )
       continue;
-    const projectedRig = rig.filter((card) => !replacements.includes(card));
+    const removedCardIds = new Set(
+      replacementLosses.flatMap((loss) =>
+        loss.cards.map((card) => card.instanceId),
+      ),
+    );
+    const projectedRig = rig.filter(
+      (card) => !removedCardIds.has(card.instanceId),
+    );
     const completionCredits = entries.reduce(
       (sum, entry) => sum + entry.credits,
       0,

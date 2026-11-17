@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
+import { reconstructBeliefState } from "../../belief-state";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -29,7 +30,7 @@ describe("pairing 557 current preparation and post-install income", () => {
     [true, false],
     [true, true],
   ])(
-    "executes the current HQ preparation without stale funding, DTO=%s resident=%s",
+    "executes the current R&D preparation without stale funding, DTO=%s resident=%s",
     (dto, resident) => {
       const cp = fixture("cp-meta557-unowned-funded-liquidity");
       expect(Object.values(cp.validation).every(Boolean)).toBe(true);
@@ -49,9 +50,18 @@ describe("pairing 557 current preparation and post-install income", () => {
         cp.input.legalActions.find((a: any) => a.actionId === result.actionId)
           ?.source,
       ).toContain("forged-activation-orders");
-      expect(pf?.selectedPlan?.moduleId).toBe("runner.pressure_central");
+      // The Tokyo-Chiba root access is separate from the subsequent deck
+      // sequence. The Corp drew Snowbank, leaving known Off-Site Backups.
+      expect(reconstructBeliefState(cp.input).rndTopFreshness).toMatchObject({
+        knownTopDefinitionId: "onr_v1_296_off-site-backups",
+        knownSequenceDefinitionIds: ["onr_v1_296_off-site-backups"],
+      });
+      expect(pf?.selectedPlan).toMatchObject({
+        moduleId: "runner.pressure_central",
+        target: { kind: "server", id: "rd" },
+      });
       expect(pf?.rootPlanInstanceId).toBe(
-        "plan:runner.pressure_central:central%3Ahq",
+        "plan:runner.pressure_central:central%3Ard",
       );
       expect(pf?.leafExecutorInstanceId).toBe(pf?.rootPlanInstanceId);
       expect(pf?.route).toMatchObject({
@@ -72,7 +82,9 @@ describe("pairing 557 current preparation and post-install income", () => {
       expect((root?.moduleState as any)?.signal?.supportNeedId).toBeUndefined();
       expect(
         portfolio?.instances.some(
-          (i) => i.parentNeedId === "run-support:central:hq",
+          (i) =>
+            i.parentNeedId === "run-support:central:hq" ||
+            i.parentNeedId === "run-support:central:rd",
         ),
       ).toBe(false);
       expect(JSON.stringify(cp.input)).toBe(before);

@@ -22,7 +22,11 @@ import {
   type AiCardHint,
 } from "../../ai-hints";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
-import { persistentEngineProfileForCard } from "./runner-persistent-install-evaluation";
+import {
+  actionMatchesCard,
+  concreteBreakerCoverageOverlaps,
+  persistentEngineProfileForCard,
+} from "./runner-persistent-install-evaluation";
 import {
   breakerVariantDeckCapabilities,
   findByInstance,
@@ -48,6 +52,22 @@ vi.mock(import("../../ai-hints"), async (importOriginal) => {
 const AI_HINTS_BY_CARD = mockedHints as Map<string, AiCardHint>;
 
 describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
+  it("does not treat an ordinary installed program as an overlapping universal breaker", () => {
+    expect(concreteBreakerCoverageOverlaps(["universal"], [])).toBe(false);
+    expect(concreteBreakerCoverageOverlaps([], ["universal"])).toBe(false);
+    expect(concreteBreakerCoverageOverlaps(["universal"], ["wall"])).toBe(true);
+  });
+
+  it("requires an instance or actual definition to bind a grip action", () => {
+    const card = visibleCard("unbound", { type: "event" });
+    delete card.definitionId;
+    expect(actionMatchesCard({
+      ...playEventAction("event", card, 0),
+      source: "basic_action",
+      payload: {},
+    }, card)).toBe(false);
+  });
+
   it("recognizes the first delayed-install engine as an actionable doctrine provider", () => {
     const shellTraders = shellTradersCard("shell-traders-hand");
     const rentICon = visibleCard("rent-i-con-hand", {

@@ -5,7 +5,6 @@ import {
   knownRemoteAgendaAccessCommitment,
   knownRemoteRootHasHighImpactRole,
   projectKnownRemoteTrashCommitment,
-  trashSupportEffectTargetHasFreeTrash,
 } from "./known-remote-access-commitment";
 
 describe("known remote access commitment", () => {
@@ -151,50 +150,45 @@ describe("known remote access commitment", () => {
     );
   });
 
-  it("uses bounded free-trash support from installed runner cards", () => {
+  it.each([
+    { amount: 1, expectedGeneralCost: 3 },
+    { amount: 0, expectedGeneralCost: 4 },
+  ])("prices a remote trash with only $amount remaining restricted credits", ({ amount, expectedGeneralCost }) => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({
-        credits: 8,
+        credits: 4,
         rig: [
-          visibleCard("kilroy", {
-            definitionId: "onr_v1_096_kilroy-was-here",
-            title: "Kilroy Was Here",
-            type: "event",
+          visibleCard("poltergeist", {
+            definitionId: "onr_v1_048_poltergeist",
+            type: "program",
+            counterDisplays: [
+              {
+                id: "restricted_pool",
+                amount,
+                displayKind: "restricted_pool",
+                label: "Trash-Credits",
+                ariaLabel: "Trash-Credits",
+                counterType: "bit",
+                usageHint: "spendable",
+                creditPool: {
+                  kind: "restricted_credit",
+                  capacity: 2,
+                  uses: ["trash_nodes"],
+                },
+              },
+            ],
           }),
         ],
       }),
       {
         serverId: "remote_1",
-        definitionId: "onr_v1_366_red-herrings",
-        rootType: "upgrade",
-        trashCost: 1,
-        creditsAfterPath: 8,
-        visibleCard: visibleCard("neutral-asset", {
-          definitionId: "onr_v1_366_red-herrings",
-          title: "Red Herrings",
-          type: "upgrade",
-        }),
+        definitionId: "onr_v1_326_holovid-campaign",
+        rootType: "asset",
+        trashCost: 4,
+        creditsAfterPath: 4,
       },
     );
-
-    expect(projection).toMatchObject({
-      generalTrashCost: 0,
-      creditsAfterTrash: 8,
-      evidence: expect.arrayContaining([
-        "known_remote_root_free_trash_support:true",
-        "known_remote_root_trash_support_source:onr_v1_096_kilroy-was-here",
-      ]),
-    });
-  });
-
-  it("matches free-trash effect targets by bounded marker segments", () => {
-    expect(trashSupportEffectTargetHasFreeTrash("free_trash")).toBe(true);
-    expect(trashSupportEffectTargetHasFreeTrash("access.free_trash")).toBe(
-      true,
-    );
-    expect(trashSupportEffectTargetHasFreeTrash("not_free_trash_noise")).toBe(
-      false,
-    );
+    expect(projection.generalTrashCost).toBe(expectedGeneralCost);
   });
 
   it("uses supplied runner economy posture as access reserve basis", () => {

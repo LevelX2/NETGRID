@@ -21,12 +21,25 @@ it("counts active encounter evidence on Runner actions", () => {
     timeoutUsed: false,
   };
   const summary = {
-    actionSequence: [entry, { ...entry, side: "corp" }],
+    actionSequence: [
+      entry,
+      { ...entry, side: "corp" },
+      {
+        ...entry,
+        actionType: "continue_run",
+        evidence: [
+          "pump_cannot_lead_to_useful_break:true",
+          "pump_would_destroy_access_reserve:true",
+        ],
+      },
+    ],
   } as AiSimulationSummary;
   expect(summarizeEncounterEffectMetrics([summary])).toMatchObject({
     futureEffectSubroutinesEncountered: 1,
     futureEffectSubroutinesWithRemainingIce: 1,
     futureEffectBreaksTaken: 1,
     futureEffectSubroutinesWithoutRemainingIce: 0,
+    pumpActionsThatCouldNotLeadToBreak: 0,
+    pumpActionsThatDestroyedAccessReserve: 0,
   });
 });

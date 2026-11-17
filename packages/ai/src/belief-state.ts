@@ -293,7 +293,7 @@ function buildBeliefState(input: AiDecisionInput): BeliefState {
     [
       ...ownPrivateEntries(input),
       ...publicBoardEntries(input),
-      ...revealedOpponentEntries(input, classifications),
+      ...revealedOpponentEntries(input, history, classifications),
       ...unknownEntries(input),
       ...hypothesisEntries(input, classifications, remoteRootTypeDeductions),
       ...remoteRootTypeDeductionEntries(input.side, remoteRootTypeDeductions),
@@ -587,6 +587,7 @@ function publicBoardEntries(input: AiDecisionInput): BeliefEntry[] {
 
 function revealedOpponentEntries(
   input: AiDecisionInput,
+  history: readonly PublicGameEvent[],
   classifications: BeliefEventClassification[],
 ): BeliefEntry[] {
   const entries: BeliefEntry[] = [];
@@ -603,17 +604,11 @@ function revealedOpponentEntries(
     });
   }
 
-  for (const classification of classifications) {
-    const event =
-      input.playerView.publicEvents.find(
-        (candidate) => candidate.eventId === classification.eventId,
-      ) ??
-      input.eventTail.find(
-        (candidate) => candidate.eventId === classification.eventId,
-      );
-    const definitionId = event
-      ? publicKnownCardDefinitionId(event, classification)
-      : undefined;
+  for (const [index, classification] of classifications.entries()) {
+    const definitionId = publicKnownCardDefinitionId(
+      history[index]!,
+      classification,
+    );
     if (!definitionId) continue;
     const revealedOpponentFamilySet = new Set([
       "access",
@@ -1714,6 +1709,8 @@ function positionInvalidatesKey(
     if (event.serverId && event.installedPositionKey) {
       return key === `${event.serverId}:${event.installedPositionKey}`;
     }
+    if (isInstalledRootEvent(event) && event.serverId)
+      return key.startsWith(`${event.serverId}:root:`);
     if (event.family === "discard" && !event.serverId)
       return key.startsWith("hq:");
     return event.serverId ? key.startsWith(`${event.serverId}:`) : true;
@@ -1867,6 +1864,7 @@ function rdTopRemovedByRunnerAccess(event: BeliefEventClassification): boolean {
   return (
     event.actor === "runner" &&
     accessEventZone(event) === "rd" &&
+    !isInstalledRootEvent(event) &&
     runnerRdTopRemovalActionTypeSet.has(event.actionType)
   );
 }
@@ -1876,8 +1874,15 @@ function isRunnerHqAccess(event: BeliefEventClassification): boolean {
     event.actor === "runner" &&
     event.actionType === "access_card" &&
     accessEventZone(event) === "hq" &&
-    event.accessedArea !== "root" &&
-    !event.accessedCardPositionKey?.startsWith("root:")
+    !isInstalledRootEvent(event)
+  );
+}
+
+function isInstalledRootEvent(event: BeliefEventClassification): boolean {
+  return (
+    event.installPlacement === "root" ||
+    event.accessedArea === "root" ||
+    event.accessedCardPositionKey?.startsWith("root:") === true
   );
 }
 
@@ -2003,14 +2008,14 @@ function rndTopDefinitionFromEvent(
   const privateLookTop = rndPrivateLookDefinitions(event)[0];
   if (privateLookTop) return privateLookTop;
   if (
-    classification.actor === "runner" &&
-    classification.actionType === "access_card" &&
-    classification.serverId === "rd"
+    isRunnerRdAccess(classification)
   )
     return definitionId;
   if (
     classification.serverId === "rd" &&
-    (classification.family === "reveal" || classification.family === "expose")
+    (classification.family === "reveal" || classification.family === "expose") &&
+    !isInstalledRootEvent(classification) &&
+    !classification.installedPositionKey
   )
     return definitionId;
   return undefined;
@@ -2203,7 +2208,8 @@ function hqHandMemoryAdjustment(
     (event.family === "steal" ||
       event.family === "trash" ||
       event.family === "score") &&
-    event.serverId === "hq"
+    event.serverId === "hq" &&
+    !isInstalledRootEvent(event)
   ) {
     return definitionId
       ? { kind: "remove_known", reason: `known_hq_card_${event.family}` }
@@ -3059,7 +3065,8 @@ function isRunnerRdAccess(event: BeliefEventClassification): boolean {
   return (
     event.actor === "runner" &&
     event.actionType === "access_card" &&
-    accessEventZone(event) === "rd"
+    accessEventZone(event) === "rd" &&
+    !isInstalledRootEvent(event)
   );
 }
 
@@ -3096,6 +3103,7 @@ function rndInvalidationReason(
   ]);
   if (
     accessEventZone(event) === "rd" &&
+    !isInstalledRootEvent(event) &&
     rdMovedCardActionTypeSet.has(event.actionType)
   ) {
     return "rd_access_moved_card";

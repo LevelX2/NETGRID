@@ -1,5 +1,5 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
-import { createAiHintsByCard } from "../ai-hints";
+import { AI_HINTS_BY_CARD } from "../ai-hints";
 import {
   quoteAccessReserve,
   type AccessReserveEconomyPosture,
@@ -13,8 +13,6 @@ import { rolesMatch } from "../role-match";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import { assessRunnerAccessTrashImpactFromPlanningCard } from "../access/runner-access-trash-impact";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
-
-const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type KnownRemoteAccessCommitment = {
   serverId: string;
@@ -108,14 +106,14 @@ export function projectKnownRemoteTrashCommitment(
   });
   const desiredCreditReserve = reserveQuote.desiredCreditReserve;
   const support = knownRemoteTrashCreditSupport(input, params.rootType);
-  const generalTrashCost = support.freeTrash
-    ? 0
-    : Math.max(0, params.trashCost - support.dedicatedCredits);
+  const generalTrashCost = Math.max(
+    0,
+    params.trashCost - support.dedicatedCredits,
+  );
   const creditsAfterTrash = params.creditsAfterPath - generalTrashCost;
   const technicallyAffordable = params.creditsAfterPath >= generalTrashCost;
   const targetProfile = knownRemoteTrashTargetProfile(
     params.definitionId,
-    params.trashCost,
     params.visibleCard,
   );
   const preservesReserve =
@@ -161,14 +159,22 @@ export function projectKnownRemoteTrashCommitment(
       removalCondition: `Bind the observed Corp trash target ${params.definitionId} to its canonical planning card.`,
     });
   }
-  const reserveBreakAllowed =
-    impact.recommendation === "trash" && !preservesReserve;
   const baseEvidence = [
     ...support.evidence,
     ...targetProfile.evidence,
     ...reserveQuote.evidence,
     ...impact.evidenceCodes,
   ];
+
+  const assessedCost = {
+    targetValue: targetProfile.value,
+    generalTrashCost,
+    desiredCreditReserve,
+    creditsAfterTrash,
+    finitePoolValueRemaining: targetProfile.corpValueRemaining,
+    technicallyAffordable,
+    preservesReserve,
+  };
 
   if (
     technicallyAffordable &&
@@ -199,13 +205,7 @@ export function projectKnownRemoteTrashCommitment(
         "remote_known_no_current_payoff",
       ],
       evidence: baseEvidence,
-      targetValue: targetProfile.value,
-      generalTrashCost,
-      desiredCreditReserve,
-      creditsAfterTrash,
-      finitePoolValueRemaining: targetProfile.corpValueRemaining,
-      technicallyAffordable,
-      preservesReserve,
+      ...assessedCost,
       reserveBreakAllowed: false,
       commitment,
     };
@@ -233,14 +233,8 @@ export function projectKnownRemoteTrashCommitment(
         "remote_root_trash_unaffordable",
       ],
       evidence: baseEvidence,
-      targetValue: targetProfile.value,
-      generalTrashCost,
-      desiredCreditReserve,
-      creditsAfterTrash,
-      finitePoolValueRemaining: targetProfile.corpValueRemaining,
-      technicallyAffordable,
-      preservesReserve,
-      reserveBreakAllowed,
+      ...assessedCost,
+      reserveBreakAllowed: false,
       commitment,
     };
   }
@@ -267,14 +261,8 @@ export function projectKnownRemoteTrashCommitment(
         "remote_root_trash_reserve_would_break",
       ],
       evidence: baseEvidence,
-      targetValue: targetProfile.value,
-      generalTrashCost,
-      desiredCreditReserve,
-      creditsAfterTrash,
-      finitePoolValueRemaining: targetProfile.corpValueRemaining,
-      technicallyAffordable,
-      preservesReserve,
-      reserveBreakAllowed,
+      ...assessedCost,
+      reserveBreakAllowed: false,
       commitment,
     };
   }
@@ -300,14 +288,8 @@ export function projectKnownRemoteTrashCommitment(
         : []),
     ],
     evidence: baseEvidence,
-    targetValue: targetProfile.value,
-    generalTrashCost,
-    desiredCreditReserve,
-    creditsAfterTrash,
-    finitePoolValueRemaining: targetProfile.corpValueRemaining,
-    technicallyAffordable,
-    preservesReserve,
-    reserveBreakAllowed,
+    ...assessedCost,
+    reserveBreakAllowed: !preservesReserve,
     commitment,
   };
 }
@@ -334,101 +316,45 @@ function trashCommitment(
 function knownRemoteTrashCreditSupport(
   input: AiDecisionInput,
   rootType: string,
-): { dedicatedCredits: number; freeTrash: boolean; evidence: string[] } {
+): { dedicatedCredits: number; evidence: string[] } {
+  const use =
+    rootType === "asset"
+      ? "trash_nodes"
+      : rootType === "upgrade"
+        ? "trash_upgrades"
+        : undefined;
   let dedicatedCredits = 0;
-  let freeTrash = false;
-  const sources: string[] = [];
-  for (const card of input.playerView.own.rig ?? []) {
-    if (!card.known || !card.definitionId) continue;
-    const hint = AI_HINTS_BY_CARD.get(card.definitionId);
-    const effects =
-      (
-        hint as
-          | {
-              effects?: Array<{
-                amount?: number;
-                kind?: string;
-                resource?: string;
-                target?: string;
-                economyMode?: string;
-              }>;
-            }
-          | undefined
-      )?.effects ?? [];
-    for (const effect of effects) {
-      if (trashSupportEffectTargetHasFreeTrash(effect.target)) {
-        freeTrash = true;
-        sources.push(card.definitionId);
+  const sources = new Set<string>();
+  if (use) {
+    for (const card of input.playerView.own.rig ?? []) {
+      if (!card.known || !card.definitionId) continue;
+      const pool = card.counterDisplays?.find(
+        (display) =>
+          display.creditPool?.kind === "restricted_credit" &&
+          display.creditPool.uses?.includes(use),
+      );
+      if (!pool || !Number.isSafeInteger(pool.amount) || pool.amount <= 0)
         continue;
-      }
-      if (!trashSupportEffectMatchesRoot(effect.target, rootType)) continue;
-      if (
-        effect.kind === "trash_credit" ||
-        (effect.kind === "recurring_economy" &&
-          effect.resource === "credits" &&
-          effect.economyMode === "restricted_credit")
-      ) {
-        const amount = Math.max(0, Math.floor(effect.amount ?? 0));
-        if (amount <= 0) continue;
-        dedicatedCredits += amount;
-        sources.push(card.definitionId);
-      }
+      dedicatedCredits += pool.amount;
+      sources.add(card.definitionId);
     }
   }
   return {
     dedicatedCredits,
-    freeTrash,
     evidence: [
       `known_remote_root_trash_dedicated_credits:${dedicatedCredits}`,
-      `known_remote_root_free_trash_support:${freeTrash}`,
-      ...[...new Set(sources)]
+      ...[...sources]
         .slice(0, 4)
         .map((source) => `known_remote_root_trash_support_source:${source}`),
     ],
   };
 }
 
-export function trashSupportEffectTargetHasFreeTrash(
-  target: string | undefined,
-): boolean {
-  if (!target) return false;
-  const targetTokens = new Set(
-    target
-      .toLowerCase()
-      .split(/[.:-]+/)
-      .filter(Boolean),
-  );
-  return targetTokens.has("free_trash");
-}
-
-function trashSupportEffectMatchesRoot(
-  target: string | undefined,
-  rootType: string,
-): boolean {
-  if (!target) return true;
-  const normalized = target.toLowerCase();
-  if (normalized === "trash_cost") {
-    return true;
-  }
-  if (normalized === rootType) return true;
-  const tokens = new Set(normalized.split(/[._:-]+/).filter(Boolean));
-  if (rootType === "asset" && tokens.has("node") && tokens.has("trash")) {
-    return true;
-  }
-  if (rootType === "upgrade" && tokens.has("upgrade") && tokens.has("trash")) {
-    return true;
-  }
-  return normalized === "node" && rootType === "asset";
-}
-
 function knownRemoteTrashTargetProfile(
   definitionId: string,
-  trashCost: number,
   visibleCard: VisibleCard | undefined,
 ): {
   value: number;
-  reserveBreakAllowed: boolean;
-  finitePoolEconomy: boolean;
   finitePoolDepleted: boolean;
   corpValueRemaining: number;
   evidence: string[];
@@ -450,20 +376,9 @@ function knownRemoteTrashTargetProfile(
   const corpValueRemaining = valueProjection.finitePoolValueRemaining;
   const finitePoolEconomy = valueProjection.kind === "finite_economy_pool";
   const finitePoolDepleted = finitePoolEconomy && corpValueRemaining <= 0;
-  const highRemainingFinitePool =
-    finitePoolEconomy &&
-    corpValueRemaining >= Math.max(trashCost + 2, 8) &&
-    trashCost > 0;
   const highImpactRole = knownRemoteRootHasHighImpactRole(roles);
-  const reserveBreakAllowed =
-    highImpactRole &&
-    value >= 2 &&
-    !finitePoolDepleted &&
-    (!finitePoolEconomy || highRemainingFinitePool);
   return {
     value,
-    reserveBreakAllowed,
-    finitePoolEconomy,
     finitePoolDepleted,
     corpValueRemaining,
     evidence: [
@@ -472,7 +387,6 @@ function knownRemoteTrashTargetProfile(
       `known_remote_root_finite_pool_economy:${finitePoolEconomy}`,
       `known_remote_root_finite_pool_depleted:${finitePoolDepleted}`,
       `known_remote_root_corp_value_remaining:${corpValueRemaining}`,
-      `known_remote_root_high_remaining_finite_pool:${highRemainingFinitePool}`,
       ...valueProjection.evidence,
       ...roles.slice(0, 6).map((role) => `known_remote_root_role:${role}`),
     ],

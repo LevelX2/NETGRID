@@ -148,10 +148,12 @@ import {
   sortedUnique,
   stackabilityClassForPersistentInstall,
   visibleOrRuntimeNumber,
+} from "./runner-persistent-install-evaluation";
+import {
   visibleRunnerTagThreat,
   visibleRunnerTraceThreat,
   visibleRunnerThreat,
-} from "./runner-persistent-install-evaluation";
+} from "../visible-runner-threat";
 import {
   runnerEffectsProvideCorpForcedDraw,
   runnerEffectsHaveOnlyTagClearCreditPool,

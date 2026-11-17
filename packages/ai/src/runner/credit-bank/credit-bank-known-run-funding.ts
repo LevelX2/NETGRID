@@ -56,8 +56,8 @@ export function creditBankFundsKnownUrgentRun(
     acceptRoute: (route) => {
       if (!cashOutIds.has(route.steps[0]?.actionId ?? "")) return false;
       const actionIds = route.steps.map((step) => step.actionId);
-      if (actionIds.some((id) => id === undefined)) return false;
-      const funded = params.quoteAfterCashouts(target, actionIds as string[]);
+      if (!actionIds.every((id) => id !== undefined)) return false;
+      const funded = params.quoteAfterCashouts(target, actionIds);
       return (
         funded !== undefined &&
         funded.actionId === target.actionId &&

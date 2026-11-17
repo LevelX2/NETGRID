@@ -5,10 +5,12 @@ import type { RunnerRunOrigin } from "../../plans/runner-run-origin-contract";
 import type { RunnerRunWindowActionAssessment } from "../../plans/runner-tactical-plan-contracts";
 import {
   currentEncounteredIceCard,
-  currentEncounterUnbrokenSubroutineIndexes,
+  currentEncounterCompleteSubroutineIndexes,
   currentRunRemainingIce,
 } from "../../runtime/current-encounter";
 import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
+import { visibleRunnerRunOnlyCredits } from "../../run-analysis/visible-run-credit-budget";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { runnerRigAfterEncounter } from "../../runtime/runner-rig-after-encounter";
 import {
   assessKnownRezzedIcePath,
@@ -54,12 +56,14 @@ export function runnerRunProgramSearchAssessment(
     typeof run.runId !== "string" ||
     run.runId.length === 0 ||
     input.playerView.timingPoint !== "run.encounter_ice" ||
-    continuation?.payload?.encounterWillEndRun !== true ||
+    !actionMatchesCurrentDecision(input, continuation) ||
+    continuation.payload?.encounterWillEndRun !== true ||
     !origin?.runRiskContract ||
     origin.runRiskContract.serverId !== run.attackedServerId ||
     candidate.abilityBindingMethod !== "canonical_capability_id" ||
     action.type !== "activated_card_ability" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !actionMatchesCurrentDecision(input, action) ||
+    action.actionId !== candidate.actionId ||
     action.source !== source?.instanceId ||
     !source?.definitionId ||
     source.hostedOn !== undefined ||
@@ -80,9 +84,9 @@ export function runnerRunProgramSearchAssessment(
   const ice = currentEncounteredIceCard(input);
   if (!ice?.known || !ice.effectiveRunQuote)
     return reject("runner_run_program_search_requires_known_encounter_quote");
-  const open = currentEncounterUnbrokenSubroutineIndexes(input);
+  const open = currentEncounterCompleteSubroutineIndexes(input);
   const subroutines = ice.effectiveRunQuote.subroutines.filter((_, i) =>
-    open.has(i),
+    open?.has(i),
   );
   if (
     !subroutines.length ||
@@ -95,13 +99,16 @@ export function runnerRunProgramSearchAssessment(
   };
   const context = currentRunPathContext(input);
   const currentRig = input.playerView.own.rig ?? [];
+  const runOnlyCredits = visibleRunnerRunOnlyCredits(run);
+  const runCreditBudget = (credits: number, rig: typeof currentRig) =>
+    runnerRunPathCreditBudgetWithVisiblePools(credits + runOnlyCredits, rig, {
+      liquidCredits: credits,
+      excludeStealthCredits: context.excludeStealthTraceCredits === true,
+    });
   const currentPath = assessKnownRezzedIcePath(
     [currentIce],
     currentRig,
-    runnerRunPathCreditBudgetWithVisiblePools(
-      input.playerView.own.credits,
-      currentRig,
-    ),
+    runCreditBudget(input.playerView.own.credits, currentRig),
     [],
     input.playerView.opponent.credits,
     context,
@@ -137,7 +144,7 @@ export function runnerRunProgramSearchAssessment(
       const current = assessKnownRezzedIcePath(
         [currentIce],
         rig,
-        runnerRunPathCreditBudgetWithVisiblePools(credits, rig),
+        runCreditBudget(credits, rig),
         [],
         input.playerView.opponent.credits,
         context,

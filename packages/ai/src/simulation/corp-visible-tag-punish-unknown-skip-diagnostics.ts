@@ -12,7 +12,11 @@ import type {
 } from "../runtime/corp-tag-punish-types";
 import { rolesMatch } from "../role-match";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
-import type { CorpVisibleTagPunishOpportunity } from "./corp-visible-tag-punish-opportunities";
+import {
+  visibleCurrentPunishDamageQuote,
+  type CorpVisibleTagPunishOpportunity,
+} from "./corp-visible-tag-punish-opportunities";
+import { fixedTaggedDamageOperation } from "../runtime/corp-fixed-tag-damage-operation-facts";
 
 export type CorpVisibleTagPunishUnknownSkipDiagnosticsDependencies = {
   sourceDefinitionIdForAction: (
@@ -50,7 +54,6 @@ export function createCorpVisibleTagPunishUnknownSkipDiagnosticsContext(
       dependencies.sourceDefinitionIdForAction(input, action) || undefined;
     const chosenCardTitle = titleForCardId(chosenCardId);
     const attribution = corpUnknownSkipAttribution(
-      action,
       decision,
       opportunities,
       chosenFamily,
@@ -67,7 +70,13 @@ export function createCorpVisibleTagPunishUnknownSkipDiagnosticsContext(
         chosenCardTitle;
     diagnostics.corpVisibleTagPunishUnknownSkipAttribution = attribution;
     diagnostics.corpVisibleTagPunishUnknownSkipPlausibility = plausibility;
-    if (corpUnknownSkipPayoffLethalOrNearLethal(input, opportunities))
+    if (
+      corpUnknownSkipPayoffLethalOrNearLethal(
+        input,
+        opportunities,
+        survivalContext,
+      )
+    )
       diagnostics.corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal = true;
     if (fixGate.eligible)
       diagnostics.corpVisibleTagPunishUnknownSkipFixGateEligible = true;
@@ -116,7 +125,6 @@ export function createCorpVisibleTagPunishUnknownSkipDiagnosticsContext(
 }
 
 function corpUnknownSkipAttribution(
-  action: LegalAction,
   decision: AiDecision,
   opportunities: CorpVisibleTagPunishOpportunity[],
   chosenFamily: CorpTagPunishUnknownChosenFamily,
@@ -250,10 +258,28 @@ function corpUnknownSkipFixGate(
 
 function corpUnknownSkipPayoffLethalOrNearLethal(
   input: AiDecisionInput,
-  opportunities: Array<{ category: CorpVisibleTagPayoffCategory }>,
+  opportunities: readonly CorpVisibleTagPunishOpportunity[],
+  survival: RunnerSurvivalCounterContext,
 ): boolean {
-  return (
-    opportunities.some((opportunity) => opportunity.category === "damage") &&
-    input.playerView.opponent.handCount <= 3
-  );
+  const handCount = input.playerView.opponent.handCount;
+  if (!Number.isSafeInteger(handCount) || handCount < 0) return false;
+  return opportunities.some((opportunity) => {
+    if (opportunity.category !== "damage") return false;
+    const quote = visibleCurrentPunishDamageQuote(input, opportunity);
+    if (quote) {
+      const minimum = quote.damageEnvelope.effectiveDamage.minimum;
+      return (
+        quote.guarantee === "guaranteed" && minimum > 0 && minimum >= handCount
+      );
+    }
+    if (
+      survival.damage ||
+      survival.flatline ||
+      opportunity.action.type !== "play_operation" ||
+      !opportunity.cardId
+    )
+      return false;
+    const fixedDamage = fixedTaggedDamageOperation(opportunity.cardId)?.damage;
+    return fixedDamage !== undefined && fixedDamage >= handCount;
+  });
 }

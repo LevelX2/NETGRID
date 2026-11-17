@@ -120,6 +120,7 @@ describe("native in-run program search (SP-333)", () => {
     "inventory",
     "no_break",
     "hosted_source",
+    "later_damage_group",
   ] as const)(
     "does not sacrifice the source when the exact route lacks %s",
     (boundary) => {
@@ -139,6 +140,31 @@ describe("native in-run program search (SP-333)", () => {
         input.playerView.own.rig!.find(
           (card) => card.instanceId === sourceId,
         )!.hostedOn = "different_host";
+      if (boundary === "later_damage_group") {
+        const run = input.playerView.run!;
+        const damage = {
+          id: "later-damage",
+          type: "do_damage",
+          damageType: "net",
+          amount: 1,
+        } as const;
+        run.encounteredIce!.effectiveRunQuote!.subroutines.push(damage);
+        if (run.position?.kind !== "ice")
+          throw Error("Expected native encounter");
+        const ice = input.playerView.servers.find(
+          (server) => server.id === run.attackedServerId,
+        )!.ice[run.position.iceIndex]!;
+        if (ice.effectiveRunQuote !== run.encounteredIce!.effectiveRunQuote)
+          ice.effectiveRunQuote!.subroutines.push(damage);
+        const continuation = input.legalActions.find(
+          (action) => action.type === "continue_run",
+        )!;
+        continuation.payload = {
+          ...continuation.payload,
+          encounterRemainingSubroutineIds: "subroutine_end_run,later-damage",
+          encounterRemainingSubroutineCount: 2,
+        };
+      }
       const decision = chooseAiAction(input);
       expect(
         input.legalActions.find((a) => a.actionId === decision.actionId)

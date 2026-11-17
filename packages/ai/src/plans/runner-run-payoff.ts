@@ -1,7 +1,7 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { PlanSchedulerContext } from "./plan-scheduler";
 import type { RunnerRunTargetEvaluation } from "../run-analysis/runner-run-target-types";
-import { visibleRunnerTraceThreatOnServer } from "../runner/hand-development/runner-persistent-install-evaluation";
+import { visibleRunnerTraceThreatOnServer } from "../runner/visible-runner-threat";
 export function runnerCardRunHasVisibleDifferentialPayoff(
   input: PlanSchedulerContext["input"],
   candidate: ActionSemanticCandidate,

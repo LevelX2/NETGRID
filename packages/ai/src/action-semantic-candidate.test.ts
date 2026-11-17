@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import { actionProvidesCredits } from "./actions/action-effect-classification";
+import type { AiHintStructuredEffect } from "./hint-ontology";
 
 const ALL_ACTION_TYPES = [
   "mandatory_draw",
@@ -41,6 +42,39 @@ const ALL_ACTION_TYPES = [
 ] as const satisfies readonly LegalAction["type"][];
 
 describe("buildActionSemanticCandidates", () => {
+  it("retains functional effects with distinct counter removal payments", () => {
+    const cardId = "hazard-operation";
+    const action = legalAction("play_operation", 1, {
+      side: "corp",
+      source: "hazard-1",
+    });
+    const effect: AiHintStructuredEffect = {
+      kind: "tag",
+      timing: "action",
+      scope: "runner",
+      target: "counter.corporate_hazard",
+      counterRemoval: { counterType: "trace_tag_counter", credits: 2, clicks: 1, amount: 1 },
+    };
+    const moreExpensive = { ...effect, counterRemoval: { ...effect.counterRemoval!, credits: 4 } };
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [action],
+      observerSide: "corp",
+      stateVersion: 42,
+      visibleSourceDefinitionsByInstanceId: { [action.source]: cardId },
+      cardSemanticProfilesByDefinitionId: {
+        [cardId]: {
+          cardId,
+          tacticSignals: [],
+          functionalEffects: [effect, effect, moreExpensive],
+        },
+      },
+    });
+    expect(candidate?.cardContextFunctionalEffects).toEqual([
+      effect,
+      moreExpensive,
+    ]);
+  });
+
   it("refuses to project an actor-private action for the other player", () => {
     const action = legalAction("resolve_choice", 1, {
       side: "corp",

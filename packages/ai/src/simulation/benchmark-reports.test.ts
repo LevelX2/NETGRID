@@ -812,6 +812,14 @@ describe("benchmark report formatting", () => {
       threshold: 0.7,
     });
 
+    const justAboveCutoff = buildSelfplayActionTypeDominanceReport([dominant], {
+      minDecisions: 4,
+      threshold: 0.8332,
+    });
+    expect(justAboveCutoff.bySide.runner).toMatchObject({
+      topShare: 0.833,
+      status: "dominance_review_required",
+    });
     expect(complete.status).toBe("complete");
     expect(complete.bySide.runner.topShare).toBe(0.25);
     expect(review.status).toBe("dominance_review_required");

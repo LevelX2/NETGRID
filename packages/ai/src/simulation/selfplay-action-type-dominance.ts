@@ -40,8 +40,8 @@ export function buildSelfplayActionTypeDominanceReport(
   const threshold = options.threshold ?? 0.7;
   const minDecisions = options.minDecisions ?? 10;
   const maxRows = options.maxRows ?? 12;
-  const rows = ["all", "runner", "corp"].flatMap((side) =>
-    actionTypeRowsForSide(summaries, side as Side | "all"),
+  const rows = (["all", "runner", "corp"] as const).flatMap((side) =>
+    actionTypeRowsForSide(summaries, side),
   );
   const bySide = {
     all: bucketForSide(rows, "all", threshold, minDecisions),
@@ -78,7 +78,8 @@ export function buildSelfplayActionTypeDominanceReport(
           left.side.localeCompare(right.side) ||
           left.actionType.localeCompare(right.actionType),
       )
-      .slice(0, maxRows),
+      .slice(0, maxRows)
+      .map((row) => ({ ...row, share: roundShare(row.share) })),
   };
 }
 
@@ -100,7 +101,7 @@ function actionTypeRowsForSide(
       side,
       actionType,
       count,
-      share: decisions > 0 ? roundShare(count / decisions) : 0,
+      share: count / decisions,
     }))
     .sort(
       (left, right) =>
@@ -123,7 +124,7 @@ function bucketForSide(
     side,
     decisions,
     ...(top ? { topActionType: top.actionType } : {}),
-    topShare,
+    topShare: roundShare(topShare),
     status:
       decisions < minDecisions
         ? "insufficient_sample"

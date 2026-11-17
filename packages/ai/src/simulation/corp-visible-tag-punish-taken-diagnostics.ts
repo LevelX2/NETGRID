@@ -3,7 +3,10 @@ import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { corpTagPunishSkipReason } from "../runtime/corp-tag-punish-skip-reason";
 import type { CorpVisibleTagPayoffCategory } from "../runtime/corp-tag-punish-types";
 import { fixedTaggedDamageOperation } from "../runtime/corp-fixed-tag-damage-operation-facts";
-import type { CorpVisibleTagPunishOpportunity } from "./corp-visible-tag-punish-opportunities";
+import {
+  visibleCurrentPunishDamageQuote,
+  type CorpVisibleTagPunishOpportunity,
+} from "./corp-visible-tag-punish-opportunities";
 import { runnerSurvivalCounterContextForInput } from "./runner-survival-counter-context";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 
@@ -117,16 +120,7 @@ function visibleLethality(
   const view = input.playerView;
   const handCount = view.opponent.handCount;
   if (!Number.isSafeInteger(handCount) || handCount < 0) return undefined;
-  const quote = view.corpPunishRouteQuoteSet?.routes.find(
-    (route) =>
-      route.complete &&
-      route.stateVersion === view.stateVersion &&
-      route.timingPoint === view.timingPoint &&
-      route.steps.length === 1 &&
-      route.steps[0]?.currentLegalAction?.actionId ===
-        opportunity.action.actionId &&
-      route.damageEnvelope.runnerHandCount === handCount,
-  );
+  const quote = visibleCurrentPunishDamageQuote(input, opportunity);
   if (quote) {
     const { minimum, maximum } = quote.damageEnvelope.effectiveDamage;
     if (quote.guarantee === "guaranteed" && minimum > handCount) return true;

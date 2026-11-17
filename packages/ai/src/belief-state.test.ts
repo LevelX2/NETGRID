@@ -89,6 +89,57 @@ describe("belief-state revealed opponent ownership", () => {
 });
 
 describe("belief-state R&D top freshness", () => {
+  it("keeps R&D root accesses and removals separate from the deck sequence", () => {
+    const deckLook = rndPrivateLookEvent("evt_rd_look", 1, ["simple_agenda"]);
+    const rootContext = {
+      actor: "runner",
+      serverId: "rd",
+      cardDefinitionId: "simple_upgrade",
+      installPlacement: "root",
+      installedPositionKey: "installed-position-v1:upgrade",
+      accessIndex: 0,
+    };
+    const rootAccess = publicEvent("evt_rd_root_access", "access_card", 2, {
+      ...rootContext,
+      actionType: "access_card",
+      accessedCardPositionKey: "root:0",
+      accessedArea: "root",
+    });
+    const rootTrash = publicEvent("evt_rd_root_trash", "trash_accessed_card", 3, {
+      ...rootContext,
+      actionType: "trash_accessed_card",
+    });
+    const beforeTrash = reconstructBeliefState(runnerInput([deckLook, rootAccess]));
+    expect(beforeTrash.knownPositionMemory).toContainEqual(
+      expect.objectContaining({ zone: "rd", positionKey: "root:0", definitionId: "simple_upgrade" }),
+    );
+    const afterTrash = reconstructBeliefState(runnerInput([deckLook, rootAccess, rootTrash]));
+    expect(afterTrash.rndTopFreshness).toMatchObject({
+      knownSequenceDefinitionIds: ["simple_agenda"],
+      knownTopDefinitionId: "simple_agenda",
+    });
+    expect(afterTrash.knownPositionMemory).not.toContainEqual(
+      expect.objectContaining({ zone: "rd", positionKey: "root:0" }),
+    );
+  });
+
+  it("retains the HQ hand copy when the Runner trashes a same-definition upgrade from the root", () => {
+    const hand = hqPrivateLookEvent("evt_hq_look", 1, ["simple_upgrade", "simple_agenda"]);
+    const rootTrash = publicEvent("evt_hq_root_trash", "trash_accessed_card", 2, {
+      actor: "runner",
+      actionType: "trash_accessed_card",
+      serverId: "hq",
+      installPlacement: "root",
+      installedPositionKey: "installed-position-v1:upgrade",
+      cardDefinitionId: "simple_upgrade",
+    });
+    const belief = reconstructBeliefState(runnerInput([hand, rootTrash], 2));
+    expect(belief.runnerOpponentModel?.hqHandMemory).toMatchObject({
+      allCardsKnown: true,
+      knownDefinitions: ["simple_upgrade", "simple_agenda"],
+    });
+  });
+
   it("retains the ordered non-stolen remainder of a five-card R&D multiaccess after the Corp draw", () => {
     const accessedDefinitions = [
       "simple_economy_operation",

@@ -14,6 +14,31 @@ import {
 } from "./shell-traders-plan-signals";
 
 describe("runner Shell Traders pipeline signals", () => {
+  it("reserves memory only for programs actually staged by Shell Traders", () => {
+    const source = shellTraders();
+    const target = card("dwarf-new", "onr_v1_021_dwarf", "program", {
+      installCost: 3,
+      memoryCost: 1,
+    });
+    const otherSetAside = card("dwarf-set-aside", "onr_v1_021_dwarf", "program", {
+      memoryCost: 1,
+    });
+    const action = shellAction("prepare-dwarf", source.instanceId, target, {
+      delayedInstallAbility: "set_aside_from_grip",
+      shellCounterAmount: 3,
+    });
+    const input = runnerInput([action], {
+      grip: [target],
+      rig: [source],
+      setAside: [otherSetAside],
+      memoryLimit: 4,
+      memoryUsed: 3,
+    });
+    expect(signals(input, [coverageGap("wall-gap", "breaker_wall")])).toEqual([
+      expect.objectContaining({ phase: "prepare", freeMemory: 1 }),
+    ]);
+  });
+
   it("stays completely inactive without an installed Shell Traders source", () => {
     const target = card("dwarf", "onr_v1_021_dwarf", "program", {
       installCost: 3,

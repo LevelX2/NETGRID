@@ -543,6 +543,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
   it("does not start a visible R&D trace run that cannot reach access and adds a run lock", () => {
     const input = aiInput({
+      traceRulesProfile: "modern_open",
       credits: 4,
       servers: [
         server("rd", {
@@ -572,6 +573,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
   it("keeps visible R&D trace pressure available when the runner can cover the base trace", () => {
     const input = aiInput({
+      traceRulesProfile: "modern_open",
       credits: 6,
       opponentCredits: 0,
       servers: [
@@ -602,6 +604,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
   it("defers visible R&D trace pressure when visible Corp max is not covered", () => {
     const input = aiInput({
+      traceRulesProfile: "modern_open",
       credits: 6,
       opponentCredits: 5,
       servers: [
@@ -639,6 +642,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
   it("defers visible R&D trace tag ICE until the tag can be avoided", () => {
     const input = aiInput({
+      traceRulesProfile: "modern_open",
       credits: 2,
       servers: [
         server("rd", {
@@ -974,6 +978,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
   it("keeps a visible remote agenda runnable through Hunter tag risk", () => {
     const input = aiInput({
+      traceRulesProfile: "modern_open",
       credits: 2,
       servers: [
         server("remote_1", {
@@ -2629,6 +2634,20 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           title: "Poltergeist",
           type: "program",
           known: true,
+          counterDisplays: [{
+            id: "restricted_pool",
+            amount: 2,
+            displayKind: "restricted_pool",
+            label: "Trash-Credits",
+            ariaLabel: "Trash-Credits",
+            counterType: "bit",
+            usageHint: "spendable",
+            creditPool: {
+              kind: "restricted_credit",
+              capacity: 2,
+              uses: ["trash_nodes"],
+            },
+          }],
         }),
       ],
       servers: [
@@ -4177,6 +4196,7 @@ function bindRemoteAgendaStealQuote(
 
 function aiInput(params: {
   credits: number;
+  traceRulesProfile?: NonNullable<PlayerView["traceRulesProfile"]>;
   stateVersion?: number;
   opponentCredits?: number;
   opponentHandCount?: number;
@@ -4188,6 +4208,7 @@ function aiInput(params: {
 }): AiDecisionInput {
   const playerView: PlayerView = {
     stateVersion: params.stateVersion ?? 1,
+    ...(params.traceRulesProfile ? { traceRulesProfile: params.traceRulesProfile } : {}),
     side: "runner",
     activeSide: "runner",
     phase: "runner_action_phase",
