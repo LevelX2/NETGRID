@@ -49,7 +49,11 @@ describe("match 5F6D runner decision checkpoints", () => {
   });
 
   it("keeps the minimal winning bid under the Trace-Limit model", () => {
-    expectCheckpointToPass(fixture(unwinnableTraceControlJson));
+    expectCheckpointToPass(
+      mutateFixture(unwinnableTraceControlJson, (checkpoint) => {
+        publishOpenTraceBid(checkpoint);
+      }),
+    );
   });
 
   it("does not take the tag when a visible active punish payoff remains", () => {
@@ -112,6 +116,7 @@ describe("match 5F6D runner decision checkpoints", () => {
       corpBidResolved.publicPayload.corpCreditBid = 2;
       delete corpBidResolved.publicPayload.baseTraceStrength;
       delete corpBidResolved.publicPayload.traceStrength;
+      publishOpenTraceBid(checkpoint);
       const choice = state.pendingChoice;
       if (!choice || choice.kind !== "bid_amount")
         throw new Error("Expected Runner trace-bid choice");
@@ -191,6 +196,16 @@ function mutateFixture(
   mutation(result);
   result.engine.stateHash = hashGameState(result.engine.testOnlyGameState);
   return result;
+}
+
+function publishOpenTraceBid(checkpoint: AiDecisionCheckpointV1): void {
+  const state = checkpoint.engine.testOnlyGameState;
+  const trace = state.trace;
+  if (trace?.status !== "runner_bid" || trace.traceValue === undefined)
+    throw new Error("Expected the fixture's open Runner bid with Corp strength");
+  state.traceRulesProfile = "modern_open";
+  trace.traceRulesProfile = "modern_open";
+  trace.bidsRevealed = true;
 }
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {

@@ -8,6 +8,10 @@
     "matchId": "match_58a8e46b91340fb2",
     "side": "corp",
     "playerView": {
+      "corpMandatoryBaseDrawQuote": {
+        "baseCount": 1,
+        "virusDrawCount": 0
+      },
       "side": "corp",
       "stateVersion": 188,
       "turnSerial": 24,

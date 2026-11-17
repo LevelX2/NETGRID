@@ -19,6 +19,7 @@ function fixture(g: number, d: number) {
 }
 function decide(f: ReturnType<typeof fixture>) {
   const input = f.checkpoint.input as AiDecisionInputWithDeckCapabilities;
+  input.playerView.corpMandatoryBaseDrawQuote = getPlayerView(f.state as GameState, "corp").corpMandatoryBaseDrawQuote;
   resetResidentPlanPortfolioMemory();
   input.planningStateIdentity = buildPlanningStateIdentity(input);
   restoreAiRuntimeCheckpoint(input,input.ownDeckSnapshot!.deckSnapshotId,f.checkpoint.runtime);

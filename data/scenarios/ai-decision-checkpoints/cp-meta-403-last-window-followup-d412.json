@@ -3,6 +3,10 @@
     "matchId": "ai-sim_meta-403-round-6-020_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0_standard_corp_mph465dv_1.1.0",
     "side": "corp",
     "playerView": {
+      "corpMandatoryBaseDrawQuote": {
+        "baseCount": 1,
+        "virusDrawCount": 0
+      },
       "side": "corp",
       "stateVersion": 411,
       "traceRulesProfile": "modern_open",

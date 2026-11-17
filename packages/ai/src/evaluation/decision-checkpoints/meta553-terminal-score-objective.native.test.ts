@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { buildPlanningStateIdentity } from "../../plans/turn-planning-contracts";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/action-card-semantic-profiles";
 import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
@@ -96,6 +97,7 @@ describe("pairing 553 terminal score objective", () => {
     if (!snapshotId) throw new Error("Missing native deck snapshot");
     // This is an initial-planning probe, deliberately without the persisted
     // portfolio that already contains the old decision at this StateVersion.
+    cp.input.planningStateIdentity = buildPlanningStateIdentity(cp.input);
     const before = JSON.stringify(cp.input);
     const result = chooseAiAction(cp.input);
     expect(JSON.stringify(cp.input)).toBe(before);

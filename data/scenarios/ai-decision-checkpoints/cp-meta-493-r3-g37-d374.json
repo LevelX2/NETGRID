@@ -3,6 +3,10 @@
     "matchId": "match_b5d8bad69c529ef7",
     "side": "corp",
     "playerView": {
+      "corpMandatoryBaseDrawQuote": {
+        "baseCount": 1,
+        "virusDrawCount": 0
+      },
       "side": "corp",
       "runnerNextTurnCreditClicks": 3,
       "stateVersion": 373,
