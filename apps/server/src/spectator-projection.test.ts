@@ -11,6 +11,11 @@ import {
   type SpectatorProjectionV1,
 } from "./spectator-projection";
 import type { EventRecord, StateSnapshot, StoredMatch } from "./multiplayer";
+import {
+  INITIAL_STATE_SNAPSHOT_ID,
+  preActionStateSnapshotId,
+  type StateSnapshotId,
+} from "./state-snapshot-id";
 
 describe("SpectatorProjectionV1 leakscan harness", () => {
   it("builds a named versioned spectator projection without player, replay, token or hidden-card payload leaks", () => {
@@ -258,9 +263,9 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
     actionReceipts: [],
     undoSnapshots: [],
     stateSnapshots: [
-      snapshot(matchId, initial, 5, "snap_initial"),
-      snapshot(matchId, hiddenState, 5, "snap_hidden_cursor"),
-      snapshot(matchId, futureState, 5, "snap_future_cursor"),
+      snapshot(matchId, initial, 5, INITIAL_STATE_SNAPSHOT_ID),
+      snapshot(matchId, hiddenState, 5, preActionStateSnapshotId(3)),
+      snapshot(matchId, futureState, 5, preActionStateSnapshotId(4)),
     ],
     pendingUndo: {
       undoRequestId: "undo_secret",
@@ -361,7 +366,7 @@ function snapshot(
   matchId: string,
   gameState: GameState,
   matchVersion: number,
-  snapshotId: string,
+  snapshotId: StateSnapshotId,
 ): StateSnapshot {
   return {
     snapshotId,

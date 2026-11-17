@@ -163,6 +163,7 @@ type ClientWsMessage =
         side: Side;
         actionId: string;
         clientKnownStateVersion: number;
+        clientKnownMatchVersion: number;
         idempotencyKey: string;
         selectedTargets?: Record<string, string>;
         selectedChoices?: Record<string, unknown>;
@@ -170,7 +171,11 @@ type ClientWsMessage =
     }
   | {
       type: "request_undo";
-      payload: { targetEventId: string; reason?: string };
+      payload: {
+        targetEventId: string;
+        clientKnownMatchVersion: number;
+        reason?: string;
+      };
     }
   | { type: "accept_undo"; payload: { undoRequestId: string } }
   | { type: "decline_undo"; payload: { undoRequestId: string } }
@@ -416,6 +421,7 @@ export class NetgridRealtimeServer {
           side: context.side,
           sessionToken: context.sessionToken,
           targetEventId: message.payload.targetEventId,
+          clientKnownMatchVersion: message.payload.clientKnownMatchVersion,
           ...(message.payload.reason ? { reason: message.payload.reason } : {}),
         }),
       );
@@ -542,6 +548,7 @@ export class NetgridRealtimeServer {
       sessionToken: context.sessionToken,
       actionId: payload.actionId,
       clientKnownStateVersion: payload.clientKnownStateVersion,
+      clientKnownMatchVersion: payload.clientKnownMatchVersion,
       idempotencyKey: payload.idempotencyKey,
       ...(payload.selectedTargets
         ? { selectedTargets: payload.selectedTargets }
@@ -716,23 +723,7 @@ export class NetgridRealtimeServer {
       false,
     );
     if ("error" in disconnected) return;
-    if (isLobbyPayload(disconnected)) {
-      await this.sendOpponentBootstrap(
-        context.matchId,
-        opposite(context.side),
-        { side: context.side, connected: false },
-      );
-      return;
-    }
-    if (isTerminalSidePayload(disconnected)) {
-      await this.sendOpponentBootstrap(
-        context.matchId,
-        opposite(context.side),
-        { side: context.side, connected: false },
-      );
-      return;
-    }
-    this.sendOpponentStatus(context.matchId, opposite(context.side), {
+    await this.sendOpponentBootstrap(context.matchId, opposite(context.side), {
       side: context.side,
       connected: false,
     });
@@ -781,17 +772,6 @@ export class NetgridRealtimeServer {
   private broadcastPayload(payload: ServicePayload): void {
     const connection = this.connection(payload.matchId, payload.side);
     sendBootstrap(connection?.socket, payload);
-  }
-
-  private sendOpponentStatus(
-    matchId: string,
-    side: Side,
-    status: SidePayload["opponentStatus"],
-  ): void {
-    send(this.connection(matchId, side)?.socket, {
-      type: "opponent_status",
-      payload: status,
-    });
   }
 
   private async sendOpponentBootstrap(
@@ -2979,7 +2959,10 @@ async function routeHttp(
       if (probeText !== null) {
         if (probeText.length > 16384) {
           sendJson(response, 400, {
-            error: { code: "engine_probe_request_invalid", message: "Die Gegenprobe ist zu groß." },
+            error: {
+              code: "engine_probe_request_invalid",
+              message: "Die Gegenprobe ist zu groß.",
+            },
           });
           return;
         }
@@ -4487,65 +4470,11 @@ function sendBootstrap(
     send(socket, { type: "lobby_update", payload });
     return;
   }
-  send(socket, {
-    type: "state_update",
-    payload: {
-      matchStatus: payload.matchStatus,
-      matchVersion: payload.matchVersion,
-      playerView: payload.playerView,
-      ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
-      pendingUndo: payload.pendingUndo ?? null,
-    },
-  });
-  send(socket, {
-    type: "legal_actions",
-    payload: {
-      stateVersion: payload.playerView.stateVersion,
-      legalActions: payload.legalActions,
-    },
-  });
-  send(socket, {
-    type: "choice_request",
-    payload: { choice: payload.pendingChoice ?? null },
-  });
-  send(socket, {
-    type: "event_log_update",
-    payload: { events: payload.eventTail },
-  });
-  send(socket, { type: "opponent_status", payload: payload.opponentStatus });
-  send(socket, {
-    type: "ai_turn",
-    payload: payload.aiTurnPresentation ?? null,
-  });
-  if (payload.pendingUndo)
-    send(socket, { type: "undo_request", payload: payload.pendingUndo });
-  if (payload.winner && payload.finalStateHash)
-    send(socket, {
-      type: "match_finished",
-      payload: {
-        matchStatus: payload.matchStatus,
-        winner: payload.winner,
-        finalStateHash: payload.finalStateHash,
-        ...(payload.resultSummary
-          ? { resultSummary: payload.resultSummary }
-          : {}),
-      },
-    });
+  send(socket, { type: "state_update", payload });
 }
 
 function isLobbyPayload(payload: ServicePayload): payload is LobbyPayload {
   return !("playerView" in payload);
-}
-
-function isTerminalSidePayload(
-  payload: ServicePayload,
-): payload is SidePayload {
-  return (
-    "playerView" in payload &&
-    (payload.matchStatus === "finished" ||
-      payload.matchStatus === "forfeited") &&
-    Boolean(payload.winner)
-  );
 }
 
 function send(socket: WebSocket | undefined, message: ServerWsMessage): void {
@@ -4559,10 +4488,18 @@ function sendUserError(
     code: string;
     diagnosticCode?: string;
     currentStateVersion?: number;
-    playerView?: ApiUserErrorPayload["playerView"];
   },
 ): void {
-  send(socket, { type: "error", payload: apiUserErrorPayload(error) });
+  send(socket, {
+    type: "error",
+    payload: apiUserErrorPayload({
+      code: error.code,
+      ...(error.diagnosticCode ? { diagnosticCode: error.diagnosticCode } : {}),
+      ...(typeof error.currentStateVersion === "number"
+        ? { currentStateVersion: error.currentStateVersion }
+        : {}),
+    }),
+  });
 }
 
 function apiUserErrorPayload(error: {
@@ -4606,7 +4543,9 @@ function localeNeutralServiceResult<T>(result: T): T | Record<string, unknown> {
       ...(typeof errorRecord.currentStateVersion === "number"
         ? { currentStateVersion: errorRecord.currentStateVersion }
         : {}),
-      ...(errorRecord.playerView ? { playerView: errorRecord.playerView } : {}),
+      ...(!record.payload && errorRecord.playerView
+        ? { playerView: errorRecord.playerView }
+        : {}),
     }),
   };
 }

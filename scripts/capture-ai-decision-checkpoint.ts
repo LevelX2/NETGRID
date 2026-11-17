@@ -1,6 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { decodeStoredGameState } from "../apps/server/src/storage-sqlite";
 
 import {
   hashGameState,
@@ -162,7 +163,7 @@ function stateAt(stateVersion: number): GameState {
     )
     .get(args.matchId, stateVersion) as { game_state_json: string } | undefined;
   if (!row) throw new Error(`checkpoint_state_not_found:${stateVersion}`);
-  return JSON.parse(row.game_state_json) as GameState;
+  return decodeStoredGameState(row.game_state_json);
 }
 
 function eventPrefixFor(stateVersion: number, side: Side): PublicGameEvent[] {

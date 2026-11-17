@@ -174,13 +174,14 @@ describe("AccountSessionService", () => {
       playMode: "human_vs_ai",
       seed: "account-session-boundary",
     });
-    const actionId = created.legalActions[0]?.actionId ?? "draw";
+    const actionId = created.playerView.legalActions[0]?.actionId ?? "draw";
 
     const denied = await matchService.submitAction({
       matchId: created.matchId,
       side: "runner",
       sessionToken: accountSession.sessionToken,
       actionId,
+      clientKnownMatchVersion: created.matchVersion,
       clientKnownStateVersion: created.playerView.stateVersion,
       idempotencyKey: "account-session-token-is-not-match-session",
     });

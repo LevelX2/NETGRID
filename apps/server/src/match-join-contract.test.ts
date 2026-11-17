@@ -90,7 +90,8 @@ describe("authenticated WebSocket match contract", () => {
         payload: {
           matchId: f.created.matchId,
           side: "runner",
-          actionId: f.created.legalActions[0]!.actionId,
+          actionId: f.created.playerView.legalActions[0]!.actionId,
+          clientKnownMatchVersion: f.created.matchVersion,
           clientKnownStateVersion: f.created.playerView.stateVersion + 1,
           idempotencyKey: "malformed-ws-rejection",
         },
@@ -130,9 +131,21 @@ describe("authenticated WebSocket match contract", () => {
       ).toBeLessThan(
         f.frames.findIndex((frame) => frame.type === "match_joined"),
       );
-      expect(
-        f.frames.find((frame) => frame.type === "legal_actions"),
-      ).toBeDefined();
+      expect(f.frames.map((frame) => frame.type)).toEqual([
+        "state_update",
+        "match_joined",
+      ]);
+      expect(f.frames[0]).toMatchObject({
+        type: "state_update",
+        payload: {
+          playerView: {
+            legalActions: expect.arrayContaining([
+              expect.objectContaining({ type: "resolve_choice" }),
+            ]),
+            pendingChoice: expect.objectContaining({ side: "runner" }),
+          },
+        },
+      });
     } finally {
       await f.close();
     }
@@ -162,7 +175,8 @@ describe("authenticated WebSocket match contract", () => {
         payload: {
           matchId: f.created.matchId,
           side: "runner",
-          actionId: f.created.legalActions[0]!.actionId,
+          actionId: f.created.playerView.legalActions[0]!.actionId,
+          clientKnownMatchVersion: f.created.matchVersion,
           clientKnownStateVersion: f.created.playerView.stateVersion + 1,
           idempotencyKey: "repeated-ws-rejection",
         },

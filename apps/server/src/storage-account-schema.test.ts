@@ -1,11 +1,59 @@
-import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { describe, expect, it } from "vitest";
-import { SqliteMatchStorage } from "./storage-sqlite";
+import {
+  openSqliteAccountDatabase,
+  SqliteMatchStorage,
+} from "./storage-sqlite";
 
 describe("SQLite schema contract", () => {
+  it("rejects the previous match schema without writing it and can open its account tables separately", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "netgrid-split-sqlite-"));
+    const oldPath = join(dir, "previous.sqlite");
+    const newPath = join(dir, "matches.sqlite");
+    const backupDir = join(dir, "backups");
+    try {
+      new SqliteMatchStorage({ dbPath: oldPath, backupDir }).close();
+      const oldDb = new DatabaseSync(oldPath);
+      try {
+        oldDb.exec("PRAGMA journal_mode = DELETE");
+        oldDb.exec(
+          "UPDATE storage_meta SET value = '3' WHERE key = 'schema_version'",
+        );
+      } finally {
+        oldDb.close();
+      }
+      const before = await readFile(oldPath);
+      expect(
+        () => new SqliteMatchStorage({ dbPath: oldPath, backupDir }),
+      ).toThrow(/aktuelle Schema/);
+      expect(await readFile(oldPath)).toEqual(before);
+      new SqliteMatchStorage({ dbPath: newPath, backupDir }).close();
+      const accountDb = openSqliteAccountDatabase({
+        dbPath: oldPath,
+        backupDir,
+      });
+      try {
+        expect(
+          accountDb.prepare("SELECT COUNT(*) AS count FROM accounts").get(),
+        ).toEqual({ count: 0 });
+        expect(
+          accountDb
+            .prepare(
+              "SELECT value FROM storage_meta WHERE key = 'schema_version'",
+            )
+            .get(),
+        ).toEqual({ value: "3" });
+      } finally {
+        accountDb.close();
+      }
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
   it("rejects schema 1 without creating a migration backup", async () => {
     const dir = await mkdtemp(join(tmpdir(), "netgrid-account-schema-"));
     const dbPath = join(dir, "netgrid.sqlite");

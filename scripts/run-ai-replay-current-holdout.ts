@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { decodeStoredGameState } from "../apps/server/src/storage-sqlite";
 import { buildAiDecisionInput, chooseAiAction } from "../packages/ai/src/index";
 import { getLegalActions } from "../packages/engine/src/index";
 import type {
@@ -326,7 +327,7 @@ function stateForTrace(
     )
     .get(trace.matchId, trace.stateVersion) as SnapshotRow | undefined;
   if (!row?.gameStateJson) return undefined;
-  const state = JSON.parse(row.gameStateJson) as GameState;
+  const state = decodeStoredGameState(row.gameStateJson);
   state.eventLog = engineEventsFor(db, trace.matchId).filter(
     (event) => event.stateVersionAfter <= state.stateVersion,
   );

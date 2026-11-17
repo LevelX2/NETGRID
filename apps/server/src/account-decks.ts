@@ -7,9 +7,7 @@ import {
   standardDeckGuidesData as standardDeckGuideData,
 } from "@netgrid/runtime-data/standard-decks";
 import { randomBytes } from "node:crypto";
-import { mkdirSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import type { DatabaseSync } from "node:sqlite";
 import { DECK_STRATEGY_PROFILE_ANALYSIS_REVISION } from "@netgrid/ai";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import {
@@ -28,10 +26,9 @@ import {
   type StandardDeckGuideStatus,
 } from "@netgrid/decks";
 import {
-  configureSqliteConnection,
+  openSqliteAccountDatabase,
   runSqliteStorageOperation,
   runSqliteTransaction,
-  SqliteMatchStorage,
 } from "./storage-sqlite";
 
 export const DEFAULT_ACCOUNT_DECK_LIMIT = 50;
@@ -212,15 +209,7 @@ export class SqliteAccountDeckStorage implements AccountDeckStorage {
   private readonly db: DatabaseSync;
 
   constructor(options: { dbPath: string; backupDir?: string }) {
-    const dbPath = resolve(options.dbPath);
-    mkdirSync(dirname(dbPath), { recursive: true });
-    const schemaOwner = new SqliteMatchStorage({
-      dbPath,
-      ...(options.backupDir ? { backupDir: resolve(options.backupDir) } : {}),
-    });
-    schemaOwner.close();
-    this.db = new DatabaseSync(dbPath);
-    configureSqliteConnection(this.db);
+    this.db = openSqliteAccountDatabase(options);
   }
 
   async createWithinLimit(

@@ -1,6 +1,4 @@
-import { mkdirSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import type { DatabaseSync } from "node:sqlite";
 import type {
   AiDifficulty,
   ApiMatchCardPool,
@@ -13,9 +11,8 @@ import {
   type StandardDeckCatalogEntry,
 } from "./account-decks";
 import {
-  configureSqliteConnection,
+  openSqliteAccountDatabase,
   runSqliteStorageOperation,
-  SqliteMatchStorage,
 } from "./storage-sqlite";
 
 export const ACCOUNT_MATCH_START_PREFERENCES_SCHEMA_VERSION =
@@ -102,15 +99,7 @@ export class SqliteAccountMatchStartPreferenceStorage implements AccountMatchSta
   private readonly db: DatabaseSync;
 
   constructor(options: { dbPath: string; backupDir?: string }) {
-    const dbPath = resolve(options.dbPath);
-    mkdirSync(dirname(dbPath), { recursive: true });
-    const schemaOwner = new SqliteMatchStorage({
-      dbPath,
-      ...(options.backupDir ? { backupDir: resolve(options.backupDir) } : {}),
-    });
-    schemaOwner.close();
-    this.db = new DatabaseSync(dbPath);
-    configureSqliteConnection(this.db);
+    this.db = openSqliteAccountDatabase(options);
   }
 
   async loadForAccount(

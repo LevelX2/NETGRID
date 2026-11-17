@@ -87,8 +87,6 @@ export function fromInitialResponse(
     isPublic: response.isPublic,
     side,
     playerView: response.playerView,
-    legalActions: response.legalActions,
-    eventTail: response.playerView.publicEvents,
     opponentStatus: {
       side: side === "runner" ? "corp" : "runner",
       connected: response.mode !== "human_vs_human",
@@ -117,8 +115,6 @@ export function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
     isPublic: response.isPublic,
     side: response.side,
     playerView: response.playerView,
-    legalActions: response.legalActions,
-    eventTail: response.eventTail ?? response.playerView.publicEvents,
     opponentStatus: {
       side: response.side === "runner" ? "corp" : "runner",
       connected: false,
