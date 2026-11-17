@@ -1,3 +1,5 @@
+import { ORIGINALSET_DEFAULT_DECKS } from "@netgrid/shared";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import type {
@@ -404,7 +406,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       legalActions: [protocolRun],
       eventTail: [
         {
-          eventId: "protocol-private-look",
+          eventId: 9,
           type: "resolve_choice",
           stateVersionBefore: 7,
           stateVersionAfter: 8,
@@ -2175,7 +2177,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
     expect(evaluation.evidence).toEqual(
       expect.arrayContaining([
-        "run_action_projection_source_card:onr_v1_187_wilson-weeflerunner-apprentice",
+        "run_action_projection_source_card:399",
         "central_memory_payoff:agenda",
       ]),
     );
@@ -2683,7 +2685,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         "known_remote_root_trash_dedicated_credits:2",
         "known_remote_root_general_trash_cost:2",
         "known_remote_root_credits_after_trash:4",
-        "known_remote_root_trash_support_source:onr_v1_048_poltergeist",
+        "known_remote_root_trash_support_source:260",
       ]),
     );
   });
@@ -2695,7 +2697,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         server("remote_1", {
           root: [
             visibleCard("spent-event", {
-              definitionId: "spent-event",
+              definitionId: syntheticCardDefinitionId("spent-event"),
               title: "Spent event",
               type: "event",
               known: true,
@@ -3039,7 +3041,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         "remote_1",
         "root:0",
         62,
-        "evt-access-remote-1",
+        eventTail[1]!.eventId,
       ),
     });
 
@@ -3102,7 +3104,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         "remote_1",
         "root:0",
         62,
-        "known-access",
+        eventTail[1]!.eventId,
       ),
     });
     expect(evaluation).toMatchObject({
@@ -3213,7 +3215,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         server("remote_1", {
           root: [
             visibleCard("spent-event", {
-              definitionId: "spent-event",
+              definitionId: syntheticCardDefinitionId("spent-event"),
               title: "Spent event",
               type: "event",
               known: true,
@@ -4318,17 +4320,17 @@ function pressureReserveInput(
 }
 
 function syntheticPublicEvent(
-  eventId: string,
+  eventLabel: string,
   stateVersionAfter: number,
   type: string,
   publicPayload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type,
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateHashAfter: `fnv1a:${eventLabel}`,
     visibilityClass: "public",
     publicPayload,
   };
@@ -4503,7 +4505,7 @@ function bankPayoutAction(
 function visibleIdentity(side: Side): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: ORIGINALSET_DEFAULT_DECKS[side].identity,
     title: `${side} identity`,
     owner: side,
     controller: side,
@@ -4799,7 +4801,7 @@ function beliefWithRndTop(params: {
   knownSequenceDefinitionIds?: number[];
 }): BeliefState {
   const rndTopFreshness: RunnerOpponentModel["rndTopFreshness"] = {
-    lastKnownAccessEventId: "test-access-rd",
+    ...(params.freshness === "invalidated" ? {} : { lastKnownAccessEventId: 2 }),
     knownToRunner: true,
     freshness: params.freshness,
     ...(params.knownTopDefinitionId
@@ -4857,14 +4859,13 @@ function beliefWithRndTop(params: {
 }
 
 function beliefWithKnownHq(
-  knownDefinitions: string[],
+  knownDefinitions: number[],
   options: {
     handCount?: number;
     unknownRestCount?: number;
   } = {},
 ): BeliefState {
   const rndTopFreshness: RunnerOpponentModel["rndTopFreshness"] = {
-    lastKnownAccessEventId: "test-invalidated-rd",
     knownToRunner: false,
     freshness: "invalidated",
     invalidationReasons: [],
@@ -4872,7 +4873,7 @@ function beliefWithKnownHq(
   const safeDefinitions = knownDefinitions.map((definitionId) => ({
     definitionId,
     count: 1,
-    sourceEventIds: ["test-hq-look"],
+    sourceEventIds: [2],
   }));
   const handCount = options.handCount ?? knownDefinitions.length;
   const unknownRestCount =
@@ -4907,13 +4908,13 @@ function beliefWithKnownHq(
           handCount > 0 &&
           knownDefinitions.length === handCount &&
           unknownRestCount === 0,
-        sourceEventIds: ["test-hq-look"],
+        sourceEventIds: [2],
         invalidationReasons: [],
         ledger: {
           safeDefinitions,
           unknownRestCount,
           candidateGroups: [],
-          sourceEventIds: ["test-hq-look"],
+          sourceEventIds: [2],
           invalidationReasons: [],
         },
       },
@@ -4928,7 +4929,7 @@ function beliefWithKnownRemoteRoot(
   serverId: string,
   positionKey: string,
   definitionId: number,
-  sourceEventId: string,
+  sourceEventId: number,
 ): BeliefState {
   const belief = beliefWithRndTop({ freshness: "invalidated" });
   const memory = {
