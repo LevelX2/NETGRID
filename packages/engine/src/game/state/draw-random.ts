@@ -68,7 +68,7 @@ export function drawCorpCards(
   }
   if (drawnCardIds.length === 0) return;
   state.pendingCorpDraw = {
-    transactionId: `corp_draw_${state.stateVersion + 1}_${drawnCardIds[0]}`,
+    transactionId: state.stateVersion + 1,
     baseDrawCount: drawnCardIds.length,
     replacementDrawCount: 0,
     drawnCardIds,

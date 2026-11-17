@@ -1,4 +1,8 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import {
+  isRunnerPaymentWindowId,
+  type AiDecisionInput,
+  type RunnerPaymentWindowId,
+} from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import type {
@@ -12,7 +16,7 @@ import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 export function originalPaymentSelectionReachesWindow(
   input: AiDecisionInput,
   previous: ResidentPlanPortfolio | undefined,
-  windowId: string | undefined,
+  windowId: RunnerPaymentWindowId | undefined,
 ): boolean {
   const origin = previous?.pendingRunnerCostPenaltySupportOrigin;
   if (
@@ -113,20 +117,24 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
     (action) =>
       action.side === "runner" &&
       action.type === "activated_card_ability" &&
-      typeof action.payload?.costPenaltySupportWindowId === "string" &&
+      isRunnerPaymentWindowId(action.payload?.costPenaltySupportWindowId) &&
       action.payload?.costPenaltySupportOriginalActionId ===
         origin?.originalActionId,
   );
   if (continuationActions.length === 0) {
     if (boundSupportActions.length !== 1) return undefined;
     const action = boundSupportActions[0]!;
-    const windowId = action.payload!.costPenaltySupportWindowId as string;
+    const candidateWindowId = action.payload?.costPenaltySupportWindowId;
+    const windowId = isRunnerPaymentWindowId(candidateWindowId)
+      ? candidateWindowId
+      : undefined;
     const directSupportFromOriginalSelection =
       originalPaymentSelectionReachesWindow(context.input, previous, windowId);
     if (
       !origin ||
       previous?.side !== "runner" ||
       previous.stateVersion > context.input.playerView.stateVersion ||
+      windowId === undefined ||
       (origin.windowId !== windowId && !directSupportFromOriginalSelection) ||
       !actionMatchesCurrentDecision(context.input, action)
     ) {
@@ -155,7 +163,7 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
         leafPlanInstanceId: origin.executorInstanceId,
         side: "runner",
         windowKind: "optional_ability",
-        windowId,
+        windowId: String(windowId),
         stateVersion: context.input.playerView.stateVersion,
         timingPoint: context.input.playerView.timingPoint,
       },
@@ -164,7 +172,7 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
   const action =
     continuationActions.length === 1 ? continuationActions[0] : undefined;
   const windowId =
-    typeof action?.payload?.runnerCostPenaltySupportWindowId === "string"
+    isRunnerPaymentWindowId(action?.payload?.runnerCostPenaltySupportWindowId)
       ? action.payload.runnerCostPenaltySupportWindowId
       : undefined;
   const supportActions = context.input.legalActions.filter(
@@ -228,7 +236,7 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
       leafPlanInstanceId: origin.executorInstanceId,
       side: "runner",
       windowKind: "optional_ability",
-      windowId,
+      windowId: String(windowId),
       stateVersion: context.input.playerView.stateVersion,
       timingPoint: context.input.playerView.timingPoint,
     },

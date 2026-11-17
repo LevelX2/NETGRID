@@ -826,7 +826,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -836,7 +836,7 @@
                 "sourceTitle": "Neural Blade"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1262,7 +1262,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1272,7 +1272,7 @@
                 "sourceTitle": "Neural Blade"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1658,7 +1658,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1668,7 +1668,7 @@
                 "sourceTitle": "Neural Blade"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2198,7 +2198,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2304,7 +2304,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2314,7 +2314,7 @@
                 "sourceTitle": "Neural Blade"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3113,7 +3113,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3123,7 +3123,7 @@
               "sourceTitle": "Neural Blade"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3549,7 +3549,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3559,7 +3559,7 @@
               "sourceTitle": "Neural Blade"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3945,7 +3945,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3955,7 +3955,7 @@
               "sourceTitle": "Neural Blade"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4485,7 +4485,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -4591,7 +4591,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4601,7 +4601,7 @@
               "sourceTitle": "Neural Blade"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -5094,7 +5094,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 77,
-      "sideSafePlanningFingerprint": "fnv1a:8557e591"
+      "sideSafePlanningFingerprint": "fnv1a:1696cee9"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

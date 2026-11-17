@@ -3703,7 +3703,7 @@
           "turnActionOrdinalEnd": 4,
           "resolvedEffects": [
             {
-              "effectId": "44.effect.0.remove_tags",
+              "effectId": 0,
               "kind": "remove_tags",
               "visibility": "public",
               "side": "runner",
@@ -3714,7 +3714,7 @@
               "sourceTitle": "Meat Upgrade"
             },
             {
-              "effectId": "44.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -3926,7 +3926,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "46.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -3936,7 +3936,7 @@
               "sourceTitle": "Panzer Run"
             },
             {
-              "effectId": "46.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -4039,7 +4039,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4390,7 +4390,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4402,7 +4402,7 @@
               "amount": 1
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4469,7 +4469,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4841,7 +4841,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "44.effect.0.remove_tags",
+              "effectId": 0,
               "kind": "remove_tags",
               "visibility": "public",
               "side": "runner",
@@ -4852,7 +4852,7 @@
               "sourceTitle": "Meat Upgrade"
             },
             {
-              "effectId": "44.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -5442,7 +5442,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -5722,7 +5722,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "56.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",

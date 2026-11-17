@@ -2723,7 +2723,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -2902,7 +2902,7 @@
           "label": "Karte in Remote 2 rezzen",
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -2956,7 +2956,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -3020,7 +3020,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -3237,7 +3237,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -3301,7 +3301,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -3550,7 +3550,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -3614,7 +3614,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -3678,7 +3678,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -3895,7 +3895,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -3908,7 +3908,7 @@
               "sourceTitle": "BBS Whispering Campaign"
             },
             {
-              "effectId": "521.effect.1.trash_source_when_empty",
+              "effectId": 1,
               "kind": "trash_source_when_empty",
               "visibility": "public",
               "side": "corp",
@@ -4165,7 +4165,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",

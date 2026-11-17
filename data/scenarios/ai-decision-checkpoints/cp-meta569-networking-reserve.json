@@ -1047,7 +1047,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1116,7 +1116,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1313,7 +1313,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1418,7 +1418,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1794,7 +1794,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "46.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1804,7 +1804,7 @@
                 "sourceTitle": "Panzer Run"
               },
               {
-                "effectId": "46.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -1900,7 +1900,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2220,7 +2220,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "45.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5568,7 +5568,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7212,7 +7212,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.root_rez_on_install.hq.c3j9",
+                "effectId": 0,
                 "kind": "rez_card",
                 "visibility": "public",
                 "side": "corp",
@@ -9319,7 +9319,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -10055,7 +10055,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -10065,7 +10065,7 @@
                 "sourceTitle": "Wall of Ice"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -11647,7 +11647,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -12383,7 +12383,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -12393,7 +12393,7 @@
               "sourceTitle": "Wall of Ice"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -13032,7 +13032,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 369,
-      "sideSafePlanningFingerprint": "fnv1a:638ecaa0"
+      "sideSafePlanningFingerprint": "fnv1a:b6830e14"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_prep_economy_pressure_2026_07_01_1.0.0",
@@ -23488,7 +23488,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -23815,7 +23815,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -24286,7 +24286,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -24537,7 +24537,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -25460,7 +25460,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "46.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -25470,7 +25470,7 @@
               "sourceTitle": "Panzer Run"
             },
             {
-              "effectId": "46.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -25715,7 +25715,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -26452,7 +26452,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "45.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -34796,7 +34796,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -38935,7 +38935,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "corp.root_rez_on_install.hq.c3j9",
+              "effectId": 0,
               "kind": "rez_card",
               "visibility": "public",
               "side": "corp",
@@ -44221,7 +44221,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -46081,7 +46081,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -46095,7 +46095,7 @@
               "cardsTrashed": 2
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",

@@ -1212,7 +1212,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1691,7 +1691,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "46.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1701,7 +1701,7 @@
                 "sourceTitle": "Panzer Run"
               },
               {
-                "effectId": "46.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -1810,7 +1810,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1987,7 +1987,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2049,7 +2049,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2907,7 +2907,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2917,7 +2917,7 @@
                 "sourceTitle": "Nerve Labyrinth"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3631,7 +3631,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6294,7 +6294,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7679,7 +7679,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -8600,7 +8600,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -9985,7 +9985,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -10339,7 +10339,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 264,
-      "sideSafePlanningFingerprint": "fnv1a:76367378"
+      "sideSafePlanningFingerprint": "fnv1a:814d5dce"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_prep_economy_pressure_2026_07_01_1.0.0",

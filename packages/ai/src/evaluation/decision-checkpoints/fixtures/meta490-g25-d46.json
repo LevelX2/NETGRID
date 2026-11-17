@@ -765,7 +765,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1171,7 +1171,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -2095,7 +2095,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -2501,7 +2501,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "307.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -3059,7 +3059,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 45,
-      "sideSafePlanningFingerprint": "fnv1a:6a961658"
+      "sideSafePlanningFingerprint": "fnv1a:9ab1a114"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_redline_riot_1.0.0",

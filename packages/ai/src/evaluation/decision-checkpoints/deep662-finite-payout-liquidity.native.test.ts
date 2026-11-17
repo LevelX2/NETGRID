@@ -3,6 +3,7 @@ import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
+import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
@@ -59,8 +60,20 @@ it("keeps a real higher-priority run ahead of residual bank liquidation", () => 
   expect(input.legalActions.some((a) => a.abilityRef?.sourceAbilityId === payoutCapability)).toBe(true);
   const decision = chooseAiAction(input);
   const action = input.legalActions.find((a) => a.actionId === decision.actionId);
-  expect(action).toMatchObject({ type: "play_event", payload: { serverId: "rd" } });
+  expect(action).toMatchObject({ type: "play_event", payload: { serverId: "hq" } });
   expect(decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ard",
+    "plan:runner.pressure_central:central%3Ahq",
   );
+  const targets = evaluateRunnerRunTargets({ input });
+  expect(targets.find((target) => target.actionId === action?.actionId)).toMatchObject({
+    creditsAfterRun: 14,
+    fundingNeed: { reason: "none" },
+  });
+  const rdVariant = input.legalActions.find(
+    (candidate) => candidate.source === action?.source && candidate.payload?.serverId === "rd",
+  );
+  expect(targets.find((target) => target.actionId === rdVariant?.actionId)).toMatchObject({
+    creditsAfterRun: 11,
+    fundingNeed: { reason: "none" },
+  });
 });

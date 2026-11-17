@@ -845,7 +845,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1016,7 +1016,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "9.cyq.successful_run.vienna",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -1061,7 +1061,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "161.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1071,7 +1071,7 @@
                 "sourceTitle": "Cruising for Netwatch"
               },
               {
-                "effectId": "161.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -1178,7 +1178,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1188,7 +1188,7 @@
                 "sourceTitle": "Dog Pile"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1437,7 +1437,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1607,7 +1607,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "182.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1617,7 +1617,7 @@
                 "sourceTitle": "Stakeout"
               },
               {
-                "effectId": "182.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -1858,7 +1858,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "182.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1868,7 +1868,7 @@
                 "sourceTitle": "Stakeout"
               },
               {
-                "effectId": "182.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -2407,7 +2407,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2466,7 +2466,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2525,7 +2525,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -4752,7 +4752,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4762,7 +4762,7 @@
                 "sourceTitle": "Dog Pile"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -5003,7 +5003,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "60.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5013,7 +5013,7 @@
                 "sourceTitle": "Charity Takeover"
               },
               {
-                "effectId": "60.effect.1.add_bad_publicity",
+                "effectId": 1,
                 "kind": "add_bad_publicity",
                 "visibility": "public",
                 "side": "corp",
@@ -6814,7 +6814,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -6824,7 +6824,7 @@
               "sourceTitle": "Dog Pile"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -7065,7 +7065,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "60.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -7075,7 +7075,7 @@
               "sourceTitle": "Charity Takeover"
             },
             {
-              "effectId": "60.effect.1.add_bad_publicity",
+              "effectId": 1,
               "kind": "add_bad_publicity",
               "visibility": "public",
               "side": "corp",
@@ -7285,7 +7285,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 170,
-      "sideSafePlanningFingerprint": "fnv1a:43b06e00"
+      "sideSafePlanningFingerprint": "fnv1a:64cc3e17"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",

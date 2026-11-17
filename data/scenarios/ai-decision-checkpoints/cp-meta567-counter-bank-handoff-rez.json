@@ -884,7 +884,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "500.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -894,7 +894,7 @@
                 "sourceTitle": "Day Shift"
               },
               {
-                "effectId": "500.effect.1.gain_credits",
+                "effectId": 1,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1035,7 +1035,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1130,7 +1130,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1191,7 +1191,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1276,7 +1276,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1286,7 +1286,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -1685,7 +1685,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1746,7 +1746,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1937,7 +1937,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "415.score.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2087,7 +2087,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2363,7 +2363,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2444,7 +2444,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3618,7 +3618,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "500.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -3628,7 +3628,7 @@
               "sourceTitle": "Day Shift"
             },
             {
-              "effectId": "500.effect.1.gain_credits",
+              "effectId": 1,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -3769,7 +3769,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3864,7 +3864,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3925,7 +3925,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -4010,7 +4010,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "507.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -4020,7 +4020,7 @@
               "sourceTitle": "Night Shift"
             },
             {
-              "effectId": "507.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -4419,7 +4419,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4480,7 +4480,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -4671,7 +4671,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "415.score.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -4821,7 +4821,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -5097,7 +5097,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -5178,7 +5178,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -6205,7 +6205,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 64,
-      "sideSafePlanningFingerprint": "fnv1a:fb89e89b"
+      "sideSafePlanningFingerprint": "fnv1a:b8812cf1"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_chrome_rush_bureau_1.1.0",

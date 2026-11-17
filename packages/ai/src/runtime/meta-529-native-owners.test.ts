@@ -180,7 +180,7 @@ describe("Paarung 529 native owner regressions", () => {
       "runner.resolve_choice",
     );
     expect(supportAction.payload?.costPenaltySupportWindowId).toBe(
-      "runner_cost_penalty_support.205",
+      205,
     );
     expect(
       support.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,

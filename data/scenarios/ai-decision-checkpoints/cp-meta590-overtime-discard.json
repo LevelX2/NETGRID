@@ -1829,7 +1829,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2408,7 +2408,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2605,7 +2605,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2724,7 +2724,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2734,7 +2734,7 @@
                 "sourceTitle": "Cortical Scrub"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2839,7 +2839,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -3303,7 +3303,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3313,7 +3313,7 @@
                 "sourceTitle": "Dog Pile"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3952,7 +3952,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -4865,7 +4865,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4927,7 +4927,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "182.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4937,7 +4937,7 @@
                 "sourceTitle": "Stakeout"
               },
               {
-                "effectId": "182.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -5409,7 +5409,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "139.cyx.successful_run.socket_rd",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -6050,7 +6050,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "159.cyx.successful_run.socket_rd",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -6423,7 +6423,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "176.cyx.successful_run.socket_rd",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -6832,7 +6832,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6892,7 +6892,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7251,7 +7251,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7530,7 +7530,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "139.cyx.successful_run.socket_rd",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -8171,7 +8171,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "159.cyx.successful_run.socket_rd",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -8544,7 +8544,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "176.cyx.successful_run.socket_rd",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -8953,7 +8953,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -9013,7 +9013,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -9372,7 +9372,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -9520,7 +9520,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 221,
-      "sideSafePlanningFingerprint": "fnv1a:a33e7e39"
+      "sideSafePlanningFingerprint": "fnv1a:1f5ff8b0"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_mr96xg94_1.2.0",

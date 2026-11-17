@@ -1134,7 +1134,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1580,7 +1580,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2041,7 +2041,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2531,7 +2531,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2e9.c1oa",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -2632,7 +2632,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2641,7 +2641,7 @@
                 "sourceTitle": "Jack Attack"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3607,7 +3607,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -4400,7 +4400,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4740,7 +4740,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "513.effect.0.damage",
+                "effectId": 0,
                 "kind": "damage",
                 "visibility": "public",
                 "side": "runner",
@@ -5842,7 +5842,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -6849,7 +6849,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -7413,7 +7413,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7631,7 +7631,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7724,7 +7724,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -9236,7 +9236,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -9800,7 +9800,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -10018,7 +10018,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -10111,7 +10111,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "307.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -10832,7 +10832,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 279,
-      "sideSafePlanningFingerprint": "fnv1a:52e5ace4"
+      "sideSafePlanningFingerprint": "fnv1a:64b5d0c5"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_deep_market_engine_1.0.0",

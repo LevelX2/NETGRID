@@ -698,7 +698,7 @@ function paymentSupportEventTail(): AiDecisionInput["eventTail"] {
         actor: "runner",
         actionType: "play_event",
         runnerCostPenaltySupportWindowOpened: true,
-        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.11",
+        runnerCostPenaltySupportWindowId: 11,
         runnerCostPenaltySupportOriginalActionId: "runner.play.social-1",
       },
     },

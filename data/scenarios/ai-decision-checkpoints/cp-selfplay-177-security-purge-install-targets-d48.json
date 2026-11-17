@@ -2570,7 +2570,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -2647,7 +2647,7 @@
           "label": "Chihuahua rezzen",
           "resolvedEffects": [
             {
-              "effectId": "72.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -2697,7 +2697,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -2716,7 +2716,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "11.cg5.0.trace",
+          "traceId": 13,
           "sourceCardId": "cg5",
           "sourceDefinitionId": 72,
           "traceLimit": 1,
@@ -2731,7 +2731,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 11
         }
       },
       {
@@ -2747,11 +2748,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "11.cg5.0.trace.corp.bid.13",
+          "choiceId": "13.corp.bid.13",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 72,
-          "traceId": "11.cg5.0.trace",
+          "traceId": 13,
           "traceStep": "corp_bid",
           "traceLimit": 1,
           "effectiveTraceLimit": 1,
@@ -2786,12 +2787,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "11.cg5.0.trace.runner.bid.14",
+          "choiceId": "13.runner.bid.14",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 72,
           "tagsAdded": 0,
-          "traceId": "11.cg5.0.trace",
+          "traceId": 13,
           "traceStep": "runner_bid",
           "traceLimit": 1,
           "corpBid": 0,
@@ -2812,7 +2813,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 11
         }
       },
       {
@@ -3206,7 +3208,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3283,7 +3285,7 @@
           "label": "Chihuahua rezzen",
           "resolvedEffects": [
             {
-              "effectId": "72.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -3333,7 +3335,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3352,7 +3354,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "30.cg6.0.trace",
+          "traceId": 32,
           "sourceCardId": "cg6",
           "sourceDefinitionId": 72,
           "traceLimit": 1,
@@ -3367,7 +3369,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 30
         }
       },
       {
@@ -3383,11 +3386,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "30.cg6.0.trace.corp.bid.32",
+          "choiceId": "32.corp.bid.32",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 72,
-          "traceId": "30.cg6.0.trace",
+          "traceId": 32,
           "traceStep": "corp_bid",
           "traceLimit": 1,
           "effectiveTraceLimit": 1,
@@ -3422,12 +3425,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "30.cg6.0.trace.runner.bid.33",
+          "choiceId": "32.runner.bid.33",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 72,
           "tagsAdded": 0,
-          "traceId": "30.cg6.0.trace",
+          "traceId": 32,
           "traceStep": "runner_bid",
           "traceLimit": 1,
           "corpBid": 0,
@@ -3448,7 +3451,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 30
         }
       },
       {

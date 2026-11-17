@@ -583,7 +583,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -930,7 +930,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1068,7 +1068,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "21.cyy.successful_run.socket_rd",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -1197,7 +1197,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1282,7 +1282,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1348,7 +1348,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "24.cyy.successful_run.socket_hq",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -1405,7 +1405,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "32.cyy.successful_run.socket_archives",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -1454,7 +1454,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "157.effect.0.add_corp_purgeable_runner_virus_counter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -1486,7 +1486,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.virus.157",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -1703,7 +1703,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "42.cyy.successful_run.socket_rd",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -1780,7 +1780,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1846,7 +1846,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "44.cyy.successful_run.socket_hq",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -1903,7 +1903,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "48.cyy.successful_run.socket_archives",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -1952,7 +1952,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "157.effect.0.add_corp_purgeable_runner_virus_counter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -2009,7 +2009,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.virus.157",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -2248,7 +2248,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "59.cyy.successful_run.socket_rd",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -2325,7 +2325,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2410,7 +2410,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2495,7 +2495,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2586,7 +2586,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "62.cyy.successful_run.socket_hq",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -2643,7 +2643,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "73.cyy.successful_run.socket_archives",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -2692,7 +2692,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "157.effect.0.add_corp_purgeable_runner_virus_counter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -2749,7 +2749,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.virus.157",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -2918,7 +2918,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3003,7 +3003,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3069,7 +3069,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "82.cyy.successful_run.socket_hq",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -3146,7 +3146,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "89.cyy.successful_run.socket_rd",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -3543,7 +3543,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -3681,7 +3681,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "21.cyy.successful_run.socket_rd",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -3810,7 +3810,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3895,7 +3895,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3961,7 +3961,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "24.cyy.successful_run.socket_hq",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -4018,7 +4018,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "32.cyy.successful_run.socket_archives",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -4067,7 +4067,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "157.effect.0.add_corp_purgeable_runner_virus_counter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -4099,7 +4099,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "corp.start.virus.157",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -4316,7 +4316,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "42.cyy.successful_run.socket_rd",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -4393,7 +4393,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4459,7 +4459,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "44.cyy.successful_run.socket_hq",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -4516,7 +4516,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "48.cyy.successful_run.socket_archives",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -4565,7 +4565,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "157.effect.0.add_corp_purgeable_runner_virus_counter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -4622,7 +4622,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "corp.start.virus.157",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -4861,7 +4861,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "59.cyy.successful_run.socket_rd",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -4938,7 +4938,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -5023,7 +5023,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -5108,7 +5108,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -5199,7 +5199,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "62.cyy.successful_run.socket_hq",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -5256,7 +5256,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "73.cyy.successful_run.socket_archives",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -5305,7 +5305,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "157.effect.0.add_corp_purgeable_runner_virus_counter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -5362,7 +5362,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "corp.start.virus.157",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -5531,7 +5531,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -5616,7 +5616,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -5682,7 +5682,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "82.cyy.successful_run.socket_hq",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -5759,7 +5759,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "89.cyy.successful_run.socket_rd",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -6011,7 +6011,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 90,
-      "sideSafePlanningFingerprint": "fnv1a:6ec4e47a"
+      "sideSafePlanningFingerprint": "fnv1a:897d3930"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_purge_window_1.0.0",

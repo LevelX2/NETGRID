@@ -955,7 +955,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -965,7 +965,7 @@
                 "sourceTitle": "Dog Pile"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1154,7 +1154,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1214,7 +1214,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1274,7 +1274,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2045,7 +2045,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2438,7 +2438,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -2448,7 +2448,7 @@
               "sourceTitle": "Dog Pile"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -2637,7 +2637,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -2697,7 +2697,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -2757,7 +2757,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -3528,7 +3528,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -3646,7 +3646,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 52,
-      "sideSafePlanningFingerprint": "fnv1a:6be8909d"
+      "sideSafePlanningFingerprint": "fnv1a:ba394855"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_mr96xg94_1.2.0",

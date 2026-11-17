@@ -15,7 +15,7 @@
       "activeSide": "runner",
       "phase": "corp_action_phase",
       "trace": {
-        "traceId": "op_trace.143.108.co5",
+        "traceId": 143,
         "sourceCardInstanceId": "co5",
         "sourceDefinitionId": 108,
         "profile": "modern_open",
@@ -648,9 +648,9 @@
         "removedFromGameCount": 0
       },
       "pendingChoice": {
-        "choiceId": "op_trace.143.108.co5.runner.bid.144",
+        "choiceId": "143.runner.bid.144",
         "side": "runner",
-        "source": "trace:op_trace.143.108.co5",
+        "source": "trace:143",
         "prompt": "Runner Link-Payment wählen (Trace-Stärke 7, Link 0; 6 Credits verfügbar)",
         "presentationKey": "generic_bid_amount",
         "kind": "bid_amount",
@@ -1387,7 +1387,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "161.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1397,7 +1397,7 @@
                 "sourceTitle": "Cruising for Netwatch"
               },
               {
-                "effectId": "161.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -1854,7 +1854,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1864,7 +1864,7 @@
                 "sourceTitle": "Bug Zapper"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2254,7 +2254,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -2302,7 +2302,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "56.start",
+                "effectId": 0,
                 "kind": "start_run",
                 "visibility": "public",
                 "side": "runner",
@@ -2564,7 +2564,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2863,7 +2863,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3021,7 +3021,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3428,7 +3428,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.doppelganger",
+                "effectId": 0,
                 "kind": "lose_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3679,7 +3679,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.doppelganger",
+                "effectId": 0,
                 "kind": "lose_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3956,7 +3956,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -4566,7 +4566,7 @@
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
             "traceStarted": true,
-            "traceId": "op_trace.143.108.co5",
+            "traceId": 143,
             "traceLimit": 6,
             "effectiveTraceLimit": 6,
             "targets": {
@@ -4592,8 +4592,8 @@
             "sourceDefinitionId": 108,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "op_trace.143.108.co5",
-            "choiceId": "op_trace.143.108.co5.corp.bid.143",
+            "traceId": 143,
+            "choiceId": "143.corp.bid.143",
             "traceStep": "corp_bid",
             "corpBid": 1,
             "traceLimit": 6,
@@ -4622,7 +4622,7 @@
           "targetRequirements": [],
           "choiceRequirements": [
             {
-              "choiceId": "op_trace.143.108.co5.runner.bid.144",
+              "choiceId": "143.runner.bid.144",
               "minSelections": 1,
               "maxSelections": 1,
               "optionIds": [
@@ -4689,7 +4689,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -4988,7 +4988,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -5146,7 +5146,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -5553,7 +5553,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "runner.start.doppelganger",
+              "effectId": 0,
               "kind": "lose_credits",
               "visibility": "public",
               "side": "runner",
@@ -5804,7 +5804,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "runner.start.doppelganger",
+              "effectId": 0,
               "kind": "lose_credits",
               "visibility": "public",
               "side": "runner",
@@ -6081,7 +6081,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "307.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -6691,7 +6691,7 @@
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
           "traceStarted": true,
-          "traceId": "op_trace.143.108.co5",
+          "traceId": 143,
           "traceLimit": 6,
           "effectiveTraceLimit": 6,
           "targets": {
@@ -6717,8 +6717,8 @@
           "sourceDefinitionId": 108,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "op_trace.143.108.co5",
-          "choiceId": "op_trace.143.108.co5.corp.bid.143",
+          "traceId": 143,
+          "choiceId": "143.corp.bid.143",
           "traceStep": "corp_bid",
           "corpBid": 1,
           "traceLimit": 6,
@@ -6747,7 +6747,7 @@
         "targetRequirements": [],
         "choiceRequirements": [
           {
-            "choiceId": "op_trace.143.108.co5.runner.bid.144",
+            "choiceId": "143.runner.bid.144",
             "minSelections": 1,
             "maxSelections": 1,
             "optionIds": [
@@ -6808,7 +6808,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 144,
-      "sideSafePlanningFingerprint": "fnv1a:712f07c3"
+      "sideSafePlanningFingerprint": "fnv1a:8aced593"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rd_express_1.1.0",

@@ -716,6 +716,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       state = applyChoice(state, "corp", "pay");
       const damageId = state.imminentEvent?.eventId;
       let damageWindowId = state.eventModificationWindow?.windowId;
+      expect(damageWindowId).toBe(state.stateVersion);
       expect(state.imminentEvent?.eventType).toBe("damage");
       for (const label of [
         "Force Shield: 1 Schaden verhindern",
@@ -727,6 +728,8 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
         );
         expect(option, label).toBeDefined();
         damageWindowId = state.eventModificationWindow?.windowId;
+        expect(damageWindowId).toBe(state.eventModificationWindow?.createdAtStateVersion);
+        expect(state.imminentEvent?.modificationWindowId).toBe(damageWindowId);
         state = applyChoice(state, "runner", String(option?.id));
       }
       const damageEvent = state.eventLog.at(-1)!;

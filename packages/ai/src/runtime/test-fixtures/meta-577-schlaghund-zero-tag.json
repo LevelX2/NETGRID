@@ -10093,7 +10093,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -10114,7 +10114,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "126.c2um.0.trace",
+          "traceId": 129,
           "sourceCardId": "c2um",
           "sourceDefinitionId": 461,
           "traceLimit": 5,
@@ -10129,7 +10129,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 126
         },
         "privatePayload": {
           "runner": {
@@ -10162,12 +10163,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "126.c2um.0.trace",
+                "traceId": 129,
                 "sourceCardId": "c2um",
                 "traceLimit": 5,
                 "effectiveTraceLimit": 5,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 4
+                "corpBidMax": 4,
+                "traceSourceRunId": 126
               },
               "resolvedEffects": [
                 {
@@ -10199,11 +10201,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "126.c2um.0.trace.corp.bid.129",
+          "choiceId": "129.corp.bid.129",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 461,
-          "traceId": "126.c2um.0.trace",
+          "traceId": 129,
           "traceStep": "corp_bid",
           "traceLimit": 5,
           "effectiveTraceLimit": 5,
@@ -10232,7 +10234,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 129,
               "selectedChoices": {
-                "choiceId": "126.c2um.0.trace.corp.bid.129",
+                "choiceId": "129.corp.bid.129",
                 "selectedOptionIds": [
                   "bid_1"
                 ]
@@ -10251,7 +10253,7 @@
               "expiresAtStateVersion": 129,
               "choiceRequirements": [
                 {
-                  "choiceId": "126.c2um.0.trace.corp.bid.129",
+                  "choiceId": "129.corp.bid.129",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -10264,10 +10266,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "126.c2um.0.trace.corp.bid.129",
+                "choiceId": "129.corp.bid.129",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "126.c2um.0.trace",
+                "traceId": 129,
                 "traceStep": "corp_bid",
                 "traceLimit": 5,
                 "effectiveTraceLimit": 5,
@@ -10296,12 +10298,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "126.c2um.0.trace.runner.bid.130",
+          "choiceId": "129.runner.bid.130",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 461,
           "tagsAdded": 1,
-          "traceId": "126.c2um.0.trace",
+          "traceId": 129,
           "traceStep": "runner_bid",
           "traceLimit": 5,
           "corpBid": 1,
@@ -10324,7 +10326,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 126
         },
         "privatePayload": {
           "runner": {
@@ -10334,7 +10337,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 130,
               "selectedChoices": {
-                "choiceId": "126.c2um.0.trace.runner.bid.130",
+                "choiceId": "129.runner.bid.130",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -10353,7 +10356,7 @@
               "expiresAtStateVersion": 130,
               "choiceRequirements": [
                 {
-                  "choiceId": "126.c2um.0.trace.runner.bid.130",
+                  "choiceId": "129.runner.bid.130",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -10367,12 +10370,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "126.c2um.0.trace.runner.bid.130",
+                "choiceId": "129.runner.bid.130",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "126.c2um.0.trace",
+                "traceId": 129,
                 "traceStep": "runner_bid",
                 "traceLimit": 5,
                 "sourceDefinitionId": 461,
@@ -10383,7 +10386,8 @@
                 "runnerStrength": 0,
                 "traceSuccessful": true,
                 "tagsAdded": 1,
-                "runnerTagsAfter": 1
+                "runnerTagsAfter": 1,
+                "traceSourceRunId": 126
               }
             }
           }

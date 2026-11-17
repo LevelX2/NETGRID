@@ -1470,7 +1470,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -3765,7 +3765,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "418.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -3847,7 +3847,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "44.effect.0.remove_tags",
+                "effectId": 0,
                 "kind": "remove_tags",
                 "visibility": "public",
                 "side": "runner",
@@ -3858,7 +3858,7 @@
                 "sourceTitle": "Meat Upgrade"
               },
               {
-                "effectId": "44.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -4035,7 +4035,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "418.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -4076,7 +4076,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -4317,7 +4317,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -4572,7 +4572,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5441,7 +5441,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "48.cap.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5481,7 +5481,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "44.effect.0.remove_tags",
+                "effectId": 0,
                 "kind": "remove_tags",
                 "visibility": "public",
                 "side": "runner",
@@ -5492,7 +5492,7 @@
                 "sourceTitle": "Meat Upgrade"
               },
               {
-                "effectId": "44.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -6423,7 +6423,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "418.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -6505,7 +6505,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "44.effect.0.remove_tags",
+              "effectId": 0,
               "kind": "remove_tags",
               "visibility": "public",
               "side": "runner",
@@ -6516,7 +6516,7 @@
               "sourceTitle": "Meat Upgrade"
             },
             {
-              "effectId": "44.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -6693,7 +6693,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "418.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -6734,7 +6734,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -6975,7 +6975,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -7230,7 +7230,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -8099,7 +8099,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "48.cap.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -8139,7 +8139,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "44.effect.0.remove_tags",
+              "effectId": 0,
               "kind": "remove_tags",
               "visibility": "public",
               "side": "runner",
@@ -8150,7 +8150,7 @@
               "sourceTitle": "Meat Upgrade"
             },
             {
-              "effectId": "44.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -8875,7 +8875,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 169,
-      "sideSafePlanningFingerprint": "fnv1a:8fd148fe"
+      "sideSafePlanningFingerprint": "fnv1a:4f0e7d1b"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_mr96xg94_1.2.0",

@@ -1726,7 +1726,7 @@
             "abilityFamily": "run-access",
             "effectKind": "trace",
             "traceStarted": true,
-            "traceId": "9.c2um.0.trace",
+            "traceId": 11,
             "traceLimit": 5,
             "effectiveTraceLimit": 5,
             "targets": {
@@ -1738,7 +1738,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1746,7 +1746,8 @@
                 "sourceDefinitionId": 461,
                 "sourceTitle": "Hunter"
               }
-            ]
+            ],
+            "traceSourceRunId": 9
           }
         },
         {
@@ -1764,8 +1765,8 @@
             "sourceDefinitionId": 461,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "9.c2um.0.trace",
-            "choiceId": "9.c2um.0.trace.corp.bid.11",
+            "traceId": 11,
+            "choiceId": "11.corp.bid.11",
             "traceStep": "corp_bid",
             "corpBid": 1,
             "traceLimit": 5,
@@ -1796,9 +1797,9 @@
             "sourceDefinitionId": 461,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "9.c2um.0.trace",
+            "traceId": 11,
             "traceSuccessful": true,
-            "choiceId": "9.c2um.0.trace.runner.bid.12",
+            "choiceId": "11.runner.bid.12",
             "traceStep": "runner_bid",
             "corpBid": 1,
             "traceLimit": 5,
@@ -1816,7 +1817,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 9
           }
         },
         {
@@ -2085,7 +2087,7 @@
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
             "traceStarted": true,
-            "traceId": "op_trace.24.496.c32e",
+            "traceId": 24,
             "traceLimit": 5,
             "effectiveTraceLimit": 5,
             "targets": {
@@ -2111,8 +2113,8 @@
             "sourceDefinitionId": 496,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "op_trace.24.496.c32e",
-            "choiceId": "op_trace.24.496.c32e.corp.bid.24",
+            "traceId": 24,
+            "choiceId": "24.corp.bid.24",
             "traceStep": "corp_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -2143,9 +2145,9 @@
             "sourceDefinitionId": 496,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "op_trace.24.496.c32e",
+            "traceId": 24,
             "traceSuccessful": true,
-            "choiceId": "op_trace.24.496.c32e.runner.bid.25",
+            "choiceId": "24.runner.bid.25",
             "traceStep": "runner_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -2967,7 +2969,7 @@
             "abilityFamily": "run-access",
             "effectKind": "trace",
             "traceStarted": true,
-            "traceId": "56.c2v1.1.trace",
+            "traceId": 58,
             "traceLimit": 5,
             "effectiveTraceLimit": 5,
             "targets": {
@@ -2979,7 +2981,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2988,7 +2990,7 @@
                 "sourceTitle": "Jack Attack"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2996,7 +2998,8 @@
                 "sourceDefinitionId": 463,
                 "sourceTitle": "Jack Attack"
               }
-            ]
+            ],
+            "traceSourceRunId": 56
           }
         },
         {
@@ -3014,8 +3017,8 @@
             "sourceDefinitionId": 463,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "56.c2v1.1.trace",
-            "choiceId": "56.c2v1.1.trace.corp.bid.58",
+            "traceId": 58,
+            "choiceId": "58.corp.bid.58",
             "traceStep": "corp_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -3046,9 +3049,9 @@
             "sourceDefinitionId": 463,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "56.c2v1.1.trace",
+            "traceId": 58,
             "traceSuccessful": true,
-            "choiceId": "56.c2v1.1.trace.runner.bid.59",
+            "choiceId": "58.runner.bid.59",
             "traceStep": "runner_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -3066,7 +3069,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 56
           }
         },
         {
@@ -3196,7 +3200,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -3385,7 +3389,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2ea.c24x",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -3497,7 +3501,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -4057,7 +4061,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -4587,7 +4591,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2e9.c27d",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -4636,7 +4640,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4732,7 +4736,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4942,7 +4946,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5060,7 +5064,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5148,7 +5152,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5158,7 +5162,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -5280,7 +5284,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5351,7 +5355,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5594,7 +5598,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2e9.c1o9",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -5609,7 +5613,7 @@
                 "cardTitle": "Self-Modifying Code"
               },
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1o9",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -5918,7 +5922,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6323,7 +6327,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2e9.c1rl",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -6338,7 +6342,7 @@
                 "cardTitle": "Worm"
               },
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1rl",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -6420,7 +6424,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -6643,7 +6647,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2e9.c1rl",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -6658,7 +6662,7 @@
                 "cardTitle": "Worm"
               },
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1rl",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -6704,7 +6708,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6756,7 +6760,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7084,7 +7088,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7295,7 +7299,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7350,7 +7354,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7388,7 +7392,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "291.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -7440,7 +7444,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7752,7 +7756,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7793,7 +7797,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -8001,7 +8005,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2e9.c27e",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -8016,7 +8020,7 @@
                 "cardTitle": "WuTech Mem Chip"
               },
               {
-                "effectId": "runner.start.delayed_install.c2ea.c275",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -8329,7 +8333,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -8642,7 +8646,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2e9.c275",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -8657,7 +8661,7 @@
                 "cardTitle": "Tycho Mem Chip"
               },
               {
-                "effectId": "runner.start.delayed_install.c2ea.c275",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -9069,7 +9073,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2e9.c21t",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -9122,7 +9126,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "332.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -9135,7 +9139,7 @@
                 "sourceTitle": "“Armadillo” Armored Road Home"
               },
               {
-                "effectId": "runner.start.delayed_install.c2ea.c21t",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -9175,7 +9179,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -9299,7 +9303,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -9343,7 +9347,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -9518,7 +9522,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2e9.c275",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -9533,7 +9537,7 @@
                 "cardTitle": "Tycho Mem Chip"
               },
               {
-                "effectId": "runner.start.delayed_install.c2ea.c275",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -9815,7 +9819,7 @@
             "effectKind": "trace",
             "hiddenZoneBarrier": true,
             "traceStarted": true,
-            "traceId": "op_trace.299.584.c3lx",
+            "traceId": 299,
             "traceLimit": 10,
             "effectiveTraceLimit": 10,
             "targets": {
@@ -9845,8 +9849,8 @@
             "sourceDefinitionId": 584,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "op_trace.299.584.c3lx",
-            "choiceId": "op_trace.299.584.c3lx.corp.bid.299",
+            "traceId": 299,
+            "choiceId": "299.corp.bid.299",
             "traceStep": "corp_bid",
             "corpBid": 0,
             "traceLimit": 10,
@@ -9877,9 +9881,9 @@
             "sourceDefinitionId": 584,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "op_trace.299.584.c3lx",
+            "traceId": 299,
             "traceSuccessful": true,
-            "choiceId": "op_trace.299.584.c3lx.runner.bid.300",
+            "choiceId": "299.runner.bid.300",
             "traceStep": "runner_bid",
             "corpBid": 0,
             "traceLimit": 10,
@@ -10630,7 +10634,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -10671,7 +10675,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -10879,7 +10883,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2e9.c27e",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -10894,7 +10898,7 @@
               "cardTitle": "WuTech Mem Chip"
             },
             {
-              "effectId": "runner.start.delayed_install.c2ea.c275",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -11207,7 +11211,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "390.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -11520,7 +11524,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2e9.c275",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -11535,7 +11539,7 @@
               "cardTitle": "Tycho Mem Chip"
             },
             {
-              "effectId": "runner.start.delayed_install.c2ea.c275",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -11947,7 +11951,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2e9.c21t",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -12000,7 +12004,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "332.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -12013,7 +12017,7 @@
               "sourceTitle": "“Armadillo” Armored Road Home"
             },
             {
-              "effectId": "runner.start.delayed_install.c2ea.c21t",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -12053,7 +12057,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "307.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -12177,7 +12181,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "390.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -12221,7 +12225,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -12396,7 +12400,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2e9.c275",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -12411,7 +12415,7 @@
               "cardTitle": "Tycho Mem Chip"
             },
             {
-              "effectId": "runner.start.delayed_install.c2ea.c275",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -12693,7 +12697,7 @@
           "effectKind": "trace",
           "hiddenZoneBarrier": true,
           "traceStarted": true,
-          "traceId": "op_trace.299.584.c3lx",
+          "traceId": 299,
           "traceLimit": 10,
           "effectiveTraceLimit": 10,
           "targets": {
@@ -12723,8 +12727,8 @@
           "sourceDefinitionId": 584,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "op_trace.299.584.c3lx",
-          "choiceId": "op_trace.299.584.c3lx.corp.bid.299",
+          "traceId": 299,
+          "choiceId": "299.corp.bid.299",
           "traceStep": "corp_bid",
           "corpBid": 0,
           "traceLimit": 10,
@@ -12755,9 +12759,9 @@
           "sourceDefinitionId": 584,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "op_trace.299.584.c3lx",
+          "traceId": 299,
           "traceSuccessful": true,
-          "choiceId": "op_trace.299.584.c3lx.runner.bid.300",
+          "choiceId": "299.runner.bid.300",
           "traceStep": "runner_bid",
           "corpBid": 0,
           "traceLimit": 10,
@@ -13443,7 +13447,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 304,
-      "sideSafePlanningFingerprint": "fnv1a:10a60805"
+      "sideSafePlanningFingerprint": "fnv1a:8991a279"
     },
     "observedTurnPlanAction": {
       "matchId": "match_8a0328738fccdc37",

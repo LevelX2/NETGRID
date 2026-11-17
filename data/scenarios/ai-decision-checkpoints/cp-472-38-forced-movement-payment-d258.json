@@ -1616,7 +1616,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1750,7 +1750,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1760,7 +1760,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -2014,7 +2014,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "161.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2024,7 +2024,7 @@
                 "sourceTitle": "Cruising for Netwatch"
               },
               {
-                "effectId": "161.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -2494,7 +2494,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2566,7 +2566,7 @@
             "title": "Score!",
             "cardDefinitionId": 320,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.51",
+            "runnerCostPenaltySupportWindowId": 51,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1z5.c1z5.404",
             "effectKind": "gain_credits",
             "gainCreditsAmount": 9,
@@ -2607,7 +2607,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2791,7 +2791,7 @@
             "title": "Streetware Distributor",
             "cardDefinitionId": 208,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.60",
+            "runnerCostPenaltySupportWindowId": 60,
             "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c1a9.c1a9",
             "effectKind": "install_card",
             "visibility": {
@@ -2855,7 +2855,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3039,7 +3039,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3135,7 +3135,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3199,7 +3199,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3450,7 +3450,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3497,7 +3497,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3753,7 +3753,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4066,7 +4066,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4351,7 +4351,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4690,7 +4690,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4975,7 +4975,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5209,7 +5209,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "415.score.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5285,7 +5285,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5344,7 +5344,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5376,7 +5376,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5666,7 +5666,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5725,7 +5725,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5784,7 +5784,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5847,7 +5847,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6077,7 +6077,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6136,7 +6136,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6195,7 +6195,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6473,7 +6473,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6486,7 +6486,7 @@
                 "sourceTitle": "BBS Whispering Campaign"
               },
               {
-                "effectId": "521.effect.1.trash_source_when_empty",
+                "effectId": 1,
                 "kind": "trash_source_when_empty",
                 "visibility": "public",
                 "side": "corp",
@@ -7444,7 +7444,7 @@
             "title": "Dwarf",
             "cardDefinitionId": 233,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.227",
+            "runnerCostPenaltySupportWindowId": 227,
             "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c1ft.c1ft",
             "effectKind": "install_card",
             "visibility": {
@@ -7521,7 +7521,7 @@
             "cardDefinitionId": 233,
             "targetIceDefinitionId": 491,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.230",
+            "runnerCostPenaltySupportWindowId": 230,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1ft.c1ft.c1ft.c319.0.printed_subroutines_end_the_run.303",
             "targets": {
               "targetIceDefinitionId": 491
@@ -7665,7 +7665,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -7932,7 +7932,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -7987,7 +7987,7 @@
             "serverLabel": "HQ",
             "installPlacement": "ice",
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.246",
+            "runnerCostPenaltySupportWindowId": 246,
             "runnerCostPenaltySupportOriginalActionId": "runner.continue_run",
             "installedPositionKey": "installed-position-v1:39b7e868",
             "abilityFamily": "run-access",
@@ -8054,7 +8054,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -8083,7 +8083,7 @@
             "serverId": "hq",
             "serverLabel": "HQ",
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.249",
+            "runnerCostPenaltySupportWindowId": 249,
             "runnerCostPenaltySupportOriginalActionId": "runner.continue_run",
             "abilityFamily": "run-access",
             "targets": {
@@ -8137,7 +8137,7 @@
             "cardDefinitionId": 233,
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.251",
+            "runnerCostPenaltySupportWindowId": 251,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1ft.c1ft.c1ft.c2ry.0.printed_subroutines_end_the_run.303",
             "targets": {
               "targetIceDefinitionId": 449
@@ -8241,7 +8241,7 @@
             "serverLabel": "HQ",
             "installPlacement": "ice",
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.255",
+            "runnerCostPenaltySupportWindowId": 255,
             "runnerCostPenaltySupportOriginalActionId": "runner.continue_run",
             "installedPositionKey": "installed-position-v1:d8b1e20c",
             "abilityFamily": "run-access",
@@ -8308,7 +8308,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -8380,7 +8380,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -8658,7 +8658,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -8671,7 +8671,7 @@
               "sourceTitle": "BBS Whispering Campaign"
             },
             {
-              "effectId": "521.effect.1.trash_source_when_empty",
+              "effectId": 1,
               "kind": "trash_source_when_empty",
               "visibility": "public",
               "side": "corp",
@@ -9629,7 +9629,7 @@
           "title": "Dwarf",
           "cardDefinitionId": 233,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.227",
+          "runnerCostPenaltySupportWindowId": 227,
           "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c1ft.c1ft",
           "effectKind": "install_card",
           "visibility": {
@@ -9706,7 +9706,7 @@
           "cardDefinitionId": 233,
           "targetIceDefinitionId": 491,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.230",
+          "runnerCostPenaltySupportWindowId": 230,
           "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1ft.c1ft.c1ft.c319.0.printed_subroutines_end_the_run.303",
           "targets": {
             "targetIceDefinitionId": 491
@@ -9850,7 +9850,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -10117,7 +10117,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -10172,7 +10172,7 @@
           "serverLabel": "HQ",
           "installPlacement": "ice",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.246",
+          "runnerCostPenaltySupportWindowId": 246,
           "runnerCostPenaltySupportOriginalActionId": "runner.continue_run",
           "installedPositionKey": "installed-position-v1:39b7e868",
           "abilityFamily": "run-access",
@@ -10239,7 +10239,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -10268,7 +10268,7 @@
           "serverId": "hq",
           "serverLabel": "HQ",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.249",
+          "runnerCostPenaltySupportWindowId": 249,
           "runnerCostPenaltySupportOriginalActionId": "runner.continue_run",
           "abilityFamily": "run-access",
           "targets": {
@@ -10322,7 +10322,7 @@
           "cardDefinitionId": 233,
           "targetIceDefinitionId": 449,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.251",
+          "runnerCostPenaltySupportWindowId": 251,
           "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1ft.c1ft.c1ft.c2ry.0.printed_subroutines_end_the_run.303",
           "targets": {
             "targetIceDefinitionId": 449
@@ -10426,7 +10426,7 @@
           "serverLabel": "HQ",
           "installPlacement": "ice",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.255",
+          "runnerCostPenaltySupportWindowId": 255,
           "runnerCostPenaltySupportOriginalActionId": "runner.continue_run",
           "installedPositionKey": "installed-position-v1:d8b1e20c",
           "abilityFamily": "run-access",
@@ -10493,7 +10493,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -10561,7 +10561,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 257,
-      "sideSafePlanningFingerprint": "fnv1a:3bb1cc73"
+      "sideSafePlanningFingerprint": "fnv1a:88424888"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",

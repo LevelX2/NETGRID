@@ -2162,7 +2162,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2314,7 +2314,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2432,7 +2432,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2660,7 +2660,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3209,7 +3209,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3408,7 +3408,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3749,7 +3749,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4953,7 +4953,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5009,7 +5009,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -5514,7 +5514,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -5820,7 +5820,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -6308,7 +6308,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -6587,7 +6587,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -7039,7 +7039,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -7318,7 +7318,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -7767,7 +7767,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -8051,7 +8051,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -8505,7 +8505,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -8812,7 +8812,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -10192,7 +10192,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -10471,7 +10471,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -10920,7 +10920,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -11204,7 +11204,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -11658,7 +11658,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -11965,7 +11965,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "corp.start.scored_agenda.mandatory_draw.c1p",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -13141,7 +13141,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 273,
-      "sideSafePlanningFingerprint": "fnv1a:8d58a7fb"
+      "sideSafePlanningFingerprint": "fnv1a:56074596"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_corp_superserum_control_grid_2026_07_01_1.1.0",

@@ -1173,7 +1173,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "182.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1183,7 +1183,7 @@
                 "sourceTitle": "Stakeout"
               },
               {
-                "effectId": "182.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -1276,7 +1276,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1472,7 +1472,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "161.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1482,7 +1482,7 @@
                 "sourceTitle": "Cruising for Netwatch"
               },
               {
-                "effectId": "161.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -2223,7 +2223,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2496,7 +2496,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "509.effect.0.gain_actions",
+                "effectId": 0,
                 "kind": "gain_actions",
                 "visibility": "public",
                 "side": "corp",
@@ -2983,7 +2983,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "415.score.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -3327,7 +3327,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3488,7 +3488,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "101.cyi.successful_run.tax",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -3502,7 +3502,7 @@
                 "serverLabel": "HQ"
               },
               {
-                "effectId": "101.cyp.successful_run.vienna",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -3932,7 +3932,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "116.cyi.successful_run.tax",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -3946,7 +3946,7 @@
                 "serverLabel": "HQ"
               },
               {
-                "effectId": "116.cyp.successful_run.vienna",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -4004,7 +4004,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.virus.155",
+                "effectId": 0,
                 "kind": "lose_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -4291,7 +4291,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "132.cyi.successful_run.tax",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -4305,7 +4305,7 @@
                 "serverLabel": "HQ"
               },
               {
-                "effectId": "132.cyp.successful_run.vienna",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -4730,7 +4730,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "147.cyi.successful_run.tax",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -4744,7 +4744,7 @@
                 "serverLabel": "HQ"
               },
               {
-                "effectId": "147.cyp.successful_run.vienna",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -5010,7 +5010,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "156.cyi.successful_run.tax",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -5024,7 +5024,7 @@
                 "serverLabel": "HQ"
               },
               {
-                "effectId": "156.cyp.successful_run.vienna",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -5057,7 +5057,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.start.virus.155",
+                "effectId": 0,
                 "kind": "lose_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5125,7 +5125,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5416,7 +5416,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5426,7 +5426,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -5583,7 +5583,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "181.cyi.successful_run.tax",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -5597,7 +5597,7 @@
                 "serverLabel": "HQ"
               },
               {
-                "effectId": "181.cyp.successful_run.vienna",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -6097,7 +6097,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "116.cyi.successful_run.tax",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -6111,7 +6111,7 @@
               "serverLabel": "HQ"
             },
             {
-              "effectId": "116.cyp.successful_run.vienna",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -6169,7 +6169,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "corp.start.virus.155",
+              "effectId": 0,
               "kind": "lose_credits",
               "visibility": "public",
               "side": "corp",
@@ -6456,7 +6456,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "132.cyi.successful_run.tax",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -6470,7 +6470,7 @@
               "serverLabel": "HQ"
             },
             {
-              "effectId": "132.cyp.successful_run.vienna",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -6895,7 +6895,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "147.cyi.successful_run.tax",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -6909,7 +6909,7 @@
               "serverLabel": "HQ"
             },
             {
-              "effectId": "147.cyp.successful_run.vienna",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -7175,7 +7175,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "156.cyi.successful_run.tax",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -7189,7 +7189,7 @@
               "serverLabel": "HQ"
             },
             {
-              "effectId": "156.cyp.successful_run.vienna",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -7222,7 +7222,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "corp.start.virus.155",
+              "effectId": 0,
               "kind": "lose_credits",
               "visibility": "public",
               "side": "corp",
@@ -7290,7 +7290,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -7581,7 +7581,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "507.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -7591,7 +7591,7 @@
               "sourceTitle": "Night Shift"
             },
             {
-              "effectId": "507.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -7748,7 +7748,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "181.cyi.successful_run.tax",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -7762,7 +7762,7 @@
               "serverLabel": "HQ"
             },
             {
-              "effectId": "181.cyp.successful_run.vienna",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -8278,7 +8278,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 201,
-      "sideSafePlanningFingerprint": "fnv1a:1d2fe5ce"
+      "sideSafePlanningFingerprint": "fnv1a:7df26cc0"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",

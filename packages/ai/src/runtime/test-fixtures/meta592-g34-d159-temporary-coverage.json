@@ -1110,7 +1110,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1119,7 +1119,7 @@
                 "sourceTitle": "Banpei"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1255,7 +1255,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.root_rez_on_install.hq.c3kt",
+                "effectId": 0,
                 "kind": "rez_card",
                 "visibility": "public",
                 "side": "corp",
@@ -1467,7 +1467,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1493,7 +1493,7 @@
             "title": "Temple Microcode Outlet",
             "cardDefinitionId": 326,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.28",
+            "runnerCostPenaltySupportWindowId": 28,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c20i.c20i.410",
             "visibility": {
               "class": "public"
@@ -1779,7 +1779,7 @@
             "title": "Rent-I-Con",
             "cardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.39",
+            "runnerCostPenaltySupportWindowId": 39,
             "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
             "effectKind": "install_card",
             "visibility": {
@@ -1884,7 +1884,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 473,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.43",
+            "runnerCostPenaltySupportWindowId": 43,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2x9.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 473
@@ -2535,7 +2535,7 @@
             "title": "Finders Keepers",
             "cardDefinitionId": 41,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.69",
+            "runnerCostPenaltySupportWindowId": 69,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c96.c96",
             "visibility": {
               "class": "public"
@@ -2824,7 +2824,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3118,7 +3118,7 @@
             "title": "Finders Keepers",
             "cardDefinitionId": 41,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.92",
+            "runnerCostPenaltySupportWindowId": 92,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c95.c95",
             "visibility": {
               "class": "public"
@@ -3414,7 +3414,7 @@
             "title": "Temple Microcode Outlet",
             "cardDefinitionId": 326,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.104",
+            "runnerCostPenaltySupportWindowId": 104,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c20h.c20h.410",
             "visibility": {
               "class": "public"
@@ -3508,7 +3508,7 @@
             "title": "Rent-I-Con",
             "cardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.107",
+            "runnerCostPenaltySupportWindowId": 107,
             "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7t.c7t",
             "effectKind": "install_card",
             "visibility": {
@@ -3588,7 +3588,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 473,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.110",
+            "runnerCostPenaltySupportWindowId": 110,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2x9.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 473
@@ -3958,7 +3958,7 @@
             "title": "Rent-I-Con",
             "cardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.124",
+            "runnerCostPenaltySupportWindowId": 124,
             "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
             "effectKind": "install_card",
             "visibility": {
@@ -4038,7 +4038,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 491,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.127",
+            "runnerCostPenaltySupportWindowId": 127,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c319.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 491
@@ -4394,7 +4394,7 @@
             "title": "Temple Microcode Outlet",
             "cardDefinitionId": 326,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.141",
+            "runnerCostPenaltySupportWindowId": 141,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c20j.c20j.410",
             "visibility": {
               "class": "public"
@@ -4488,7 +4488,7 @@
             "title": "Rent-I-Con",
             "cardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.144",
+            "runnerCostPenaltySupportWindowId": 144,
             "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7u.c7u",
             "effectKind": "install_card",
             "visibility": {
@@ -4568,7 +4568,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 473,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.147",
+            "runnerCostPenaltySupportWindowId": 147,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2x9.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 473
@@ -5145,7 +5145,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -5439,7 +5439,7 @@
           "title": "Finders Keepers",
           "cardDefinitionId": 41,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.92",
+          "runnerCostPenaltySupportWindowId": 92,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c95.c95",
           "visibility": {
             "class": "public"
@@ -5735,7 +5735,7 @@
           "title": "Temple Microcode Outlet",
           "cardDefinitionId": 326,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.104",
+          "runnerCostPenaltySupportWindowId": 104,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c20h.c20h.410",
           "visibility": {
             "class": "public"
@@ -5829,7 +5829,7 @@
           "title": "Rent-I-Con",
           "cardDefinitionId": 35,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.107",
+          "runnerCostPenaltySupportWindowId": 107,
           "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7t.c7t",
           "effectKind": "install_card",
           "visibility": {
@@ -5909,7 +5909,7 @@
           "cardDefinitionId": 35,
           "targetIceDefinitionId": 473,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.110",
+          "runnerCostPenaltySupportWindowId": 110,
           "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2x9.0.printed_subroutines_end_the_run.48",
           "targets": {
             "targetIceDefinitionId": 473
@@ -6279,7 +6279,7 @@
           "title": "Rent-I-Con",
           "cardDefinitionId": 35,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.124",
+          "runnerCostPenaltySupportWindowId": 124,
           "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
           "effectKind": "install_card",
           "visibility": {
@@ -6359,7 +6359,7 @@
           "cardDefinitionId": 35,
           "targetIceDefinitionId": 491,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.127",
+          "runnerCostPenaltySupportWindowId": 127,
           "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c319.0.printed_subroutines_end_the_run.48",
           "targets": {
             "targetIceDefinitionId": 491
@@ -6715,7 +6715,7 @@
           "title": "Temple Microcode Outlet",
           "cardDefinitionId": 326,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.141",
+          "runnerCostPenaltySupportWindowId": 141,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c20j.c20j.410",
           "visibility": {
             "class": "public"
@@ -6809,7 +6809,7 @@
           "title": "Rent-I-Con",
           "cardDefinitionId": 35,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.144",
+          "runnerCostPenaltySupportWindowId": 144,
           "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7u.c7u",
           "effectKind": "install_card",
           "visibility": {
@@ -6889,7 +6889,7 @@
           "cardDefinitionId": 35,
           "targetIceDefinitionId": 473,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.147",
+          "runnerCostPenaltySupportWindowId": 147,
           "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2x9.0.printed_subroutines_end_the_run.48",
           "targets": {
             "targetIceDefinitionId": 473
@@ -7454,7 +7454,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 158,
-      "sideSafePlanningFingerprint": "fnv1a:9c2ab5a0"
+      "sideSafePlanningFingerprint": "fnv1a:59d35022"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",

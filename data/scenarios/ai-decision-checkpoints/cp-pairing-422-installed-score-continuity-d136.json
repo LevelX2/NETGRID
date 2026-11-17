@@ -1279,7 +1279,7 @@
             "title": "Junkyard BBS",
             "cardDefinitionId": 377,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.11",
+            "runnerCostPenaltySupportWindowId": 11,
             "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c2bt.c2bt",
             "effectKind": "install_card",
             "visibility": {
@@ -1590,7 +1590,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.24",
+            "runnerCostPenaltySupportWindowId": 24,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2ry.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 449
@@ -1959,7 +1959,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1985,7 +1985,7 @@
             "title": "Rent-I-Con",
             "cardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.40",
+            "runnerCostPenaltySupportWindowId": 40,
             "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
             "effectKind": "install_card",
             "visibility": {
@@ -2550,7 +2550,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2560,7 +2560,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -4214,7 +4214,7 @@
             "title": "Gideon’s Pawnshop",
             "cardDefinitionId": 301,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.129",
+            "runnerCostPenaltySupportWindowId": 129,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1ux.c1ux.385",
             "visibility": {
               "class": "public"
@@ -5065,7 +5065,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "507.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -5075,7 +5075,7 @@
               "sourceTitle": "Night Shift"
             },
             {
-              "effectId": "507.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -6729,7 +6729,7 @@
           "title": "Gideon’s Pawnshop",
           "cardDefinitionId": 301,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.129",
+          "runnerCostPenaltySupportWindowId": 129,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1ux.c1ux.385",
           "visibility": {
             "class": "public"
@@ -7445,7 +7445,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 135,
-      "sideSafePlanningFingerprint": "fnv1a:3f43fb09"
+      "sideSafePlanningFingerprint": "fnv1a:ed0ca043"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_rent_to_own_war_engine_1.1.0",

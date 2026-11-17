@@ -2373,7 +2373,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "500.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -2383,7 +2383,7 @@
               "sourceTitle": "Day Shift"
             },
             {
-              "effectId": "500.effect.1.gain_credits",
+              "effectId": 1,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -2441,7 +2441,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",

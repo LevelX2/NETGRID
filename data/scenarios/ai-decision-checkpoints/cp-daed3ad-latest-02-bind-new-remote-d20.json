@@ -2840,7 +2840,7 @@
           "label": "Zug beenden",
           "resolvedEffects": [
             {
-              "effectId": "48.cap.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -3107,7 +3107,7 @@
           "label": "Zug beenden",
           "resolvedEffects": [
             {
-              "effectId": "48.cap.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",

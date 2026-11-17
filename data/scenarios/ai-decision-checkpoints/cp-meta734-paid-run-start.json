@@ -25,7 +25,7 @@
         "expiresAtStateVersion": 151,
         "payload": {
           "runnerCostPenaltySupportContinuation": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150",
+          "runnerCostPenaltySupportWindowId": 150,
           "serverId": "rd",
           "runnerEventRun": true,
           "cardId": "c10i",
@@ -767,7 +767,7 @@
           "expiresAtStateVersion": 151,
           "payload": {
             "runnerCostPenaltySupportContinuation": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150",
+            "runnerCostPenaltySupportWindowId": 150,
             "serverId": "rd",
             "runnerEventRun": true,
             "cardId": "c10i",
@@ -826,7 +826,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "208.c1a9.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -856,7 +856,7 @@
           "title": "Highlighter",
           "cardDefinitionId": 148,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.148",
+          "runnerCostPenaltySupportWindowId": 148,
           "runnerCostPenaltySupportOriginalActionId": "runner.install_card.cwy.cwy",
           "effectKind": "install_card",
           "visibility": {
@@ -904,7 +904,7 @@
           "cardDefinitionId": 164,
           "serverLabel": "R&D",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150",
+          "runnerCostPenaltySupportWindowId": 150,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c10i.rd.c10i.226",
           "targets": {
             "serverLabel": "R&D"
@@ -1836,7 +1836,7 @@
       "sourceStepId": "plan:runner.pressure_central:central%3Ard:pressure:rd",
       "originalActionId": "runner.play_event.c10i.rd.c10i.226",
       "selectedAtStateVersion": 149,
-      "windowId": "runner_cost_penalty_support.150"
+      "windowId": 150
     },
     "rootForegroundInstanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
     "executorInstanceId": "plan:runner.economy:runner-portfolio-credit-reserve"
@@ -1856,7 +1856,7 @@
         "targetRequirements": [],
         "choiceRequirements": [
           {
-            "choiceId": "152.c2px.0.trace.base_link.155",
+            "choiceId": "154.base_link.155",
             "minSelections": 1,
             "maxSelections": 1,
             "optionIds": [
@@ -1885,7 +1885,7 @@
       "activeSide": "runner",
       "phase": "run",
       "trace": {
-        "traceId": "152.c2px.0.trace",
+        "traceId": 154,
         "sourceCardInstanceId": "c2px",
         "sourceDefinitionId": 440,
         "profile": "modern_open",
@@ -1898,7 +1898,8 @@
         "visibleOpponentBidCapacity": 0,
         "corpBid": 0,
         "corpStrength": 6,
-        "runnerLink": 0
+        "runnerLink": 0,
+        "sourceRunId": 152
       },
       "own": {
         "identity": {
@@ -2650,9 +2651,9 @@
         }
       },
       "pendingChoice": {
-        "choiceId": "152.c2px.0.trace.base_link.155",
+        "choiceId": "154.base_link.155",
         "side": "runner",
-        "source": "trace_base_link:152.c2px.0.trace",
+        "source": "trace_base_link:154",
         "prompt": "Base-Link-Karte fuer Trace nutzen",
         "kind": "select_option",
         "options": [
@@ -2685,7 +2686,7 @@
           "targetRequirements": [],
           "choiceRequirements": [
             {
-              "choiceId": "152.c2px.0.trace.base_link.155",
+              "choiceId": "154.base_link.155",
               "minSelections": 1,
               "maxSelections": 1,
               "optionIds": [
@@ -2719,7 +2720,7 @@
           "cardDefinitionId": 164,
           "serverLabel": "R&D",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150",
+          "runnerCostPenaltySupportWindowId": 150,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c10i.rd.c10i.226",
           "targets": {
             "serverLabel": "R&D"
@@ -2805,7 +2806,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "152.start",
+              "effectId": 0,
               "kind": "start_run",
               "visibility": "public",
               "side": "runner",
@@ -2854,7 +2855,7 @@
           "abilityFamily": "run-access",
           "effectKind": "trace",
           "traceStarted": true,
-          "traceId": "152.c2px.0.trace",
+          "traceId": 154,
           "traceLimit": 6,
           "effectiveTraceLimit": 6,
           "targets": {
@@ -2866,7 +2867,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -2874,7 +2875,8 @@
               "sourceDefinitionId": 440,
               "sourceTitle": "Cinderella"
             }
-          ]
+          ],
+          "traceSourceRunId": 152
         }
       },
       {
@@ -2892,8 +2894,8 @@
           "sourceDefinitionId": 440,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "152.c2px.0.trace",
-          "choiceId": "152.c2px.0.trace.corp.bid.154",
+          "traceId": 154,
+          "choiceId": "154.corp.bid.154",
           "traceStep": "corp_bid",
           "corpBid": 0,
           "traceLimit": 6,

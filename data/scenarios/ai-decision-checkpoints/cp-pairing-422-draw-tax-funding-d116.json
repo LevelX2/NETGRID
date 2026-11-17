@@ -1076,7 +1076,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1135,7 +1135,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1194,7 +1194,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1636,7 +1636,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1646,7 +1646,7 @@
                 "sourceTitle": "Haunting Inquisition"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2084,7 +2084,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "415.score.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2236,7 +2236,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2365,7 +2365,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "46.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2375,7 +2375,7 @@
                 "sourceTitle": "Panzer Run"
               },
               {
-                "effectId": "46.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -2961,7 +2961,7 @@
             "sourceDefinitionId": 388,
             "targetCardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.88",
+            "runnerCostPenaltySupportWindowId": 88,
             "runnerCostPenaltySupportOriginalActionId": "runner.trigger_ability.c2e9.c2e9.shell.c7u.remove_shell_counter.c7u",
             "abilityFamily": "hosting-counters",
             "abilityId": "remove_shell_counter",
@@ -3024,7 +3024,7 @@
             "sourceDefinitionId": 388,
             "targetCardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.90",
+            "runnerCostPenaltySupportWindowId": 90,
             "runnerCostPenaltySupportOriginalActionId": "runner.trigger_ability.c2e9.c2e9.shell.c7u.remove_shell_counter.c7u",
             "abilityFamily": "hosting-counters",
             "abilityId": "remove_shell_counter",
@@ -3087,7 +3087,7 @@
             "sourceDefinitionId": 388,
             "targetCardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.92",
+            "runnerCostPenaltySupportWindowId": 92,
             "runnerCostPenaltySupportOriginalActionId": "runner.trigger_ability.c2e9.c2e9.shell.c7u.remove_shell_counter.c7u",
             "abilityFamily": "hosting-counters",
             "abilityId": "remove_shell_counter",
@@ -3240,7 +3240,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.97",
+            "runnerCostPenaltySupportWindowId": 97,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2rx.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 449
@@ -3363,7 +3363,7 @@
             "title": "Gideon’s Pawnshop",
             "cardDefinitionId": 301,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.102",
+            "runnerCostPenaltySupportWindowId": 102,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1ux.c1ux.385",
             "visibility": {
               "class": "public"
@@ -3687,7 +3687,7 @@
             "sourceDefinitionId": 388,
             "targetCardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.114",
+            "runnerCostPenaltySupportWindowId": 114,
             "runnerCostPenaltySupportOriginalActionId": "runner.trigger_ability.c2e9.c2e9.shell.c7u.remove_shell_counter.c7u",
             "abilityFamily": "hosting-counters",
             "abilityId": "remove_shell_counter",
@@ -3984,7 +3984,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3994,7 +3994,7 @@
               "sourceTitle": "Haunting Inquisition"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4432,7 +4432,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "415.score.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -4584,7 +4584,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4713,7 +4713,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "46.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -4723,7 +4723,7 @@
               "sourceTitle": "Panzer Run"
             },
             {
-              "effectId": "46.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -5309,7 +5309,7 @@
           "sourceDefinitionId": 388,
           "targetCardDefinitionId": 35,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.88",
+          "runnerCostPenaltySupportWindowId": 88,
           "runnerCostPenaltySupportOriginalActionId": "runner.trigger_ability.c2e9.c2e9.shell.c7u.remove_shell_counter.c7u",
           "abilityFamily": "hosting-counters",
           "abilityId": "remove_shell_counter",
@@ -5372,7 +5372,7 @@
           "sourceDefinitionId": 388,
           "targetCardDefinitionId": 35,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.90",
+          "runnerCostPenaltySupportWindowId": 90,
           "runnerCostPenaltySupportOriginalActionId": "runner.trigger_ability.c2e9.c2e9.shell.c7u.remove_shell_counter.c7u",
           "abilityFamily": "hosting-counters",
           "abilityId": "remove_shell_counter",
@@ -5435,7 +5435,7 @@
           "sourceDefinitionId": 388,
           "targetCardDefinitionId": 35,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.92",
+          "runnerCostPenaltySupportWindowId": 92,
           "runnerCostPenaltySupportOriginalActionId": "runner.trigger_ability.c2e9.c2e9.shell.c7u.remove_shell_counter.c7u",
           "abilityFamily": "hosting-counters",
           "abilityId": "remove_shell_counter",
@@ -5588,7 +5588,7 @@
           "cardDefinitionId": 35,
           "targetIceDefinitionId": 449,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.97",
+          "runnerCostPenaltySupportWindowId": 97,
           "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2rx.0.printed_subroutines_end_the_run.48",
           "targets": {
             "targetIceDefinitionId": 449
@@ -5711,7 +5711,7 @@
           "title": "Gideon’s Pawnshop",
           "cardDefinitionId": 301,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.102",
+          "runnerCostPenaltySupportWindowId": 102,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1ux.c1ux.385",
           "visibility": {
             "class": "public"
@@ -6035,7 +6035,7 @@
           "sourceDefinitionId": 388,
           "targetCardDefinitionId": 35,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.114",
+          "runnerCostPenaltySupportWindowId": 114,
           "runnerCostPenaltySupportOriginalActionId": "runner.trigger_ability.c2e9.c2e9.shell.c7u.remove_shell_counter.c7u",
           "abilityFamily": "hosting-counters",
           "abilityId": "remove_shell_counter",
@@ -6268,7 +6268,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 115,
-      "sideSafePlanningFingerprint": "fnv1a:8f55c58e"
+      "sideSafePlanningFingerprint": "fnv1a:8bce2e6f"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",

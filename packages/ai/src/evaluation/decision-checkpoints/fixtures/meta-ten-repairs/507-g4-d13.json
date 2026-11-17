@@ -591,7 +591,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1238,7 +1238,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -1613,7 +1613,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 12,
-      "sideSafePlanningFingerprint": "fnv1a:e138ca16"
+      "sideSafePlanningFingerprint": "fnv1a:bff3ac48"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_cybernetics_risk_rig_2026_07_01_1.0.0",

@@ -61,7 +61,7 @@ it("retains the direct central run root across both real Pocket traces and Chiba
         "runner.resolve_choice",
       );
       expect(a.payload.costPenaltySupportWindowId).toBe(
-        "runner_cost_penalty_support.126",
+        126,
       );
       expect(input.playerView.own.rig.find((card: { instanceId: string }) => card.instanceId === a.source)?.definitionId).toBe(191);
     }
@@ -116,7 +116,7 @@ it.each([
       input.eventTail = input.eventTail.filter((e: any) => e !== event);
     if (variant === "corp_actor") event.publicPayload.actor = "corp";
     if (variant === "foreign_trace")
-      event.publicPayload.traceId = "foreign-run.foreign.trace";
+      event.publicPayload.traceSourceRunId = 118;
     if (variant === "nontrace_effect")
       event.publicPayload.effectKind = "not-trace";
     const result: Extract<PlanSchedulerResult, { lane: "engine_window" }> = {

@@ -505,7 +505,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -769,7 +769,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -886,7 +886,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 6,
-      "sideSafePlanningFingerprint": "fnv1a:6923e0ae"
+      "sideSafePlanningFingerprint": "fnv1a:94aa4756"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_ivory_bastion_1.1.0",

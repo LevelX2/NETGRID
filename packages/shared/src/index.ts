@@ -181,6 +181,7 @@ export function isCardDefinitionId(value: unknown): value is CardDefinitionId {
 
 export type CardInstanceId = string;
 export type RunId = number;
+export type TraceId = number;
 
 export function isRunId(value: unknown): value is RunId {
   return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
@@ -190,6 +191,15 @@ export function parseRunIdToken(value: string | undefined): RunId | undefined {
   const id = Number(value);
   return isRunId(id) && String(id) === value ? id : undefined;
 }
+export function isTraceId(value: unknown): value is TraceId {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
+export function parseTraceIdToken(value: string | undefined): TraceId | undefined {
+  const id = Number(value);
+  return isTraceId(id) && String(id) === value ? id : undefined;
+}
+
 export type FixedPlayCostDefinition = {
   kind: "fixed";
   credits: number;
@@ -500,6 +510,12 @@ export type RunnerVirusPurgeWindowState = {
   timingFamily: "run_special_effect" | "corp_start_of_turn_between_effects";
 };
 
+export type RunnerPaymentWindowId = number;
+
+export function isRunnerPaymentWindowId(value: unknown): value is RunnerPaymentWindowId {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
 export type ResolvedGameEffectKind =
   | "start_run"
   | "gain_credits"
@@ -524,8 +540,8 @@ export type ResolvedGameEffectKind =
   | "pay_credits_or_lose_game"
   | "resolve_subroutine";
 
-export type ResolvedGameEffect = {
-  effectId: string;
+export type ResolvedGameEffect<Id extends string | number = string> = {
+  effectId: Id;
   kind: ResolvedGameEffectKind;
   visibility: EventVisibilityClass;
   side?: Side;
@@ -661,6 +677,13 @@ export type PublicCounterThresholdVisibilityTransition = {
   cards: PublicInstalledCorpCardIdentity[];
 };
 
+/** The effect ID is its zero-based position in the originating public event. */
+export type PublicResolvedGameEffect = ResolvedGameEffect<number>;
+
+export function isPublicResolvedGameEffectId(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
 /**
  * Side-safe fields shared by Chronicle, replay, AI and server projections.
  * Event-specific fields remain possible, but common semantics must use these
@@ -673,6 +696,10 @@ export type PublicCounterThresholdVisibilityTransition = {
  */
 export type PublicEventPayload = Record<string, unknown> & {
   actor?: Side;
+  traceId?: TraceId;
+  traceSourceRunId?: RunId;
+  traceSourceCardInstanceId?: CardInstanceId;
+  traceSourceSubroutineIndex?: number;
   actionType?: string;
   label?: string;
   abilityFamily?: PublicAbilityFamily;
@@ -683,7 +710,7 @@ export type PublicEventPayload = Record<string, unknown> & {
   amounts?: Record<string, number>;
   targets?: Record<string, string | number | boolean>;
   visibility?: PublicAbilityVisibility;
-  resolvedEffects?: ResolvedGameEffect[];
+  resolvedEffects?: PublicResolvedGameEffect[];
   /** Canonically ordered aggregate mutations from this engine transition. */
   counterMutations?: PublicCounterMutation[];
   publicVisibilityTransitions?: PublicCounterThresholdVisibilityTransition[];
@@ -706,7 +733,7 @@ export type PublicEventPayload = Record<string, unknown> & {
   /** Opaque stable anchor; never a CardInstanceId or card definition. */
   installedPositionKey?: string;
   runnerCostPenaltySupportWindowOpened?: boolean;
-  runnerCostPenaltySupportWindowId?: string;
+  runnerCostPenaltySupportWindowId?: RunnerPaymentWindowId;
   runnerCostPenaltySupportOriginalActionId?: string;
 };
 
@@ -774,6 +801,12 @@ export type EventModificationKind =
   | "increase";
 export type ReplacementEventType = ImminentEventType | "prevent_damage";
 
+export type EventWindowId = number;
+
+export function isEventWindowId(value: unknown): value is EventWindowId {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
 export type ImminentEvent = {
   eventId: string;
   eventType: ImminentEventType;
@@ -787,7 +820,7 @@ export type ImminentEvent = {
   payload: Record<string, unknown>;
   visibility: EventVisibilityClass;
   createdAtStateVersion: number;
-  modificationWindowId?: string;
+  modificationWindowId?: EventWindowId;
 };
 
 export type EventModificationCandidate = {
@@ -828,7 +861,7 @@ export type EventModificationCandidate = {
 };
 
 export type EventModificationWindow = {
-  windowId: string;
+  windowId: EventWindowId;
   eventId: string;
   eventType: ImminentEventType;
   kind: EventModificationKind;
@@ -857,7 +890,7 @@ export type ReplacementCandidate = {
 };
 
 export type ReplacementWindow = {
-  windowId: string;
+  windowId: EventWindowId;
   originalEventId: string;
   eventType: ImminentEventType;
   candidates: ReplacementCandidate[];
@@ -1964,7 +1997,9 @@ export type TraceRunnerBidPaymentCommitment = {
 };
 
 export type TraceState = {
-  traceId: string;
+  traceId: TraceId;
+  /** Present only for a trace initiated by a printed encounter subroutine. */
+  sourceRunId?: RunId;
   sourceCardInstanceId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
   traceRulesProfile?: TraceRulesProfile;
@@ -2062,7 +2097,7 @@ export type GameEvent = PublicGameEvent & {
 };
 
 export type RunnerDrawSequence = {
-  sequenceId: string;
+  sequenceId: number;
   originActionId: string;
   remainingDrawCount: number;
   drawnCardIds: CardInstanceId[];
@@ -2147,7 +2182,7 @@ export type CardCreditGainContinuation =
     };
 
 export type CorpDrawTransaction = {
-  transactionId: string;
+  transactionId: number;
   baseDrawCount: number;
   replacementDrawCount: number;
   drawnCardIds: CardInstanceId[];
@@ -2181,7 +2216,7 @@ export type PendingAddTagContinuation =
     }
   | {
       kind: "runner_draw_tax";
-      sequenceId: string;
+      sequenceId: number;
       sourceCardId: CardInstanceId;
       sourceIndex: number;
       runnerTagsBefore: number;
@@ -2310,14 +2345,14 @@ export type GameState = {
     accessZone: "installed" | "hq" | "rd" | "archives";
   };
   pendingTraceProgramTrashContinuation?: {
-    traceId: string;
+    traceId: TraceId;
     traceStep: "runner_bid" | "post_bid_link";
     additionalTagAmount?: number;
   };
   pendingTraceHardwareWreckerContinuation?: {
     sourceDefinitionId: CardDefinitionId;
     sourceCardInstanceId: CardInstanceId;
-    traceId: string;
+    traceId: TraceId;
     damageAmount: number;
     stage: "select_hardware" | "trash_prevention";
     targetHardwareId?: CardInstanceId;
@@ -2441,7 +2476,7 @@ export type GameState = {
   runnerPermanentMeatDamagePrevention?: boolean;
   eventModificationHarness?: EventModificationTestHarness;
   runnerCostPenaltySupportWindow?: {
-    windowId: string;
+    windowId: RunnerPaymentWindowId;
     originalActionId: string;
     amountDue: number;
     kind: "cost" | "penalty";
@@ -2985,7 +3020,7 @@ export type EngineRandomizedTraceBidCandidate = {
 };
 
 export type EngineRandomizedTraceBidAssessment = {
-  traceId: string;
+  traceId: TraceId;
   traceRulesProfile: TraceRulesProfile;
   printedTrace: number;
   effectiveTraceLimit: number;
@@ -4274,7 +4309,8 @@ export type VisibleCard = {
 };
 
 export type VisibleTraceState = {
-  traceId: string;
+  traceId: TraceId;
+  sourceRunId?: RunId;
   sourceCardInstanceId?: CardInstanceId;
   sourceSubroutineIndex?: number;
   /** Public Engine fact: neither bid changes success or the fixed effect amount. */

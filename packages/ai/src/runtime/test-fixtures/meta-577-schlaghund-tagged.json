@@ -2896,7 +2896,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -3216,7 +3216,7 @@
           "turnActionOrdinalEnd": 2,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "op_trace.18.496.c32e",
+          "traceId": 18,
           "sourceCardId": "c32e",
           "sourceDefinitionId": 496,
           "traceLimit": 5,
@@ -3266,7 +3266,7 @@
                 "cardImplementationAbilityKey": "abilities_on_play_trace",
                 "cardImplementationAbilityId": 610,
                 "traceStarted": true,
-                "traceId": "op_trace.18.496.c32e",
+                "traceId": 18,
                 "sourceCardId": "c32e",
                 "sourceDefinitionId": 496,
                 "traceLimit": 5,
@@ -3290,11 +3290,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "op_trace.18.496.c32e.corp.bid.18",
+          "choiceId": "18.corp.bid.18",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 496,
-          "traceId": "op_trace.18.496.c32e",
+          "traceId": 18,
           "traceStep": "corp_bid",
           "traceLimit": 5,
           "effectiveTraceLimit": 5,
@@ -3322,7 +3322,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 18,
               "selectedChoices": {
-                "choiceId": "op_trace.18.496.c32e.corp.bid.18",
+                "choiceId": "18.corp.bid.18",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -3341,7 +3341,7 @@
               "expiresAtStateVersion": 18,
               "choiceRequirements": [
                 {
-                  "choiceId": "op_trace.18.496.c32e.corp.bid.18",
+                  "choiceId": "18.corp.bid.18",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -3353,10 +3353,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "op_trace.18.496.c32e.corp.bid.18",
+                "choiceId": "18.corp.bid.18",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "op_trace.18.496.c32e",
+                "traceId": 18,
                 "traceStep": "corp_bid",
                 "traceLimit": 5,
                 "effectiveTraceLimit": 5,
@@ -3385,12 +3385,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "op_trace.18.496.c32e.runner.bid.19",
+          "choiceId": "18.runner.bid.19",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 496,
           "tagsAdded": 1,
-          "traceId": "op_trace.18.496.c32e",
+          "traceId": 18,
           "traceStep": "runner_bid",
           "traceLimit": 5,
           "corpBid": 0,
@@ -3422,7 +3422,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 19,
               "selectedChoices": {
-                "choiceId": "op_trace.18.496.c32e.runner.bid.19",
+                "choiceId": "18.runner.bid.19",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -3441,7 +3441,7 @@
               "expiresAtStateVersion": 19,
               "choiceRequirements": [
                 {
-                  "choiceId": "op_trace.18.496.c32e.runner.bid.19",
+                  "choiceId": "18.runner.bid.19",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -3451,12 +3451,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "op_trace.18.496.c32e.runner.bid.19",
+                "choiceId": "18.runner.bid.19",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "op_trace.18.496.c32e",
+                "traceId": 18,
                 "traceStep": "runner_bid",
                 "traceLimit": 5,
                 "sourceDefinitionId": 496,
@@ -3490,7 +3490,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "497.effect.0.lose_credits",
+              "effectId": 0,
               "kind": "lose_credits",
               "visibility": "public",
               "side": "runner",
@@ -5152,7 +5152,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "505.effect.0.add_tags",
+              "effectId": 0,
               "kind": "add_tags",
               "visibility": "public",
               "side": "runner",
@@ -5163,7 +5163,7 @@
               "sourceTitle": "Netwatch Credit Voucher"
             },
             {
-              "effectId": "505.effect.1.gain_credits",
+              "effectId": 1,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -5277,7 +5277,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "514.effect.0.damage",
+              "effectId": 0,
               "kind": "damage",
               "visibility": "public",
               "side": "runner",
@@ -6039,7 +6039,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "507.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -6049,7 +6049,7 @@
               "sourceTitle": "Night Shift"
             },
             {
-              "effectId": "507.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -11799,7 +11799,7 @@
           "accessIndex": 2,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "op_trace.155.584.c3lx",
+          "traceId": 155,
           "sourceCardId": "c3lx",
           "sourceDefinitionId": 584,
           "traceLimit": 10,
@@ -11864,7 +11864,7 @@
                 "accessedFromZone": "installed",
                 "cardId": "c3lx",
                 "traceStarted": true,
-                "traceId": "op_trace.155.584.c3lx",
+                "traceId": 155,
                 "sourceCardId": "c3lx",
                 "sourceDefinitionId": 584,
                 "traceLimit": 10,
@@ -11889,11 +11889,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "op_trace.155.584.c3lx.corp.bid.155",
+          "choiceId": "155.corp.bid.155",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 584,
-          "traceId": "op_trace.155.584.c3lx",
+          "traceId": 155,
           "traceStep": "corp_bid",
           "traceLimit": 10,
           "effectiveTraceLimit": 10,
@@ -11922,7 +11922,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 155,
               "selectedChoices": {
-                "choiceId": "op_trace.155.584.c3lx.corp.bid.155",
+                "choiceId": "155.corp.bid.155",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -11941,7 +11941,7 @@
               "expiresAtStateVersion": 155,
               "choiceRequirements": [
                 {
-                  "choiceId": "op_trace.155.584.c3lx.corp.bid.155",
+                  "choiceId": "155.corp.bid.155",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -11956,10 +11956,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "op_trace.155.584.c3lx.corp.bid.155",
+                "choiceId": "155.corp.bid.155",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "op_trace.155.584.c3lx",
+                "traceId": 155,
                 "traceStep": "corp_bid",
                 "traceLimit": 10,
                 "effectiveTraceLimit": 10,
@@ -11988,12 +11988,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "op_trace.155.584.c3lx.runner.bid.156",
+          "choiceId": "155.runner.bid.156",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 584,
           "tagsAdded": 1,
-          "traceId": "op_trace.155.584.c3lx",
+          "traceId": 155,
           "traceStep": "runner_bid",
           "traceLimit": 10,
           "corpBid": 0,
@@ -12026,7 +12026,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 156,
               "selectedChoices": {
-                "choiceId": "op_trace.155.584.c3lx.runner.bid.156",
+                "choiceId": "155.runner.bid.156",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -12045,7 +12045,7 @@
               "expiresAtStateVersion": 156,
               "choiceRequirements": [
                 {
-                  "choiceId": "op_trace.155.584.c3lx.runner.bid.156",
+                  "choiceId": "155.runner.bid.156",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -12055,12 +12055,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "op_trace.155.584.c3lx.runner.bid.156",
+                "choiceId": "155.runner.bid.156",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "op_trace.155.584.c3lx",
+                "traceId": 155,
                 "traceStep": "runner_bid",
                 "traceLimit": 10,
                 "sourceDefinitionId": 584,
@@ -12303,7 +12303,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "499.effect.0.add_tags",
+              "effectId": 0,
               "kind": "add_tags",
               "visibility": "public",
               "side": "runner",

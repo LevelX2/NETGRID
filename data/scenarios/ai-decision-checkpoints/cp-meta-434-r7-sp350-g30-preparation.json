@@ -827,7 +827,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "subroutine_1",
+                                                                                          "effectId": 0,
                                                                                           "kind": "resolve_subroutine",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -1096,7 +1096,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.add_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "add_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -1290,7 +1290,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.take_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "take_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -1554,7 +1554,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.add_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "add_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -1847,7 +1847,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.take_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "take_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -1933,7 +1933,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "309.effect.0.gain_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "gain_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -2824,7 +2824,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "subroutine_1",
+                                                                                "effectId": 0,
                                                                                 "kind": "resolve_subroutine",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -3093,7 +3093,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.add_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "add_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -3287,7 +3287,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.take_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "take_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -3551,7 +3551,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.add_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "add_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -3844,7 +3844,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.take_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "take_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -3930,7 +3930,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "309.effect.0.gain_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "gain_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -4443,7 +4443,7 @@
                               },
                               "planningStateIdentity": {
                                         "stateVersion": 63,
-                                        "sideSafePlanningFingerprint": "fnv1a:b2d756de"
+                                        "sideSafePlanningFingerprint": "fnv1a:60c76256"
                               },
                               "ownDeckSnapshot": {
                                         "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -10644,7 +10644,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "subroutine_1",
+                                                                                          "effectId": 0,
                                                                                           "kind": "resolve_subroutine",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -10913,7 +10913,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.add_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "add_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -11107,7 +11107,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.take_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "take_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -11371,7 +11371,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.add_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "add_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -11664,7 +11664,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.take_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "take_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -11750,7 +11750,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "309.effect.0.gain_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "gain_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -12622,7 +12622,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "subroutine_1",
+                                                                                "effectId": 0,
                                                                                 "kind": "resolve_subroutine",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -12891,7 +12891,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.add_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "add_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -13085,7 +13085,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.take_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "take_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -13349,7 +13349,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.add_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "add_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -13642,7 +13642,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.take_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "take_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -13728,7 +13728,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "309.effect.0.gain_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "gain_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -14222,7 +14222,7 @@
                               },
                               "planningStateIdentity": {
                                         "stateVersion": 64,
-                                        "sideSafePlanningFingerprint": "fnv1a:3f9c231c"
+                                        "sideSafePlanningFingerprint": "fnv1a:7dd7169a"
                               },
                               "ownDeckSnapshot": {
                                         "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -18508,7 +18508,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "subroutine_1",
+                                                                                          "effectId": 0,
                                                                                           "kind": "resolve_subroutine",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -18777,7 +18777,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.add_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "add_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -18971,7 +18971,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.take_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "take_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -19235,7 +19235,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.add_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "add_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -19528,7 +19528,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.take_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "take_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -19614,7 +19614,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "309.effect.0.gain_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "gain_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -20536,7 +20536,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "subroutine_1",
+                                                                                "effectId": 0,
                                                                                 "kind": "resolve_subroutine",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -20805,7 +20805,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.add_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "add_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -20999,7 +20999,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.take_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "take_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -21263,7 +21263,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.add_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "add_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -21556,7 +21556,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.take_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "take_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -21642,7 +21642,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "309.effect.0.gain_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "gain_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -22186,7 +22186,7 @@
                               },
                               "planningStateIdentity": {
                                         "stateVersion": 65,
-                                        "sideSafePlanningFingerprint": "fnv1a:193b9e1a"
+                                        "sideSafePlanningFingerprint": "fnv1a:c34dd65e"
                               },
                               "ownDeckSnapshot": {
                                         "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -26514,7 +26514,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "subroutine_1",
+                                                                                          "effectId": 0,
                                                                                           "kind": "resolve_subroutine",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -26783,7 +26783,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.add_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "add_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -26977,7 +26977,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.take_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "take_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -27241,7 +27241,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.add_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "add_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -27534,7 +27534,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.take_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "take_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -27620,7 +27620,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "309.effect.0.gain_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "gain_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -28352,7 +28352,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "subroutine_1",
+                                                                                "effectId": 0,
                                                                                 "kind": "resolve_subroutine",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -28621,7 +28621,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.add_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "add_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -28815,7 +28815,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.take_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "take_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -29079,7 +29079,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.add_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "add_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -29372,7 +29372,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.take_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "take_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -29458,7 +29458,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "309.effect.0.gain_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "gain_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -29812,7 +29812,7 @@
                               },
                               "planningStateIdentity": {
                                         "stateVersion": 66,
-                                        "sideSafePlanningFingerprint": "fnv1a:aaa4c8f4"
+                                        "sideSafePlanningFingerprint": "fnv1a:1660f30a"
                               },
                               "ownDeckSnapshot": {
                                         "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -34139,7 +34139,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "subroutine_1",
+                                                                                          "effectId": 0,
                                                                                           "kind": "resolve_subroutine",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -34408,7 +34408,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.add_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "add_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -34602,7 +34602,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.take_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "take_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -34866,7 +34866,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.add_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "add_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -35159,7 +35159,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.take_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "take_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -35245,7 +35245,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "309.effect.0.gain_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "gain_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -36038,7 +36038,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "subroutine_1",
+                                                                                "effectId": 0,
                                                                                 "kind": "resolve_subroutine",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -36307,7 +36307,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.add_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "add_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -36501,7 +36501,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.take_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "take_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -36765,7 +36765,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.add_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "add_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -37058,7 +37058,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.take_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "take_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -37144,7 +37144,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "309.effect.0.gain_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "gain_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -37559,7 +37559,7 @@
                               },
                               "planningStateIdentity": {
                                         "stateVersion": 67,
-                                        "sideSafePlanningFingerprint": "fnv1a:5637e8c2"
+                                        "sideSafePlanningFingerprint": "fnv1a:34dbee64"
                               },
                               "ownDeckSnapshot": {
                                         "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -41886,7 +41886,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "subroutine_1",
+                                                                                          "effectId": 0,
                                                                                           "kind": "resolve_subroutine",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -42155,7 +42155,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.add_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "add_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -42349,7 +42349,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.take_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "take_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -42613,7 +42613,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.add_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "add_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -42906,7 +42906,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.take_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "take_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -42992,7 +42992,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "309.effect.0.gain_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "gain_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -43725,7 +43725,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "subroutine_1",
+                                                                                "effectId": 0,
                                                                                 "kind": "resolve_subroutine",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -43994,7 +43994,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.add_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "add_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -44188,7 +44188,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.take_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "take_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -44452,7 +44452,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.add_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "add_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -44745,7 +44745,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.take_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "take_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -44831,7 +44831,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "309.effect.0.gain_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "gain_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -45186,7 +45186,7 @@
                               },
                               "planningStateIdentity": {
                                         "stateVersion": 68,
-                                        "sideSafePlanningFingerprint": "fnv1a:c9f744f7"
+                                        "sideSafePlanningFingerprint": "fnv1a:0e74464f"
                               },
                               "ownDeckSnapshot": {
                                         "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -49481,7 +49481,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "subroutine_1",
+                                                                                          "effectId": 0,
                                                                                           "kind": "resolve_subroutine",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -49750,7 +49750,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.add_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "add_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -49944,7 +49944,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.take_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "take_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -50208,7 +50208,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.add_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "add_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -50501,7 +50501,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "366.effect.0.take_hosted_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "take_hosted_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -50587,7 +50587,7 @@
                                                                       },
                                                                       "resolvedEffects": [
                                                                                 {
-                                                                                          "effectId": "309.effect.0.gain_credits",
+                                                                                          "effectId": 0,
                                                                                           "kind": "gain_credits",
                                                                                           "visibility": "public",
                                                                                           "side": "runner",
@@ -51380,7 +51380,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "subroutine_1",
+                                                                                "effectId": 0,
                                                                                 "kind": "resolve_subroutine",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -51649,7 +51649,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.add_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "add_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -51843,7 +51843,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.take_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "take_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -52107,7 +52107,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.add_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "add_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -52400,7 +52400,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "366.effect.0.take_hosted_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "take_hosted_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -52486,7 +52486,7 @@
                                                             },
                                                             "resolvedEffects": [
                                                                       {
-                                                                                "effectId": "309.effect.0.gain_credits",
+                                                                                "effectId": 0,
                                                                                 "kind": "gain_credits",
                                                                                 "visibility": "public",
                                                                                 "side": "runner",
@@ -52901,7 +52901,7 @@
                               },
                               "planningStateIdentity": {
                                         "stateVersion": 69,
-                                        "sideSafePlanningFingerprint": "fnv1a:499e8154"
+                                        "sideSafePlanningFingerprint": "fnv1a:6faf72c8"
                               },
                               "ownDeckSnapshot": {
                                         "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

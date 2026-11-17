@@ -1,4 +1,4 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import { isRunnerPaymentWindowId, type AiDecisionInput } from "@netgrid/shared";
 import {
   runnerConfirmedDamageRequiredHandFloor,
   runnerVisibleLethalIceDamageAssessment,
@@ -28,8 +28,7 @@ export function currentEncounterRequiresDamagePreservingBreak(
         action.timingPoint === input.playerView.timingPoint &&
         (action.payload?.runnerCostPenaltySupportContinuation === true ||
           (action.type === "activated_card_ability" &&
-            typeof action.payload?.costPenaltySupportWindowId === "string" &&
-            action.payload.costPenaltySupportWindowId.length > 0 &&
+            isRunnerPaymentWindowId(action.payload?.costPenaltySupportWindowId) &&
             typeof action.payload.costPenaltySupportOriginalActionId ===
               "string" &&
             action.payload.costPenaltySupportOriginalActionId.length > 0)),

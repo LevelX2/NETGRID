@@ -1,4 +1,4 @@
-import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
+import { isRunnerPaymentWindowId, type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { runnerCandidateIsCardAbility } from "../../runtime/runner-information-action-facts";
@@ -101,7 +101,7 @@ export function runnerRunPaymentSupportAction(
   const action = runWindowLegalAction(input, candidate, actionsById);
   return action &&
     action.type === "activated_card_ability" &&
-    typeof action.payload?.costPenaltySupportWindowId === "string" &&
+    isRunnerPaymentWindowId(action.payload?.costPenaltySupportWindowId) &&
     typeof action.payload.costPenaltySupportOriginalActionId === "string"
     ? action
     : undefined;

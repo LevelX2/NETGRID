@@ -1538,7 +1538,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1735,7 +1735,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "497.effect.0.lose_credits",
+                "effectId": 0,
                 "kind": "lose_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3209,7 +3209,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -5463,7 +5463,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5656,7 +5656,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7730,7 +7730,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -7923,7 +7923,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -8389,7 +8389,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 184,
-      "sideSafePlanningFingerprint": "fnv1a:6c14d557"
+      "sideSafePlanningFingerprint": "fnv1a:0fa07ebe"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_manhunt_pressure_bureau_1.1.0",

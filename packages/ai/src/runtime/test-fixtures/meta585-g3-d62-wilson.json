@@ -1063,7 +1063,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "287.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1343,7 +1343,7 @@
             "abilityFamily": "run-access",
             "effectKind": "trace",
             "traceStarted": true,
-            "traceId": "32.c2rq.0.trace",
+            "traceId": 34,
             "traceLimit": 5,
             "effectiveTraceLimit": 5,
             "targets": {
@@ -1355,7 +1355,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1363,7 +1363,8 @@
                 "sourceDefinitionId": 448,
                 "sourceTitle": "Data Raven"
               }
-            ]
+            ],
+            "traceSourceRunId": 32
           }
         },
         {
@@ -1381,8 +1382,8 @@
             "sourceDefinitionId": 448,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "32.c2rq.0.trace",
-            "choiceId": "32.c2rq.0.trace.corp.bid.34",
+            "traceId": 34,
+            "choiceId": "34.corp.bid.34",
             "traceStep": "corp_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -1413,9 +1414,9 @@
             "sourceDefinitionId": 448,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "32.c2rq.0.trace",
+            "traceId": 34,
             "traceSuccessful": true,
-            "choiceId": "32.c2rq.0.trace.runner.bid.35",
+            "choiceId": "34.runner.bid.35",
             "traceStep": "runner_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -1437,7 +1438,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 32
           }
         },
         {
@@ -1617,7 +1619,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1627,7 +1629,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -1716,7 +1718,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.trace_tag_counter",
+                "effectId": 0,
                 "kind": "add_tags",
                 "visibility": "public",
                 "side": "runner",
@@ -3077,7 +3079,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "287.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -3357,7 +3359,7 @@
           "abilityFamily": "run-access",
           "effectKind": "trace",
           "traceStarted": true,
-          "traceId": "32.c2rq.0.trace",
+          "traceId": 34,
           "traceLimit": 5,
           "effectiveTraceLimit": 5,
           "targets": {
@@ -3369,7 +3371,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3377,7 +3379,8 @@
               "sourceDefinitionId": 448,
               "sourceTitle": "Data Raven"
             }
-          ]
+          ],
+          "traceSourceRunId": 32
         }
       },
       {
@@ -3395,8 +3398,8 @@
           "sourceDefinitionId": 448,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "32.c2rq.0.trace",
-          "choiceId": "32.c2rq.0.trace.corp.bid.34",
+          "traceId": 34,
+          "choiceId": "34.corp.bid.34",
           "traceStep": "corp_bid",
           "corpBid": 0,
           "traceLimit": 5,
@@ -3427,9 +3430,9 @@
           "sourceDefinitionId": 448,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "32.c2rq.0.trace",
+          "traceId": 34,
           "traceSuccessful": true,
-          "choiceId": "32.c2rq.0.trace.runner.bid.35",
+          "choiceId": "34.runner.bid.35",
           "traceStep": "runner_bid",
           "corpBid": 0,
           "traceLimit": 5,
@@ -3451,7 +3454,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 32
         }
       },
       {
@@ -3631,7 +3635,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "507.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -3641,7 +3645,7 @@
               "sourceTitle": "Night Shift"
             },
             {
-              "effectId": "507.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -3730,7 +3734,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "runner.start.trace_tag_counter",
+              "effectId": 0,
               "kind": "add_tags",
               "visibility": "public",
               "side": "runner",
@@ -4449,7 +4453,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 61,
-      "sideSafePlanningFingerprint": "fnv1a:d4a5f1bf"
+      "sideSafePlanningFingerprint": "fnv1a:abc80e12"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_blink_pressure_rig_1.0.0",

@@ -12,6 +12,7 @@ import {
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
   RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION,
+  isPublicResolvedGameEffectId,
   type AiDecisionInput,
   type AiDifficulty,
   type CorpOptionalRezChoiceQuote,
@@ -24,6 +25,7 @@ import {
   type PlayerView,
   type PublicAbilityFamily,
   type PublicGameEvent,
+  type PublicResolvedGameEffect,
   type ResolvedGameEffect,
   type Side,
   type SubroutineType,
@@ -522,6 +524,9 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "damageResolved",
   "traceStarted",
   "traceId",
+  "traceSourceRunId",
+  "traceSourceCardInstanceId",
+  "traceSourceSubroutineIndex",
   "traceSuccessful",
   "choiceId",
   "traceStep",
@@ -3718,9 +3723,9 @@ function sanitizeChoiceRequirement(
   };
 }
 
-function sanitizeResolvedGameEffect(
-  effect: ResolvedGameEffect,
-): ResolvedGameEffect {
+function sanitizeResolvedGameEffect<Id extends string | number>(
+  effect: ResolvedGameEffect<Id>,
+): ResolvedGameEffect<Id> {
   return {
     effectId: effect.effectId,
     kind: effect.kind,
@@ -3835,13 +3840,17 @@ function sanitizePublicPayload(
   if (Array.isArray(payload.resolvedEffects)) {
     const resolvedEffects = payload.resolvedEffects
       .filter(
-        (effect): effect is ResolvedGameEffect =>
+        (effect): effect is PublicResolvedGameEffect =>
           typeof effect === "object" &&
           effect !== null &&
           !Array.isArray(effect) &&
-          (effect as Partial<ResolvedGameEffect>).visibility === "public",
+          (effect as Partial<PublicResolvedGameEffect>).visibility === "public",
       )
-      .map(sanitizeResolvedGameEffect);
+      .map((effect) => {
+        if (!isPublicResolvedGameEffectId(effect.effectId))
+          throw new Error("invalid_public_resolved_game_effect_id");
+        return sanitizeResolvedGameEffect(effect);
+      });
     if (resolvedEffects.length > 0) result.resolvedEffects = resolvedEffects;
   }
   return result;

@@ -28,8 +28,9 @@ describe("AI input DTO public event source binding", () => {
       publicPayload: {
         actor: "runner",
         actionType: "resolve_choice",
-        traceId: "173.ice.0.trace",
-        choiceId: "173.ice.0.trace.runner.bid.184",
+        traceId: 174,
+        traceSourceRunId: 173,
+        choiceId: "174.runner.bid.184",
         traceStep: "runner_bid",
         traceSuccessful: false,
         unapprovedTraceAlias: "discard",
@@ -49,8 +50,9 @@ describe("AI input DTO public event source binding", () => {
       profileId: "public-trace",
     });
     expect(input.eventTail[0]?.publicPayload).toMatchObject({
-      traceId: "173.ice.0.trace",
-      choiceId: "173.ice.0.trace.runner.bid.184",
+      traceId: 174,
+      traceSourceRunId: 173,
+      choiceId: "174.runner.bid.184",
       traceSuccessful: false,
     });
     expect(input.eventTail[0]?.publicPayload).not.toHaveProperty(
@@ -308,7 +310,7 @@ describe("AI input DTO public event source binding", () => {
         actor: "runner",
         actionType: "play_event",
         runnerCostPenaltySupportWindowOpened: true,
-        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.11",
+        runnerCostPenaltySupportWindowId: 11,
         runnerCostPenaltySupportOriginalActionId: "runner.play.social-1",
         unapprovedPaymentSupportAlias: "must-not-cross-dto",
       },
@@ -330,7 +332,7 @@ describe("AI input DTO public event source binding", () => {
 
     expect(input.eventTail[0]?.publicPayload).toMatchObject({
       runnerCostPenaltySupportWindowOpened: true,
-      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.11",
+      runnerCostPenaltySupportWindowId: 11,
       runnerCostPenaltySupportOriginalActionId: "runner.play.social-1",
     });
     expect(input.eventTail[0]?.publicPayload).not.toHaveProperty(

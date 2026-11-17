@@ -460,7 +460,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -952,7 +952,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -1297,7 +1297,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 8,
-      "sideSafePlanningFingerprint": "fnv1a:e60aad68"
+      "sideSafePlanningFingerprint": "fnv1a:890fbcd6"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_last_call_at_rd_1.0.0",

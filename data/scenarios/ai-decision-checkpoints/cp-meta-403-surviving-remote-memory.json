@@ -1577,7 +1577,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1712,7 +1712,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1801,7 +1801,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1841,7 +1841,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "161.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1851,7 +1851,7 @@
                 "sourceTitle": "Cruising for Netwatch"
               },
               {
-                "effectId": "161.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -2405,7 +2405,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2623,7 +2623,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "421.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2887,7 +2887,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "421.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2941,7 +2941,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "421.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2995,7 +2995,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "421.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -3108,7 +3108,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3320,7 +3320,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "421.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -3629,7 +3629,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3662,7 +3662,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3697,7 +3697,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_2",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -5802,7 +5802,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -8146,7 +8146,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -8156,7 +8156,7 @@
                 "sourceTitle": "Haunting Inquisition"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -8203,7 +8203,7 @@
             "title": "Viral Pipeline",
             "cardDefinitionId": 157,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.263",
+            "runnerCostPenaltySupportWindowId": 263,
             "runnerCostPenaltySupportOriginalActionId": "runner.install_card.cyx.cyx",
             "effectKind": "install_card",
             "visibility": {
@@ -8835,7 +8835,7 @@
             "title": "Krash",
             "cardDefinitionId": 251,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.289",
+            "runnerCostPenaltySupportWindowId": 289,
             "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2ye.329",
             "visibility": {
               "class": "private_to_side"
@@ -8876,7 +8876,7 @@
             "title": "Krash",
             "cardDefinitionId": 251,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.291",
+            "runnerCostPenaltySupportWindowId": 291,
             "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2ye.329",
             "visibility": {
               "class": "private_to_side"
@@ -8917,7 +8917,7 @@
             "title": "Krash",
             "cardDefinitionId": 251,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.293",
+            "runnerCostPenaltySupportWindowId": 293,
             "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2ye.329",
             "visibility": {
               "class": "private_to_side"
@@ -8959,7 +8959,7 @@
             "cardDefinitionId": 251,
             "targetIceDefinitionId": 478,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.295",
+            "runnerCostPenaltySupportWindowId": 295,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ye.0.printed_subroutines_end_the_run.328",
             "targets": {
               "targetIceDefinitionId": 478
@@ -9093,7 +9093,7 @@
             "title": "Krash",
             "cardDefinitionId": 251,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.301",
+            "runnerCostPenaltySupportWindowId": 301,
             "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2rx.329",
             "visibility": {
               "class": "private_to_side"
@@ -9135,7 +9135,7 @@
             "cardDefinitionId": 251,
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.303",
+            "runnerCostPenaltySupportWindowId": 303,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2rx.0.printed_subroutines_end_the_run.328",
             "targets": {
               "targetIceDefinitionId": 449
@@ -10119,7 +10119,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "341.cyx.successful_run.socket_archives",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -10442,7 +10442,7 @@
             "title": "Krash",
             "cardDefinitionId": 251,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.356",
+            "runnerCostPenaltySupportWindowId": 356,
             "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2ye.329",
             "visibility": {
               "class": "private_to_side"
@@ -10483,7 +10483,7 @@
             "title": "Krash",
             "cardDefinitionId": 251,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.358",
+            "runnerCostPenaltySupportWindowId": 358,
             "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2ye.329",
             "visibility": {
               "class": "private_to_side"
@@ -10524,7 +10524,7 @@
             "title": "Krash",
             "cardDefinitionId": 251,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.360",
+            "runnerCostPenaltySupportWindowId": 360,
             "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2ye.329",
             "visibility": {
               "class": "private_to_side"
@@ -10566,7 +10566,7 @@
             "cardDefinitionId": 251,
             "targetIceDefinitionId": 478,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.362",
+            "runnerCostPenaltySupportWindowId": 362,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ye.0.printed_subroutines_end_the_run.328",
             "targets": {
               "targetIceDefinitionId": 478
@@ -10700,7 +10700,7 @@
             "title": "Krash",
             "cardDefinitionId": 251,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.368",
+            "runnerCostPenaltySupportWindowId": 368,
             "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2rx.329",
             "visibility": {
               "class": "private_to_side"
@@ -10742,7 +10742,7 @@
             "cardDefinitionId": 251,
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.370",
+            "runnerCostPenaltySupportWindowId": 370,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2rx.0.printed_subroutines_end_the_run.328",
             "targets": {
               "targetIceDefinitionId": 449
@@ -11359,7 +11359,7 @@
           "title": "Krash",
           "cardDefinitionId": 251,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.301",
+          "runnerCostPenaltySupportWindowId": 301,
           "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2rx.329",
           "visibility": {
             "class": "private_to_side"
@@ -11401,7 +11401,7 @@
           "cardDefinitionId": 251,
           "targetIceDefinitionId": 449,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.303",
+          "runnerCostPenaltySupportWindowId": 303,
           "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2rx.0.printed_subroutines_end_the_run.328",
           "targets": {
             "targetIceDefinitionId": 449
@@ -12385,7 +12385,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "341.cyx.successful_run.socket_archives",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -12708,7 +12708,7 @@
           "title": "Krash",
           "cardDefinitionId": 251,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.356",
+          "runnerCostPenaltySupportWindowId": 356,
           "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2ye.329",
           "visibility": {
             "class": "private_to_side"
@@ -12749,7 +12749,7 @@
           "title": "Krash",
           "cardDefinitionId": 251,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.358",
+          "runnerCostPenaltySupportWindowId": 358,
           "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2ye.329",
           "visibility": {
             "class": "private_to_side"
@@ -12790,7 +12790,7 @@
           "title": "Krash",
           "cardDefinitionId": 251,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.360",
+          "runnerCostPenaltySupportWindowId": 360,
           "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2ye.329",
           "visibility": {
             "class": "private_to_side"
@@ -12832,7 +12832,7 @@
           "cardDefinitionId": 251,
           "targetIceDefinitionId": 478,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.362",
+          "runnerCostPenaltySupportWindowId": 362,
           "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2ye.0.printed_subroutines_end_the_run.328",
           "targets": {
             "targetIceDefinitionId": 478
@@ -12966,7 +12966,7 @@
           "title": "Krash",
           "cardDefinitionId": 251,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.368",
+          "runnerCostPenaltySupportWindowId": 368,
           "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2rx.329",
           "visibility": {
             "class": "private_to_side"
@@ -13008,7 +13008,7 @@
           "cardDefinitionId": 251,
           "targetIceDefinitionId": 449,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.370",
+          "runnerCostPenaltySupportWindowId": 370,
           "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2rx.0.printed_subroutines_end_the_run.328",
           "targets": {
             "targetIceDefinitionId": 449
@@ -13612,7 +13612,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 378,
-      "sideSafePlanningFingerprint": "fnv1a:d033eae3"
+      "sideSafePlanningFingerprint": "fnv1a:63f840e0"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",

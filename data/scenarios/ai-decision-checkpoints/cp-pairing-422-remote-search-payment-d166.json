@@ -1033,7 +1033,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "507.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -1043,7 +1043,7 @@
                   "sourceTitle": "Night Shift"
                 },
                 {
-                  "effectId": "507.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -1178,7 +1178,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -1267,7 +1267,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -1301,7 +1301,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "291.effect.0.draw_cards",
+                  "effectId": 0,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "runner",
@@ -1342,7 +1342,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "309.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -1493,7 +1493,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -1552,7 +1552,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -1611,7 +1611,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -2116,7 +2116,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "247.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -2657,7 +2657,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -3230,7 +3230,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "408.score.credit_swing.lose_credits",
+                  "effectId": 0,
                   "kind": "lose_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -3624,7 +3624,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -3972,7 +3972,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -4299,7 +4299,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "415.score.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -4328,7 +4328,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -4586,7 +4586,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -4821,7 +4821,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "507.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -4831,7 +4831,7 @@
                   "sourceTitle": "Night Shift"
                 },
                 {
-                  "effectId": "507.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -4860,7 +4860,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -4949,7 +4949,7 @@
               "cardDefinitionId": 35,
               "targetIceDefinitionId": 456,
               "runnerCostPenaltySupportWindowOpened": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.148",
+              "runnerCostPenaltySupportWindowId": 148,
               "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2ti.0.printed_subroutines_end_the_run.48",
               "targets": {
                 "targetIceDefinitionId": 456
@@ -5046,7 +5046,7 @@
               "cardDefinitionId": 35,
               "targetIceDefinitionId": 449,
               "runnerCostPenaltySupportWindowOpened": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.152",
+              "runnerCostPenaltySupportWindowId": 152,
               "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2rx.0.printed_subroutines_end_the_run.48",
               "targets": {
                 "targetIceDefinitionId": 449
@@ -5326,7 +5326,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "507.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -5336,7 +5336,7 @@
                   "sourceTitle": "Night Shift"
                 },
                 {
-                  "effectId": "507.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -5392,7 +5392,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -5405,7 +5405,7 @@
                   "sourceTitle": "Invisibility"
                 },
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                  "effectId": 1,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -5420,7 +5420,7 @@
                   "cardTitle": "Vewy Vewy Quiet"
                 },
                 {
-                  "effectId": "283.effect.0.add_hosted_credits",
+                  "effectId": 2,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -6095,7 +6095,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -6443,7 +6443,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -6770,7 +6770,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "415.score.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6799,7 +6799,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -7057,7 +7057,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -7292,7 +7292,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7302,7 +7302,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -7331,7 +7331,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -7420,7 +7420,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 456,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.148",
+            "runnerCostPenaltySupportWindowId": 148,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2ti.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 456
@@ -7517,7 +7517,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.152",
+            "runnerCostPenaltySupportWindowId": 152,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2rx.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 449
@@ -7797,7 +7797,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7807,7 +7807,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -7863,7 +7863,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -7876,7 +7876,7 @@
                 "sourceTitle": "Invisibility"
               },
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -7891,7 +7891,7 @@
                 "cardTitle": "Vewy Vewy Quiet"
               },
               {
-                "effectId": "283.effect.0.add_hosted_credits",
+                "effectId": 2,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -8249,7 +8249,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 165,
-        "sideSafePlanningFingerprint": "fnv1a:54a84f06"
+        "sideSafePlanningFingerprint": "fnv1a:e1c474fa"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",
@@ -17730,7 +17730,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "507.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -17740,7 +17740,7 @@
                   "sourceTitle": "Night Shift"
                 },
                 {
-                  "effectId": "507.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -17875,7 +17875,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -17964,7 +17964,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -17998,7 +17998,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "291.effect.0.draw_cards",
+                  "effectId": 0,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "runner",
@@ -18039,7 +18039,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "309.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -18190,7 +18190,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -18249,7 +18249,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -18308,7 +18308,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -18813,7 +18813,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "247.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -19354,7 +19354,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -19927,7 +19927,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "408.score.credit_swing.lose_credits",
+                  "effectId": 0,
                   "kind": "lose_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -20321,7 +20321,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -20669,7 +20669,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -20996,7 +20996,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "415.score.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -21025,7 +21025,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -21283,7 +21283,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -21518,7 +21518,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "507.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -21528,7 +21528,7 @@
                   "sourceTitle": "Night Shift"
                 },
                 {
-                  "effectId": "507.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -21557,7 +21557,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -21646,7 +21646,7 @@
               "cardDefinitionId": 35,
               "targetIceDefinitionId": 456,
               "runnerCostPenaltySupportWindowOpened": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.148",
+              "runnerCostPenaltySupportWindowId": 148,
               "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2ti.0.printed_subroutines_end_the_run.48",
               "targets": {
                 "targetIceDefinitionId": 456
@@ -21743,7 +21743,7 @@
               "cardDefinitionId": 35,
               "targetIceDefinitionId": 449,
               "runnerCostPenaltySupportWindowOpened": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.152",
+              "runnerCostPenaltySupportWindowId": 152,
               "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2rx.0.printed_subroutines_end_the_run.48",
               "targets": {
                 "targetIceDefinitionId": 449
@@ -22023,7 +22023,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "507.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -22033,7 +22033,7 @@
                   "sourceTitle": "Night Shift"
                 },
                 {
-                  "effectId": "507.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -22089,7 +22089,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -22102,7 +22102,7 @@
                   "sourceTitle": "Invisibility"
                 },
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                  "effectId": 1,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -22117,7 +22117,7 @@
                   "cardTitle": "Vewy Vewy Quiet"
                 },
                 {
-                  "effectId": "283.effect.0.add_hosted_credits",
+                  "effectId": 2,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -22147,7 +22147,7 @@
               "title": "Sneak Preview",
               "cardDefinitionId": 322,
               "runnerCostPenaltySupportWindowOpened": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.166",
+              "runnerCostPenaltySupportWindowId": 166,
               "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1zm.c1zm.406",
               "visibility": {
                 "class": "public"
@@ -22176,7 +22176,7 @@
             "visibility": "public",
             "expiresAtStateVersion": 166,
             "payload": {
-              "costPenaltySupportWindowId": "runner_cost_penalty_support.166",
+              "costPenaltySupportWindowId": 166,
               "costPenaltySupportOriginalActionId": "runner.play_event.c1zm.c1zm.406",
               "costPenaltySupportRunnerCreditTarget": 3,
               "costPenaltySupportAmountDue": 3,
@@ -22212,7 +22212,7 @@
             "expiresAtStateVersion": 166,
             "payload": {
               "runnerCostPenaltySupportContinuation": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.166",
+              "runnerCostPenaltySupportWindowId": 166,
               "cardId": "c1zm",
               "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
               "cardImplementationAbilityId": 406,
@@ -22562,7 +22562,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -22910,7 +22910,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -23237,7 +23237,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "415.score.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -23266,7 +23266,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -23524,7 +23524,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -23759,7 +23759,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -23769,7 +23769,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -23798,7 +23798,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -23887,7 +23887,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 456,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.148",
+            "runnerCostPenaltySupportWindowId": 148,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2ti.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 456
@@ -23984,7 +23984,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.152",
+            "runnerCostPenaltySupportWindowId": 152,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2rx.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 449
@@ -24264,7 +24264,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -24274,7 +24274,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -24330,7 +24330,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -24343,7 +24343,7 @@
                 "sourceTitle": "Invisibility"
               },
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -24358,7 +24358,7 @@
                 "cardTitle": "Vewy Vewy Quiet"
               },
               {
-                "effectId": "283.effect.0.add_hosted_credits",
+                "effectId": 2,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -24388,7 +24388,7 @@
             "title": "Sneak Preview",
             "cardDefinitionId": 322,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.166",
+            "runnerCostPenaltySupportWindowId": 166,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1zm.c1zm.406",
             "visibility": {
               "class": "public"
@@ -24417,7 +24417,7 @@
           "visibility": "public",
           "expiresAtStateVersion": 166,
           "payload": {
-            "costPenaltySupportWindowId": "runner_cost_penalty_support.166",
+            "costPenaltySupportWindowId": 166,
             "costPenaltySupportOriginalActionId": "runner.play_event.c1zm.c1zm.406",
             "costPenaltySupportRunnerCreditTarget": 3,
             "costPenaltySupportAmountDue": 3,
@@ -24453,7 +24453,7 @@
           "expiresAtStateVersion": 166,
           "payload": {
             "runnerCostPenaltySupportContinuation": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.166",
+            "runnerCostPenaltySupportWindowId": 166,
             "cardId": "c1zm",
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
             "cardImplementationAbilityId": 406,
@@ -24503,7 +24503,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 166,
-        "sideSafePlanningFingerprint": "fnv1a:3f4ab5d0"
+        "sideSafePlanningFingerprint": "fnv1a:98da038e"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",
@@ -30600,7 +30600,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "507.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -30610,7 +30610,7 @@
                   "sourceTitle": "Night Shift"
                 },
                 {
-                  "effectId": "507.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -30745,7 +30745,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -30834,7 +30834,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -30868,7 +30868,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "291.effect.0.draw_cards",
+                  "effectId": 0,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "runner",
@@ -30909,7 +30909,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "309.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -31060,7 +31060,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -31119,7 +31119,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -31178,7 +31178,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -31683,7 +31683,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "247.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -32224,7 +32224,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -32797,7 +32797,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "408.score.credit_swing.lose_credits",
+                  "effectId": 0,
                   "kind": "lose_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -33191,7 +33191,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -33539,7 +33539,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -33866,7 +33866,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "415.score.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -33895,7 +33895,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -34153,7 +34153,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -34388,7 +34388,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "507.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -34398,7 +34398,7 @@
                   "sourceTitle": "Night Shift"
                 },
                 {
-                  "effectId": "507.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -34427,7 +34427,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -34516,7 +34516,7 @@
               "cardDefinitionId": 35,
               "targetIceDefinitionId": 456,
               "runnerCostPenaltySupportWindowOpened": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.148",
+              "runnerCostPenaltySupportWindowId": 148,
               "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2ti.0.printed_subroutines_end_the_run.48",
               "targets": {
                 "targetIceDefinitionId": 456
@@ -34613,7 +34613,7 @@
               "cardDefinitionId": 35,
               "targetIceDefinitionId": 449,
               "runnerCostPenaltySupportWindowOpened": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.152",
+              "runnerCostPenaltySupportWindowId": 152,
               "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2rx.0.printed_subroutines_end_the_run.48",
               "targets": {
                 "targetIceDefinitionId": 449
@@ -34893,7 +34893,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "507.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -34903,7 +34903,7 @@
                   "sourceTitle": "Night Shift"
                 },
                 {
-                  "effectId": "507.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -34959,7 +34959,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -34972,7 +34972,7 @@
                   "sourceTitle": "Invisibility"
                 },
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                  "effectId": 1,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -34987,7 +34987,7 @@
                   "cardTitle": "Vewy Vewy Quiet"
                 },
                 {
-                  "effectId": "283.effect.0.add_hosted_credits",
+                  "effectId": 2,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -35017,7 +35017,7 @@
               "title": "Sneak Preview",
               "cardDefinitionId": 322,
               "runnerCostPenaltySupportWindowOpened": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.166",
+              "runnerCostPenaltySupportWindowId": 166,
               "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1zm.c1zm.406",
               "visibility": {
                 "class": "public"
@@ -35088,7 +35088,7 @@
             "expiresAtStateVersion": 167,
             "payload": {
               "runnerCostPenaltySupportContinuation": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.166",
+              "runnerCostPenaltySupportWindowId": 166,
               "cardId": "c1zm",
               "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
               "cardImplementationAbilityId": 406,
@@ -35414,7 +35414,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -35762,7 +35762,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -36089,7 +36089,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "415.score.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -36118,7 +36118,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -36376,7 +36376,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -36611,7 +36611,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -36621,7 +36621,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -36650,7 +36650,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -36739,7 +36739,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 456,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.148",
+            "runnerCostPenaltySupportWindowId": 148,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2ti.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 456
@@ -36836,7 +36836,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.152",
+            "runnerCostPenaltySupportWindowId": 152,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2rx.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 449
@@ -37116,7 +37116,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -37126,7 +37126,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -37182,7 +37182,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -37195,7 +37195,7 @@
                 "sourceTitle": "Invisibility"
               },
               {
-                "effectId": "runner.start.delayed_install.c2ea.c1qx",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -37210,7 +37210,7 @@
                 "cardTitle": "Vewy Vewy Quiet"
               },
               {
-                "effectId": "283.effect.0.add_hosted_credits",
+                "effectId": 2,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -37240,7 +37240,7 @@
             "title": "Sneak Preview",
             "cardDefinitionId": 322,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.166",
+            "runnerCostPenaltySupportWindowId": 166,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1zm.c1zm.406",
             "visibility": {
               "class": "public"
@@ -37311,7 +37311,7 @@
           "expiresAtStateVersion": 167,
           "payload": {
             "runnerCostPenaltySupportContinuation": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.166",
+            "runnerCostPenaltySupportWindowId": 166,
             "cardId": "c1zm",
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
             "cardImplementationAbilityId": 406,
@@ -37361,7 +37361,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 167,
-        "sideSafePlanningFingerprint": "fnv1a:0d1c11e3"
+        "sideSafePlanningFingerprint": "fnv1a:13118d61"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",

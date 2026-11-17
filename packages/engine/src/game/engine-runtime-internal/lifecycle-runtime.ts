@@ -887,7 +887,7 @@ export function createLifecycleRuntime(
         affordableUnrezzedDrawTaxSourceIds(state).length > 0)
     ) {
       state.runnerDrawSequence = {
-        sequenceId: `${state.stateVersion + 1}`,
+        sequenceId: state.stateVersion + 1,
         originActionId: "",
         remainingDrawCount: drawAmount,
         drawnCardIds: [],
@@ -937,7 +937,7 @@ export function createLifecycleRuntime(
       throw new Error("Nur der Runner darf City Surveillance aufloesen.");
     const [, choiceSequenceId = "", sourceCardId = "", sourceIndex = ""] =
       choice.source.split(":");
-    if (choiceSequenceId !== sequence.sequenceId)
+    if (choiceSequenceId !== String(sequence.sequenceId))
       throw new Error("Die Runner-Ziehsequenz ist veraltet.");
     const expectedSourceId =
       sequence.currentDrawTaxSourceIds[sequence.currentDrawTaxSourceIndex];
@@ -1082,7 +1082,7 @@ export function createLifecycleRuntime(
     if (choice.side !== "corp" || legalAction.side !== "corp")
       throw new Error("Nur die Korp darf City Surveillance rezzen.");
     const [, choiceSequenceId = ""] = choice.source.split(":");
-    if (choiceSequenceId !== sequence.sequenceId)
+    if (choiceSequenceId !== String(sequence.sequenceId))
       throw new Error("Die Runner-Ziehsequenz ist veraltet.");
     const selected = deps.selectedChoiceIds(playerAction.selectedChoices)[0];
     if (!choice.options.some((option) => option.id === selected))

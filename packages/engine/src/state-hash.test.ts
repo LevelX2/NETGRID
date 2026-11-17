@@ -48,7 +48,7 @@ describe("mechanical StateHash baseline", () => {
       stateVersion: 1,
       cardInstances: {},
       trace: {
-        traceId: "trace_hash",
+        traceId: 1,
         sourceCardInstanceId: "source",
         sourceDefinitionId: 462381168,
         traceLimit: 3,
@@ -130,7 +130,7 @@ describe("mechanical StateHash baseline", () => {
       stateVersion: 3,
       cardInstances: {},
       pendingCorpDraw: {
-        transactionId: "draw:capability",
+        transactionId: 1,
         baseDrawCount: 1,
         replacementDrawCount: 0,
         drawnCardIds: ["drawn"],

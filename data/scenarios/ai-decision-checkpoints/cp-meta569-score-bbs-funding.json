@@ -1609,7 +1609,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1992,7 +1992,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "44.effect.0.remove_tags",
+                "effectId": 0,
                 "kind": "remove_tags",
                 "visibility": "public",
                 "side": "runner",
@@ -2003,7 +2003,7 @@
                 "sourceTitle": "Meat Upgrade"
               },
               {
-                "effectId": "44.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -2268,7 +2268,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "46.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2278,7 +2278,7 @@
                 "sourceTitle": "Panzer Run"
               },
               {
-                "effectId": "46.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -3285,7 +3285,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3363,7 +3363,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "509.effect.0.gain_actions",
+                "effectId": 0,
                 "kind": "gain_actions",
                 "visibility": "public",
                 "side": "corp",
@@ -4328,7 +4328,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "45.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6850,7 +6850,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "45.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -9383,7 +9383,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 200,
-      "sideSafePlanningFingerprint": "fnv1a:85aa6af2"
+      "sideSafePlanningFingerprint": "fnv1a:1c18a0f4"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_ivory_bastion_1.1.0",
@@ -29161,7 +29161,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -30055,7 +30055,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "44.effect.0.remove_tags",
+              "effectId": 0,
               "kind": "remove_tags",
               "visibility": "public",
               "side": "runner",
@@ -30066,7 +30066,7 @@
               "sourceTitle": "Meat Upgrade"
             },
             {
-              "effectId": "44.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -30751,7 +30751,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "46.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -30761,7 +30761,7 @@
               "sourceTitle": "Panzer Run"
             },
             {
-              "effectId": "46.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -33235,7 +33235,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -33427,7 +33427,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "509.effect.0.gain_actions",
+              "effectId": 0,
               "kind": "gain_actions",
               "visibility": "public",
               "side": "corp",
@@ -35796,7 +35796,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "45.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",

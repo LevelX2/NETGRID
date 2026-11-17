@@ -1101,7 +1101,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2069,7 +2069,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "291.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -2117,7 +2117,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2189,7 +2189,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2476,7 +2476,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2546,7 +2546,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2587,7 +2587,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2794,7 +2794,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2853,7 +2853,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "291.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -2901,7 +2901,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3143,7 +3143,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3226,7 +3226,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3838,7 +3838,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4026,7 +4026,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4074,7 +4074,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4301,7 +4301,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4349,7 +4349,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4432,7 +4432,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4682,7 +4682,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4868,7 +4868,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5026,7 +5026,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "corp.root_rez_on_install.hq.c5h",
+                "effectId": 0,
                 "kind": "rez_card",
                 "visibility": "public",
                 "side": "corp",
@@ -6162,7 +6162,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "257.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -6210,7 +6210,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "257.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -6437,7 +6437,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "257.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -6485,7 +6485,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "257.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -6568,7 +6568,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -6818,7 +6818,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "257.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -7004,7 +7004,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "257.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -7162,7 +7162,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "corp.root_rez_on_install.hq.c5h",
+              "effectId": 0,
               "kind": "rez_card",
               "visibility": "public",
               "side": "corp",
@@ -8233,7 +8233,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 200,
-      "sideSafePlanningFingerprint": "fnv1a:75894678"
+      "sideSafePlanningFingerprint": "fnv1a:a4948bdb"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_last_call_at_rd_1.0.0",

@@ -222,7 +222,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     )!;
     expect(selected.source).toBe("c7v");
     expect(selected.payload).toMatchObject({
-      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.308",
+      runnerCostPenaltySupportWindowId: 308,
       runnerCostPenaltySupportContinuation: true,
     });
     const continued = residentPlanPortfolioSnapshot(payment)!;

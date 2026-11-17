@@ -3218,7 +3218,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -3260,7 +3260,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "500.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -3270,7 +3270,7 @@
               "sourceTitle": "Day Shift"
             },
             {
-              "effectId": "500.effect.1.gain_credits",
+              "effectId": 1,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -3564,7 +3564,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "509.effect.0.gain_actions",
+              "effectId": 0,
               "kind": "gain_actions",
               "visibility": "public",
               "side": "corp",
@@ -3628,7 +3628,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "507.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -3638,7 +3638,7 @@
               "sourceTitle": "Night Shift"
             },
             {
-              "effectId": "507.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -3715,7 +3715,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "507.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -3725,7 +3725,7 @@
               "sourceTitle": "Night Shift"
             },
             {
-              "effectId": "507.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -4019,7 +4019,7 @@
           "label": "Zug beenden",
           "resolvedEffects": [
             {
-              "effectId": "396.c2g1.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -4029,7 +4029,7 @@
               "sourceTitle": "Top Runners' Conference"
             },
             {
-              "effectId": "396.c2g2.effect.0.gain_credits",
+              "effectId": 1,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -4121,7 +4121,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "396.c2g1.effect.0.trash_source",
+              "effectId": 0,
               "kind": "trash_source",
               "visibility": "public",
               "side": "runner",
@@ -4131,7 +4131,7 @@
               "sourceTitle": "Top Runners' Conference"
             },
             {
-              "effectId": "396.c2g2.effect.0.trash_source",
+              "effectId": 1,
               "kind": "trash_source",
               "visibility": "public",
               "side": "runner",
@@ -4195,7 +4195,7 @@
           "label": "Self-Modifying Code: Programm aus Stack installieren",
           "resolvedEffects": [
             {
-              "effectId": "271.effect.0.trash_source",
+              "effectId": 0,
               "kind": "trash_source",
               "visibility": "public",
               "side": "runner",
@@ -4308,7 +4308,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4912,7 +4912,7 @@
           "label": "Agenda in Remote 1 scoren",
           "resolvedEffects": [
             {
-              "effectId": "415.score.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -5198,7 +5198,7 @@
           "label": "Agenda in Remote 1 scoren",
           "resolvedEffects": [
             {
-              "effectId": "415.score.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -5675,7 +5675,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -5743,7 +5743,7 @@
           "turnActionOrdinalEnd": 4,
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",

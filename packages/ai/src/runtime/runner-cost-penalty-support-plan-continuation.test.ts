@@ -36,7 +36,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         variant === "continue"
           ? continuedPaymentAction(93, "runner.continue_run")
           : supportAction(93, "runner.continue_run");
-      const windowId = String(
+      const windowId = Number(
         action.payload![
           variant === "continue"
             ? "runnerCostPenaltySupportWindowId"
@@ -45,6 +45,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       );
       const next = traceBidInput(93, [action]);
       delete next.playerView.pendingChoice;
+      delete next.playerView.trace;
       next.playerView.timingPoint = "run.approach_ice";
       action.timingPoint =
         variant === "wrong_timing" ? "run.encounter_ice" : "run.approach_ice";
@@ -91,8 +92,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         next.eventTail[0]!.publicPayload.serverId = "rd";
       if (variant === "wrong_run") next.playerView.run!.runId = 212;
       if (variant === "wrong_window")
-        next.eventTail[2]!.publicPayload.runnerCostPenaltySupportWindowId =
-          "different";
+        next.eventTail[2]!.publicPayload.runnerCostPenaltySupportWindowId = windowId + 1;
       if (variant === "wrong_original")
         next.eventTail[2]!.publicPayload.runnerCostPenaltySupportOriginalActionId =
           "different";
@@ -131,6 +131,7 @@ describe("Runner cost/penalty support plan continuation", () => {
     } as LegalAction;
     const before = traceBidInput(90, [action]);
     delete before.playerView.pendingChoice;
+    delete before.playerView.trace;
     before.playerView.timingPoint = "run.jack_out_window";
     before.playerView.run!.phase = "movement";
     const selected = planResult(90, action.actionId, "rig-root");
@@ -156,6 +157,7 @@ describe("Runner cost/penalty support plan continuation", () => {
     const support = supportAction(91, action.actionId);
     const next = traceBidInput(91, [support]);
     delete next.playerView.pendingChoice;
+    delete next.playerView.trace;
     next.playerView.timingPoint = "run.movement_rez_window";
     support.timingPoint = "run.movement_rez_window";
     const resolution = resolvePlanBoundRunnerCostPenaltyContinuation(
@@ -229,7 +231,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         leafPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
         side: "runner",
         windowKind: "optional_ability",
-        windowId: 91,
+        windowId: "91",
         stateVersion: 92,
         timingPoint: "runner_action.main",
       },
@@ -622,7 +624,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         leafPlanInstanceId: executorInstanceId,
         side: "runner",
         windowKind: "optional_ability",
-        windowId: 91,
+        windowId: "91",
         stateVersion: 91,
         timingPoint: "runner_action.main",
       },
@@ -722,7 +724,7 @@ describe("Runner cost/penalty support plan continuation", () => {
 
   it("preserves a direct run-root owner when the mandatory trace starts before a run-window leaf exists", () => {
     const originalAction = traceBidAction(69);
-    const choiceId = "66.asp.trace.runner.bid.69";
+    const choiceId = "68.runner.bid.69";
     originalAction.choiceRequirements![0]!.choiceId = choiceId;
     originalAction.payload = { choiceId, choiceKind: "bid_amount" };
     const previous = directRunRootPortfolio(65);
@@ -743,10 +745,16 @@ describe("Runner cost/penalty support plan continuation", () => {
       attackedServerId: "r1",
       position: { kind: "ice", serverId: "r1", iceIndex: 0 },
     } as never;
+    traceInput.playerView.trace = {
+      ...traceInput.playerView.trace!,
+      traceId: 68,
+      sourceRunId: 66,
+      sourceDefinitionId: 433,
+    };
     traceInput.playerView.pendingChoice = {
       ...traceInput.playerView.pendingChoice!,
       choiceId,
-      source: "trace:66.asp.trace",
+      source: "trace:68",
       stateVersion: 69,
     } as never;
     traceInput.eventTail = [
@@ -783,6 +791,8 @@ describe("Runner cost/penalty support plan continuation", () => {
           actionType: "continue_run",
           effectKind: "trace",
           traceStarted: true,
+          traceId: 68,
+          traceSourceRunId: 66,
           serverId: "r1",
         },
       },
@@ -891,7 +901,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         leafPlanInstanceId: "plan:runner.convert_run_window:run%3Arun_211",
         side: "runner",
         windowKind: "optional_ability",
-        windowId: 91,
+        windowId: "91",
         stateVersion: 226,
         timingPoint: "run.encounter_ice",
       },
@@ -1034,7 +1044,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         leafPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
         side: "runner",
         windowKind: "optional_ability",
-        windowId: 91,
+        windowId: "91",
         stateVersion: 91,
         timingPoint: "runner_action.main",
       },
@@ -1179,7 +1189,7 @@ function traceBidAction(stateVersion: number): LegalAction {
     targetRequirements: [],
     choiceRequirements: [
       {
-        choiceId: "211.hunter.trace.runner.bid.225",
+        choiceId: "224.runner.bid.225",
         minSelections: 1,
         maxSelections: 1,
         optionIds: ["bid_0", "bid_1", "bid_2", "bid_3", "bid_4", "bid_5"],
@@ -1188,7 +1198,7 @@ function traceBidAction(stateVersion: number): LegalAction {
     visibility: "private_to_actor",
     expiresAtStateVersion: stateVersion,
     payload: {
-      choiceId: "211.hunter.trace.runner.bid.225",
+      choiceId: "224.runner.bid.225",
       choiceKind: "bid_amount",
     },
   } as unknown as LegalAction;
@@ -1208,10 +1218,23 @@ function traceBidInput(
     badPublicityCredits: 0,
     successful: false,
   } as never;
+  value.playerView.trace = {
+    traceId: 224,
+    sourceRunId: 211,
+    sourceDefinitionId: 461,
+    profile: "modern_open",
+    phase: "runner_bid",
+    printedTrace: 3,
+    effectiveTraceLimit: 3,
+    bidsRevealed: false,
+    corpBidCommitted: true,
+    runnerBidCommitted: false,
+    visibleOpponentBidCapacity: 0,
+  };
   value.playerView.pendingChoice = {
-    choiceId: "211.hunter.trace.runner.bid.225",
+    choiceId: "224.runner.bid.225",
     side: "runner",
-    source: "trace:211.hunter.trace",
+    source: "trace:224",
     prompt: "Runner Link-Payment wählen",
     presentationKey: "generic_bid_amount",
     kind: "bid_amount",
@@ -1239,6 +1262,8 @@ function traceBidInput(
         actionType: "continue_run",
         effectKind: "trace",
         traceStarted: true,
+        traceId: 224,
+        traceSourceRunId: 211,
         serverId: "hq",
       },
     },

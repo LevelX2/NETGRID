@@ -943,7 +943,7 @@
             "abilityFamily": "run-access",
             "effectKind": "trace",
             "traceStarted": true,
-            "traceId": "21.c2v1.1.trace",
+            "traceId": 23,
             "traceLimit": 5,
             "effectiveTraceLimit": 5,
             "targets": {
@@ -955,7 +955,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -964,7 +964,7 @@
                 "sourceTitle": "Jack Attack"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -972,7 +972,8 @@
                 "sourceDefinitionId": 463,
                 "sourceTitle": "Jack Attack"
               }
-            ]
+            ],
+            "traceSourceRunId": 21
           }
         },
         {
@@ -990,8 +991,8 @@
             "sourceDefinitionId": 463,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "21.c2v1.1.trace",
-            "choiceId": "21.c2v1.1.trace.corp.bid.23",
+            "traceId": 23,
+            "choiceId": "23.corp.bid.23",
             "traceStep": "corp_bid",
             "corpBid": 1,
             "traceLimit": 5,
@@ -1022,9 +1023,9 @@
             "sourceDefinitionId": 463,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "21.c2v1.1.trace",
+            "traceId": 23,
             "traceSuccessful": true,
-            "choiceId": "21.c2v1.1.trace.runner.bid.24",
+            "choiceId": "23.runner.bid.24",
             "traceStep": "runner_bid",
             "corpBid": 1,
             "traceLimit": 5,
@@ -1042,7 +1043,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 21
           }
         },
         {
@@ -2569,7 +2571,7 @@
           "abilityFamily": "run-access",
           "effectKind": "trace",
           "traceStarted": true,
-          "traceId": "21.c2v1.1.trace",
+          "traceId": 23,
           "traceLimit": 5,
           "effectiveTraceLimit": 5,
           "targets": {
@@ -2581,7 +2583,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -2590,7 +2592,7 @@
               "sourceTitle": "Jack Attack"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -2598,7 +2600,8 @@
               "sourceDefinitionId": 463,
               "sourceTitle": "Jack Attack"
             }
-          ]
+          ],
+          "traceSourceRunId": 21
         }
       },
       {
@@ -2616,8 +2619,8 @@
           "sourceDefinitionId": 463,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "21.c2v1.1.trace",
-          "choiceId": "21.c2v1.1.trace.corp.bid.23",
+          "traceId": 23,
+          "choiceId": "23.corp.bid.23",
           "traceStep": "corp_bid",
           "corpBid": 1,
           "traceLimit": 5,
@@ -2648,9 +2651,9 @@
           "sourceDefinitionId": 463,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "21.c2v1.1.trace",
+          "traceId": 23,
           "traceSuccessful": true,
-          "choiceId": "21.c2v1.1.trace.runner.bid.24",
+          "choiceId": "23.runner.bid.24",
           "traceStep": "runner_bid",
           "corpBid": 1,
           "traceLimit": 5,
@@ -2668,7 +2671,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 21
         }
       },
       {
@@ -3615,7 +3619,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 53,
-      "sideSafePlanningFingerprint": "fnv1a:64fe8414"
+      "sideSafePlanningFingerprint": "fnv1a:17e53b7f"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_blink_pressure_rig_1.0.0",

@@ -753,7 +753,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1390,7 +1390,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1713,7 +1713,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -2122,7 +2122,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "519.effect.0.damage",
+                "effectId": 0,
                 "kind": "damage",
                 "visibility": "public",
                 "side": "runner",
@@ -2651,7 +2651,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -3288,7 +3288,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -3611,7 +3611,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "307.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -4020,7 +4020,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "519.effect.0.damage",
+              "effectId": 0,
               "kind": "damage",
               "visibility": "public",
               "side": "runner",
@@ -4305,7 +4305,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 62,
-      "sideSafePlanningFingerprint": "fnv1a:0b64e6c2"
+      "sideSafePlanningFingerprint": "fnv1a:d9f1b96e"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_mp48400s_1.0.0",

@@ -983,7 +983,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1873,7 +1873,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -2240,7 +2240,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 21,
-      "sideSafePlanningFingerprint": "fnv1a:ea5b2255"
+      "sideSafePlanningFingerprint": "fnv1a:b7d39ce5"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_cheap_bag_tricks_1.0.0",

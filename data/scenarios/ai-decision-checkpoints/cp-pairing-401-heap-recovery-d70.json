@@ -1086,7 +1086,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1096,7 +1096,7 @@
                 "sourceTitle": "Bug Zapper"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3075,7 +3075,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3085,7 +3085,7 @@
               "sourceTitle": "Bug Zapper"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4379,7 +4379,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 69,
-      "sideSafePlanningFingerprint": "fnv1a:d1960ad3"
+      "sideSafePlanningFingerprint": "fnv1a:d3ac627f"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",

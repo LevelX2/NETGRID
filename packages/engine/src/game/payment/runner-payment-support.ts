@@ -133,7 +133,7 @@ export function quoteRunnerCostPenaltySupportOpening(
   )
     return undefined;
   return {
-    windowId: `runner_cost_penalty_support.${state.stateVersion + 1}`,
+    windowId: state.stateVersion + 1,
     originalActionId: legalAction.actionId,
     amountDue: amount,
     kind: options.kind ?? "cost",

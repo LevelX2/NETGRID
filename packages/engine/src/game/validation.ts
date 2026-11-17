@@ -1,4 +1,4 @@
-import { isRunId } from "@netgrid/shared";
+import { isRunId, isTraceId } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 // Read-only Game invariant validation. This module does not execute actions,
 // mutate state, or build PublicPayloads.
@@ -10,8 +10,10 @@ import {
   type GameState,
   type RestrictedActionGrantBucket,
   type TraceSuccessEffect,
+  isEventWindowId,
   type ValidationResult,
   PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES,
+  isRunnerPaymentWindowId,
 } from "@netgrid/shared";
 import { runnerMemoryLimit } from "../ability-engine/effective-values";
 import {
@@ -121,9 +123,17 @@ export function validateGameState(state: GameState): ValidationResult {
     }
   }
 
+  const paymentWindow = state.runnerCostPenaltySupportWindow;
+  if (
+    paymentWindow &&
+    (!isRunnerPaymentWindowId(paymentWindow.windowId) ||
+      paymentWindow.windowId !== paymentWindow.createdAtStateVersion + 1)
+  )
+    errors.push("Runner payment window requires its opening state version.");
+
   if (state.pendingCorpDraw) {
     const transaction = state.pendingCorpDraw;
-    if (!transaction.transactionId)
+    if (!Number.isSafeInteger(transaction.transactionId) || transaction.transactionId < 1)
       errors.push("Pending Corp draw requires a transactionId.");
     if (
       !Number.isInteger(transaction.baseDrawCount) ||
@@ -421,6 +431,17 @@ export function validateGameState(state: GameState): ValidationResult {
     }
   }
   if (state.trace) {
+    if (!isTraceId(state.trace.traceId) || state.trace.traceId > state.stateVersion)
+      errors.push("Trace id must identify a current or earlier GameState version.");
+    if (
+      state.trace.sourceRunId !== undefined &&
+      (!isRunId(state.trace.sourceRunId) ||
+        state.trace.sourceRunId > state.trace.traceId ||
+        state.trace.subroutineIndex === undefined ||
+        !Number.isSafeInteger(state.trace.subroutineIndex) ||
+        state.trace.subroutineIndex < 0)
+    )
+      errors.push("Encounter Trace must identify its originating run and subroutine.");
     const traceRules = traceRulesDefinitionForTrace(state.trace);
     if (
       normalizeTraceRulesProfile(state.trace.traceRulesProfile) !==
@@ -601,7 +622,7 @@ export function validateGameState(state: GameState): ValidationResult {
     errors.push("End-turn tag continuation has an invalid accumulator.");
   if (state.runnerDrawSequence) {
     const sequence = state.runnerDrawSequence;
-    if (!sequence.sequenceId)
+    if (!Number.isSafeInteger(sequence.sequenceId) || sequence.sequenceId < 1)
       errors.push("Runner draw sequence requires an id.");
     if (!sequence.originActionId)
       errors.push("Runner draw sequence requires its origin action id.");
@@ -771,7 +792,16 @@ export function validateGameState(state: GameState): ValidationResult {
     "corpTurnFlags.restrictedActionGrants",
     state.corpTurnFlags?.restrictedActionGrants,
   );
+  const modificationWindowId = state.imminentEvent?.modificationWindowId;
+  if (modificationWindowId !== undefined &&
+    (!isEventWindowId(modificationWindowId) || modificationWindowId > state.stateVersion))
+    errors.push("ImminentEvent modificationWindowId must identify an opened window.");
   if (state.eventModificationWindow) {
+    if (
+      state.eventModificationWindow.windowId !== state.eventModificationWindow.createdAtStateVersion ||
+      state.eventModificationWindow.windowId !== modificationWindowId
+    )
+      errors.push("EventModificationWindow windowId must match its opening version and ImminentEvent.");
     if (!state.imminentEvent)
       errors.push("EventModificationWindow requires an ImminentEvent.");
     if (state.eventModificationWindow.eventId !== state.imminentEvent?.eventId)
@@ -788,6 +818,11 @@ export function validateGameState(state: GameState): ValidationResult {
     }
   }
   if (state.replacementWindow) {
+    if (
+      state.replacementWindow.windowId !== state.replacementWindow.createdAtStateVersion ||
+      state.replacementWindow.windowId !== modificationWindowId
+    )
+      errors.push("ReplacementWindow windowId must match its opening version and ImminentEvent.");
     if (!state.imminentEvent)
       errors.push("ReplacementWindow requires an ImminentEvent.");
     if (

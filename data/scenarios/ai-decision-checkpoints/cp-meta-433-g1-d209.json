@@ -835,7 +835,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1679,7 +1679,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1689,7 +1689,7 @@
                 "sourceTitle": "Bug Zapper"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1871,7 +1871,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1881,7 +1881,7 @@
                 "sourceTitle": "Dog Pile"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2453,7 +2453,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "67.cyy.successful_run.socket_rd",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -2810,7 +2810,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "82.cyy.successful_run.socket_rd",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -2856,7 +2856,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3816,7 +3816,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "119.cyy.successful_run.socket_rd",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -4216,7 +4216,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "134.cyy.successful_run.socket_rd",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -4427,7 +4427,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "144.cyy.successful_run.socket_rd",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -6220,7 +6220,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "134.cyy.successful_run.socket_rd",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -6431,7 +6431,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "144.cyy.successful_run.socket_rd",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -7923,7 +7923,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 208,
-      "sideSafePlanningFingerprint": "fnv1a:94f902e9"
+      "sideSafePlanningFingerprint": "fnv1a:87434dcf"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",

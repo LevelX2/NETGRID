@@ -2749,7 +2749,7 @@
             "turnActionOrdinalEnd": 3,
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -3300,7 +3300,7 @@
             "turnActionOrdinalEnd": 1,
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -3310,7 +3310,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -3407,7 +3407,7 @@
             "turnActionOrdinalEnd": 2,
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -3583,7 +3583,7 @@
             "turnActionOrdinalEnd": 1,
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3786,7 +3786,7 @@
             "label": "Subroutinen auslösen (Run endet)",
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4569,7 +4569,7 @@
             "label": "Subroutinen auslösen",
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4585,7 +4585,7 @@
             "unbrokenSubroutineCount": 1,
             "encounterWillEndRun": false,
             "traceStarted": true,
-            "traceId": "33.c2oe.0.trace",
+            "traceId": 36,
             "sourceCardId": "c2oe",
             "sourceDefinitionId": 433,
             "baseTraceStrength": 5,
@@ -4597,7 +4597,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 33
           },
           "privatePayload": {
             "runner": {
@@ -4627,10 +4628,11 @@
                   "encounterSourceWillTrashAtEndOfTurn": false,
                   "encounterSubroutineIds": "card_implementation.433.printed_subroutine.1.trace",
                   "traceStarted": true,
-                  "traceId": "33.c2oe.0.trace",
+                  "traceId": 36,
                   "sourceCardId": "c2oe",
                   "baseTraceStrength": 5,
-                  "corpBidMax": 9
+                  "corpBidMax": 9,
+                  "traceSourceRunId": 33
                 },
                 "resolvedEffects": [
                   {
@@ -4662,9 +4664,9 @@
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
             "choiceKind": "bid_amount",
-            "choiceId": "33.c2oe.0.trace.corp.bid.36",
+            "choiceId": "36.corp.bid.36",
             "sourceDefinitionId": 433,
-            "traceId": "33.c2oe.0.trace",
+            "traceId": 36,
             "traceStep": "corp_bid",
             "baseTraceStrength": 5,
             "corpBidMax": 9,
@@ -4691,7 +4693,7 @@
                 "actionId": "corp.resolve_choice",
                 "clientKnownStateVersion": 36,
                 "selectedChoices": {
-                  "choiceId": "33.c2oe.0.trace.corp.bid.36",
+                  "choiceId": "36.corp.bid.36",
                   "selectedOptionIds": [
                     "bid_0"
                   ]
@@ -4711,7 +4713,7 @@
                 "expiresAtStateVersion": 36,
                 "choiceRequirements": [
                   {
-                    "choiceId": "33.c2oe.0.trace.corp.bid.36",
+                    "choiceId": "36.corp.bid.36",
                     "minSelections": 1,
                     "maxSelections": 1,
                     "optionIds": [
@@ -4729,10 +4731,10 @@
                   }
                 ],
                 "payload": {
-                  "choiceId": "33.c2oe.0.trace.corp.bid.36",
+                  "choiceId": "36.corp.bid.36",
                   "choiceVisibility": "public",
                   "choiceKind": "bid_amount",
-                  "traceId": "33.c2oe.0.trace",
+                  "traceId": 36,
                   "traceStep": "corp_bid",
                   "baseTraceStrength": 5,
                   "sourceDefinitionId": 433,
@@ -4760,10 +4762,10 @@
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
             "choiceKind": "bid_amount",
-            "choiceId": "33.c2oe.0.trace.runner.bid.37",
+            "choiceId": "36.runner.bid.37",
             "sourceDefinitionId": 433,
             "tagsAdded": 0,
-            "traceId": "33.c2oe.0.trace",
+            "traceId": 36,
             "traceStep": "runner_bid",
             "baseTraceStrength": 5,
             "corpBid": 0,
@@ -4783,7 +4785,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 33
           },
           "privatePayload": {
             "runner": {
@@ -4793,7 +4796,7 @@
                 "actionId": "runner.resolve_choice",
                 "clientKnownStateVersion": 37,
                 "selectedChoices": {
-                  "choiceId": "33.c2oe.0.trace.runner.bid.37",
+                  "choiceId": "36.runner.bid.37",
                   "selectedOptionIds": [
                     "bid_5"
                   ]
@@ -4813,7 +4816,7 @@
                 "expiresAtStateVersion": 37,
                 "choiceRequirements": [
                   {
-                    "choiceId": "33.c2oe.0.trace.runner.bid.37",
+                    "choiceId": "36.runner.bid.37",
                     "minSelections": 1,
                     "maxSelections": 1,
                     "optionIds": [
@@ -4834,10 +4837,10 @@
                   }
                 ],
                 "payload": {
-                  "choiceId": "33.c2oe.0.trace.runner.bid.37",
+                  "choiceId": "36.runner.bid.37",
                   "choiceVisibility": "public",
                   "choiceKind": "bid_amount",
-                  "traceId": "33.c2oe.0.trace",
+                  "traceId": 36,
                   "traceStep": "runner_bid",
                   "baseTraceStrength": 5,
                   "sourceDefinitionId": 433,
@@ -4847,7 +4850,8 @@
                   "runnerBid": 5,
                   "runnerStrength": 5,
                   "traceSuccessful": false,
-                  "tagsAdded": 0
+                  "tagsAdded": 0,
+                  "traceSourceRunId": 33
                 }
               }
             }
@@ -5120,7 +5124,7 @@
                 "payload": {
                   "cardId": "c96",
                   "runnerCostPenaltySupportWindowOpened": true,
-                  "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.43"
+                  "runnerCostPenaltySupportWindowId": 43
                 }
               }
             }
@@ -5140,7 +5144,7 @@
             "label": "Chiba Bank Account: 4 Credits nehmen",
             "resolvedEffects": [
               {
-                "effectId": "191.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "hidden_info_barrier",
                 "side": "runner",
@@ -5212,7 +5216,7 @@
                   "cardImplementationAbilityLabel": "Chiba Bank Account: 4 Credits nehmen",
                   "gainCreditsAmount": 4,
                   "cardImplementationTrashSourceCost": true,
-                  "costPenaltySupportWindowId": "runner_cost_penalty_support.43",
+                  "costPenaltySupportWindowId": 43,
                   "costPenaltySupportOriginalActionId": "runner.play_event.c96.c96",
                   "costPenaltySupportAmountDue": 7,
                   "costPenaltySupportKind": "cost",
@@ -5709,7 +5713,7 @@
             "turnActionOrdinalEnd": 1,
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5719,7 +5723,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -8197,7 +8201,7 @@
             "turnActionOrdinalEnd": 2,
             "resolvedEffects": [
               {
-                "effectId": "291.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -8285,7 +8289,7 @@
             "turnActionOrdinalEnd": 3,
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -8812,7 +8816,7 @@
             "turnActionOrdinalEnd": 1,
             "resolvedEffects": [
               {
-                "effectId": "291.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -8984,7 +8988,7 @@
                 "payload": {
                   "cardId": "c95",
                   "runnerCostPenaltySupportWindowOpened": true,
-                  "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.104"
+                  "runnerCostPenaltySupportWindowId": 104
                 }
               }
             }
@@ -9004,7 +9008,7 @@
             "label": "Swiss Bank Account: 6 Credits nehmen",
             "resolvedEffects": [
               {
-                "effectId": "210.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "hidden_info_barrier",
                 "side": "runner",
@@ -9076,7 +9080,7 @@
                   "cardImplementationAbilityLabel": "Swiss Bank Account: 6 Credits nehmen",
                   "gainCreditsAmount": 6,
                   "cardImplementationTrashSourceCost": true,
-                  "costPenaltySupportWindowId": "runner_cost_penalty_support.104",
+                  "costPenaltySupportWindowId": 104,
                   "costPenaltySupportOriginalActionId": "runner.play_event.c95.c95",
                   "costPenaltySupportAmountDue": 7,
                   "costPenaltySupportKind": "cost",
@@ -9497,7 +9501,7 @@
             "label": "Subroutinen auslösen (Run endet)",
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -10129,7 +10133,7 @@
             "turnActionOrdinalEnd": 4,
             "resolvedEffects": [
               {
-                "effectId": "223.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -12338,7 +12342,7 @@
             "label": "Zug beenden",
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1dl",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -13239,7 +13243,7 @@
             "label": "Choice wurde beantwortet.",
             "resolvedEffects": [
               {
-                "effectId": "247.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -14012,7 +14016,7 @@
             "turnActionOrdinalEnd": 3,
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -14518,7 +14522,7 @@
             "turnActionOrdinalEnd": 1,
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -14918,7 +14922,7 @@
             "turnActionOrdinalEnd": 4,
             "resolvedEffects": [
               {
-                "effectId": "247.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",

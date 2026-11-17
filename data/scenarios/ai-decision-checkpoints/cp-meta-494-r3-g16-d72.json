@@ -1158,7 +1158,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1569,7 +1569,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "44.effect.0.remove_tags",
+                "effectId": 0,
                 "kind": "remove_tags",
                 "visibility": "public",
                 "side": "runner",
@@ -1580,7 +1580,7 @@
                 "sourceTitle": "Meat Upgrade"
               },
               {
-                "effectId": "44.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -1880,7 +1880,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "514.effect.0.damage",
+                "effectId": 0,
                 "kind": "damage",
                 "visibility": "public",
                 "side": "runner",
@@ -1943,7 +1943,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "499.effect.0.add_tags",
+                "effectId": 0,
                 "kind": "add_tags",
                 "visibility": "public",
                 "side": "runner",
@@ -3680,7 +3680,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4091,7 +4091,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "44.effect.0.remove_tags",
+              "effectId": 0,
               "kind": "remove_tags",
               "visibility": "public",
               "side": "runner",
@@ -4102,7 +4102,7 @@
               "sourceTitle": "Meat Upgrade"
             },
             {
-              "effectId": "44.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -4402,7 +4402,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "514.effect.0.damage",
+              "effectId": 0,
               "kind": "damage",
               "visibility": "public",
               "side": "runner",
@@ -4465,7 +4465,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "499.effect.0.add_tags",
+              "effectId": 0,
               "kind": "add_tags",
               "visibility": "public",
               "side": "runner",
@@ -5811,7 +5811,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 71,
-      "sideSafePlanningFingerprint": "fnv1a:c4bd0dbd"
+      "sideSafePlanningFingerprint": "fnv1a:112d6151"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_neon_guillotine_1.1.0",

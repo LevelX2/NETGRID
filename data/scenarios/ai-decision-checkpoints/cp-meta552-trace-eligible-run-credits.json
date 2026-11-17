@@ -1318,7 +1318,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -1511,7 +1511,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.add_hosted_credits",
+                    "effectId": 0,
                     "kind": "add_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -1702,7 +1702,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.take_hosted_credits",
+                    "effectId": 0,
                     "kind": "take_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -1808,7 +1808,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -2102,7 +2102,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.add_hosted_credits",
+                    "effectId": 0,
                     "kind": "add_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -2355,7 +2355,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.add_hosted_credits",
+                    "effectId": 0,
                     "kind": "add_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -2420,7 +2420,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "309.effect.0.gain_credits",
+                    "effectId": 0,
                     "kind": "gain_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -3823,7 +3823,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -4016,7 +4016,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "366.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -4207,7 +4207,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "366.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -4313,7 +4313,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -4607,7 +4607,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "366.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -4860,7 +4860,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "366.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -4925,7 +4925,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "309.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -5762,7 +5762,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 87,
-          "sideSafePlanningFingerprint": "fnv1a:47d71a5c"
+          "sideSafePlanningFingerprint": "fnv1a:3352d6b8"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",
@@ -13253,7 +13253,7 @@
           "activeSide": "runner",
           "phase": "run",
           "trace": {
-            "traceId": "88.c2px.0.trace",
+            "traceId": 90,
             "sourceCardInstanceId": "c2px",
             "bidEffect": "zero_corp_bid_guaranteed_fixed_effect",
             "sourceDefinitionId": 440,
@@ -13267,7 +13267,8 @@
             "visibleOpponentBidCapacity": 3,
             "corpBid": 0,
             "corpStrength": 6,
-            "runnerLink": 0
+            "runnerLink": 0,
+            "sourceRunId": 88
           },
           "own": {
             "identity": {
@@ -13773,9 +13774,9 @@
             "successful": false
           },
           "pendingChoice": {
-            "choiceId": "88.c2px.0.trace.runner.bid.91",
+            "choiceId": "90.runner.bid.91",
             "side": "runner",
-            "source": "trace:88.c2px.0.trace",
+            "source": "trace:90",
             "prompt": "Runner Link-Payment wählen (Trace-Stärke 6, Link 0; 4 Credits verfügbar)",
             "presentationKey": "generic_bid_amount",
             "kind": "bid_amount",
@@ -14671,7 +14672,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -14864,7 +14865,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.add_hosted_credits",
+                    "effectId": 0,
                     "kind": "add_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -15055,7 +15056,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.take_hosted_credits",
+                    "effectId": 0,
                     "kind": "take_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -15161,7 +15162,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -15455,7 +15456,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.add_hosted_credits",
+                    "effectId": 0,
                     "kind": "add_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -15708,7 +15709,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.add_hosted_credits",
+                    "effectId": 0,
                     "kind": "add_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -15773,7 +15774,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "309.effect.0.gain_credits",
+                    "effectId": 0,
                     "kind": "gain_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -16269,7 +16270,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -16277,7 +16278,9 @@
                     "sourceDefinitionId": 440,
                     "sourceTitle": "Cinderella"
                   }
-                ]
+                ],
+                "traceId": 90,
+                "traceSourceRunId": 88
               }
             },
             {
@@ -16307,7 +16310,8 @@
                 },
                 "visibility": {
                   "class": "public"
-                }
+                },
+                "traceId": 90
               }
             }
           ],
@@ -16323,7 +16327,7 @@
               "targetRequirements": [],
               "choiceRequirements": [
                 {
-                  "choiceId": "88.c2px.0.trace.runner.bid.91",
+                  "choiceId": "90.runner.bid.91",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -16848,7 +16852,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -17041,7 +17045,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "366.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -17232,7 +17236,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "366.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -17338,7 +17342,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -17632,7 +17636,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "366.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -17885,7 +17889,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "366.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -17950,7 +17954,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "309.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -18446,7 +18450,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -18454,7 +18458,9 @@
                   "sourceDefinitionId": 440,
                   "sourceTitle": "Cinderella"
                 }
-              ]
+              ],
+              "traceId": 90,
+              "traceSourceRunId": 88
             }
           },
           {
@@ -18484,7 +18490,8 @@
               },
               "visibility": {
                 "class": "public"
-              }
+              },
+              "traceId": 90
             }
           }
         ],
@@ -18500,7 +18507,7 @@
             "targetRequirements": [],
             "choiceRequirements": [
               {
-                "choiceId": "88.c2px.0.trace.runner.bid.91",
+                "choiceId": "90.runner.bid.91",
                 "minSelections": 1,
                 "maxSelections": 1,
                 "optionIds": [
@@ -18559,7 +18566,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 91,
-          "sideSafePlanningFingerprint": "fnv1a:8b057946"
+          "sideSafePlanningFingerprint": "fnv1a:e0234621"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",

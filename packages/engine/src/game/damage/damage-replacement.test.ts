@@ -14,7 +14,7 @@ describe("damage replacement choice", () => {
       candidate("replacement_b", 80),
     ];
     const window = {
-      windowId: "window_1",
+      windowId: 4,
       originalEventId: "damage_1",
       eventType: "damage",
       candidates,
@@ -44,7 +44,7 @@ describe("damage replacement choice", () => {
     const source = candidate("replacement_card", 80);
     source.sourceRef = { kind: "card", label: "Unbound card" };
     const window = {
-      windowId: "window_unbound",
+      windowId: 4,
       candidates: [source],
     } as ReplacementWindow;
     expect(() =>

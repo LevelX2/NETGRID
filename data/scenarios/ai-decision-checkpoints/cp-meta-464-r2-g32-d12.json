@@ -673,7 +673,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1050,7 +1050,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -1130,7 +1130,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 11,
-      "sideSafePlanningFingerprint": "fnv1a:d265418e"
+      "sideSafePlanningFingerprint": "fnv1a:dbae4d1c"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_mit_ansage_der_perfekte_coup_2026_07_09_1.0.0",

@@ -1842,7 +1842,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "493.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -2000,7 +2000,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -2481,7 +2481,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -2839,7 +2839,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "161.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -2849,7 +2849,7 @@
                   "sourceTitle": "Cruising for Netwatch"
                 },
                 {
-                  "effectId": "161.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "runner",
@@ -3112,7 +3112,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -4062,7 +4062,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -4831,7 +4831,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -5244,7 +5244,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -5499,7 +5499,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "132.cyh.successful_run.tax",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -5513,7 +5513,7 @@
                   "serverLabel": "HQ"
                 },
                 {
-                  "effectId": "132.cyq.successful_run.vienna",
+                  "effectId": 1,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -5800,7 +5800,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -6083,7 +6083,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "151.cyh.successful_run.tax",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -6097,7 +6097,7 @@
                   "serverLabel": "HQ"
                 },
                 {
-                  "effectId": "151.cyq.successful_run.vienna",
+                  "effectId": 1,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -6161,7 +6161,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "corp.start.virus.155",
+                  "effectId": 0,
                   "kind": "lose_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -6420,7 +6420,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -6646,7 +6646,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "173.cyh.successful_run.tax",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -6660,7 +6660,7 @@
                   "serverLabel": "HQ"
                 },
                 {
-                  "effectId": "173.cyq.successful_run.vienna",
+                  "effectId": 1,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -7207,7 +7207,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -7461,7 +7461,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "201.cyh.successful_run.tax",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -7475,7 +7475,7 @@
                   "serverLabel": "HQ"
                 },
                 {
-                  "effectId": "201.cyq.successful_run.vienna",
+                  "effectId": 1,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -7841,7 +7841,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -8067,7 +8067,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "224.cyh.successful_run.tax",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -8081,7 +8081,7 @@
                   "serverLabel": "HQ"
                 },
                 {
-                  "effectId": "224.cyq.successful_run.vienna",
+                  "effectId": 1,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -8495,7 +8495,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -8742,7 +8742,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "246.cyh.successful_run.tax",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -8756,7 +8756,7 @@
                   "serverLabel": "HQ"
                 },
                 {
-                  "effectId": "246.cyq.successful_run.vienna",
+                  "effectId": 1,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -9318,7 +9318,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "272.cyh.successful_run.tax",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -9332,7 +9332,7 @@
                   "serverLabel": "HQ"
                 },
                 {
-                  "effectId": "272.cyq.successful_run.vienna",
+                  "effectId": 1,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -9720,7 +9720,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -9999,7 +9999,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "293.cyh.successful_run.tax",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -10013,7 +10013,7 @@
                   "serverLabel": "HQ"
                 },
                 {
-                  "effectId": "293.cyq.successful_run.vienna",
+                  "effectId": 1,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -10093,7 +10093,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -10375,7 +10375,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "304.cyh.successful_run.tax",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -10389,7 +10389,7 @@
                   "serverLabel": "HQ"
                 },
                 {
-                  "effectId": "304.cyq.successful_run.vienna",
+                  "effectId": 1,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -10422,7 +10422,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "corp.start.virus.155",
+                  "effectId": 0,
                   "kind": "lose_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -11058,7 +11058,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "502.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -11867,7 +11867,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "corp.start.scored_agenda.optional_draw.c2jh",
+                  "effectId": 0,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -12195,7 +12195,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "507.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -12205,7 +12205,7 @@
                   "sourceTitle": "Night Shift"
                 },
                 {
-                  "effectId": "507.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -12514,7 +12514,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "507.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -12524,7 +12524,7 @@
                   "sourceTitle": "Night Shift"
                 },
                 {
-                  "effectId": "507.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -13233,7 +13233,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "320.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -14639,7 +14639,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -14726,7 +14726,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -20399,7 +20399,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 597,
-        "sideSafePlanningFingerprint": "fnv1a:bc1da79f"
+        "sideSafePlanningFingerprint": "fnv1a:dbb56161"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -31414,7 +31414,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -31788,7 +31788,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -32065,7 +32065,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "552.c3et.access_effect.0.damage",
+              "effectId": 0,
               "kind": "damage",
               "visibility": "hidden_info_barrier",
               "side": "runner",
@@ -32948,7 +32948,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -32969,7 +32969,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "26.c2xy.0.trace",
+          "traceId": 28,
           "sourceCardId": "c2xy",
           "sourceDefinitionId": 476,
           "traceLimit": 3,
@@ -32984,7 +32984,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 26
         },
         "privatePayload": {
           "runner": {
@@ -33017,12 +33018,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "26.c2xy.0.trace",
+                "traceId": 28,
                 "sourceCardId": "c2xy",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 6
+                "corpBidMax": 6,
+                "traceSourceRunId": 26
               },
               "resolvedEffects": [
                 {
@@ -33054,11 +33056,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "26.c2xy.0.trace.corp.bid.28",
+          "choiceId": "28.corp.bid.28",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "26.c2xy.0.trace",
+          "traceId": 28,
           "traceStep": "corp_bid",
           "traceLimit": 3,
           "effectiveTraceLimit": 3,
@@ -33087,7 +33089,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 28,
               "selectedChoices": {
-                "choiceId": "26.c2xy.0.trace.corp.bid.28",
+                "choiceId": "28.corp.bid.28",
                 "selectedOptionIds": [
                   "bid_3"
                 ]
@@ -33106,7 +33108,7 @@
               "expiresAtStateVersion": 28,
               "choiceRequirements": [
                 {
-                  "choiceId": "26.c2xy.0.trace.corp.bid.28",
+                  "choiceId": "28.corp.bid.28",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -33121,10 +33123,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "26.c2xy.0.trace.corp.bid.28",
+                "choiceId": "28.corp.bid.28",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "26.c2xy.0.trace",
+                "traceId": 28,
                 "traceStep": "corp_bid",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
@@ -33153,11 +33155,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "26.c2xy.0.trace.runner.bid.29",
+          "choiceId": "28.runner.bid.29",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "26.c2xy.0.trace",
+          "traceId": 28,
           "traceStep": "runner_bid",
           "traceLimit": 3,
           "corpBid": 3,
@@ -33185,7 +33187,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 29,
               "selectedChoices": {
-                "choiceId": "26.c2xy.0.trace.runner.bid.29",
+                "choiceId": "28.runner.bid.29",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -33204,7 +33206,7 @@
               "expiresAtStateVersion": 29,
               "choiceRequirements": [
                 {
-                  "choiceId": "26.c2xy.0.trace.runner.bid.29",
+                  "choiceId": "28.runner.bid.29",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -33218,12 +33220,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "26.c2xy.0.trace.runner.bid.29",
+                "choiceId": "28.runner.bid.29",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "26.c2xy.0.trace",
+                "traceId": 28,
                 "traceStep": "runner_bid",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -33259,7 +33261,7 @@
           "runnerCreditsAfter": 2,
           "hiddenRunnerResourceRevealed": true,
           "hiddenResourceSlotId": "s1xaivco",
-          "traceId": "26.c2xy.0.trace",
+          "traceId": 28,
           "traceStep": "trace_success_cancel",
           "traceEffectCanceled": true,
           "traceSuccessCancelCostPaid": 3,
@@ -33287,7 +33289,8 @@
             "redactedKind": "choice"
           },
           "cardDefinitionId": 187,
-          "title": "Back Door to Netwatch"
+          "title": "Back Door to Netwatch",
+          "traceSourceRunId": 26
         },
         "privatePayload": {
           "runner": {
@@ -33297,7 +33300,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 30,
               "selectedChoices": {
-                "choiceId": "26.c2xy.0.trace.success_cancel.30",
+                "choiceId": "28.success_cancel.30",
                 "selectedOptionIds": [
                   "trace_success_cancel_c15l"
                 ]
@@ -33316,7 +33319,7 @@
               "expiresAtStateVersion": 30,
               "choiceRequirements": [
                 {
-                  "choiceId": "26.c2xy.0.trace.success_cancel.30",
+                  "choiceId": "28.success_cancel.30",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -33326,10 +33329,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "26.c2xy.0.trace.success_cancel.30",
+                "choiceId": "28.success_cancel.30",
                 "choiceVisibility": "hidden_info_barrier",
                 "choiceKind": "select_option",
-                "traceId": "26.c2xy.0.trace",
+                "traceId": 28,
                 "traceStep": "trace_success_cancel",
                 "sourceDefinitionId": 187,
                 "traceEffectCanceled": true,
@@ -33343,7 +33346,8 @@
                 "trashedCardDefinitionId": 187,
                 "badPublicityAdded": 1,
                 "corpBadPublicityAfter": 1,
-                "runnerCreditsAfter": 2
+                "runnerCreditsAfter": 2,
+                "traceSourceRunId": 26
               }
             }
           }
@@ -33893,7 +33897,7 @@
           "turnActionOrdinalEnd": 4,
           "resolvedEffects": [
             {
-              "effectId": "161.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -33903,7 +33907,7 @@
               "sourceTitle": "Cruising for Netwatch"
             },
             {
-              "effectId": "161.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -34530,7 +34534,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -34551,7 +34555,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "48.c2xy.0.trace",
+          "traceId": 50,
           "sourceCardId": "c2xy",
           "sourceDefinitionId": 476,
           "traceLimit": 3,
@@ -34566,7 +34570,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 48
         },
         "privatePayload": {
           "runner": {
@@ -34599,12 +34604,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "48.c2xy.0.trace",
+                "traceId": 50,
                 "sourceCardId": "c2xy",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 0
+                "corpBidMax": 0,
+                "traceSourceRunId": 48
               },
               "resolvedEffects": [
                 {
@@ -34636,11 +34642,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "48.c2xy.0.trace.corp.bid.50",
+          "choiceId": "50.corp.bid.50",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "48.c2xy.0.trace",
+          "traceId": 50,
           "traceStep": "corp_bid",
           "traceLimit": 3,
           "effectiveTraceLimit": 3,
@@ -34669,7 +34675,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 50,
               "selectedChoices": {
-                "choiceId": "48.c2xy.0.trace.corp.bid.50",
+                "choiceId": "50.corp.bid.50",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -34688,7 +34694,7 @@
               "expiresAtStateVersion": 50,
               "choiceRequirements": [
                 {
-                  "choiceId": "48.c2xy.0.trace.corp.bid.50",
+                  "choiceId": "50.corp.bid.50",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -34697,10 +34703,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "48.c2xy.0.trace.corp.bid.50",
+                "choiceId": "50.corp.bid.50",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "48.c2xy.0.trace",
+                "traceId": 50,
                 "traceStep": "corp_bid",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
@@ -34729,12 +34735,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "48.c2xy.0.trace.runner.bid.51",
+          "choiceId": "50.runner.bid.51",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
           "tagsAdded": 0,
-          "traceId": "48.c2xy.0.trace",
+          "traceId": 50,
           "traceStep": "runner_bid",
           "traceLimit": 3,
           "corpBid": 0,
@@ -34755,7 +34761,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 48
         },
         "privatePayload": {
           "runner": {
@@ -34765,7 +34772,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 51,
               "selectedChoices": {
-                "choiceId": "48.c2xy.0.trace.runner.bid.51",
+                "choiceId": "50.runner.bid.51",
                 "selectedOptionIds": [
                   "bid_3"
                 ]
@@ -34784,7 +34791,7 @@
               "expiresAtStateVersion": 51,
               "choiceRequirements": [
                 {
-                  "choiceId": "48.c2xy.0.trace.runner.bid.51",
+                  "choiceId": "50.runner.bid.51",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -34796,12 +34803,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "48.c2xy.0.trace.runner.bid.51",
+                "choiceId": "50.runner.bid.51",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "48.c2xy.0.trace",
+                "traceId": 50,
                 "traceStep": "runner_bid",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -34811,7 +34818,8 @@
                 "runnerBid": 3,
                 "runnerStrength": 3,
                 "traceSuccessful": false,
-                "tagsAdded": 0
+                "tagsAdded": 0,
+                "traceSourceRunId": 48
               }
             }
           }
@@ -36892,7 +36900,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -36913,7 +36921,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "87.c2xy.0.trace",
+          "traceId": 88,
           "sourceCardId": "c2xy",
           "sourceDefinitionId": 476,
           "traceLimit": 3,
@@ -36928,7 +36936,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 87
         },
         "privatePayload": {
           "runner": {
@@ -36961,12 +36970,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "87.c2xy.0.trace",
+                "traceId": 88,
                 "sourceCardId": "c2xy",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 4
+                "corpBidMax": 4,
+                "traceSourceRunId": 87
               },
               "resolvedEffects": [
                 {
@@ -36998,11 +37008,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "87.c2xy.0.trace.corp.bid.88",
+          "choiceId": "88.corp.bid.88",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "87.c2xy.0.trace",
+          "traceId": 88,
           "traceStep": "corp_bid",
           "traceLimit": 3,
           "effectiveTraceLimit": 3,
@@ -37031,7 +37041,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 88,
               "selectedChoices": {
-                "choiceId": "87.c2xy.0.trace.corp.bid.88",
+                "choiceId": "88.corp.bid.88",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -37050,7 +37060,7 @@
               "expiresAtStateVersion": 88,
               "choiceRequirements": [
                 {
-                  "choiceId": "87.c2xy.0.trace.corp.bid.88",
+                  "choiceId": "88.corp.bid.88",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -37063,10 +37073,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "87.c2xy.0.trace.corp.bid.88",
+                "choiceId": "88.corp.bid.88",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "87.c2xy.0.trace",
+                "traceId": 88,
                 "traceStep": "corp_bid",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
@@ -37095,12 +37105,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "select_option",
-          "choiceId": "87.c2xy.0.trace.base_link.89",
+          "choiceId": "88.base_link.89",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
           "runnerCreditsAfter": 6,
-          "traceId": "87.c2xy.0.trace",
+          "traceId": 88,
           "traceStep": "base_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -37132,7 +37142,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 89,
               "selectedChoices": {
-                "choiceId": "87.c2xy.0.trace.base_link.89",
+                "choiceId": "88.base_link.89",
                 "selectedOptionIds": [
                   "trace_base_link_c15t"
                 ]
@@ -37151,7 +37161,7 @@
               "expiresAtStateVersion": 89,
               "choiceRequirements": [
                 {
-                  "choiceId": "87.c2xy.0.trace.base_link.89",
+                  "choiceId": "88.base_link.89",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -37161,10 +37171,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "87.c2xy.0.trace.base_link.89",
+                "choiceId": "88.base_link.89",
                 "choiceVisibility": "public",
                 "choiceKind": "select_option",
-                "traceId": "87.c2xy.0.trace",
+                "traceId": 88,
                 "traceStep": "base_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -37195,11 +37205,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "87.c2xy.0.trace.runner.bid.90",
+          "choiceId": "88.runner.bid.90",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "87.c2xy.0.trace",
+          "traceId": 88,
           "traceStep": "runner_bid",
           "traceLimit": 3,
           "corpBid": 0,
@@ -37227,7 +37237,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 90,
               "selectedChoices": {
-                "choiceId": "87.c2xy.0.trace.runner.bid.90",
+                "choiceId": "88.runner.bid.90",
                 "selectedOptionIds": [
                   "bid_1"
                 ]
@@ -37246,7 +37256,7 @@
               "expiresAtStateVersion": 90,
               "choiceRequirements": [
                 {
-                  "choiceId": "87.c2xy.0.trace.runner.bid.90",
+                  "choiceId": "88.runner.bid.90",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -37261,12 +37271,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "87.c2xy.0.trace.runner.bid.90",
+                "choiceId": "88.runner.bid.90",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "87.c2xy.0.trace",
+                "traceId": 88,
                 "traceStep": "runner_bid",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -37301,7 +37311,7 @@
           "runnerCreditsAfter": 6,
           "tagsAdded": 0,
           "gainedCredits": 1,
-          "traceId": "87.c2xy.0.trace",
+          "traceId": 88,
           "traceStep": "post_bid_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -37327,7 +37337,8 @@
           "visibility": {
             "class": "hidden_info_barrier",
             "redactedKind": "choice"
-          }
+          },
+          "traceSourceRunId": 87
         },
         "privatePayload": {
           "runner": {
@@ -37337,7 +37348,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 91,
               "selectedChoices": {
-                "choiceId": "87.c2xy.0.trace.post_bid_link.91",
+                "choiceId": "88.post_bid_link.91",
                 "selectedOptionIds": [
                   "pass"
                 ]
@@ -37356,7 +37367,7 @@
               "expiresAtStateVersion": 91,
               "choiceRequirements": [
                 {
-                  "choiceId": "87.c2xy.0.trace.post_bid_link.91",
+                  "choiceId": "88.post_bid_link.91",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -37366,10 +37377,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "87.c2xy.0.trace.post_bid_link.91",
+                "choiceId": "88.post_bid_link.91",
                 "choiceVisibility": "hidden_info_barrier",
                 "choiceKind": "select_option",
-                "traceId": "87.c2xy.0.trace",
+                "traceId": 88,
                 "traceStep": "post_bid_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -37384,7 +37395,8 @@
                 "traceAvoidRewardCredits": 1,
                 "gainedCredits": 1,
                 "runnerCreditsAfter": 6,
-                "traceAvoidRewardSourceDefinitionIds": "188"
+                "traceAvoidRewardSourceDefinitionIds": "188",
+                "traceSourceRunId": 87
               }
             }
           }
@@ -38837,7 +38849,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -39827,7 +39839,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -39848,7 +39860,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "132.c2xy.0.trace",
+          "traceId": 133,
           "sourceCardId": "c2xy",
           "sourceDefinitionId": 476,
           "traceLimit": 3,
@@ -39863,7 +39875,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 132
         },
         "privatePayload": {
           "runner": {
@@ -39896,12 +39909,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "132.c2xy.0.trace",
+                "traceId": 133,
                 "sourceCardId": "c2xy",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 1
+                "corpBidMax": 1,
+                "traceSourceRunId": 132
               },
               "resolvedEffects": [
                 {
@@ -39933,11 +39947,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "132.c2xy.0.trace.corp.bid.133",
+          "choiceId": "133.corp.bid.133",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "132.c2xy.0.trace",
+          "traceId": 133,
           "traceStep": "corp_bid",
           "traceLimit": 3,
           "effectiveTraceLimit": 3,
@@ -39966,7 +39980,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 133,
               "selectedChoices": {
-                "choiceId": "132.c2xy.0.trace.corp.bid.133",
+                "choiceId": "133.corp.bid.133",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -39985,7 +39999,7 @@
               "expiresAtStateVersion": 133,
               "choiceRequirements": [
                 {
-                  "choiceId": "132.c2xy.0.trace.corp.bid.133",
+                  "choiceId": "133.corp.bid.133",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -39995,10 +40009,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "132.c2xy.0.trace.corp.bid.133",
+                "choiceId": "133.corp.bid.133",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "132.c2xy.0.trace",
+                "traceId": 133,
                 "traceStep": "corp_bid",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
@@ -40027,12 +40041,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "select_option",
-          "choiceId": "132.c2xy.0.trace.base_link.134",
+          "choiceId": "133.base_link.134",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
           "runnerCreditsAfter": 4,
-          "traceId": "132.c2xy.0.trace",
+          "traceId": 133,
           "traceStep": "base_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -40064,7 +40078,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 134,
               "selectedChoices": {
-                "choiceId": "132.c2xy.0.trace.base_link.134",
+                "choiceId": "133.base_link.134",
                 "selectedOptionIds": [
                   "trace_base_link_c15t"
                 ]
@@ -40083,7 +40097,7 @@
               "expiresAtStateVersion": 134,
               "choiceRequirements": [
                 {
-                  "choiceId": "132.c2xy.0.trace.base_link.134",
+                  "choiceId": "133.base_link.134",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -40093,10 +40107,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "132.c2xy.0.trace.base_link.134",
+                "choiceId": "133.base_link.134",
                 "choiceVisibility": "public",
                 "choiceKind": "select_option",
-                "traceId": "132.c2xy.0.trace",
+                "traceId": 133,
                 "traceStep": "base_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -40127,11 +40141,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "132.c2xy.0.trace.runner.bid.135",
+          "choiceId": "133.runner.bid.135",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "132.c2xy.0.trace",
+          "traceId": 133,
           "traceStep": "runner_bid",
           "traceLimit": 3,
           "corpBid": 0,
@@ -40159,7 +40173,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 135,
               "selectedChoices": {
-                "choiceId": "132.c2xy.0.trace.runner.bid.135",
+                "choiceId": "133.runner.bid.135",
                 "selectedOptionIds": [
                   "bid_1"
                 ]
@@ -40178,7 +40192,7 @@
               "expiresAtStateVersion": 135,
               "choiceRequirements": [
                 {
-                  "choiceId": "132.c2xy.0.trace.runner.bid.135",
+                  "choiceId": "133.runner.bid.135",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -40191,12 +40205,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "132.c2xy.0.trace.runner.bid.135",
+                "choiceId": "133.runner.bid.135",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "132.c2xy.0.trace",
+                "traceId": 133,
                 "traceStep": "runner_bid",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -40231,7 +40245,7 @@
           "runnerCreditsAfter": 4,
           "tagsAdded": 0,
           "gainedCredits": 1,
-          "traceId": "132.c2xy.0.trace",
+          "traceId": 133,
           "traceStep": "post_bid_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -40257,7 +40271,8 @@
           "visibility": {
             "class": "hidden_info_barrier",
             "redactedKind": "choice"
-          }
+          },
+          "traceSourceRunId": 132
         },
         "privatePayload": {
           "runner": {
@@ -40267,7 +40282,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 136,
               "selectedChoices": {
-                "choiceId": "132.c2xy.0.trace.post_bid_link.136",
+                "choiceId": "133.post_bid_link.136",
                 "selectedOptionIds": [
                   "pass"
                 ]
@@ -40286,7 +40301,7 @@
               "expiresAtStateVersion": 136,
               "choiceRequirements": [
                 {
-                  "choiceId": "132.c2xy.0.trace.post_bid_link.136",
+                  "choiceId": "133.post_bid_link.136",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -40296,10 +40311,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "132.c2xy.0.trace.post_bid_link.136",
+                "choiceId": "133.post_bid_link.136",
                 "choiceVisibility": "hidden_info_barrier",
                 "choiceKind": "select_option",
-                "traceId": "132.c2xy.0.trace",
+                "traceId": 133,
                 "traceStep": "post_bid_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -40314,7 +40329,8 @@
                 "traceAvoidRewardCredits": 1,
                 "gainedCredits": 1,
                 "runnerCreditsAfter": 4,
-                "traceAvoidRewardSourceDefinitionIds": "188"
+                "traceAvoidRewardSourceDefinitionIds": "188",
+                "traceSourceRunId": 132
               }
             }
           }
@@ -40523,7 +40539,7 @@
           "label": "Chicago Branch trashen",
           "resolvedEffects": [
             {
-              "effectId": "132.cyh.successful_run.tax",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -40537,7 +40553,7 @@
               "serverLabel": "HQ"
             },
             {
-              "effectId": "132.cyq.successful_run.vienna",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -41250,7 +41266,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -41271,7 +41287,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "151.c2xy.0.trace",
+          "traceId": 152,
           "sourceCardId": "c2xy",
           "sourceDefinitionId": 476,
           "traceLimit": 3,
@@ -41286,7 +41302,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 151
         },
         "privatePayload": {
           "runner": {
@@ -41319,12 +41336,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "151.c2xy.0.trace",
+                "traceId": 152,
                 "sourceCardId": "c2xy",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 4
+                "corpBidMax": 4,
+                "traceSourceRunId": 151
               },
               "resolvedEffects": [
                 {
@@ -41356,11 +41374,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "151.c2xy.0.trace.corp.bid.152",
+          "choiceId": "152.corp.bid.152",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "151.c2xy.0.trace",
+          "traceId": 152,
           "traceStep": "corp_bid",
           "traceLimit": 3,
           "effectiveTraceLimit": 3,
@@ -41389,7 +41407,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 152,
               "selectedChoices": {
-                "choiceId": "151.c2xy.0.trace.corp.bid.152",
+                "choiceId": "152.corp.bid.152",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -41408,7 +41426,7 @@
               "expiresAtStateVersion": 152,
               "choiceRequirements": [
                 {
-                  "choiceId": "151.c2xy.0.trace.corp.bid.152",
+                  "choiceId": "152.corp.bid.152",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -41421,10 +41439,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "151.c2xy.0.trace.corp.bid.152",
+                "choiceId": "152.corp.bid.152",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "151.c2xy.0.trace",
+                "traceId": 152,
                 "traceStep": "corp_bid",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
@@ -41453,12 +41471,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "select_option",
-          "choiceId": "151.c2xy.0.trace.base_link.153",
+          "choiceId": "152.base_link.153",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
           "runnerCreditsAfter": 5,
-          "traceId": "151.c2xy.0.trace",
+          "traceId": 152,
           "traceStep": "base_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -41490,7 +41508,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 153,
               "selectedChoices": {
-                "choiceId": "151.c2xy.0.trace.base_link.153",
+                "choiceId": "152.base_link.153",
                 "selectedOptionIds": [
                   "trace_base_link_c15t"
                 ]
@@ -41509,7 +41527,7 @@
               "expiresAtStateVersion": 153,
               "choiceRequirements": [
                 {
-                  "choiceId": "151.c2xy.0.trace.base_link.153",
+                  "choiceId": "152.base_link.153",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -41519,10 +41537,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "151.c2xy.0.trace.base_link.153",
+                "choiceId": "152.base_link.153",
                 "choiceVisibility": "public",
                 "choiceKind": "select_option",
-                "traceId": "151.c2xy.0.trace",
+                "traceId": 152,
                 "traceStep": "base_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -41553,11 +41571,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "151.c2xy.0.trace.runner.bid.154",
+          "choiceId": "152.runner.bid.154",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "151.c2xy.0.trace",
+          "traceId": 152,
           "traceStep": "runner_bid",
           "traceLimit": 3,
           "corpBid": 0,
@@ -41585,7 +41603,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 154,
               "selectedChoices": {
-                "choiceId": "151.c2xy.0.trace.runner.bid.154",
+                "choiceId": "152.runner.bid.154",
                 "selectedOptionIds": [
                   "bid_1"
                 ]
@@ -41604,7 +41622,7 @@
               "expiresAtStateVersion": 154,
               "choiceRequirements": [
                 {
-                  "choiceId": "151.c2xy.0.trace.runner.bid.154",
+                  "choiceId": "152.runner.bid.154",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -41618,12 +41636,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "151.c2xy.0.trace.runner.bid.154",
+                "choiceId": "152.runner.bid.154",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "151.c2xy.0.trace",
+                "traceId": 152,
                 "traceStep": "runner_bid",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -41658,7 +41676,7 @@
           "runnerCreditsAfter": 5,
           "tagsAdded": 0,
           "gainedCredits": 1,
-          "traceId": "151.c2xy.0.trace",
+          "traceId": 152,
           "traceStep": "post_bid_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -41684,7 +41702,8 @@
           "visibility": {
             "class": "hidden_info_barrier",
             "redactedKind": "choice"
-          }
+          },
+          "traceSourceRunId": 151
         },
         "privatePayload": {
           "runner": {
@@ -41694,7 +41713,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 155,
               "selectedChoices": {
-                "choiceId": "151.c2xy.0.trace.post_bid_link.155",
+                "choiceId": "152.post_bid_link.155",
                 "selectedOptionIds": [
                   "pass"
                 ]
@@ -41713,7 +41732,7 @@
               "expiresAtStateVersion": 155,
               "choiceRequirements": [
                 {
-                  "choiceId": "151.c2xy.0.trace.post_bid_link.155",
+                  "choiceId": "152.post_bid_link.155",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -41723,10 +41742,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "151.c2xy.0.trace.post_bid_link.155",
+                "choiceId": "152.post_bid_link.155",
                 "choiceVisibility": "hidden_info_barrier",
                 "choiceKind": "select_option",
-                "traceId": "151.c2xy.0.trace",
+                "traceId": 152,
                 "traceStep": "post_bid_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -41741,7 +41760,8 @@
                 "traceAvoidRewardCredits": 1,
                 "gainedCredits": 1,
                 "runnerCreditsAfter": 5,
-                "traceAvoidRewardSourceDefinitionIds": "188"
+                "traceAvoidRewardSourceDefinitionIds": "188",
+                "traceSourceRunId": 151
               }
             }
           }
@@ -42011,7 +42031,7 @@
           "label": "Rockerboy Promotion trashen",
           "resolvedEffects": [
             {
-              "effectId": "151.cyh.successful_run.tax",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -42025,7 +42045,7 @@
               "serverLabel": "HQ"
             },
             {
-              "effectId": "151.cyq.successful_run.vienna",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -42209,7 +42229,7 @@
           "label": "Discard wurde abgeschlossen.",
           "resolvedEffects": [
             {
-              "effectId": "corp.start.virus.155",
+              "effectId": 0,
               "kind": "lose_credits",
               "visibility": "public",
               "side": "corp",
@@ -42952,7 +42972,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -42973,7 +42993,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "173.c2xy.0.trace",
+          "traceId": 174,
           "sourceCardId": "c2xy",
           "sourceDefinitionId": 476,
           "traceLimit": 3,
@@ -42988,7 +43008,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 173
         },
         "privatePayload": {
           "runner": {
@@ -43021,12 +43042,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "173.c2xy.0.trace",
+                "traceId": 174,
                 "sourceCardId": "c2xy",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 3
+                "corpBidMax": 3,
+                "traceSourceRunId": 173
               },
               "resolvedEffects": [
                 {
@@ -43058,11 +43080,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "173.c2xy.0.trace.corp.bid.174",
+          "choiceId": "174.corp.bid.174",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "173.c2xy.0.trace",
+          "traceId": 174,
           "traceStep": "corp_bid",
           "traceLimit": 3,
           "effectiveTraceLimit": 3,
@@ -43091,7 +43113,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 174,
               "selectedChoices": {
-                "choiceId": "173.c2xy.0.trace.corp.bid.174",
+                "choiceId": "174.corp.bid.174",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -43110,7 +43132,7 @@
               "expiresAtStateVersion": 174,
               "choiceRequirements": [
                 {
-                  "choiceId": "173.c2xy.0.trace.corp.bid.174",
+                  "choiceId": "174.corp.bid.174",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -43122,10 +43144,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "173.c2xy.0.trace.corp.bid.174",
+                "choiceId": "174.corp.bid.174",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "173.c2xy.0.trace",
+                "traceId": 174,
                 "traceStep": "corp_bid",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
@@ -43154,12 +43176,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "select_option",
-          "choiceId": "173.c2xy.0.trace.base_link.175",
+          "choiceId": "174.base_link.175",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
           "runnerCreditsAfter": 4,
-          "traceId": "173.c2xy.0.trace",
+          "traceId": 174,
           "traceStep": "base_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -43191,7 +43213,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 175,
               "selectedChoices": {
-                "choiceId": "173.c2xy.0.trace.base_link.175",
+                "choiceId": "174.base_link.175",
                 "selectedOptionIds": [
                   "trace_base_link_c15t"
                 ]
@@ -43210,7 +43232,7 @@
               "expiresAtStateVersion": 175,
               "choiceRequirements": [
                 {
-                  "choiceId": "173.c2xy.0.trace.base_link.175",
+                  "choiceId": "174.base_link.175",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -43220,10 +43242,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "173.c2xy.0.trace.base_link.175",
+                "choiceId": "174.base_link.175",
                 "choiceVisibility": "public",
                 "choiceKind": "select_option",
-                "traceId": "173.c2xy.0.trace",
+                "traceId": 174,
                 "traceStep": "base_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -43254,11 +43276,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "173.c2xy.0.trace.runner.bid.176",
+          "choiceId": "174.runner.bid.176",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "173.c2xy.0.trace",
+          "traceId": 174,
           "traceStep": "runner_bid",
           "traceLimit": 3,
           "corpBid": 0,
@@ -43286,7 +43308,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 176,
               "selectedChoices": {
-                "choiceId": "173.c2xy.0.trace.runner.bid.176",
+                "choiceId": "174.runner.bid.176",
                 "selectedOptionIds": [
                   "bid_1"
                 ]
@@ -43305,7 +43327,7 @@
               "expiresAtStateVersion": 176,
               "choiceRequirements": [
                 {
-                  "choiceId": "173.c2xy.0.trace.runner.bid.176",
+                  "choiceId": "174.runner.bid.176",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -43318,12 +43340,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "173.c2xy.0.trace.runner.bid.176",
+                "choiceId": "174.runner.bid.176",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "173.c2xy.0.trace",
+                "traceId": 174,
                 "traceStep": "runner_bid",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -43358,7 +43380,7 @@
           "runnerCreditsAfter": 4,
           "tagsAdded": 0,
           "gainedCredits": 1,
-          "traceId": "173.c2xy.0.trace",
+          "traceId": 174,
           "traceStep": "post_bid_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -43384,7 +43406,8 @@
           "visibility": {
             "class": "hidden_info_barrier",
             "redactedKind": "choice"
-          }
+          },
+          "traceSourceRunId": 173
         },
         "privatePayload": {
           "runner": {
@@ -43394,7 +43417,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 177,
               "selectedChoices": {
-                "choiceId": "173.c2xy.0.trace.post_bid_link.177",
+                "choiceId": "174.post_bid_link.177",
                 "selectedOptionIds": [
                   "pass"
                 ]
@@ -43413,7 +43436,7 @@
               "expiresAtStateVersion": 177,
               "choiceRequirements": [
                 {
-                  "choiceId": "173.c2xy.0.trace.post_bid_link.177",
+                  "choiceId": "174.post_bid_link.177",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -43423,10 +43446,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "173.c2xy.0.trace.post_bid_link.177",
+                "choiceId": "174.post_bid_link.177",
                 "choiceVisibility": "hidden_info_barrier",
                 "choiceKind": "select_option",
-                "traceId": "173.c2xy.0.trace",
+                "traceId": 174,
                 "traceStep": "post_bid_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -43441,7 +43464,8 @@
                 "traceAvoidRewardCredits": 1,
                 "gainedCredits": 1,
                 "runnerCreditsAfter": 4,
-                "traceAvoidRewardSourceDefinitionIds": "188"
+                "traceAvoidRewardSourceDefinitionIds": "188",
+                "traceSourceRunId": 173
               }
             }
           }
@@ -43589,7 +43613,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "173.cyh.successful_run.tax",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -43603,7 +43627,7 @@
               "serverLabel": "HQ"
             },
             {
-              "effectId": "173.cyq.successful_run.vienna",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -44937,7 +44961,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -44958,7 +44982,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "201.c2xy.0.trace",
+          "traceId": 202,
           "sourceCardId": "c2xy",
           "sourceDefinitionId": 476,
           "traceLimit": 3,
@@ -44973,7 +44997,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 201
         },
         "privatePayload": {
           "runner": {
@@ -45006,12 +45031,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "201.c2xy.0.trace",
+                "traceId": 202,
                 "sourceCardId": "c2xy",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 0
+                "corpBidMax": 0,
+                "traceSourceRunId": 201
               },
               "resolvedEffects": [
                 {
@@ -45043,11 +45069,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "201.c2xy.0.trace.corp.bid.202",
+          "choiceId": "202.corp.bid.202",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "201.c2xy.0.trace",
+          "traceId": 202,
           "traceStep": "corp_bid",
           "traceLimit": 3,
           "effectiveTraceLimit": 3,
@@ -45076,7 +45102,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 202,
               "selectedChoices": {
-                "choiceId": "201.c2xy.0.trace.corp.bid.202",
+                "choiceId": "202.corp.bid.202",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -45095,7 +45121,7 @@
               "expiresAtStateVersion": 202,
               "choiceRequirements": [
                 {
-                  "choiceId": "201.c2xy.0.trace.corp.bid.202",
+                  "choiceId": "202.corp.bid.202",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -45104,10 +45130,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "201.c2xy.0.trace.corp.bid.202",
+                "choiceId": "202.corp.bid.202",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "201.c2xy.0.trace",
+                "traceId": 202,
                 "traceStep": "corp_bid",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
@@ -45136,12 +45162,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "select_option",
-          "choiceId": "201.c2xy.0.trace.base_link.203",
+          "choiceId": "202.base_link.203",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
           "runnerCreditsAfter": 7,
-          "traceId": "201.c2xy.0.trace",
+          "traceId": 202,
           "traceStep": "base_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -45173,7 +45199,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 203,
               "selectedChoices": {
-                "choiceId": "201.c2xy.0.trace.base_link.203",
+                "choiceId": "202.base_link.203",
                 "selectedOptionIds": [
                   "trace_base_link_c15t"
                 ]
@@ -45192,7 +45218,7 @@
               "expiresAtStateVersion": 203,
               "choiceRequirements": [
                 {
-                  "choiceId": "201.c2xy.0.trace.base_link.203",
+                  "choiceId": "202.base_link.203",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -45202,10 +45228,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "201.c2xy.0.trace.base_link.203",
+                "choiceId": "202.base_link.203",
                 "choiceVisibility": "public",
                 "choiceKind": "select_option",
-                "traceId": "201.c2xy.0.trace",
+                "traceId": 202,
                 "traceStep": "base_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -45236,11 +45262,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "201.c2xy.0.trace.runner.bid.204",
+          "choiceId": "202.runner.bid.204",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "201.c2xy.0.trace",
+          "traceId": 202,
           "traceStep": "runner_bid",
           "traceLimit": 3,
           "corpBid": 0,
@@ -45268,7 +45294,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 204,
               "selectedChoices": {
-                "choiceId": "201.c2xy.0.trace.runner.bid.204",
+                "choiceId": "202.runner.bid.204",
                 "selectedOptionIds": [
                   "bid_1"
                 ]
@@ -45287,7 +45313,7 @@
               "expiresAtStateVersion": 204,
               "choiceRequirements": [
                 {
-                  "choiceId": "201.c2xy.0.trace.runner.bid.204",
+                  "choiceId": "202.runner.bid.204",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -45303,12 +45329,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "201.c2xy.0.trace.runner.bid.204",
+                "choiceId": "202.runner.bid.204",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "201.c2xy.0.trace",
+                "traceId": 202,
                 "traceStep": "runner_bid",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -45343,7 +45369,7 @@
           "runnerCreditsAfter": 7,
           "tagsAdded": 0,
           "gainedCredits": 1,
-          "traceId": "201.c2xy.0.trace",
+          "traceId": 202,
           "traceStep": "post_bid_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -45369,7 +45395,8 @@
           "visibility": {
             "class": "hidden_info_barrier",
             "redactedKind": "choice"
-          }
+          },
+          "traceSourceRunId": 201
         },
         "privatePayload": {
           "runner": {
@@ -45379,7 +45406,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 205,
               "selectedChoices": {
-                "choiceId": "201.c2xy.0.trace.post_bid_link.205",
+                "choiceId": "202.post_bid_link.205",
                 "selectedOptionIds": [
                   "pass"
                 ]
@@ -45398,7 +45425,7 @@
               "expiresAtStateVersion": 205,
               "choiceRequirements": [
                 {
-                  "choiceId": "201.c2xy.0.trace.post_bid_link.205",
+                  "choiceId": "202.post_bid_link.205",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -45408,10 +45435,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "201.c2xy.0.trace.post_bid_link.205",
+                "choiceId": "202.post_bid_link.205",
                 "choiceVisibility": "hidden_info_barrier",
                 "choiceKind": "select_option",
-                "traceId": "201.c2xy.0.trace",
+                "traceId": 202,
                 "traceStep": "post_bid_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -45426,7 +45453,8 @@
                 "traceAvoidRewardCredits": 1,
                 "gainedCredits": 1,
                 "runnerCreditsAfter": 7,
-                "traceAvoidRewardSourceDefinitionIds": "188"
+                "traceAvoidRewardSourceDefinitionIds": "188",
+                "traceSourceRunId": 201
               }
             }
           }
@@ -45635,7 +45663,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "201.cyh.successful_run.tax",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -45649,7 +45677,7 @@
               "serverLabel": "HQ"
             },
             {
-              "effectId": "201.cyq.successful_run.vienna",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -46711,7 +46739,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -46732,7 +46760,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "224.c2xy.0.trace",
+          "traceId": 225,
           "sourceCardId": "c2xy",
           "sourceDefinitionId": 476,
           "traceLimit": 3,
@@ -46747,7 +46775,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 224
         },
         "privatePayload": {
           "runner": {
@@ -46780,12 +46809,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "224.c2xy.0.trace",
+                "traceId": 225,
                 "sourceCardId": "c2xy",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 0
+                "corpBidMax": 0,
+                "traceSourceRunId": 224
               },
               "resolvedEffects": [
                 {
@@ -46817,11 +46847,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "224.c2xy.0.trace.corp.bid.225",
+          "choiceId": "225.corp.bid.225",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "224.c2xy.0.trace",
+          "traceId": 225,
           "traceStep": "corp_bid",
           "traceLimit": 3,
           "effectiveTraceLimit": 3,
@@ -46850,7 +46880,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 225,
               "selectedChoices": {
-                "choiceId": "224.c2xy.0.trace.corp.bid.225",
+                "choiceId": "225.corp.bid.225",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -46869,7 +46899,7 @@
               "expiresAtStateVersion": 225,
               "choiceRequirements": [
                 {
-                  "choiceId": "224.c2xy.0.trace.corp.bid.225",
+                  "choiceId": "225.corp.bid.225",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -46878,10 +46908,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "224.c2xy.0.trace.corp.bid.225",
+                "choiceId": "225.corp.bid.225",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "224.c2xy.0.trace",
+                "traceId": 225,
                 "traceStep": "corp_bid",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
@@ -46910,12 +46940,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "select_option",
-          "choiceId": "224.c2xy.0.trace.base_link.226",
+          "choiceId": "225.base_link.226",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
           "runnerCreditsAfter": 9,
-          "traceId": "224.c2xy.0.trace",
+          "traceId": 225,
           "traceStep": "base_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -46947,7 +46977,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 226,
               "selectedChoices": {
-                "choiceId": "224.c2xy.0.trace.base_link.226",
+                "choiceId": "225.base_link.226",
                 "selectedOptionIds": [
                   "trace_base_link_c15t"
                 ]
@@ -46966,7 +46996,7 @@
               "expiresAtStateVersion": 226,
               "choiceRequirements": [
                 {
-                  "choiceId": "224.c2xy.0.trace.base_link.226",
+                  "choiceId": "225.base_link.226",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -46976,10 +47006,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "224.c2xy.0.trace.base_link.226",
+                "choiceId": "225.base_link.226",
                 "choiceVisibility": "public",
                 "choiceKind": "select_option",
-                "traceId": "224.c2xy.0.trace",
+                "traceId": 225,
                 "traceStep": "base_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -47010,11 +47040,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "224.c2xy.0.trace.runner.bid.227",
+          "choiceId": "225.runner.bid.227",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "224.c2xy.0.trace",
+          "traceId": 225,
           "traceStep": "runner_bid",
           "traceLimit": 3,
           "corpBid": 0,
@@ -47042,7 +47072,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 227,
               "selectedChoices": {
-                "choiceId": "224.c2xy.0.trace.runner.bid.227",
+                "choiceId": "225.runner.bid.227",
                 "selectedOptionIds": [
                   "bid_1"
                 ]
@@ -47061,7 +47091,7 @@
               "expiresAtStateVersion": 227,
               "choiceRequirements": [
                 {
-                  "choiceId": "224.c2xy.0.trace.runner.bid.227",
+                  "choiceId": "225.runner.bid.227",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -47079,12 +47109,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "224.c2xy.0.trace.runner.bid.227",
+                "choiceId": "225.runner.bid.227",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "224.c2xy.0.trace",
+                "traceId": 225,
                 "traceStep": "runner_bid",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -47119,7 +47149,7 @@
           "runnerCreditsAfter": 9,
           "tagsAdded": 0,
           "gainedCredits": 1,
-          "traceId": "224.c2xy.0.trace",
+          "traceId": 225,
           "traceStep": "post_bid_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -47145,7 +47175,8 @@
           "visibility": {
             "class": "hidden_info_barrier",
             "redactedKind": "choice"
-          }
+          },
+          "traceSourceRunId": 224
         },
         "privatePayload": {
           "runner": {
@@ -47155,7 +47186,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 228,
               "selectedChoices": {
-                "choiceId": "224.c2xy.0.trace.post_bid_link.228",
+                "choiceId": "225.post_bid_link.228",
                 "selectedOptionIds": [
                   "pass"
                 ]
@@ -47174,7 +47205,7 @@
               "expiresAtStateVersion": 228,
               "choiceRequirements": [
                 {
-                  "choiceId": "224.c2xy.0.trace.post_bid_link.228",
+                  "choiceId": "225.post_bid_link.228",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -47184,10 +47215,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "224.c2xy.0.trace.post_bid_link.228",
+                "choiceId": "225.post_bid_link.228",
                 "choiceVisibility": "hidden_info_barrier",
                 "choiceKind": "select_option",
-                "traceId": "224.c2xy.0.trace",
+                "traceId": 225,
                 "traceStep": "post_bid_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -47202,7 +47233,8 @@
                 "traceAvoidRewardCredits": 1,
                 "gainedCredits": 1,
                 "runnerCreditsAfter": 9,
-                "traceAvoidRewardSourceDefinitionIds": "188"
+                "traceAvoidRewardSourceDefinitionIds": "188",
+                "traceSourceRunId": 224
               }
             }
           }
@@ -47350,7 +47382,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "224.cyh.successful_run.tax",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -47364,7 +47396,7 @@
               "serverLabel": "HQ"
             },
             {
-              "effectId": "224.cyq.successful_run.vienna",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -48562,7 +48594,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -48583,7 +48615,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "246.c2xy.0.trace",
+          "traceId": 248,
           "sourceCardId": "c2xy",
           "sourceDefinitionId": 476,
           "traceLimit": 3,
@@ -48598,7 +48630,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 246
         },
         "privatePayload": {
           "runner": {
@@ -48631,12 +48664,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "246.c2xy.0.trace",
+                "traceId": 248,
                 "sourceCardId": "c2xy",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 0
+                "corpBidMax": 0,
+                "traceSourceRunId": 246
               },
               "resolvedEffects": [
                 {
@@ -48668,11 +48702,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "246.c2xy.0.trace.corp.bid.248",
+          "choiceId": "248.corp.bid.248",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "246.c2xy.0.trace",
+          "traceId": 248,
           "traceStep": "corp_bid",
           "traceLimit": 3,
           "effectiveTraceLimit": 3,
@@ -48701,7 +48735,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 248,
               "selectedChoices": {
-                "choiceId": "246.c2xy.0.trace.corp.bid.248",
+                "choiceId": "248.corp.bid.248",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -48720,7 +48754,7 @@
               "expiresAtStateVersion": 248,
               "choiceRequirements": [
                 {
-                  "choiceId": "246.c2xy.0.trace.corp.bid.248",
+                  "choiceId": "248.corp.bid.248",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -48729,10 +48763,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "246.c2xy.0.trace.corp.bid.248",
+                "choiceId": "248.corp.bid.248",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "246.c2xy.0.trace",
+                "traceId": 248,
                 "traceStep": "corp_bid",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
@@ -48761,12 +48795,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "select_option",
-          "choiceId": "246.c2xy.0.trace.base_link.249",
+          "choiceId": "248.base_link.249",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
           "runnerCreditsAfter": 5,
-          "traceId": "246.c2xy.0.trace",
+          "traceId": 248,
           "traceStep": "base_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -48798,7 +48832,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 249,
               "selectedChoices": {
-                "choiceId": "246.c2xy.0.trace.base_link.249",
+                "choiceId": "248.base_link.249",
                 "selectedOptionIds": [
                   "trace_base_link_c15t"
                 ]
@@ -48817,7 +48851,7 @@
               "expiresAtStateVersion": 249,
               "choiceRequirements": [
                 {
-                  "choiceId": "246.c2xy.0.trace.base_link.249",
+                  "choiceId": "248.base_link.249",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -48827,10 +48861,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "246.c2xy.0.trace.base_link.249",
+                "choiceId": "248.base_link.249",
                 "choiceVisibility": "public",
                 "choiceKind": "select_option",
-                "traceId": "246.c2xy.0.trace",
+                "traceId": 248,
                 "traceStep": "base_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -48861,11 +48895,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "246.c2xy.0.trace.runner.bid.250",
+          "choiceId": "248.runner.bid.250",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "246.c2xy.0.trace",
+          "traceId": 248,
           "traceStep": "runner_bid",
           "traceLimit": 3,
           "corpBid": 0,
@@ -48893,7 +48927,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 250,
               "selectedChoices": {
-                "choiceId": "246.c2xy.0.trace.runner.bid.250",
+                "choiceId": "248.runner.bid.250",
                 "selectedOptionIds": [
                   "bid_1"
                 ]
@@ -48912,7 +48946,7 @@
               "expiresAtStateVersion": 250,
               "choiceRequirements": [
                 {
-                  "choiceId": "246.c2xy.0.trace.runner.bid.250",
+                  "choiceId": "248.runner.bid.250",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -48926,12 +48960,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "246.c2xy.0.trace.runner.bid.250",
+                "choiceId": "248.runner.bid.250",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "246.c2xy.0.trace",
+                "traceId": 248,
                 "traceStep": "runner_bid",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -48966,7 +49000,7 @@
           "runnerCreditsAfter": 5,
           "tagsAdded": 0,
           "gainedCredits": 1,
-          "traceId": "246.c2xy.0.trace",
+          "traceId": 248,
           "traceStep": "post_bid_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -48992,7 +49026,8 @@
           "visibility": {
             "class": "hidden_info_barrier",
             "redactedKind": "choice"
-          }
+          },
+          "traceSourceRunId": 246
         },
         "privatePayload": {
           "runner": {
@@ -49002,7 +49037,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 251,
               "selectedChoices": {
-                "choiceId": "246.c2xy.0.trace.post_bid_link.251",
+                "choiceId": "248.post_bid_link.251",
                 "selectedOptionIds": [
                   "pass"
                 ]
@@ -49021,7 +49056,7 @@
               "expiresAtStateVersion": 251,
               "choiceRequirements": [
                 {
-                  "choiceId": "246.c2xy.0.trace.post_bid_link.251",
+                  "choiceId": "248.post_bid_link.251",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -49031,10 +49066,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "246.c2xy.0.trace.post_bid_link.251",
+                "choiceId": "248.post_bid_link.251",
                 "choiceVisibility": "hidden_info_barrier",
                 "choiceKind": "select_option",
-                "traceId": "246.c2xy.0.trace",
+                "traceId": 248,
                 "traceStep": "post_bid_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -49049,7 +49084,8 @@
                 "traceAvoidRewardCredits": 1,
                 "gainedCredits": 1,
                 "runnerCreditsAfter": 5,
-                "traceAvoidRewardSourceDefinitionIds": "188"
+                "traceAvoidRewardSourceDefinitionIds": "188",
+                "traceSourceRunId": 246
               }
             }
           }
@@ -49244,7 +49280,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "246.cyh.successful_run.tax",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -49258,7 +49294,7 @@
               "serverLabel": "HQ"
             },
             {
-              "effectId": "246.cyq.successful_run.vienna",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -50882,7 +50918,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "272.cyh.successful_run.tax",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -50896,7 +50932,7 @@
               "serverLabel": "HQ"
             },
             {
-              "effectId": "272.cyq.successful_run.vienna",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -51889,7 +51925,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -51910,7 +51946,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "293.c2xy.0.trace",
+          "traceId": 294,
           "sourceCardId": "c2xy",
           "sourceDefinitionId": 476,
           "traceLimit": 3,
@@ -51925,7 +51961,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 293
         },
         "privatePayload": {
           "runner": {
@@ -51958,12 +51995,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "293.c2xy.0.trace",
+                "traceId": 294,
                 "sourceCardId": "c2xy",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 2
+                "corpBidMax": 2,
+                "traceSourceRunId": 293
               },
               "resolvedEffects": [
                 {
@@ -51995,11 +52033,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "293.c2xy.0.trace.corp.bid.294",
+          "choiceId": "294.corp.bid.294",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "293.c2xy.0.trace",
+          "traceId": 294,
           "traceStep": "corp_bid",
           "traceLimit": 3,
           "effectiveTraceLimit": 3,
@@ -52028,7 +52066,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 294,
               "selectedChoices": {
-                "choiceId": "293.c2xy.0.trace.corp.bid.294",
+                "choiceId": "294.corp.bid.294",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -52047,7 +52085,7 @@
               "expiresAtStateVersion": 294,
               "choiceRequirements": [
                 {
-                  "choiceId": "293.c2xy.0.trace.corp.bid.294",
+                  "choiceId": "294.corp.bid.294",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -52058,10 +52096,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "293.c2xy.0.trace.corp.bid.294",
+                "choiceId": "294.corp.bid.294",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "293.c2xy.0.trace",
+                "traceId": 294,
                 "traceStep": "corp_bid",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
@@ -52090,12 +52128,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "select_option",
-          "choiceId": "293.c2xy.0.trace.base_link.295",
+          "choiceId": "294.base_link.295",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
           "runnerCreditsAfter": 5,
-          "traceId": "293.c2xy.0.trace",
+          "traceId": 294,
           "traceStep": "base_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -52127,7 +52165,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 295,
               "selectedChoices": {
-                "choiceId": "293.c2xy.0.trace.base_link.295",
+                "choiceId": "294.base_link.295",
                 "selectedOptionIds": [
                   "trace_base_link_c15t"
                 ]
@@ -52146,7 +52184,7 @@
               "expiresAtStateVersion": 295,
               "choiceRequirements": [
                 {
-                  "choiceId": "293.c2xy.0.trace.base_link.295",
+                  "choiceId": "294.base_link.295",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -52156,10 +52194,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "293.c2xy.0.trace.base_link.295",
+                "choiceId": "294.base_link.295",
                 "choiceVisibility": "public",
                 "choiceKind": "select_option",
-                "traceId": "293.c2xy.0.trace",
+                "traceId": 294,
                 "traceStep": "base_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -52190,11 +52228,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "293.c2xy.0.trace.runner.bid.296",
+          "choiceId": "294.runner.bid.296",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "293.c2xy.0.trace",
+          "traceId": 294,
           "traceStep": "runner_bid",
           "traceLimit": 3,
           "corpBid": 0,
@@ -52222,7 +52260,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 296,
               "selectedChoices": {
-                "choiceId": "293.c2xy.0.trace.runner.bid.296",
+                "choiceId": "294.runner.bid.296",
                 "selectedOptionIds": [
                   "bid_1"
                 ]
@@ -52241,7 +52279,7 @@
               "expiresAtStateVersion": 296,
               "choiceRequirements": [
                 {
-                  "choiceId": "293.c2xy.0.trace.runner.bid.296",
+                  "choiceId": "294.runner.bid.296",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -52255,12 +52293,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "293.c2xy.0.trace.runner.bid.296",
+                "choiceId": "294.runner.bid.296",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "293.c2xy.0.trace",
+                "traceId": 294,
                 "traceStep": "runner_bid",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -52295,7 +52333,7 @@
           "runnerCreditsAfter": 5,
           "tagsAdded": 0,
           "gainedCredits": 1,
-          "traceId": "293.c2xy.0.trace",
+          "traceId": 294,
           "traceStep": "post_bid_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -52321,7 +52359,8 @@
           "visibility": {
             "class": "hidden_info_barrier",
             "redactedKind": "choice"
-          }
+          },
+          "traceSourceRunId": 293
         },
         "privatePayload": {
           "runner": {
@@ -52331,7 +52370,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 297,
               "selectedChoices": {
-                "choiceId": "293.c2xy.0.trace.post_bid_link.297",
+                "choiceId": "294.post_bid_link.297",
                 "selectedOptionIds": [
                   "pass"
                 ]
@@ -52350,7 +52389,7 @@
               "expiresAtStateVersion": 297,
               "choiceRequirements": [
                 {
-                  "choiceId": "293.c2xy.0.trace.post_bid_link.297",
+                  "choiceId": "294.post_bid_link.297",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -52360,10 +52399,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "293.c2xy.0.trace.post_bid_link.297",
+                "choiceId": "294.post_bid_link.297",
                 "choiceVisibility": "hidden_info_barrier",
                 "choiceKind": "select_option",
-                "traceId": "293.c2xy.0.trace",
+                "traceId": 294,
                 "traceStep": "post_bid_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -52378,7 +52417,8 @@
                 "traceAvoidRewardCredits": 1,
                 "gainedCredits": 1,
                 "runnerCreditsAfter": 5,
-                "traceAvoidRewardSourceDefinitionIds": "188"
+                "traceAvoidRewardSourceDefinitionIds": "188",
+                "traceSourceRunId": 293
               }
             }
           }
@@ -52643,7 +52683,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "293.cyh.successful_run.tax",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -52657,7 +52697,7 @@
               "serverLabel": "HQ"
             },
             {
-              "effectId": "293.cyq.successful_run.vienna",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -52870,7 +52910,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -52891,7 +52931,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "304.c2xy.0.trace",
+          "traceId": 305,
           "sourceCardId": "c2xy",
           "sourceDefinitionId": 476,
           "traceLimit": 3,
@@ -52906,7 +52946,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 304
         },
         "privatePayload": {
           "runner": {
@@ -52939,12 +52980,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "304.c2xy.0.trace",
+                "traceId": 305,
                 "sourceCardId": "c2xy",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 2
+                "corpBidMax": 2,
+                "traceSourceRunId": 304
               },
               "resolvedEffects": [
                 {
@@ -52976,11 +53018,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "304.c2xy.0.trace.corp.bid.305",
+          "choiceId": "305.corp.bid.305",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "304.c2xy.0.trace",
+          "traceId": 305,
           "traceStep": "corp_bid",
           "traceLimit": 3,
           "effectiveTraceLimit": 3,
@@ -53009,7 +53051,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 305,
               "selectedChoices": {
-                "choiceId": "304.c2xy.0.trace.corp.bid.305",
+                "choiceId": "305.corp.bid.305",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -53028,7 +53070,7 @@
               "expiresAtStateVersion": 305,
               "choiceRequirements": [
                 {
-                  "choiceId": "304.c2xy.0.trace.corp.bid.305",
+                  "choiceId": "305.corp.bid.305",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -53039,10 +53081,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "304.c2xy.0.trace.corp.bid.305",
+                "choiceId": "305.corp.bid.305",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "304.c2xy.0.trace",
+                "traceId": 305,
                 "traceStep": "corp_bid",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
@@ -53071,12 +53113,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "select_option",
-          "choiceId": "304.c2xy.0.trace.base_link.306",
+          "choiceId": "305.base_link.306",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
           "runnerCreditsAfter": 5,
-          "traceId": "304.c2xy.0.trace",
+          "traceId": 305,
           "traceStep": "base_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -53108,7 +53150,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 306,
               "selectedChoices": {
-                "choiceId": "304.c2xy.0.trace.base_link.306",
+                "choiceId": "305.base_link.306",
                 "selectedOptionIds": [
                   "trace_base_link_c15t"
                 ]
@@ -53127,7 +53169,7 @@
               "expiresAtStateVersion": 306,
               "choiceRequirements": [
                 {
-                  "choiceId": "304.c2xy.0.trace.base_link.306",
+                  "choiceId": "305.base_link.306",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -53137,10 +53179,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "304.c2xy.0.trace.base_link.306",
+                "choiceId": "305.base_link.306",
                 "choiceVisibility": "public",
                 "choiceKind": "select_option",
-                "traceId": "304.c2xy.0.trace",
+                "traceId": 305,
                 "traceStep": "base_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -53171,11 +53213,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "304.c2xy.0.trace.runner.bid.307",
+          "choiceId": "305.runner.bid.307",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "304.c2xy.0.trace",
+          "traceId": 305,
           "traceStep": "runner_bid",
           "traceLimit": 3,
           "corpBid": 0,
@@ -53203,7 +53245,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 307,
               "selectedChoices": {
-                "choiceId": "304.c2xy.0.trace.runner.bid.307",
+                "choiceId": "305.runner.bid.307",
                 "selectedOptionIds": [
                   "bid_1"
                 ]
@@ -53222,7 +53264,7 @@
               "expiresAtStateVersion": 307,
               "choiceRequirements": [
                 {
-                  "choiceId": "304.c2xy.0.trace.runner.bid.307",
+                  "choiceId": "305.runner.bid.307",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -53236,12 +53278,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "304.c2xy.0.trace.runner.bid.307",
+                "choiceId": "305.runner.bid.307",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "304.c2xy.0.trace",
+                "traceId": 305,
                 "traceStep": "runner_bid",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -53276,7 +53318,7 @@
           "runnerCreditsAfter": 5,
           "tagsAdded": 0,
           "gainedCredits": 1,
-          "traceId": "304.c2xy.0.trace",
+          "traceId": 305,
           "traceStep": "post_bid_link",
           "traceLimit": 3,
           "corpBid": 0,
@@ -53302,7 +53344,8 @@
           "visibility": {
             "class": "hidden_info_barrier",
             "redactedKind": "choice"
-          }
+          },
+          "traceSourceRunId": 304
         },
         "privatePayload": {
           "runner": {
@@ -53312,7 +53355,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 308,
               "selectedChoices": {
-                "choiceId": "304.c2xy.0.trace.post_bid_link.308",
+                "choiceId": "305.post_bid_link.308",
                 "selectedOptionIds": [
                   "pass"
                 ]
@@ -53331,7 +53374,7 @@
               "expiresAtStateVersion": 308,
               "choiceRequirements": [
                 {
-                  "choiceId": "304.c2xy.0.trace.post_bid_link.308",
+                  "choiceId": "305.post_bid_link.308",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -53341,10 +53384,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "304.c2xy.0.trace.post_bid_link.308",
+                "choiceId": "305.post_bid_link.308",
                 "choiceVisibility": "hidden_info_barrier",
                 "choiceKind": "select_option",
-                "traceId": "304.c2xy.0.trace",
+                "traceId": 305,
                 "traceStep": "post_bid_link",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -53359,7 +53402,8 @@
                 "traceAvoidRewardCredits": 1,
                 "gainedCredits": 1,
                 "runnerCreditsAfter": 5,
-                "traceAvoidRewardSourceDefinitionIds": "188"
+                "traceAvoidRewardSourceDefinitionIds": "188",
+                "traceSourceRunId": 304
               }
             }
           }
@@ -53629,7 +53673,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "304.cyh.successful_run.tax",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -53643,7 +53687,7 @@
               "serverLabel": "HQ"
             },
             {
-              "effectId": "304.cyq.successful_run.vienna",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -53782,7 +53826,7 @@
           "label": "Zug beenden",
           "resolvedEffects": [
             {
-              "effectId": "corp.start.virus.155",
+              "effectId": 0,
               "kind": "lose_credits",
               "visibility": "public",
               "side": "corp",
@@ -55434,7 +55478,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -57523,7 +57567,7 @@
           "label": "Korp Pflichtkarte ziehen",
           "resolvedEffects": [
             {
-              "effectId": "corp.start.scored_agenda.optional_draw.c2jh",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -58330,7 +58374,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "507.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -58340,7 +58384,7 @@
               "sourceTitle": "Night Shift"
             },
             {
-              "effectId": "507.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -59158,7 +59202,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "507.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -59168,7 +59212,7 @@
               "sourceTitle": "Night Shift"
             },
             {
-              "effectId": "507.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -60979,7 +61023,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -64532,7 +64576,7 @@
           "label": "Karte in Remote 4 rezzen",
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -64752,7 +64796,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -71051,7 +71095,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "558.c3g5.access_effect.0.damage_from_source_advancement_counters",
+              "effectId": 0,
               "kind": "damage",
               "visibility": "hidden_info_barrier",
               "side": "runner",

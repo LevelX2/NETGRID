@@ -71,7 +71,7 @@ it("finishes the already bound native pump payment under its original run owner"
   expect(plan.executionOrigin).toMatchObject({
     rootPlanInstanceId: plan.rootPlanInstanceId,
     leafPlanInstanceId: plan.leafExecutorInstanceId,
-    windowId: "runner_cost_penalty_support.108",
+    windowId: "108",
     stateVersion: 108,
   });
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);

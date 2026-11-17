@@ -9058,7 +9058,7 @@ describe("formatChronicleEvent", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
-        traceId: "trace_hidden",
+        traceId: 1,
         traceStep: "corp_bid",
         traceRulesProfile: "classic_blind",
         traceBidsRevealed: false,

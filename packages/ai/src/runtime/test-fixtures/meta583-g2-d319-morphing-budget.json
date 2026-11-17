@@ -1502,7 +1502,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "502.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -1689,7 +1689,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -1928,7 +1928,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -2023,7 +2023,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -2215,7 +2215,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "415.score.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -2441,7 +2441,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "502.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -3001,7 +3001,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -3060,7 +3060,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -3119,7 +3119,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -3334,7 +3334,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -3393,7 +3393,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -3452,7 +3452,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -3513,7 +3513,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "161.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -3523,7 +3523,7 @@
                   "sourceTitle": "Cruising for Netwatch"
                 },
                 {
-                  "effectId": "161.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "runner",
@@ -3723,7 +3723,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "80.cwy.successful_run.highlighter",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -3827,7 +3827,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -3886,7 +3886,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -3945,7 +3945,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -3958,7 +3958,7 @@
                   "sourceTitle": "BBS Whispering Campaign"
                 },
                 {
-                  "effectId": "521.effect.1.trash_source_when_empty",
+                  "effectId": 1,
                   "kind": "trash_source_when_empty",
                   "visibility": "public",
                   "side": "corp",
@@ -4221,7 +4221,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "94.cwy.successful_run.highlighter",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -4638,7 +4638,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "493.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -4839,7 +4839,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "493.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -5834,7 +5834,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "507.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -5844,7 +5844,7 @@
                   "sourceTitle": "Night Shift"
                 },
                 {
-                  "effectId": "507.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -6022,7 +6022,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "182.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -6032,7 +6032,7 @@
                   "sourceTitle": "Stakeout"
                 },
                 {
-                  "effectId": "182.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "runner",
@@ -6211,7 +6211,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "320.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -7293,7 +7293,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "494.effect.0.draw_cards",
+                  "effectId": 0,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -8445,7 +8445,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "493.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -8524,7 +8524,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "161.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -8534,7 +8534,7 @@
                   "sourceTitle": "Cruising for Netwatch"
                 },
                 {
-                  "effectId": "161.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "runner",
@@ -8721,7 +8721,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "507.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -8731,7 +8731,7 @@
                   "sourceTitle": "Night Shift"
                 },
                 {
-                  "effectId": "507.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -9210,7 +9210,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "320.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -9717,7 +9717,7 @@
               "abilityFamily": "run-access",
               "effectKind": "trace",
               "traceStarted": true,
-              "traceId": "312.c2un.0.trace",
+              "traceId": 314,
               "traceLimit": 5,
               "effectiveTraceLimit": 5,
               "targets": {
@@ -9729,7 +9729,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -9737,7 +9737,8 @@
                   "sourceDefinitionId": 461,
                   "sourceTitle": "Hunter"
                 }
-              ]
+              ],
+              "traceSourceRunId": 312
             }
           },
           {
@@ -9755,8 +9756,8 @@
               "sourceDefinitionId": 461,
               "abilityFamily": "trace-tags",
               "effectKind": "trace",
-              "traceId": "312.c2un.0.trace",
-              "choiceId": "312.c2un.0.trace.corp.bid.314",
+              "traceId": 314,
+              "choiceId": "314.corp.bid.314",
               "traceStep": "corp_bid",
               "corpBid": 0,
               "traceLimit": 5,
@@ -9787,9 +9788,9 @@
               "sourceDefinitionId": 461,
               "abilityFamily": "trace-tags",
               "effectKind": "trace",
-              "traceId": "312.c2un.0.trace",
+              "traceId": 314,
               "traceSuccessful": false,
-              "choiceId": "312.c2un.0.trace.runner.bid.315",
+              "choiceId": "314.runner.bid.315",
               "traceStep": "runner_bid",
               "corpBid": 0,
               "traceLimit": 5,
@@ -9805,7 +9806,8 @@
               },
               "visibility": {
                 "class": "public"
-              }
+              },
+              "traceSourceRunId": 312
             }
           },
           {
@@ -11049,7 +11051,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -11128,7 +11130,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "161.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -11138,7 +11140,7 @@
                 "sourceTitle": "Cruising for Netwatch"
               },
               {
-                "effectId": "161.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -11325,7 +11327,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -11335,7 +11337,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -11814,7 +11816,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -12321,7 +12323,7 @@
             "abilityFamily": "run-access",
             "effectKind": "trace",
             "traceStarted": true,
-            "traceId": "312.c2un.0.trace",
+            "traceId": 314,
             "traceLimit": 5,
             "effectiveTraceLimit": 5,
             "targets": {
@@ -12333,7 +12335,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -12341,7 +12343,8 @@
                 "sourceDefinitionId": 461,
                 "sourceTitle": "Hunter"
               }
-            ]
+            ],
+            "traceSourceRunId": 312
           }
         },
         {
@@ -12359,8 +12362,8 @@
             "sourceDefinitionId": 461,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "312.c2un.0.trace",
-            "choiceId": "312.c2un.0.trace.corp.bid.314",
+            "traceId": 314,
+            "choiceId": "314.corp.bid.314",
             "traceStep": "corp_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -12391,9 +12394,9 @@
             "sourceDefinitionId": 461,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "312.c2un.0.trace",
+            "traceId": 314,
             "traceSuccessful": false,
-            "choiceId": "312.c2un.0.trace.runner.bid.315",
+            "choiceId": "314.runner.bid.315",
             "traceStep": "runner_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -12409,7 +12412,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 312
           }
         },
         {
@@ -12962,7 +12966,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 318,
-        "sideSafePlanningFingerprint": "fnv1a:386a3b8e"
+        "sideSafePlanningFingerprint": "fnv1a:e0fa23c7"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",
@@ -23560,7 +23564,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -24014,7 +24018,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -24582,7 +24586,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -24803,7 +24807,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -25230,7 +25234,7 @@
           "label": "Agenda in Remote 1 scoren",
           "resolvedEffects": [
             {
-              "effectId": "415.score.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -25769,7 +25773,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -27047,7 +27051,7 @@
           "label": "Karte in Remote 1 rezzen",
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -27185,7 +27189,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -27350,7 +27354,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -27903,7 +27907,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -28068,7 +28072,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -28233,7 +28237,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -28437,7 +28441,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "161.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -28447,7 +28451,7 @@
               "sourceTitle": "Cruising for Netwatch"
             },
             {
-              "effectId": "161.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -28961,7 +28965,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "80.cwy.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -29178,7 +29182,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -29343,7 +29347,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -29508,7 +29512,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -29521,7 +29525,7 @@
               "sourceTitle": "BBS Whispering Campaign"
             },
             {
-              "effectId": "521.effect.1.trash_source_when_empty",
+              "effectId": 1,
               "kind": "trash_source_when_empty",
               "visibility": "public",
               "side": "corp",
@@ -30259,7 +30263,7 @@
           "label": "Bioweapons Engineering stehlen",
           "resolvedEffects": [
             {
-              "effectId": "94.cwy.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -31475,7 +31479,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -31959,7 +31963,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -34451,7 +34455,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "507.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -34461,7 +34465,7 @@
               "sourceTitle": "Night Shift"
             },
             {
-              "effectId": "507.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -34921,7 +34925,7 @@
           "turnActionOrdinalEnd": 4,
           "resolvedEffects": [
             {
-              "effectId": "182.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -34931,7 +34935,7 @@
               "sourceTitle": "Stakeout"
             },
             {
-              "effectId": "182.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -35402,7 +35406,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -38367,7 +38371,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "494.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -41178,7 +41182,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -41373,7 +41377,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "161.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -41383,7 +41387,7 @@
               "sourceTitle": "Cruising for Netwatch"
             },
             {
-              "effectId": "161.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -41858,7 +41862,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "507.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -41868,7 +41872,7 @@
               "sourceTitle": "Night Shift"
             },
             {
-              "effectId": "507.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -43067,7 +43071,7 @@
           "turnActionOrdinalEnd": 4,
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -44319,7 +44323,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -44340,7 +44344,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "312.c2un.0.trace",
+          "traceId": 314,
           "sourceCardId": "c2un",
           "sourceDefinitionId": 461,
           "traceLimit": 5,
@@ -44355,7 +44359,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 312
         },
         "privatePayload": {
           "runner": {
@@ -44388,12 +44393,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "312.c2un.0.trace",
+                "traceId": 314,
                 "sourceCardId": "c2un",
                 "traceLimit": 5,
                 "effectiveTraceLimit": 5,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 2
+                "corpBidMax": 2,
+                "traceSourceRunId": 312
               },
               "resolvedEffects": [
                 {
@@ -44425,11 +44431,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "312.c2un.0.trace.corp.bid.314",
+          "choiceId": "314.corp.bid.314",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 461,
-          "traceId": "312.c2un.0.trace",
+          "traceId": 314,
           "traceStep": "corp_bid",
           "traceLimit": 5,
           "effectiveTraceLimit": 5,
@@ -44458,7 +44464,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 314,
               "selectedChoices": {
-                "choiceId": "312.c2un.0.trace.corp.bid.314",
+                "choiceId": "314.corp.bid.314",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -44477,7 +44483,7 @@
               "expiresAtStateVersion": 314,
               "choiceRequirements": [
                 {
-                  "choiceId": "312.c2un.0.trace.corp.bid.314",
+                  "choiceId": "314.corp.bid.314",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -44488,10 +44494,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "312.c2un.0.trace.corp.bid.314",
+                "choiceId": "314.corp.bid.314",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "312.c2un.0.trace",
+                "traceId": 314,
                 "traceStep": "corp_bid",
                 "traceLimit": 5,
                 "effectiveTraceLimit": 5,
@@ -44520,12 +44526,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "312.c2un.0.trace.runner.bid.315",
+          "choiceId": "314.runner.bid.315",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 461,
           "tagsAdded": 0,
-          "traceId": "312.c2un.0.trace",
+          "traceId": 314,
           "traceStep": "runner_bid",
           "traceLimit": 5,
           "corpBid": 0,
@@ -44546,7 +44552,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 312
         },
         "privatePayload": {
           "runner": {
@@ -44556,7 +44563,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 315,
               "selectedChoices": {
-                "choiceId": "312.c2un.0.trace.runner.bid.315",
+                "choiceId": "314.runner.bid.315",
                 "selectedOptionIds": [
                   "bid_5"
                 ]
@@ -44575,7 +44582,7 @@
               "expiresAtStateVersion": 315,
               "choiceRequirements": [
                 {
-                  "choiceId": "312.c2un.0.trace.runner.bid.315",
+                  "choiceId": "314.runner.bid.315",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -44598,12 +44605,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "312.c2un.0.trace.runner.bid.315",
+                "choiceId": "314.runner.bid.315",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "312.c2un.0.trace",
+                "traceId": 314,
                 "traceStep": "runner_bid",
                 "traceLimit": 5,
                 "sourceDefinitionId": 461,
@@ -44613,7 +44620,8 @@
                 "runnerBid": 5,
                 "runnerStrength": 5,
                 "traceSuccessful": false,
-                "tagsAdded": 0
+                "tagsAdded": 0,
+                "traceSourceRunId": 312
               }
             }
           }

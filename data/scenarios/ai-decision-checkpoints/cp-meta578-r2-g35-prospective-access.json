@@ -1054,7 +1054,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1064,7 +1064,7 @@
                 "sourceTitle": "Data Darts"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2102,7 +2102,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -2112,7 +2112,7 @@
               "sourceTitle": "Data Darts"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -2535,7 +2535,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 34,
-      "sideSafePlanningFingerprint": "fnv1a:672f14bd"
+      "sideSafePlanningFingerprint": "fnv1a:b31ae715"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_purge_window_1.0.0",

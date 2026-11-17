@@ -512,7 +512,7 @@ describe("damage core", () => {
 
   it("keeps differently sized prevention sources in the same priority stage", () => {
     const window: EventModificationWindow = {
-      windowId: "prevention_stage",
+      windowId: 1,
       eventId: "damage_event",
       eventType: "damage",
       kind: "prevent",

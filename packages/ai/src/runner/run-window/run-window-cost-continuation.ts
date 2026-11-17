@@ -1,4 +1,4 @@
-import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
+import { isRunnerPaymentWindowId, isTraceId, type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import type { PlanSchedulerResult } from "../../plans/plan-scheduler";
 import {
@@ -37,7 +37,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
   const continuation =
     continuationActions.length === 1 ? continuationActions[0] : undefined;
   const supportWindowId =
-    typeof selectedAction?.payload?.costPenaltySupportWindowId === "string"
+    isRunnerPaymentWindowId(selectedAction?.payload?.costPenaltySupportWindowId)
       ? selectedAction.payload.costPenaltySupportWindowId
       : undefined;
   const supportOriginalActionId =
@@ -46,7 +46,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       ? selectedAction.payload.costPenaltySupportOriginalActionId
       : undefined;
   const continuationWindowId =
-    typeof continuation?.payload?.runnerCostPenaltySupportWindowId === "string"
+    isRunnerPaymentWindowId(continuation?.payload?.runnerCostPenaltySupportWindowId)
       ? continuation.payload.runnerCostPenaltySupportWindowId
       : undefined;
   const selectedPaymentSupport =
@@ -310,7 +310,10 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
         directRunRootTraceContinuationIsBound) &&
       choice?.side === "runner" &&
       choice.kind === "bid_amount" &&
-      choice.source.startsWith(`trace:${run?.runId}.`) &&
+      run !== undefined &&
+      trace !== undefined &&
+      trace.sourceRunId === run.runId &&
+      choice.source === `trace:${trace.traceId}` &&
       choice.stateVersion === input.playerView.stateVersion &&
       selectedAction?.side === "runner" &&
       selectedAction.type === "resolve_choice" &&
@@ -336,8 +339,9 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       interveningEvents[0]?.publicPayload.traceStep === "runner_bid" &&
       typeof interveningEvents[0]?.publicPayload.traceSuccessful ===
         "boolean" &&
-      typeof interveningEvents[0]?.publicPayload.traceId === "string" &&
-      interveningEvents[0].publicPayload.traceId.startsWith(`${run?.runId}.`) &&
+      isTraceId(interveningEvents[0]?.publicPayload.traceId) &&
+      run !== undefined &&
+      interveningEvents[0].publicPayload.traceSourceRunId === run.runId &&
       interveningEvents[0].publicPayload.choiceId ===
         `${interveningEvents[0].publicPayload.traceId}.runner.bid.${previous?.stateVersion}`;
     const exactForcedRunContinuationOrigin =
@@ -658,7 +662,7 @@ function restorePaidRunnerRunStartExecutor(
     action.actionId !== pending.originalActionId ||
     action.payload?.runnerCostPenaltySupportContinuation !== true ||
     action.payload.runnerCostPenaltySupportWindowId !== pending.windowId ||
-    result.origin.windowId !== pending.windowId ||
+    result.origin.windowId !== String(pending.windowId) ||
     result.origin.rootPlanInstanceId !== pending.rootPlanInstanceId ||
     result.origin.leafPlanInstanceId !== pending.executorInstanceId
   ) {

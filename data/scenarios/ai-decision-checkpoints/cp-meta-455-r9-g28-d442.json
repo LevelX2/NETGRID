@@ -2137,7 +2137,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2178,7 +2178,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2311,7 +2311,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "9.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -2404,7 +2404,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "13.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -2542,7 +2542,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2677,7 +2677,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2805,7 +2805,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "509.effect.0.gain_actions",
+                "effectId": 0,
                 "kind": "gain_actions",
                 "visibility": "public",
                 "side": "corp",
@@ -3036,7 +3036,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "161.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3046,7 +3046,7 @@
                 "sourceTitle": "Cruising for Netwatch"
               },
               {
-                "effectId": "161.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -3087,7 +3087,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "182.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3097,7 +3097,7 @@
                 "sourceTitle": "Stakeout"
               },
               {
-                "effectId": "182.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -3138,7 +3138,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "182.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3148,7 +3148,7 @@
                 "sourceTitle": "Stakeout"
               },
               {
-                "effectId": "182.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -3381,7 +3381,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3913,7 +3913,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4989,7 +4989,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "106.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -5620,7 +5620,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "132.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -6052,7 +6052,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "152.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -6527,7 +6527,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "172.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -7127,7 +7127,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "194.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -7432,7 +7432,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -7986,7 +7986,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "231.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -8504,7 +8504,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "254.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -8859,7 +8859,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "270.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -9444,7 +9444,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "293.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -9963,7 +9963,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "318.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -10122,7 +10122,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -10132,7 +10132,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -10521,7 +10521,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "340.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -11026,7 +11026,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "363.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -11557,7 +11557,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -12101,7 +12101,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "410.cwx.successful_run.highlighter",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -12321,7 +12321,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -12545,7 +12545,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "509.effect.0.gain_actions",
+                "effectId": 0,
                 "kind": "gain_actions",
                 "visibility": "public",
                 "side": "corp",
@@ -13151,7 +13151,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "363.cwx.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -13682,7 +13682,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "386.cwx.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -14226,7 +14226,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "410.cwx.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -14446,7 +14446,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -14670,7 +14670,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "509.effect.0.gain_actions",
+              "effectId": 0,
               "kind": "gain_actions",
               "visibility": "public",
               "side": "corp",
@@ -14996,7 +14996,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 441,
-      "sideSafePlanningFingerprint": "fnv1a:d049a909"
+      "sideSafePlanningFingerprint": "fnv1a:f6b1387f"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_chrome_rush_bureau_1.1.0",

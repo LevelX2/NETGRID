@@ -27,8 +27,11 @@ Werte aus Engine-Daten. Die Engine verwendet im öffentlichen Verlauf
 die Nummer des Übergangs plus eins und der Server für terminalen
 Zeitablauf die nächste Nummer.
 
-Die Run-ID ist die StateVersion des eröffnenden Übergangs. Kartenexemplare
-verwenden einen kurzen Base36-Schlüssel. SQLite-Schema 8 speichert
+Runs, Spiel-Traces, Zahlungs-, Änderungs- und Ersatzfenster sowie
+laufende Ziehvorgänge erhalten beim Öffnen die StateVersion des
+Übergangs. Die Herkunft eines Traces wird gesondert gebunden.
+Öffentliche Effekte tragen ihre Position im Ereignis, beginnend bei null.
+Kartenexemplare verwenden einen kurzen Base36-Schlüssel. SQLite-Schema 9 speichert
 Kartenlisten als Positionen in der Instanztabelle. Verdeckte Slots und
 adressierbare verdeckte Ressourcen haben jeweils einen eigenen kurzen
 Schlüsseltyp. Remotes werden als `r1`, `r2` und entsprechend ihrer
@@ -40,8 +43,11 @@ sowie die StateVersion für geöffnete Choices. Die Engine bindet diese Nummern
 an das Angebot einer Seite. Der Server prüft zusätzlich die MatchVersion.
 
 Die integrierte Abnahme umfasst die KI-Regressionen mit aktualisierten
-Testaufzeichnungen. Spiel-Traces, Fenster, Effekt- und Subroutinenreferenzen
-sowie numerische Zufallszwecke sind weitere Schritte des Plans.
+Testaufzeichnungen. Für gedruckte und hinzugefügte Subroutinen sowie weitere
+interne Regelfenster gelten ihre bestehenden Regelbindungen. In SQLite
+speichert eine Zufallsaufzeichnung die Position ihres Zwecks in einer
+gemeinsamen Liste. Typisierte Zufallszwecke im Engine-Vertrag sind ein
+weiterer Schritt.
 
 ## Umfang und Vergabe der Schlüssel
 
@@ -53,7 +59,7 @@ sowie numerische Zufallszwecke sind weitere Schritte des Plans.
 | Adressierbare Fähigkeit                     | Feste positive Nummer im Fähigkeitsregister. Eine Instanzbindung verwendet Quelleninstanz und Fähigkeitsnummer.                                                                                    |
 | `ActionId`                                  | Laufende positive Nummer im deterministisch erzeugten LegalAction-Satz einer Seite und StateVersion. Die Einreichung beim Server bindet auch Match und MatchVersion.                                 |
 | `ChoiceId`, `ChoiceOptionId`                | Nummer der geöffneten Choice innerhalb der Partie und Nummer einer Option innerhalb dieser Choice. Reihenfolge und fachlicher Wert der Option sind eigene Eigenschaften.                             |
-| Server, Run, Trace und Fenster              | Remotes heißen `rN`; Run-IDs sind Zahlen. Partielokale Nummern für Traces und Fenster bleiben Ziel des Plans. „Neuer Remote“ ist ein eigenes Installationsziel.                                    |
+| Server, Run, Trace und Fenster              | Remotes heißen `rN`. Run, Spiel-Trace sowie Zahlungs-, Änderungs- und Ersatzfenster verwenden die Eröffnungs-StateVersion. „Neuer Remote“ ist ein eigenes Installationsziel.                                    |
 | Ereignis, Snapshot, KI-Trace                | Nummern in der jeweiligen Match-Tabelle. Historienreferenzen enthalten den Matchkontext. Eine Diagnosekennung für einen fehlgeschlagenen KI-Versuch bleibt eine Fehlerreferenz.                      |
 | Aufgelöster Effekt, Subroutine              | Effektposition innerhalb des Ereignisses. Subroutinen werden innerhalb des konkreten Encounters adressiert; gedruckte Herkunft, zusätzliche Beiträge und Ausführungsreihenfolge haben eigene Felder. |
 | Zufallszweck und wiederholte Speicherfelder | Numerischer Zweckcode mit typisierten Argumenten. In SQLite verwenden die Karteninstanzliste und die Zufallsprotokolle kompakte, fest definierte Zeilen.                                             |
@@ -223,9 +229,9 @@ laden, speichern und zum Matchstart verwenden.
    `runtime-shared.ts`, Input-DTO, Sanitizer, Replay und Chronicle
    verwenden dieselben Typen. [Runtime-Vertrag](../../packages/engine/src/game/engine-runtime-internal/runtime-shared.ts) · [KI-Input](../../packages/ai/src/input-dto.ts)
 3. Zentralen über ihre festen Kürzel und Remotes als `rN` adressieren.
-   Der Serverzustand trägt seinen fachlichen Typ. Die Run-ID stammt aus
-   der StateVersion beim Öffnen. Für Spiel-Traces, Fenster und Sequenzen
-   ist dieselbe Art der Vergabe vorgesehen.
+   Der Serverzustand trägt seinen fachlichen Typ. Die IDs für Runs,
+   Spiel-Traces, Zahlungs-, Änderungs- und Ersatzfenster sowie
+   Ziehvorgänge stammen aus der StateVersion beim Öffnen.
    Für Encounter-Subroutinen stehen Bindung an Encounter und Reihenfolge
    als Werte zur Verfügung. Chronicle adressiert Effekte über Ereignis
    und Effektposition. [Remote-Vergabe](../../packages/engine/src/game/state/remote-server-id.ts) · [Chronicle](../../apps/web/app/chronicle.ts)

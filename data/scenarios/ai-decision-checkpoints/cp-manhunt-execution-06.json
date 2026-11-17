@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 17,
-    "stateHash": "fnv1a:99962139",
+    "stateHash": "fnv1a:553cb077",
     "testOnlyGameState": {
       "matchId": "match_fa11540b1f1e08b6",
       "baseline": {
@@ -2146,7 +2146,7 @@
       },
       "turnSerial": 2,
       "trace": {
-        "traceId": "op_trace.17.496.c32d",
+        "traceId": 17,
         "sourceCardInstanceId": "c32d",
         "sourceDefinitionId": 496,
         "traceLimit": 5,
@@ -2161,9 +2161,9 @@
         "returnActiveSide": "corp"
       },
       "pendingChoice": {
-        "choiceId": "op_trace.17.496.c32d.corp.bid.17",
+        "choiceId": "17.corp.bid.17",
         "side": "corp",
-        "source": "trace:op_trace.17.496.c32d",
+        "source": "trace:17",
         "prompt": "Korp Trace-Bid wählen (Base Trace 5)",
         "kind": "bid_amount",
         "options": [
@@ -2666,7 +2666,7 @@
           "turnActionOrdinalStart": 1,
           "turnActionOrdinalEnd": 1,
           "traceStarted": true,
-          "traceId": "op_trace.17.496.c32d",
+          "traceId": 17,
           "sourceCardId": "c32d",
           "sourceDefinitionId": 496,
           "baseTraceStrength": 5,

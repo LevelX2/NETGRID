@@ -43,6 +43,7 @@ function setupWindow(candidates: EventModificationCandidate[]) {
     seed: "tag-prevention-pass-priorities",
     setupMode: "completed",
   });
+  const windowId = ++state.stateVersion;
   const event: ImminentEvent = {
     eventId: "tag_event",
     eventType: "add_tag",
@@ -51,17 +52,17 @@ function setupWindow(candidates: EventModificationCandidate[]) {
     affectedSide: "runner",
     payload: { amount: 1 },
     visibility: "public",
-    createdAtStateVersion: state.stateVersion + 1,
-    modificationWindowId: "tag_window",
+    createdAtStateVersion: windowId,
+    modificationWindowId: windowId,
   };
   const window: EventModificationWindow = {
-    windowId: "tag_window",
+    windowId,
     eventId: event.eventId,
     eventType: "add_tag",
     kind: "avoid",
     side: "runner",
     candidates,
-    createdAtStateVersion: state.stateVersion + 1,
+    createdAtStateVersion: windowId,
     optional: true,
   };
   state.imminentEvent = event;
@@ -70,7 +71,7 @@ function setupWindow(candidates: EventModificationCandidate[]) {
     state,
     window,
     event,
-    state.stateVersion + 1,
+    windowId,
   );
   return state;
 }
@@ -107,14 +108,17 @@ describe("event modification tag-prevention pass", () => {
       tagCandidate("second", 20),
     ]);
     const firstAction = { payload: {} } as LegalAction;
+    const openingVersion = state.stateVersion;
 
     resolveEventModificationChoice(state, firstAction, passAction());
 
     expect(state.runner.tags).toBe(0);
-    expect(state.eventModificationWindow?.candidates).toHaveLength(1);
-    expect(state.eventModificationWindow?.candidates[0]?.candidateId).toBe(
-      "second",
-    );
+    expect(state.eventModificationWindow).toMatchObject({
+      windowId: openingVersion + 1,
+      createdAtStateVersion: openingVersion + 1,
+      candidates: [expect.objectContaining({ candidateId: "second" })],
+    });
+    expect(state.imminentEvent?.modificationWindowId).toBe(openingVersion + 1);
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
       "pass",
       "second",

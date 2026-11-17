@@ -3286,7 +3286,7 @@
             "label": "Subroutinen auslösen (Run endet)",
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3298,7 +3298,7 @@
                 "amount": 0
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3956,7 +3956,7 @@
             "turnActionOrdinalEnd": 2,
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -4053,7 +4053,7 @@
             "turnActionOrdinalEnd": 3,
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -4849,7 +4849,7 @@
             "turnActionOrdinalEnd": 4,
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5329,7 +5329,7 @@
             "turnActionOrdinalEnd": 1,
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5615,7 +5615,7 @@
             "label": "Subroutinen auslösen",
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -5632,7 +5632,7 @@
             "encounterWillEndRun": false,
             "traceStarted": true,
             "traceRulesProfile": "modern_open",
-            "traceId": "43.cim.0.trace",
+            "traceId": 45,
             "sourceCardId": "cim",
             "sourceDefinitionId": 83,
             "traceLimit": 0,
@@ -5646,7 +5646,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 43
           },
           "privatePayload": {
             "runner": {
@@ -5677,12 +5678,13 @@
                   "encounterSubroutineIds": "subroutine_trace_x_end_run_and_run_lock",
                   "abilityFamily": "run-access",
                   "traceStarted": true,
-                  "traceId": "43.cim.0.trace",
+                  "traceId": 45,
                   "sourceCardId": "cim",
                   "traceLimit": 0,
                   "effectiveTraceLimit": 0,
                   "traceRulesProfile": "modern_open",
-                  "corpBidMax": 0
+                  "corpBidMax": 0,
+                  "traceSourceRunId": 43
                 },
                 "resolvedEffects": [
                   {
@@ -5714,11 +5716,11 @@
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
             "choiceKind": "bid_amount",
-            "choiceId": "43.cim.0.trace.corp.bid.45",
+            "choiceId": "45.corp.bid.45",
             "traceRulesProfile": "modern_open",
             "traceBidsRevealed": true,
             "sourceDefinitionId": 83,
-            "traceId": "43.cim.0.trace",
+            "traceId": 45,
             "traceStep": "corp_bid",
             "traceLimit": 0,
             "effectiveTraceLimit": 0,
@@ -5747,7 +5749,7 @@
                 "actionId": "corp.resolve_choice",
                 "clientKnownStateVersion": 45,
                 "selectedChoices": {
-                  "choiceId": "43.cim.0.trace.corp.bid.45",
+                  "choiceId": "45.corp.bid.45",
                   "selectedOptionIds": [
                     "bid_0"
                   ]
@@ -5767,7 +5769,7 @@
                 "expiresAtStateVersion": 45,
                 "choiceRequirements": [
                   {
-                    "choiceId": "43.cim.0.trace.corp.bid.45",
+                    "choiceId": "45.corp.bid.45",
                     "minSelections": 1,
                     "maxSelections": 1,
                     "optionIds": [
@@ -5776,10 +5778,10 @@
                   }
                 ],
                 "payload": {
-                  "choiceId": "43.cim.0.trace.corp.bid.45",
+                  "choiceId": "45.corp.bid.45",
                   "choiceVisibility": "public",
                   "choiceKind": "bid_amount",
-                  "traceId": "43.cim.0.trace",
+                  "traceId": 45,
                   "traceStep": "corp_bid",
                   "traceLimit": 0,
                   "effectiveTraceLimit": 0,
@@ -5808,12 +5810,12 @@
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
             "choiceKind": "bid_amount",
-            "choiceId": "43.cim.0.trace.runner.bid.46",
+            "choiceId": "45.runner.bid.46",
             "traceRulesProfile": "modern_open",
             "traceBidsRevealed": true,
             "sourceDefinitionId": 83,
             "tagsAdded": 0,
-            "traceId": "43.cim.0.trace",
+            "traceId": 45,
             "traceStep": "runner_bid",
             "traceLimit": 0,
             "corpBid": 0,
@@ -5834,7 +5836,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 43
           },
           "privatePayload": {
             "runner": {
@@ -5844,7 +5847,7 @@
                 "actionId": "runner.resolve_choice",
                 "clientKnownStateVersion": 46,
                 "selectedChoices": {
-                  "choiceId": "43.cim.0.trace.runner.bid.46",
+                  "choiceId": "45.runner.bid.46",
                   "selectedOptionIds": [
                     "bid_0"
                   ]
@@ -5864,7 +5867,7 @@
                 "expiresAtStateVersion": 46,
                 "choiceRequirements": [
                   {
-                    "choiceId": "43.cim.0.trace.runner.bid.46",
+                    "choiceId": "45.runner.bid.46",
                     "minSelections": 1,
                     "maxSelections": 1,
                     "optionIds": [
@@ -5877,12 +5880,12 @@
                   }
                 ],
                 "payload": {
-                  "choiceId": "43.cim.0.trace.runner.bid.46",
+                  "choiceId": "45.runner.bid.46",
                   "choiceVisibility": "public",
                   "choiceKind": "bid_amount",
                   "traceRulesProfile": "modern_open",
                   "traceBidsRevealed": true,
-                  "traceId": "43.cim.0.trace",
+                  "traceId": 45,
                   "traceStep": "runner_bid",
                   "traceLimit": 0,
                   "sourceDefinitionId": 83,
@@ -5892,7 +5895,8 @@
                   "runnerBid": 0,
                   "runnerStrength": 0,
                   "traceSuccessful": false,
-                  "tagsAdded": 0
+                  "tagsAdded": 0,
+                  "traceSourceRunId": 43
                 }
               }
             }
@@ -6033,7 +6037,7 @@
             "label": "Karte accessen",
             "resolvedEffects": [
               {
-                "effectId": "62.cdy.access_effect.0.damage",
+                "effectId": 0,
                 "kind": "damage",
                 "visibility": "hidden_info_barrier",
                 "side": "runner",
@@ -7587,7 +7591,7 @@
             "turnActionOrdinalEnd": 3,
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -8070,7 +8074,7 @@
             "turnActionOrdinalEnd": 1,
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -8869,7 +8873,7 @@
             "turnActionOrdinalEnd": 1,
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -10204,7 +10208,7 @@
             "label": "Subroutinen auslösen (Run endet)",
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -10216,7 +10220,7 @@
                 "amount": 0
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -10317,7 +10321,7 @@
             "turnActionOrdinalEnd": 2,
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -10438,7 +10442,7 @@
             "turnActionOrdinalEnd": 3,
             "resolvedEffects": [
               {
-                "effectId": "291.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -11187,7 +11191,7 @@
             "turnActionOrdinalEnd": 1,
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -12223,7 +12227,7 @@
             "label": "Subroutinen auslösen",
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -12240,7 +12244,7 @@
             "encounterWillEndRun": false,
             "traceStarted": true,
             "traceRulesProfile": "modern_open",
-            "traceId": "143.cim.0.trace",
+            "traceId": 144,
             "sourceCardId": "cim",
             "sourceDefinitionId": 83,
             "traceLimit": 0,
@@ -12254,7 +12258,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 143
           },
           "privatePayload": {
             "runner": {
@@ -12285,12 +12290,13 @@
                   "encounterSubroutineIds": "subroutine_trace_x_end_run_and_run_lock",
                   "abilityFamily": "run-access",
                   "traceStarted": true,
-                  "traceId": "143.cim.0.trace",
+                  "traceId": 144,
                   "sourceCardId": "cim",
                   "traceLimit": 0,
                   "effectiveTraceLimit": 0,
                   "traceRulesProfile": "modern_open",
-                  "corpBidMax": 3
+                  "corpBidMax": 3,
+                  "traceSourceRunId": 143
                 },
                 "resolvedEffects": [
                   {
@@ -12322,11 +12328,11 @@
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
             "choiceKind": "bid_amount",
-            "choiceId": "143.cim.0.trace.corp.bid.144",
+            "choiceId": "144.corp.bid.144",
             "traceRulesProfile": "modern_open",
             "traceBidsRevealed": true,
             "sourceDefinitionId": 83,
-            "traceId": "143.cim.0.trace",
+            "traceId": 144,
             "traceStep": "corp_bid",
             "traceLimit": 0,
             "effectiveTraceLimit": 0,
@@ -12355,7 +12361,7 @@
                 "actionId": "corp.resolve_choice",
                 "clientKnownStateVersion": 144,
                 "selectedChoices": {
-                  "choiceId": "143.cim.0.trace.corp.bid.144",
+                  "choiceId": "144.corp.bid.144",
                   "selectedOptionIds": [
                     "bid_0"
                   ]
@@ -12375,7 +12381,7 @@
                 "expiresAtStateVersion": 144,
                 "choiceRequirements": [
                   {
-                    "choiceId": "143.cim.0.trace.corp.bid.144",
+                    "choiceId": "144.corp.bid.144",
                     "minSelections": 1,
                     "maxSelections": 1,
                     "optionIds": [
@@ -12387,10 +12393,10 @@
                   }
                 ],
                 "payload": {
-                  "choiceId": "143.cim.0.trace.corp.bid.144",
+                  "choiceId": "144.corp.bid.144",
                   "choiceVisibility": "public",
                   "choiceKind": "bid_amount",
-                  "traceId": "143.cim.0.trace",
+                  "traceId": 144,
                   "traceStep": "corp_bid",
                   "traceLimit": 0,
                   "effectiveTraceLimit": 0,
@@ -12419,12 +12425,12 @@
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
             "choiceKind": "bid_amount",
-            "choiceId": "143.cim.0.trace.runner.bid.145",
+            "choiceId": "144.runner.bid.145",
             "traceRulesProfile": "modern_open",
             "traceBidsRevealed": true,
             "sourceDefinitionId": 83,
             "tagsAdded": 0,
-            "traceId": "143.cim.0.trace",
+            "traceId": 144,
             "traceStep": "runner_bid",
             "traceLimit": 0,
             "corpBid": 0,
@@ -12445,7 +12451,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 143
           },
           "privatePayload": {
             "runner": {
@@ -12455,7 +12462,7 @@
                 "actionId": "runner.resolve_choice",
                 "clientKnownStateVersion": 145,
                 "selectedChoices": {
-                  "choiceId": "143.cim.0.trace.runner.bid.145",
+                  "choiceId": "144.runner.bid.145",
                   "selectedOptionIds": [
                     "bid_0"
                   ]
@@ -12475,7 +12482,7 @@
                 "expiresAtStateVersion": 145,
                 "choiceRequirements": [
                   {
-                    "choiceId": "143.cim.0.trace.runner.bid.145",
+                    "choiceId": "144.runner.bid.145",
                     "minSelections": 1,
                     "maxSelections": 1,
                     "optionIds": [
@@ -12485,12 +12492,12 @@
                   }
                 ],
                 "payload": {
-                  "choiceId": "143.cim.0.trace.runner.bid.145",
+                  "choiceId": "144.runner.bid.145",
                   "choiceVisibility": "public",
                   "choiceKind": "bid_amount",
                   "traceRulesProfile": "modern_open",
                   "traceBidsRevealed": true,
-                  "traceId": "143.cim.0.trace",
+                  "traceId": 144,
                   "traceStep": "runner_bid",
                   "traceLimit": 0,
                   "sourceDefinitionId": 83,
@@ -12500,7 +12507,8 @@
                   "runnerBid": 0,
                   "runnerStrength": 0,
                   "traceSuccessful": false,
-                  "tagsAdded": 0
+                  "tagsAdded": 0,
+                  "traceSourceRunId": 143
                 }
               }
             }
@@ -12641,7 +12649,7 @@
             "label": "Karte accessen",
             "resolvedEffects": [
               {
-                "effectId": "62.cdx.access_effect.0.damage",
+                "effectId": 0,
                 "kind": "damage",
                 "visibility": "hidden_info_barrier",
                 "side": "runner",
@@ -13270,7 +13278,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -13280,7 +13288,7 @@
               "sourceTitle": "Dog Pile"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -13525,7 +13533,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "307.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -13560,7 +13568,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "307.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -13870,7 +13878,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -14061,7 +14069,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -14161,7 +14169,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -14908,7 +14916,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -15107,7 +15115,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -15431,7 +15439,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -15938,7 +15946,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -15948,7 +15956,7 @@
               "sourceTitle": "Dog Pile"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -15991,7 +15999,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -16029,7 +16037,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "291.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -16318,7 +16326,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -16711,7 +16719,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",

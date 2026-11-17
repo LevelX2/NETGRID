@@ -6438,7 +6438,7 @@ describe("authoritative plan-first live runtime", () => {
           actionType: "continue_run",
           resolvedEffects: [
             {
-              effectId: "vacuum-link-rewind",
+              effectId: 0,
               kind: "resolve_subroutine",
               sourceDefinitionId: 487,
               visibility: "public",
@@ -6492,7 +6492,7 @@ describe("authoritative plan-first live runtime", () => {
                 ? {
                     resolvedEffects: [
                       {
-                        effectId: "vacuum-link-rewind",
+                        effectId: 0,
                         kind: "resolve_subroutine",
                         sourceDefinitionId: 487,
                         visibility: "public",
@@ -7855,7 +7855,7 @@ describe("authoritative plan-first live runtime", () => {
           sourceDefinitionId: 366,
           resolvedEffects: [
             {
-              effectId: "broker-1-load-effect",
+              effectId: 0,
               kind: "add_hosted_credits",
               visibility: "public",
               amount: 3,
@@ -18389,7 +18389,7 @@ describe("authoritative plan-first live runtime", () => {
         publicPayload: {
           resolvedEffects: [
             {
-              effectId: "conference-first-payout-effect",
+              effectId: 0,
               kind: "gain_credits",
               visibility: "public",
               side: "runner",
@@ -18399,7 +18399,7 @@ describe("authoritative plan-first live runtime", () => {
               sourceDefinitionId: 396,
             },
             {
-              effectId: "earlier-conference-copy-payout",
+              effectId: 1,
               kind: "gain_credits",
               visibility: "public",
               side: "runner",
@@ -18485,8 +18485,8 @@ describe("authoritative plan-first live runtime", () => {
         stateHashAfter: "fnv1a:conference-amortized",
         visibilityClass: "public",
         publicPayload: {
-          resolvedEffects: [1, 2].map((payout) => ({
-            effectId: `conference-payout-${payout}`,
+          resolvedEffects: [0, 1].map((effectId) => ({
+            effectId,
             kind: "gain_credits",
             visibility: "public" as const,
             amount: 2,
@@ -24362,7 +24362,7 @@ describe("authoritative plan-first live runtime", () => {
           unbrokenSubroutineCount: 1,
           resolvedEffects: [
             {
-              effectId: "fatal-attractor-subroutine",
+              effectId: 0,
               kind: "resolve_subroutine",
               visibility: "public",
               side: "runner",
@@ -24609,7 +24609,7 @@ describe("authoritative plan-first live runtime", () => {
           unbrokenSubroutineCount: 1,
           resolvedEffects: [
             {
-              effectId: "fatal-attractor-subroutine",
+              effectId: 0,
               kind: "resolve_subroutine",
               visibility: "public",
               side: "runner",
@@ -26151,7 +26151,7 @@ describe("authoritative plan-first live runtime", () => {
     continuation.payload = {
       ...continuation.payload,
       runnerCostPenaltySupportContinuation: true,
-      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.2",
+      runnerCostPenaltySupportWindowId: 2,
     };
     continuation.expiresAtStateVersion = 2;
     const continuationInput = aiInput("runner", [continuation]);
@@ -31047,7 +31047,7 @@ describe("plan-bound Trace Base-Link continuation", () => {
     );
     resolveChoice.choiceRequirements = [
       {
-        choiceId: "trace_1.base_link.70",
+        choiceId: "1.base_link.70",
         minSelections: 1,
         maxSelections: 1,
         optionIds: ["pass", "trace_base_link_baedeker"],
@@ -31065,7 +31065,7 @@ describe("plan-bound Trace Base-Link continuation", () => {
       successful: false,
     };
     input.playerView.trace = {
-      traceId: "trace_1",
+      traceId: 1,
       sourceDefinitionId: 463,
       profile: "modern_open",
       phase: "base_link",
@@ -31104,9 +31104,9 @@ describe("plan-bound Trace Base-Link continuation", () => {
       traceSuccessCancelOptions: [],
     };
     input.playerView.pendingChoice = {
-      choiceId: "trace_1.base_link.70",
+      choiceId: "1.base_link.70",
       side: "runner",
-      source: "trace_base_link:trace_1",
+      source: "trace_base_link:1",
       prompt: "Base-Link-Karte fuer Trace nutzen",
       kind: "select_option",
       options: [
@@ -31185,7 +31185,7 @@ describe("plan-bound Trace Base-Link continuation", () => {
       actionId: resolveChoice.actionId,
       reasonCode: "plan_first.runner.contest_remote",
       selectedChoices: {
-        choiceId: "trace_1.base_link.70",
+        choiceId: "1.base_link.70",
         selectedOptionIds: ["trace_base_link_baedeker"],
       },
       fallbackUsed: false,
@@ -31214,7 +31214,7 @@ describe("plan-bound Trace success-cancel continuation", () => {
     );
     resolveChoice.choiceRequirements = [
       {
-        choiceId: "trace_1.success_cancel.71",
+        choiceId: "1.success_cancel.71",
         minSelections: 1,
         maxSelections: 1,
         optionIds: ["pass", "trace_success_cancel_back_door"],
@@ -31232,7 +31232,7 @@ describe("plan-bound Trace success-cancel continuation", () => {
       successful: false,
     };
     input.playerView.trace = {
-      traceId: "trace_1",
+      traceId: 1,
       sourceDefinitionId: 448,
       profile: "modern_open",
       phase: "trace_success_cancel",
@@ -31275,9 +31275,9 @@ describe("plan-bound Trace success-cancel continuation", () => {
       ],
     };
     input.playerView.pendingChoice = {
-      choiceId: "trace_1.success_cancel.71",
+      choiceId: "1.success_cancel.71",
       side: "runner",
-      source: "trace_success_cancel:trace_1",
+      source: "trace_success_cancel:1",
       prompt: "Trace-Erfolgseffekt canceln",
       kind: "select_option",
       options: [
@@ -31356,7 +31356,7 @@ describe("plan-bound Trace success-cancel continuation", () => {
       actionId: resolveChoice.actionId,
       reasonCode: "plan_first.runner.pressure_central",
       selectedChoices: {
-        choiceId: "trace_1.success_cancel.71",
+        choiceId: "1.success_cancel.71",
         selectedOptionIds: ["trace_success_cancel_back_door"],
       },
       fallbackUsed: false,

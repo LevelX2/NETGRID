@@ -3328,7 +3328,7 @@
             "label": "Karte accessen",
             "resolvedEffects": [
               {
-                "effectId": "62.cdx.access_effect.0.damage",
+                "effectId": 0,
                 "kind": "damage",
                 "visibility": "hidden_info_barrier",
                 "side": "runner",
@@ -3787,7 +3787,7 @@
             "label": "Choice wurde beantwortet.",
             "resolvedEffects": [
               {
-                "effectId": "126.cs6.access_effect.0.add_counter_to_all_installed_runner_icebreakers",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -4648,7 +4648,7 @@
             "label": "Karte accessen",
             "resolvedEffects": [
               {
-                "effectId": "62.cdy.access_effect.0.damage",
+                "effectId": 0,
                 "kind": "damage",
                 "visibility": "hidden_info_barrier",
                 "side": "runner",
@@ -5281,7 +5281,7 @@
             "turnActionOrdinalEnd": 2,
             "resolvedEffects": [
               {
-                "effectId": "46.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5291,7 +5291,7 @@
                 "sourceTitle": "Panzer Run"
               },
               {
-                "effectId": "46.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -6753,7 +6753,7 @@
             "label": "Subroutinen auslösen (Run endet)",
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -6765,7 +6765,7 @@
                 "amount": 0
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -7581,7 +7581,7 @@
             "turnActionOrdinalEnd": 3,
             "resolvedEffects": [
               {
-                "effectId": "45.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7779,7 +7779,7 @@
             "label": "Karte accessen",
             "resolvedEffects": [
               {
-                "effectId": "133.ctp.access_effect.0.damage",
+                "effectId": 0,
                 "kind": "damage",
                 "visibility": "hidden_info_barrier",
                 "side": "runner",
@@ -10979,7 +10979,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "126.cs6.access_effect.0.add_counter_to_all_installed_runner_icebreakers",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -11549,7 +11549,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "46.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -11559,7 +11559,7 @@
               "sourceTitle": "Panzer Run"
             },
             {
-              "effectId": "46.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -12112,7 +12112,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -12122,7 +12122,7 @@
               "sourceTitle": "Dog Pile"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -12447,7 +12447,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "45.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",

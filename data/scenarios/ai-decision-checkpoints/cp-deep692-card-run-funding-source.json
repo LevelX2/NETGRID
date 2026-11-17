@@ -938,7 +938,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "8.start",
+                  "effectId": 0,
                   "kind": "start_run",
                   "visibility": "public",
                   "side": "runner",
@@ -1001,7 +1001,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -1385,7 +1385,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -1444,7 +1444,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -1503,7 +1503,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -1619,7 +1619,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -1773,7 +1773,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "502.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -1829,7 +1829,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -1888,7 +1888,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -1995,7 +1995,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "46.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -2005,7 +2005,7 @@
                   "sourceTitle": "Panzer Run"
                 },
                 {
-                  "effectId": "46.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "runner",
@@ -2164,7 +2164,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -2223,7 +2223,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -2283,7 +2283,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "44.effect.0.remove_tags",
+                  "effectId": 0,
                   "kind": "remove_tags",
                   "visibility": "public",
                   "side": "runner",
@@ -2294,7 +2294,7 @@
                   "sourceTitle": "Meat Upgrade"
                 },
                 {
-                  "effectId": "44.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "runner",
@@ -2475,7 +2475,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -2562,7 +2562,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -2575,7 +2575,7 @@
                   "sourceTitle": "BBS Whispering Campaign"
                 },
                 {
-                  "effectId": "521.effect.1.trash_source_when_empty",
+                  "effectId": 1,
                   "kind": "trash_source_when_empty",
                   "visibility": "public",
                   "side": "corp",
@@ -3158,7 +3158,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "48.cap.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -3362,7 +3362,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "45.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -3540,7 +3540,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "48.cap.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -3588,7 +3588,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "97.start",
+                  "effectId": 0,
                   "kind": "start_run",
                   "visibility": "public",
                   "side": "runner",
@@ -4082,7 +4082,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "48.cap.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -4477,7 +4477,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -4536,7 +4536,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -4643,7 +4643,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "46.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4653,7 +4653,7 @@
                 "sourceTitle": "Panzer Run"
               },
               {
-                "effectId": "46.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -4812,7 +4812,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -4871,7 +4871,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -4931,7 +4931,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "44.effect.0.remove_tags",
+                "effectId": 0,
                 "kind": "remove_tags",
                 "visibility": "public",
                 "side": "runner",
@@ -4942,7 +4942,7 @@
                 "sourceTitle": "Meat Upgrade"
               },
               {
-                "effectId": "44.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -5123,7 +5123,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5210,7 +5210,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5223,7 +5223,7 @@
                 "sourceTitle": "BBS Whispering Campaign"
               },
               {
-                "effectId": "521.effect.1.trash_source_when_empty",
+                "effectId": 1,
                 "kind": "trash_source_when_empty",
                 "visibility": "public",
                 "side": "corp",
@@ -5806,7 +5806,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "48.cap.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6010,7 +6010,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "45.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6188,7 +6188,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "48.cap.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6236,7 +6236,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "97.start",
+                "effectId": 0,
                 "kind": "start_run",
                 "visibility": "public",
                 "side": "runner",
@@ -6730,7 +6730,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "48.cap.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7121,7 +7121,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 116,
-        "sideSafePlanningFingerprint": "fnv1a:34f3a28a"
+        "sideSafePlanningFingerprint": "fnv1a:96eb78bd"
       },
       "observedTurnPlanAction": {
         "matchId": "match_81893d1a4a838fb0",

@@ -1,6 +1,10 @@
-import type { MatchEventId } from "@netgrid/shared";
+import {
+  isRunnerPaymentWindowId,
+  type MatchEventId,
+  type RunnerPaymentWindowId,
+  type Side,
+} from "@netgrid/shared";
 import type { RunnerExposeInformationMemoryRecord } from "../runner/expose-information/expose-information-types";
-import type { Side } from "@netgrid/shared";
 import {
   assertValidPlanInstance,
   deduplicatePlanProposals,
@@ -164,7 +168,7 @@ export type PendingRunnerCostPenaltySupportOrigin = Readonly<{
   sourceStepId: string;
   originalActionId: string;
   selectedAtStateVersion: number;
-  windowId?: string;
+  windowId?: RunnerPaymentWindowId;
 }>;
 
 export type ResidentSelectedActionOrigin = Readonly<{
@@ -847,7 +851,7 @@ export function assertResidentPlanPortfolio(
       paymentOrigin.selectedAtStateVersion < 0 ||
       paymentOrigin.selectedAtStateVersion > portfolio.stateVersion ||
       (paymentOrigin.windowId !== undefined &&
-        paymentOrigin.windowId.trim().length === 0))
+        !isRunnerPaymentWindowId(paymentOrigin.windowId)))
   ) {
     throw portfolioFailure(
       "executor_invariant_broken",

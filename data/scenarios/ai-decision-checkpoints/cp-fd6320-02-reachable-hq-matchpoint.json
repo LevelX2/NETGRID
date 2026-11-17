@@ -3130,7 +3130,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -3237,7 +3237,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -3277,7 +3277,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "223.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -3414,7 +3414,7 @@
           "turnActionOrdinalEnd": 4,
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -3615,7 +3615,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "46.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -3625,7 +3625,7 @@
               "sourceTitle": "Panzer Run"
             },
             {
-              "effectId": "46.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -3720,7 +3720,7 @@
           "unbrokenSubroutineCount": 2,
           "encounterWillEndRun": false,
           "traceStarted": true,
-          "traceId": "22.c2v3.1.trace",
+          "traceId": 24,
           "sourceCardId": "c2v3",
           "sourceDefinitionId": 463,
           "baseTraceStrength": 5,
@@ -3732,7 +3732,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 22
         }
       },
       {
@@ -3747,9 +3748,9 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "22.c2v3.1.trace.corp.bid.24",
+          "choiceId": "24.corp.bid.24",
           "sourceDefinitionId": 463,
-          "traceId": "22.c2v3.1.trace",
+          "traceId": 24,
           "traceStep": "corp_bid",
           "baseTraceStrength": 5,
           "corpBidMax": 5,
@@ -3781,10 +3782,10 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "22.c2v3.1.trace.runner.bid.25",
+          "choiceId": "24.runner.bid.25",
           "sourceDefinitionId": 463,
           "tagsAdded": 0,
-          "traceId": "22.c2v3.1.trace",
+          "traceId": 24,
           "traceStep": "runner_bid",
           "baseTraceStrength": 5,
           "corpBid": 0,
@@ -3804,7 +3805,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 22
         }
       },
       {
@@ -3890,7 +3892,7 @@
           "unbrokenSubroutineCount": 1,
           "encounterWillEndRun": false,
           "traceStarted": true,
-          "traceId": "22.ciu.0.trace",
+          "traceId": 30,
           "sourceCardId": "ciu",
           "sourceDefinitionId": 84,
           "baseTraceStrength": 5,
@@ -3902,7 +3904,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 22
         }
       },
       {
@@ -3917,9 +3920,9 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "22.ciu.0.trace.corp.bid.30",
+          "choiceId": "30.corp.bid.30",
           "sourceDefinitionId": 84,
-          "traceId": "22.ciu.0.trace",
+          "traceId": 30,
           "traceStep": "corp_bid",
           "baseTraceStrength": 5,
           "corpBidMax": 4,
@@ -3951,10 +3954,10 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "22.ciu.0.trace.runner.bid.31",
+          "choiceId": "30.runner.bid.31",
           "sourceDefinitionId": 84,
           "tagsAdded": 1,
-          "traceId": "22.ciu.0.trace",
+          "traceId": 30,
           "traceStep": "runner_bid",
           "baseTraceStrength": 5,
           "corpBid": 0,
@@ -3976,7 +3979,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 22
         }
       },
       {
@@ -4038,7 +4042,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "63.ce6.access_effect.0.add_tags",
+              "effectId": 0,
               "kind": "add_tags",
               "visibility": "hidden_info_barrier",
               "side": "runner",
@@ -4229,7 +4233,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -5345,7 +5349,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -5516,7 +5520,7 @@
           "label": "Agenda in Remote 1 scoren",
           "resolvedEffects": [
             {
-              "effectId": "415.score.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -5577,7 +5581,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "291.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -5649,7 +5653,7 @@
           "turnActionOrdinalEnd": 4,
           "resolvedEffects": [
             {
-              "effectId": "45.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -6048,7 +6052,7 @@
           "unbrokenSubroutineCount": 1,
           "encounterWillEndRun": false,
           "traceStarted": true,
-          "traceId": "104.cit.0.trace",
+          "traceId": 114,
           "sourceCardId": "cit",
           "sourceDefinitionId": 84,
           "baseTraceStrength": 5,
@@ -6060,7 +6064,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 104
         }
       },
       {
@@ -6075,9 +6080,9 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "104.cit.0.trace.corp.bid.114",
+          "choiceId": "114.corp.bid.114",
           "sourceDefinitionId": 84,
-          "traceId": "104.cit.0.trace",
+          "traceId": 114,
           "traceStep": "corp_bid",
           "baseTraceStrength": 5,
           "corpBidMax": 3,
@@ -6109,10 +6114,10 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "104.cit.0.trace.runner.bid.115",
+          "choiceId": "114.runner.bid.115",
           "sourceDefinitionId": 84,
           "tagsAdded": 1,
-          "traceId": "104.cit.0.trace",
+          "traceId": 114,
           "traceStep": "runner_bid",
           "baseTraceStrength": 5,
           "corpBid": 0,
@@ -6134,7 +6139,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 104
         }
       },
       {

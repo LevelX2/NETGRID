@@ -1395,7 +1395,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1405,7 +1405,7 @@
                 "sourceTitle": "Mobile Barricade"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1652,7 +1652,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1827,7 +1827,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2304,7 +2304,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2352,7 +2352,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "283.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2420,7 +2420,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2623,7 +2623,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3037,7 +3037,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "126.cs6.access_effect.0.add_counter_to_all_installed_runner_icebreakers",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -3519,7 +3519,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4198,7 +4198,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "182.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4208,7 +4208,7 @@
                 "sourceTitle": "Stakeout"
               },
               {
-                "effectId": "182.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -4384,7 +4384,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4428,7 +4428,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4815,7 +4815,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4966,7 +4966,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1qy",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -4979,7 +4979,7 @@
                 "sourceTitle": "Vewy Vewy Quiet"
               },
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 1,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5023,7 +5023,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5278,7 +5278,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5580,7 +5580,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5639,7 +5639,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5698,7 +5698,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5730,7 +5730,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5871,7 +5871,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6103,7 +6103,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6384,7 +6384,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6595,7 +6595,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "197.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6822,7 +6822,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6939,7 +6939,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7121,7 +7121,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7375,7 +7375,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7860,7 +7860,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1qy",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -7873,7 +7873,7 @@
                 "sourceTitle": "Vewy Vewy Quiet"
               },
               {
-                "effectId": "runner.start.restricted_hosted_credit.c17u",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -7886,7 +7886,7 @@
                 "sourceTitle": "Eurocorpse (TM) Spin Chip"
               },
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 2,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -8422,7 +8422,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1qy",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -8435,7 +8435,7 @@
                 "sourceTitle": "Vewy Vewy Quiet"
               },
               {
-                "effectId": "runner.start.restricted_hosted_credit.c17u",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -8448,7 +8448,7 @@
                 "sourceTitle": "Eurocorpse (TM) Spin Chip"
               },
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 2,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -8495,7 +8495,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -8542,7 +8542,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -8746,7 +8746,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "208.c1a9.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -8759,7 +8759,7 @@
                 "sourceTitle": "Streetware Distributor"
               },
               {
-                "effectId": "208.c1aa.effect.0.take_hosted_credits",
+                "effectId": 1,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -9279,7 +9279,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "208.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -9461,7 +9461,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "208.c1a9.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -9715,7 +9715,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "208.c1a9.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -10200,7 +10200,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "runner.start.restricted_hosted_credit.c1qy",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -10213,7 +10213,7 @@
               "sourceTitle": "Vewy Vewy Quiet"
             },
             {
-              "effectId": "runner.start.restricted_hosted_credit.c17u",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -10226,7 +10226,7 @@
               "sourceTitle": "Eurocorpse (TM) Spin Chip"
             },
             {
-              "effectId": "208.c1a9.effect.0.take_hosted_credits",
+              "effectId": 2,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -10762,7 +10762,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "runner.start.restricted_hosted_credit.c1qy",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -10775,7 +10775,7 @@
               "sourceTitle": "Vewy Vewy Quiet"
             },
             {
-              "effectId": "runner.start.restricted_hosted_credit.c17u",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -10788,7 +10788,7 @@
               "sourceTitle": "Eurocorpse (TM) Spin Chip"
             },
             {
-              "effectId": "208.c1a9.effect.0.take_hosted_credits",
+              "effectId": 2,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -10835,7 +10835,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "208.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -10882,7 +10882,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "208.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -11086,7 +11086,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "208.c1a9.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -11099,7 +11099,7 @@
               "sourceTitle": "Streetware Distributor"
             },
             {
-              "effectId": "208.c1aa.effect.0.take_hosted_credits",
+              "effectId": 1,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -11627,7 +11627,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 301,
-      "sideSafePlanningFingerprint": "fnv1a:30be78db"
+      "sideSafePlanningFingerprint": "fnv1a:9aebff51"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_krashkurs_clown_kreditmaschine_2026_07_11_1.0.0",

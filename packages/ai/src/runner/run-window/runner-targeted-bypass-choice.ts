@@ -273,7 +273,7 @@ function targetedBypassPaymentSupportOffset(
     openingEvent.publicPayload.actionType === "play_event" &&
     openingEvent.publicPayload.runnerCostPenaltySupportWindowOpened === true &&
     openingEvent.publicPayload.runnerCostPenaltySupportWindowId ===
-      `runner_cost_penalty_support.${openingStateVersion}` &&
+      openingStateVersion &&
     openingEvent.publicPayload.runnerCostPenaltySupportOriginalActionId ===
       continuation.sourceActionId &&
     exactSupportEvents &&

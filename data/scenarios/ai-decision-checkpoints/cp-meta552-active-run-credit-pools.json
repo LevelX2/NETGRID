@@ -1128,7 +1128,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "320.effect.0.gain_credits",
+                    "effectId": 0,
                     "kind": "gain_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -1275,7 +1275,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -1285,7 +1285,7 @@
                     "sourceTitle": "Neural Blade"
                   },
                   {
-                    "effectId": "subroutine_2",
+                    "effectId": 1,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -3095,7 +3095,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2eb.c276",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -3765,7 +3765,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2eb.c276",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -3928,7 +3928,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -4103,7 +4103,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2eb.c276",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -4231,7 +4231,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -4241,7 +4241,7 @@
                     "sourceTitle": "Neural Blade"
                   },
                   {
-                    "effectId": "subroutine_2",
+                    "effectId": 1,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -4569,7 +4569,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2eb.c276",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -4812,7 +4812,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2eb.c276",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -5119,7 +5119,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2eb.c1ll",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -5240,7 +5240,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -5365,7 +5365,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -5432,7 +5432,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.add_hosted_credits",
+                    "effectId": 0,
                     "kind": "add_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -5634,7 +5634,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2eb.c1ep",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -5674,7 +5674,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "291.effect.0.draw_cards",
+                    "effectId": 0,
                     "kind": "draw_cards",
                     "visibility": "public",
                     "side": "runner",
@@ -6053,7 +6053,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2eb.c276",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -6216,7 +6216,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -6391,7 +6391,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2eb.c276",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -6519,7 +6519,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -6529,7 +6529,7 @@
                   "sourceTitle": "Neural Blade"
                 },
                 {
-                  "effectId": "subroutine_2",
+                  "effectId": 1,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -6857,7 +6857,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2eb.c276",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -7100,7 +7100,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2eb.c276",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -7407,7 +7407,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2eb.c1ll",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -7528,7 +7528,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -7653,7 +7653,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -7720,7 +7720,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "366.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -7922,7 +7922,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2eb.c1ep",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -7962,7 +7962,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "291.effect.0.draw_cards",
+                  "effectId": 0,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "runner",
@@ -8218,7 +8218,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 182,
-          "sideSafePlanningFingerprint": "fnv1a:d4b754d8"
+          "sideSafePlanningFingerprint": "fnv1a:b354a63c"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",
@@ -15970,7 +15970,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -16010,7 +16010,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "320.effect.0.gain_credits",
+                    "effectId": 0,
                     "kind": "gain_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -16051,7 +16051,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "309.effect.0.gain_credits",
+                    "effectId": 0,
                     "kind": "gain_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -17376,7 +17376,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -17880,7 +17880,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "291.effect.0.draw_cards",
+                    "effectId": 0,
                     "kind": "draw_cards",
                     "visibility": "public",
                     "side": "runner",
@@ -18218,7 +18218,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -18258,7 +18258,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "320.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -18299,7 +18299,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "309.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -19624,7 +19624,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -20128,7 +20128,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "291.effect.0.draw_cards",
+                  "effectId": 0,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "runner",
@@ -20392,7 +20392,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 86,
-          "sideSafePlanningFingerprint": "fnv1a:9bbafea9"
+          "sideSafePlanningFingerprint": "fnv1a:4f78d66d"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",
@@ -28682,7 +28682,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -28781,7 +28781,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -28880,7 +28880,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -28979,7 +28979,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -29210,7 +29210,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -29463,7 +29463,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.add_hosted_credits",
+                    "effectId": 0,
                     "kind": "add_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -29785,7 +29785,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "291.effect.0.draw_cards",
+                    "effectId": 0,
                     "kind": "draw_cards",
                     "visibility": "public",
                     "side": "runner",
@@ -30018,7 +30018,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "320.effect.0.gain_credits",
+                    "effectId": 0,
                     "kind": "gain_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -30805,7 +30805,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "subroutine_1",
+                    "effectId": 0,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -30815,7 +30815,7 @@
                     "sourceTitle": "Haunting Inquisition"
                   },
                   {
-                    "effectId": "subroutine_2",
+                    "effectId": 1,
                     "kind": "resolve_subroutine",
                     "visibility": "public",
                     "side": "runner",
@@ -31137,7 +31137,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.take_hosted_credits",
+                    "effectId": 0,
                     "kind": "take_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -31491,7 +31491,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.add_hosted_credits",
+                    "effectId": 0,
                     "kind": "add_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -31713,7 +31713,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.take_hosted_credits",
+                    "effectId": 0,
                     "kind": "take_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -31963,7 +31963,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.add_hosted_credits",
+                    "effectId": 0,
                     "kind": "add_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -32157,7 +32157,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.take_hosted_credits",
+                    "effectId": 0,
                     "kind": "take_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -32204,7 +32204,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.add_hosted_credits",
+                    "effectId": 0,
                     "kind": "add_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -32485,7 +32485,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.take_hosted_credits",
+                    "effectId": 0,
                     "kind": "take_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -32754,7 +32754,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.add_hosted_credits",
+                    "effectId": 0,
                     "kind": "add_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -32792,7 +32792,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "291.effect.0.draw_cards",
+                    "effectId": 0,
                     "kind": "draw_cards",
                     "visibility": "public",
                     "side": "runner",
@@ -33011,7 +33011,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.take_hosted_credits",
+                    "effectId": 0,
                     "kind": "take_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -33055,7 +33055,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "309.effect.0.gain_credits",
+                    "effectId": 0,
                     "kind": "gain_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -33123,7 +33123,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "366.effect.0.add_hosted_credits",
+                    "effectId": 0,
                     "kind": "add_hosted_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -33334,7 +33334,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "320.effect.0.gain_credits",
+                    "effectId": 0,
                     "kind": "gain_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -33754,7 +33754,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2e9.c277",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -34213,7 +34213,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2e9.c277",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -34228,7 +34228,7 @@
                     "cardTitle": "Tycho Mem Chip"
                   },
                   {
-                    "effectId": "runner.start.delayed_install.c2ea.c277",
+                    "effectId": 1,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -34645,7 +34645,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2e9.c1ep",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -34695,7 +34695,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2ea.c1ep",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -34741,7 +34741,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "309.effect.0.gain_credits",
+                    "effectId": 0,
                     "kind": "gain_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -35217,7 +35217,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2e9.c1ep",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -35267,7 +35267,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2ea.c1ep",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -35516,7 +35516,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "320.effect.0.gain_credits",
+                    "effectId": 0,
                     "kind": "gain_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -35744,7 +35744,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2e9.c277",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -35794,7 +35794,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2ea.c277",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -36097,7 +36097,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "291.effect.0.draw_cards",
+                    "effectId": 0,
                     "kind": "draw_cards",
                     "visibility": "public",
                     "side": "runner",
@@ -36181,7 +36181,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "corp.root_rez_on_install.hq.c3ku",
+                    "effectId": 0,
                     "kind": "rez_card",
                     "visibility": "public",
                     "side": "corp",
@@ -36322,7 +36322,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2e9.c1eq",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -36372,7 +36372,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2ea.c1eq",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -36921,7 +36921,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2e9.c1ll",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -36971,7 +36971,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2ea.c1eq",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -37402,7 +37402,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "corp.root_rez_on_install.rd.c3kt",
+                    "effectId": 0,
                     "kind": "rez_card",
                     "visibility": "public",
                     "side": "corp",
@@ -37540,7 +37540,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2e9.c1eq",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -37590,7 +37590,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2ea.c1fu",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -38199,7 +38199,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2e9.c1fu",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -38249,7 +38249,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2ea.c1fu",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -38635,7 +38635,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "309.effect.0.gain_credits",
+                    "effectId": 0,
                     "kind": "gain_credits",
                     "visibility": "public",
                     "side": "runner",
@@ -38842,7 +38842,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2e9.c1fu",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -38892,7 +38892,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2ea.c1fu",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -39506,7 +39506,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2e9.c1fu",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -39592,7 +39592,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2ea.c1lm",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -40781,7 +40781,7 @@
                 },
                 "resolvedEffects": [
                   {
-                    "effectId": "runner.start.delayed_install.c2e9.c263",
+                    "effectId": 0,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -40796,7 +40796,7 @@
                     "cardTitle": "R&D Interface"
                   },
                   {
-                    "effectId": "runner.start.delayed_install.c2ea.c263",
+                    "effectId": 1,
                     "kind": "counter_change",
                     "visibility": "public",
                     "side": "runner",
@@ -41505,7 +41505,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2e9.c1fu",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -41555,7 +41555,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c1fu",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -42169,7 +42169,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2e9.c1fu",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -42255,7 +42255,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c1lm",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -43444,7 +43444,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "runner.start.delayed_install.c2e9.c263",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -43459,7 +43459,7 @@
                   "cardTitle": "R&D Interface"
                 },
                 {
-                  "effectId": "runner.start.delayed_install.c2ea.c263",
+                  "effectId": 1,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "runner",
@@ -44013,7 +44013,7 @@
         },
         "planningStateIdentity": {
           "stateVersion": 453,
-          "sideSafePlanningFingerprint": "fnv1a:07c69f00"
+          "sideSafePlanningFingerprint": "fnv1a:72c8b010"
         },
         "ownDeckSnapshot": {
           "deckSnapshotId": "standard_standard_runner_lucidrine_shell_traders_1.0.0",

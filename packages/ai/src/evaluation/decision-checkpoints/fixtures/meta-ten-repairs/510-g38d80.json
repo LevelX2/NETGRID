@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "corp",
   "stateVersion": 79,
-  "stateHash": "fnv1a:1a32c3e4",
+  "stateHash": "fnv1a:0dafa55d",
   "input": {
     "matchId": "match_839fea6262036232",
     "side": "corp",
@@ -657,9 +657,9 @@
         "removedFromGameCount": 0
       },
       "pendingChoice": {
-        "choiceId": "trace_hardware_wrecker_75.c2py.0.trace_79",
+        "choiceId": "trace_hardware_wrecker_77_79",
         "side": "corp",
-        "source": "trace_success.hardware_wrecker:75.c2py.0.trace",
+        "source": "trace_success.hardware_wrecker:77",
         "prompt": "Wähle die Hardware, die getrasht wird.",
         "presentationKey": "generic_select_cards",
         "kind": "select_cards",
@@ -1678,7 +1678,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1712,7 +1712,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -1779,7 +1779,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2000,7 +2000,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2476,7 +2476,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2693,7 +2693,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2799,7 +2799,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2849,7 +2849,7 @@
           "stateHashAfter": "fnv1a:0a32af2c",
           "visibilityClass": "public",
           "publicPayload": {
-            "traceId": "75.c2py.0.trace",
+            "traceId": 77,
             "traceSuccessful": true,
             "actor": "runner",
             "actionType": "resolve_choice",
@@ -2868,7 +2868,10 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 75,
+            "traceSourceCardInstanceId": "c2py",
+            "traceSourceSubroutineIndex": 0
           }
         }
       ],
@@ -2884,7 +2887,7 @@
           "targetRequirements": [],
           "choiceRequirements": [
             {
-              "choiceId": "trace_hardware_wrecker_75.c2py.0.trace_79",
+              "choiceId": "trace_hardware_wrecker_77_79",
               "minSelections": 1,
               "maxSelections": 1,
               "optionIds": [
@@ -3877,7 +3880,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3911,7 +3914,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "307.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -3978,7 +3981,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -4199,7 +4202,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -4675,7 +4678,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -4892,7 +4895,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -4998,7 +5001,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -5048,7 +5051,7 @@
         "stateHashAfter": "fnv1a:0a32af2c",
         "visibilityClass": "public",
         "publicPayload": {
-          "traceId": "75.c2py.0.trace",
+          "traceId": 77,
           "traceSuccessful": true,
           "actor": "runner",
           "actionType": "resolve_choice",
@@ -5067,7 +5070,10 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 75,
+          "traceSourceCardInstanceId": "c2py",
+          "traceSourceSubroutineIndex": 0
         }
       }
     ],
@@ -5083,7 +5089,7 @@
         "targetRequirements": [],
         "choiceRequirements": [
           {
-            "choiceId": "trace_hardware_wrecker_75.c2py.0.trace_79",
+            "choiceId": "trace_hardware_wrecker_77_79",
             "minSelections": 1,
             "maxSelections": 1,
             "optionIds": [
@@ -5138,7 +5144,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 79,
-      "sideSafePlanningFingerprint": "fnv1a:afa3b76c"
+      "sideSafePlanningFingerprint": "fnv1a:11894f9d"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_siren_fortress_1.1.0",

@@ -1644,7 +1644,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1871,7 +1871,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2325,7 +2325,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2718,7 +2718,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -2832,7 +2832,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "53.start",
+                "effectId": 0,
                 "kind": "start_run",
                 "visibility": "public",
                 "side": "runner",
@@ -2997,7 +2997,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3214,7 +3214,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -3294,7 +3294,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -3476,7 +3476,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3624,7 +3624,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -3929,7 +3929,7 @@
             "abilityFamily": "run-access",
             "effectKind": "trace",
             "traceStarted": true,
-            "traceId": "89.c2un.0.trace",
+            "traceId": 91,
             "traceLimit": 5,
             "effectiveTraceLimit": 5,
             "targets": {
@@ -3941,7 +3941,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3949,7 +3949,8 @@
                 "sourceDefinitionId": 461,
                 "sourceTitle": "Hunter"
               }
-            ]
+            ],
+            "traceSourceRunId": 89
           }
         },
         {
@@ -3967,8 +3968,8 @@
             "sourceDefinitionId": 461,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "89.c2un.0.trace",
-            "choiceId": "89.c2un.0.trace.corp.bid.91",
+            "traceId": 91,
+            "choiceId": "91.corp.bid.91",
             "traceStep": "corp_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -3999,9 +4000,9 @@
             "sourceDefinitionId": 461,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "89.c2un.0.trace",
+            "traceId": 91,
             "traceSuccessful": true,
-            "choiceId": "89.c2un.0.trace.runner.bid.92",
+            "choiceId": "91.runner.bid.92",
             "traceStep": "runner_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -4019,7 +4020,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 89
           }
         },
         {
@@ -4122,7 +4124,7 @@
             "abilityFamily": "run-access",
             "effectKind": "trace",
             "traceStarted": true,
-            "traceId": "89.c2ul.0.trace",
+            "traceId": 97,
             "traceLimit": 5,
             "effectiveTraceLimit": 5,
             "targets": {
@@ -4134,7 +4136,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4142,7 +4144,8 @@
                 "sourceDefinitionId": 461,
                 "sourceTitle": "Hunter"
               }
-            ]
+            ],
+            "traceSourceRunId": 89
           }
         },
         {
@@ -4160,8 +4163,8 @@
             "sourceDefinitionId": 461,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "89.c2ul.0.trace",
-            "choiceId": "89.c2ul.0.trace.corp.bid.97",
+            "traceId": 97,
+            "choiceId": "97.corp.bid.97",
             "traceStep": "corp_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -4192,9 +4195,9 @@
             "sourceDefinitionId": 461,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "89.c2ul.0.trace",
+            "traceId": 97,
             "traceSuccessful": true,
-            "choiceId": "89.c2ul.0.trace.runner.bid.98",
+            "choiceId": "97.runner.bid.98",
             "traceStep": "runner_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -4212,7 +4215,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 89
           }
         },
         {
@@ -5458,7 +5462,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5468,7 +5472,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -5603,7 +5607,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5915,7 +5919,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6000,7 +6004,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6299,7 +6303,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7175,7 +7179,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7185,7 +7189,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -7320,7 +7324,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7382,7 +7386,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7612,7 +7616,7 @@
             "abilityFamily": "run-access",
             "effectKind": "trace",
             "traceStarted": true,
-            "traceId": "232.c2rr.0.trace",
+            "traceId": 234,
             "traceLimit": 5,
             "effectiveTraceLimit": 5,
             "targets": {
@@ -7624,7 +7628,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -7632,7 +7636,8 @@
                 "sourceDefinitionId": 448,
                 "sourceTitle": "Data Raven"
               }
-            ]
+            ],
+            "traceSourceRunId": 232
           }
         },
         {
@@ -7650,8 +7655,8 @@
             "sourceDefinitionId": 448,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "232.c2rr.0.trace",
-            "choiceId": "232.c2rr.0.trace.corp.bid.234",
+            "traceId": 234,
+            "choiceId": "234.corp.bid.234",
             "traceStep": "corp_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -7682,9 +7687,9 @@
             "sourceDefinitionId": 448,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "232.c2rr.0.trace",
+            "traceId": 234,
             "traceSuccessful": false,
-            "choiceId": "232.c2rr.0.trace.runner.bid.235",
+            "choiceId": "234.runner.bid.235",
             "traceStep": "runner_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -7700,7 +7705,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 232
           }
         },
         {
@@ -7878,7 +7884,7 @@
             "abilityFamily": "run-access",
             "effectKind": "trace",
             "traceStarted": true,
-            "traceId": "232.c2un.0.trace",
+            "traceId": 243,
             "traceLimit": 5,
             "effectiveTraceLimit": 5,
             "targets": {
@@ -7890,7 +7896,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -7898,7 +7904,8 @@
                 "sourceDefinitionId": 461,
                 "sourceTitle": "Hunter"
               }
-            ]
+            ],
+            "traceSourceRunId": 232
           }
         },
         {
@@ -7916,8 +7923,8 @@
             "sourceDefinitionId": 461,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "232.c2un.0.trace",
-            "choiceId": "232.c2un.0.trace.corp.bid.243",
+            "traceId": 243,
+            "choiceId": "243.corp.bid.243",
             "traceStep": "corp_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -7948,9 +7955,9 @@
             "sourceDefinitionId": 461,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "232.c2un.0.trace",
+            "traceId": 243,
             "traceSuccessful": false,
-            "choiceId": "232.c2un.0.trace.runner.bid.244",
+            "choiceId": "243.runner.bid.244",
             "traceStep": "runner_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -7966,7 +7973,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 232
           }
         },
         {
@@ -8042,7 +8050,7 @@
             "abilityFamily": "run-access",
             "effectKind": "trace",
             "traceStarted": true,
-            "traceId": "232.c2ul.0.trace",
+            "traceId": 248,
             "traceLimit": 5,
             "effectiveTraceLimit": 5,
             "targets": {
@@ -8054,7 +8062,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -8062,7 +8070,8 @@
                 "sourceDefinitionId": 461,
                 "sourceTitle": "Hunter"
               }
-            ]
+            ],
+            "traceSourceRunId": 232
           }
         },
         {
@@ -8080,8 +8089,8 @@
             "sourceDefinitionId": 461,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "232.c2ul.0.trace",
-            "choiceId": "232.c2ul.0.trace.corp.bid.248",
+            "traceId": 248,
+            "choiceId": "248.corp.bid.248",
             "traceStep": "corp_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -8112,9 +8121,9 @@
             "sourceDefinitionId": 461,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "232.c2ul.0.trace",
+            "traceId": 248,
             "traceSuccessful": false,
-            "choiceId": "232.c2ul.0.trace.runner.bid.249",
+            "choiceId": "248.runner.bid.249",
             "traceStep": "runner_bid",
             "corpBid": 0,
             "traceLimit": 5,
@@ -8130,7 +8139,8 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 232
           }
         },
         {
@@ -9217,7 +9227,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "415.score.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -9258,7 +9268,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -10142,7 +10152,7 @@
           "abilityFamily": "run-access",
           "effectKind": "trace",
           "traceStarted": true,
-          "traceId": "232.c2rr.0.trace",
+          "traceId": 234,
           "traceLimit": 5,
           "effectiveTraceLimit": 5,
           "targets": {
@@ -10154,7 +10164,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -10162,7 +10172,8 @@
               "sourceDefinitionId": 448,
               "sourceTitle": "Data Raven"
             }
-          ]
+          ],
+          "traceSourceRunId": 232
         }
       },
       {
@@ -10180,8 +10191,8 @@
           "sourceDefinitionId": 448,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "232.c2rr.0.trace",
-          "choiceId": "232.c2rr.0.trace.corp.bid.234",
+          "traceId": 234,
+          "choiceId": "234.corp.bid.234",
           "traceStep": "corp_bid",
           "corpBid": 0,
           "traceLimit": 5,
@@ -10212,9 +10223,9 @@
           "sourceDefinitionId": 448,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "232.c2rr.0.trace",
+          "traceId": 234,
           "traceSuccessful": false,
-          "choiceId": "232.c2rr.0.trace.runner.bid.235",
+          "choiceId": "234.runner.bid.235",
           "traceStep": "runner_bid",
           "corpBid": 0,
           "traceLimit": 5,
@@ -10230,7 +10241,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 232
         }
       },
       {
@@ -10408,7 +10420,7 @@
           "abilityFamily": "run-access",
           "effectKind": "trace",
           "traceStarted": true,
-          "traceId": "232.c2un.0.trace",
+          "traceId": 243,
           "traceLimit": 5,
           "effectiveTraceLimit": 5,
           "targets": {
@@ -10420,7 +10432,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -10428,7 +10440,8 @@
               "sourceDefinitionId": 461,
               "sourceTitle": "Hunter"
             }
-          ]
+          ],
+          "traceSourceRunId": 232
         }
       },
       {
@@ -10446,8 +10459,8 @@
           "sourceDefinitionId": 461,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "232.c2un.0.trace",
-          "choiceId": "232.c2un.0.trace.corp.bid.243",
+          "traceId": 243,
+          "choiceId": "243.corp.bid.243",
           "traceStep": "corp_bid",
           "corpBid": 0,
           "traceLimit": 5,
@@ -10478,9 +10491,9 @@
           "sourceDefinitionId": 461,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "232.c2un.0.trace",
+          "traceId": 243,
           "traceSuccessful": false,
-          "choiceId": "232.c2un.0.trace.runner.bid.244",
+          "choiceId": "243.runner.bid.244",
           "traceStep": "runner_bid",
           "corpBid": 0,
           "traceLimit": 5,
@@ -10496,7 +10509,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 232
         }
       },
       {
@@ -10572,7 +10586,7 @@
           "abilityFamily": "run-access",
           "effectKind": "trace",
           "traceStarted": true,
-          "traceId": "232.c2ul.0.trace",
+          "traceId": 248,
           "traceLimit": 5,
           "effectiveTraceLimit": 5,
           "targets": {
@@ -10584,7 +10598,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -10592,7 +10606,8 @@
               "sourceDefinitionId": 461,
               "sourceTitle": "Hunter"
             }
-          ]
+          ],
+          "traceSourceRunId": 232
         }
       },
       {
@@ -10610,8 +10625,8 @@
           "sourceDefinitionId": 461,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "232.c2ul.0.trace",
-          "choiceId": "232.c2ul.0.trace.corp.bid.248",
+          "traceId": 248,
+          "choiceId": "248.corp.bid.248",
           "traceStep": "corp_bid",
           "corpBid": 0,
           "traceLimit": 5,
@@ -10642,9 +10657,9 @@
           "sourceDefinitionId": 461,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "232.c2ul.0.trace",
+          "traceId": 248,
           "traceSuccessful": false,
-          "choiceId": "232.c2ul.0.trace.runner.bid.249",
+          "choiceId": "248.runner.bid.249",
           "traceStep": "runner_bid",
           "corpBid": 0,
           "traceLimit": 5,
@@ -10660,7 +10675,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 232
         }
       },
       {
@@ -11747,7 +11763,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "415.score.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -11788,7 +11804,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -12511,7 +12527,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 306,
-      "sideSafePlanningFingerprint": "fnv1a:5659c9da"
+      "sideSafePlanningFingerprint": "fnv1a:2e791dd2"
     },
     "observedTurnPlanAction": {
       "matchId": "match_65460d752039b472",

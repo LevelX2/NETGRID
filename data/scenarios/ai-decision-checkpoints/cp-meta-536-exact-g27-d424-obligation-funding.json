@@ -2914,7 +2914,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3051,7 +3051,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3248,7 +3248,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3293,7 +3293,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3362,7 +3362,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "287.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3516,7 +3516,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2du.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3766,7 +3766,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2du.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3831,7 +3831,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4034,7 +4034,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2du.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4136,7 +4136,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4223,7 +4223,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4257,7 +4257,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -4326,7 +4326,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4535,7 +4535,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2dt.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4548,7 +4548,7 @@
                 "sourceTitle": "Rigged Investments"
               },
               {
-                "effectId": "386.c2du.effect.0.take_hosted_credits",
+                "effectId": 1,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4586,7 +4586,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -4631,7 +4631,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4685,7 +4685,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4739,7 +4739,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4947,7 +4947,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2dt.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4960,7 +4960,7 @@
                 "sourceTitle": "Rigged Investments"
               },
               {
-                "effectId": "386.c2du.effect.0.take_hosted_credits",
+                "effectId": 1,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5014,7 +5014,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5064,7 +5064,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "391.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5074,7 +5074,7 @@
                 "sourceTitle": "Silicon Saloon Franchise"
               },
               {
-                "effectId": "391.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -5115,7 +5115,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5156,7 +5156,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5327,7 +5327,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2dt.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5340,7 +5340,7 @@
                 "sourceTitle": "Rigged Investments"
               },
               {
-                "effectId": "386.c2du.effect.0.take_hosted_credits",
+                "effectId": 1,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5378,7 +5378,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "291.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -5423,7 +5423,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "287.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5671,7 +5671,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "530.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5731,7 +5731,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "530.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5817,7 +5817,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2dt.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5830,7 +5830,7 @@
                 "sourceTitle": "Rigged Investments"
               },
               {
-                "effectId": "386.c2du.effect.0.take_hosted_credits",
+                "effectId": 1,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5880,7 +5880,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "391.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5890,7 +5890,7 @@
                 "sourceTitle": "Silicon Saloon Franchise"
               },
               {
-                "effectId": "391.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -6010,7 +6010,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "391.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6020,7 +6020,7 @@
                 "sourceTitle": "Silicon Saloon Franchise"
               },
               {
-                "effectId": "391.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -6138,7 +6138,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "530.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6226,7 +6226,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "530.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6258,7 +6258,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1ru",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -6296,7 +6296,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2dt.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6309,7 +6309,7 @@
                 "sourceTitle": "Rigged Investments"
               },
               {
-                "effectId": "386.c2du.effect.0.take_hosted_credits",
+                "effectId": 1,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6545,7 +6545,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "391.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6555,7 +6555,7 @@
                 "sourceTitle": "Silicon Saloon Franchise"
               },
               {
-                "effectId": "391.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -6621,7 +6621,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6798,7 +6798,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2dt.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6811,7 +6811,7 @@
                 "sourceTitle": "Rigged Investments"
               },
               {
-                "effectId": "386.c2du.effect.0.take_hosted_credits",
+                "effectId": 1,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6861,7 +6861,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "391.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6871,7 +6871,7 @@
                 "sourceTitle": "Silicon Saloon Franchise"
               },
               {
-                "effectId": "391.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -6943,7 +6943,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "391.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -6953,7 +6953,7 @@
                 "sourceTitle": "Silicon Saloon Franchise"
               },
               {
-                "effectId": "391.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -7173,7 +7173,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "530.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7225,7 +7225,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "530.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7285,7 +7285,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "530.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7340,7 +7340,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2dt.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7353,7 +7353,7 @@
                 "sourceTitle": "Rigged Investments"
               },
               {
-                "effectId": "386.c2du.effect.0.take_hosted_credits",
+                "effectId": 1,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7427,7 +7427,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "391.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7437,7 +7437,7 @@
                 "sourceTitle": "Silicon Saloon Franchise"
               },
               {
-                "effectId": "391.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -7726,7 +7726,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1rt",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -7739,7 +7739,7 @@
                 "sourceTitle": "Zetatech Software Installer"
               },
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1ru",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -7777,7 +7777,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "396.c2g3.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7812,7 +7812,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2dt.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7825,7 +7825,7 @@
                 "sourceTitle": "Rigged Investments"
               },
               {
-                "effectId": "386.c2du.effect.0.take_hosted_credits",
+                "effectId": 1,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -7872,7 +7872,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "396.c2g3.effect.0.trash_source",
+                "effectId": 0,
                 "kind": "trash_source",
                 "visibility": "public",
                 "side": "runner",
@@ -9125,7 +9125,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "391.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -9135,7 +9135,7 @@
                 "sourceTitle": "Silicon Saloon Franchise"
               },
               {
-                "effectId": "391.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -9345,7 +9345,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2dt.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -9358,7 +9358,7 @@
                 "sourceTitle": "Rigged Investments"
               },
               {
-                "effectId": "386.c2du.effect.0.take_hosted_credits",
+                "effectId": 1,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -9371,7 +9371,7 @@
                 "sourceTitle": "Rigged Investments"
               },
               {
-                "effectId": "386.c2du.effect.1.trash_source_when_empty",
+                "effectId": 2,
                 "kind": "trash_source_when_empty",
                 "visibility": "public",
                 "side": "runner",
@@ -9880,7 +9880,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -9934,7 +9934,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -10167,7 +10167,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2dt.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -10266,7 +10266,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -10791,7 +10791,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -10804,7 +10804,7 @@
                 "sourceTitle": "Short-Term Contract"
               },
               {
-                "effectId": "390.effect.1.trash_source_when_empty",
+                "effectId": 1,
                 "kind": "trash_source_when_empty",
                 "visibility": "public",
                 "side": "runner",
@@ -10849,7 +10849,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -11005,7 +11005,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2dt.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -11059,7 +11059,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -11113,7 +11113,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -11191,7 +11191,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "390.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -11350,7 +11350,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "386.c2dt.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -11363,7 +11363,7 @@
                 "sourceTitle": "Rigged Investments"
               },
               {
-                "effectId": "386.c2dt.effect.1.trash_source_when_empty",
+                "effectId": 1,
                 "kind": "trash_source_when_empty",
                 "visibility": "public",
                 "side": "runner",
@@ -11410,7 +11410,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "391.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -11420,7 +11420,7 @@
                 "sourceTitle": "Silicon Saloon Franchise"
               },
               {
-                "effectId": "391.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -13826,7 +13826,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -14107,7 +14107,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -16295,7 +16295,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -16576,7 +16576,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -17589,7 +17589,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 423,
-      "sideSafePlanningFingerprint": "fnv1a:1126e159"
+      "sideSafePlanningFingerprint": "fnv1a:655598e2"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_tycho_ice_stack_1.1.0",

@@ -34,7 +34,7 @@ describe("persisted card capability identity validation", () => {
       originalActionPayload: {},
     };
     state.pendingCorpDraw = {
-      transactionId: "draw:capability",
+      transactionId: 1,
       baseDrawCount: 1,
       replacementDrawCount: 0,
       drawnCardIds: [drawnCardId],

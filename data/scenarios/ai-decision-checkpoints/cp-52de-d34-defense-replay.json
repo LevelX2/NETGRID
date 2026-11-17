@@ -1001,7 +1001,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2287,7 +2287,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2334,7 +2334,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2381,7 +2381,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "257.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2956,7 +2956,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4242,7 +4242,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "257.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -4289,7 +4289,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "257.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -4336,7 +4336,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "257.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -4622,7 +4622,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 69,
-      "sideSafePlanningFingerprint": "fnv1a:e61a552c"
+      "sideSafePlanningFingerprint": "fnv1a:8bfbedb2"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_cheap_bag_tricks_1.0.0",

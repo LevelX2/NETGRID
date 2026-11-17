@@ -810,7 +810,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     );
     state.runner.credits = 3;
     state.runnerCostPenaltySupportWindow = {
-      windowId: "runner_cost_penalty_support.test",
+      windowId: state.stateVersion + 1,
       originalActionId: "runner.install.test",
       amountDue: 6,
       kind: "cost",
@@ -2461,7 +2461,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     state.runner.credits = 3;
     state.corp.badPublicity = 6;
     state.trace = {
-      traceId: "pro012_trace",
+      traceId: 1,
       sourceCardInstanceId: "corp_trace_source" as CardInstanceId,
       sourceDefinitionId: 400,
       traceLimit: 5,
@@ -2476,7 +2476,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     state.pendingChoice = {
       choiceId: "pro012_trace_cancel_choice",
       side: "runner",
-      source: "trace_success_cancel:pro012_trace",
+      source: "trace_success_cancel:1",
       prompt: "Trace-Erfolgseffekt canceln",
       kind: "select_option",
       options: [
@@ -2534,7 +2534,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     );
     tagsOnly.runner.credits = 3;
     tagsOnly.trace = {
-      traceId: "pro012_tags_trace",
+      traceId: 2,
       sourceCardInstanceId: "corp_trace_source_tags" as CardInstanceId,
       sourceDefinitionId: 400,
       traceLimit: 5,
@@ -2549,7 +2549,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     tagsOnly.pendingChoice = {
       choiceId: "pro012_trace_cancel_tags_choice",
       side: "runner",
-      source: "trace_success_cancel:pro012_tags_trace",
+      source: "trace_success_cancel:2",
       prompt: "Trace-Erfolgseffekt canceln",
       kind: "select_option",
       options: [

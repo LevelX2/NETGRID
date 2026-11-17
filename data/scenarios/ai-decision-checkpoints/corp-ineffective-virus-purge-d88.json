@@ -2437,7 +2437,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -2529,7 +2529,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -2620,7 +2620,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -3028,7 +3028,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "24.cwp.successful_run.garbage",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -3447,7 +3447,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "41.cwp.successful_run.garbage",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -4047,7 +4047,7 @@
           "label": "Accounts Receivable kostenlos trashen",
           "resolvedEffects": [
             {
-              "effectId": "63.cwp.successful_run.garbage",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -4623,7 +4623,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "86.cwp.successful_run.garbage",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -5044,7 +5044,7 @@
           "label": "Efficiency Experts kostenlos trashen",
           "resolvedEffects": [
             {
-              "effectId": "102.cwp.successful_run.garbage",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -5982,7 +5982,7 @@
           "label": "Nicht trashen",
           "resolvedEffects": [
             {
-              "effectId": "134.cwp.successful_run.garbage",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -6515,7 +6515,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "500.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -6525,7 +6525,7 @@
               "sourceTitle": "Day Shift"
             },
             {
-              "effectId": "500.effect.1.gain_credits",
+              "effectId": 1,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -6567,7 +6567,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "509.effect.0.gain_actions",
+              "effectId": 0,
               "kind": "gain_actions",
               "visibility": "public",
               "side": "corp",
@@ -6784,7 +6784,7 @@
           "turnActionOrdinalEnd": 4,
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -7137,7 +7137,7 @@
           "label": "Snowbank rezzen",
           "resolvedEffects": [
             {
-              "effectId": "96.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -7691,7 +7691,7 @@
           "label": "Misleading Access Menus kostenlos trashen",
           "resolvedEffects": [
             {
-              "effectId": "205.cwp.successful_run.garbage",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -7892,7 +7892,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "291.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -8110,7 +8110,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "222.cwp.successful_run.garbage",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -8124,7 +8124,7 @@
               "serverLabel": "R&D"
             },
             {
-              "effectId": "222.cwz.successful_run.highlighter",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -8630,7 +8630,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "241.cwp.successful_run.garbage",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -8644,7 +8644,7 @@
               "serverLabel": "R&D"
             },
             {
-              "effectId": "241.cwz.successful_run.highlighter",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",

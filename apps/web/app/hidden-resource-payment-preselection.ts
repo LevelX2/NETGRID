@@ -1,5 +1,13 @@
-import { isCanonicalCapabilityId, type CanonicalCapabilityId, type RunId } from "@netgrid/shared";
-import type { Side, VisibleCard, VisibleRunnerPaymentSupportAbility } from "@netgrid/shared";
+import {
+  isCanonicalCapabilityId,
+  isRunnerPaymentWindowId,
+  type CanonicalCapabilityId,
+  type RunId,
+  type RunnerPaymentWindowId,
+  type Side,
+  type VisibleCard,
+  type VisibleRunnerPaymentSupportAbility,
+} from "@netgrid/shared";
 import type { LegalAction, PlayerView } from "../lib/presented-player-view";
 
 type PaymentSupportAbilityIdentity = {
@@ -31,12 +39,12 @@ function samePaymentSupportAbilityIdentity(
 
 export type PaymentSupportPreselectionResolution =
   | { kind: "waiting" }
-  | { kind: "invalid"; windowId: string }
-  | { kind: "match"; windowId: string; action: LegalAction };
+  | { kind: "invalid"; windowId: RunnerPaymentWindowId }
+  | { kind: "match"; windowId: RunnerPaymentWindowId; action: LegalAction };
 
 export type PendingPaymentSupportContinuation = {
   matchId: string;
-  windowId: string;
+  windowId: RunnerPaymentWindowId;
   supportSubmittedAtStateVersion: number;
 };
 
@@ -122,7 +130,7 @@ export function resolveHiddenResourcePaymentPreselection(
   );
   if (windowIds.size === 0) return { kind: "waiting" };
   if (windowIds.size !== 1)
-    return { kind: "invalid", windowId: [...windowIds].sort()[0] ?? "" };
+    return { kind: "invalid", windowId: Math.min(...windowIds) };
   const windowId = [...windowIds][0]!;
   const matches = legalActions.filter(
     (action) =>
@@ -145,7 +153,7 @@ export function resolveHiddenResourcePaymentPreselection(
 
 export function paymentSupportSubmitKey(
   matchId: string,
-  windowId: string,
+  windowId: RunnerPaymentWindowId,
   action: LegalAction,
 ): string {
   return `${matchId}:${windowId}:${action.actionId}`;
@@ -168,8 +176,7 @@ export function pendingPaymentSupportContinuation(
     supportAction.type !== "activated_card_ability" ||
     supportAction.payload?.cardImplementationAbilityTiming !==
       "runner_cost_penalty_support" ||
-    typeof windowId !== "string" ||
-    windowId.length === 0
+    !isRunnerPaymentWindowId(windowId)
   )
     return null;
   return {
@@ -206,13 +213,13 @@ export function actionBelongsToRunnerPaymentSupportWindow(
   return paymentSupportWindowId(action) !== null;
 }
 
-function paymentSupportWindowId(action: LegalAction): string | null {
+function paymentSupportWindowId(
+  action: LegalAction,
+): RunnerPaymentWindowId | null {
   const supportWindowId = action.payload?.costPenaltySupportWindowId;
-  if (typeof supportWindowId === "string" && supportWindowId.length > 0)
-    return supportWindowId;
+  if (isRunnerPaymentWindowId(supportWindowId)) return supportWindowId;
   const continuationWindowId = action.payload?.runnerCostPenaltySupportWindowId;
-  return typeof continuationWindowId === "string" &&
-    continuationWindowId.length > 0
+  return isRunnerPaymentWindowId(continuationWindowId)
     ? continuationWindowId
     : null;
 }

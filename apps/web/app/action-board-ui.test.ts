@@ -978,7 +978,7 @@ describe("V1.0.5 action board UI helpers", () => {
       {
         cardId: "runner_swiss_1",
         cardImplementationAbilityTiming: "runner_cost_penalty_support",
-        costPenaltySupportWindowId: "runner_cost_penalty_support.217",
+        costPenaltySupportWindowId: 217,
       },
       "runner_action.main",
     );
@@ -991,7 +991,7 @@ describe("V1.0.5 action board UI helpers", () => {
         cardId: "running_interference_1",
         serverId: "hq",
         runnerCostPenaltySupportContinuation: true,
-        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.217",
+        runnerCostPenaltySupportWindowId: 217,
       },
       "runner_action.main",
     );
@@ -1004,7 +1004,7 @@ describe("V1.0.5 action board UI helpers", () => {
         breakerId: "runner_breaker_1",
         subroutineIndex: 0,
         runnerCostPenaltySupportContinuation: true,
-        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.218",
+        runnerCostPenaltySupportWindowId: 218,
       },
       "run.encounter_ice",
     );
@@ -3627,12 +3627,12 @@ describe("V1.0.6 resource and card-display helpers", () => {
         actionCostClicks: 1,
         turnActionOrdinalStart: 3,
         turnActionOrdinalEnd: 3,
-        costPenaltySupportWindowId: "runner_cost_penalty_support.227",
+        costPenaltySupportWindowId: 227,
       }),
       publicEvent(5, "activated_card_ability", {
         actor: "runner",
         actionType: "activated_card_ability",
-        costPenaltySupportWindowId: "runner_cost_penalty_support.227",
+        costPenaltySupportWindowId: 227,
       }),
       publicEvent(6, "play_event", {
         actor: "runner",
@@ -3641,7 +3641,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         turnActionOrdinalStart: 3,
         turnActionOrdinalEnd: 3,
         runnerCostPenaltySupportContinuation: true,
-        costPenaltySupportWindowId: "runner_cost_penalty_support.227",
+        costPenaltySupportWindowId: 227,
       }),
     ];
 

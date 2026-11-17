@@ -647,7 +647,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -743,7 +743,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1358,7 +1358,7 @@
             "title": "Bodyweight™ Synthetic Blood",
             "cardDefinitionId": 291,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.38",
+            "runnerCostPenaltySupportWindowId": 38,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1sp.c1sp.375",
             "visibility": {
               "class": "public"
@@ -1387,7 +1387,7 @@
           "visibility": "public",
           "expiresAtStateVersion": 38,
           "payload": {
-            "costPenaltySupportWindowId": "runner_cost_penalty_support.38",
+            "costPenaltySupportWindowId": 38,
             "costPenaltySupportOriginalActionId": "runner.play_event.c1sp.c1sp.375",
             "costPenaltySupportRunnerCreditTarget": 2,
             "costPenaltySupportAmountDue": 2,
@@ -1423,7 +1423,7 @@
           "expiresAtStateVersion": 38,
           "payload": {
             "runnerCostPenaltySupportContinuation": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.38",
+            "runnerCostPenaltySupportWindowId": 38,
             "cardId": "c1sp",
             "drawCardsAmount": 5,
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
@@ -1740,7 +1740,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -1836,7 +1836,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -2451,7 +2451,7 @@
           "title": "Bodyweight™ Synthetic Blood",
           "cardDefinitionId": 291,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.38",
+          "runnerCostPenaltySupportWindowId": 38,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1sp.c1sp.375",
           "visibility": {
             "class": "public"
@@ -2480,7 +2480,7 @@
         "visibility": "public",
         "expiresAtStateVersion": 38,
         "payload": {
-          "costPenaltySupportWindowId": "runner_cost_penalty_support.38",
+          "costPenaltySupportWindowId": 38,
           "costPenaltySupportOriginalActionId": "runner.play_event.c1sp.c1sp.375",
           "costPenaltySupportRunnerCreditTarget": 2,
           "costPenaltySupportAmountDue": 2,
@@ -2516,7 +2516,7 @@
         "expiresAtStateVersion": 38,
         "payload": {
           "runnerCostPenaltySupportContinuation": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.38",
+          "runnerCostPenaltySupportWindowId": 38,
           "cardId": "c1sp",
           "drawCardsAmount": 5,
           "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
@@ -2567,7 +2567,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 38,
-      "sideSafePlanningFingerprint": "fnv1a:57146656"
+      "sideSafePlanningFingerprint": "fnv1a:0cbf19fe"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",

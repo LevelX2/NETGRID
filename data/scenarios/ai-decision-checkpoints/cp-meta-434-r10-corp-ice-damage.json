@@ -2521,7 +2521,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2531,7 +2531,7 @@
                 "sourceTitle": "Wall of Ice"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2541,7 +2541,7 @@
                 "sourceTitle": "Wall of Ice"
               },
               {
-                "effectId": "subroutine_3",
+                "effectId": 2,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4738,7 +4738,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4748,7 +4748,7 @@
               "sourceTitle": "Wall of Ice"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -4758,7 +4758,7 @@
               "sourceTitle": "Wall of Ice"
             },
             {
-              "effectId": "subroutine_3",
+              "effectId": 2,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -5068,7 +5068,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 82,
-      "sideSafePlanningFingerprint": "fnv1a:12c75a1a"
+      "sideSafePlanningFingerprint": "fnv1a:8f9efd4c"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

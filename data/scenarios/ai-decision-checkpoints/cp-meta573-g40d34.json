@@ -560,7 +560,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1241,7 +1241,7 @@
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
             "traceStarted": true,
-            "traceId": "op_trace.30.108.co5",
+            "traceId": 30,
             "traceLimit": 6,
             "effectiveTraceLimit": 6,
             "targets": {
@@ -1267,8 +1267,8 @@
             "sourceDefinitionId": 108,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "op_trace.30.108.co5",
-            "choiceId": "op_trace.30.108.co5.corp.bid.30",
+            "traceId": 30,
+            "choiceId": "30.corp.bid.30",
             "traceStep": "corp_bid",
             "corpBid": 0,
             "traceLimit": 6,
@@ -1299,9 +1299,9 @@
             "sourceDefinitionId": 108,
             "abilityFamily": "trace-tags",
             "effectKind": "trace",
-            "traceId": "op_trace.30.108.co5",
+            "traceId": 30,
             "traceSuccessful": true,
-            "choiceId": "op_trace.30.108.co5.runner.bid.31",
+            "choiceId": "30.runner.bid.31",
             "traceStep": "runner_bid",
             "corpBid": 0,
             "traceLimit": 6,
@@ -1678,7 +1678,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -2359,7 +2359,7 @@
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
           "traceStarted": true,
-          "traceId": "op_trace.30.108.co5",
+          "traceId": 30,
           "traceLimit": 6,
           "effectiveTraceLimit": 6,
           "targets": {
@@ -2385,8 +2385,8 @@
           "sourceDefinitionId": 108,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "op_trace.30.108.co5",
-          "choiceId": "op_trace.30.108.co5.corp.bid.30",
+          "traceId": 30,
+          "choiceId": "30.corp.bid.30",
           "traceStep": "corp_bid",
           "corpBid": 0,
           "traceLimit": 6,
@@ -2417,9 +2417,9 @@
           "sourceDefinitionId": 108,
           "abilityFamily": "trace-tags",
           "effectKind": "trace",
-          "traceId": "op_trace.30.108.co5",
+          "traceId": 30,
           "traceSuccessful": true,
-          "choiceId": "op_trace.30.108.co5.runner.bid.31",
+          "choiceId": "30.runner.bid.31",
           "traceStep": "runner_bid",
           "corpBid": 0,
           "traceLimit": 6,
@@ -2621,7 +2621,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 33,
-      "sideSafePlanningFingerprint": "fnv1a:c5e1990a"
+      "sideSafePlanningFingerprint": "fnv1a:7e1b2b38"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_adb10896_1.1.0",

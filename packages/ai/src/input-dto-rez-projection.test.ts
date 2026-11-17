@@ -96,8 +96,8 @@ describe("AI input DTO Corp rez projection contract", () => {
     action.payload = {
       ...action.payload,
       runnerCostPenaltySupportContinuation: true,
-      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.91",
-      costPenaltySupportWindowId: "runner_cost_penalty_support.91",
+      runnerCostPenaltySupportWindowId: 91,
+      costPenaltySupportWindowId: 91,
       costPenaltySupportOriginalActionId: "runner.play_event.temple",
     };
     const view = playerView(action);
@@ -115,8 +115,8 @@ describe("AI input DTO Corp rez projection contract", () => {
 
     expect(input.legalActions[0]?.payload).toMatchObject({
       runnerCostPenaltySupportContinuation: true,
-      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.91",
-      costPenaltySupportWindowId: "runner_cost_penalty_support.91",
+      runnerCostPenaltySupportWindowId: 91,
+      costPenaltySupportWindowId: 91,
       costPenaltySupportOriginalActionId: "runner.play_event.temple",
     });
     expect(input.playerView.legalActions[0]?.payload).toMatchObject(

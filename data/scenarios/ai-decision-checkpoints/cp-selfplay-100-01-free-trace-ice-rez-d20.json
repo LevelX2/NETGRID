@@ -916,7 +916,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "396.c2g1.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -957,7 +957,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "396.c2g1.effect.0.trash_source",
+                "effectId": 0,
                 "kind": "trash_source",
                 "visibility": "public",
                 "side": "runner",
@@ -1503,7 +1503,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "396.c2g1.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -1544,7 +1544,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "396.c2g1.effect.0.trash_source",
+              "effectId": 0,
               "kind": "trash_source",
               "visibility": "public",
               "side": "runner",
@@ -1653,7 +1653,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 19,
-      "sideSafePlanningFingerprint": "fnv1a:17f0abc7"
+      "sideSafePlanningFingerprint": "fnv1a:fe5ea74b"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_syds_ice_pfandhaus_2026_07_09_1.1.0",

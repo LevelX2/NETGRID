@@ -1,6 +1,7 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
+  isRunnerPaymentWindowId,
   type CardDefinition,
   type CardInstanceId,
   type EventVisibilityClass,
@@ -10,7 +11,7 @@ import {
   type AbilityPayloadDiscriminatorField,
   type PlayerAction,
   type PublicEventPayload,
-  type ResolvedGameEffect,
+  type PublicResolvedGameEffect,
   type Side,
   type StateHash,
 } from "@netgrid/shared";
@@ -92,6 +93,11 @@ export function buildEventWithHost(
     legalAction,
     host.publicContext.deps,
   );
+  let resolvedEffects: PublicResolvedGameEffect[] | undefined =
+    legalAction.resolvedEffects?.map((effect, effectId) => ({
+      ...effect,
+      effectId,
+    }));
   const startedRun =
     state.run && state.run.runId !== previousState.run?.runId
       ? state.run
@@ -101,8 +107,9 @@ export function buildEventWithHost(
     actionContext.abilityFamily = "run-access";
     actionContext.effectKind = "run";
     if (legalAction.type !== "start_run") {
-      const runStartEffect: ResolvedGameEffect = {
-        effectId: `${startedRun.runId}.start`,
+      resolvedEffects ??= [];
+      resolvedEffects.push({
+        effectId: resolvedEffects.length,
         kind: "start_run",
         visibility: "public",
         side: "runner",
@@ -110,11 +117,7 @@ export function buildEventWithHost(
         serverId: startedRun.attackedServerId,
         accessServerId:
           startedRun.accessServerOverride ?? startedRun.attackedServerId,
-      };
-      actionContext.resolvedEffects = [
-        ...(legalAction.resolvedEffects ?? []),
-        runStartEffect,
-      ];
+      });
     }
   }
   if (
@@ -138,7 +141,7 @@ export function buildEventWithHost(
     state,
     legalAction,
   );
-  const publicPayload: Record<string, unknown> = {
+  const publicPayload: PublicEventPayload = {
     actor,
     actionType: publicEventType,
     label: publicLabel(legalAction),
@@ -160,6 +163,7 @@ export function buildEventWithHost(
       visibilityClass,
     ),
     ...(counterMutations.length > 0 ? { counterMutations } : {}),
+    ...(resolvedEffects ? { resolvedEffects } : {}),
     ...(legalAction.publicVisibilityTransitions?.length
       ? {
           publicVisibilityTransitions: legalAction.publicVisibilityTransitions,
@@ -255,7 +259,7 @@ function runnerCostPenaltySupportEventContext(
     return {};
   }
   const windowId = legalAction.payload.runnerCostPenaltySupportWindowId;
-  if (typeof windowId !== "string" || windowId.length === 0) {
+  if (!isRunnerPaymentWindowId(windowId)) {
     throw new Error(
       "Runner-Kostenfenster benötigt eine öffentliche Window-ID.",
     );

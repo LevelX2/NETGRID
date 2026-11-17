@@ -1,5 +1,5 @@
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
-import type { AiDecisionInput } from "@netgrid/shared";
+import { isRunnerPaymentWindowId, type AiDecisionInput } from "@netgrid/shared";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import type { RunnerRemoteContestSignal } from "../../plans/runner-tactical-plan-contracts";
 import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
@@ -29,7 +29,7 @@ export function runnerRemoteCoveragePaymentNeed(
   const windowId = continuation?.payload?.runnerCostPenaltySupportWindowId;
   if (
     !continuation ||
-    typeof windowId !== "string" ||
+    !isRunnerPaymentWindowId(windowId) ||
     continuation.actionId !== pending.originalActionId ||
     !input.legalActions.every(
       (a) =>

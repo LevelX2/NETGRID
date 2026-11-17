@@ -1526,7 +1526,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2049,7 +2049,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2395,7 +2395,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.trace_tag_counter",
+                "effectId": 0,
                 "kind": "add_tags",
                 "visibility": "public",
                 "side": "runner",
@@ -2644,7 +2644,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.trace_tag_counter",
+                "effectId": 0,
                 "kind": "add_tags",
                 "visibility": "public",
                 "side": "runner",
@@ -2991,7 +2991,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.trace_tag_counter",
+                "effectId": 0,
                 "kind": "add_tags",
                 "visibility": "public",
                 "side": "runner",
@@ -3544,7 +3544,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "46.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3554,7 +3554,7 @@
                 "sourceTitle": "Panzer Run"
               },
               {
-                "effectId": "46.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -3760,7 +3760,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4122,7 +4122,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "499.effect.0.add_tags",
+                "effectId": 0,
                 "kind": "add_tags",
                 "visibility": "public",
                 "side": "runner",
@@ -4162,7 +4162,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "513.effect.0.damage",
+                "effectId": 0,
                 "kind": "damage",
                 "visibility": "public",
                 "side": "runner",
@@ -4438,7 +4438,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "505.effect.0.add_tags",
+                "effectId": 0,
                 "kind": "add_tags",
                 "visibility": "public",
                 "side": "runner",
@@ -4449,7 +4449,7 @@
                 "sourceTitle": "Netwatch Credit Voucher"
               },
               {
-                "effectId": "505.effect.1.gain_credits",
+                "effectId": 1,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -4930,7 +4930,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -4940,7 +4940,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -5677,7 +5677,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -7555,7 +7555,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -9053,7 +9053,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "56.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -9720,7 +9720,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "46.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -9730,7 +9730,7 @@
                 "sourceTitle": "Panzer Run"
               },
               {
-                "effectId": "46.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -10029,7 +10029,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.cci",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -10149,7 +10149,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -10345,7 +10345,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -11477,7 +11477,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "56.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -12144,7 +12144,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "46.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -12154,7 +12154,7 @@
               "sourceTitle": "Panzer Run"
             },
             {
-              "effectId": "46.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -12453,7 +12453,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "runner.start.restricted_hosted_credit.cci",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -12573,7 +12573,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -12769,7 +12769,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -13304,7 +13304,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 360,
-      "sideSafePlanningFingerprint": "fnv1a:870f803d"
+      "sideSafePlanningFingerprint": "fnv1a:fc4a0afc"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_prep_economy_pressure_2026_07_01_1.0.0",

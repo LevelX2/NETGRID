@@ -1124,7 +1124,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "corp.root_rez_on_install.hq.c3kt",
+                  "effectId": 0,
                   "kind": "rez_card",
                   "visibility": "public",
                   "side": "corp",
@@ -1240,7 +1240,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "9.cwx.successful_run.highlighter",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -1300,7 +1300,7 @@
               "title": "Codecracker",
               "cardDefinitionId": 226,
               "runnerCostPenaltySupportWindowOpened": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.12",
+              "runnerCostPenaltySupportWindowId": 12,
               "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c1e9.c1e9",
               "effectKind": "install_card",
               "visibility": {
@@ -1865,7 +1865,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -1980,7 +1980,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "36.cwx.successful_run.highlighter",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -2259,7 +2259,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -2445,7 +2445,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "48.cwx.successful_run.highlighter",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -2818,7 +2818,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "subroutine_1",
+                  "effectId": 0,
                   "kind": "resolve_subroutine",
                   "visibility": "public",
                   "side": "runner",
@@ -3000,7 +3000,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "70.cwx.successful_run.highlighter",
+                  "effectId": 0,
                   "kind": "counter_change",
                   "visibility": "public",
                   "side": "corp",
@@ -3957,7 +3957,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "507.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -3967,7 +3967,7 @@
                   "sourceTitle": "Night Shift"
                 },
                 {
-                  "effectId": "507.effect.1.draw_cards",
+                  "effectId": 1,
                   "kind": "draw_cards",
                   "visibility": "public",
                   "side": "corp",
@@ -4241,7 +4241,7 @@
               "serverLabel": "Remote 1",
               "installPlacement": "root",
               "runnerCostPenaltySupportWindowOpened": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.127",
+              "runnerCostPenaltySupportWindowId": 127,
               "runnerCostPenaltySupportOriginalActionId": "runner.trash_accessed_card.c3bh.2",
               "installedPositionKey": "installed-position-v1:b4da6d3c",
               "abilityFamily": "run-access",
@@ -4694,7 +4694,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.add_hosted_credits",
+                  "effectId": 0,
                   "kind": "add_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -4753,7 +4753,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -4812,7 +4812,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "521.effect.0.take_hosted_credits",
+                  "effectId": 0,
                   "kind": "take_hosted_credits",
                   "visibility": "public",
                   "side": "corp",
@@ -4928,7 +4928,7 @@
               "serverLabel": "Remote 3",
               "installPlacement": "root",
               "runnerCostPenaltySupportWindowOpened": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150",
+              "runnerCostPenaltySupportWindowId": 150,
               "runnerCostPenaltySupportOriginalActionId": "runner.trash_accessed_card.c37y.4",
               "installedPositionKey": "installed-position-v1:792efe2d",
               "abilityFamily": "run-access",
@@ -5553,7 +5553,7 @@
               "title": "Codecracker",
               "cardDefinitionId": 226,
               "runnerCostPenaltySupportWindowOpened": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.175",
+              "runnerCostPenaltySupportWindowId": 175,
               "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1e9.c1e9.c1e9.c2x9.292",
               "visibility": {
                 "class": "private_to_side"
@@ -5594,7 +5594,7 @@
               "title": "Codecracker",
               "cardDefinitionId": 226,
               "runnerCostPenaltySupportWindowOpened": true,
-              "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.177",
+              "runnerCostPenaltySupportWindowId": 177,
               "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1e9.c1e9.c1e9.c2x9.292",
               "visibility": {
                 "class": "private_to_side"
@@ -6089,7 +6089,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6099,7 +6099,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -6373,7 +6373,7 @@
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.127",
+            "runnerCostPenaltySupportWindowId": 127,
             "runnerCostPenaltySupportOriginalActionId": "runner.trash_accessed_card.c3bh.2",
             "installedPositionKey": "installed-position-v1:b4da6d3c",
             "abilityFamily": "run-access",
@@ -6826,7 +6826,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6885,7 +6885,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6944,7 +6944,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "521.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7060,7 +7060,7 @@
             "serverLabel": "Remote 3",
             "installPlacement": "root",
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150",
+            "runnerCostPenaltySupportWindowId": 150,
             "runnerCostPenaltySupportOriginalActionId": "runner.trash_accessed_card.c37y.4",
             "installedPositionKey": "installed-position-v1:792efe2d",
             "abilityFamily": "run-access",
@@ -7685,7 +7685,7 @@
             "title": "Codecracker",
             "cardDefinitionId": 226,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.175",
+            "runnerCostPenaltySupportWindowId": 175,
             "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1e9.c1e9.c1e9.c2x9.292",
             "visibility": {
               "class": "private_to_side"
@@ -7726,7 +7726,7 @@
             "title": "Codecracker",
             "cardDefinitionId": 226,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.177",
+            "runnerCostPenaltySupportWindowId": 177,
             "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1e9.c1e9.c1e9.c2x9.292",
             "visibility": {
               "class": "private_to_side"
@@ -7923,7 +7923,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 182,
-        "sideSafePlanningFingerprint": "fnv1a:04f6fa2b"
+        "sideSafePlanningFingerprint": "fnv1a:f2745c09"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -17495,7 +17495,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "corp.root_rez_on_install.hq.c3kt",
+              "effectId": 0,
               "kind": "rez_card",
               "visibility": "public",
               "side": "corp",
@@ -17771,7 +17771,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "9.cwx.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -17974,7 +17974,7 @@
           "turnActionOrdinalStart": 4,
           "turnActionOrdinalEnd": 4,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.12",
+          "runnerCostPenaltySupportWindowId": 12,
           "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c1e9.c1e9",
           "zoneLabel": "Rig",
           "effectKind": "install_card",
@@ -18012,7 +18012,7 @@
                 "cardId": "c1e9",
                 "effectKind": "install_card",
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.12"
+                "runnerCostPenaltySupportWindowId": 12
               }
             }
           }
@@ -18078,7 +18078,7 @@
                 "cardId": "c1e9",
                 "effectKind": "install_card",
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.12",
+                "runnerCostPenaltySupportWindowId": 12,
                 "runnerCostPenaltySupportWindowClosed": true,
                 "installCostPaid": 2,
                 "runnerInstallNormalCreditsPaid": 2,
@@ -19326,7 +19326,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -19595,7 +19595,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "36.cwx.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -20325,7 +20325,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -20346,7 +20346,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "48.c2sl.0.trace",
+          "traceId": 50,
           "sourceCardId": "c2sl",
           "sourceDefinitionId": 452,
           "traceLimit": 4,
@@ -20361,7 +20361,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 48
         },
         "privatePayload": {
           "runner": {
@@ -20394,12 +20395,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "48.c2sl.0.trace",
+                "traceId": 50,
                 "sourceCardId": "c2sl",
                 "traceLimit": 4,
                 "effectiveTraceLimit": 4,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 0
+                "corpBidMax": 0,
+                "traceSourceRunId": 48
               },
               "resolvedEffects": [
                 {
@@ -20431,11 +20433,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "48.c2sl.0.trace.corp.bid.50",
+          "choiceId": "50.corp.bid.50",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 452,
-          "traceId": "48.c2sl.0.trace",
+          "traceId": 50,
           "traceStep": "corp_bid",
           "traceLimit": 4,
           "effectiveTraceLimit": 4,
@@ -20464,7 +20466,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 50,
               "selectedChoices": {
-                "choiceId": "48.c2sl.0.trace.corp.bid.50",
+                "choiceId": "50.corp.bid.50",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -20483,7 +20485,7 @@
               "expiresAtStateVersion": 50,
               "choiceRequirements": [
                 {
-                  "choiceId": "48.c2sl.0.trace.corp.bid.50",
+                  "choiceId": "50.corp.bid.50",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -20492,10 +20494,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "48.c2sl.0.trace.corp.bid.50",
+                "choiceId": "50.corp.bid.50",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "48.c2sl.0.trace",
+                "traceId": 50,
                 "traceStep": "corp_bid",
                 "traceLimit": 4,
                 "effectiveTraceLimit": 4,
@@ -20524,12 +20526,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "48.c2sl.0.trace.runner.bid.51",
+          "choiceId": "50.runner.bid.51",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 452,
           "tagsAdded": 0,
-          "traceId": "48.c2sl.0.trace",
+          "traceId": 50,
           "traceStep": "runner_bid",
           "traceLimit": 4,
           "corpBid": 0,
@@ -20552,7 +20554,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 48
         },
         "privatePayload": {
           "runner": {
@@ -20562,7 +20565,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 51,
               "selectedChoices": {
-                "choiceId": "48.c2sl.0.trace.runner.bid.51",
+                "choiceId": "50.runner.bid.51",
                 "selectedOptionIds": [
                   "bid_4"
                 ]
@@ -20581,7 +20584,7 @@
               "expiresAtStateVersion": 51,
               "choiceRequirements": [
                 {
-                  "choiceId": "48.c2sl.0.trace.runner.bid.51",
+                  "choiceId": "50.runner.bid.51",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -20598,12 +20601,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "48.c2sl.0.trace.runner.bid.51",
+                "choiceId": "50.runner.bid.51",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "48.c2sl.0.trace",
+                "traceId": 50,
                 "traceStep": "runner_bid",
                 "traceLimit": 4,
                 "sourceDefinitionId": 452,
@@ -20615,7 +20618,8 @@
                 "traceSuccessful": false,
                 "tagsAdded": 0,
                 "hackerTrackerCountersAdded": 1,
-                "traceHostedCreditsAdded": 1
+                "traceHostedCreditsAdded": 1,
+                "traceSourceRunId": 48
               }
             }
           }
@@ -20824,7 +20828,7 @@
           "label": "Corprunner's Shattered Remains trashen",
           "resolvedEffects": [
             {
-              "effectId": "48.cwx.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -21783,7 +21787,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -21804,7 +21808,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "70.c2sl.0.trace",
+          "traceId": 71,
           "sourceCardId": "c2sl",
           "sourceDefinitionId": 452,
           "traceLimit": 4,
@@ -21819,7 +21823,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 70
         },
         "privatePayload": {
           "runner": {
@@ -21852,12 +21857,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "70.c2sl.0.trace",
+                "traceId": 71,
                 "sourceCardId": "c2sl",
                 "traceLimit": 4,
                 "effectiveTraceLimit": 4,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 2
+                "corpBidMax": 2,
+                "traceSourceRunId": 70
               },
               "resolvedEffects": [
                 {
@@ -21889,11 +21895,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "70.c2sl.0.trace.corp.bid.71",
+          "choiceId": "71.corp.bid.71",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 452,
-          "traceId": "70.c2sl.0.trace",
+          "traceId": 71,
           "traceStep": "corp_bid",
           "traceLimit": 4,
           "effectiveTraceLimit": 4,
@@ -21922,7 +21928,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 71,
               "selectedChoices": {
-                "choiceId": "70.c2sl.0.trace.corp.bid.71",
+                "choiceId": "71.corp.bid.71",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -21941,7 +21947,7 @@
               "expiresAtStateVersion": 71,
               "choiceRequirements": [
                 {
-                  "choiceId": "70.c2sl.0.trace.corp.bid.71",
+                  "choiceId": "71.corp.bid.71",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -21952,10 +21958,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "70.c2sl.0.trace.corp.bid.71",
+                "choiceId": "71.corp.bid.71",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "70.c2sl.0.trace",
+                "traceId": 71,
                 "traceStep": "corp_bid",
                 "traceLimit": 4,
                 "effectiveTraceLimit": 4,
@@ -21984,12 +21990,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "70.c2sl.0.trace.runner.bid.72",
+          "choiceId": "71.runner.bid.72",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 452,
           "tagsAdded": 0,
-          "traceId": "70.c2sl.0.trace",
+          "traceId": 71,
           "traceStep": "runner_bid",
           "traceLimit": 4,
           "corpBid": 0,
@@ -22012,7 +22018,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 70
         },
         "privatePayload": {
           "runner": {
@@ -22022,7 +22029,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 72,
               "selectedChoices": {
-                "choiceId": "70.c2sl.0.trace.runner.bid.72",
+                "choiceId": "71.runner.bid.72",
                 "selectedOptionIds": [
                   "bid_4"
                 ]
@@ -22041,7 +22048,7 @@
               "expiresAtStateVersion": 72,
               "choiceRequirements": [
                 {
-                  "choiceId": "70.c2sl.0.trace.runner.bid.72",
+                  "choiceId": "71.runner.bid.72",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -22058,12 +22065,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "70.c2sl.0.trace.runner.bid.72",
+                "choiceId": "71.runner.bid.72",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "70.c2sl.0.trace",
+                "traceId": 71,
                 "traceStep": "runner_bid",
                 "traceLimit": 4,
                 "sourceDefinitionId": 452,
@@ -22075,7 +22082,8 @@
                 "traceSuccessful": false,
                 "tagsAdded": 0,
                 "hackerTrackerCountersAdded": 1,
-                "traceHostedCreditsAdded": 1
+                "traceHostedCreditsAdded": 1,
+                "traceSourceRunId": 70
               }
             }
           }
@@ -22288,7 +22296,7 @@
           "label": "Netwatch Operations Office stehlen",
           "resolvedEffects": [
             {
-              "effectId": "70.cwx.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -24776,7 +24784,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "507.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -24786,7 +24794,7 @@
               "sourceTitle": "Night Shift"
             },
             {
-              "effectId": "507.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "corp",
@@ -25484,7 +25492,7 @@
           "actionType": "trash_accessed_card",
           "label": "Kostenfenster geöffnet.",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.127",
+          "runnerCostPenaltySupportWindowId": 127,
           "runnerCostPenaltySupportOriginalActionId": "runner.trash_accessed_card.c3bh.2",
           "serverLabel": "Remote 1",
           "accessTrashBaseCost": 2,
@@ -25536,7 +25544,7 @@
                 "effectKind": "trash_card",
                 "serverId": "r1",
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.127"
+                "runnerCostPenaltySupportWindowId": 127
               }
             }
           }
@@ -25603,7 +25611,7 @@
                 "abilityFamily": "run-access",
                 "effectKind": "trash_card",
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.127",
+                "runnerCostPenaltySupportWindowId": 127,
                 "serverId": "r1",
                 "runnerCostPenaltySupportWindowClosed": true,
                 "breachId": "123.breach",
@@ -26548,7 +26556,7 @@
           "label": "Karte in Remote 3 rezzen",
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -26686,7 +26694,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -26851,7 +26859,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -27193,7 +27201,7 @@
           "actionType": "trash_accessed_card",
           "label": "Kostenfenster geöffnet.",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150",
+          "runnerCostPenaltySupportWindowId": 150,
           "runnerCostPenaltySupportOriginalActionId": "runner.trash_accessed_card.c37y.4",
           "serverLabel": "Remote 3",
           "accessTrashBaseCost": 4,
@@ -27245,7 +27253,7 @@
                 "effectKind": "trash_card",
                 "serverId": "r3",
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150"
+                "runnerCostPenaltySupportWindowId": 150
               }
             }
           }
@@ -27308,7 +27316,7 @@
                 "abilityFamily": "run-access",
                 "effectKind": "trash_card",
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150",
+                "runnerCostPenaltySupportWindowId": 150,
                 "serverId": "r3",
                 "runnerCostPenaltySupportWindowClosed": true,
                 "breachId": "148.breach",
@@ -28728,7 +28736,7 @@
           "actionType": "pump_breaker",
           "label": "Kostenfenster geöffnet.",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.175",
+          "runnerCostPenaltySupportWindowId": 175,
           "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1e9.c1e9.c1e9.c2x9.292",
           "pumpStrengthAmount": 1,
           "pumpBreakerCreditCost": 1,
@@ -28789,7 +28797,7 @@
                 "cardImplementationAbilityId": 292,
                 "pumpStrengthAmount": 1,
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.175"
+                "runnerCostPenaltySupportWindowId": 175
               }
             }
           }
@@ -28866,7 +28874,7 @@
                 "cardImplementationAbilityId": 292,
                 "pumpStrengthAmount": 1,
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.175",
+                "runnerCostPenaltySupportWindowId": 175,
                 "runnerCostPenaltySupportWindowClosed": true
               }
             }
@@ -28886,7 +28894,7 @@
           "actionType": "pump_breaker",
           "label": "Kostenfenster geöffnet.",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.177",
+          "runnerCostPenaltySupportWindowId": 177,
           "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1e9.c1e9.c1e9.c2x9.292",
           "pumpStrengthAmount": 1,
           "pumpBreakerCreditCost": 1,
@@ -28947,7 +28955,7 @@
                 "cardImplementationAbilityId": 292,
                 "pumpStrengthAmount": 1,
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.177"
+                "runnerCostPenaltySupportWindowId": 177
               }
             }
           }
@@ -29024,7 +29032,7 @@
                 "cardImplementationAbilityId": 292,
                 "pumpStrengthAmount": 1,
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.177",
+                "runnerCostPenaltySupportWindowId": 177,
                 "runnerCostPenaltySupportWindowClosed": true
               }
             }

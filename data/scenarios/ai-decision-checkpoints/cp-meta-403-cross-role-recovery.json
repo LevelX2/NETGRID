@@ -1329,7 +1329,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1462,7 +1462,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1557,7 +1557,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1567,7 +1567,7 @@
                 "sourceTitle": "Laser Wire"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2099,7 +2099,7 @@
             "title": "Score!",
             "cardDefinitionId": 320,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.34",
+            "runnerCostPenaltySupportWindowId": 34,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1z5.c1z5.404",
             "effectKind": "gain_credits",
             "gainCreditsAmount": 9,
@@ -2180,7 +2180,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4180,7 +4180,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4434,7 +4434,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "118.cvm.successful_run.crumble",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -4448,7 +4448,7 @@
                 "serverLabel": "HQ"
               },
               {
-                "effectId": "118.cyy.successful_run.socket_hq",
+                "effectId": 1,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -4984,7 +4984,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5157,7 +5157,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "423.c2m5.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5403,7 +5403,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "166.cyy.successful_run.socket_archives",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "corp",
@@ -5539,7 +5539,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "423.c2m5.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -5722,7 +5722,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "161.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5732,7 +5732,7 @@
                 "sourceTitle": "Cruising for Netwatch"
               },
               {
-                "effectId": "161.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -5842,7 +5842,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "423.c2m5.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6259,7 +6259,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "423.c2m5.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6701,7 +6701,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -6760,7 +6760,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "423.c2m5.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7066,7 +7066,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "423.c2m5.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7134,7 +7134,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7332,7 +7332,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "423.c2m5.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7561,7 +7561,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -7571,7 +7571,7 @@
                 "sourceTitle": "Haunting Inquisition"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -7701,7 +7701,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "423.c2m5.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7852,7 +7852,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "421.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -8024,7 +8024,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "423.c2m5.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -8102,7 +8102,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "421.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -8700,7 +8700,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "423.c2m5.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -9142,7 +9142,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -9201,7 +9201,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "423.c2m5.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -9507,7 +9507,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "423.c2m5.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -9575,7 +9575,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -9773,7 +9773,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "423.c2m5.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -10002,7 +10002,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -10012,7 +10012,7 @@
               "sourceTitle": "Haunting Inquisition"
             },
             {
-              "effectId": "subroutine_2",
+              "effectId": 1,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -10142,7 +10142,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "423.c2m5.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -10293,7 +10293,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "421.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -10465,7 +10465,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "423.c2m5.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -10543,7 +10543,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "421.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -11015,7 +11015,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 274,
-      "sideSafePlanningFingerprint": "fnv1a:e5c0312b"
+      "sideSafePlanningFingerprint": "fnv1a:e52bba56"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",

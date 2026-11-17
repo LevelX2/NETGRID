@@ -1085,7 +1085,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "309.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -2313,7 +2313,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2931,7 +2931,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 25,
-        "sideSafePlanningFingerprint": "fnv1a:8c24be4e"
+        "sideSafePlanningFingerprint": "fnv1a:e3e941f4"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_corp_siren_fortress_1.1.0",

@@ -2646,7 +2646,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -2746,7 +2746,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "10.cwx.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -2818,7 +2818,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "12.cwx.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -3074,7 +3074,7 @@
           "label": "Karte accessen",
           "resolvedEffects": [
             {
-              "effectId": "20.cwx.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -3261,7 +3261,7 @@
           "label": "Corporate War stehlen",
           "resolvedEffects": [
             {
-              "effectId": "24.cwx.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -3446,7 +3446,7 @@
           "label": "Chicago Branch trashen",
           "resolvedEffects": [
             {
-              "effectId": "30.cwx.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",
@@ -3661,7 +3661,7 @@
           "label": "Corporate Downsizing stehlen",
           "resolvedEffects": [
             {
-              "effectId": "36.cwx.successful_run.highlighter",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "corp",

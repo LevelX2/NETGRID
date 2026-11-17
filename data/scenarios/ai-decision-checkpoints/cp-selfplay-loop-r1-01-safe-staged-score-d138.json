@@ -2955,7 +2955,7 @@
             "turnActionOrdinalEnd": 2,
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -3260,7 +3260,7 @@
             "label": "Subroutinen auslösen (Run endet)",
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3796,7 +3796,7 @@
             "turnActionOrdinalStart": 1,
             "turnActionOrdinalEnd": 1,
             "traceStarted": true,
-            "traceId": "op_trace.19.495.c325",
+            "traceId": 19,
             "sourceCardId": "c325",
             "sourceDefinitionId": 495,
             "baseTraceStrength": 5,
@@ -3838,7 +3838,7 @@
                 "payload": {
                   "cardId": "c325",
                   "traceStarted": true,
-                  "traceId": "op_trace.19.495.c325",
+                  "traceId": 19,
                   "sourceCardId": "c325",
                   "sourceDefinitionId": 495,
                   "baseTraceStrength": 5
@@ -3860,9 +3860,9 @@
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
             "choiceKind": "bid_amount",
-            "choiceId": "op_trace.19.495.c325.corp.bid.19",
+            "choiceId": "19.corp.bid.19",
             "sourceDefinitionId": 495,
-            "traceId": "op_trace.19.495.c325",
+            "traceId": 19,
             "traceStep": "corp_bid",
             "baseTraceStrength": 5,
             "corpBidMax": 7,
@@ -3888,7 +3888,7 @@
                 "actionId": "corp.resolve_choice",
                 "clientKnownStateVersion": 19,
                 "selectedChoices": {
-                  "choiceId": "op_trace.19.495.c325.corp.bid.19",
+                  "choiceId": "19.corp.bid.19",
                   "selectedOptionIds": [
                     "bid_0"
                   ]
@@ -3908,7 +3908,7 @@
                 "expiresAtStateVersion": 19,
                 "choiceRequirements": [
                   {
-                    "choiceId": "op_trace.19.495.c325.corp.bid.19",
+                    "choiceId": "19.corp.bid.19",
                     "minSelections": 1,
                     "maxSelections": 1,
                     "optionIds": [
@@ -3924,10 +3924,10 @@
                   }
                 ],
                 "payload": {
-                  "choiceId": "op_trace.19.495.c325.corp.bid.19",
+                  "choiceId": "19.corp.bid.19",
                   "choiceVisibility": "public",
                   "choiceKind": "bid_amount",
-                  "traceId": "op_trace.19.495.c325",
+                  "traceId": 19,
                   "traceStep": "corp_bid",
                   "baseTraceStrength": 5,
                   "sourceDefinitionId": 495,
@@ -3955,10 +3955,10 @@
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
             "choiceKind": "bid_amount",
-            "choiceId": "op_trace.19.495.c325.runner.bid.20",
+            "choiceId": "19.runner.bid.20",
             "sourceDefinitionId": 495,
             "tagsAdded": 1,
-            "traceId": "op_trace.19.495.c325",
+            "traceId": 19,
             "traceStep": "runner_bid",
             "baseTraceStrength": 5,
             "corpBid": 0,
@@ -3989,7 +3989,7 @@
                 "actionId": "runner.resolve_choice",
                 "clientKnownStateVersion": 20,
                 "selectedChoices": {
-                  "choiceId": "op_trace.19.495.c325.runner.bid.20",
+                  "choiceId": "19.runner.bid.20",
                   "selectedOptionIds": [
                     "bid_0"
                   ]
@@ -4009,7 +4009,7 @@
                 "expiresAtStateVersion": 20,
                 "choiceRequirements": [
                   {
-                    "choiceId": "op_trace.19.495.c325.runner.bid.20",
+                    "choiceId": "19.runner.bid.20",
                     "minSelections": 1,
                     "maxSelections": 1,
                     "optionIds": [
@@ -4020,10 +4020,10 @@
                   }
                 ],
                 "payload": {
-                  "choiceId": "op_trace.19.495.c325.runner.bid.20",
+                  "choiceId": "19.runner.bid.20",
                   "choiceVisibility": "public",
                   "choiceKind": "bid_amount",
-                  "traceId": "op_trace.19.495.c325",
+                  "traceId": 19,
                   "traceStep": "runner_bid",
                   "baseTraceStrength": 5,
                   "sourceDefinitionId": 495,
@@ -4057,7 +4057,7 @@
             "turnActionOrdinalEnd": 2,
             "resolvedEffects": [
               {
-                "effectId": "514.effect.0.damage",
+                "effectId": 0,
                 "kind": "damage",
                 "visibility": "public",
                 "side": "runner",
@@ -4984,7 +4984,7 @@
             "turnActionOrdinalEnd": 3,
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -5803,7 +5803,7 @@
             "label": "Subroutinen auslösen",
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -6271,7 +6271,7 @@
             "turnActionOrdinalEnd": 1,
             "resolvedEffects": [
               {
-                "effectId": "509.effect.0.gain_actions",
+                "effectId": 0,
                 "kind": "gain_actions",
                 "visibility": "public",
                 "side": "corp",
@@ -6597,7 +6597,7 @@
             "label": "Agenda in Remote 1 scoren",
             "resolvedEffects": [
               {
-                "effectId": "415.score.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -6786,7 +6786,7 @@
             "label": "Subroutinen auslösen",
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -7051,7 +7051,7 @@
             "turnActionOrdinalEnd": 3,
             "resolvedEffects": [
               {
-                "effectId": "291.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -7140,7 +7140,7 @@
             "turnActionOrdinalEnd": 4,
             "resolvedEffects": [
               {
-                "effectId": "307.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
@@ -7537,7 +7537,7 @@
             "turnActionOrdinalEnd": 3,
             "resolvedEffects": [
               {
-                "effectId": "502.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -7848,7 +7848,7 @@
             "label": "Subroutinen auslösen",
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -8357,7 +8357,7 @@
             "turnActionOrdinalEnd": 2,
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -8668,7 +8668,7 @@
             "label": "Subroutinen auslösen",
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -10134,7 +10134,7 @@
             "label": "Subroutinen auslösen",
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -10420,7 +10420,7 @@
             "turnActionOrdinalStart": 1,
             "turnActionOrdinalEnd": 1,
             "traceStarted": true,
-            "traceId": "op_trace.125.495.c327",
+            "traceId": 125,
             "sourceCardId": "c327",
             "sourceDefinitionId": 495,
             "baseTraceStrength": 5,
@@ -10462,7 +10462,7 @@
                 "payload": {
                   "cardId": "c327",
                   "traceStarted": true,
-                  "traceId": "op_trace.125.495.c327",
+                  "traceId": 125,
                   "sourceCardId": "c327",
                   "sourceDefinitionId": 495,
                   "baseTraceStrength": 5
@@ -10484,9 +10484,9 @@
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
             "choiceKind": "bid_amount",
-            "choiceId": "op_trace.125.495.c327.corp.bid.125",
+            "choiceId": "125.corp.bid.125",
             "sourceDefinitionId": 495,
-            "traceId": "op_trace.125.495.c327",
+            "traceId": 125,
             "traceStep": "corp_bid",
             "baseTraceStrength": 5,
             "corpBidMax": 10,
@@ -10512,7 +10512,7 @@
                 "actionId": "corp.resolve_choice",
                 "clientKnownStateVersion": 125,
                 "selectedChoices": {
-                  "choiceId": "op_trace.125.495.c327.corp.bid.125",
+                  "choiceId": "125.corp.bid.125",
                   "selectedOptionIds": [
                     "bid_0"
                   ]
@@ -10532,7 +10532,7 @@
                 "expiresAtStateVersion": 125,
                 "choiceRequirements": [
                   {
-                    "choiceId": "op_trace.125.495.c327.corp.bid.125",
+                    "choiceId": "125.corp.bid.125",
                     "minSelections": 1,
                     "maxSelections": 1,
                     "optionIds": [
@@ -10551,10 +10551,10 @@
                   }
                 ],
                 "payload": {
-                  "choiceId": "op_trace.125.495.c327.corp.bid.125",
+                  "choiceId": "125.corp.bid.125",
                   "choiceVisibility": "public",
                   "choiceKind": "bid_amount",
-                  "traceId": "op_trace.125.495.c327",
+                  "traceId": 125,
                   "traceStep": "corp_bid",
                   "baseTraceStrength": 5,
                   "sourceDefinitionId": 495,
@@ -10582,10 +10582,10 @@
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
             "choiceKind": "bid_amount",
-            "choiceId": "op_trace.125.495.c327.runner.bid.126",
+            "choiceId": "125.runner.bid.126",
             "sourceDefinitionId": 495,
             "tagsAdded": 1,
-            "traceId": "op_trace.125.495.c327",
+            "traceId": 125,
             "traceStep": "runner_bid",
             "baseTraceStrength": 5,
             "corpBid": 0,
@@ -10616,7 +10616,7 @@
                 "actionId": "runner.resolve_choice",
                 "clientKnownStateVersion": 126,
                 "selectedChoices": {
-                  "choiceId": "op_trace.125.495.c327.runner.bid.126",
+                  "choiceId": "125.runner.bid.126",
                   "selectedOptionIds": [
                     "bid_0"
                   ]
@@ -10636,7 +10636,7 @@
                 "expiresAtStateVersion": 126,
                 "choiceRequirements": [
                   {
-                    "choiceId": "op_trace.125.495.c327.runner.bid.126",
+                    "choiceId": "125.runner.bid.126",
                     "minSelections": 1,
                     "maxSelections": 1,
                     "optionIds": [
@@ -10646,10 +10646,10 @@
                   }
                 ],
                 "payload": {
-                  "choiceId": "op_trace.125.495.c327.runner.bid.126",
+                  "choiceId": "125.runner.bid.126",
                   "choiceVisibility": "public",
                   "choiceKind": "bid_amount",
-                  "traceId": "op_trace.125.495.c327",
+                  "traceId": 125,
                   "traceStep": "runner_bid",
                   "baseTraceStrength": 5,
                   "sourceDefinitionId": 495,
@@ -11552,7 +11552,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -11673,7 +11673,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -11970,7 +11970,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "514.effect.0.damage",
+              "effectId": 0,
               "kind": "damage",
               "visibility": "public",
               "side": "runner",
@@ -12332,7 +12332,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -12637,7 +12637,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -12814,7 +12814,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "509.effect.0.gain_actions",
+              "effectId": 0,
               "kind": "gain_actions",
               "visibility": "public",
               "side": "corp",
@@ -12952,7 +12952,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "415.score.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -13025,7 +13025,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -13126,7 +13126,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "291.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -13161,7 +13161,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "307.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -13312,7 +13312,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -13429,7 +13429,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -13634,7 +13634,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -13752,7 +13752,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -14296,7 +14296,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",

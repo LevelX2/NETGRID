@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "corp",
   "stateVersion": 119,
-  "stateHash": "fnv1a:aa392cf9",
+  "stateHash": "fnv1a:b758215b",
   "input": {
     "matchId": "match_422e834c99b91c33",
     "side": "corp",
@@ -869,9 +869,9 @@
         "removedFromGameCount": 0
       },
       "pendingChoice": {
-        "choiceId": "trace_hardware_wrecker_111.c2px.0.trace_119",
+        "choiceId": "trace_hardware_wrecker_117_119",
         "side": "corp",
-        "source": "trace_success.hardware_wrecker:111.c2px.0.trace",
+        "source": "trace_success.hardware_wrecker:117",
         "prompt": "Wähle die Hardware, die getrasht wird.",
         "presentationKey": "generic_select_cards",
         "kind": "select_cards",
@@ -2681,7 +2681,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2874,7 +2874,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2973,7 +2973,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3274,7 +3274,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3466,7 +3466,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "366.effect.0.take_hosted_credits",
+                "effectId": 0,
                 "kind": "take_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -3944,7 +3944,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -3994,7 +3994,7 @@
           "stateHashAfter": "fnv1a:fae6c860",
           "visibilityClass": "public",
           "publicPayload": {
-            "traceId": "111.c2px.0.trace",
+            "traceId": 117,
             "traceSuccessful": true,
             "actor": "runner",
             "actionType": "resolve_choice",
@@ -4013,7 +4013,10 @@
             },
             "visibility": {
               "class": "public"
-            }
+            },
+            "traceSourceRunId": 111,
+            "traceSourceCardInstanceId": "c2px",
+            "traceSourceSubroutineIndex": 0
           }
         }
       ],
@@ -4029,7 +4032,7 @@
           "targetRequirements": [],
           "choiceRequirements": [
             {
-              "choiceId": "trace_hardware_wrecker_111.c2px.0.trace_119",
+              "choiceId": "trace_hardware_wrecker_117_119",
               "minSelections": 1,
               "maxSelections": 1,
               "optionIds": [
@@ -4761,7 +4764,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -4954,7 +4957,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -5053,7 +5056,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -5354,7 +5357,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -5546,7 +5549,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "366.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -6024,7 +6027,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -6074,7 +6077,7 @@
         "stateHashAfter": "fnv1a:fae6c860",
         "visibilityClass": "public",
         "publicPayload": {
-          "traceId": "111.c2px.0.trace",
+          "traceId": 117,
           "traceSuccessful": true,
           "actor": "runner",
           "actionType": "resolve_choice",
@@ -6093,7 +6096,10 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 111,
+          "traceSourceCardInstanceId": "c2px",
+          "traceSourceSubroutineIndex": 0
         }
       }
     ],
@@ -6109,7 +6115,7 @@
         "targetRequirements": [],
         "choiceRequirements": [
           {
-            "choiceId": "trace_hardware_wrecker_111.c2px.0.trace_119",
+            "choiceId": "trace_hardware_wrecker_117_119",
             "minSelections": 1,
             "maxSelections": 1,
             "optionIds": [
@@ -6164,7 +6170,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 119,
-      "sideSafePlanningFingerprint": "fnv1a:4e9674fd"
+      "sideSafePlanningFingerprint": "fnv1a:23d93667"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_siren_fortress_1.1.0",

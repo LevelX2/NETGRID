@@ -349,7 +349,7 @@
         "removedFromGameCount": 0
       },
       "pendingChoice": {
-        "choiceId": "v121_choice_v121_window_imminent_damage_22_damage.21.519",
+        "choiceId": "v121_choice_22",
         "side": "runner",
         "source": "v121.replacement.damage",
         "prompt": "Damage Replacement",
@@ -592,7 +592,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "493.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -726,7 +726,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1074,7 +1074,7 @@
           "targetRequirements": [],
           "choiceRequirements": [
             {
-              "choiceId": "v121_choice_v121_window_imminent_damage_22_damage.21.519",
+              "choiceId": "v121_choice_22",
               "minSelections": 1,
               "maxSelections": 1,
               "optionIds": [
@@ -1277,7 +1277,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "493.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -1411,7 +1411,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -1759,7 +1759,7 @@
         "targetRequirements": [],
         "choiceRequirements": [
           {
-            "choiceId": "v121_choice_v121_window_imminent_damage_22_damage.21.519",
+            "choiceId": "v121_choice_22",
             "minSelections": 1,
             "maxSelections": 1,
             "optionIds": [
@@ -1815,7 +1815,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 22,
-      "sideSafePlanningFingerprint": "fnv1a:e7d03ee9"
+      "sideSafePlanningFingerprint": "fnv1a:b3fc4f39"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",

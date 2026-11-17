@@ -161,7 +161,7 @@ export function pdcaEventWithReturnContext(
 ): ImminentEvent {
   return {
     ...event,
-    modificationWindowId: `proteus_pdca_${event.eventId}`,
+    modificationWindowId: state.stateVersion + 1,
     payload: {
       ...event.payload,
       pdcaReturnPhase: state.phase,

@@ -2,7 +2,7 @@
   "sourceCommit": "773fd24e36f40684159dcbb80f222b43761b0634",
   "seed": "meta-ten-20261103-592-r2-039",
   "checkedStates": 350,
-  "stateHash": "fnv1a:cb471cbd",
+  "stateHash": "fnv1a:f851f25d",
   "state": {
     "matchId": "match_2b18796b0c6a67fe",
     "baseline": {
@@ -4218,7 +4218,7 @@
           "actionType": "pump_breaker",
           "label": "Kostenfenster geöffnet.",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.22",
+          "runnerCostPenaltySupportWindowId": 22,
           "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c7u.c7u.c7u.c2yd.49",
           "pumpStrengthAmount": 1,
           "pumpBreakerCreditCost": 1,
@@ -4279,7 +4279,7 @@
                 "cardImplementationAbilityId": 49,
                 "pumpStrengthAmount": 1,
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.22"
+                "runnerCostPenaltySupportWindowId": 22
               }
             }
           }
@@ -4299,7 +4299,7 @@
           "label": "Swiss Bank Account: 6 Credits nehmen",
           "resolvedEffects": [
             {
-              "effectId": "210.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "hidden_info_barrier",
               "side": "runner",
@@ -4374,7 +4374,7 @@
                 "cardImplementationAbilityLabel": "Swiss Bank Account: 6 Credits nehmen",
                 "gainCreditsAmount": 6,
                 "cardImplementationTrashSourceCost": true,
-                "costPenaltySupportWindowId": "runner_cost_penalty_support.22",
+                "costPenaltySupportWindowId": 22,
                 "costPenaltySupportOriginalActionId": "runner.pump_breaker.c7u.c7u.c7u.c2yd.49",
                 "costPenaltySupportAmountDue": 1,
                 "costPenaltySupportRunnerCreditTarget": 1,
@@ -4481,7 +4481,7 @@
                 "cardImplementationAbilityId": 49,
                 "pumpStrengthAmount": 1,
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.22",
+                "runnerCostPenaltySupportWindowId": 22,
                 "runnerCostPenaltySupportWindowClosed": true
               }
             }
@@ -5917,7 +5917,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -5938,7 +5938,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "46.c2xy.0.trace",
+          "traceId": 48,
           "sourceCardId": "c2xy",
           "sourceDefinitionId": 476,
           "traceLimit": 3,
@@ -5953,7 +5953,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 46
         },
         "privatePayload": {
           "runner": {
@@ -5986,12 +5987,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "46.c2xy.0.trace",
+                "traceId": 48,
                 "sourceCardId": "c2xy",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 1
+                "corpBidMax": 1,
+                "traceSourceRunId": 46
               },
               "resolvedEffects": [
                 {
@@ -6023,11 +6025,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "46.c2xy.0.trace.corp.bid.48",
+          "choiceId": "48.corp.bid.48",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
-          "traceId": "46.c2xy.0.trace",
+          "traceId": 48,
           "traceStep": "corp_bid",
           "traceLimit": 3,
           "effectiveTraceLimit": 3,
@@ -6056,7 +6058,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 48,
               "selectedChoices": {
-                "choiceId": "46.c2xy.0.trace.corp.bid.48",
+                "choiceId": "48.corp.bid.48",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -6075,7 +6077,7 @@
               "expiresAtStateVersion": 48,
               "choiceRequirements": [
                 {
-                  "choiceId": "46.c2xy.0.trace.corp.bid.48",
+                  "choiceId": "48.corp.bid.48",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -6085,10 +6087,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "46.c2xy.0.trace.corp.bid.48",
+                "choiceId": "48.corp.bid.48",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "46.c2xy.0.trace",
+                "traceId": 48,
                 "traceStep": "corp_bid",
                 "traceLimit": 3,
                 "effectiveTraceLimit": 3,
@@ -6117,12 +6119,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "46.c2xy.0.trace.runner.bid.49",
+          "choiceId": "48.runner.bid.49",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 476,
           "tagsAdded": 0,
-          "traceId": "46.c2xy.0.trace",
+          "traceId": 48,
           "traceStep": "runner_bid",
           "traceLimit": 3,
           "corpBid": 0,
@@ -6143,7 +6145,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 46
         },
         "privatePayload": {
           "runner": {
@@ -6153,7 +6156,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 49,
               "selectedChoices": {
-                "choiceId": "46.c2xy.0.trace.runner.bid.49",
+                "choiceId": "48.runner.bid.49",
                 "selectedOptionIds": [
                   "bid_3"
                 ]
@@ -6172,7 +6175,7 @@
               "expiresAtStateVersion": 49,
               "choiceRequirements": [
                 {
-                  "choiceId": "46.c2xy.0.trace.runner.bid.49",
+                  "choiceId": "48.runner.bid.49",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -6189,12 +6192,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "46.c2xy.0.trace.runner.bid.49",
+                "choiceId": "48.runner.bid.49",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "46.c2xy.0.trace",
+                "traceId": 48,
                 "traceStep": "runner_bid",
                 "traceLimit": 3,
                 "sourceDefinitionId": 476,
@@ -6204,7 +6207,8 @@
                 "runnerBid": 3,
                 "runnerStrength": 3,
                 "traceSuccessful": false,
-                "tagsAdded": 0
+                "tagsAdded": 0,
+                "traceSourceRunId": 46
               }
             }
           }
@@ -6415,7 +6419,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -8412,7 +8416,7 @@
           "label": "Zug beenden",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2eb.c16p",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -8968,7 +8972,7 @@
           "actionType": "trash_accessed_card",
           "label": "Kostenfenster geöffnet.",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.93",
+          "runnerCostPenaltySupportWindowId": 93,
           "runnerCostPenaltySupportOriginalActionId": "runner.trash_accessed_card.c3gd.1",
           "serverLabel": "Remote 1",
           "accessTrashBaseCost": 1,
@@ -9020,7 +9024,7 @@
                 "effectKind": "trash_card",
                 "serverId": "r1",
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.93"
+                "runnerCostPenaltySupportWindowId": 93
               }
             }
           }
@@ -9087,7 +9091,7 @@
                 "abilityFamily": "run-access",
                 "effectKind": "trash_card",
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.93",
+                "runnerCostPenaltySupportWindowId": 93,
                 "serverId": "r1",
                 "runnerCostPenaltySupportWindowClosed": true,
                 "breachId": "88.breach",
@@ -9420,7 +9424,7 @@
           "label": "Discard wurde abgeschlossen.",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2eb.c16p",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -9560,7 +9564,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "247.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -10046,7 +10050,7 @@
           "label": "Karte in Remote 2 rezzen",
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -10184,7 +10188,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -10429,7 +10433,7 @@
           "label": "Zug beenden",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2eb.c16p",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -10589,7 +10593,7 @@
           "actionType": "pump_breaker",
           "label": "Kostenfenster geöffnet.",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.114",
+          "runnerCostPenaltySupportWindowId": 114,
           "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c7v.c7v.c7v.c2xy.49",
           "pumpStrengthAmount": 1,
           "pumpBreakerCreditCost": 1,
@@ -10650,7 +10654,7 @@
                 "cardImplementationAbilityId": 49,
                 "pumpStrengthAmount": 1,
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.114"
+                "runnerCostPenaltySupportWindowId": 114
               }
             }
           }
@@ -10727,7 +10731,7 @@
                 "cardImplementationAbilityId": 49,
                 "pumpStrengthAmount": 1,
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.114",
+                "runnerCostPenaltySupportWindowId": 114,
                 "runnerCostPenaltySupportWindowClosed": true
               }
             }
@@ -10747,7 +10751,7 @@
           "actionType": "break_subroutine",
           "label": "Kostenfenster geöffnet.",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.116",
+          "runnerCostPenaltySupportWindowId": 116,
           "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2xy.0.printed_subroutines_trace.48",
           "subroutineIndex": 0,
           "targetIceDefinitionId": 476,
@@ -10815,7 +10819,7 @@
                 "cardImplementationAbilityKey": "break_any_subroutine_and_trash_after_run",
                 "cardImplementationAbilityId": 48,
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.116"
+                "runnerCostPenaltySupportWindowId": 116
               }
             }
           }
@@ -10899,7 +10903,7 @@
                 "cardImplementationAbilityKey": "break_any_subroutine_and_trash_after_run",
                 "cardImplementationAbilityId": 48,
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.116",
+                "runnerCostPenaltySupportWindowId": 116,
                 "runnerCostPenaltySupportWindowClosed": true
               }
             }
@@ -11241,7 +11245,7 @@
           "turnActionOrdinalStart": 3,
           "turnActionOrdinalEnd": 3,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.123",
+          "runnerCostPenaltySupportWindowId": 123,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1zm.c1zm.406",
           "visibility": {
             "class": "public"
@@ -11283,7 +11287,7 @@
                 "cardImplementationAbilityKey": "install_program_from_stack_or_trash",
                 "cardImplementationAbilityId": 406,
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.123"
+                "runnerCostPenaltySupportWindowId": 123
               }
             }
           }
@@ -11364,7 +11368,7 @@
                 "cardImplementationAbilityKey": "install_program_from_stack_or_trash",
                 "cardImplementationAbilityId": 406,
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.123",
+                "runnerCostPenaltySupportWindowId": 123,
                 "runnerCostPenaltySupportWindowClosed": true,
                 "normalCreditsSpent": 3,
                 "runnerCreditsAfter": 0,
@@ -11763,7 +11767,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -11928,7 +11932,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -12093,7 +12097,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -12255,7 +12259,7 @@
           "label": "Zug beenden",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.restricted_hosted_credit.c1iy",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -12268,7 +12272,7 @@
               "sourceTitle": "Invisibility"
             },
             {
-              "effectId": "runner.start.delayed_install.c2eb.c16p",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -12552,7 +12556,7 @@
           "turnActionOrdinalStart": 3,
           "turnActionOrdinalEnd": 4,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.136",
+          "runnerCostPenaltySupportWindowId": 136,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.caa.caa.60",
           "gainCreditsAmount": 4,
           "drawCardsAmount": 2,
@@ -12603,7 +12607,7 @@
                 "cardImplementationAbilityId": 60,
                 "effectKind": "gain_credits",
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.136"
+                "runnerCostPenaltySupportWindowId": 136
               }
             }
           }
@@ -12626,7 +12630,7 @@
           "turnActionOrdinalEnd": 4,
           "resolvedEffects": [
             {
-              "effectId": "46.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -12636,7 +12640,7 @@
               "sourceTitle": "Panzer Run"
             },
             {
-              "effectId": "46.effect.1.draw_cards",
+              "effectId": 1,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
@@ -12703,7 +12707,7 @@
                 "cardImplementationAbilityId": 60,
                 "effectKind": "gain_credits",
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.136",
+                "runnerCostPenaltySupportWindowId": 136,
                 "runnerCostPenaltySupportWindowClosed": true,
                 "normalCreditsSpent": 1,
                 "runnerCreditsAfter": 4,
@@ -12855,7 +12859,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -13102,7 +13106,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -13303,7 +13307,7 @@
           "label": "Choice wurde beantwortet.",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2eb.c16p",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -13504,7 +13508,7 @@
           "turnActionOrdinalStart": 2,
           "turnActionOrdinalEnd": 2,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.146",
+          "runnerCostPenaltySupportWindowId": 146,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1z5.c1z5.404",
           "gainCreditsAmount": 9,
           "effectKind": "gain_credits",
@@ -13553,7 +13557,7 @@
                 "cardImplementationAbilityId": 404,
                 "effectKind": "gain_credits",
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.146"
+                "runnerCostPenaltySupportWindowId": 146
               }
             }
           }
@@ -13576,7 +13580,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "320.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -13639,7 +13643,7 @@
                 "cardImplementationAbilityId": 404,
                 "effectKind": "gain_credits",
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.146",
+                "runnerCostPenaltySupportWindowId": 146,
                 "runnerCostPenaltySupportWindowClosed": true,
                 "normalCreditsSpent": 5,
                 "runnerCreditsAfter": 9,
@@ -13677,7 +13681,7 @@
           "turnActionOrdinalStart": 3,
           "turnActionOrdinalEnd": 3,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.148",
+          "runnerCostPenaltySupportWindowId": 148,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c95.c95",
           "visibility": {
             "class": "public"
@@ -13712,7 +13716,7 @@
               "payload": {
                 "cardId": "c95",
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.148"
+                "runnerCostPenaltySupportWindowId": 148
               }
             }
           }
@@ -13785,7 +13789,7 @@
               "payload": {
                 "cardId": "c95",
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.148",
+                "runnerCostPenaltySupportWindowId": 148,
                 "runnerCostPenaltySupportWindowClosed": true,
                 "normalCreditsSpent": 7,
                 "runnerCreditsAfter": 10,
@@ -13978,7 +13982,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -14143,7 +14147,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -14156,7 +14160,7 @@
               "sourceTitle": "BBS Whispering Campaign"
             },
             {
-              "effectId": "521.effect.1.trash_source_when_empty",
+              "effectId": 1,
               "kind": "trash_source_when_empty",
               "visibility": "public",
               "side": "corp",
@@ -14451,7 +14455,7 @@
           "label": "Choice wurde beantwortet.",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2eb.c16p",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -14594,7 +14598,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -14957,7 +14961,7 @@
           "turnActionOrdinalStart": 4,
           "turnActionOrdinalEnd": 4,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.162",
+          "runnerCostPenaltySupportWindowId": 162,
           "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
           "zoneLabel": "Rig",
           "effectKind": "install_card",
@@ -14995,7 +14999,7 @@
                 "cardId": "c7v",
                 "effectKind": "install_card",
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.162"
+                "runnerCostPenaltySupportWindowId": 162
               }
             }
           }
@@ -15061,7 +15065,7 @@
                 "cardId": "c7v",
                 "effectKind": "install_card",
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.162",
+                "runnerCostPenaltySupportWindowId": 162,
                 "runnerCostPenaltySupportWindowClosed": true,
                 "installCostPaid": 3,
                 "runnerInstallNormalCreditsPaid": 3,
@@ -15192,7 +15196,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "502.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
@@ -15443,7 +15447,7 @@
           "label": "Choice wurde beantwortet.",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2eb.c16p",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -15715,7 +15719,7 @@
           "actionType": "pump_breaker",
           "label": "Kostenfenster geöffnet.",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.173",
+          "runnerCostPenaltySupportWindowId": 173,
           "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c7v.c7v.c7v.c2xy.49",
           "pumpStrengthAmount": 1,
           "pumpBreakerCreditCost": 1,
@@ -15776,7 +15780,7 @@
                 "cardImplementationAbilityId": 49,
                 "pumpStrengthAmount": 1,
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.173"
+                "runnerCostPenaltySupportWindowId": 173
               }
             }
           }
@@ -15853,7 +15857,7 @@
                 "cardImplementationAbilityId": 49,
                 "pumpStrengthAmount": 1,
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.173",
+                "runnerCostPenaltySupportWindowId": 173,
                 "runnerCostPenaltySupportWindowClosed": true
               }
             }
@@ -15873,7 +15877,7 @@
           "actionType": "break_subroutine",
           "label": "Kostenfenster geöffnet.",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.175",
+          "runnerCostPenaltySupportWindowId": 175,
           "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2xy.0.printed_subroutines_trace.48",
           "subroutineIndex": 0,
           "targetIceDefinitionId": 476,
@@ -15941,7 +15945,7 @@
                 "cardImplementationAbilityKey": "break_any_subroutine_and_trash_after_run",
                 "cardImplementationAbilityId": 48,
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.175"
+                "runnerCostPenaltySupportWindowId": 175
               }
             }
           }
@@ -16025,7 +16029,7 @@
                 "cardImplementationAbilityKey": "break_any_subroutine_and_trash_after_run",
                 "cardImplementationAbilityId": 48,
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.175",
+                "runnerCostPenaltySupportWindowId": 175,
                 "runnerCostPenaltySupportWindowClosed": true
               }
             }
@@ -16252,7 +16256,7 @@
           "turnActionOrdinalStart": 3,
           "turnActionOrdinalEnd": 3,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.180",
+          "runnerCostPenaltySupportWindowId": 180,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c96.c96",
           "visibility": {
             "class": "public"
@@ -16287,7 +16291,7 @@
               "payload": {
                 "cardId": "c96",
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.180"
+                "runnerCostPenaltySupportWindowId": 180
               }
             }
           }
@@ -16360,7 +16364,7 @@
               "payload": {
                 "cardId": "c96",
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.180",
+                "runnerCostPenaltySupportWindowId": 180,
                 "runnerCostPenaltySupportWindowClosed": true,
                 "normalCreditsSpent": 7,
                 "runnerCreditsAfter": 8,
@@ -16392,7 +16396,7 @@
           "turnActionOrdinalStart": 4,
           "turnActionOrdinalEnd": 4,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.182",
+          "runnerCostPenaltySupportWindowId": 182,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c209.c209.409",
           "visibility": {
             "class": "public"
@@ -16434,7 +16438,7 @@
                 "cardImplementationAbilityKey": "abilities_on_play_corp_discard_hq_with_retain_payment",
                 "cardImplementationAbilityId": 409,
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.182"
+                "runnerCostPenaltySupportWindowId": 182
               }
             }
           }
@@ -16513,7 +16517,7 @@
                 "cardImplementationAbilityKey": "abilities_on_play_corp_discard_hq_with_retain_payment",
                 "cardImplementationAbilityId": 409,
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.182",
+                "runnerCostPenaltySupportWindowId": 182,
                 "runnerCostPenaltySupportWindowClosed": true,
                 "normalCreditsSpent": 4,
                 "runnerCreditsAfter": 4,
@@ -16933,7 +16937,7 @@
           "label": "Zug beenden",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.restricted_hosted_credit.c1iy",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -17016,7 +17020,7 @@
           "label": "Choice wurde beantwortet.",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2eb.c16p",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -17451,7 +17455,7 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -17852,7 +17856,7 @@
           "label": "Choice wurde beantwortet.",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2eb.c16p",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -18237,7 +18241,7 @@
           "actionType": "trash_accessed_card",
           "label": "Kostenfenster geöffnet.",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.209",
+          "runnerCostPenaltySupportWindowId": 209,
           "runnerCostPenaltySupportOriginalActionId": "runner.trash_accessed_card.c38l.1",
           "serverLabel": "Remote 3",
           "accessTrashBaseCost": 1,
@@ -18289,7 +18293,7 @@
                 "effectKind": "trash_card",
                 "serverId": "r3",
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.209"
+                "runnerCostPenaltySupportWindowId": 209
               }
             }
           }
@@ -18352,7 +18356,7 @@
                 "abilityFamily": "run-access",
                 "effectKind": "trash_card",
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.209",
+                "runnerCostPenaltySupportWindowId": 209,
                 "serverId": "r3",
                 "runnerCostPenaltySupportWindowClosed": true,
                 "breachId": "205.breach",
@@ -18379,7 +18383,7 @@
           "turnActionOrdinalStart": 2,
           "turnActionOrdinalEnd": 2,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.211",
+          "runnerCostPenaltySupportWindowId": 211,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1ux.c1ux.385",
           "visibility": {
             "class": "public"
@@ -18423,7 +18427,7 @@
                 "cardImplementationAbilityKey": "abilities_on_play_search_trash_to_grip",
                 "cardImplementationAbilityId": 385,
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.211"
+                "runnerCostPenaltySupportWindowId": 211
               }
             }
           }
@@ -18505,7 +18509,7 @@
                 "cardImplementationAbilityKey": "abilities_on_play_search_trash_to_grip",
                 "cardImplementationAbilityId": 385,
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.211",
+                "runnerCostPenaltySupportWindowId": 211,
                 "runnerCostPenaltySupportWindowClosed": true,
                 "normalCreditsSpent": 2,
                 "runnerCreditsAfter": 1,
@@ -19111,7 +19115,7 @@
           "label": "Choice wurde beantwortet.",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2eb.c16p",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -19253,7 +19257,7 @@
           "turnActionOrdinalStart": 1,
           "turnActionOrdinalEnd": 1,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.223",
+          "runnerCostPenaltySupportWindowId": 223,
           "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
           "zoneLabel": "Rig",
           "effectKind": "install_card",
@@ -19291,7 +19295,7 @@
                 "cardId": "c7v",
                 "effectKind": "install_card",
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.223"
+                "runnerCostPenaltySupportWindowId": 223
               }
             }
           }
@@ -19357,7 +19361,7 @@
                 "cardId": "c7v",
                 "effectKind": "install_card",
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.223",
+                "runnerCostPenaltySupportWindowId": 223,
                 "runnerCostPenaltySupportWindowClosed": true,
                 "installCostPaid": 3,
                 "runnerInstallNormalCreditsPaid": 3,
@@ -19634,7 +19638,7 @@
           "actionType": "pump_breaker",
           "label": "Kostenfenster geöffnet.",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.229",
+          "runnerCostPenaltySupportWindowId": 229,
           "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c7v.c7v.c7v.c2xx.49",
           "pumpStrengthAmount": 1,
           "pumpBreakerCreditCost": 1,
@@ -19695,7 +19699,7 @@
                 "cardImplementationAbilityId": 49,
                 "pumpStrengthAmount": 1,
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.229"
+                "runnerCostPenaltySupportWindowId": 229
               }
             }
           }
@@ -19772,7 +19776,7 @@
                 "cardImplementationAbilityId": 49,
                 "pumpStrengthAmount": 1,
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.229",
+                "runnerCostPenaltySupportWindowId": 229,
                 "runnerCostPenaltySupportWindowClosed": true
               }
             }
@@ -19792,7 +19796,7 @@
           "actionType": "break_subroutine",
           "label": "Kostenfenster geöffnet.",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.231",
+          "runnerCostPenaltySupportWindowId": 231,
           "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2xx.0.printed_subroutines_trace.48",
           "subroutineIndex": 0,
           "targetIceDefinitionId": 476,
@@ -19860,7 +19864,7 @@
                 "cardImplementationAbilityKey": "break_any_subroutine_and_trash_after_run",
                 "cardImplementationAbilityId": 48,
                 "runnerCostPenaltySupportWindowOpened": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.231"
+                "runnerCostPenaltySupportWindowId": 231
               }
             }
           }
@@ -19880,7 +19884,7 @@
           "label": "Chiba Bank Account: 4 Credits nehmen",
           "resolvedEffects": [
             {
-              "effectId": "191.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "hidden_info_barrier",
               "side": "runner",
@@ -19955,7 +19959,7 @@
                 "cardImplementationAbilityLabel": "Chiba Bank Account: 4 Credits nehmen",
                 "gainCreditsAmount": 4,
                 "cardImplementationTrashSourceCost": true,
-                "costPenaltySupportWindowId": "runner_cost_penalty_support.231",
+                "costPenaltySupportWindowId": 231,
                 "costPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2xx.0.printed_subroutines_trace.48",
                 "costPenaltySupportAmountDue": 1,
                 "costPenaltySupportRunnerCreditTarget": 1,
@@ -20069,7 +20073,7 @@
                 "cardImplementationAbilityKey": "break_any_subroutine_and_trash_after_run",
                 "cardImplementationAbilityId": 48,
                 "runnerCostPenaltySupportContinuation": true,
-                "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.231",
+                "runnerCostPenaltySupportWindowId": 231,
                 "runnerCostPenaltySupportWindowClosed": true
               }
             }
@@ -20958,7 +20962,7 @@
           "label": "Zug beenden",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.restricted_hosted_credit.c1iy",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -21041,7 +21045,7 @@
           "label": "Choice wurde beantwortet.",
           "resolvedEffects": [
             {
-              "effectId": "192.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "runner",
@@ -21054,7 +21058,7 @@
               "sourceTitle": "Cortical Cybermodem"
             },
             {
-              "effectId": "runner.start.delayed_install.c2eb.c16p",
+              "effectId": 1,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -21796,7 +21800,7 @@
           "label": "Zug beenden",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2eb.c7u",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -22441,7 +22445,7 @@
           "label": "Zug beenden",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2eb.c7u",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -23310,7 +23314,7 @@
           "label": "Zug beenden",
           "resolvedEffects": [
             {
-              "effectId": "runner.start.delayed_install.c2eb.c7u",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -24364,7 +24368,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -24614,7 +24618,7 @@
           "turnActionOrdinalEnd": 1,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "op_trace.303.496.c32d",
+          "traceId": 303,
           "sourceCardId": "c32d",
           "sourceDefinitionId": 496,
           "traceLimit": 5,
@@ -24664,7 +24668,7 @@
                 "cardImplementationAbilityKey": "abilities_on_play_trace",
                 "cardImplementationAbilityId": 610,
                 "traceStarted": true,
-                "traceId": "op_trace.303.496.c32d",
+                "traceId": 303,
                 "sourceCardId": "c32d",
                 "sourceDefinitionId": 496,
                 "traceLimit": 5,
@@ -24688,11 +24692,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "op_trace.303.496.c32d.corp.bid.303",
+          "choiceId": "303.corp.bid.303",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 496,
-          "traceId": "op_trace.303.496.c32d",
+          "traceId": 303,
           "traceStep": "corp_bid",
           "traceLimit": 5,
           "effectiveTraceLimit": 5,
@@ -24720,7 +24724,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 303,
               "selectedChoices": {
-                "choiceId": "op_trace.303.496.c32d.corp.bid.303",
+                "choiceId": "303.corp.bid.303",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -24739,7 +24743,7 @@
               "expiresAtStateVersion": 303,
               "choiceRequirements": [
                 {
-                  "choiceId": "op_trace.303.496.c32d.corp.bid.303",
+                  "choiceId": "303.corp.bid.303",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -24754,10 +24758,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "op_trace.303.496.c32d.corp.bid.303",
+                "choiceId": "303.corp.bid.303",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "op_trace.303.496.c32d",
+                "traceId": 303,
                 "traceStep": "corp_bid",
                 "traceLimit": 5,
                 "effectiveTraceLimit": 5,
@@ -24786,12 +24790,12 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "op_trace.303.496.c32d.runner.bid.304",
+          "choiceId": "303.runner.bid.304",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 496,
           "tagsAdded": 1,
-          "traceId": "op_trace.303.496.c32d",
+          "traceId": 303,
           "traceStep": "runner_bid",
           "traceLimit": 5,
           "corpBid": 0,
@@ -24825,7 +24829,7 @@
               "actionId": "runner.resolve_choice",
               "clientKnownStateVersion": 304,
               "selectedChoices": {
-                "choiceId": "op_trace.303.496.c32d.runner.bid.304",
+                "choiceId": "303.runner.bid.304",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -24844,7 +24848,7 @@
               "expiresAtStateVersion": 304,
               "choiceRequirements": [
                 {
-                  "choiceId": "op_trace.303.496.c32d.runner.bid.304",
+                  "choiceId": "303.runner.bid.304",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -24857,12 +24861,12 @@
                 }
               ],
               "payload": {
-                "choiceId": "op_trace.303.496.c32d.runner.bid.304",
+                "choiceId": "303.runner.bid.304",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
                 "traceRulesProfile": "modern_open",
                 "traceBidsRevealed": true,
-                "traceId": "op_trace.303.496.c32d",
+                "traceId": 303,
                 "traceStep": "runner_bid",
                 "traceLimit": 5,
                 "sourceDefinitionId": 496,
@@ -24898,7 +24902,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "519.effect.0.damage",
+              "effectId": 0,
               "kind": "damage",
               "visibility": "public",
               "side": "runner",
@@ -25497,7 +25501,7 @@
           "label": "Karte in Remote 4 rezzen",
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.add_hosted_credits",
+              "effectId": 0,
               "kind": "add_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -25635,7 +25639,7 @@
           "turnActionOrdinalEnd": 2,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -25800,7 +25804,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -26498,7 +26502,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -26727,7 +26731,7 @@
           "turnActionOrdinalEnd": 3,
           "resolvedEffects": [
             {
-              "effectId": "521.effect.0.take_hosted_credits",
+              "effectId": 0,
               "kind": "take_hosted_credits",
               "visibility": "public",
               "side": "corp",
@@ -27166,7 +27170,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -27989,7 +27993,7 @@
           "label": "Subroutinen auslösen",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -28010,7 +28014,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "333.c2px.0.trace",
+          "traceId": 348,
           "sourceCardId": "c2px",
           "sourceDefinitionId": 440,
           "traceLimit": 6,
@@ -28025,7 +28029,8 @@
           },
           "visibility": {
             "class": "public"
-          }
+          },
+          "traceSourceRunId": 333
         },
         "privatePayload": {
           "runner": {
@@ -28058,12 +28063,13 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "333.c2px.0.trace",
+                "traceId": 348,
                 "sourceCardId": "c2px",
                 "traceLimit": 6,
                 "effectiveTraceLimit": 6,
                 "traceRulesProfile": "modern_open",
-                "corpBidMax": 2
+                "corpBidMax": 2,
+                "traceSourceRunId": 333
               },
               "resolvedEffects": [
                 {
@@ -28095,11 +28101,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "333.c2px.0.trace.corp.bid.348",
+          "choiceId": "348.corp.bid.348",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 440,
-          "traceId": "333.c2px.0.trace",
+          "traceId": 348,
           "traceStep": "corp_bid",
           "traceLimit": 6,
           "effectiveTraceLimit": 6,
@@ -28128,7 +28134,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 348,
               "selectedChoices": {
-                "choiceId": "333.c2px.0.trace.corp.bid.348",
+                "choiceId": "348.corp.bid.348",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -28147,7 +28153,7 @@
               "expiresAtStateVersion": 348,
               "choiceRequirements": [
                 {
-                  "choiceId": "333.c2px.0.trace.corp.bid.348",
+                  "choiceId": "348.corp.bid.348",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -28158,10 +28164,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "333.c2px.0.trace.corp.bid.348",
+                "choiceId": "348.corp.bid.348",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "333.c2px.0.trace",
+                "traceId": 348,
                 "traceStep": "corp_bid",
                 "traceLimit": 6,
                 "effectiveTraceLimit": 6,
@@ -28327,7 +28333,7 @@
       "traceAttemptedThisRun": true
     },
     "trace": {
-      "traceId": "333.c2px.0.trace",
+      "traceId": 348,
       "sourceCardInstanceId": "c2px",
       "sourceDefinitionId": 440,
       "traceRulesProfile": "modern_open",
@@ -28343,12 +28349,13 @@
       "corpBid": 0,
       "traceValue": 6,
       "bidsRevealed": true,
-      "runnerLink": 0
+      "runnerLink": 0,
+      "sourceRunId": 333
     },
     "pendingChoice": {
-      "choiceId": "333.c2px.0.trace.runner.bid.349",
+      "choiceId": "348.runner.bid.349",
       "side": "runner",
-      "source": "trace:333.c2px.0.trace",
+      "source": "trace:348",
       "prompt": "Runner Link-Payment wählen (Trace-Stärke 6, Link 0; 4 Credits verfügbar)",
       "kind": "bid_amount",
       "options": [
@@ -28395,7 +28402,7 @@
     "actionId": "runner.resolve_choice",
     "clientKnownStateVersion": 349,
     "selectedChoices": {
-      "choiceId": "333.c2px.0.trace.runner.bid.349",
+      "choiceId": "348.runner.bid.349",
       "selectedOptionIds": [
         "bid_0"
       ]

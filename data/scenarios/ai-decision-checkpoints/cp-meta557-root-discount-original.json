@@ -2746,7 +2746,7 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "309.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
@@ -3720,7 +3720,7 @@
               },
               "resolvedEffects": [
                 {
-                  "effectId": "309.effect.0.gain_credits",
+                  "effectId": 0,
                   "kind": "gain_credits",
                   "visibility": "public",
                   "side": "runner",
@@ -4079,7 +4079,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "309.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -4225,7 +4225,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 10,
-        "sideSafePlanningFingerprint": "fnv1a:0cb1bdef"
+        "sideSafePlanningFingerprint": "fnv1a:09560bb7"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_corp_salazar_toll_road_1.1.0",

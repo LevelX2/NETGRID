@@ -38,8 +38,7 @@ describe("selfplay cycle 130 decision checkpoints", () => {
     expect(decision).toMatchObject({
       actionId: "runner.resolve_choice",
       selectedChoices: {
-        choiceId:
-          "v120_choice_v120_window_imminent_damage_306_305.c2ra.0_next_100_runner",
+        choiceId: "v120_choice_307",
         selectedOptionIds: [
           "card_implementation_damage_prevent_c1hd_0_1__prevent_amount_1",
         ],

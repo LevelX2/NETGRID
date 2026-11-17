@@ -993,7 +993,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "320.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -1434,7 +1434,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1518,7 +1518,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "507.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "corp",
@@ -1528,7 +1528,7 @@
                 "sourceTitle": "Night Shift"
               },
               {
-                "effectId": "507.effect.1.draw_cards",
+                "effectId": 1,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "corp",
@@ -1685,7 +1685,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -1711,7 +1711,7 @@
             "title": "Temple Microcode Outlet",
             "cardDefinitionId": 326,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.36",
+            "runnerCostPenaltySupportWindowId": 36,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c20i.c20i.410",
             "visibility": {
               "class": "public"
@@ -1805,7 +1805,7 @@
             "title": "Rent-I-Con",
             "cardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.39",
+            "runnerCostPenaltySupportWindowId": 39,
             "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
             "effectKind": "install_card",
             "visibility": {
@@ -2066,7 +2066,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "247.effect.0.add_hosted_credits",
+                "effectId": 0,
                 "kind": "add_hosted_credits",
                 "visibility": "public",
                 "side": "runner",
@@ -2151,7 +2151,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.52",
+            "runnerCostPenaltySupportWindowId": 52,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2rz.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 449
@@ -2284,7 +2284,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2294,7 +2294,7 @@
                 "sourceTitle": "Haunting Inquisition"
               },
               {
-                "effectId": "subroutine_2",
+                "effectId": 1,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -2320,7 +2320,7 @@
             "title": "Sneak Preview",
             "cardDefinitionId": 322,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.58",
+            "runnerCostPenaltySupportWindowId": 58,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1zl.c1zl.406",
             "visibility": {
               "class": "public"
@@ -2586,7 +2586,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -2691,7 +2691,7 @@
             "title": "Rent-I-Con",
             "cardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.71",
+            "runnerCostPenaltySupportWindowId": 71,
             "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
             "effectKind": "install_card",
             "visibility": {
@@ -3690,7 +3690,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 456,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.113",
+            "runnerCostPenaltySupportWindowId": 113,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2th.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 456
@@ -3851,7 +3851,7 @@
             "cardDefinitionId": 525,
             "serverLabel": "R&D",
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.120",
+            "runnerCostPenaltySupportWindowId": 120,
             "runnerCostPenaltySupportOriginalActionId": "runner.trash_accessed_card.c38t.2",
             "abilityFamily": "run-access",
             "effectKind": "trash_card",
@@ -3936,7 +3936,7 @@
             "title": "Finders Keepers",
             "cardDefinitionId": 41,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.123",
+            "runnerCostPenaltySupportWindowId": 123,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c95.c95",
             "visibility": {
               "class": "public"
@@ -3992,7 +3992,7 @@
             "title": "Sneak Preview",
             "cardDefinitionId": 322,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.125",
+            "runnerCostPenaltySupportWindowId": 125,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1zn.c1zn.406",
             "visibility": {
               "class": "public"
@@ -4281,7 +4281,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -4377,7 +4377,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4503,7 +4503,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4529,7 +4529,7 @@
             "title": "Rent-I-Con",
             "cardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.144",
+            "runnerCostPenaltySupportWindowId": 144,
             "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
             "effectKind": "install_card",
             "visibility": {
@@ -4615,7 +4615,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
@@ -4683,7 +4683,7 @@
             "serverId": "r1",
             "serverLabel": "Remote 1",
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150",
+            "runnerCostPenaltySupportWindowId": 150,
             "runnerCostPenaltySupportOriginalActionId": "runner.continue_run",
             "abilityFamily": "run-access",
             "targets": {
@@ -4736,7 +4736,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 449,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.152",
+            "runnerCostPenaltySupportWindowId": 152,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2rx.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 449
@@ -5065,7 +5065,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -5095,7 +5095,7 @@
             "title": "Sneak Preview",
             "cardDefinitionId": 322,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.166",
+            "runnerCostPenaltySupportWindowId": 166,
             "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1zm.c1zm.406",
             "visibility": {
               "class": "public"
@@ -5453,7 +5453,7 @@
             "title": "Rent-I-Con",
             "cardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.179",
+            "runnerCostPenaltySupportWindowId": 179,
             "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
             "effectKind": "install_card",
             "visibility": {
@@ -5804,7 +5804,7 @@
             "cardDefinitionId": 35,
             "targetIceDefinitionId": 456,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.193",
+            "runnerCostPenaltySupportWindowId": 193,
             "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2th.0.printed_subroutines_end_the_run.48",
             "targets": {
               "targetIceDefinitionId": 456
@@ -6218,7 +6218,7 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "runner.start.restricted_hosted_credit.c1iy",
+                "effectId": 0,
                 "kind": "counter_change",
                 "visibility": "public",
                 "side": "runner",
@@ -6269,7 +6269,7 @@
             "title": "Rent-I-Con",
             "cardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
-            "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.212",
+            "runnerCostPenaltySupportWindowId": 212,
             "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7t.c7t",
             "effectKind": "install_card",
             "visibility": {
@@ -6762,7 +6762,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -6788,7 +6788,7 @@
           "title": "Rent-I-Con",
           "cardDefinitionId": 35,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.144",
+          "runnerCostPenaltySupportWindowId": 144,
           "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
           "effectKind": "install_card",
           "visibility": {
@@ -6874,7 +6874,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
@@ -6942,7 +6942,7 @@
           "serverId": "r1",
           "serverLabel": "Remote 1",
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.150",
+          "runnerCostPenaltySupportWindowId": 150,
           "runnerCostPenaltySupportOriginalActionId": "runner.continue_run",
           "abilityFamily": "run-access",
           "targets": {
@@ -6995,7 +6995,7 @@
           "cardDefinitionId": 35,
           "targetIceDefinitionId": 449,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.152",
+          "runnerCostPenaltySupportWindowId": 152,
           "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2rx.0.printed_subroutines_end_the_run.48",
           "targets": {
             "targetIceDefinitionId": 449
@@ -7324,7 +7324,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "runner.start.restricted_hosted_credit.c1iy",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -7354,7 +7354,7 @@
           "title": "Sneak Preview",
           "cardDefinitionId": 322,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.166",
+          "runnerCostPenaltySupportWindowId": 166,
           "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c1zm.c1zm.406",
           "visibility": {
             "class": "public"
@@ -7712,7 +7712,7 @@
           "title": "Rent-I-Con",
           "cardDefinitionId": 35,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.179",
+          "runnerCostPenaltySupportWindowId": 179,
           "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
           "effectKind": "install_card",
           "visibility": {
@@ -8063,7 +8063,7 @@
           "cardDefinitionId": 35,
           "targetIceDefinitionId": 456,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.193",
+          "runnerCostPenaltySupportWindowId": 193,
           "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2th.0.printed_subroutines_end_the_run.48",
           "targets": {
             "targetIceDefinitionId": 456
@@ -8477,7 +8477,7 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "runner.start.restricted_hosted_credit.c1iy",
+              "effectId": 0,
               "kind": "counter_change",
               "visibility": "public",
               "side": "runner",
@@ -8528,7 +8528,7 @@
           "title": "Rent-I-Con",
           "cardDefinitionId": 35,
           "runnerCostPenaltySupportWindowOpened": true,
-          "runnerCostPenaltySupportWindowId": "runner_cost_penalty_support.212",
+          "runnerCostPenaltySupportWindowId": 212,
           "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7t.c7t",
           "effectKind": "install_card",
           "visibility": {
@@ -9010,7 +9010,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 221,
-      "sideSafePlanningFingerprint": "fnv1a:bcf99a38"
+      "sideSafePlanningFingerprint": "fnv1a:b38a1bbe"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",
