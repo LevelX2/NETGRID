@@ -5,6 +5,7 @@ import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import type { SemanticRuntimeChoice } from "./runtime/semantic-runtime-types";
 import {
   CURRENT_RULES_BASELINE,
+  isCanonicalCapabilityId,
   ORIGINALSET_DEFAULT_DECKS,
   CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
@@ -104,7 +105,7 @@ export function runnerWallCoverageInput(
     server("rd"),
     server("archives"),
     server(
-      "remote_1",
+      "r1",
       [
         withEffectiveRunQuote(
           visibleCard(589, "corp", "ice", {
@@ -303,9 +304,11 @@ export function legalAction(
 ): LegalAction {
   const source =
     options.source ?? (type === "end_turn" ? "game_rule" : "basic_action");
+  const abilityId = options.payload?.cardImplementationAbilityId;
   const canonicalAbilityId =
-    typeof options.payload?.cardImplementationAbilityId === "string"
-      ? options.payload.cardImplementationAbilityId
+    options.payload?.cardImplementationCapabilityBindingKind === "card_spec_capability_key" &&
+    isCanonicalCapabilityId(abilityId)
+      ? abilityId
       : undefined;
   const action: LegalAction = {
     actionId,

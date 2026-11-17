@@ -1,9 +1,16 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import { actionProvidesCredits } from "./actions/action-effect-classification";
 import type { AiHintStructuredEffect } from "./hint-ontology";
+
+const droppBreakKey = "icebreaker_abilities_break_subroutine";
+const droppBreakId = canonicalCapabilityId(231, capabilityKey(droppBreakKey));
+const brokerStoreId = canonicalCapabilityId(366, capabilityKey("store_credits"));
+const brokerWithdrawId = canonicalCapabilityId(366, capabilityKey("withdraw_credits"));
 
 const ALL_ACTION_TYPES = [
   "mandatory_draw",
@@ -43,7 +50,7 @@ const ALL_ACTION_TYPES = [
 
 describe("buildActionSemanticCandidates", () => {
   it("retains functional effects with distinct counter removal payments", () => {
-    const cardId = "hazard-operation";
+    const cardId = syntheticCardDefinitionId("hazard-operation");
     const action = legalAction("play_operation", 1, {
       side: "corp",
       source: "hazard-1",
@@ -104,7 +111,7 @@ describe("buildActionSemanticCandidates", () => {
       observerSide: "corp",
       stateVersion: 42,
       visibleSourceDefinitionsByInstanceId: {
-        "recycler-1": "generic-recycler-definition",
+        "recycler-1": syntheticCardDefinitionId("generic-recycler-definition"),
       },
     });
 
@@ -112,7 +119,7 @@ describe("buildActionSemanticCandidates", () => {
     expect(candidate).toMatchObject({
       semanticActionType: "corp_board.return_installed_card_to_hq",
       sourceCardInstanceId: "recycler-1",
-      sourceDefinitionId: "generic-recycler-definition",
+      sourceDefinitionId: syntheticCardDefinitionId("generic-recycler-definition"),
     });
     expect(candidate?.actionTacticSignals).toEqual([
       "board.recycling",
@@ -669,13 +676,13 @@ describe("buildActionSemanticCandidates", () => {
           source: "breaker-1",
           abilityRef: {
             sourceCardInstanceId: "breaker-1",
-            sourceAbilityId: "test_breaker:break_1",
+            sourceAbilityId: droppBreakId,
           },
           payload: {
             cardId: "breaker-1",
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-            cardImplementationAbilityId: "test_breaker:break_1",
-            cardImplementationAbilityKey: "break_1",
+            cardImplementationAbilityId: droppBreakId,
+            cardImplementationAbilityKey: droppBreakKey,
           },
         }),
         legalAction("trigger_ability", 1, {
@@ -713,7 +720,7 @@ describe("buildActionSemanticCandidates", () => {
     }
 
     expect(explicit.sourceCardId).toBe("breaker-1");
-    expect(explicit.abilityId).toBe("test_breaker:break_1");
+    expect(explicit.abilityId).toBe(droppBreakId);
     expect(explicit.abilityBindingMethod).toBe("canonical_capability_id");
     expect(explicit.projectionIssues).not.toContain("ability_unresolved");
 
@@ -773,8 +780,8 @@ describe("buildActionSemanticCandidates", () => {
     expect(candidate.evidence).toEqual(
       expect.arrayContaining([
         "AI038 source instance bound from LegalAction: runner-resource-1",
-        "AI038 source definition bound from LegalAction: onr_proteus_136_credit-subversion",
-        "AI038 payload cardImplementationAbilityId: onr_proteus_136_credit-subversion:successful_run_before_access:0",
+        "AI038 source definition bound from LegalAction: 194",
+        "AI038 payload cardImplementationAbilityId: 194:successful_run_before_access:0",
         "AI038 payload cardImplementationAbilityKey: successful_run_before_access:0",
         "AI038 payload cardImplementationPrimitiveKind: successful_run_before_access_effect",
         "AI038 payload cardImplementationEffectKind: corp_lose_credits",
@@ -871,7 +878,7 @@ describe("buildActionSemanticCandidates", () => {
       "economy.corp_credit_denial",
     );
     expect(candidate.evidence).toContain(
-      "AI038 payload cardImplementationAbilityKey-derived abilityId: onr_proteus_136_credit-subversion:successful_run_before_access:0",
+      "AI038 payload cardImplementationAbilityKey-derived abilityId: 194:successful_run_before_access:0",
     );
   });
 
@@ -881,13 +888,13 @@ describe("buildActionSemanticCandidates", () => {
         legalAction("play_event", 0, {
           source: "structured-economy-event",
           payload: {
-            sourceDefinitionId: "structured-economy-event",
+            sourceDefinitionId: syntheticCardDefinitionId("structured-economy-event"),
           },
         }),
       ],
       cardSemanticProfilesByDefinitionId: {
-        "structured-economy-event": {
-          cardId: "structured-economy-event",
+        [syntheticCardDefinitionId("structured-economy-event")]: {
+          cardId: syntheticCardDefinitionId("structured-economy-event"),
           tacticSignals: ["economy.card"],
           functionalEffects: [
             {
@@ -927,12 +934,12 @@ describe("buildActionSemanticCandidates", () => {
       legalActions: [
         legalAction("play_event", 0, {
           source: "generic-bypass-event-instance",
-          payload: { sourceDefinitionId: "generic-bypass-event" },
+          payload: { sourceDefinitionId: syntheticCardDefinitionId("generic-bypass-event") },
         }),
       ],
       cardSemanticProfilesByDefinitionId: {
-        "generic-bypass-event": {
-          cardId: "generic-bypass-event",
+        [syntheticCardDefinitionId("generic-bypass-event")]: {
+          cardId: syntheticCardDefinitionId("generic-bypass-event"),
           tacticSignals: [],
           functionalEffects: [
             {
@@ -974,7 +981,7 @@ describe("buildActionSemanticCandidates", () => {
       source: "generic-fort-support-instance",
       costs: [{ credits: 1 }],
       payload: {
-        sourceDefinitionId: "generic-fort-support",
+        sourceDefinitionId: syntheticCardDefinitionId("generic-fort-support"),
         cardImplementationFortRunRezSupportQuoteSchemaVersion:
           "corp-fort-run-rez-support-quote-v1",
         cardImplementationFortRunRezSupportQuoteKind:
@@ -982,7 +989,7 @@ describe("buildActionSemanticCandidates", () => {
         cardImplementationFortRunRezSupportQuoteComplete: true,
         cardImplementationFortRunRezSupportQuoteSourceCardInstanceId:
           "generic-fort-support-instance",
-        cardImplementationFortRunRezSupportQuoteTargetServerId: "remote_1",
+        cardImplementationFortRunRezSupportQuoteTargetServerId: "r1",
         cardImplementationFortRunRezSupportQuoteStateVersion: 43,
         cardImplementationFortRunRezSupportQuoteActionId:
           "rez-generic-fort-support",
@@ -998,14 +1005,14 @@ describe("buildActionSemanticCandidates", () => {
       legalActions: [action],
       stateVersion: 43,
       visibleSourceDefinitionsByInstanceId: {
-        "generic-fort-support-instance": "generic-fort-support",
+        "generic-fort-support-instance": syntheticCardDefinitionId("generic-fort-support"),
       },
     });
 
     expect(candidate?.conditionalDefenseFollowupQuote).toMatchObject({
       schemaVersion: "conditional-defense-followup-quote-v1",
       sourceCardInstanceId: "generic-fort-support-instance",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       actionId: "rez-generic-fort-support",
       stateVersion: 43,
       rezCredits: 1,
@@ -1021,13 +1028,13 @@ describe("buildActionSemanticCandidates", () => {
         legalAction("activated_card_ability", 0, {
           source: "multi-ability-card-instance",
           payload: {
-            sourceDefinitionId: "multi-ability-card",
+            sourceDefinitionId: syntheticCardDefinitionId("multi-ability-card"),
           },
         }),
       ],
       cardSemanticProfilesByDefinitionId: {
-        "multi-ability-card": {
-          cardId: "multi-ability-card",
+        [syntheticCardDefinitionId("multi-ability-card")]: {
+          cardId: syntheticCardDefinitionId("multi-ability-card"),
           tacticSignals: [],
           functionalEffects: [
             {
@@ -1065,14 +1072,14 @@ describe("buildActionSemanticCandidates", () => {
         legalAction("activated_card_ability", 0, {
           source: "bound-multi-ability-instance",
           payload: {
-            sourceDefinitionId: "bound-multi-ability-card",
+            sourceDefinitionId: syntheticCardDefinitionId("bound-multi-ability-card"),
             abilityId: "bound-multi-ability-card:draw",
           },
         }),
       ],
       cardSemanticProfilesByDefinitionId: {
-        "bound-multi-ability-card": {
-          cardId: "bound-multi-ability-card",
+        [syntheticCardDefinitionId("bound-multi-ability-card")]: {
+          cardId: syntheticCardDefinitionId("bound-multi-ability-card"),
           tacticSignals: [],
           functionalEffects: [
             { kind: "draw", timing: "action", scope: "runner" },
@@ -1613,7 +1620,7 @@ describe("buildActionSemanticCandidates", () => {
       legalActions: [
         legalAction("activated_card_ability", 0, {
           source: "single-ability-instance",
-          payload: { sourceDefinitionId: "single-ability-card" },
+          payload: { sourceDefinitionId: syntheticCardDefinitionId("single-ability-card") },
           targetRequirements: [
             {
               id: "target",
@@ -1625,20 +1632,20 @@ describe("buildActionSemanticCandidates", () => {
         }),
         legalAction("activated_card_ability", 1, {
           source: "multi-ability-instance",
-          payload: { sourceCardDefinitionId: "multi-ability-card" },
+          payload: { sourceCardDefinitionId: syntheticCardDefinitionId("multi-ability-card") },
         }),
         legalAction("trigger_ability", 2, {
           source: "multi-ability-bound-instance",
           payload: {
             cardId: "multi-ability-bound-instance",
-            sourceDefinitionId: "multi-ability-bound-card",
+            sourceDefinitionId: 366,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-            cardImplementationAbilityId: "multi-ability-bound-card:ability_b",
-            cardImplementationAbilityKey: "ability_b",
+            cardImplementationAbilityId: brokerWithdrawId,
+            cardImplementationAbilityKey: "withdraw_credits",
           },
           abilityRef: {
             sourceCardInstanceId: "multi-ability-bound-instance",
-            sourceAbilityId: "multi-ability-bound-card:ability_b",
+            sourceAbilityId: brokerWithdrawId,
           },
         }),
       ],
@@ -1651,15 +1658,15 @@ describe("buildActionSemanticCandidates", () => {
         {
           actionId: "ai036-0-activated_card_ability",
           sourceCardId: "single-ability-instance",
-          sourceDefinitionId: "single-ability-card",
+          sourceDefinitionId: syntheticCardDefinitionId("single-ability-card"),
           abilityId: "ability.single",
           method: "single_legal_ability_inferred",
           evidence: ["AI041 test single ability binding"],
         },
       ],
       cardSemanticProfilesByDefinitionId: {
-        "single-ability-card": {
-          cardId: "single-ability-card",
+        [syntheticCardDefinitionId("single-ability-card")]: {
+          cardId: syntheticCardDefinitionId("single-ability-card"),
           tacticSignals: ["card.context.economy"],
           abilitySemantics: [
             {
@@ -1684,21 +1691,21 @@ describe("buildActionSemanticCandidates", () => {
             },
           ],
         },
-        "multi-ability-card": {
-          cardId: "multi-ability-card",
+        [syntheticCardDefinitionId("multi-ability-card")]: {
+          cardId: syntheticCardDefinitionId("multi-ability-card"),
           tacticSignals: ["card.context.multi", "access.payoff"],
           abilitySemantics: [
             { abilityId: "ability.a", tacticSignals: ["draw.card"] },
             { abilityId: "ability.b", tacticSignals: ["economy.gain"] },
           ],
         },
-        "multi-ability-bound-card": {
-          cardId: "multi-ability-bound-card",
+        366: {
+          cardId: 366,
           tacticSignals: ["card.context.bound", "damage.payoff"],
           abilitySemantics: [
             { abilityId: "ability.a", tacticSignals: ["draw.card"] },
             {
-              abilityId: "multi-ability-bound-card:ability_b",
+              abilityId: brokerWithdrawId,
               tacticSignals: ["tag.remove"],
             },
           ],
@@ -1714,7 +1721,7 @@ describe("buildActionSemanticCandidates", () => {
     }
 
     expect(single.sourceCardInstanceId).toBe("single-ability-instance");
-    expect(single.sourceDefinitionId).toBe("single-ability-card");
+    expect(single.sourceDefinitionId).toBe(syntheticCardDefinitionId("single-ability-card"));
     expect(single.cardContextSignals).toEqual(["card.context.economy"]);
     expect(single.actionTacticSignals).toEqual(["economy.burst"]);
     expect(single.strategySupport).toEqual([
@@ -1725,14 +1732,14 @@ describe("buildActionSemanticCandidates", () => {
     ]);
 
     expect(unresolved.sourceCardInstanceId).toBe("multi-ability-instance");
-    expect(unresolved.sourceDefinitionId).toBe("multi-ability-card");
+    expect(unresolved.sourceDefinitionId).toBe(syntheticCardDefinitionId("multi-ability-card"));
     expect(unresolved.cardContextSignals).toEqual(["card.context.multi"]);
     expect(unresolved.actionTacticSignals).toEqual([]);
     expect(unresolved.compatibilitySignals).toContain("access.payoff");
     expect(unresolved.projectionIssues).toContain("ability_unresolved");
 
     expect(explicit.sourceCardInstanceId).toBe("multi-ability-bound-instance");
-    expect(explicit.sourceDefinitionId).toBe("multi-ability-bound-card");
+    expect(explicit.sourceDefinitionId).toBe(366);
     expect(explicit.cardContextSignals).toEqual(["card.context.bound"]);
     expect(explicit.actionTacticSignals).toEqual(["tag.remove"]);
     expect(explicit.compatibilitySignals).toContain("damage.payoff");
@@ -1746,24 +1753,24 @@ describe("buildActionSemanticCandidates", () => {
           source: "profile-only-instance",
           payload: {
             cardId: "profile-only-instance",
-            sourceDefinitionId: "profile-only-card",
+            sourceDefinitionId: 366,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-            cardImplementationAbilityId: "profile-only-card:profile_only",
-            cardImplementationAbilityKey: "profile_only",
+            cardImplementationAbilityId: brokerStoreId,
+            cardImplementationAbilityKey: "store_credits",
           },
           abilityRef: {
             sourceCardInstanceId: "profile-only-instance",
-            sourceAbilityId: "profile-only-card:profile_only",
+            sourceAbilityId: brokerStoreId,
           },
         }),
       ],
       cardSemanticProfilesByDefinitionId: {
-        "profile-only-card": {
-          cardId: "profile-only-card",
+        366: {
+          cardId: 366,
           tacticSignals: [],
           abilitySemantics: [
             {
-              abilityId: "profile-only-card:profile_only",
+              abilityId: brokerStoreId,
               tacticSignals: [],
               targetProfileMatches: [
                 {
@@ -1786,7 +1793,7 @@ describe("buildActionSemanticCandidates", () => {
       (gate) => gate.gateId === "target_context",
     );
 
-    expect(candidate.sourceDefinitionId).toBe("profile-only-card");
+    expect(candidate.sourceDefinitionId).toBe(366);
     expect(candidate.targetContext).toBeUndefined();
     expect(targetContextGate?.status).toBe("not_applicable");
     expect(candidate.projectionIssues).not.toContain(
@@ -1800,12 +1807,12 @@ describe("buildActionSemanticCandidates", () => {
       legalActions: [
         legalAction("activated_card_ability", 0, {
           source: "compat-instance",
-          payload: { sourceDefinitionId: "compat-card" },
+          payload: { sourceDefinitionId: syntheticCardDefinitionId("compat-card") },
         }),
       ],
       cardSemanticProfilesByDefinitionId: {
-        "compat-card": {
-          cardId: "compat-card",
+        [syntheticCardDefinitionId("compat-card")]: {
+          cardId: syntheticCardDefinitionId("compat-card"),
           tacticSignals: ["economy.card"],
           compatibilitySignals: [
             "role:economy",
@@ -1835,12 +1842,12 @@ describe("buildActionSemanticCandidates", () => {
       legalActions: [
         legalAction("activated_card_ability", 0, {
           source: "bucket-instance",
-          payload: { sourceDefinitionId: "bucket-card" },
+          payload: { sourceDefinitionId: syntheticCardDefinitionId("bucket-card") },
         }),
       ],
       cardSemanticProfilesByDefinitionId: {
-        "bucket-card": {
-          cardId: "bucket-card",
+        [syntheticCardDefinitionId("bucket-card")]: {
+          cardId: syntheticCardDefinitionId("bucket-card"),
           tacticSignals: [
             "card.context.economy",
             "card.context.economy:action",
@@ -1867,7 +1874,7 @@ describe("buildActionSemanticCandidates", () => {
       legalActions: [
         legalAction("activated_card_ability", 0, {
           source: "preferred-instance",
-          payload: { sourceDefinitionId: "preferred-card" },
+          payload: { sourceDefinitionId: syntheticCardDefinitionId("preferred-card") },
         }),
       ],
       sideSafeAbilityBindings: [
@@ -1875,15 +1882,15 @@ describe("buildActionSemanticCandidates", () => {
           actionId: "ai036-0-activated_card_ability",
           sourceCardId: "legacy-wrong-instance",
           sourceCardInstanceId: "preferred-instance",
-          sourceDefinitionId: "preferred-card",
+          sourceDefinitionId: syntheticCardDefinitionId("preferred-card"),
           abilityId: "ability.preferred",
           method: "single_legal_ability_inferred",
           evidence: ["R1 preferred sourceCardInstanceId binding"],
         },
       ],
       cardSemanticProfilesByDefinitionId: {
-        "preferred-card": {
-          cardId: "preferred-card",
+        [syntheticCardDefinitionId("preferred-card")]: {
+          cardId: syntheticCardDefinitionId("preferred-card"),
           tacticSignals: ["card.context.preferred"],
           abilitySemantics: [
             {
@@ -1898,7 +1905,7 @@ describe("buildActionSemanticCandidates", () => {
     if (!candidate) throw new Error("Expected one preferred binding candidate");
     expect(candidate.sourceCardId).toBe("preferred-instance");
     expect(candidate.sourceCardInstanceId).toBe("preferred-instance");
-    expect(candidate.sourceDefinitionId).toBe("preferred-card");
+    expect(candidate.sourceDefinitionId).toBe(syntheticCardDefinitionId("preferred-card"));
     expect(candidate.abilityId).toBe("ability.preferred");
     expect(candidate.cardContextSignals).toEqual(["card.context.preferred"]);
     expect(candidate.actionTacticSignals).toEqual(["economy.preferred"]);
@@ -1915,8 +1922,8 @@ describe("buildActionSemanticCandidates", () => {
         }),
       ],
       cardSemanticProfilesByDefinitionId: {
-        "hidden-instance-only": {
-          cardId: "hidden-instance-only",
+        [syntheticCardDefinitionId("hidden-instance-only")]: {
+          cardId: syntheticCardDefinitionId("hidden-instance-only"),
           tacticSignals: ["must.not.join"],
           abilitySemantics: [
             { abilityId: "ability.hidden", tacticSignals: ["hidden.signal"] },
@@ -1947,14 +1954,14 @@ describe("buildActionSemanticCandidates", () => {
           abilityRef: {
             sourceCardInstanceId: "dropp-instance",
             sourceAbilityId:
-              "231:icebreaker_abilities_break_subroutine",
+              droppBreakId,
           },
           payload: {
             cardId: "dropp-instance",
             sourceDefinitionId: 231,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityId:
-              "231:icebreaker_abilities_break_subroutine",
+              droppBreakId,
             cardImplementationAbilityKey:
               "icebreaker_abilities_break_subroutine",
             iceId: "ice-1",
@@ -1976,14 +1983,14 @@ describe("buildActionSemanticCandidates", () => {
         },
       },
       cardSemanticProfilesByDefinitionId: {
-        onr_v1_019_dropp: {
+        231: {
           cardId: 231,
           tacticSignals: [],
           strategySupport: [],
           abilitySemantics: [
             {
               abilityId:
-                "231:icebreaker_abilities_break_subroutine",
+                droppBreakId,
               tacticSignals: [
                 "breaker.break_any_subroutine",
                 "encounter.emergency_subroutine_prevention",
