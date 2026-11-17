@@ -3,10 +3,12 @@ import type {
   EngineRandomizedTraceBidSelectionReceipt,
   EngineRandomizedTurnPlanSelectionReceipt,
   GameEvent,
+  GameState,
   LegalAction,
   PlayerAction,
   Side,
 } from "@netgrid/shared";
+import { findLastHistoryIndex } from "./public-event-history";
 import {
   bindTurnPlanChoices,
   canonicalTurnPlanningSerialize,
@@ -86,6 +88,38 @@ export function observeTurnPlanAction(params: {
       ? { selectedTargets: { ...applied.selectedTargets } }
       : {}),
   };
+}
+
+/** Read an accepted Engine selection even after the run opens a response window. */
+export function observeRandomizedRunnerRunStart(
+  state: GameState,
+  side: Side,
+): ObservedTurnPlanAction | undefined {
+  if (
+    side !== "runner" ||
+    !state.run ||
+    (state.aiTurnPlanRandomCounter ?? 0) === 0
+  )
+    return undefined;
+  const index = findLastHistoryIndex(
+    state.eventLog,
+    (entry) =>
+      entry.publicPayload.actor === "runner" &&
+      entry.turnSerial === state.turnSerial &&
+      entry.publicPayload.actionType === "start_run",
+  );
+  const event = state.eventLog[index];
+  if (!event || event.publicPayload.serverId !== state.run.attackedServerId)
+    return undefined;
+  const observed = observeTurnPlanAction({
+    matchId: state.matchId,
+    side,
+    stateVersion: event.stateVersionAfter,
+    event,
+  });
+  return observed?.engineSelectionKey && observed.actionType === "start_run"
+    ? observed
+    : undefined;
 }
 
 function randomizedAppliedAction(

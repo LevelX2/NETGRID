@@ -375,7 +375,8 @@ export function createAiGameSimulator(
       );
       const action =
         decision.selectionKind === "engine_randomized_ice_install_selection" ||
-        decision.selectionKind === "engine_randomized_trace_bid_selection"
+        decision.selectionKind === "engine_randomized_trace_bid_selection" ||
+        decision.selectionKind === "engine_randomized_turn_plan_selection"
           ? randomizedResult?.ok
             ? randomizedResult.receipt.selectedLegalAction
             : undefined

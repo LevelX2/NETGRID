@@ -1,9 +1,11 @@
 import {
   applyRandomizedIceInstallSelection,
   applyRandomizedTraceBidSelection,
+  applyRandomizedTurnPlanSelection,
   quoteCorpPunishRoute,
   quoteRandomizedIceInstallSelection,
   quoteRandomizedTraceBidSelection,
+  quoteRandomizedTurnPlanSelection,
 } from "@netgrid/engine";
 import type { AiDecision, GameState } from "@netgrid/shared";
 import type { AiDecisionRuntimeOptions } from "../runtime/choose-ai-action";
@@ -15,6 +17,7 @@ export function simulationEngineRuntimeOptions(
   | "quoteCorpPunishRoute"
   | "quoteRandomizedIceInstallSelection"
   | "quoteRandomizedTraceBidSelection"
+  | "quoteRandomizedTurnPlanSelection"
 > {
   return {
     quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
@@ -22,6 +25,12 @@ export function simulationEngineRuntimeOptions(
       quoteRandomizedIceInstallSelection(state, request),
     quoteRandomizedTraceBidSelection: (request) =>
       quoteRandomizedTraceBidSelection(state, request),
+    ...(state.activeSide === "runner"
+      ? {
+          quoteRandomizedTurnPlanSelection: (request) =>
+            quoteRandomizedTurnPlanSelection(state, request),
+        }
+      : {}),
   };
 }
 export function applySimulationEngineSelection(
@@ -31,6 +40,11 @@ export function applySimulationEngineSelection(
 ) {
   if (decision.selectionKind === "engine_randomized_ice_install_selection")
     return applyRandomizedIceInstallSelection(state, {
+      ...decision.engineCommand,
+      idempotencyKey,
+    });
+  if (decision.selectionKind === "engine_randomized_turn_plan_selection")
+    return applyRandomizedTurnPlanSelection(state, {
       ...decision.engineCommand,
       idempotencyKey,
     });

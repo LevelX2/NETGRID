@@ -377,6 +377,12 @@ import {
 } from "../runner/terminal-win/terminal-win-signals";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
+import {
+  certifyRunnerCentralAccessVariation,
+  reconcileRunnerCentralAccessVariation,
+  runnerCentralAccessVariationCommand,
+  type RunnerCentralAccessVariation,
+} from "../plans/runner-central-access-variation";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
 import { corpRdReorderChoiceSignal } from "../corp/hand-management/rd-reorder-choice";
 import { uniqueBy } from "./collection";
@@ -550,7 +556,10 @@ export function choosePlanFirstLiveAction(
         buildActionCardSemanticProfilesByDefinitionId(),
     }),
   );
-  const previous = residentPlanPortfolioSnapshot(input);
+  const previous = reconcileRunnerCentralAccessVariation(
+    input as AiDecisionInputWithDeckCapabilities,
+    residentPlanPortfolioSnapshot(input),
+  );
   const registry =
     input.side === "runner"
       ? createSidePlanRegistry({
@@ -836,6 +845,17 @@ export function choosePlanFirstLiveAction(
     result,
     dependencies.runnerProgramInstallTrashAssessmentForCard,
   );
+  const runnerAccessVariation =
+    options.runnerCentralAccessVariation === true &&
+    input.side === "runner" &&
+    turnPlannerCutover
+      ? certifyRunnerCentralAccessVariation({
+          input,
+          cutover: turnPlannerCutover,
+          previous,
+          runTargets: (context.domain as RunnerPlanDomain).runTargetEvaluations,
+        })
+      : undefined;
   const decision = decisionFromScheduler(
     input,
     candidates,
@@ -845,6 +865,7 @@ export function choosePlanFirstLiveAction(
     dependencies,
     options,
     turnPlanningDebug,
+    runnerAccessVariation,
   );
   if (result.lane === "plan" && decision.engineCommand) {
     const lease = result.portfolio.turnPlanExecutionLease;
@@ -852,6 +873,15 @@ export function choosePlanFirstLiveAction(
       lease.engineSelectionKey = turnPlanEngineSelectionKey(
         decision.engineCommand,
       );
+      if (
+        runnerAccessVariation &&
+        decision.selectionKind === "engine_randomized_turn_plan_selection"
+      ) {
+        result.portfolio.pendingRunnerCentralAccessVariation = {
+          engineSelectionKey: lease.engineSelectionKey,
+          origins: runnerAccessVariation.origins,
+        };
+      }
     }
   }
   bindSelectedRunnerCoverageSearchChoiceContinuation(
@@ -1817,7 +1847,9 @@ export function runnerActionDispositions(
     signals: domain.defense,
     runWindows: domain.runWindows,
     runTargets,
-    terminalActionIds: new Set((domain.terminalWins ?? []).flatMap((signal) => signal.actionIds ?? [])),
+    terminalActionIds: new Set(
+      (domain.terminalWins ?? []).flatMap((signal) => signal.actionIds ?? []),
+    ),
     alreadyClassifiedActionIds: new Set(
       dispositions.map((entry) => entry.actionId),
     ),
@@ -2377,7 +2409,8 @@ export function runnerActionDispositions(
       runnerEffectsProvideTopTrashRecovery(candidate.functionalEffects);
     const hostedProgramRecovery =
       candidate.actionType === "activated_card_ability" &&
-      runnerRecoveryActionContract(input, candidate)?.hostedTarget !== undefined;
+      runnerRecoveryActionContract(input, candidate)?.hostedTarget !==
+        undefined;
     if (
       (structuredTopHeapRecovery || hostedProgramRecovery) &&
       !dispositions.some((entry) => entry.actionId === candidate.actionId) &&
@@ -3858,7 +3891,10 @@ function buildCorpDomain(
     virusPressure,
     punishCampaigns,
     ambushes,
-    handManagement: [...handManagement, ...corpPunishHandDrawSignals(input, punishCampaigns)],
+    handManagement: [
+      ...handManagement,
+      ...corpPunishHandDrawSignals(input, punishCampaigns),
+    ],
   };
 }
 
@@ -4087,6 +4123,7 @@ function decisionFromScheduler(
   dependencies: PlanFirstLiveDependencies,
   options: AiDecisionRuntimeOptions,
   turnPlanningDebug?: AiTurnPlanningDebug,
+  runnerAccessVariation?: RunnerCentralAccessVariation,
 ): AiDecision {
   const randomizedIceInstallNearTie =
     result.lane === "plan"
@@ -4252,10 +4289,13 @@ function decisionFromScheduler(
   }
   const actionAlternatives = debugActionWindow.map((alternative, index) => {
     const randomizedCandidate =
-      randomizedIceInstallNearTie?.candidates.some(
-        (candidate) => candidate.actionId === alternative.actionId,
-      ) ?? false;
+      (
+        runnerAccessVariation?.candidates ??
+        randomizedIceInstallNearTie?.candidates
+      )?.some((candidate) => candidate.actionId === alternative.actionId) ??
+      false;
     const selected =
+      runnerAccessVariation === undefined &&
       randomizedIceInstallNearTie === undefined &&
       alternative.actionId === actionId;
     const encounterExclusion =
@@ -4746,6 +4786,17 @@ function decisionFromScheduler(
         kind: "engine_randomized_trace_bid_selection",
         quote: quote.quote,
       },
+    };
+  }
+  if (runnerAccessVariation) {
+    return {
+      ...decisionBase,
+      selectionKind: "engine_randomized_turn_plan_selection",
+      engineCommand: runnerCentralAccessVariationCommand(
+        input,
+        options,
+        runnerAccessVariation,
+      ),
     };
   }
   if (randomizedAgendaSlice) {

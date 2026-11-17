@@ -644,6 +644,20 @@ Ein öffentlich beobachteter Corp-Draw invalidiert die bekannte R&D-Spitze
 und verändert die Zugriffsbewertung. Die D112-Gegenprobe hält die LegalActions
 fest und prüft den Wechsel des tatsächlichen Zugriffsziels von R&D zu HQ.
 
+Der Pilot `runnerCentralAccessVariation` materialisiert im letzten Klick bei
+maximal zwei fehlenden Runner-Siegpunkten jeweils eine vollständige freie
+Basisrun-Linie auf ungeschütztes HQ und R&D mit unbekanntem Zugriffsertrag.
+Beide Linien haben P4, keine offene Pflicht, keinen bekannten Pfadrisiko-
+oder Ressourcenunterschied und höchstens 20 Punkte Abstand im TurnPlanner.
+Bei Gleichstand erhalten sie Gewicht eins. Innerhalb des Bandes erhält die
+höher bewertete Linie Gewicht zwei. Eine laufende Bindung, eine belegte
+Siegroute und ein relevanter Ressourcen- oder Sicherheitsunterschied
+begrenzen die Variation. Die Engine wendet genau eine Variante über
+`ai_turn_plan_selection` an. Der validierte Spielbeleg stellt vor dem ersten
+Run-Fenster die konkret gezogene Planinstanz und ihren Step wieder her.
+Die Runtime-Option ermöglicht einen Vergleich bei identischen Decks und
+Seeds. Der Pilot deckt vorerst das Auswahl- und Zugriffsfenster ab.
+
 Die Informationsroute bewertet ein öffentlich beobachtetes kostenloses
 Run-Ende im laufenden Zug: Folgt auf den Basisrun ausschließlich kostenloses
 ICE-Rezzen und ein von der Engine bestätigtes End-the-Run-Fenster ohne
