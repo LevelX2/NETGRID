@@ -36,6 +36,8 @@ it("retains the contest owner through rez, two mandatory traces and the selected
   ).toBe(true);
   let state: GameState = saved.state;
   const initial = state;
+  if (!initial.run) throw new Error("Missing the native run at the checkpoint.");
+  const runExecutor = `plan:runner.convert_run_window:${encodeURIComponent(`run:${initial.run.runId}`)}`;
   const actions: string[] = [];
   const bids: string[][] = [];
   let support = 0;
@@ -67,8 +69,8 @@ it("retains the contest owner through rez, two mandatory traces and the selected
       expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
         stateVersion: 182,
         pendingRunnerCostPenaltySupportOrigin: {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-          executorInstanceId: "plan:runner.convert_run_window:run%3Arun_173",
+          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          executorInstanceId: runExecutor,
           originalActionId: a.actionId,
           selectedAtStateVersion: 182,
         },
@@ -77,8 +79,8 @@ it("retains the contest owner through rez, two mandatory traces and the selected
       support++;
       expect(d.decisionDebug?.planFirstDecision?.executionOrigin).toMatchObject(
         {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-          leafPlanInstanceId: "plan:runner.convert_run_window:run%3Arun_173",
+          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          leafPlanInstanceId: runExecutor,
         },
       );
     }
@@ -134,7 +136,7 @@ it.each(["gap", "wrong_server", "wrong_run", "foreign_executor"] as const)(
       input.eventTail.find(
         (e: any) => e.stateVersionBefore === 181,
       ).publicPayload.serverId = "rd";
-    if (boundary === "wrong_run") input.playerView.run.runId = "different_run";
+    if (boundary === "wrong_run") input.playerView.run.runId += 1;
     if (boundary === "foreign_executor")
       p.instances.find(
         (x: any) => x.instanceId === p.executorInstanceId,

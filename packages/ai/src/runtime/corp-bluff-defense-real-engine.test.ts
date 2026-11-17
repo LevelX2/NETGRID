@@ -55,8 +55,8 @@ function fixture(ice = DOG, credits = 6) {
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
     .withCorpCredits(credits)
-    .withCorpRemoteRoot("remote_1", BEL)
-    .withCorpIceOnServer("remote_1", ice)
+    .withCorpRemoteRoot("r1", BEL)
+    .withCorpIceOnServer("r1", ice)
     .withRunnerCredits(6)
     .withRunnerProgramInstalled(151);
   state.turnSerial = 12;
@@ -98,7 +98,7 @@ function startRun(state: GameState) {
     state,
     "runner",
     getLegalActions(state, "runner").find(
-      (a) => a.type === "start_run" && a.payload?.serverId === "remote_1",
+      (a) => a.type === "start_run" && a.payload?.serverId === "r1",
     )!.actionId,
   );
 }
@@ -122,10 +122,10 @@ function chooseAndApply(state: GameState, side: Side) {
 it("funds the exact installed decoy ICE before committing the last credit elsewhere", () => {
   const state = fixture(DOG, 4);
   const i = input(state);
-  const source = i.playerView.servers.find((s) => s.id === "remote_1")!
+  const source = i.playerView.servers.find((s) => s.id === "r1")!
     .root[0]!;
   expect(
-    corpBluffDefenseNeed(i, "remote_1", source.instanceId, 0),
+    corpBluffDefenseNeed(i, "r1", source.instanceId, 0),
   ).toMatchObject({
     fundingGap: 1,
     requiredCredits: 5,
@@ -146,7 +146,7 @@ it("does not count next-run Bad Publicity as cash extracted by bait ICE", () => 
   state.corp.badPublicity = 5;
   const decisionInput = input(state);
   expect(decisionInput.playerView.runnerNextRunBadPublicityCredits).toBe(5);
-  const server = decisionInput.playerView.servers.find((entry) => entry.id === "remote_1")!;
+  const server = decisionInput.playerView.servers.find((entry) => entry.id === "r1")!;
   expect(
     corpBluffDefenseNeed(decisionInput, server.id, server.root[0]!.instanceId, 0),
   ).toBeUndefined();
@@ -154,6 +154,10 @@ it("does not count next-run Bad Publicity as cash extracted by bait ICE", () => 
 
 it("rezzes funded bait ICE, charges an actual break and only then recycles the bait", () => {
   let state = startRun(fixture());
+  const bait = state.corp.servers.find((server) => server.id === "r1")?.root.find(
+    (id) => state.cardInstances[id]?.definitionId === BEL,
+  );
+  if (!bait) throw new Error("Missing the installed bluff card.");
   const first = chooseAndApply(state, "corp");
   expect(first.action.type).toBe("rez_ice");
   expect(
@@ -169,17 +173,14 @@ it("rezzes funded bait ICE, charges an actual break and only then recycles the b
         ? "runner"
         : "corp";
     const next = chooseAndApply(state, side);
-    if (
-      next.action.type === "rez_card" &&
-      next.action.source.includes("bel-digmo")
-    ) {
+    if (next.action.type === "rez_card" && next.action.source === bait) {
       expect(state.runner.credits).toBeLessThan(runnerBefore);
       expect(state.run?.position.kind).toBe("server");
       const lines =
         next.decision.decisionDebug?.planFirstDecision?.turnPlanning
           ?.consideredLines;
       const decline = lines?.find(
-        (line) => line.firstActionId === "corp.decline_rez.remote_1",
+        (line) => line.firstActionId === "corp.decline_rez.r1",
       );
       expect(decline?.steps).toHaveLength(1);
       expect(decline?.stopReason).toBe("observation_boundary");
@@ -199,7 +200,7 @@ it("quotes and executes Riddler's paid stop with a publicly selected nonmatching
   state.cardInstances[fubarId]!.selectedSubtype = "sentry";
   state = startRun(state);
   const before = hashState(state);
-  const corp = input(state).playerView.servers.find((s) => s.id === "remote_1")!
+  const corp = input(state).playerView.servers.find((s) => s.id === "r1")!
     .ice[0]!;
   expect(corp.effectivePostRezRunQuote).toMatchObject({
     complete: true,
@@ -212,7 +213,7 @@ it("quotes and executes Riddler's paid stop with a publicly selected nonmatching
     },
   });
   expect(
-    getPlayerView(state, "runner").servers.find((s) => s.id === "remote_1")!
+    getPlayerView(state, "runner").servers.find((s) => s.id === "r1")!
       .ice[0]!.effectivePostRezRunQuote,
   ).toBeUndefined();
   expect(hashState(state)).toBe(before);
@@ -230,7 +231,7 @@ it("quotes and executes Riddler's paid stop with a publicly selected nonmatching
 });
 it("does not fund stale ICE quotes or consume an independent scoring reserve", () => {
   const i = input(fixture(DOG, 4));
-  const server = i.playerView.servers.find((s) => s.id === "remote_1")!;
+  const server = i.playerView.servers.find((s) => s.id === "r1")!;
   expect(
     corpBluffDefenseNeed(i, server.id, server.root[0]!.instanceId, 4),
   ).toBeUndefined();
@@ -251,7 +252,7 @@ it("keeps an unconfigured subtype unknown and quotes a configured matching break
   )!;
   state = startRun(state);
   const read = () =>
-    input(state).playerView.servers.find((s) => s.id === "remote_1")!.ice[0]!
+    input(state).playerView.servers.find((s) => s.id === "r1")!.ice[0]!
       .effectivePostRezRunQuote;
   expect(read()).toMatchObject({
     complete: true,
@@ -291,14 +292,14 @@ it("prefers an available taxing remote over naked placement and preserves Score'
   const signal = corpRdRecyclingSignals(i, candidates).find(
     (s) => s.phase === "install",
   )!;
-  expect(signal.serverId).toBe("remote_1");
+  expect(signal.serverId).toBe("r1");
   expect(signal.defenseNeed?.outcome).toBe("access_cost");
   expect(
     corpRdRecyclingSignals(
       i,
       candidates,
       undefined,
-      new Set(["remote_1"]),
+      new Set(["r1"]),
     ).find((s) => s.phase === "install")?.serverId,
   ).toBe("new_remote");
 });

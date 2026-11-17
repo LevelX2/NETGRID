@@ -14,6 +14,7 @@ import { buildAiDecisionInput } from "./ai-decision-input";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import { restoreAiRuntimeCheckpoint } from "../evaluation/decision-checkpoints/runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
+import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
 import { runnerFreeAgendaStealForCurrentAccess } from "../runner/run-window/run-window-action-facts";
 
 afterEach(resetResidentPlanPortfolioMemory);
@@ -40,6 +41,7 @@ function original() {
     ...checkpoint.input,
     ...buildAiDecisionInputDto(checkpoint.input),
   } as AiDecisionInputWithDeckCapabilities;
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
   restoreAiRuntimeCheckpoint(
     input,
     input.ownDeckSnapshot!.deckSnapshotId,
