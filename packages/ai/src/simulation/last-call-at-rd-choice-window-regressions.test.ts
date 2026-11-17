@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import type { DeckDefinition } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
@@ -317,7 +318,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     )!;
     expect(sourceAction.type).toBe("start_run");
     const sourceServer = String(sourceAction.payload!.serverId);
-    const remote = sourceServer.startsWith("remote_");
+    const remote = isRemoteServerId(sourceServer);
     const sourceModule = remote
       ? "runner.contest_remote"
       : "runner.pressure_central";
@@ -338,7 +339,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     expect(choiceCapture?.input.playerView.pendingChoice).toMatchObject({
       choiceId: `runner_run_start_order_${choiceCapture!.state.stateVersion}`,
       side: "runner",
-      source: `runner_run_start.order:run_${choiceCapture!.state.stateVersion}`,
+      source: `runner_run_start.order:${choiceCapture!.state.stateVersion}`,
       kind: "select_cards",
       minSelections: 1,
       maxSelections: 1,
@@ -588,9 +589,9 @@ function deckMetadata(deck: StandardDeck, deckHash: string) {
 }
 
 function assertRegularReplay(summary: ReturnType<typeof simulateAiGame>): void {
-  expect(summary.terminationKind).toBe("game_result");
-  expect(summary.errors).toEqual([]);
   expect(summary.runtimeFailures).toEqual([]);
+  expect(summary.errors).toEqual([]);
+  expect(summary.terminationKind).toBe("game_result");
   expect(summary.metrics.illegalActions).toBe(0);
   expect(summary.replayOk).toBe(true);
   expect(summary.replayErrors).toEqual([]);

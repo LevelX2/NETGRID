@@ -40,8 +40,7 @@ describe("Inside Job central plan-first coverage", () => {
         payload: {
           cardId: "inside-job-card",
           sourceDefinitionId: 306,
-          cardImplementationAbilityId:
-            "306:abilities_on_play_make_run",
+          cardImplementationAbilityId: 390,
           cardImplementationAbilityKey: "abilities_on_play_make_run",
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           serverId: "rd",

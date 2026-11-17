@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -9,6 +10,7 @@ import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-conf
 import { resolveBenchmarkDeckSlot } from "./benchmark-deck-slot-resolver";
 
 const SLOT_ID = "strategy_panel_net_damage_black_ice";
+const TOP_RUNNERS_CONFERENCE = 396;
 
 describe("turn-planner shadow behavior-baseline regressions", () => {
   it("keeps Top Runners' Conference install plan-owned at the captured opening state [legacy_compare]", () => {
@@ -16,16 +18,16 @@ describe("turn-planner shadow behavior-baseline regressions", () => {
       "ai-behavior-baseline-v1-05",
       8,
     );
-    const actionId =
-      "runner.install_card.runner_396_2.runner_396_2";
-    const diagnostic = captureDiagnostic(capture, actionId);
+    const installations = capture.input.legalActions.filter(
+      (action) =>
+        action.type === "install_card" &&
+        capture.state.cardInstances[action.source]?.definitionId === TOP_RUNNERS_CONFERENCE,
+    );
+    const diagnostic = captureDiagnostic(capture, installations[0]?.actionId);
 
     expect(capture.side).toBe("runner");
     expect(capture.state.stateVersion).toBe(8);
-    expect(
-      capture.input.legalActions.some((action) => action.actionId === actionId),
-      JSON.stringify(diagnostic, undefined, 2),
-    ).toBe(true);
+    expect(installations, JSON.stringify(diagnostic, undefined, 2)).toHaveLength(1);
     expect(summary.errors, JSON.stringify(diagnostic, undefined, 2)).toEqual(
       [],
     );
@@ -38,7 +40,7 @@ describe("turn-planner shadow behavior-baseline regressions", () => {
         entry.side === "corp" &&
         entry.actionType === "install_card" &&
         entry.targetCardType === "agenda" &&
-        entry.targetServerId?.startsWith("remote_") === true,
+        isRemoteServerId(entry.targetServerId) === true,
     );
     const agendaServerId =
       summary.actionSequence[agendaInstallIndex]?.targetServerId;
@@ -143,7 +145,7 @@ function runSeedSummary(seed: string, maxActions: number) {
 
 function captureDiagnostic(
   capture: AiSimulationDecisionCheckpointCapture,
-  actionId: string,
+  actionId: string | undefined,
 ) {
   return {
     side: capture.side,

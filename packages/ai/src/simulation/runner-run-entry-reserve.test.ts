@@ -78,7 +78,7 @@ it.each([4])(
     input.legalActions = input.legalActions.filter(
       (a) =>
         a.type === "play_event" &&
-        a.source.includes(String(INSIDE_JOB)) &&
+        state.cardInstances[a.source]?.definitionId === INSIDE_JOB &&
         a.payload?.serverId === "rd",
     );
     input.playerView.legalActions = input.legalActions;
@@ -115,11 +115,12 @@ it.each([4])(
 );
 
 it("rejects an isolated event whose consumed card leaves the quoted hand buffer short", () => {
-  const input = runnerInput(fixture(3));
+  const state = fixture(3);
+  const input = runnerInput(state);
   input.legalActions = input.legalActions.filter(
     (a) =>
       a.type === "play_event" &&
-      a.source.includes(String(INSIDE_JOB)) &&
+      state.cardInstances[a.source]?.definitionId === INSIDE_JOB &&
       a.payload?.serverId === "rd",
   );
   input.playerView.legalActions = input.legalActions;
