@@ -94,24 +94,38 @@ export function runnerFinalClickCentralAccessBeforeTerminalScore(
   if (
     input.side !== "runner" ||
     view.own.clicks !== 1 ||
-    (evaluation.targetKind !== "hq" && evaluation.targetKind !== "rd") ||
-    evaluation.targetServerId !== evaluation.accessServerId ||
-    evaluation.runActionProjection.sourceKind !== "basic_action" ||
+    (evaluation.accessTargetKind !== "hq" &&
+      evaluation.accessTargetKind !== "rd") ||
+    !runnerRunProjectionPreservesNormalAccess(
+      input,
+      evaluation.runActionProjection,
+    ) ||
+    (evaluation.runActionProjection.postRunSelfDamage ?? 0) > 0 ||
+    (evaluation.runActionProjection.successfulRunSelfTags ?? 0) > 0 ||
     evaluation.pathPassability !== "reachable" ||
-    quote?.reachability !== "guaranteed_access" ||
+    !quote ||
+    quote.reachability === "no_access" ||
     quote.fundingGap !== 0 ||
     quote.effects.length !== 0 ||
+    quote.conditionalReasons.some(
+      (reason) => reason !== "unknown_ice_on_route",
+    ) ||
     (quote.conditionalRiskReasons?.length ?? 0) !== 0 ||
-    evaluation.prerunReserveQuote?.status !== "not_required" ||
-    evaluation.fundingNeed.reason !== "post_run_floor_gap" ||
-    (evaluation.knownAccessState !== "unknown" &&
-      evaluation.knownAccessState !== "fresh") ||
+    (evaluation.prerunReserveQuote?.status !== "not_required" &&
+      evaluation.prerunReserveQuote?.status !== "satisfied") ||
+    (evaluation.fundingNeed.reason !== "post_run_floor_gap" &&
+      evaluation.recommendation !== "run_now" &&
+      evaluation.recommendation !== "run_if_free") ||
+    evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.accessPayoffContestable === false
   )
     return false;
   const stealCost = runnerAgendaStealCreditRequirement(
     input,
     evaluation.accessServerId,
+    evaluation.accessPayoff === "agenda"
+      ? evaluation.accessFacts.knownTargetDefinitionIds
+      : undefined,
   );
   if (
     stealCost === undefined ||
@@ -127,7 +141,8 @@ export function runnerFinalClickCentralAccessBeforeTerminalScore(
   const currentRun = currentActions.some(
     (action) =>
       action.actionId === evaluation.actionId &&
-      action.type === "start_run" &&
+      action.type === evaluation.runActionProjection.actionType &&
+      (action.type === "start_run" || action.type === "play_event") &&
       action.payload?.serverId === evaluation.targetServerId &&
       action.costs.reduce((clicks, cost) => clicks + (cost.clicks ?? 0), 0) ===
         1,
@@ -164,8 +179,13 @@ export function runnerFinalClickCentralAccessBeforeTerminalScore(
   );
   const remoteRunBlocked = (target: RunnerRunTargetEvaluation) =>
     target.pathPassability !== "reachable" ||
+    !target.routeQuote ||
+    target.routeQuote.reachability === "no_access" ||
+    target.routeQuote.fundingGap > 0 ||
     target.prerunReserveQuote?.status === "blocked" ||
-    (target.routeQuote !== undefined && target.routeQuote.fundingGap > 0);
+    target.accessPayoffContestable === false ||
+    target.visibleTraceTagHazardUnavoidable === true ||
+    (target.unavoidableVisibleIceHazardCount ?? 0) > 0;
   return (
     !remoteRoutes.some(
       (target) =>

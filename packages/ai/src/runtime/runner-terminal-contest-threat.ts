@@ -130,13 +130,8 @@ export function runnerTerminalContestThreat(
           server.id.startsWith("remote_") &&
           server.root.some(
             (card, index) =>
-              rootMayBeAgenda(
-                input,
-                server.id,
-                card,
-                index,
-                pointsNeeded === 4 ? 4 : 0,
-              ) && (card.advancementCounters ?? 0) >= 1,
+              rootMayBeAgenda(input, server.id, card, index, pointsNeeded) &&
+              (card.advancementCounters ?? 0) >= 1,
           ),
       )
       .map((server) => server.id)
@@ -166,7 +161,7 @@ export function runnerTerminalContestThreat(
         server.id.startsWith("remote_") &&
         server.root.some(
           (card, index) =>
-            rootMayBeAgenda(input, server.id, card, index) &&
+            rootMayBeAgenda(input, server.id, card, index, pointsNeeded) &&
             (card.advancementCounters ?? 0) >= 2,
         ),
     )
@@ -194,7 +189,7 @@ export function runnerTerminalContestThreat(
         server.root.some(
           (card, index) =>
             card.known === false &&
-            rootMayBeAgenda(input, server.id, card, index),
+            rootMayBeAgenda(input, server.id, card, index, pointsNeeded),
         ),
     )
     .map((server) => server.id)

@@ -351,6 +351,7 @@ export function uniqueCoverageGaps(
         candidates,
         evaluation,
         deckCapabilities,
+        handBuffer.minimumHandBuffer,
       );
     const coverageUpgrade = costRecovery
       ? undefined

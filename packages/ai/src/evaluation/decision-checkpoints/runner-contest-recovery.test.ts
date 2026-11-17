@@ -1,5 +1,7 @@
+import type { PublicGameEvent, VisibleCard } from "@netgrid/shared";
 import { afterEach, describe, expect, it } from "vitest";
 
+import multipleAccessReplay from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-405-prepared-path-hazard-d293.json";
 import efficientBreakerReplay from "../../../../../data/scenarios/ai-decision-checkpoints/cp-ce27c6b1-d97-efficient-breaker-replay.json";
 import terminalSpendReplay from "../../../../../data/scenarios/ai-decision-checkpoints/cp-ce27c6b1-d112-terminal-spend-replay.json";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
@@ -7,6 +9,8 @@ import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { runnerFinalClickCentralAccessBeforeTerminalScore } from "../../plans/runner-run-purpose";
+import { buildPlanningStateIdentity } from "../../plans/turn-planning-contracts";
+import { runnerDefenseHandBufferFacts } from "../../runner/defense-recovery/defense-signals";
 import { runnerCostEffectiveCoverageRecovery } from "../../runner/rig-coverage/coverage-recovery";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -62,6 +66,32 @@ function centralAndRemoteRoutes(input: AiDecisionInputWithDeckCapabilities) {
   return { hq, remote, routes };
 }
 
+function visibleOpponentAgenda(
+  input: AiDecisionInputWithDeckCapabilities,
+  points: number,
+  serverId: NonNullable<VisibleCard["effectiveStealCostQuote"]>["serverId"],
+): VisibleCard {
+  const source = input.playerView.opponent.scoreArea?.find(
+    (card) => card.type === "agenda" && card.agendaPoints === points,
+  );
+  if (!source)
+    throw new Error("Expected a scored agenda of the requested size.");
+  const instanceId = source.instanceId + "_review_" + serverId;
+  return {
+    ...source,
+    instanceId,
+    known: true,
+    rezzed: false,
+    effectiveStealCostQuote: {
+      agendaInstanceId: instanceId,
+      serverId,
+      stateVersion: input.playerView.stateVersion,
+      creditCost: 0,
+      complete: true,
+    },
+  };
+}
+
 afterEach(resetResidentPlanPortfolioMemory);
 
 describe("Runner contest recovery", () => {
@@ -78,6 +108,77 @@ describe("Runner contest recovery", () => {
         stateVersion: input.playerView.stateVersion,
       },
       selectedPlan: { moduleId: "runner.rig_and_coverage" },
+    });
+  });
+
+  it("restores the D97 hand after installation and requotes the cheaper HQ path", () => {
+    const input = capturedInput(efficientBreakerReplay);
+    const install = cheaperBreakerInstall(input);
+    const decision = chooseAiAction(input);
+    expect(decision.actionId).toBe(install.actionId);
+    expect(
+      decision.decisionDebug?.planFirstDecision?.selectedPlan?.evidenceCodes,
+    ).toEqual(
+      expect.arrayContaining([
+        "coverage_efficiency_hand_recovery_clicks:1",
+        "coverage_efficiency_plausible_accesses:2",
+        "coverage_efficiency_savings_after_setup_clicks:4",
+      ]),
+    );
+
+    // Side-safe consequence of the exact current install. The next draw
+    // is an observation boundary and supplies no hypothetical card.
+    const view = input.playerView;
+    const own = view.own;
+    const installed = own.gripOrHq.find(
+      (card) => card.instanceId === install.source,
+    )!;
+    own.gripOrHq = own.gripOrHq.filter((card) => card !== installed);
+    own.rig!.push(installed);
+    own.memoryUsed! += installed.memoryCost!;
+    own.credits -= install.costs.reduce(
+      (credits, cost) => credits + (cost.credits ?? 0),
+      0,
+    );
+    own.clicks -= install.costs.reduce(
+      (clicks, cost) => clicks + (cost.clicks ?? 0),
+      0,
+    );
+    const stateVersionBefore = view.stateVersion++;
+    input.legalActions = input.legalActions
+      .filter((action) => action.source !== install.source)
+      .map((action) => ({
+        ...action,
+        expiresAtStateVersion: view.stateVersion,
+      }));
+    for (const server of view.servers) {
+      if (server.runnerAgendaStealCostQuote)
+        server.runnerAgendaStealCostQuote.stateVersion = view.stateVersion;
+    }
+    input.observedTurnPlanAction = {
+      matchId: input.matchId!,
+      side: "runner",
+      stateVersionBefore,
+      stateVersionAfter: view.stateVersion,
+      actionId: install.actionId,
+      actionType: install.type,
+      source: install.source,
+      boundChoices: [],
+    };
+    input.planningStateIdentity = buildPlanningStateIdentity(input);
+    expect(centralAndRemoteRoutes(input).hq).toMatchObject({ pathCost: 7 });
+    expect(chooseAiAction(input)).toMatchObject({
+      actionId: "runner.draw_card",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          selectedPlan: { moduleId: "runner.defense_and_recovery" },
+          route: {
+            actionId: "runner.draw_card",
+            stateVersion: view.stateVersion,
+          },
+        },
+      },
     });
   });
 
@@ -107,8 +208,19 @@ describe("Runner contest recovery", () => {
       });
       const deck = input.ownDeckCapabilities;
       if (!deck) throw new Error("Expected the captured breaker profiles.");
+      const { minimumHandBuffer } = runnerDefenseHandBufferFacts(
+        input,
+        [hq],
+        () => false,
+      );
       expect(
-        runnerCostEffectiveCoverageRecovery(input, candidates, hq, deck),
+        runnerCostEffectiveCoverageRecovery(
+          input,
+          candidates,
+          hq,
+          deck,
+          minimumHandBuffer,
+        ),
       ).toMatchObject({
         installActionId: install.actionId,
         totalRecoveryCost: 11,
@@ -122,7 +234,13 @@ describe("Runner contest recovery", () => {
         input.playerView.own.clicks = 1;
       }
       expect(
-        runnerCostEffectiveCoverageRecovery(input, candidates, hq, deck),
+        runnerCostEffectiveCoverageRecovery(
+          input,
+          candidates,
+          hq,
+          deck,
+          minimumHandBuffer,
+        ),
       ).toBeUndefined();
     },
   );
@@ -149,6 +267,182 @@ describe("Runner contest recovery", () => {
         stepId: expect.stringContaining(":pressure:hq"),
         stateVersion: input.playerView.stateVersion,
       },
+    });
+  });
+
+  it("takes a known payable winning agenda in unprotected Archives", () => {
+    const input = capturedInput(terminalSpendReplay);
+    const view = input.playerView;
+    const archives = view.servers.find((server) => server.id === "archives")!;
+    archives.root.push(visibleOpponentAgenda(input, 3, archives.id));
+    view.opponent.discardCount++;
+
+    const decision = chooseAiAction(input);
+    expect(decision).toMatchObject({
+      actionId: "runner.start_run.archives",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          selectedPlan: { moduleId: "runner.pressure_central" },
+          route: {
+            actionId: "runner.start_run.archives",
+            stateVersion: view.stateVersion,
+          },
+        },
+      },
+    });
+  });
+
+  it("considers an immediately affordable multiple access in the same last-click window", () => {
+    const input = capturedInput(terminalSpendReplay);
+    const example =
+      multipleAccessReplay.input as AiDecisionInputWithDeckCapabilities;
+    const event = example.legalActions.find(
+      (action) =>
+        action.type === "play_event" && action.actionId.includes("all-hands"),
+    )!;
+    const card = example.playerView.own.gripOrHq.find(
+      (card) => card.instanceId === event.source,
+    )!;
+    input.playerView.own.gripOrHq.push(structuredClone(card));
+    input.legalActions.push({
+      ...structuredClone(event),
+      expiresAtStateVersion: input.playerView.stateVersion,
+    });
+
+    expect(chooseAiAction(input)).toMatchObject({
+      actionId: event.actionId,
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          selectedPlan: { moduleId: "runner.pressure_central" },
+        },
+      },
+    });
+  });
+
+  it("preserves liquidity when the only visible remote agenda cannot give Corp enough points", () => {
+    const input = capturedInput(terminalSpendReplay);
+    const view = input.playerView;
+    view.opponent.agendaPoints = 4;
+    const remote = view.servers.find((server) => server.id === "remote_1")!;
+    remote.root = [
+      { ...visibleOpponentAgenda(input, 1, remote.id), advancementCounters: 1 },
+    ];
+    // Keep the remote out of current reach even after the unknown-agenda
+    // reserve is replaced by the assessment of a visible agenda.
+    for (const ice of remote.ice.slice(0, 2)) {
+      for (const copy of [1, 2]) {
+        const iceId = ice.instanceId + "_review_" + copy;
+        remote.ice.unshift({
+          ...ice,
+          instanceId: iceId,
+          effectiveRunQuote: {
+            ...ice.effectiveRunQuote!,
+            iceInstanceId: iceId,
+          },
+        });
+      }
+    }
+
+    expect(chooseAiAction(input)).toMatchObject({
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: { selectedPlan: { moduleId: "runner.economy" } },
+      },
+    });
+  });
+
+  it("keeps the HQ chance when a reachable second remote can only contain an upgrade", () => {
+    const input = capturedInput(terminalSpendReplay);
+    const view = input.playerView;
+    const id = "remote_2";
+    const label = "Remote 2";
+    const remote = view.servers.find((server) => server.id === "remote_1")!;
+    view.servers.push({
+      ...remote,
+      id,
+      label,
+      root: [{ instanceId: "hidden_remote2_upgrade", known: false }],
+      ice: [],
+      runnerAgendaStealCostQuote: {
+        ...remote.runnerAgendaStealCostQuote!,
+        serverId: id,
+      },
+    });
+    const run = input.legalActions.find(
+      (action) => action.actionId === "runner.start_run.remote_1",
+    )!;
+    input.legalActions.push({
+      ...run,
+      actionId: "runner.start_run." + id,
+      payload: { ...run.payload, serverId: id },
+    });
+    const events: PublicGameEvent[] = [
+      {
+        eventId: "evt_review_replacement",
+        type: "install_card",
+        stateVersionBefore: 177,
+        stateVersionAfter: 178,
+        turnSerial: 28,
+        stateHashAfter: "fnv1a:d0000000",
+        visibilityClass: "public",
+        publicPayload: {
+          actor: "corp",
+          actionType: "install_card",
+          serverLabel: label,
+          installPlacement: "root",
+          rootReplacement: "asset_to_agenda",
+          replacedRootCardType: "asset",
+        },
+      },
+      {
+        eventId: "evt_review_score",
+        type: "score_agenda",
+        stateVersionBefore: 178,
+        stateVersionAfter: 179,
+        turnSerial: 28,
+        stateHashAfter: "fnv1a:d0000001",
+        visibilityClass: "public",
+        publicPayload: {
+          actor: "corp",
+          actionType: "score_agenda",
+          targets: { scoredFromServerId: id },
+          cardDefinitionId: "onr_v1_193_corporate-coup",
+        },
+      },
+    ];
+    view.publicEvents.push(...events);
+    input.eventTail.push(...events);
+
+    const { routes } = centralAndRemoteRoutes(input);
+    expect(routes.find((route) => route.targetServerId === id)).toMatchObject({
+      pathPassability: "reachable",
+      accessPayoffContestable: false,
+    });
+    expect(chooseAiAction(input)).toMatchObject({
+      actionId: "runner.start_run.hq",
+      fallbackUsed: false,
+    });
+  });
+
+  it("keeps three hand cards when no draw can restore the shared defense buffer", () => {
+    const input = capturedInput(efficientBreakerReplay);
+    const nonInstallableCard =
+      terminalSpendReplay.input.playerView.own.gripOrHq.find(
+        (card) => card.title === "Desperate Competitor",
+      )!;
+    input.playerView.own.gripOrHq.push(
+      structuredClone(nonInstallableCard) as VisibleCard,
+    );
+    input.playerView.own.stackOrRdCount = 0;
+    input.legalActions = input.legalActions.filter(
+      (action) => action.type !== "draw_card",
+    );
+
+    expect(chooseAiAction(input)).toMatchObject({
+      actionId: "runner.gain_credit",
+      fallbackUsed: false,
     });
   });
 

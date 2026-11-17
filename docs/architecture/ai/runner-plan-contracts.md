@@ -620,15 +620,24 @@ Nullnutzen, unvermeidbare Gefahr, fehlende Zugriffskonversion und veraltete
 Actions begründen keine solche Alternative. Ein unbekanntes Root wird dadurch
 nicht als bekannte Agenda behandelt.
 
-Im letzten Klick kann der Zentraldruck einen vollständig gequoteten Basisrun
-auf HQ oder R&D zulassen, wenn eine öffentlich begründete terminale
-Bedrohung im Remote ansteht und der Contest im aktuellen Zug nicht mehr
-ausführbar ist. Der Plan prüft alle aktuellen Remote-Routen und vorbereitenden
-Angebote, die ohne den letzten Klick auskommen. Ein öffentlicher Scorebereich
-muss eine Agenda in der für einen Sieg nötigen Punktgröße belegen. Die Karte
-im Zielzugriff bleibt unbekannt. Mindestreserve, Handpuffer, sichtbare
-Steal-Kosten und Sicherheitsquote bleiben bindend. Match ce27c6b1 D112 prüft
-den HQ-Zugriff mit einem Klick gegen die noch offene Remote-Finanzierung.
+Im letzten Klick vergleicht der Zentraldruck aktuelle Basis- und Kartenruns
+mit normalem Zugriff auf HQ oder R&D, wenn eine öffentlich begründete
+terminale Bedrohung im Remote ansteht. Eine bekannte Remote-Agenda muss
+genügend Punkte für den Corp-Sieg liefern. Ein finanzierter Remote mit
+relevantem Zugriff oder belegter Vorbereitung behält seinen Contest-Anspruch.
+Ein aus dem öffentlichen Verlauf abgeleiteter Remote ohne Agenda-Chance
+blockiert die Zentralroute nicht. Bei unbekanntem ICE bleibt eine bedingte
+Route mit vollständig finanzierter Vorabreserve und ohne weitere offene
+ICE-Wirkungen vergleichbar. Mindestreserve, Handpuffer und sichtbare
+Steal-Kosten bleiben bindend. D112 aus Match ce27c6b1 und die Gegenproben
+prüfen den HQ-Basisrun, Mehrfachzugriff und die Remote-Alternativen.
+
+Ein aktuell legaler Run auf das ungeschützte Archiv besitzt einen
+P1-Sieganspruch, wenn der Bestand vollständig sichtbar ist, der Zugriff
+keine offenen Effekte enthält und die aktuelle Engine-Quote einer sichtbaren
+Siegagenda ihren Steal finanziert. Der Zentraldruck bindet den Anspruch an
+die konkrete Archiv-Action. Normale und spekulative Zugriffe behalten ihre
+jeweiligen Prioritätsklassen.
 
 Die Informationsroute bewertet ein öffentlich beobachtetes kostenloses
 Run-Ende im laufenden Zug: Folgt auf den Basisrun ausschließlich kostenloses
@@ -1200,10 +1209,15 @@ Gleiche Kosten erzeugen keinen Effizienzbedarf, auch bei kostenloser Kopie.
 Das gilt auch für einen technisch finanzierten Zentralpfad, den seine
 allgemeine Nach-Run-Reserve zurückstellt. Hier bindet Coverage nur eine
 bereits legale Handinstallation, die den Pfad inklusive Installationskosten
-verbilligt und freien Speicher nutzt. Der aktuelle Handpuffer bleibt erhalten
-oder kann mit einem belegten Ziehschritt vor Zugende wiederhergestellt werden.
-Ein späterer Run bleibt an seiner eigenen Zulassung gebunden. Match
-ce27c6b1 D97 prüft die Installationsbindung bei elf statt zwölf Credits.
+verbilligt und freien Speicher nutzt. Maßgeblich ist der bereits erreichte
+gemeinsame Defense-Handpuffer. Ein erforderlicher, aktuell belegter Ziehschritt
+muss neben dem Installations- und einem Run-Klick Platz finden. Installations-
+und Ziehklick gehen mit dem bestehenden Klickwert in den Vergleich ein.
+Öffentlich belegter Zentraldruck in mindestens zwei eigenen Zügen begründet
+einen auf zwei Zugriffe begrenzten Nutzungshorizont, solange der Corp mehr
+als zwei Siegpunkte fehlen. Ein späterer Run wird anhand seiner eigenen
+Quote neu zugelassen. D97 aus Match ce27c6b1 prüft Installation, Handaufbau
+und die erneute HQ-Pfadquote.
 
 Eine unbezahlbare vollständige Schadensvermeidung kann den vorhandenen
 Coverage-Owner ebenfalls mit einer günstigeren Handinstallation beauftragen.

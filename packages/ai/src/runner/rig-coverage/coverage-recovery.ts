@@ -24,7 +24,11 @@ import {
 import { runnerVisibleDeckBreaker } from "./coverage-card-facts";
 import { runnerBreakerCapabilityCoversRole } from "./coverage-card-facts";
 import { runnerVisibleBreakerUpgradeInstallRoute } from "./coverage-breaker-upgrades";
-import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
+import {
+  mergedPublicHistory,
+  serverIdFromEvent,
+} from "../../runtime/public-event-history";
+import { RUNNER_BREAKER_UPGRADE_CLICK_VALUE } from "./runner-breaker-upgrade-economics";
 import { runnerDrawProjectionFor } from "../../actions/action-economy-projection";
 export type RunnerCostEffectiveCoverageRecovery = Readonly<{
   requiredRole: RunnerCoverageGapSignal["requiredRole"];
@@ -47,6 +51,7 @@ export function runnerCostEffectiveCoverageRecovery(
   candidates: readonly ActionSemanticCandidate[],
   evaluation: RunnerRunTargetEvaluation,
   deckCapabilities: DeckCapabilityProfile,
+  minimumHandBuffer: number,
 ): RunnerCostEffectiveCoverageRecovery | undefined {
   // Missing coverage identifies one blocking role. Cost recovery instead
   // compares every role against the entire known path: a cheaper answer to
@@ -64,6 +69,7 @@ export function runnerCostEffectiveCoverageRecovery(
       evaluation,
       role,
       deckCapabilities,
+      minimumHandBuffer,
     );
     return recovery ? [recovery] : [];
   }).sort(
@@ -85,6 +91,7 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
   evaluation: RunnerRunTargetEvaluation,
   role: RunnerCoverageGapSignal["requiredRole"],
   deckCapabilities: DeckCapabilityProfile,
+  minimumHandBuffer: number,
 ): RunnerCostEffectiveCoverageRecovery | undefined {
   const reserveDefersFundedCentralRun =
     (evaluation.targetKind === "hq" || evaluation.targetKind === "rd") &&
@@ -157,6 +164,13 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
   );
   if (installedDefinitionIds.size === 0) return undefined;
 
+  const expectedRunUses =
+    reserveDefersFundedCentralRun &&
+    input.playerView.opponent.agendaPoints <
+      input.playerView.agendaPointsToWin - 2 &&
+    hasRepeatedCentralRunPressure(input, evaluation.targetServerId)
+      ? 2
+      : 1;
   const visibleOptions = input.playerView.own.gripOrHq
     .filter(
       (card) =>
@@ -188,6 +202,7 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
             candidates,
             card,
             deckCapabilities,
+            minimumHandBuffer,
           )
         : undefined;
       if (reserveDefersFundedCentralRun && !preparation) return [];
@@ -212,13 +227,22 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
         return [];
       }
       const totalRecoveryCost = installCost + breakCost;
-      return totalRecoveryCost < currentOperatingCost
+      const savingsAfterSetup = preparation
+        ? expectedRunUses * (currentOperatingCost - breakCost) -
+          installCost -
+          (preparation.clickCost + preparation.handRecoveryClicks) *
+            RUNNER_BREAKER_UPGRADE_CLICK_VALUE
+        : undefined;
+      return totalRecoveryCost < currentOperatingCost &&
+        (savingsAfterSetup === undefined || savingsAfterSetup > 0)
         ? [
             {
               card: preparation ? { ...card, installCost } : card,
               totalRecoveryCost,
               breakCost,
               installActionId: preparation?.actionId,
+              handRecoveryClicks: preparation?.handRecoveryClicks,
+              savingsAfterSetup,
             },
           ]
         : [];
@@ -296,6 +320,13 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
             `coverage_efficiency_visible_answer_install_cost:${visibleAnswer.card.installCost}`,
             `coverage_efficiency_visible_answer_break_cost:${visibleAnswer.breakCost}`,
             `coverage_efficiency_visible_answer_total_cost:${visibleAnswer.totalRecoveryCost}`,
+            ...(visibleAnswer.savingsAfterSetup === undefined
+              ? []
+              : [
+                  `coverage_efficiency_plausible_accesses:${expectedRunUses}`,
+                  `coverage_efficiency_hand_recovery_clicks:${visibleAnswer.handRecoveryClicks}`,
+                  `coverage_efficiency_savings_after_setup_clicks:${visibleAnswer.savingsAfterSetup}`,
+                ]),
           ]
         : []),
       ...(deckAlternative && deckAlternativeOperatingCost !== undefined
@@ -313,11 +344,38 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
   };
 }
 
+function hasRepeatedCentralRunPressure(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const observedTurns = new Set<number>();
+  for (const event of mergedPublicHistory(input)) {
+    if (
+      event.publicPayload.actor !== "runner" ||
+      event.turnSerial === undefined
+    )
+      continue;
+    const convertedRun = event.publicPayload.resolvedEffects?.some(
+      (effect) =>
+        effect.kind === "start_run" && effect.accessServerId === serverId,
+    );
+    const directRun =
+      (event.type === "start_run" ||
+        event.publicPayload.actionType === "start_run") &&
+      serverIdFromEvent(event) === serverId;
+    if (!convertedRun && !directRun) continue;
+    observedTurns.add(event.turnSerial);
+    if (observedTurns.size >= 2) return true;
+  }
+  return false;
+}
+
 function runnerReserveDeferredBreakerInstall(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   card: VisibleCard,
   deckCapabilities: DeckCapabilityProfile,
+  minimumHandBuffer: number,
 ) {
   const own = input.playerView.own;
   const breaker = deckCapabilities.runner?.breakerInventory.find(
@@ -350,31 +408,36 @@ function runnerReserveDeferredBreakerInstall(
   )
     return undefined;
 
-  const protectedHand = Math.min(
-    own.gripOrHq.length,
-    runnerDamageThreatAssessment(input).flatlineRisk.recommendedHandFloor,
-  );
+  const protectedHand = Math.min(own.gripOrHq.length, minimumHandBuffer);
   // An install-only preparation is re-evaluated before its run. Keep room
   // to restore the current damage buffer before ending the turn.
   const handAfterInstall = own.gripOrHq.length - 1;
-  if (handAfterInstall >= protectedHand) return install;
-  const canRestoreHand = input.legalActions.some((action) => {
+  if (handAfterInstall >= protectedHand)
+    return { ...install, handRecoveryClicks: 0 };
+
+  const handRecoveryCosts = input.legalActions.flatMap((action) => {
     if (
       action.side !== "runner" ||
       action.type !== "draw_card" ||
+      action.source !== "basic_action" ||
       action.expiresAtStateVersion !== input.playerView.stateVersion ||
-      action.costs.some((cost) => (cost.credits ?? 0) > 0) ||
-      action.costs.reduce((clicks, cost) => clicks + (cost.clicks ?? 0), 0) >
-        own.clicks - install.clickCost
+      action.costs.some((cost) => (cost.credits ?? 0) > 0)
     )
-      return false;
+      return [];
+    const clickCost = action.costs.reduce(
+      (clicks, cost) => clicks + (cost.clicks ?? 0),
+      0,
+    );
     const draw = runnerDrawProjectionFor(action);
-    return (
+    return clickCost < own.clicks - install.clickCost &&
       draw !== undefined &&
       draw.projectedNetHandDelta >= protectedHand - handAfterInstall
-    );
+      ? [clickCost]
+      : [];
   });
-  return canRestoreHand ? install : undefined;
+  return handRecoveryCosts.length > 0
+    ? { ...install, handRecoveryClicks: Math.min(...handRecoveryCosts) }
+    : undefined;
 }
 
 export function runnerCostEffectiveDeckCoverageAlternative(

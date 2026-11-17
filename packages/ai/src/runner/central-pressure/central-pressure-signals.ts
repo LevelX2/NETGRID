@@ -59,7 +59,10 @@ import {
   mergedPublicHistory,
   serverIdFromEvent,
 } from "../../runtime/public-event-history";
-import { runnerArchivesHasQualifiedHiddenPayoff } from "../../runtime/runner-archives-score";
+import {
+  runnerArchivesHasQualifiedHiddenPayoff,
+  runnerVisibleArchivesWinningRun,
+} from "../../runtime/runner-archives-score";
 import {
   runnerMultiRunEventAssessment,
   type RunnerMultiRunEventAssessment,
@@ -924,6 +927,43 @@ export function buildRunnerCentralPressureSignals({
       );
     }
   }
+  const noPayableRemotePreparation = !coverageGaps.some((gap) => {
+    const conversion = gap.sameTurnRunConversion;
+    // A current, fully fundable install-and-run preparation is an
+    // alternative to the last-chance central gamble, even while the
+    // present rig cannot yet pass the scoring fort.
+    return (
+      gap.requesterModuleId === "runner.contest_remote" &&
+      conversion !== undefined &&
+      gap.targetRunActionId === conversion.targetRunActionId &&
+      conversion.requiredClicksAfterFunding <= input.playerView.own.clicks &&
+      (gap.fundingGap === 0 || gap.fundingActionIds.length > 0) &&
+      (gap.installActionIds ?? []).some((id) =>
+        input.legalActions.some(
+          (a) =>
+            a.actionId === id &&
+            a.type === "install_card" &&
+            a.expiresAtStateVersion === input.playerView.stateVersion,
+        ),
+      ) &&
+      runTargets.some(
+        (target) =>
+          target.actionId === conversion.targetRunActionId &&
+          target.targetServerId === gap.targetServerId &&
+          target.targetKind === "remote" &&
+          target.knownAccessState !== "known_no_current_payoff",
+      ) &&
+      input.legalActions.some(
+        (a) =>
+          a.actionId === conversion.targetRunActionId &&
+          a.expiresAtStateVersion === input.playerView.stateVersion,
+      )
+    );
+  });
+  const protectedLiquidFloor = Math.max(
+    economy.minimumCreditFloor,
+    economy.creditReservePolicy.emergencyReserve,
+  );
   const deferredPostBreakTrashRuns = new Map<
     string,
     DeferredPostBreakTrashRun
@@ -994,15 +1034,44 @@ export function buildRunnerCentralPressureSignals({
               return evidence ? [[candidate.actionId, evidence] as const] : [];
             }),
           );
+          const regularRoutes = sameServerEvaluations.filter(
+            (candidate) => !probeExclusions.has(candidate.actionId),
+          );
+          const winningArchivesRun = sameServerEvaluations.find((candidate) =>
+            runnerVisibleArchivesWinningRun(input, candidate),
+          );
+          const lastClickRoutes = noPayableRemotePreparation
+            ? regularRoutes.filter(
+                (candidate) =>
+                  !confirmedDamageRequiresHandBuffer(
+                    candidate.targetServerId,
+                  ) &&
+                  !runnerCostlyCentralRunIsBelowHandBuffer(
+                    handSize,
+                    minimumHandBuffer,
+                    candidate,
+                  ) &&
+                  runnerFinalClickCentralAccessBeforeTerminalScore(
+                    input,
+                    candidate,
+                    runTargets,
+                    protectedLiquidFloor,
+                  ),
+              )
+            : [];
+          const lastClickActionIds = new Set(
+            lastClickRoutes.map((candidate) => candidate.actionId),
+          );
           const evaluation =
+            winningArchivesRun ??
             bestRunTargetsByServer(
               input,
               economy,
-              sameServerEvaluations.filter(
-                (candidate) => !probeExclusions.has(candidate.actionId),
-              ),
+              lastClickRoutes.length > 0 ? lastClickRoutes : regularRoutes,
               candidates,
-            )[0] ?? bestEvaluation;
+            )[0] ??
+            lastClickRoutes[0] ??
+            bestEvaluation;
           const knownAgendaInArchives =
             evaluation.targetServerId === "archives" &&
             archivesHasVisibleKnownAgenda(input);
@@ -1020,9 +1089,14 @@ export function buildRunnerCentralPressureSignals({
             evaluation.targetServerId as "hq" | "rd" | "archives",
           );
           const probeExclusion = probeExclusions.get(evaluation.actionId);
-          const pressureCadence = probeExclusion
-            ? { routeAvailable: false, evidenceCode: probeExclusion }
-            : ordinaryPressureCadence;
+          const pressureCadence = winningArchivesRun
+            ? {
+                routeAvailable: true,
+                evidenceCode: "runner_visible_archives_winning_access",
+              }
+            : probeExclusion
+              ? { routeAvailable: false, evidenceCode: probeExclusion }
+              : ordinaryPressureCadence;
           const multiRunRoutesByActionId = new Map(
             sameServerEvaluations.flatMap((candidateEvaluation) => {
               const quote = runnerCentralPressureMultiRunRouteQuote(
@@ -1109,57 +1183,7 @@ export function buildRunnerCentralPressureSignals({
             evaluation.knownAccessState === "known_no_current_payoff" ||
             (evaluation.accessServerId === "archives" &&
               archivesIsKnownWithoutAgenda(input));
-          const noPayableRemotePreparation = !coverageGaps.some((gap) => {
-            const conversion = gap.sameTurnRunConversion;
-            // A current, fully fundable install-and-run preparation is an
-            // alternative to the last-chance central gamble, even while the
-            // present rig cannot yet pass the scoring fort.
-            return (
-              gap.requesterModuleId === "runner.contest_remote" &&
-              conversion !== undefined &&
-              gap.targetRunActionId === conversion.targetRunActionId &&
-              conversion.requiredClicksAfterFunding <=
-                input.playerView.own.clicks &&
-              (gap.fundingGap === 0 || gap.fundingActionIds.length > 0) &&
-              (gap.installActionIds ?? []).some((id) =>
-                input.legalActions.some(
-                  (a) =>
-                    a.actionId === id &&
-                    a.type === "install_card" &&
-                    a.expiresAtStateVersion === input.playerView.stateVersion,
-                ),
-              ) &&
-              runTargets.some(
-                (target) =>
-                  target.actionId === conversion.targetRunActionId &&
-                  target.targetServerId === gap.targetServerId &&
-                  target.targetKind === "remote" &&
-                  target.knownAccessState !== "known_no_current_payoff",
-              ) &&
-              input.legalActions.some(
-                (a) =>
-                  a.actionId === conversion.targetRunActionId &&
-                  a.expiresAtStateVersion === input.playerView.stateVersion,
-              )
-            );
-          });
-          const lastClickFundedCentralAccess =
-            noPayableRemotePreparation &&
-            !confirmedDamageRequiresHandBuffer(evaluation.targetServerId) &&
-            !runnerCostlyCentralRunIsBelowHandBuffer(
-              handSize,
-              minimumHandBuffer,
-              evaluation,
-            ) &&
-            runnerFinalClickCentralAccessBeforeTerminalScore(
-              input,
-              evaluation,
-              runTargets,
-              Math.max(
-                economy.minimumCreditFloor,
-                economy.creditReservePolicy.emergencyReserve,
-              ),
-            );
+          const lastClickFundedCentralAccess = lastClickRoutes.length > 0;
           const terminalRemoteUnreachableCentralLastChance =
             noPayableRemotePreparation &&
             (lastClickFundedCentralAccess ||
@@ -1239,6 +1263,8 @@ export function buildRunnerCentralPressureSignals({
               terminalCentralAccess,
             );
           const fundingSupport =
+            winningArchivesRun ||
+            lastClickFundedCentralAccess ||
             safetyBlocked ||
             !pressureCadence.routeAvailable ||
             !informationKnownPathAdmitted
@@ -1264,33 +1290,34 @@ export function buildRunnerCentralPressureSignals({
           // access payoff. The one-credit information-probe budget must not
           // replace that route's already validated path and follow-up budget.
           const currentPressureRoute =
-            (!knownNoPayoff || concreteRunSetupAvailable) &&
-            pressureCadence.routeAvailable &&
-            (materialMarginalValue ||
-              concreteRunSetupAvailable ||
-              terminalRemoteUnreachableCentralLastChance) &&
-            (!costlyInformationRunBelowHandBuffer ||
-              terminalRemoteUnreachableCentralLastChance) &&
-            fundingSupport === undefined &&
-            coverageSupport === undefined &&
-            evaluation.pathPassability === "reachable" &&
-            evaluation.routeQuote?.reachability !== "no_access" &&
-            evaluation.prerunReserveQuote?.status !== "blocked" &&
-            (executionMode !== "information" ||
-              terminalRemoteUnreachableCentralLastChance ||
-              runnerInformationProbeCanUseQuotedPath(
-                evaluation,
-                directRunCanConvertNow,
-                terminalCentralAccess,
-              )) &&
-            (evaluation.recommendation === "run_now" ||
-              evaluation.recommendation === "run_if_free" ||
-              directRunCanConvertNow ||
-              lastCounterConversion !== undefined ||
-              terminalRemoteUnreachableCentralLastChance) &&
-            (evaluation.score > 0 ||
-              concreteRunSetupAvailable ||
-              terminalRemoteUnreachableCentralLastChance);
+            winningArchivesRun !== undefined ||
+            ((!knownNoPayoff || concreteRunSetupAvailable) &&
+              pressureCadence.routeAvailable &&
+              (materialMarginalValue ||
+                concreteRunSetupAvailable ||
+                terminalRemoteUnreachableCentralLastChance) &&
+              (!costlyInformationRunBelowHandBuffer ||
+                terminalRemoteUnreachableCentralLastChance) &&
+              fundingSupport === undefined &&
+              coverageSupport === undefined &&
+              evaluation.pathPassability === "reachable" &&
+              evaluation.routeQuote?.reachability !== "no_access" &&
+              evaluation.prerunReserveQuote?.status !== "blocked" &&
+              (executionMode !== "information" ||
+                terminalRemoteUnreachableCentralLastChance ||
+                runnerInformationProbeCanUseQuotedPath(
+                  evaluation,
+                  directRunCanConvertNow,
+                  terminalCentralAccess,
+                )) &&
+              (evaluation.recommendation === "run_now" ||
+                evaluation.recommendation === "run_if_free" ||
+                directRunCanConvertNow ||
+                lastCounterConversion !== undefined ||
+                terminalRemoteUnreachableCentralLastChance) &&
+              (evaluation.score > 0 ||
+                concreteRunSetupAvailable ||
+                terminalRemoteUnreachableCentralLastChance));
           const purpose =
             terminalRemoteUnreachableCentralLastChance ||
             executionMode === "contest"
@@ -1333,16 +1360,18 @@ export function buildRunnerCentralPressureSignals({
             serverId: evaluation.targetServerId as "hq" | "rd" | "archives",
             purpose,
             strategyLineIds: [strategicIntent.primaryWinIntent],
-            priorityClass: knownAgendaInArchives
-              ? ("P2" as const)
-              : terminalRemoteUnreachableCentralLastChance
+            priorityClass: winningArchivesRun
+              ? ("P1" as const)
+              : knownAgendaInArchives
                 ? ("P2" as const)
-                : lastCounterConversion
-                  ? ("P3" as const)
-                  : evaluation.accessServerId === "archives" &&
-                      ["unknown", "fresh"].includes(evaluation.accessPayoff)
-                    ? ("P6" as const)
-                    : ("P4" as const),
+                : terminalRemoteUnreachableCentralLastChance
+                  ? ("P2" as const)
+                  : lastCounterConversion
+                    ? ("P3" as const)
+                    : evaluation.accessServerId === "archives" &&
+                        ["unknown", "fresh"].includes(evaluation.accessPayoff)
+                      ? ("P6" as const)
+                      : ("P4" as const),
             reachable:
               currentPressureRoute && !safetyBlocked && !forgoUnsafeRunCapacity,
             marginalValue:
@@ -1367,65 +1396,69 @@ export function buildRunnerCentralPressureSignals({
               bestMultiRunRouteValue,
             evidenceCode: forgoUnsafeRunCapacity
               ? "runner_restricted_run_capacity_below_required_hand_buffer"
-              : knownAgendaInArchives
-                ? "visible_known_agenda_in_archives"
-                : terminalRemoteUnreachableCentralLastChance
-                  ? `runner_terminal_remote_unreachable_central_last_chance:${evaluation.targetServerId}`
-                  : safetyBlocked
-                    ? confirmedDamageRouteBlocked
-                      ? `runner_confirmed_damage_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
-                      : recentSafetyAbort!.evidenceCode
-                    : lastCounterConversion
-                      ? `runner_last_central_counter_conversion:${evaluation.targetServerId}:${lastCounterConversion.sourceDefinitionId}`
-                      : knownNoPayoff
-                        ? `runner_central_pressure_known_no_current_payoff:${evaluation.targetServerId}`
-                        : !pressureCadence.routeAvailable
-                          ? pressureCadence.evidenceCode
-                          : hqSuccessWindowRoute
-                            ? `runner_hq_success_window_setup:${hqSuccessWindowRoute.setup.sourceDefinitionId}`
-                            : coverageSupport
-                              ? coverageSupport.evidenceCode
-                              : fundingSupport
-                                ? fundingSupport.evidenceCode
-                                : !informationKnownPathAdmitted
-                                  ? `runner_central_information_probe_known_path_not_admitted:${evaluation.targetServerId}`
-                                  : costlyInformationRunBelowHandBuffer
-                                    ? `runner_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
-                                    : !materialMarginalValue
-                                      ? `runner_central_pressure_below_material_value:${evaluation.targetServerId}`
-                                      : !currentPressureRoute
-                                        ? `runner_central_pressure_no_admissible_route:${evaluation.targetServerId}`
-                                        : (evaluation.evidence[0] ??
-                                          "runner_run_target"),
+              : winningArchivesRun
+                ? "runner_visible_archives_winning_access"
+                : knownAgendaInArchives
+                  ? "visible_known_agenda_in_archives"
+                  : terminalRemoteUnreachableCentralLastChance
+                    ? `runner_terminal_remote_unreachable_central_last_chance:${evaluation.targetServerId}`
+                    : safetyBlocked
+                      ? confirmedDamageRouteBlocked
+                        ? `runner_confirmed_damage_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
+                        : recentSafetyAbort!.evidenceCode
+                      : lastCounterConversion
+                        ? `runner_last_central_counter_conversion:${evaluation.targetServerId}:${lastCounterConversion.sourceDefinitionId}`
+                        : knownNoPayoff
+                          ? `runner_central_pressure_known_no_current_payoff:${evaluation.targetServerId}`
+                          : !pressureCadence.routeAvailable
+                            ? pressureCadence.evidenceCode
+                            : hqSuccessWindowRoute
+                              ? `runner_hq_success_window_setup:${hqSuccessWindowRoute.setup.sourceDefinitionId}`
+                              : coverageSupport
+                                ? coverageSupport.evidenceCode
+                                : fundingSupport
+                                  ? fundingSupport.evidenceCode
+                                  : !informationKnownPathAdmitted
+                                    ? `runner_central_information_probe_known_path_not_admitted:${evaluation.targetServerId}`
+                                    : costlyInformationRunBelowHandBuffer
+                                      ? `runner_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
+                                      : !materialMarginalValue
+                                        ? `runner_central_pressure_below_material_value:${evaluation.targetServerId}`
+                                        : !currentPressureRoute
+                                          ? `runner_central_pressure_no_admissible_route:${evaluation.targetServerId}`
+                                          : (evaluation.evidence[0] ??
+                                            "runner_run_target"),
             ...(coverageSupport
               ? { supportNeedId: coverageSupport.gapId }
               : fundingSupport
                 ? { supportNeedId: fundingSupport.needId }
                 : {}),
-            runActionIds: pressureCadence.routeAvailable
-              ? lastClickFundedCentralAccess
-                ? [evaluation.actionId]
-                : [
-                    ...new Set([
-                      ...witnessedRunActionIds(
-                        candidates,
-                        runTargets,
-                        evaluation.targetServerId,
-                      ).filter(
-                        (id) =>
-                          !informationRouteExclusions.has(id) &&
-                          !sameAccessExclusions.has(id),
-                      ),
-                      ...(terminalRemoteUnreachableCentralLastChance
-                        ? [evaluation.actionId]
-                        : []),
-                      ...(hqSuccessWindowRoute
-                        ? [hqSuccessWindowRoute.actionId]
-                        : []),
-                      ...(lastCounterConversion ? [evaluation.actionId] : []),
-                    ]),
-                  ]
-              : [],
+            runActionIds: winningArchivesRun
+              ? [winningArchivesRun.actionId]
+              : pressureCadence.routeAvailable
+                ? lastClickFundedCentralAccess
+                  ? [...lastClickActionIds]
+                  : [
+                      ...new Set([
+                        ...witnessedRunActionIds(
+                          candidates,
+                          runTargets,
+                          evaluation.targetServerId,
+                        ).filter(
+                          (id) =>
+                            !informationRouteExclusions.has(id) &&
+                            !sameAccessExclusions.has(id),
+                        ),
+                        ...(terminalRemoteUnreachableCentralLastChance
+                          ? [evaluation.actionId]
+                          : []),
+                        ...(hqSuccessWindowRoute
+                          ? [hqSuccessWindowRoute.actionId]
+                          : []),
+                        ...(lastCounterConversion ? [evaluation.actionId] : []),
+                      ]),
+                    ]
+                : [],
             runActionValues: Object.fromEntries(
               sameServerEvaluations
                 .filter(
@@ -1515,16 +1548,16 @@ export function buildRunnerCentralPressureSignals({
             ),
             runActionExclusions: Object.fromEntries(
               sameServerEvaluations.flatMap((candidate) => {
-                if (
-                  lastClickFundedCentralAccess &&
-                  candidate.actionId !== evaluation.actionId
-                )
-                  return [
-                    [
-                      candidate.actionId,
-                      ["runner_central_last_click_exact_run_required"],
-                    ],
-                  ];
+                if (winningArchivesRun) return [];
+                if (lastClickFundedCentralAccess)
+                  return lastClickActionIds.has(candidate.actionId)
+                    ? []
+                    : [
+                        [
+                          candidate.actionId,
+                          ["runner_central_last_click_exact_run_required"],
+                        ],
+                      ];
                 const repeatedProbe = probeExclusions.get(candidate.actionId);
                 if (repeatedProbe)
                   return [[candidate.actionId, [repeatedProbe]]];
@@ -1705,7 +1738,11 @@ export function buildRunnerCentralPressureSignals({
     ],
     (signal) => signal.pressureId,
   ).map((signal) => {
-    if (!recurringEconomyRunDeferralEvidenceCode) return signal;
+    if (
+      !recurringEconomyRunDeferralEvidenceCode ||
+      signal.priorityClass === "P1"
+    )
+      return signal;
     const runActionIds = signal.runActionIds ?? [];
     if (runActionIds.length === 0) return signal;
     return {
@@ -1726,6 +1763,7 @@ export function buildRunnerCentralPressureSignals({
     if (
       !signal.reachable ||
       signal.routePreparation ||
+      signal.priorityClass === "P1" ||
       signal.priorityClass === "P2"
     )
       return signal;
