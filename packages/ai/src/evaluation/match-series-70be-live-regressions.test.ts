@@ -5,6 +5,8 @@ import {
   applyRandomizedTurnPlanSelection,
   createGameAfterSetup,
   getLegalActions,
+  hashGameState,
+  replayEvents,
 } from "@netgrid/engine";
 import {
   DEMO_DECKS,
@@ -224,7 +226,8 @@ describe("match series 70BE real Engine regressions", () => {
   it("keeps a safe productive central run above a non-acute one-card hand buffer", () => {
     const state = runnerTurnState("series-70be-hand-buffer-live-input");
     RealEngineFixtureBuilder.forState(state)
-      .withRunnerGripSize(1)
+      .withRunnerGripSize(0)
+      .withRunnerCardInGrip(RUSH_HOUR)
       .withRunnerCredits(5);
     const input = decisionInput(state, "runner", RUNNER_DECK);
     const decision = chooseRunnerAction(input);
@@ -235,12 +238,18 @@ describe("match series 70BE real Engine regressions", () => {
     expect(["start_run", "play_event"]).toContain(selected?.type);
     expect(selected?.payload).toMatchObject({ serverId: "rd" });
     expect(decision.evidence).toContain("plan_module:runner.pressure_central");
+    const after = applyDecision(state, "runner", decision);
+    expect(after.run?.attackedServerId).toBe("rd");
+    const replay = replayEvents(state, after.eventLog.slice(state.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(hashGameState(replay.state)).toBe(hashGameState(after));
   });
 
   it("keeps a visible immediate remote score threat as a hand-buffer override", () => {
     const state = runnerTurnState("series-70be-hand-buffer-score-threat");
     RealEngineFixtureBuilder.forState(state)
-      .withRunnerGripSize(1)
+      .withRunnerGripSize(0)
+      .withRunnerCardInGrip(RUSH_HOUR)
       .withRunnerCredits(10)
       .withCorpRemoteAgenda("r1", 2);
     const input = decisionInput(state, "runner", RUNNER_DECK);
@@ -253,6 +262,11 @@ describe("match series 70BE real Engine regressions", () => {
       type: "start_run",
       payload: { serverId: "r1" },
     });
+    const after = applyDecision(state, "runner", decision);
+    expect(after.run?.attackedServerId).toBe("r1");
+    const replay = replayEvents(state, after.eventLog.slice(state.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(hashGameState(replay.state)).toBe(hashGameState(after));
   });
 });
 
