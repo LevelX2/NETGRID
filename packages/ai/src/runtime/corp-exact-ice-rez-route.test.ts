@@ -6,6 +6,7 @@ import {
   getPlayerView,
 } from "@netgrid/engine";
 import type {
+  CardDefinitionId,
   CardInstanceId,
   DeckDefinition,
   GameState,
@@ -24,6 +25,7 @@ import {
 import { assessCorpExactIceRezAgainstScoreReserves } from "../corp/defense/corp-defense-score-reserve";
 import { readKnownCorpCentralAgendaThreat } from "../corp/defense/corp-central-defense-facts-adapter";
 import { assessCorpScoreProtection } from "./corp-score-protection-assessment";
+import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 
 describe("exact Corp ICE rez route", () => {
   it.each([
@@ -2210,7 +2212,7 @@ function engineIceRezWindow(
     runnerCredits?: number;
     runnerRunOnlyAction?: boolean;
     runnerScoredAgendaPoints?: number;
-    runnerPrograms?: readonly string[];
+    runnerPrograms?: readonly CardDefinitionId[];
     runnerProgramStrengthModifiers?: readonly number[];
     runnerProgramBitCounters?: readonly number[];
     futureIceDefinitionId?: number;
@@ -2408,7 +2410,7 @@ function engineIceRezWindow(
     throw new Error("Engine did not expose a payable ICE rez action");
   }
   const playerView = getPlayerView(state, "corp");
-  const input = buildAiDecisionInputDto({
+  const input: AiDecisionInputWithDeckCapabilities = buildAiDecisionInputDto({
     side: "corp",
     playerView,
     eventTail: [],
@@ -2430,15 +2432,7 @@ function engineIceRezWindow(
     profileId: "exact-glacier-rez-test",
   });
   if (options?.useEntrapmentFixtureDeck) {
-    (
-      input as typeof input & {
-        ownDeckSnapshot: {
-          deckSnapshotId: string;
-          side: "corp";
-          cards: Array<{ cardId: string; quantity: number }>;
-        };
-      }
-    ).ownDeckSnapshot = {
+    input.ownDeckSnapshot = {
       deckSnapshotId: ENTRAPMENT_FIXTURE_CORP_DECK.id,
       side: "corp",
       cards: ENTRAPMENT_FIXTURE_CORP_DECK.cards.map((card) => ({

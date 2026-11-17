@@ -7,6 +7,7 @@ import {
 } from "@netgrid/engine";
 import {
   DEMO_DECKS,
+  type CardDefinitionId,
   type DeckDefinition,
   type GameState,
   type LegalAction,
@@ -357,8 +358,8 @@ function decisionInput(state: GameState) {
 
 function punishState(
   profile: TraceRulesProfile,
-  source: string,
-  damage: string,
+  source: CardDefinitionId,
+  damage: CardDefinitionId,
   credits: number,
   clicks: number,
   grip: number,
@@ -435,7 +436,7 @@ function applyMandatoryDraw(state: GameState): GameState {
 function withCards(
   base: DeckDefinition,
   id: string,
-  additions: readonly string[],
+  additions: readonly CardDefinitionId[],
 ): DeckDefinition {
   return {
     ...base,

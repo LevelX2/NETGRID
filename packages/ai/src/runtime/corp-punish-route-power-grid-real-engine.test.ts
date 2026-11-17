@@ -8,6 +8,7 @@ import {
 import {
   DEMO_DECKS,
   type AiDecision,
+  type CardDefinitionId,
   type CardInstanceId,
   type DeckDefinition,
   type GameState,
@@ -344,7 +345,7 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
         if (drift === "current action drift") {
           head.currentLegalAction!.actionId = actions[2]!.actionId;
         } else if (drift === "capability drift") {
-          head.sourceCapabilityId = "ability:on_play:0";
+          head.sourceCapabilityId = Number.MAX_SAFE_INTEGER;
         } else {
           head.hardwareTrashProjection!.eligibleTargetCount += 1;
         }
@@ -368,8 +369,8 @@ function powerGridState(
   seed: string,
   corpCredits: number,
   options: {
-    hardware: readonly string[];
-    resources?: readonly string[];
+    hardware: readonly CardDefinitionId[];
+    resources?: readonly CardDefinitionId[];
     runnerTags?: number;
   },
 ): GameState {
@@ -542,7 +543,7 @@ function removeCardEverywhere(state: GameState, cardId: CardInstanceId): void {
 function withCards(
   base: DeckDefinition,
   id: string,
-  additions: readonly string[],
+  additions: readonly CardDefinitionId[],
 ): DeckDefinition {
   return {
     ...base,
