@@ -321,21 +321,14 @@ function damageProjection(
           input.playerView.own.freeNetOrCoreDamagePreventionRemaining ?? 0,
         )
       : undefined;
-  const survivalCapacity = runnerHandCount + (visiblePrevention ?? 0);
+  const appliedDamage = Math.max(0, amount - (visiblePrevention ?? 0));
+  const remainingHand = runnerHandCount - appliedDamage;
   return {
     type,
     amount,
-    ...(input.side === "runner"
-      ? {
-          runnerSurvivable: amount <= survivalCapacity,
-          runnerHandBufferPreserved:
-            survivalCapacity - amount >= REQUIRED_POST_ACCESS_HAND_BUFFER,
-        }
-      : {
-          runnerSurvivable: amount <= runnerHandCount,
-          runnerHandBufferPreserved:
-            runnerHandCount - amount >= REQUIRED_POST_ACCESS_HAND_BUFFER,
-        }),
+    runnerSurvivable: remainingHand >= 0,
+    runnerHandBufferPreserved:
+      remainingHand >= REQUIRED_POST_ACCESS_HAND_BUFFER,
   };
 }
 

@@ -100,6 +100,16 @@ describe("TargetChoiceShadow candidate coverage", () => {
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
   });
 
+  it("leaves a total expectation open when some scenarios have no count", () => {
+    const report = buildTargetChoiceShadowCandidateCoverageReport([
+      { scenarioId: "known", reports: [], expectedCandidateCount: 2 },
+      { scenarioId: "unknown", reports: [] },
+    ]);
+
+    expect(report.scenarioCount).toBe(2);
+    expect(report.expectedCandidateCount).toBeUndefined();
+  });
+
   it("reports target-choice coverage over real Engine target candidates", () => {
     const scenarios = buildRealEngineDecisionCorpusScenarios();
     const samples = buildRealEngineDecisionCorpus(scenarios);

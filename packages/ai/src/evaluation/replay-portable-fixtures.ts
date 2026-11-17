@@ -70,8 +70,7 @@ export function coverageRunGapPortableFixture(): ReplayPortableDecisionFixture {
     fixtureId: "ai-replay-coverage-run-gap-portable-v1",
     source: {
       kind: "synthetic_near_same_state",
-      derivedFrom:
-        "docs/reviews/ai/ai-replay-decision-repro-2026-06-23.md#replay-case-509c7f2d5d6a49c2",
+      derivedFrom: "replay-case-509c7f2d5d6a49c2",
       deviationNote:
         "Original local SQLite state is not embedded; fixture keeps only side-safe PlayerView, LegalActions and the visible run/coverage decision shape.",
     },
@@ -103,8 +102,7 @@ export function coverageRunGapNoRunNegativeFixture(): ReplayPortableDecisionFixt
     fixtureId: "ai-replay-coverage-run-gap-no-run-negative-v1",
     source: {
       kind: "synthetic_near_same_state",
-      derivedFrom:
-        "docs/reviews/ai/ai-replay-decision-repro-2026-06-23.md#negative-control",
+      derivedFrom: "ai-replay-coverage-run-gap-portable-v1",
       deviationNote:
         "Negative control removes start_run from LegalActions; the AI must not invent one.",
     },

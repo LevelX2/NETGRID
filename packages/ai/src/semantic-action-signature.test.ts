@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import {
   buildSemanticActionSignature,
+  semanticActionSignatureFromCandidate,
   signatureInputIsRedactionSafe,
 } from "./semantic-action-signature";
 
@@ -61,6 +63,46 @@ describe("semantic action signatures", () => {
     ).toBe(false);
     expect(JSON.stringify(unsafe)).not.toContain("cardInstances");
     expect(unsafe.targetIdentity).toBe("unknown_hidden_blocked");
+  });
+
+  it("redacts a forbidden marker even in the base action labels", () => {
+    const signature = buildSemanticActionSignature({
+      actionType: "privatePayload",
+      semanticActionType: "decisionDebug.explanation",
+      sourceKind: "deckTop",
+    });
+
+    expect(signature).toMatchObject({
+      actionType: "unknown",
+      semanticActionType: "unknown",
+      sourceKind: "unknown",
+    });
+    expect(signatureInputIsRedactionSafe(signature)).toBe(true);
+  });
+
+  it("distinguishes different multi-break sets with the same first target", () => {
+    const signatureFor = (subroutineIndexes: string) => {
+      const [candidate] = buildActionSemanticCandidates({
+        legalActions: [
+          {
+            actionId: "runner.multi-break",
+            type: "break_subroutine",
+            label: "Break subroutines",
+            source: "runner-visible-breaker",
+            side: "runner",
+            timingPoint: "run.encounter_ice",
+            expiresAtStateVersion: 1,
+            costs: [],
+            visibility: "public",
+            targetRequirements: [],
+            payload: { iceId: "visible-ice", subroutineIndexes },
+          },
+        ],
+      });
+      return semanticActionSignatureFromCandidate(candidate!).signatureKey;
+    };
+
+    expect(signatureFor("0,1")).not.toBe(signatureFor("0,2"));
   });
 
   it("bounds hidden-info marker detection to exact tokens", () => {

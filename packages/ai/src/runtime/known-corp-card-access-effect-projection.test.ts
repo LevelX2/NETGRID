@@ -24,6 +24,25 @@ describe("projectKnownCorpCardAccessEffect", () => {
     });
   });
 
+  it("does not count unused damage prevention as cards in the hand buffer", () => {
+    const current = input("runner", { corpCredits: 4, runnerHandCount: 0 });
+    current.playerView.own.freeNetOrCoreDamagePreventionRemaining = 5;
+
+    expect(
+      projectKnownCorpCardAccessEffect({
+        input: current,
+        sourceDefinitionId: "onr_v1_345_trap",
+        sourceCard: card("trap", "asset"),
+      }),
+    ).toMatchObject({
+      status: "complete",
+      damage: {
+        runnerSurvivable: true,
+        runnerHandBufferPreserved: false,
+      },
+    });
+  });
+
   it("fails the optional effect closed as inapplicable when Corp cannot pay", () => {
     expect(
       projectKnownCorpCardAccessEffect({

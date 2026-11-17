@@ -21,6 +21,27 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     expect(component?.reason).toContain("follow_up_server:hq");
   });
 
+  it("does not pay to unlock a follow-up that its target already prohibits", () => {
+    const current = input();
+    current.playerView.servers[0]!.statuses = [
+      {
+        id: "run-restriction",
+        kind: "run_prohibited",
+        scope: "target_server",
+        reason: "required_corp_activity_during_latest_corp_turn_missing",
+        targetServerId: "hq",
+        sourceCardInstanceId: "restriction-source",
+        sourceAbilityId: "run-restriction",
+        sourceTitle: "Run restriction",
+        sourceSide: "corp",
+      },
+    ];
+
+    expect(
+      runnerRunLockReleaseScoreComponent(current, releaseAction()),
+    ).toBeUndefined();
+  });
+
   it("does not release without a click for the follow-up run", () => {
     const current = input();
     current.playerView.own.clicks = 1;
@@ -98,7 +119,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
   });
 
   it("releases below matchpoint for a well-funded credible follow-up", () => {
-    const current = input();
+    const current = input(1);
     current.playerView.opponent.agendaPoints = 4;
     current.playerView.own.credits = 12;
 
@@ -215,11 +236,14 @@ describe("runnerRunLockReleaseScoreComponent", () => {
   });
 });
 
-function input(): AiDecisionInput {
+function input(releaseCredits = 2): AiDecisionInput {
   return {
     side: "runner",
     eventTail: [],
+    legalActions: [releaseAction(releaseCredits)],
     playerView: {
+      stateVersion: 10,
+      timingPoint: "runner_action.main",
       publicEvents: [],
       agendaPointsToWin: 7,
       own: {
@@ -251,6 +275,8 @@ function releaseAction(credits = 2): LegalAction {
     actionId: "runner.trigger_ability",
     side: "runner",
     type: "trigger_ability",
+    timingPoint: "runner_action.main",
+    expiresAtStateVersion: 10,
     costs: [{ clicks: 1, credits }],
     payload: {
       abilityId: "pay_to_remove_run_lock",

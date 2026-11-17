@@ -213,11 +213,19 @@ function conclusions(
   if (!gates.fullAiTestGreen) {
     result.push("Der vollstaendige AI-Testlauf ist nicht als gruen belegt.");
   }
-  result.push(
-    status === "accepted"
-      ? "Alle Acceptance-Gates sind belegt."
-      : "Der korrekte Status ist Iteration implementiert, Abnahme unvollstaendig.",
-  );
+  switch (status) {
+    case "accepted":
+      result.push("Alle Abnahmeprüfungen sind belegt.");
+      break;
+    case "blocked":
+      result.push(
+        "Die Abnahme ist durch eine fehlgeschlagene Pflichtprüfung blockiert.",
+      );
+      break;
+    case "implemented_but_acceptance_incomplete":
+      result.push("Die Umsetzung liegt vor. Die Abnahme ist unvollständig.");
+      break;
+  }
   return result;
 }
 
