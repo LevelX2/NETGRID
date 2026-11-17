@@ -42,23 +42,32 @@ describe("Corp mixed draw score-protection coverage", () => {
     expect(conversionCapture.state.timingPoint).toBe("corp_action.main");
     expect(drawCapture.state.timingPoint).toBe("corp_action.main");
 
+    const efficiency = conversionCapture.input.playerView.own.gripOrHq.find(
+      (card) => card.definitionId === 502,
+    );
+    const annualReviews = conversionCapture.input.playerView.own.gripOrHq.find(
+      (card) => card.definitionId === 494,
+    );
+    if (!efficiency || !annualReviews) {
+      throw new Error("Missing the captured Corp economy and draw sources.");
+    }
     const efficiencyAction = conversionCapture.input.legalActions.find(
       (action) =>
         action.type === "play_operation" &&
-        action.source === "corp_502_1",
+        action.source === efficiency.instanceId,
     );
     const annualReviewsAction = conversionCapture.input.legalActions.find(
       (action) =>
         action.type === "play_operation" &&
-        action.source === "corp_494_1",
+        action.source === annualReviews.instanceId,
     );
     expect(efficiencyAction).toMatchObject({
       side: "corp",
       type: "play_operation",
-      source: "corp_502_1",
+      source: efficiency.instanceId,
       costs: [{ clicks: 1, credits: 0 }],
       payload: {
-        cardId: "corp_502_1",
+        cardId: efficiency.instanceId,
         gainCreditsAmount: 3,
       },
     });
@@ -125,7 +134,7 @@ describe("Corp mixed draw score-protection coverage", () => {
     ).not.toContain(annualReviewsAction?.actionId);
     expect(
       drawCapture.input.playerView.own.gripOrHq.some(
-        (card) => card.definitionId === 502,
+        (card) => card.instanceId === efficiency.instanceId,
       ),
     ).toBe(false);
   });

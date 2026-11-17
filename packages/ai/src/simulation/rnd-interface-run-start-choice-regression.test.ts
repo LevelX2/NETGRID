@@ -39,8 +39,9 @@ describe("R&D Interface Dig run-start choice regression", () => {
         decisionDebug: { planKind: "runner.pressure_central" },
       });
       let state = applyDecision(fixture.state, source);
-      expect(state.pendingChoice?.source).toMatch(
-        /^runner_run_start\.order:run_/,
+      expect(state.run?.runId).toBe(state.stateVersion);
+      expect(state.pendingChoice?.source).toBe(
+        `runner_run_start.order:${state.run!.runId}`,
       );
       const choice = chooseAiAction(fixture.input(state));
       expect(choice).toMatchObject({
