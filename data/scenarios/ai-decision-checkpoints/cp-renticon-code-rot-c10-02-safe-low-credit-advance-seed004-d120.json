@@ -3689,7 +3689,7 @@
                   "cardDefinitionId": 35,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 35,
-                  "revealedCardDefinitionIds": 35,
+                  "revealedCardDefinitionIds": "35",
                   "revealedCount": 1
                 }
               }
@@ -6946,7 +6946,7 @@
             "hiddenZoneBarrier": true,
             "hiddenZoneAction": "temporary_program_install_end_turn_return",
             "returnedCount": 1,
-            "returnedCardDefinitionIds": 35,
+            "returnedCardDefinitionIds": "35",
             "redactedKind": "hidden_zone",
             "abilityId": "temporary_program_install_end_turn_return",
             "effectKind": "hidden_zone",
@@ -6954,7 +6954,7 @@
               "returnedCount": 1
             },
             "targets": {
-              "returnedCardDefinitionIds": 35,
+              "returnedCardDefinitionIds": "35",
               "redactedKind": "hidden_zone"
             },
             "visibility": {
@@ -6987,7 +6987,7 @@
                   "hiddenZoneBarrier": true,
                   "hiddenZoneAction": "temporary_program_install_end_turn_return",
                   "returnedCount": 1,
-                  "returnedCardDefinitionIds": 35
+                  "returnedCardDefinitionIds": "35"
                 }
               }
             }
@@ -7950,7 +7950,7 @@
                   "runnerCreditsAfter": 8,
                   "gainedCredits": 4,
                   "firstPrepCreditGainBonus": 1,
-                  "firstPrepCreditGainBonusSourceDefinitionIds": 49
+                  "firstPrepCreditGainBonusSourceDefinitionIds": "49"
                 },
                 "resolvedEffects": [
                   {

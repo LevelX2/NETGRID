@@ -4866,7 +4866,7 @@
             "temporaryDerezAfterRun": true,
             "rezCostPaid": 1,
             "rezCostReductionAmount": 2,
-            "rezCostReductionSourceDefinitionIds": 575,
+            "rezCostReductionSourceDefinitionIds": "575",
             "abilityFamily": "run-access",
             "cardId": "c319"
           }
@@ -7133,7 +7133,7 @@
           "temporaryDerezAfterRun": true,
           "rezCostPaid": 1,
           "rezCostReductionAmount": 2,
-          "rezCostReductionSourceDefinitionIds": 575,
+          "rezCostReductionSourceDefinitionIds": "575",
           "abilityFamily": "run-access",
           "cardId": "c319"
         }
@@ -7193,7 +7193,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 139,
-      "sideSafePlanningFingerprint": "fnv1a:a8464bd9"
+      "sideSafePlanningFingerprint": "fnv1a:88c55d03"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_cheap_bag_tricks_1.0.0",

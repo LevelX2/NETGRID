@@ -32,8 +32,8 @@ describe("meta 411 conditional damage continuation", () => {
       true,
     );
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_445",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A445",
     });
   });
 
@@ -46,7 +46,7 @@ describe("meta 411 conditional damage continuation", () => {
     "break_locked",
   ])("retains the damage guard when the full break is %s", (kind) => {
     const { input } = capture();
-    const ice = input.playerView.servers.find((s) => s.id === "remote_1")!
+    const ice = input.playerView.servers.find((s) => s.id === "r1")!
       .ice[0]!;
     if (kind === "unknown") ice.known = false;
     if (kind === "unrezzed") ice.rezzed = false;
@@ -64,7 +64,7 @@ describe("meta 411 conditional damage continuation", () => {
     input.playerView.own.credits = 6;
     expect(runnerFutureEncounterDamageJackOutAssessment(input)).toBeUndefined();
     input.playerView.servers.find(
-      (s) => s.id === "remote_1",
+      (s) => s.id === "r1",
     )!.ice[0]!.effectiveRunQuote!.breakSubroutineAdditionalCostPerSubroutine =
       1;
     expect(runnerFutureEncounterDamageJackOutAssessment(input)).toBeDefined();

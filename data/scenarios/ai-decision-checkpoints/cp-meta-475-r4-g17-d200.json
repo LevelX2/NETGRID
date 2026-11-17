@@ -6834,7 +6834,7 @@
             "iceInstallBaseCost": 0,
             "iceInstallAdditionalCost": 2,
             "iceInstallReduction": 2,
-            "iceInstallReductionSourceDefinitionIds": 385,
+            "iceInstallReductionSourceDefinitionIds": "385",
             "iceInstallTotalCost": 2,
             "postInstallRezQuoteCardId": "c25",
             "postInstallRezQuoteTargetServerId": "archives",
@@ -9297,7 +9297,7 @@
           "iceInstallBaseCost": 0,
           "iceInstallAdditionalCost": 2,
           "iceInstallReduction": 2,
-          "iceInstallReductionSourceDefinitionIds": 385,
+          "iceInstallReductionSourceDefinitionIds": "385",
           "iceInstallTotalCost": 2,
           "postInstallRezQuoteCardId": "c25",
           "postInstallRezQuoteTargetServerId": "archives",
@@ -9498,7 +9498,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 199,
-      "sideSafePlanningFingerprint": "fnv1a:b2d6d0b9"
+      "sideSafePlanningFingerprint": "fnv1a:28fa892d"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_corp_remote_lab_deflection_2026_07_01_1.2.0",

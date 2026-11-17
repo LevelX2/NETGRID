@@ -51,7 +51,7 @@ function restore(
 }
 
 const root = "plan:runner.pressure_central:central%3Ahq";
-const executor = "plan:runner.convert_run_window:run%3Arun_162";
+const executor = "plan:runner.convert_run_window:run%3A162";
 
 function expectContinuation(input: AiDecisionInput) {
   const decision = chooseAiAction(input);

@@ -8407,7 +8407,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 1,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 276,
+            "corpMandatoryAdditionalSourceDefinitionIds": "276",
             "visibility": {
               "class": "private_to_side"
             },
@@ -9268,7 +9268,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 2,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 276,
+            "corpMandatoryAdditionalSourceDefinitionIds": "276",
             "visibility": {
               "class": "private_to_side"
             },
@@ -9665,7 +9665,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 2,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 276,
+            "corpMandatoryAdditionalSourceDefinitionIds": "276",
             "visibility": {
               "class": "private_to_side"
             },
@@ -9958,7 +9958,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 2,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 276,
+            "corpMandatoryAdditionalSourceDefinitionIds": "276",
             "visibility": {
               "class": "private_to_side"
             },
@@ -10867,7 +10867,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 1,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 276,
+          "corpMandatoryAdditionalSourceDefinitionIds": "276",
           "visibility": {
             "class": "private_to_side"
           },
@@ -11728,7 +11728,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 2,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 276,
+          "corpMandatoryAdditionalSourceDefinitionIds": "276",
           "visibility": {
             "class": "private_to_side"
           },
@@ -12125,7 +12125,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 2,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 276,
+          "corpMandatoryAdditionalSourceDefinitionIds": "276",
           "visibility": {
             "class": "private_to_side"
           },
@@ -12418,7 +12418,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 2,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 276,
+          "corpMandatoryAdditionalSourceDefinitionIds": "276",
           "visibility": {
             "class": "private_to_side"
           },
@@ -12964,7 +12964,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 335,
-      "sideSafePlanningFingerprint": "fnv1a:97d44d6e"
+      "sideSafePlanningFingerprint": "fnv1a:fadecfe6"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_skivviss_mill_pressure_1.0.0",

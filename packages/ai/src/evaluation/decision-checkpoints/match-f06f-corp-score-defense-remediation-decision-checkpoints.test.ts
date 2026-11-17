@@ -45,7 +45,7 @@ describe("match f06f Corp score and defense remediation checkpoints", () => {
       planExecution: {
         acceptablePlanKinds: ["corp.economy"],
         acceptableCapabilities: ["develop_or_convert_corp_economy"],
-        requiredAssessmentEvidence: ["corp_engine_certified_visible_card_payout:onr_v1_309_bbs-whispering-campaign"],
+        requiredAssessmentEvidence: ["corp_engine_certified_visible_card_payout:521"],
       },
     };
     const result = runAiDecisionCheckpoint(checkpoint);
@@ -98,7 +98,7 @@ describe("match f06f Corp score and defense remediation checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_71_1.rd.corp_71_1.4",
+              "corp.install_card.cfx.rd.cfx.4",
           },
         ],
         planExecution: {

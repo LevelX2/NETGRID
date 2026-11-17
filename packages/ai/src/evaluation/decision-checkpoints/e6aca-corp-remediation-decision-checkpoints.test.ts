@@ -80,14 +80,14 @@ describe("e6aca Corp remediation decision checkpoints", () => {
         planInstanceId: plan?.selectedPlan?.instanceId,
       });
       const bbsRoot =
-        "plan:corp.economy:economy-campaign%3Acorp_521_1%3Arez%3Aremote_1";
+        "plan:corp.economy:economy-campaign%3Ac37x%3Arez%3Ar1";
       expect(plan?.turnPlanning?.heads).toContainEqual(
         expect.objectContaining({
           moduleId: "corp.economy",
           rootPlanInstanceId: bbsRoot,
           executorPlanInstanceId: bbsRoot,
           actionId:
-            "corp.rez_card.corp_521_1.remote_1.corp_521_1",
+            "corp.rez_card.c37x.r1.c37x",
           witnessValid: true,
         }),
       );
@@ -106,7 +106,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
         acceptableActions: [
           {
             sourceDefinitionId: 559,
-            targetServerId: "remote_1",
+            targetServerId: "r1",
           },
         ],
         planExecution: {
@@ -158,7 +158,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
           acceptableActions: [
             {
               actionId:
-                "corp.install_card.corp_71_1.rd.corp_71_1.4",
+                "corp.install_card.cfx.rd.cfx.4",
             },
           ],
         };

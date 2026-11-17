@@ -22,7 +22,7 @@ describe("meta 403 known ETR plus core damage", () => {
       capture.runtime,
     );
     const target = evaluateRunnerRunTargets({ input: capture.input }).find(
-      (e) => e.actionId === "runner.start_run.remote_1",
+      (e) => e.actionId === "runner.start_run.r1",
     );
     expect(target).toMatchObject({
       pathPassability: "blocked_by_visible_damage_hand_buffer",
@@ -32,7 +32,7 @@ describe("meta 403 known ETR plus core damage", () => {
       },
     });
     const decision = chooseAiAction(capture.input);
-    expect(decision.actionId).not.toBe("runner.start_run.remote_1");
+    expect(decision.actionId).not.toBe("runner.start_run.r1");
     expect(decision.fallbackUsed).toBe(false);
     expect(
       capture.input.legalActions.some((a) => a.actionId === decision.actionId),
@@ -40,7 +40,7 @@ describe("meta 403 known ETR plus core damage", () => {
     expect(decision.decisionDebug?.planFirstDecision?.dispositions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          actionId: "runner.start_run.remote_1",
+          actionId: "runner.start_run.r1",
           ownerModuleId: "runner.contest_remote",
           disposition: "explicitly_nonproductive",
         }),

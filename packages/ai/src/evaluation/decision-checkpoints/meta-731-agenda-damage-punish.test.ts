@@ -22,7 +22,7 @@ it("requests the exact current agenda-funded damage head from the real SP-848 de
       kind: "meat_damage",
       sourceCardInstanceId: action.source,
       sourceCapabilityId:
-        "539:unique_direct_longtail_tagged_meat_damage_meat",
+        648,
       currentLegalActionId: action.actionId,
     }),
   ]);

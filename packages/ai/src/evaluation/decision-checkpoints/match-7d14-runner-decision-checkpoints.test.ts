@@ -38,7 +38,7 @@ describe("match 7D14 runner decision checkpoints", () => {
           acceptablePlanKinds: ["runner.rig_and_coverage"],
           acceptableCapabilities: ["draw_for_answer_breaker_sentry"],
           requiredAssessmentEvidence: [
-            "runner_known_remote_coverage_project:remote_1",
+            "runner_known_remote_coverage_project:r1",
           ],
         },
       };
@@ -52,9 +52,9 @@ describe("match 7D14 runner decision checkpoints", () => {
       matchpointDiscardJson,
       (checkpoint) => {
         const state = checkpoint.engine.testOnlyGameState;
-        const handInstanceId = "runner_341_1";
+        const handInstanceId = "c23t";
         const installedInstanceId =
-          "runner_onr_v1_129_hq-interface_companion_installed";
+          "runner_341_companion_installed";
         const handCard = state.cardInstances[handInstanceId];
         if (!handCard) throw new Error("Expected HQ Interface in grip");
         state.cardInstances[installedInstanceId] = {

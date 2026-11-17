@@ -8912,7 +8912,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 7,
+            "corpMandatoryAdditionalSourceDefinitionIds": "7",
             "visibility": {
               "class": "private_to_side"
             },
@@ -9198,7 +9198,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 7,
+            "corpMandatoryAdditionalSourceDefinitionIds": "7",
             "visibility": {
               "class": "private_to_side"
             },
@@ -9581,7 +9581,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 7,
+            "corpMandatoryAdditionalSourceDefinitionIds": "7",
             "visibility": {
               "class": "private_to_side"
             },
@@ -9937,7 +9937,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 7,
+            "corpMandatoryAdditionalSourceDefinitionIds": "7",
             "visibility": {
               "class": "private_to_side"
             },
@@ -11597,7 +11597,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 7,
+          "corpMandatoryAdditionalSourceDefinitionIds": "7",
           "visibility": {
             "class": "private_to_side"
           },
@@ -11883,7 +11883,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 7,
+          "corpMandatoryAdditionalSourceDefinitionIds": "7",
           "visibility": {
             "class": "private_to_side"
           },
@@ -12266,7 +12266,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 7,
+          "corpMandatoryAdditionalSourceDefinitionIds": "7",
           "visibility": {
             "class": "private_to_side"
           },
@@ -12622,7 +12622,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 7,
+          "corpMandatoryAdditionalSourceDefinitionIds": "7",
           "visibility": {
             "class": "private_to_side"
           },
@@ -13220,7 +13220,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 324,
-      "sideSafePlanningFingerprint": "fnv1a:e2ba87fb"
+      "sideSafePlanningFingerprint": "fnv1a:e864e1cb"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

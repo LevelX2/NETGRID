@@ -43,7 +43,7 @@ it("keeps six credits instead of pumping to break a lock with no following encou
     decisionDebug: {
       planFirstDecision: {
         rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_82",
+        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A82",
         route: {
           actionId: continuation.actionId,
           stateVersion: input.playerView.stateVersion,

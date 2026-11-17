@@ -60,7 +60,7 @@ it("SP-458 preserves the installed breaker by the existing run-window jack-out r
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_265",
+        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A265",
         route: { actionId: "runner.jack_out" },
       },
     },

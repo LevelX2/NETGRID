@@ -19,7 +19,7 @@ it.each([game27, game25])(
       runtime: AiRuntimeCheckpointV1;
     };
     const payout = cp.input.legalActions.find((action) =>
-      action.actionId.endsWith(":withdraw_credits"),
+      action.payload?.cardImplementationAbilityId === 441,
     )!;
     expect(payout).toBeDefined();
     resetResidentPlanPortfolioMemory();
@@ -33,11 +33,11 @@ it.each([game27, game25])(
     expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
     expect(decision.actionId).toBe(payout.actionId);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       selectedPlan: {
         moduleId: "runner.credit_bank",
-        parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-        parentNeedId: "run-support:remote:remote_1",
+        parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        parentNeedId: "run-support:remote:r1",
       },
       route: {
         actionId: payout.actionId,

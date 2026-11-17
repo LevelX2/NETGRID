@@ -7948,7 +7948,7 @@
                   "cardDefinitionId": 262,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 262,
-                  "revealedCardDefinitionIds": 262,
+                  "revealedCardDefinitionIds": "262",
                   "revealedCount": 1
                 }
               }

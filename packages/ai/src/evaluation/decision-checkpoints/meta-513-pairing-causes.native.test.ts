@@ -89,7 +89,7 @@ it("admits the native G5/D170 Lucidrine remote contest through the live DTO", ()
   const { d, pf } = decide(input);
   expect(pf.selectedPlan?.moduleId).toBe("runner.contest_remote");
   expect(d.actionId).toBe(
-    "runner.play_event.runner_310_1.remote_1.runner_310_1.onr_v1_098_lucidrine-booster-drug:abilities_on_play_make_run",
+    "runner.play_event.c1wx.r1.c1wx.394",
   );
   const route = evaluateRunnerRunTargets({ input }).find(
     (t) => t.actionId === d.actionId,
@@ -106,7 +106,7 @@ it.each([true, false])(
     if (!terminal) input.playerView.opponent.agendaPoints = 0;
     const { d, pf } = decide(input);
     if (terminal) {
-      expect(d.actionId).toBe("runner.start_run.remote_1");
+      expect(d.actionId).toBe("runner.start_run.r1");
       expect(pf.selectedPlan?.moduleId).toBe("runner.contest_remote");
     } else {
       expect(d.actionId).toBe("runner.gain_credit");
@@ -116,7 +116,7 @@ it.each([true, false])(
       );
     }
     const route = evaluateRunnerRunTargets({ input }).find(
-      (t) => t.actionId === "runner.start_run.remote_1",
+      (t) => t.actionId === "runner.start_run.r1",
     )!;
     expect(route.pathPassability).toBe("reachable");
     expect(route.prerunReserveQuote).toMatchObject({
@@ -139,7 +139,7 @@ it("keeps the native G6/D186 real sentry gap when no Boon is installed", () => {
   expect(d.actionId).toBe("runner.draw_card");
   expect(pf.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
   const route = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "runner.start_run.r1",
   )!;
   expect(route.pathPassability).toBe("blocked_missing_coverage");
 });
@@ -156,7 +156,7 @@ it("retains mature development cashout as an executable ordinary-priority candid
     signal: {
       priorityClass: "P4",
       actionIds: [
-        "runner.activated_card_ability.runner_366_1.runner_366_1.activated.onr_v1_154_broker:withdraw_credits",
+        "runner.activated_card_ability.c29d.c29d.activated.441",
       ],
       evidenceCodes: expect.arrayContaining([
         "runner_credit_bank_cashout_for_mature_development_funding",
@@ -169,9 +169,14 @@ it("keeps both Broker balances when changing the funded remote would leave a saf
   const { d, pf } = decide(input);
   expect(d.actionId).toBe("runner.start_run.rd");
   expect(pf.selectedPlan?.moduleId).toBe("runner.pressure_central");
+  const brokerWithdrawals = new Set(
+    input.legalActions
+      .filter((action) => action.payload?.cardImplementationAbilityId === 441)
+      .map((action) => action.actionId),
+  );
   expect(
     d.decisionDebug?.actionAlternatives?.filter((entry) =>
-      entry.actionId.includes("broker") && entry.actionId.includes("withdraw_credits"),
+      brokerWithdrawals.has(entry.actionId),
     ),
   ).toEqual([
     expect.objectContaining({ whyNot: expect.arrayContaining([
@@ -182,7 +187,7 @@ it("keeps both Broker balances when changing the funded remote would leave a saf
     ]) }),
   ]);
   const route = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "runner.start_run.r1",
   )!;
   expect(route.pathPassability).toBe("reachable");
   expect(route.routeQuote?.conditionalReasons).toContain(
@@ -242,7 +247,7 @@ it("preserves the actual seeded Engine strength after the first native run actio
   state = apply(
     state,
     "runner",
-    "runner.play_event.runner_310_1.remote_1.runner_310_1.onr_v1_098_lucidrine-booster-drug:abilities_on_play_make_run",
+    "runner.play_event.c1wx.r1.c1wx.394",
   );
   const view = getPlayerView(state, "runner"),
     original = view.own.rig!.find(
@@ -302,7 +307,7 @@ it("continues native G32 Shock with the exact legal Boon pump instead of accepti
   const { d, pf } = decide(input);
   expect(pf.selectedPlan?.moduleId).toBe("runner.convert_run_window");
   expect(d.actionId).toBe(
-    "runner.pump_breaker.runner_214_2.runner_214_2.runner_214_2.corp_480_1.onr_v1_002_ai-boon:icebreaker_abilities_increase_strength",
+    "runner.pump_breaker.c1bm.c1bm.c1bm.c2yt.277",
   );
 });
 it("quotes a hypothetical pumped resolved breaker without mutating its current public state", () => {
@@ -347,7 +352,7 @@ it("executes the native G32 pump, break and remaining run through the current En
         state = apply(state, "corp", corp[0]!.actionId);
       } else {
         const originalRezId =
-          "corp.rez_ice.corp_491_2.corp_491_2";
+          "corp.rez_ice.c31a.c31a";
         expect(corp).toHaveLength(2);
         expect(corp.filter((a) => a.type === "decline_rez")).toHaveLength(1);
         expect(corp.find((a) => a.actionId === originalRezId)?.type).toBe(

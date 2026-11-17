@@ -32884,7 +32884,7 @@
                 "cardDefinitionId": 153,
                 "publicRevealKind": "reveal",
                 "publicRevealDefinitionId": 153,
-                "revealedCardDefinitionIds": 153,
+                "revealedCardDefinitionIds": "153",
                 "revealedCount": 1
               }
             }
@@ -35070,7 +35070,7 @@
                 "cardDefinitionId": 137,
                 "publicRevealKind": "reveal",
                 "publicRevealDefinitionId": 137,
-                "revealedCardDefinitionIds": 137,
+                "revealedCardDefinitionIds": "137",
                 "revealedCount": 1
               }
             }
@@ -36804,7 +36804,7 @@
                 "cardDefinitionId": 141,
                 "publicRevealKind": "reveal",
                 "publicRevealDefinitionId": 141,
-                "revealedCardDefinitionIds": 141,
+                "revealedCardDefinitionIds": "141",
                 "revealedCount": 1
               }
             }
@@ -47197,7 +47197,7 @@
                 "agendaInstallScoreHorizonQuoteComplete": true,
                 "effectKind": "install_card",
                 "replacedRootCardIds": "c3et",
-                "replacedRootDefinitionIds": 552,
+                "replacedRootDefinitionIds": "552",
                 "replacedRootCardType": "asset"
               }
             }

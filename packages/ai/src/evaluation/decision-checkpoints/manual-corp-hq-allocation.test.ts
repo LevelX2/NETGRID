@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import fixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manual-20261108-corp-hq-allocation.json";
 import firstRemoteFixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manual-d09-hq-d30.json";
 import secondRemoteLayerFixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manual-d09-hq-d33.json";
@@ -48,11 +49,11 @@ it("retains higher HQ agenda exposure in the concrete installation at D34", () =
 });
 
 it.each([
-  [firstRemoteFixture, "filter", 2],
-  [secondRemoteLayerFixture, "data-wall", 3],
+  ["Filter", firstRemoteFixture, 456, 2],
+  ["Data Wall", secondRemoteLayerFixture, 449, 3],
 ] as const)(
   "protects repeated HQ exposure with %s",
-  (fixture, ice, recentTurns) => {
+  (_label, fixture, ice, recentTurns) => {
     const input = capturedInput(fixture);
     expect(allocateCorpCentralDefenseFromAiFacts({ input })).toMatchObject({
       selectedServerId: "hq",
@@ -68,7 +69,7 @@ it.each([
       (entry) => entry.actionId === decision.actionId,
     );
     expect(decision.fallbackUsed).toBe(false);
-    expect(action?.actionId).toContain(ice);
+    expect(referencesDefaultDeckCard(action?.source, ice)).toBe(true);
     expect(action?.payload?.serverId).toBe("hq");
     expect(action?.costs).toEqual([{ clicks: 1, credits: 2 }]);
     expect(decision.evidence).toContain("plan_priority_class:P3");
@@ -85,7 +86,9 @@ it.each([
 it("keeps the score parent if HQ has no repeat access", () => {
   const input = capturedInput(firstRemoteFixture);
   const isEarlierAccess = (event: (typeof input.eventTail)[number]) =>
-    event.eventId === 37;
+    event.type === "access_card" &&
+    event.stateVersionBefore === 36 &&
+    event.publicPayload.serverId === "hq";
   input.playerView.publicEvents = input.playerView.publicEvents.filter(
     (event) => !isEarlierAccess(event),
   );
@@ -134,7 +137,7 @@ it.each([true, false])(
     expect(decision.fallbackUsed).toBe(false);
     expect(head?.payload?.serverId).toBe(diversionVisible ? "archives" : "hq");
     if (diversionVisible) {
-      expect(head?.actionId).toContain("wall-of-static");
+      expect(head?.actionId).toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 491));
       expect(head?.payload?.postInstallRezQuoteFinalCredits).toBe(3);
     }
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({

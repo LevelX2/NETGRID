@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -54,7 +55,7 @@ describe("pairing 343 Runner strategic MU control checkpoint", () => {
     ).toBe(false);
     expect(
       decision.decisionDebug?.actionAlternatives?.find((alternative) =>
-        alternative.actionId.includes("wutech-mem-chip"),
+        referencesDefaultDeckCard(alternative.actionId, 357),
       ),
     ).toMatchObject({
       selected: false,

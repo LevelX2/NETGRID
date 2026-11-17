@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { beforeEach, expect, it } from "vitest";
 import {
@@ -51,7 +52,7 @@ it("binds the native lethal damage replacement to the defense owner", () => {
   expect(decision.selectedChoices).toEqual({
     choiceId: input.playerView.pendingChoice!.choiceId,
     selectedOptionIds: [
-      "flatline_tag_replacement_from_grip_runner_290_1",
+      "flatline_tag_replacement_from_grip_c1sh",
     ],
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
@@ -108,7 +109,7 @@ it("applies the actual Engine rescue without flatlining", () => {
     .withRunnerTags(1)
     .withCorpCardInHq(514);
   const operation = getLegalActions(state, "corp").find(
-    (a) => a.type === "play_operation" && a.source?.includes("scorched-earth"),
+    (a) => a.type === "play_operation" && referencesDefaultDeckCard(a.source, 514),
   )!;
   const damage = applyAction(state, {
     matchId: state.matchId,
@@ -136,7 +137,9 @@ it("applies the actual Engine rescue without flatlining", () => {
   expect(rescue.state.winner).toBeNull();
   expect(rescue.state.runner.tags).toBe(0);
   expect(
-    rescue.state.runner.heap.some((id) => id.includes("arasaka-owns-you")),
+    rescue.state.runner.heap.some(
+      (id) => rescue.state.cardInstances[id]?.definitionId === 290,
+    ),
   ).toBe(true);
   expect(rescue.state.runner.grip).toHaveLength(
     rescue.state.runner.maxHandSize,

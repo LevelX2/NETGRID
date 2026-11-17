@@ -35,7 +35,7 @@ it("resolves the real Deadeye window with the converted agenda in the complete l
   expect(decision.actionId).toBe("corp.resolve_choice");
   expect(decision.selectedChoices).toEqual({
     choiceId: "trash_installed_program_42",
-    selectedOptionIds: ["card_runner_226_1"],
+    selectedOptionIds: ["card_c1e9"],
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     stateVersion: 42,

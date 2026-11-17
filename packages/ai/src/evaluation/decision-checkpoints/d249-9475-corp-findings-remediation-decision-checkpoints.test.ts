@@ -28,7 +28,7 @@ describe("d249 and 9475 Corp remediation checkpoints", () => {
       checkpoint.expectation.acceptableActions = [
         {
           actionId:
-            "corp.play_operation.corp_507_1.corp_507_1.onr_v1_295_night-shift:abilities_on_play_gain_credits",
+            "corp.play_operation.c34t.c34t.621",
         },
       ];
     }

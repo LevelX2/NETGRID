@@ -3650,7 +3650,7 @@
             "choiceId": "p3_34_advancement_distribution_19",
             "sourceDefinitionId": 516,
             "targetCount": 1,
-            "targetCardDefinitionIds": 408,
+            "targetCardDefinitionIds": "408",
             "targetCardDefinitionId": 408,
             "v1919OperationAbility": "add_advancement_counters",
             "targetCardId": "c2iv",
@@ -3662,7 +3662,7 @@
             "targets": {
               "sourceDefinitionId": 516,
               "targetCardDefinitionId": 408,
-              "targetCardDefinitionIds": 408,
+              "targetCardDefinitionIds": "408",
               "choiceVisibility": "public"
             },
             "visibility": {
@@ -3716,7 +3716,7 @@
                   "advancementCountersAdded": 2,
                   "addedAdvancementCounters": 2,
                   "targetCount": 1,
-                  "targetCardDefinitionIds": 408,
+                  "targetCardDefinitionIds": "408",
                   "advancementCounterDistribution": "c2iv:2",
                   "targetCardId": "c2iv",
                   "targetCardDefinitionId": 408,
@@ -13349,7 +13349,7 @@
             "publicRevealDefinitionIds": "514",
             "publicRevealTitles": "Scorched Earth",
             "archivesRevealCount": 1,
-            "archivesRevealDefinitionIds": 514,
+            "archivesRevealDefinitionIds": "514",
             "archivesRevealTitles": "Scorched Earth",
             "archivesRevealAgendaDefinitionIds": "",
             "redactedKind": "hidden_zone",
@@ -13392,7 +13392,7 @@
                   "hiddenZoneBarrier": true,
                   "hiddenZoneAction": "archives_breach_reveal",
                   "archivesRevealCount": 1,
-                  "archivesRevealDefinitionIds": 514,
+                  "archivesRevealDefinitionIds": "514",
                   "archivesRevealTitles": "Scorched Earth",
                   "archivesRevealAgendaDefinitionIds": "",
                   "publicRevealDefinitionIds": "514",
@@ -19749,7 +19749,7 @@
             "choiceId": "p3_34_advancement_distribution_285",
             "sourceDefinitionId": 516,
             "targetCount": 1,
-            "targetCardDefinitionIds": 408,
+            "targetCardDefinitionIds": "408",
             "targetCardDefinitionId": 408,
             "v1919OperationAbility": "add_advancement_counters",
             "targetCardId": "c2it",
@@ -19761,7 +19761,7 @@
             "targets": {
               "sourceDefinitionId": 516,
               "targetCardDefinitionId": 408,
-              "targetCardDefinitionIds": 408,
+              "targetCardDefinitionIds": "408",
               "choiceVisibility": "public"
             },
             "visibility": {
@@ -19815,7 +19815,7 @@
                   "advancementCountersAdded": 2,
                   "addedAdvancementCounters": 2,
                   "targetCount": 1,
-                  "targetCardDefinitionIds": 408,
+                  "targetCardDefinitionIds": "408",
                   "advancementCounterDistribution": "c2it:2",
                   "targetCardId": "c2it",
                   "targetCardDefinitionId": 408,

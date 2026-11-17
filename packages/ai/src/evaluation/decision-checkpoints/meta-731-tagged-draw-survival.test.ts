@@ -82,7 +82,7 @@ it.each([
     "known damage payoff",
     (input: AiDecisionInputWithDeckCapabilities) => {
       const root = input.playerView.servers.find(
-        (server) => server.id === "remote_2",
+        (server) => server.id === "r2",
       )!.root;
       root.push({
         ...root[0]!,

@@ -10,7 +10,7 @@ import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 
 afterEach(resetResidentPlanPortfolioMemory);
 const actionId =
-  "corp.advance_card.corp_5_2.corp_5_2";
+  "corp.advance_card.c1a.c1a";
 
 function checkpoint() {
   const cp = JSON.parse(

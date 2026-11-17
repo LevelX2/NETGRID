@@ -15,8 +15,8 @@ describe("match 36BA22D6 runner decision checkpoints", () => {
       openingSearchKeepJson,
       (checkpoint) => {
         const state = checkpoint.engine.testOnlyGameState;
-        const temple = "runner_326_2";
-        const thirdPanzerRun = "runner_46_1";
+        const temple = "c20i";
+        const thirdPanzerRun = "ca9";
         if (
           !state.runner.grip.includes(temple) ||
           !state.runner.stack.includes(thirdPanzerRun)

@@ -37,7 +37,7 @@ describe("CP-081 Shell Traders source-install evaluation", () => {
       deferReason: "none",
       priority: 1000,
       legalActionId:
-        "runner.install_card.runner_388_2.runner_388_2",
+        "runner.install_card.c2ea.c2ea",
       persistentInstallEvaluation: {
         engineAssessment: {
           kind: "delayed_install_engine",

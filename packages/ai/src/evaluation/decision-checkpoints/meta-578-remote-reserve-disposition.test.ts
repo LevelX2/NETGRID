@@ -59,7 +59,7 @@ it("does not retain the reserve rejection once the current grip is buffered", ()
     instanceId: "owned-buffer-countercase",
   });
   const remote = evaluateRunnerRunTargets({ input: cp.input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "runner.start_run.r1",
   )!;
   expect(remote.prerunReserveQuote?.status).not.toBe("blocked");
   restoreAiRuntimeCheckpoint(
@@ -77,6 +77,6 @@ it("does not retain the reserve rejection once the current grip is buffered", ()
   );
   expect(alternative).toBeDefined();
   expect(alternative?.whyNot).not.toContain(
-    "runner_remote_run_prerun_reserve_blocked:remote_1",
+    "runner_remote_run_prerun_reserve_blocked:r1",
   );
 });

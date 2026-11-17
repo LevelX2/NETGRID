@@ -17,24 +17,24 @@ it("does not waive a known break lock and ETR as a last-chance damage floor", ()
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, runtime);
   const target = evaluateRunnerRunTargets({ input }).find(
-    (entry) => entry.actionId === "runner.start_run.remote_2",
+    (entry) => entry.actionId === "runner.start_run.r2",
   );
   expect(target).toMatchObject({
     pathPassability: "blocked_unbreakable",
     routeQuote: { reachability: "no_access", noAccessReason: "harmful_unbroken_run_effect" },
   });
   const decision = chooseAiAction(input);
-  expect(decision.actionId).not.toBe("runner.start_run.remote_2");
+  expect(decision.actionId).not.toBe("runner.start_run.r2");
   expect(decision.fallbackUsed).toBe(false);
   expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
   expect(decision.decisionDebug?.planFirstDecision?.dispositions).toContainEqual(
-    expect.objectContaining({ actionId: "runner.start_run.remote_2", ownerModuleId: "runner.contest_remote", disposition: "explicitly_nonproductive" }),
+    expect.objectContaining({ actionId: "runner.start_run.r2", ownerModuleId: "runner.contest_remote", disposition: "explicitly_nonproductive" }),
   );
 });
 
 it("continues past direct damage to preserve a later known ETR barrier", () => {
   const input = checkpointJson.input as unknown as AiDecisionInputWithDeckCapabilities;
-  const wall = input.playerView.servers.find((server) => server.id === "remote_2")!.ice.find(
+  const wall = input.playerView.servers.find((server) => server.id === "r2")!.ice.find(
     (card) => card.definitionId === 490,
   )!;
   const path = assessKnownRezzedIcePath([wall, damageOnlyIce()], [], 4);

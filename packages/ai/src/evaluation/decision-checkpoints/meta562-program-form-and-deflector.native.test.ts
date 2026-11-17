@@ -90,7 +90,7 @@ it("resolves the original accessed-agenda MU choice with an installed program-fo
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     lane: "engine_window",
-    rootPlanInstanceId: "run:run_146",
+    rootPlanInstanceId: "run:146",
     leafExecutorInstanceId: "rules.window_resolution",
     selectedStep: { stepId: "access.resolve_card:157" },
   });
@@ -114,10 +114,10 @@ it("resolves the original accessed-agenda MU choice with an installed program-fo
     f.memory.input.playerView.own.memoryLimit!,
   );
   expect(after.runner.rig.programs).toContain(
-    "corp_8_1",
+    "c1x",
   );
   expect(
-    after.cardInstances["corp_8_1"]
+    after.cardInstances["c1x"]
       ?.installedAsRunnerProgram?.memoryCost,
   ).toBe(2);
 });
@@ -174,7 +174,7 @@ it("retains the same native Trapdoor rez when an actual subsidiary target exists
   expect(targetIce).toBeDefined();
   state.corp.hq = state.corp.hq.filter((id) => id !== targetIce);
   state.corp.servers.push({
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     ice: [targetIce],
@@ -183,7 +183,7 @@ it("retains the same native Trapdoor rez when an actual subsidiary target exists
   state.cardInstances[targetIce]!.zone = {
     side: "corp",
     zone: "serverIce",
-    serverId: "remote_1",
+    serverId: "r1",
   };
   const input = buildAiDecisionInput(state, "corp", {
     difficulty: "hard",

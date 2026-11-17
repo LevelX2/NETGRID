@@ -57,7 +57,7 @@ it("prepares the native cheaper full mitigation route instead of calling Codecra
   });
   expect(result).toMatchObject({
     actionId:
-      "runner.install_card.runner_226_1.runner_226_1",
+      "runner.install_card.c1e9.c1e9",
     decisionDebug: {
       planFirstDecision: {
         rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",

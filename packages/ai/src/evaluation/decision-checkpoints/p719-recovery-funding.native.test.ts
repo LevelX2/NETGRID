@@ -33,11 +33,11 @@ it.each([game38, afterRecovery38])(
     const { input, runtime } = structuredClone(
       source,
     ) as unknown as FundingCheckpoint;
-    const runActionId = "runner.start_run.remote_1";
+    const runActionId = "runner.start_run.r1";
     const { target } = quoteRunnerRunTarget({
       input,
       runActionId,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       deckCapabilities:
         createDeckCapabilitiesContext().deckCapabilitiesForInput(input),
     })!;
@@ -88,10 +88,10 @@ it("revalidates the recovered loan when the terminal hazards still need funding"
   expect(
     sanitizeAiDecisionDebug(decision.decisionDebug)?.planFirstDecision,
   ).toMatchObject({
-    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
     selectedPlan: {
       moduleId: "runner.economy",
-      parentNeedId: "run-support:remote:remote_1",
+      parentNeedId: "run-support:remote:r1",
     },
     route: {
       actionId: loan.actionId,
@@ -143,15 +143,15 @@ it.each([
       expect(
         sanitizeAiDecisionDebug(decision.decisionDebug)?.planFirstDecision,
       ).toMatchObject({
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
         route: { actionId: recovery.actionId },
       });
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
         selectedPlan: {
           moduleId: "runner.economy",
-          parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-          parentNeedId: "run-support:remote:remote_1",
+          parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          parentNeedId: "run-support:remote:r1",
         },
         route: {
           actionId: recovery.actionId,

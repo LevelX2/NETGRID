@@ -189,7 +189,7 @@ it("preserves funding against nominal capacity but gives genuinely productive sa
   const action = input.legalActions.find(
     (a) =>
       a.type === "install_card" &&
-      a.source === "corp_434_2" &&
+      a.source === "c2om" &&
       a.payload?.serverId === "rd",
   )!;
   expect(action).toBeDefined();

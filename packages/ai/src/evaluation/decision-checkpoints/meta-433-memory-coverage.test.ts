@@ -57,7 +57,7 @@ it("SP-366 distinguishes canonical Wall and Code-Gate functions before binding t
     requiredMemoryToFree: 1,
     selectedCards: [
       {
-        cardInstanceId: "runner_158_1",
+        cardInstanceId: "cz5",
         memoryCost: 1,
       },
     ],
@@ -70,7 +70,7 @@ it("does not reopen an already bound historical memory choice", () => {
     actionId: "runner.resolve_choice",
     fallbackUsed: false,
     selectedChoices: {
-      selectedOptionIds: ["card_runner_153_2"],
+      selectedOptionIds: ["card_cy2"],
     },
   });
 });

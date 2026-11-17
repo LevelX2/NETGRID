@@ -29,9 +29,9 @@ it.each([false, true])(
     );
     const decision = chooseAiAction(capture.input);
     const advance =
-      "corp.advance_card.corp_418_1.corp_418_1";
+      "corp.advance_card.c2l1.c2l1";
     const counter = capture.input.legalActions.find(
-      (action) => action.source === "corp_516_2",
+      (action) => action.source === "c36u",
     )!.actionId;
     expect(decision).toMatchObject({
       actionId: counterConversion ? counter : advance,
@@ -45,9 +45,9 @@ it.each([false, true])(
     const plan = decision.decisionDebug?.planFirstDecision;
     expect(plan).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.score_agenda:agenda%3Acorp_418_1%3Aremote_1",
+        "plan:corp.score_agenda:agenda%3Ac2l1%3Ar1",
       leafExecutorInstanceId:
-        "plan:corp.score_agenda:agenda%3Acorp_418_1%3Aremote_1",
+        "plan:corp.score_agenda:agenda%3Ac2l1%3Ar1",
       turnPlanning: {
         coverage: {
           status: "pass",
@@ -61,7 +61,7 @@ it.each([false, true])(
       expect(plan?.dispositions).toContainEqual(
         expect.objectContaining({
           actionId:
-            "corp.advance_card.corp_418_1.corp_418_1",
+            "corp.advance_card.c2l1.c2l1",
           ownerModuleId: "corp.score_agenda",
           disposition: "explicitly_nonproductive",
           evidenceCode:

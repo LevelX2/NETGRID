@@ -79,11 +79,11 @@ it.each([
     expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
     expect(decision.actionId).toBe(loan.actionId);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       selectedPlan: {
         moduleId: "runner.economy",
-        parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-        parentNeedId: "run-support:remote:remote_1",
+        parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        parentNeedId: "run-support:remote:r1",
       },
       route: {
         actionId: loan.actionId,

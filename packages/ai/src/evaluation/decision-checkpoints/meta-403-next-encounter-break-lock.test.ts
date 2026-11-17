@@ -44,7 +44,7 @@ it("SP-289 binds the legal jack-out when a public break lock makes known next da
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_91",
+        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A91",
         route: { actionId: jackout.actionId },
       },
     },

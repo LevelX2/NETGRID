@@ -150,7 +150,7 @@ function serverIdForLabel(value: unknown): string | undefined {
     return "archives";
   }
   const remoteMatch = /^(?:remote|server)\s*(\d+)$/.exec(normalized);
-  return remoteMatch ? `remote_${remoteMatch[1]}` : undefined;
+  return remoteMatch ? `r${remoteMatch[1]}` : undefined;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

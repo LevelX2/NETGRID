@@ -5718,7 +5718,7 @@
           "choiceId": "p3_34_advancement_distribution_112",
           "sourceDefinitionId": 516,
           "targetCount": 1,
-          "targetCardDefinitionIds": 408,
+          "targetCardDefinitionIds": "408",
           "targetCardDefinitionId": 408,
           "v1919OperationAbility": "add_advancement_counters",
           "targetCardId": "c2iv",
@@ -5730,7 +5730,7 @@
           "targets": {
             "sourceDefinitionId": 516,
             "targetCardDefinitionId": 408,
-            "targetCardDefinitionIds": 408,
+            "targetCardDefinitionIds": "408",
             "choiceVisibility": "public"
           },
           "visibility": {

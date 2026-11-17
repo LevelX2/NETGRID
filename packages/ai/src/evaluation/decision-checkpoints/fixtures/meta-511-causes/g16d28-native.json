@@ -1261,7 +1261,7 @@
             "accessIndex": 0,
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "abilityFamily": "agenda-scoring",
             "targets": {
@@ -2344,7 +2344,7 @@
           "accessIndex": 0,
           "stealCost": 2,
           "stealAdditionalCost": 2,
-          "stealCostSourceDefinitionIds": 62,
+          "stealCostSourceDefinitionIds": "62",
           "stealCostSourceTitles": "Fetal AI",
           "abilityFamily": "agenda-scoring",
           "targets": {
@@ -2627,7 +2627,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 27,
-      "sideSafePlanningFingerprint": "fnv1a:dca4f145"
+      "sideSafePlanningFingerprint": "fnv1a:8b358d35"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_krashkurs_clown_kreditmaschine_2026_07_11_1.0.0",

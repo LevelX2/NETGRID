@@ -4353,7 +4353,7 @@
             "installedPositionKey": "installed-position-v1:ac9d67dd",
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "stealBlockedByCost": true,
             "targets": {
@@ -13652,7 +13652,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 387,
-      "sideSafePlanningFingerprint": "fnv1a:575d6cdd"
+      "sideSafePlanningFingerprint": "fnv1a:fcce6c85"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_redline_riot_1.0.0",

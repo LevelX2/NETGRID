@@ -73,8 +73,8 @@ describe("match 28a78 run costs and admission", () => {
     expect(action.type).toBe("break_subroutine");
     expect(action.payload?.subroutineIndex).toBe(1);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_159",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A159",
     });
   });
   it.each([85, 90])(
@@ -82,23 +82,23 @@ describe("match 28a78 run costs and admission", () => {
     (index) => {
       const { input, decision } = replay(capture(index));
       const target = evaluateRunnerRunTargets({ input }).find(
-        (t) => t.targetServerId === "remote_1",
+        (t) => t.targetServerId === "r1",
       )!;
       expect(target.prerunReserveQuote).toMatchObject({
         status: "blocked",
         creditGap: 11,
       });
-      expect(decision.actionId).not.toBe("runner.start_run.remote_1");
+      expect(decision.actionId).not.toBe("runner.start_run.r1");
       const plan = decision.decisionDebug?.planFirstDecision;
       expect(plan?.route?.actionId).toBe(decision.actionId);
       if (index === 85) {
         expect(plan?.selectedPlan).toMatchObject({
           moduleId: "runner.develop_board_and_hand",
           instanceId:
-            "plan:runner.develop_board_and_hand:card%3Arunner_313_1",
+            "plan:runner.develop_board_and_hand:card%3Ac1xl",
         });
         expect(plan?.executionOrigin?.rootPlanInstanceId).toBe(
-          "plan:runner.develop_board_and_hand:card%3Arunner_313_1",
+          "plan:runner.develop_board_and_hand:card%3Ac1xl",
         );
       } else {
         expect(plan?.selectedPlan?.moduleId).toBe(
@@ -113,10 +113,10 @@ describe("match 28a78 run costs and admission", () => {
     const { input, decision } = replay(funded);
     expect(
       evaluateRunnerRunTargets({ input }).find(
-        (t) => t.targetServerId === "remote_1",
+        (t) => t.targetServerId === "r1",
       )?.prerunReserveQuote,
     ).toMatchObject({ creditGap: 0 });
-    expect(decision.actionId).toBe("runner.start_run.remote_1");
+    expect(decision.actionId).toBe("runner.start_run.r1");
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.contest_remote");

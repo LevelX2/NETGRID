@@ -73,7 +73,7 @@ it("does not spend the bound full-run reserve on a next-encounter-only marker", 
     "plan:runner.pressure_central:central%3Ard",
   );
   expect(plan.leafExecutorInstanceId).toBe(
-    "plan:runner.convert_run_window:run%3Arun_265",
+    "plan:runner.convert_run_window:run%3A265",
   );
   expect(plan.route).toMatchObject({
     actionId: decision.actionId,

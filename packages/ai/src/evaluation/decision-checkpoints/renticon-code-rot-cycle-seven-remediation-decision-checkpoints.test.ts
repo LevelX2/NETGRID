@@ -25,7 +25,7 @@ describe("Rent-I-Con versus CODE ROT cycle-seven remediation checkpoints", () =>
         acceptableActions: [
           {
             actionId:
-              "runner.install_card.runner_247_1.runner_247_1",
+              "runner.install_card.c1ix.c1ix",
           },
         ],
         planExecution: {
@@ -46,7 +46,7 @@ describe("Rent-I-Con versus CODE ROT cycle-seven remediation checkpoints", () =>
       noNeedSearchJson,
     ) as AiDecisionCheckpointV1;
     const state = checkpoint.engine.testOnlyGameState;
-    const id = "runner_247_1";
+    const id = "c1ix";
     state.runner.grip = state.runner.grip.filter((cardId) => cardId !== id);
     state.runner.stack.push(id);
     Object.assign(state.cardInstances[id]!, {

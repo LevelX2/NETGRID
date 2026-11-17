@@ -2682,7 +2682,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -4676,7 +4676,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -11644,7 +11644,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 301,
-      "sideSafePlanningFingerprint": "fnv1a:03497c05"
+      "sideSafePlanningFingerprint": "fnv1a:b9ab531d"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_redline_riot_1.0.0",

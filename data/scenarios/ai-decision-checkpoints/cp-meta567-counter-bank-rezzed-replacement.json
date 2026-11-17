@@ -4380,7 +4380,7 @@
             "iceInstallBaseCost": 2,
             "iceInstallAdditionalCost": 0,
             "iceInstallReduction": 2,
-            "iceInstallReductionSourceDefinitionIds": 564,
+            "iceInstallReductionSourceDefinitionIds": "564",
             "iceInstallTotalCost": 0,
             "postInstallRezQuoteCardId": "c31a",
             "postInstallRezQuoteTargetServerId": "hq",
@@ -4455,7 +4455,7 @@
             "iceInstallBaseCost": 0,
             "iceInstallAdditionalCost": 2,
             "iceInstallReduction": 0,
-            "iceInstallIncreaseSourceDefinitionIds": 385,
+            "iceInstallIncreaseSourceDefinitionIds": "385",
             "iceInstallTotalCost": 2,
             "postInstallRezQuoteCardId": "c31a",
             "postInstallRezQuoteTargetServerId": "archives",
@@ -6958,7 +6958,7 @@
           "iceInstallBaseCost": 2,
           "iceInstallAdditionalCost": 0,
           "iceInstallReduction": 2,
-          "iceInstallReductionSourceDefinitionIds": 564,
+          "iceInstallReductionSourceDefinitionIds": "564",
           "iceInstallTotalCost": 0,
           "postInstallRezQuoteCardId": "c31a",
           "postInstallRezQuoteTargetServerId": "hq",
@@ -7033,7 +7033,7 @@
           "iceInstallBaseCost": 0,
           "iceInstallAdditionalCost": 2,
           "iceInstallReduction": 0,
-          "iceInstallIncreaseSourceDefinitionIds": 385,
+          "iceInstallIncreaseSourceDefinitionIds": "385",
           "iceInstallTotalCost": 2,
           "postInstallRezQuoteCardId": "c31a",
           "postInstallRezQuoteTargetServerId": "archives",
@@ -7391,7 +7391,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 121,
-      "sideSafePlanningFingerprint": "fnv1a:dd6228b3"
+      "sideSafePlanningFingerprint": "fnv1a:3ffa8725"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_chrome_rush_bureau_1.1.0",

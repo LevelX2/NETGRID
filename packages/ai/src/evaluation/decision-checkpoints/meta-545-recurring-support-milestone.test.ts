@@ -19,7 +19,7 @@ type HandParams = Parameters<typeof evaluateRunnerHandDevelopment>[0];
 type Decision = ReturnType<
   ReturnType<typeof createAiLiveRuntimeComposition>["chooseAiAction"]
 >;
-const supportId = "runner_283_2";
+const supportId = "c1qy";
 function fixture(name: string) {
   const f = JSON.parse(
     readFileSync(
@@ -102,9 +102,9 @@ describe("admitted recurring support milestone", () => {
     expectBoundRoute(first.input, setup);
     expect(setup.decisionDebug?.actionAlternatives).toContainEqual(
       expect.objectContaining({
-        actionId: "runner.install_card.runner_358_1.runner_358_1",
+        actionId: "runner.install_card.c27l.c27l",
         whyNot: expect.arrayContaining([
-          expect.stringMatching(/candidate_plan:.*zetatech-mem-chip_1:ready/),
+          expect.stringMatching(/candidate_plan:.*card%3Ac27l:ready/),
         ]),
       }),
     );

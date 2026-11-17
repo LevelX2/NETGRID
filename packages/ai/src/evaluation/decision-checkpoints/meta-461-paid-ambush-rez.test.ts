@@ -103,11 +103,11 @@ describe("meta461 paid access ambush rez", () => {
     const f = fixture();
     f.input.playerView.run!.position = {
       kind: "ice",
-      serverId: "remote_1",
+      serverId: "r1",
       iceIndex: 0,
     };
     expect(signals(f)[0]?.actionIds).toEqual([]);
-    f.input.playerView.run!.position = { kind: "server", serverId: "remote_1" };
+    f.input.playerView.run!.position = { kind: "server", serverId: "r1" };
     f.input.playerView.run!.attackedServerId = "rd";
     expect(signals(f)[0]?.actionIds).toEqual([]);
   });

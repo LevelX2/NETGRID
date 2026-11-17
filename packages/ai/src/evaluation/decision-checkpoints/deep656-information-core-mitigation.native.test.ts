@@ -34,7 +34,7 @@ it("retains funded current core mitigation after an information access path beco
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.rootPlanInstanceId).toBe("plan:runner.pressure_central:central%3Ahq");
-  expect(plan.leafExecutorInstanceId).toBe("plan:runner.convert_run_window:run%3Arun_89");
+  expect(plan.leafExecutorInstanceId).toBe("plan:runner.convert_run_window:run%3A89");
   expect(plan.route).toMatchObject({ actionId: pump.actionId, stateVersion: 96 });
   expect(JSON.stringify(plan)).toContain("encounter_partial_mitigation:true");
   expect(JSON.stringify(input)).toBe(before);
@@ -50,6 +50,6 @@ it.each(["unfunded", "prevented"])("keeps the information guard for an explicitl
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(fixture.historicalActionId);
   expect(decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId)
-    .toBe("plan:runner.convert_run_window:run%3Arun_89");
+    .toBe("plan:runner.convert_run_window:run%3A89");
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
 });

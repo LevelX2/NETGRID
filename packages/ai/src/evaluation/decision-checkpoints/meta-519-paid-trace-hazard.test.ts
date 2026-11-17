@@ -38,7 +38,7 @@ it("keeps the paid Asp avoidance cost but removes its prevented residual risk un
   expect(rd.score).toBeGreaterThan(0);
   const chosen = chooseAiAction(input);
   expect(chosen.actionId).toBe(
-    "runner.install_card.runner_341_2.runner_341_2",
+    "runner.install_card.c23u.c23u",
   );
   expect(chosen.fallbackUsed).toBe(false);
   expect(chosen.decisionDebug?.planFirstDecision).toMatchObject({

@@ -45,7 +45,7 @@ describe("selfplay 177 Security Purge install targets decision checkpoint", () =
     expect(option).toBeDefined();
     expect(option.selectable).not.toBe(false);
     const [iceId, serverId] = String(option.value).split("|");
-    expect(iceId).toBe("corp_70_2");
+    expect(iceId).toBe("cfq");
     const checkpoint = structuredClone(
       securityPurgeJson,
     ) as AiDecisionCheckpointV1;

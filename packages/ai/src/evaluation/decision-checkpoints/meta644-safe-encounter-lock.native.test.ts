@@ -62,7 +62,7 @@ function freshlyQuotedSource() {
 it("quotes the native fully known no-break continuation as conditional zero-cost access", () => {
   const input = nativeInput();
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "runner.start_run.r1",
   )!;
   expect(target).toMatchObject({
     pathPassability: "reachable",
@@ -87,14 +87,14 @@ it("keeps the native remote-contest owner, action and state binding", () => {
   const result = chooseAiAction(input);
   expect(JSON.stringify(input.playerView)).toBe(before);
   expect(result).toMatchObject({
-    actionId: "runner.start_run.remote_1",
+    actionId: "runner.start_run.r1",
     fallbackUsed: false,
     timeoutUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-        leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-        route: { actionId: "runner.start_run.remote_1", stateVersion: 190 },
+        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        route: { actionId: "runner.start_run.r1", stateVersion: 190 },
       },
     },
   });
@@ -102,7 +102,7 @@ it("keeps the native remote-contest owner, action and state binding", () => {
 
 it("does not certify an unknown next encounter", () => {
   const input = nativeInput(),
-    remote = input.playerView.servers.find((s) => s.id === "remote_1")!;
+    remote = input.playerView.servers.find((s) => s.id === "r1")!;
   const inner = remote.ice[0]!;
   const unknownInner = {
     instanceId: inner.instanceId,
@@ -120,7 +120,7 @@ it("does not certify an unknown next encounter", () => {
 
 it("keeps the benign continuation reachable with the complete fresh lock quote", () => {
   const input = nativeInput(),
-    remote = input.playerView.servers.find((s) => s.id === "remote_1")!;
+    remote = input.playerView.servers.find((s) => s.id === "r1")!;
   const assessment = assessKnownRezzedIcePath(
     [remote.ice[0]!, freshlyQuotedSource()],
     input.playerView.own.rig!,
@@ -135,7 +135,7 @@ it("keeps the benign continuation reachable with the complete fresh lock quote",
 
 it("preserves the lock when the known next ICE must be broken", () => {
   const input = nativeInput(),
-    remote = input.playerView.servers.find((s) => s.id === "remote_1")!;
+    remote = input.playerView.servers.find((s) => s.id === "r1")!;
   const wall = input.playerView.servers
     .find((s) => s.id === "hq")!
     .ice.find((i) => i.definitionId === 457)!;

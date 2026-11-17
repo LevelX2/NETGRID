@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { expect, it } from "vitest";
 import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-455-r11-g13-d500.json";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -31,11 +32,11 @@ it("quotes Babylon without Overtime and selects the newly reachable terminal Tyc
     input,
     runtime.residentPlanPortfolio!,
   );
-  const agenda = "corp_426_1";
+  const agenda = "c2mt";
   const paths = corpSameTurnScoreConversionPaths(input).filter(
     (p) => p.agendaCardId === agenda,
   );
-  expect(paths.find((p) => p.targetServerId === "remote_1")).toMatchObject({
+  expect(paths.find((p) => p.targetServerId === "r1")).toMatchObject({
     advancementRequirement: 2,
     creditsRequired: 2,
     clicksRequired: 3,
@@ -59,10 +60,10 @@ it("quotes Babylon without Overtime and selects the newly reachable terminal Tyc
   )!;
   expect(action).toMatchObject({
     type: "play_operation",
-    source: "corp_509_3",
+    source: "c35b",
   });
   const parent =
-    "plan:corp.score_agenda:agenda%3Acorp_432_2%3Aremote_1";
+    "plan:corp.score_agenda:agenda%3Ac2o6%3Ar1";
   const plan = result.decisionDebug?.planFirstDecision;
   expect(plan?.rootPlanInstanceId).toBe(parent);
   expect(plan?.leafExecutorInstanceId).toBe(parent);
@@ -76,7 +77,7 @@ it("quotes Babylon without Overtime and selects the newly reachable terminal Tyc
     (a) =>
       a.type === "install_card" &&
       a.source === agenda &&
-      a.payload?.serverId === "remote_1",
+      a.payload?.serverId === "r1",
   )!;
   expect(
     corpScorelineFeasibilityForDecisionInput(input)
@@ -102,8 +103,8 @@ it.each([
   const action = input.legalActions.find(
     (a) =>
       a.type === "install_card" &&
-      a.source.includes("project-babylon") &&
-      a.payload?.serverId === "remote_1",
+      referencesDefaultDeckCard(a.source, 426) &&
+      a.payload?.serverId === "r1",
   )!;
   const p = action.payload!;
   if (kind === "missing")
@@ -112,7 +113,7 @@ it.each([
     p.agendaInstallScoreHorizonQuoteSchemaVersion = "invalid";
   if (kind === "card") p.agendaInstallScoreHorizonQuoteCardId = "other";
   if (kind === "server")
-    p.agendaInstallScoreHorizonQuoteTargetServerId = "remote_2";
+    p.agendaInstallScoreHorizonQuoteTargetServerId = "r2";
   if (kind === "version")
     p.agendaInstallScoreHorizonQuoteExpiresAtStateVersion = 498;
   if (kind === "action-version") action.expiresAtStateVersion = 498;
@@ -129,7 +130,7 @@ it.each([
       input.playerView,
       action,
       action.source,
-      "remote_1",
+      "r1",
     ),
   ).toThrow(/invalid_player_view_card_projection/);
 });
@@ -141,8 +142,8 @@ it("keeps the quoted difficulty even when the next-turn horizon is incomplete", 
   const action = input.legalActions.find(
     (a) =>
       a.type === "install_card" &&
-      a.source.includes("project-babylon") &&
-      a.payload?.serverId === "remote_1",
+      referencesDefaultDeckCard(a.source, 426) &&
+      a.payload?.serverId === "r1",
   )!;
   action.payload!.agendaInstallScoreHorizonQuoteComplete = false;
   expect(
@@ -150,7 +151,7 @@ it("keeps the quoted difficulty even when the next-turn horizon is incomplete", 
       input.playerView,
       action,
       action.source,
-      "remote_1",
+      "r1",
     ),
   ).toBe(2);
 });

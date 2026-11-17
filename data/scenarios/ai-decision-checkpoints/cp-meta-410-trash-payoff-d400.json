@@ -4543,7 +4543,7 @@
             "serverLabel": "R&D",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:c9d7dad8",
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealCostPersistedForCurrentAccess": true,
             "abilityFamily": "run-access",
@@ -7248,7 +7248,7 @@
             "serverLabel": "HQ",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:ccd7df91",
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealCostPersistedForCurrentAccess": true,
             "abilityFamily": "run-access",
@@ -7769,7 +7769,7 @@
             "installedPositionKey": "installed-position-v1:ac9d67dd",
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "targets": {
               "serverLabel": "Remote 2"
@@ -7970,7 +7970,7 @@
             "installedPositionKey": "installed-position-v1:ac9d67dd",
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "abilityFamily": "agenda-scoring",
             "targets": {
@@ -8583,7 +8583,7 @@
             "installedPositionKey": "installed-position-v1:ab9d664a",
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "abilityFamily": "agenda-scoring",
             "targets": {
@@ -13666,7 +13666,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 399,
-      "sideSafePlanningFingerprint": "fnv1a:0fc39f42"
+      "sideSafePlanningFingerprint": "fnv1a:964ef5c2"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_adb10896_1.1.0",

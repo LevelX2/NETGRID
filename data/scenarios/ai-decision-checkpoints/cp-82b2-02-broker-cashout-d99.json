@@ -4530,7 +4530,7 @@
           "revealedCount": 3,
           "revealKind": "reveal",
           "agendaPurgeInstallContract": "corp_server_choice_per_ice",
-          "installedIceDefinitionIds": 464,
+          "installedIceDefinitionIds": "464",
           "installedIceServerLabels": "R&D",
           "trashedDefinitionIds": "502,516",
           "revealedIceCount": 1,

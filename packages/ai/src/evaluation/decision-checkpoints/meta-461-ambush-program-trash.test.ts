@@ -36,8 +36,8 @@ function fixture(name: string) {
 }
 afterEach(resetResidentPlanPortfolioMemory);
 it.each([
-  ["g21-d110", "runner_32_2"],
-  ["g31-d75", "runner_34_2"],
+  ["g21-d110", "c76"],
+  ["g31-d75", "c7m"],
 ])("owns the original program-trash choice %s", (name, target) => {
   const input = fixture(name!);
   const decision = chooseAiAction(input);

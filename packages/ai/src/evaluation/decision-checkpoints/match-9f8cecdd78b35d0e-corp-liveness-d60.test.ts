@@ -41,35 +41,35 @@ describe("match 9f8cecdd78b35d0e Corp scoring liveness at decision 60", () => {
 
   it("converts the unchanged blocked score root through its exact Defense provider", () => {
     const input = decisionInput(11, 20, 60);
-    const parentNeedId = "score-protection:agenda:agenda-1:remote_1:revision-4";
+    const parentNeedId = "score-protection:agenda:agenda-1:r1:revision-4";
     const project = {
-      projectId: "agenda:agenda-1:remote_1",
+      projectId: "agenda:agenda-1:r1",
       agendaDefinitionId: "agenda-definition",
       agendaInstanceId: "agenda-1",
       agendaPoints: 2,
-      serverId: "remote_1",
+      serverId: "r1",
       phase: "install_agenda",
       sameTurnCloseout: false,
       terminalScore: false,
       feasible: false,
       protectionNeed: {
         needId: parentNeedId,
-        parentProjectId: "agenda:agenda-1:remote_1",
-        targetServerId: "remote_1",
+        parentProjectId: "agenda:agenda-1:r1",
+        targetServerId: "r1",
         observedAtStateVersion: 60,
         scoreReserve: { creditBreakdown: [], hardClickReserve: 0 },
       },
-      evidenceCode: "corp_score_protection_required:remote_1",
+      evidenceCode: "corp_score_protection_required:r1",
     } as unknown as CorpScoreProjectSignal;
     const provider = checkpointDefenseCandidate(
       "bound-score-and-remote-demand",
-      "remote_1",
+      "r1",
       "remote-hardening-ice",
     );
     const defenseProvider: CorpDefenseSignal = {
       kind: "score_protection_staging_install",
-      defenseId: "score-protection-staging:agenda-1:remote_1",
-      serverId: "remote_1",
+      defenseId: "score-protection-staging:agenda-1:r1",
+      serverId: "r1",
       phase: "install_ice",
       parentProjectId: project.projectId,
       parentNeedId,
@@ -101,15 +101,15 @@ describe("match 9f8cecdd78b35d0e Corp scoring liveness at decision 60", () => {
     expect(scoreConsumerSupportState(project)).toEqual({
       kind: "awaiting_remote_protection",
       agendaInstanceId: "agenda-1",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       protectionNeedId: parentNeedId,
     });
     expect(remoteProject).toMatchObject({
       projectId: "strategic-score-remote",
-      target: { status: "bound", serverId: "remote_1" },
+      target: { status: "bound", serverId: "r1" },
       need: {
         capability: "improve_remote_protection_path",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
       },
     });
     expect(slice).toMatchObject({
@@ -182,7 +182,7 @@ function decisionInput(
         costs: [{ clicks: 1, credits: 0 }],
         payload: {
           placement: "ice",
-          serverId: "remote_1",
+          serverId: "r1",
           postInstallRezQuoteComplete: true,
           postInstallRezQuoteFinalCredits: 14,
         },
@@ -198,7 +198,7 @@ function decisionInput(
         costs: [{ clicks: 1, credits: 0 }],
         payload: {
           placement: "root" as const,
-          serverId: "remote_1",
+          serverId: "r1",
           cardId: agendaInstanceId,
         },
       })),
@@ -221,7 +221,7 @@ function decisionInput(
         { id: "rd", ice: [], root: [] },
         { id: "archives", ice: [], root: [] },
         {
-          id: "remote_1",
+          id: "r1",
           ice: [
             { instanceId: "remote-ice-1", known: true, rezzed: false },
             { instanceId: "remote-ice-2", known: true, rezzed: false },

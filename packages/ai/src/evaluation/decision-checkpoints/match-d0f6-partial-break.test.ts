@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import {
@@ -256,14 +257,14 @@ describe("match d0f6 partial-break mitigation", () => {
       for (let i = 0; i < pumps; i++)
         state = applyMatching(
           state,
-          (a) => a.type === "pump_breaker" && a.source?.includes("loony-goon"),
+          (a) => a.type === "pump_breaker" && referencesDefaultDeckCard(a.source, 252),
         );
       for (let i = 0; i < breaks; i++)
         state = applyMatching(
           state,
           (a) =>
             a.type === "break_subroutine" &&
-            a.source?.includes("loony-goon") &&
+            referencesDefaultDeckCard(a.source, 252) &&
             a.payload?.subroutineIndex === i,
         );
       for (let step = 0; state.run && step < 15; step++) {

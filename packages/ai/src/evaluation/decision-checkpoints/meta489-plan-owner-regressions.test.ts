@@ -35,8 +35,8 @@ describe("meta489 native plan-owner regressions", () => {
 
   it("keeps the exact scoring agenda and executes its cheaper current-turn route", () => {
     const input = checkpoint("g10-d129");
-    const agenda = "corp_408_1";
-    const parent = `plan:corp.score_agenda:agenda%3A${agenda}%3Aremote_1`;
+    const agenda = "c2it";
+    const parent = `plan:corp.score_agenda:agenda%3A${agenda}%3Ar1`;
     expect(
       corpSameTurnScoreConversionPaths(input).find(
         (path) => path.agendaCardId === agenda,
@@ -79,7 +79,7 @@ describe("meta489 native plan-owner regressions", () => {
     expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
       leafExecutorInstanceId:
-        "plan:runner.expose_information:ice%3Acorp_75_3",
+        "plan:runner.expose_information:ice%3Acgv",
       executionOrigin: {
         rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
         stateVersion: 111,
@@ -89,8 +89,8 @@ describe("meta489 native plan-owner regressions", () => {
       side: "runner",
       expiresAtStateVersion: 111,
       payload: {
-        cardId: "runner_277_1",
-        iceId: "corp_75_3",
+        cardId: "c1pl",
+        iceId: "cgv",
       },
     });
   });

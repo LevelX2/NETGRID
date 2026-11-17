@@ -35,11 +35,11 @@ type ReconstructedDecisionCapture = {
 };
 
 const SCORE_ROOT =
-  "plan:corp.score_agenda:agenda%3Acorp_63_1%3Aremote_1";
+  "plan:corp.score_agenda:agenda%3Ace5%3Ar1";
 const SCORE_SUPPORT =
-  "plan:corp.economy:score-support%3Aagenda%3Acorp_63_1%3Aremote_1";
+  "plan:corp.economy:score-support%3Aagenda%3Ace5%3Ar1";
 const SCORE_NEED =
-  "score-support:agenda:corp_63_1:remote_1";
+  "score-support:agenda:ce5:r1";
 
 function decide(
   source: unknown,
@@ -145,7 +145,7 @@ describe("SP-082 score campaign continuity checkpoints", () => {
     // residual credit taking in a state with this now-supported preparation.
     expect(decision).toMatchObject({
       actionId:
-        "corp.install_card.corp_112_2.new_remote.corp_112_2",
+        "corp.install_card.cp2.new_remote.cp2",
       reasonCode: "plan_first.corp.ambush_and_bluff",
       fallbackUsed: false,
     });
@@ -155,7 +155,7 @@ describe("SP-082 score campaign continuity checkpoints", () => {
         selectedPlan: {
           moduleId: "corp.ambush_and_bluff",
           instanceId:
-            "plan:corp.ambush_and_bluff:ambush%3Acorp_112_2%3Asetup%3Anew_remote",
+            "plan:corp.ambush_and_bluff:ambush%3Acp2%3Asetup%3Anew_remote",
         },
       },
     });

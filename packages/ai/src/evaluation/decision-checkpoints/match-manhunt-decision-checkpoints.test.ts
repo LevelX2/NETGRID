@@ -49,7 +49,7 @@ describe("match Manhunt exact decision checkpoints", () => {
       const action = getLegalActions(state, "corp").find((candidate) =>
         index === 0
           ? candidate.actionId === result.decision!.actionId
-          : candidate.source === "corp_521_2" &&
+          : candidate.source === "c37y" &&
             (index === 1
               ? candidate.type === "rez_card"
               : candidate.payload?.cardImplementationTakesHostedCredits ===
@@ -138,7 +138,7 @@ describe("match Manhunt exact decision checkpoints", () => {
           acceptablePlanKinds: ["corp.economy"],
           acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_visible_card_payout:onr_v1_309_bbs-whispering-campaign",
+            "corp_engine_certified_visible_card_payout:521",
           ],
         },
       };
@@ -239,14 +239,14 @@ function campaignDevelopmentExpectation(): AiDecisionCheckpointV1["expectation"]
     acceptableActions: [
       {
         actionId:
-          "corp.install_card.corp_521_2.remote_1.corp_521_2",
+          "corp.install_card.c37y.r1.c37y",
       },
     ],
     planExecution: {
       acceptablePlanKinds: ["corp.economy"],
       acceptableCapabilities: ["develop_or_convert_corp_economy"],
       requiredAssessmentEvidence: [
-        "corp_visible_economy_campaign:install:remote_1:protected_contestable",
+        "corp_visible_economy_campaign:install:r1:protected_contestable",
       ],
       forbiddenPlanKinds: ["corp.execute_punish_sequence"],
     },

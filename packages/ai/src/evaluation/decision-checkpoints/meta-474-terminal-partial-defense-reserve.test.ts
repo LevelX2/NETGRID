@@ -84,14 +84,14 @@ describe("pairing 474: reserve the best funded partial terminal defense", () => 
         runnerCreditsRemainingOnBestAccessPath: 0,
       },
       selectedRezCosts: [
-        { iceInstanceId: "corp_464_1", credits: 4 },
+        { iceInstanceId: "c2v9", credits: 4 },
       ],
     });
     expect(reserve).toMatchObject({
       preservesReserve: false,
       availableCreditsAfterRez: 2,
       requiredCreditsAfterRez: 4,
-      immediateRezIceIds: ["corp_464_1"],
+      immediateRezIceIds: ["c2v9"],
     });
   });
 

@@ -123,7 +123,7 @@ it("produces and consumes the same binding through all three native decisions", 
   expect(order.selectedChoices).toMatchObject({
     choiceId: "runner_run_start_order_80",
     selectedOptionIds: [
-      "source_card_implementation:runner_396_2",
+      "source_card_implementation:c2g2",
     ],
   });
   expect(
@@ -141,7 +141,7 @@ it("produces and consumes the same binding through all three native decisions", 
     selectedAtStateVersion: 83,
   });
   expect(chooseAiAction(native().input).selectedChoices).toMatchObject({
-    choiceId: "card_implementation.vacuum_link_rewind:run_80:84",
+    choiceId: "card_implementation.vacuum_link_rewind:80:84",
     selectedOptionIds: ["resume_from_rezzed_ice_back"],
   });
 });

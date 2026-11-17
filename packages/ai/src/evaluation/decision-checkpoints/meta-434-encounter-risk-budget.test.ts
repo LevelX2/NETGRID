@@ -65,7 +65,7 @@ it.each([
     const root =
       game === 21
         ? "plan:runner.pressure_central:central%3Ahq"
-        : "plan:runner.contest_remote:remote%3Aremote_1";
+        : "plan:runner.contest_remote:remote%3Ar1";
     expect(decision.evidence).toContain(`plan_first_root:${root}`);
     expect(
       decision.evidence?.some((e: string) =>
@@ -90,7 +90,7 @@ it.each([10, 12])(
       input.legalActions.find((a) => a.actionId === decision.actionId)?.type,
     ).toBe("break_subroutine");
     expect(decision.evidence).toContain(
-      "plan_first_root:plan:runner.contest_remote:remote%3Aremote_1",
+      "plan_first_root:plan:runner.contest_remote:remote%3Ar1",
     );
     expect(decision.fallbackUsed).toBe(false);
   },
@@ -108,7 +108,7 @@ it("preserves the original break that keeps a later jack-out available", () => {
     input.legalActions.find((a) => a.actionId === decision.actionId)?.type,
   ).toBe("break_subroutine");
   expect(decision.evidence).toContain(
-    "plan_first_root:plan:runner.contest_remote:remote%3Aremote_3",
+    "plan_first_root:plan:runner.contest_remote:remote%3Ar3",
   );
   expect(decision.fallbackUsed).toBe(false);
 });
@@ -129,7 +129,7 @@ it.each(["liquid", "run-only"])(
       input.legalActions.find((a) => a.actionId === decision.actionId)?.type,
     ).toBe("pump_breaker");
     expect(decision.evidence).toContain(
-      "plan_first_root:plan:runner.contest_remote:remote%3Aremote_1",
+      "plan_first_root:plan:runner.contest_remote:remote%3Ar1",
     );
     expect(decision.fallbackUsed).toBe(false);
   },

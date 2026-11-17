@@ -46,7 +46,7 @@ it.each([false, true])(
       routeQuote: { reachability: "conditional_access" },
     });
     expect(runnerRepeatedFreeStopProbeEvidence(input, target)).toContain(
-      "free_stop_already_observed:hq:evt_62",
+      "free_stop_already_observed:hq:63",
     );
     restoreAiRuntimeCheckpoint(
       input,

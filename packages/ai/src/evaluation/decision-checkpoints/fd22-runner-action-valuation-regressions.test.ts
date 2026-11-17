@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { describe, expect, it } from "vitest";
 
 import redundantPsychicFriendJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-fd22-01-redundant-psychic-friend-d64.json";
@@ -39,7 +40,7 @@ describe("match fd22 runner action valuation regression evidence", () => {
 
     expect(result.ok, result.message).toBe(true);
     expect(result.selectedAction?.type).not.toBe("install_card");
-    expect(result.selectedAction?.actionId).not.toContain("psychic-friend");
+    expect(result.selectedAction?.actionId).not.toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 34));
   });
 
   it.each([

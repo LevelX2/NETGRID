@@ -153,7 +153,7 @@ it("prepares the fifth Grip card at manual D61 when the payoff is known but the 
     cardSpecPlanningCardByDefinitionId(JETTISON_ICE)!.definition;
   if (drawnCard.type !== "event") throw new Error("Expected a Runner event");
   view.own.gripOrHq.push({
-    instanceId: "runner_292_3",
+    instanceId: "c1sz",
     known: true,
     owner: "runner",
     title: drawnCard.title,
@@ -599,7 +599,7 @@ it("keeps an immediately executable terminal remote contest above the concealed-
     runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.start_run.remote_1");
+  expect(decision.actionId).toBe("runner.start_run.r1");
   expect(decision.evidence).toContain("plan_priority_class:P2");
 });
 
@@ -1027,7 +1027,7 @@ function withKnownDamage(definitions: readonly number[], keepFallGuy = false) {
       ...events,
       ...definitions.map((id, index) => ({
         ...access,
-        eventId: access.stateVersionAfter + index + 1,
+        eventId: access.eventId + index + 1,
         publicPayload: { ...access.publicPayload, cardDefinitionId: id },
       })),
     ];

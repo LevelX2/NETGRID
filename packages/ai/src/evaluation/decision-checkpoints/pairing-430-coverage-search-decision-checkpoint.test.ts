@@ -27,14 +27,14 @@ describe("pairing 430 coverage search answers the actual ICE category", () => {
       choiceJson,
       role: "code_gate",
       stateVersion: 80,
-      answer: "card_runner_226_1",
+      answer: "card_c1e9",
     },
     {
       searchJson: sentrySearchJson,
       choiceJson: sentryChoiceJson,
       role: "sentry",
       stateVersion: 91,
-      answer: "card_runner_252_1",
+      answer: "card_c1k1",
     },
   ])(
     "binds the actual $role need and unchanged Engine choice to its answer",
@@ -58,7 +58,7 @@ describe("pairing 430 coverage search answers the actual ICE category", () => {
       );
       const decision = chooseAiAction(search.input);
       expect(decision.actionId).toBe(
-        "runner.activated_card_ability.runner_389_2.runner_389_2.activated.onr_v1_177_the-short-circuit:abilities_activated_runner_main_search_stack_to_grip",
+        "runner.activated_card_ability.c2ei.c2ei.activated.464",
       );
       expect(decision.fallbackUsed).toBe(false);
       expect(

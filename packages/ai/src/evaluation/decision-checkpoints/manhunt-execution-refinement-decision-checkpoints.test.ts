@@ -54,7 +54,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
           acceptablePlanKinds: ["corp.punish_campaign"],
           acceptableCapabilities: ["punish_prepare"],
           requiredAssessmentEvidence: [
-            "tag_punish_ontology_prepare:onr_v1_313_city-surveillance",
+            "tag_punish_ontology_prepare:525",
           ],
         },
       };
@@ -110,7 +110,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
         acceptableActions: [{
           type: "install_card",
           sourceDefinitionId: 408,
-          targetServerId: "remote_1",
+          targetServerId: "r1",
         }],
         forbiddenActions: [{ type: "install_card", targetServerId: "hq" }],
         planExecution: {

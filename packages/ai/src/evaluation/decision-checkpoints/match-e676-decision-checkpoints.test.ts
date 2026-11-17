@@ -16,7 +16,7 @@ describe("match e676 exact decision checkpoints", () => {
       [
         "plan_module:corp.economy",
         "plan_step_capability:develop_or_convert_corp_economy",
-        "plan_assessment_evidence:corp_score_protection_required:remote_1",
+        "plan_assessment_evidence:corp_score_protection_required:r1",
       ],
     ],
     [
@@ -41,7 +41,7 @@ describe("match e676 exact decision checkpoints", () => {
       acceptableActions: [
         {
           actionId:
-            "corp.install_card.corp_455_2.rd.corp_455_2.2",
+            "corp.install_card.c2ta.rd.c2ta.2",
         },
       ],
       forbiddenActions: [{ type: "rez_card", sourceDefinitionId: CHESTER_MIX }],
@@ -49,7 +49,7 @@ describe("match e676 exact decision checkpoints", () => {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["allocate_server_defense"],
         requiredAssessmentEvidence: [
-          "corp_score_material_capacity_release:rd:corp.install_card.corp_455_2.rd.corp_455_2.2",
+          "corp_score_material_capacity_release:rd:corp.install_card.c2ta.rd.c2ta.2",
         ],
       },
     };

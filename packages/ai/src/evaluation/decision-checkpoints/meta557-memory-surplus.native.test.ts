@@ -39,7 +39,7 @@ describe("pairing 557 memory sacrifice values only the current deficit", () => {
     const action = cp.input.legalActions.find(
       (a: any) =>
         a.actionId ===
-        "runner.install_card.runner_286_2.runner_286_2.runner_program_trash_before_install.runner_287_1.2.2",
+        "runner.install_card.c1rm.c1rm.runner_program_trash_before_install.c1rt.2.2",
     );
     expect(action).toBeDefined();
     const assessment = context.runnerProgramInstallTrashAssessmentForAction(
@@ -100,7 +100,7 @@ describe("pairing 557 memory sacrifice values only the current deficit", () => {
     expect(result.selectedChoices).toEqual({
       choiceId: "runner_program_trash_before_install_172",
       selectedOptionIds: [
-        "card_runner_287_1",
+        "card_c1rt",
       ],
     });
     expect(pf.executionOrigin).toMatchObject({
@@ -125,7 +125,7 @@ describe("pairing 557 memory sacrifice values only the current deficit", () => {
     );
     expect(chooseAiAction(cp.input).selectedChoices).toEqual({
       choiceId: "runner_program_trash_before_install_172",
-      selectedOptionIds: ["card_runner_257_1"],
+      selectedOptionIds: ["card_c1l5"],
     });
   });
 

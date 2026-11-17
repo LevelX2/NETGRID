@@ -4828,7 +4828,7 @@
           "hiddenZoneBarrier": true,
           "hiddenZoneAction": "temporary_program_install_end_turn_return",
           "returnedCount": 1,
-          "returnedCardDefinitionIds": 251,
+          "returnedCardDefinitionIds": "251",
           "redactedKind": "hidden_zone",
           "abilityId": "temporary_program_install_end_turn_return",
           "effectKind": "hidden_zone",
@@ -4836,7 +4836,7 @@
             "returnedCount": 1
           },
           "targets": {
-            "returnedCardDefinitionIds": 251,
+            "returnedCardDefinitionIds": "251",
             "redactedKind": "hidden_zone"
           },
           "visibility": {

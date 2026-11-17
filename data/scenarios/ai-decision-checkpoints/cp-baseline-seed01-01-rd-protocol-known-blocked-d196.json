@@ -6021,7 +6021,7 @@
                   "rootReplacement": "asset_to_agenda",
                   "effectKind": "install_card",
                   "replacedRootCardIds": "c3fx",
-                  "replacedRootDefinitionIds": 557,
+                  "replacedRootDefinitionIds": "557",
                   "replacedRootCardType": "asset"
                 }
               }
@@ -10999,7 +10999,7 @@
                   "cardDefinitionId": 251,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 251,
-                  "revealedCardDefinitionIds": 251,
+                  "revealedCardDefinitionIds": "251",
                   "revealedCount": 1
                 }
               }
@@ -15237,7 +15237,7 @@
             "runnerCreditsAfter": 12,
             "trashedCount": 1,
             "hiddenZoneBarrier": true,
-            "trashedCardDefinitionIds": 251,
+            "trashedCardDefinitionIds": "251",
             "choiceVisibility": "hidden_info_barrier",
             "installed": true,
             "installCostPaid": 2,
@@ -15309,7 +15309,7 @@
                   "runnerProgramTrashBeforeInstallResolved": true,
                   "runnerProgramTrashBeforeInstallCostsPrepaid": true,
                   "trashedCount": 1,
-                  "trashedCardDefinitionIds": 251,
+                  "trashedCardDefinitionIds": "251",
                   "installCostPaid": 2,
                   "runnerInstallNormalCreditsPaid": 2,
                   "runnerInstallHostedCreditsPaid": 0,

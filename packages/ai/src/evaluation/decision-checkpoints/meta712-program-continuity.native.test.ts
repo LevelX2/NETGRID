@@ -1,4 +1,5 @@
 import { afterEach, expect, it } from "vitest";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import checkpoint from "./fixtures/meta712-d245-program-continuity.json";
 import {
   aiLiveRuntimeDependencies,
@@ -35,7 +36,9 @@ it("does not declare the only stable breaker redundant to an incoming random-los
     choice.options,
   );
   expect(
-    assessment.candidates.find((c) => c.card?.instanceId.endsWith("krash_2")),
+    assessment.candidates.find((c) =>
+      referencesDefaultDeckCard(c.card?.instanceId, 251, 2),
+    ),
   ).toMatchObject({ protectedRole: true });
   expect(
     services.selectedRunnerProgramInstallTrashOptionIds(
@@ -43,7 +46,7 @@ it("does not declare the only stable breaker redundant to an incoming random-los
       choice,
       choice.options,
     ),
-  ).toEqual(["card_runner_271_2"]);
+  ).toEqual(["card_c1oa"]);
 });
 
 it("preserves the previously bound historical choice and its plan owner", () => {
@@ -68,7 +71,7 @@ it("preserves the previously bound historical choice and its plan owner", () => 
     actionId: "runner.resolve_choice",
     selectedChoices: {
       choiceId: "runner_program_trash_before_install_244",
-      selectedOptionIds: ["card_runner_251_2"],
+      selectedOptionIds: ["card_c1ju"],
     },
     fallbackUsed: false,
     timeoutUsed: false,

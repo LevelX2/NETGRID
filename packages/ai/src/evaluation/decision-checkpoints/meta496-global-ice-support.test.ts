@@ -119,7 +119,7 @@ describe("global ICE support installation admission (SP-207)", () => {
       p.postInstallRezQuoteCardId = "wrong_source";
     if (condition === "existing_target")
       input.playerView.servers.push({
-        id: p.postInstallRezQuoteProjectedServerId as `remote_${number}`,
+        id: p.postInstallRezQuoteProjectedServerId as `r${number}`,
         label: "Already existing target",
         ice: [],
         root: [],

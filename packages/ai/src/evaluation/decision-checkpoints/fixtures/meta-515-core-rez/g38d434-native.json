@@ -10519,7 +10519,7 @@
             "accessIndex": 3,
             "stealCost": 5,
             "stealAdditionalCost": 5,
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealBlockedByCost": true,
             "targets": {
@@ -17895,7 +17895,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 433,
-      "sideSafePlanningFingerprint": "fnv1a:c517f1a9"
+      "sideSafePlanningFingerprint": "fnv1a:6e8251c9"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_last_call_at_rd_1.0.0",

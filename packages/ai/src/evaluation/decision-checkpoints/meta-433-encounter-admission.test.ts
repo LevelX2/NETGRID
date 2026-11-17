@@ -24,8 +24,8 @@ function fixture(capture: unknown) {
 }
 
 it.each([
-  [zeroRemote, "plan:runner.contest_remote:remote%3Aremote_1", "run_205"],
-  [zeroCentral, "plan:runner.pressure_central:central%3Ard", "run_532"],
+  [zeroRemote, "plan:runner.contest_remote:remote%3Ar1", "205"],
+  [zeroCentral, "plan:runner.pressure_central:central%3Ard", "532"],
 ] as const)(
   "retains the paid ETR route beside certified zero Core damage",
   (capture, root, run) => {
@@ -82,7 +82,7 @@ it("configures a breaker using its available run credit without changing ownersh
     decisionDebug: {
       planFirstDecision: {
         rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_170",
+        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A170",
         route: {
           actionId: action.actionId,
           stateVersion: input.playerView.stateVersion,

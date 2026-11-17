@@ -19,7 +19,7 @@ function decide(checkpoint: unknown, credits?: number, clicks?: number) {
   };
   if (!input.playerView.run) {
     bindSyntheticAgendaStealQuotes(input, "rd", 0, {});
-    bindSyntheticAgendaStealQuotes(input, "remote_1", 0, {});
+    bindSyntheticAgendaStealQuotes(input, "r1", 0, {});
   }
   if (credits !== undefined) input.playerView.own.credits = credits;
   if (clicks !== undefined) input.playerView.own.clicks = clicks;
@@ -58,13 +58,13 @@ it("funds the urgent remote while its two-credit prefix and run still fit", () =
   expect(input.playerView.own.clicks).toBe(4);
   expect(decision.actionId).toBe("runner.gain_credit");
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
     leafExecutorInstanceId:
-      "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+      "plan:runner.economy:run-support%3Aremote%3Ar1",
   });
   expect(
     evaluateRunnerRunTargets({ input }).find(
-      (target) => target.actionId === "runner.start_run.remote_1",
+      (target) => target.actionId === "runner.start_run.r1",
     )?.prerunReserveQuote,
   ).toMatchObject({ status: "blocked", creditGap: 2 });
 });
@@ -79,7 +79,7 @@ it("continues the actual paid HQ access instead of derezzing a zero-rez-cost pas
   expect(decision.actionId).toBe("runner.continue_run");
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_145",
+    leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A145",
     route: { actionId: "runner.continue_run", stateVersion: 147 },
   });
 });
@@ -90,7 +90,7 @@ it.each([5, 6])(
     // Controlled funding contrast, not another historical game state.
     const { input, decision } = decide(preparationCheckpoint, credits);
     const remote = evaluateRunnerRunTargets({ input }).find(
-      (t) => t.targetServerId === "remote_1",
+      (t) => t.targetServerId === "r1",
     )!;
     expect(remote.pathCost).toBe(3);
     const prepare = input.legalActions.find(
@@ -108,7 +108,7 @@ it.each([5, 6])(
       expect(remote.prerunReserveQuote?.creditGap).toBe(0);
       expect(decision.actionId).toBe(prepare.actionId);
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
         route: { actionId: prepare.actionId, stateVersion: 103 },
       });
       expect(

@@ -118,7 +118,7 @@ it.each(["funded", "unfunded", "agenda_in_hq", "occupied"] as const)(
     if (variant === "agenda_in_hq") input.playerView.own.gripOrHq[0] = agenda;
     if (variant === "occupied")
       input.playerView.servers
-        .find((server) => server.id === "remote_1")!
+        .find((server) => server.id === "r1")!
         .root.push(agenda);
     expect(chooseAiAction(input).selectedChoices?.selectedOptionIds).toEqual([
       variant === "funded" ? "draw" : "skip",

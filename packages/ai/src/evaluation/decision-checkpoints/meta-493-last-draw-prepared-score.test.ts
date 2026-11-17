@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -9,9 +10,9 @@ import {
 } from "./runtime-checkpoint";
 
 afterEach(resetResidentPlanPortfolioMemory);
-const installed = "corp_429_1";
+const installed = "c2nh";
 const newInstall =
-  "corp.install_card.corp_424_1.new_remote.corp_424_1";
+  "corp.install_card.c2md.new_remote.c2md";
 function checkpoint() {
   return JSON.parse(
     readFileSync(
@@ -63,14 +64,15 @@ it("funds the already certified terminal continuation instead of opening an unpr
   expect(result.actionId).toBe("corp.gain_credit");
   expect(plan.selectedPlan?.moduleId).toBe("corp.economy");
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:corp.score_agenda:agenda%3Acorp_429_1%3Aremote_1",
+    "plan:corp.score_agenda:agenda%3Ac2nh%3Ar1",
   );
   expect(plan.priority?.effectiveClass).toBe("P2");
   expect(plan.leafExecutorInstanceId).toBe(plan.selectedPlan?.instanceId);
   expect(plan.selectedStep?.planInstanceId).toBe(plan.leafExecutorInstanceId);
   expect(
     plan.portfolio?.find((p) =>
-      p.dedupeKey.includes("priority-requisition_1:new_remote"),
+      referencesDefaultDeckCard(p.dedupeKey, 424, 1) &&
+      p.dedupeKey.endsWith(":new_remote"),
     )?.evidenceCodes,
   ).not.toContain("corp_last_viable_deckout_matchpoint_install:new_remote");
 });

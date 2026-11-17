@@ -1602,7 +1602,7 @@
             "serverLabel": "R&D",
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "stealBlockedByCost": true,
             "targets": {
@@ -12296,7 +12296,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 350,
-      "sideSafePlanningFingerprint": "fnv1a:04f4d476"
+      "sideSafePlanningFingerprint": "fnv1a:2a7e17ce"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_adb10896_1.1.0",

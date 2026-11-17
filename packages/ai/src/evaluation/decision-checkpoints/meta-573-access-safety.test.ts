@@ -56,10 +56,10 @@ it("jacks out of the native remote after Data Darts leaves one card before unkno
     actionId: "runner.jack_out",
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_40",
+        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A40",
         selectedStep: {
-          parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
         },
         route: {
           actionId: "runner.jack_out",
@@ -115,7 +115,7 @@ it("does not impose the unknown-access barrier on a larger hand", () => {
 });
 it("does not invent unknown access when the root is fully known", () => {
   const { input } = checkpoint();
-  input.playerView.servers.find((s) => s.id === "remote_1")!.root = [];
+  input.playerView.servers.find((s) => s.id === "r1")!.root = [];
   expect(
     currentRunAbortAssessment(input, undefined)?.evidenceCode,
   ).not.toContain("runner_critical_low_grip_unknown_remote_access");
@@ -127,7 +127,7 @@ it("does not infer damage pressure from a hidden root alone", () => {
   input.playerView.opponent.discardCards = [];
   input.playerView.servers.forEach((s) => {
     s.ice = [];
-    if (s.id !== "remote_1") s.root = [];
+    if (s.id !== "r1") s.root = [];
   });
   expect(currentRunAbortAssessment(input, undefined)).toBeUndefined();
 });

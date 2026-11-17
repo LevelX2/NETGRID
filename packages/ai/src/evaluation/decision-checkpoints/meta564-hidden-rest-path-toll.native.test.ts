@@ -85,7 +85,7 @@ it("rejects the unaffordable Rasmin suffix and pumps the funded hosted breaker",
   );
   expect(action).toMatchObject({
     type: "pump_breaker",
-    payload: { breakerId: "runner_251_1" },
+    payload: { breakerId: "c1jt" },
     expiresAtStateVersion: 301,
   });
   expect(decision.fallbackUsed).toBe(false);

@@ -107,11 +107,11 @@ describe("SP-135: the paid mitigation pump keeps its exact break purpose", () =>
       expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
       const plan = decision.decisionDebug!.planFirstDecision!;
       expect(plan.rootPlanInstanceId).toBe(
-        "plan:runner.contest_remote:remote%3Aremote_1",
+        "plan:runner.contest_remote:remote%3Ar1",
       );
       expect(plan.selectedPlan?.moduleId).toBe("runner.convert_run_window");
       expect(plan.leafExecutorInstanceId).toBe(
-        "plan:runner.convert_run_window:run%3Arun_348",
+        "plan:runner.convert_run_window:run%3A348",
       );
       expect(plan.route?.actionId).toBe(action.actionId);
       expect(plan.route?.stateVersion).toBe(input.playerView.stateVersion);

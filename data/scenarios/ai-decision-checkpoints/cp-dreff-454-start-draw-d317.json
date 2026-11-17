@@ -4658,7 +4658,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -4998,7 +4998,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -5401,7 +5401,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -5772,7 +5772,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -6169,7 +6169,7 @@
             "serverLabel": "R&D",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:c9d7dad8",
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealCostPersistedForCurrentAccess": true,
             "abilityFamily": "run-access",
@@ -6410,7 +6410,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -6716,7 +6716,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -7577,7 +7577,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -7880,7 +7880,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -8199,7 +8199,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -8541,7 +8541,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -8980,7 +8980,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -10623,7 +10623,7 @@
           "corpMandatoryOptionalAgendaCardCount": 1,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 411,
+          "corpMandatoryAdditionalSourceDefinitionIds": "411",
           "visibility": {
             "class": "private_to_side"
           },
@@ -11062,7 +11062,7 @@
           "corpMandatoryOptionalAgendaCardCount": 1,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 411,
+          "corpMandatoryAdditionalSourceDefinitionIds": "411",
           "visibility": {
             "class": "private_to_side"
           },
@@ -12724,7 +12724,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 316,
-      "sideSafePlanningFingerprint": "fnv1a:a8341ab6"
+      "sideSafePlanningFingerprint": "fnv1a:e60d187a"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_dr_dreffs_letzte_visite_1.3.0",

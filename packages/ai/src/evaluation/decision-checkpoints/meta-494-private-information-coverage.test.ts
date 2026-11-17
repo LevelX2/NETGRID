@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { afterEach, expect, it, vi } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
@@ -15,11 +16,11 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 it.each([
-  [1, 133, "sandbox-dig", "rd"],
-  [5, 10, "executive-file-clerk", "hq"],
+  [1, 133, 54, "rd"],
+  [5, 10, 50, "hq"],
 ])(
   "classifies the native G%i D%i information capability at its central owner",
-  (game, d, name, server) => {
+  (game, d, definitionId, server) => {
     const cp = JSON.parse(
       readFileSync(
         new URL(
@@ -74,8 +75,8 @@ it.each([
       selected.decisionDebug?.planFirstDecision?.selectedStep?.stepId,
     ).toBeTruthy();
     const actions = input.legalActions.filter(
-      (a: { type: string; actionId: string }) =>
-        a.type === "activated_card_ability" && a.actionId.includes(name),
+      (a: { type: string; source?: string }) =>
+        a.type === "activated_card_ability" && referencesDefaultDeckCard(a.source, definitionId),
     );
     expect(actions.length).toBeGreaterThan(0);
     for (const action of actions)

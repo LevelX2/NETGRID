@@ -27,7 +27,7 @@ it.each([false, true])(
       runtime,
     );
     const remote = evaluateRunnerRunTargets({ input }).find(
-      (r) => r.actionId === "runner.start_run.remote_1",
+      (r) => r.actionId === "runner.start_run.r1",
     )!;
     expect(remote.routeQuote?.preRunPreparation).toBeUndefined();
     expect(remote.visibleTraceTagHazardUnavoidable).toBe(false);
@@ -38,7 +38,7 @@ it.each([false, true])(
         creditGap: 2,
       });
       expect(decision.actionId).toBe(
-        "runner.play_event.runner_159_1.hq.runner_159_1.onr_proteus_101_all-hands:on_play_hq_run_access_four_prohibit_noisy_icebreakers",
+        "runner.play_event.czd.hq.czd.221",
       );
       const central = evaluateRunnerRunTargets({ input }).find(
         (target) => target.actionId === decision.actionId,
@@ -70,10 +70,10 @@ it.each([false, true])(
       return;
     }
     expect(remote.prerunReserveQuote?.status).toBe("satisfied");
-    expect(decision.actionId).toBe("runner.start_run.remote_1");
+    expect(decision.actionId).toBe("runner.start_run.r1");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       route: {
         actionId: decision.actionId,
         stateVersion: input.playerView.stateVersion,
@@ -94,7 +94,7 @@ it("retains the native last-chance contest without an obsolete rig investment to
     runtime,
   );
   const remote = evaluateRunnerRunTargets({ input }).find(
-    (target) => target.actionId === "runner.start_run.remote_1",
+    (target) => target.actionId === "runner.start_run.r1",
   )!;
   expect(remote.visibleTraceTagHazardUnavoidable).toBe(false);
   expect(remote.prerunReserveQuote).toMatchObject({

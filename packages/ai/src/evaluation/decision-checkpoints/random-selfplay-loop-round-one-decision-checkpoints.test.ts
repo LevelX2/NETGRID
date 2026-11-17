@@ -34,7 +34,7 @@ describe("random standard selfplay loop round one", () => {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["develop_score_protection"],
         requiredAssessmentEvidence: [
-          "score_plan_requires_effective_ice_draw:agenda:corp_421_2:remote_1:remote_1",
+          "score_plan_requires_effective_ice_draw:agenda:c2lq:r1:r1",
         ],
       };
     }
@@ -50,7 +50,7 @@ describe("random standard selfplay loop round one", () => {
     if (json === terminalBrokerFundingJson) {
       expect(
         evaluateRunnerRunTargets({ input: result.input }).find(
-          (target) => target.actionId === "runner.start_run.remote_1",
+          (target) => target.actionId === "runner.start_run.r1",
         ),
       ).toMatchObject({ visibleTraceTagHazardUnavoidable: true });
     }
@@ -88,7 +88,7 @@ describe("random standard selfplay loop round one", () => {
         evidence.some(
           (entry) =>
             entry ===
-            "runner_credit_bank_bound_run_action:runner.start_run.remote_1",
+            "runner_credit_bank_bound_run_action:runner.start_run.r1",
         ),
       ).toBe(true);
       const before = checkpoint.engine.testOnlyGameState;
@@ -105,7 +105,7 @@ describe("random standard selfplay loop round one", () => {
         difficulty: "hard",
       });
       const decision = chooseAiAction(next);
-      expect(decision.actionId).toBe("runner.start_run.remote_1");
+      expect(decision.actionId).toBe("runner.start_run.r1");
       const started = applyAction(paid.state, {
         matchId: paid.state.matchId,
         side: "runner",

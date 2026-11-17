@@ -3747,7 +3747,7 @@
             "serverLabel": "HQ",
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "targets": {
               "serverLabel": "HQ"
@@ -5453,7 +5453,7 @@
             "serverLabel": "HQ",
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:ccd7df91",
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealCostPersistedForCurrentAccess": true,
             "abilityFamily": "run-access",
@@ -15083,7 +15083,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 462,
-      "sideSafePlanningFingerprint": "fnv1a:947c2910"
+      "sideSafePlanningFingerprint": "fnv1a:5f23a228"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_adb10896_1.1.0",

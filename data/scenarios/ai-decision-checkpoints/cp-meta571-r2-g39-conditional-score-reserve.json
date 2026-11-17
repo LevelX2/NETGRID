@@ -3867,7 +3867,7 @@
             "accessIndex": 0,
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "abilityFamily": "agenda-scoring",
             "targets": {
@@ -14162,7 +14162,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 361,
-      "sideSafePlanningFingerprint": "fnv1a:30b1ab5b"
+      "sideSafePlanningFingerprint": "fnv1a:914907ff"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_lucidrine_lockdown_1.5.0",

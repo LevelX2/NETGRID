@@ -49,14 +49,14 @@ it.each([false, true])(
     const modes = input.legalActions.filter(
       (a) =>
         a.type === "install_card" &&
-        a.payload?.cardId === "runner_150_1" &&
+        a.payload?.cardId === "cxd" &&
         !a.payload.runnerProgramTrashBeforeInstall,
     );
     expect(modes).toHaveLength(3);
     const development = residentPlanPortfolioSnapshot(input)!.instances.find(
       (instance) =>
         instance.instanceId ===
-        "plan:runner.develop_board_and_hand:card%3Arunner_150_1",
+        "plan:runner.develop_board_and_hand:card%3Acxd",
     );
     expect(development?.moduleState).toMatchObject({
       kind: "development",

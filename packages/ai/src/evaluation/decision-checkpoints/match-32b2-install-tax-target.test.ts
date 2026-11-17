@@ -25,7 +25,7 @@ const capture = JSON.parse(
 };
 
 const definitionId = 385;
-const instanceId = "runner_385_1";
+const instanceId = "c2dl";
 
 function taxOffers(input: AiDecisionInputWithDeckCapabilities) {
   return buildActionSemanticCandidates(input).filter(
@@ -103,7 +103,7 @@ describe("match 32b2 D45 ICE install-tax target", () => {
   it("does not let a single scoring opportunity displace the persistent HQ target", () => {
     const { input } = structuredClone(capture);
     const remote = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!;
     remote.root.push({
       instanceId: "faceup-remote-agenda",
@@ -144,7 +144,7 @@ describe("match 32b2 D45 ICE install-tax target", () => {
     const { input } = structuredClone(capture);
     input.ownStrategicIntentState!.targetVector = {
       kind: "remote",
-      targetId: "remote_1",
+      targetId: "r1",
       evidence: [],
     };
     const candidates = taxOffers(input);
@@ -160,14 +160,14 @@ describe("match 32b2 D45 ICE install-tax target", () => {
         event.type === "start_run" &&
         (event.turnSerial === 9 || event.turnSerial === 11)
       ) {
-        event.publicPayload.serverId = "remote_1";
+        event.publicPayload.serverId = "r1";
       }
     }
     expect(
       runnerInstallTaxTarget(input, definitionId, candidates)?.target?.serverId,
-    ).toBe("remote_1");
+    ).toBe("r1");
 
-    input.playerView.servers.find((server) => server.id === "remote_1")!.ice =
+    input.playerView.servers.find((server) => server.id === "r1")!.ice =
       [];
     expect(runnerInstallTaxTarget(input, definitionId, candidates)).toEqual({});
   });

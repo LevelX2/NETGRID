@@ -137,7 +137,7 @@ it("keeps actual terminal R&D defense ahead of the native nonwinning score payof
   );
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(
-    "corp.install_card.corp_434_1.rd.corp_434_1.1",
+    "corp.install_card.c2ol.rd.c2ol.1",
   );
   expect(
     decision.decisionDebug?.planFirstDecision?.priority?.effectiveClass,

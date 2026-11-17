@@ -24,10 +24,10 @@ const checkpoint = JSON.parse(
   input: AiDecisionInputWithDeckCapabilities;
   runtime: AiRuntimeCheckpointV1;
 };
-const parentId = "plan:runner.contest_remote:remote%3Aremote_1";
-const bankId = "plan:runner.credit_bank:runner_366_2";
+const parentId = "plan:runner.contest_remote:remote%3Ar1";
+const bankId = "plan:runner.credit_bank:c29e";
 const cashoutId =
-  "runner.activated_card_ability.runner_366_2.runner_366_2.activated.onr_v1_154_broker:withdraw_credits";
+  "runner.activated_card_ability.c29e.c29e.activated.441";
 afterEach(resetResidentPlanPortfolioMemory);
 
 it("preserves exact Remote funding through the generic matchpoint focus", () => {
@@ -50,7 +50,7 @@ it("preserves exact Remote funding through the generic matchpoint focus", () => 
       planInstanceId: bankId,
       stepId: `${bankId}:cash_out`,
       parentInstanceId: parentId,
-      needId: "run-support:remote:remote_1",
+      needId: "run-support:remote:r1",
     },
     route: { actionId: cashoutId, stateVersion: input.playerView.stateVersion },
   });
@@ -62,10 +62,10 @@ it("preserves exact Remote funding through the generic matchpoint focus", () => 
   expect(signal).toMatchObject({
     terminalPatternThreat: true,
     reachable: false,
-    supportNeedId: "run-support:remote:remote_1",
+    supportNeedId: "run-support:remote:r1",
   });
   expect(
-    signal.runActionAssessments["runner.start_run.remote_1"],
+    signal.runActionAssessments["runner.start_run.r1"],
   ).toMatchObject({
     verdict: "explicitly_nonproductive",
   });
@@ -88,7 +88,7 @@ it.each(["insufficient_payout", "no_cashout", "no_conversion_click"] as const)(
     );
     const decision = chooseAiAction(input);
     expect(decision.fallbackUsed).toBe(false);
-    expect(decision.actionId).not.toBe("runner.start_run.remote_1");
+    expect(decision.actionId).not.toBe("runner.start_run.r1");
     const provider = residentPlanPortfolioSnapshot(input)!.instances.find(
       (p) => p.instanceId === bankId,
     );

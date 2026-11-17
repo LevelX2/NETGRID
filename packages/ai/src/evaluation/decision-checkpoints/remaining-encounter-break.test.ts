@@ -29,8 +29,8 @@ it("SP-346 pays the last open ETR without rebudgeting a previously broken subrou
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_2",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_395",
+        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar2",
+        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A395",
         route: { actionId: action.actionId },
       },
     },

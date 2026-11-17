@@ -8,9 +8,9 @@ import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { resolvePlanBoundRunnerRunProgramSearchChoice } from "../../runner/run-window/run-window-program-search-binding";
 
-const sourceId = "runner_271_1";
-const root = "plan:runner.contest_remote:remote%3Aremote_1";
-const leaf = "plan:runner.convert_run_window:run%3Arun_134";
+const sourceId = "c1o9";
+const root = "plan:runner.contest_remote:remote%3Ar1";
+const leaf = "plan:runner.convert_run_window:run%3A134";
 const read = (name: string) =>
   JSON.parse(
     readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), "utf8"),
@@ -78,7 +78,7 @@ describe("native in-run program search (SP-333)", () => {
     expect(decision.actionId).toBe("runner.resolve_choice");
     expect(decision.selectedChoices).toEqual({
       choiceId: "p3_38_search_stack_install_138",
-      selectedOptionIds: ["card_runner_226_1"],
+      selectedOptionIds: ["card_c1e9"],
     });
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: root,

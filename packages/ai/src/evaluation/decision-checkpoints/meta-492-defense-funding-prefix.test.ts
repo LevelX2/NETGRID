@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -30,19 +31,19 @@ it("preserves the financing threshold while known central reserve protection sus
   expect(cp.input.playerView.own.clicks).toBe(2);
   const account = cp.input.legalActions.find(
       (a) =>
-        a.type === "play_operation" && a.source.includes("accounts-receivable"),
+        a.type === "play_operation" && referencesDefaultDeckCard(a.source, 493),
     )!,
     before = JSON.stringify(cp.input),
     decision = chooseAiAction(cp.input);
   expect(decision.actionId).toBe(account.actionId);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:corp.economy:economy-immediate-operation%3Acorp_493_1",
+    "plan:corp.economy:economy-immediate-operation%3Ac31p",
   );
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(
     plan.dispositions.some(
       (disposition) =>
-        disposition.actionId.includes("d-arc-knight") &&
+        referencesDefaultDeckCard(disposition.actionId, 445) &&
         disposition.actionId.includes(".hq.") &&
         disposition.disposition === "explicitly_nonproductive" &&
         disposition.ownerModuleId === "corp.defend_servers",

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 
 import rdInstallJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-ec735a96-01-rd-ice-with-unbound-credit-pool-d23.json";
 import hqRezJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-ec735a96-02-rez-filter-with-unbound-credit-pool-d28.json";
@@ -40,7 +41,7 @@ function expectKnownDefenseSearch(checkpoint: AiDecisionCheckpointV1): void {
       acceptablePlanKinds: ["corp.defend_servers"],
       acceptableCapabilities: ["develop_score_protection"],
       requiredAssessmentEvidence: [
-        "score_plan_requires_effective_ice_draw:agenda:corp_404_1:new_remote:new_remote",
+        "score_plan_requires_effective_ice_draw:agenda:c2hx:new_remote:new_remote",
       ],
     },
   };
@@ -55,12 +56,22 @@ function expectKnownDefenseSearch(checkpoint: AiDecisionCheckpointV1): void {
   expect(
     result.input.playerView.servers.find((server) => server.id === "rd")!.ice,
   ).toHaveLength(0);
-  expect(result.decision?.decisionDebug?.actionAlternatives).toEqual(
+  const shockInstallIds = new Set(
+    result.input.legalActions
+      .filter(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.serverId === "rd" &&
+          referencesDefaultDeckCard(action.source, 480),
+      )
+      .map((action) => action.actionId),
+  );
+  const shockAlternatives = result.decision?.decisionDebug?.actionAlternatives?.filter(
+    (action) => shockInstallIds.has(action.actionId),
+  );
+  expect(shockAlternatives).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
-        actionId: expect.stringMatching(
-          /^corp\.install_card\.corp_onr_v1_268_shock-r_\d\.rd\./,
-        ),
         excluded: true,
         whyNot: expect.arrayContaining([
           "explicitly_nonproductive:corp.defend_servers:corp_ice_install_has_no_executable_funded_or_project_bound_defense_route",

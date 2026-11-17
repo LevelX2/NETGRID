@@ -2954,7 +2954,7 @@
             "accessIndex": 0,
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "stealBlockedByCost": true,
             "targets": {
@@ -5238,7 +5238,7 @@
           "accessIndex": 0,
           "stealCost": 2,
           "stealAdditionalCost": 2,
-          "stealCostSourceDefinitionIds": 62,
+          "stealCostSourceDefinitionIds": "62",
           "stealCostSourceTitles": "Fetal AI",
           "stealBlockedByCost": true,
           "targets": {
@@ -6658,7 +6658,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 131,
-      "sideSafePlanningFingerprint": "fnv1a:11df97a9"
+      "sideSafePlanningFingerprint": "fnv1a:7bcbaf6d"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_deep_market_engine_1.0.0",

@@ -3916,7 +3916,7 @@
                   "cardDefinitionId": 35,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 35,
-                  "revealedCardDefinitionIds": 35,
+                  "revealedCardDefinitionIds": "35",
                   "revealedCount": 1
                 }
               }
@@ -7658,7 +7658,7 @@
                   "rootReplacement": "asset_to_agenda",
                   "effectKind": "install_card",
                   "replacedRootCardIds": "c3b2",
-                  "replacedRootDefinitionIds": 535,
+                  "replacedRootDefinitionIds": "535",
                   "replacedRootCardType": "asset"
                 }
               }
@@ -10276,7 +10276,7 @@
                   "cardDefinitionId": 35,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 35,
-                  "revealedCardDefinitionIds": 35,
+                  "revealedCardDefinitionIds": "35",
                   "revealedCount": 1
                 }
               }
@@ -13050,7 +13050,7 @@
                   "cardDefinitionId": 35,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 35,
-                  "revealedCardDefinitionIds": 35,
+                  "revealedCardDefinitionIds": "35",
                   "revealedCount": 1
                 }
               }
@@ -17082,7 +17082,7 @@
             "publicRevealTitles": "Team Restructuring",
             "serverId": "archives",
             "archivesRevealCount": 1,
-            "archivesRevealDefinitionIds": 517,
+            "archivesRevealDefinitionIds": "517",
             "archivesRevealTitles": "Team Restructuring",
             "archivesRevealAgendaDefinitionIds": "",
             "redactedKind": "hidden_zone",
@@ -17129,7 +17129,7 @@
                   "hiddenZoneBarrier": true,
                   "hiddenZoneAction": "archives_breach_reveal",
                   "archivesRevealCount": 1,
-                  "archivesRevealDefinitionIds": 517,
+                  "archivesRevealDefinitionIds": "517",
                   "archivesRevealTitles": "Team Restructuring",
                   "archivesRevealAgendaDefinitionIds": "",
                   "publicRevealDefinitionIds": "517",
@@ -19684,7 +19684,7 @@
                   "cardDefinitionId": 35,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 35,
-                  "revealedCardDefinitionIds": 35,
+                  "revealedCardDefinitionIds": "35",
                   "revealedCount": 1
                 }
               }

@@ -28,9 +28,9 @@ import { assessCorpEconomyAssetPayback } from "../../corp/economy/economy-asset-
 afterEach(() => resetResidentPlanPortfolioMemory());
 
 it.each([
-  [1, "data-wall"],
-  [4, "wall-of-static"],
-  [6, "data-wall"],
+  [1, 449],
+  [4, 491],
+  [6, 449],
 ] as const)(
   "compares pure ETR choices against %s remaining runner credits",
   (credits, expected) => {
@@ -42,7 +42,7 @@ it.each([
     const option = input.playerView.pendingChoice!.options.find(
       (o) => o.id === selectedOptionId(decision),
     )!;
-    expect(String(option.value)).toContain(expected);
+    expect(state.cardInstances[String(option.value)]?.definitionId).toBe(expected);
     expect(decision.fallbackUsed).toBe(false);
     expect(
       decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
@@ -92,9 +92,10 @@ it.each(["missing", "stale", "foreign_run", "malformed"])(
 );
 
 it("does not turn an explicitly unmodeled option into a proven access block", () => {
-  const input = corpInput(choiceState(4));
+  const state = choiceState(4);
+  const input = corpInput(state);
   const option = input.playerView.pendingChoice!.options.find((o) =>
-    String(o.value).includes("wall-of-static"),
+    state.cardInstances[String(o.value)]?.definitionId === 491,
   )!;
   const quote = JSON.parse(
     option.metadata!.temporaryEncounterBreakQuoteJson as string,
@@ -105,22 +106,23 @@ it("does not turn an explicitly unmodeled option into a proven access block", ()
     reason: "visible_runner_break_projection_unknown",
   });
   const decision = chooseCorpAction(input);
-  expect(selectedOptionId(decision)).toContain("data-wall");
+  expect(selectedIceDefinition(state, decision)).toBe(449);
 });
 
 it("does not spend more solely to make an unthreatened fort harder", () => {
-  const input = corpInput(choiceState(4));
+  const state = choiceState(4);
+  const input = corpInput(state);
   const remote = input.playerView.servers.find(
-    (server) => server.id === "remote_1",
+    (server) => server.id === "r1",
   )!;
   remote.root = remote.root.filter((card) => card.type !== "agenda");
-  expect(selectedOptionId(chooseCorpAction(input))).toContain("data-wall");
+  expect(selectedIceDefinition(state, chooseCorpAction(input))).toBe(449);
 });
 
 it("includes current run-only credits in the visible break response", () => {
   const state = choiceState(4, 2);
   const decision = chooseCorpAction(corpInput(state));
-  expect(selectedOptionId(decision)).toContain("data-wall");
+  expect(selectedIceDefinition(state, decision)).toBe(449);
 });
 
 it("ends a real temporary Asp encounter against the full four-credit runner trace response", () => {
@@ -128,7 +130,7 @@ it("ends a real temporary Asp encounter against the full four-credit runner trac
   const initial = structuredClone(state);
   const eventStart = state.eventLog.length;
   const decision = chooseCorpAction(corpInput(state));
-  expect(selectedOptionId(decision)).toContain("asp");
+  expect(selectedIceDefinition(state, decision)).toBe(433);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
     leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
@@ -176,7 +178,7 @@ it("already values a BBS pool more highly behind effective protection", () => {
   const payback = (input: ReturnType<typeof corpInput>) =>
     assessCorpEconomyAssetPayback({
       input,
-      serverId: "remote_1",
+      serverId: "r1",
       cadence: "finite_pool",
       baselineHorizonTurns: 3,
       finitePoolCredits: 16,
@@ -187,7 +189,7 @@ it("already values a BBS pool more highly behind effective protection", () => {
     });
   const ice =
     state.cardInstances[
-      putCorpIceOnServer(state, "remote_1", 491)
+      putCorpIceOnServer(state, "r1", 491)
     ]!;
   ice.rezzed = true;
   ice.faceup = true;
@@ -223,7 +225,7 @@ it.each([true, false])(
     const initial = structuredClone(state);
     const eventStart = state.eventLog.length;
     const bbsActions = getLegalActions(state, "corp").filter((a) =>
-      a.source?.includes("bbs-whispering-campaign"),
+      a.source !== undefined && state.cardInstances[a.source]?.definitionId === 521,
     );
     expect(bbsActions).toEqual(
       expect.arrayContaining([
@@ -279,6 +281,16 @@ function selectedOptionId(
   if (!Array.isArray(ids) || ids.length !== 1 || typeof ids[0] !== "string")
     throw new Error("Expected one bound option");
   return ids[0];
+}
+
+function selectedIceDefinition(
+  state: GameState,
+  decision: ReturnType<typeof chooseCorpAction>,
+) {
+  const selected = state.pendingChoice?.options.find(
+    (option) => option.id === selectedOptionId(decision),
+  );
+  return state.cardInstances[String(selected?.value)]?.definitionId;
 }
 
 function choiceState(
@@ -367,7 +379,7 @@ function choiceState(
   state.corp.badPublicity = badPublicity;
   state = applyMatching(
     state,
-    (a) => a.type === "start_run" && a.payload?.serverId === "remote_1",
+    (a) => a.type === "start_run" && a.payload?.serverId === "r1",
   );
   for (let step = 0; !state.pendingChoice && step < 10; step++)
     state = applyMatching(

@@ -5090,7 +5090,7 @@
           "choiceId": "p3_34_advancement_distribution_95",
           "sourceDefinitionId": 512,
           "targetCount": 1,
-          "targetCardDefinitionIds": 415,
+          "targetCardDefinitionIds": "415",
           "targetCardDefinitionId": 415,
           "v1919OperationAbility": "add_advancement_counters",
           "targetCardId": "c2kf",
@@ -5102,7 +5102,7 @@
           "targets": {
             "sourceDefinitionId": 512,
             "targetCardDefinitionId": 415,
-            "targetCardDefinitionIds": 415,
+            "targetCardDefinitionIds": "415",
             "choiceVisibility": "public"
           },
           "visibility": {

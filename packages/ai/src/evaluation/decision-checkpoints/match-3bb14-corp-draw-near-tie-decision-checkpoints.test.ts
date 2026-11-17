@@ -69,7 +69,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["develop_score_protection"],
         requiredAssessmentEvidence: [
-          "score_plan_requires_effective_ice_draw:agenda:corp_429_1:new_remote:new_remote",
+          "score_plan_requires_effective_ice_draw:agenda:c2nh:new_remote:new_remote",
         ],
       },
     };
@@ -110,7 +110,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     const checkpoint = fixture(defensiveDrawD9Json);
     const shock =
       checkpoint.engine.testOnlyGameState.cardInstances[
-        "corp_480_2"
+        "c2yu"
       ];
     if (!shock) throw new Error("Missing captured Shock.r instance");
     shock.definitionId = 475;
@@ -124,7 +124,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
         acceptablePlanKinds: ["corp.economy"],
         acceptableCapabilities: ["develop_or_convert_corp_economy"],
         requiredAssessmentEvidence: [
-          "corp_defense_exact_route_funding_required:rd:corp.install_card.corp_480_2.rd.corp_480_2.0",
+          "corp_defense_exact_route_funding_required:rd:corp.install_card.c2yu.rd.c2yu.0",
         ],
       },
     };
@@ -196,7 +196,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
   // Current positive control: Shock.r's next-encounter lock cannot protect
   // an empty server. Give this installation test a canonical stopping ICE.
   checkpoint.engine.testOnlyGameState.cardInstances[
-    "corp_480_2"
+    "c2yu"
   ]!.definitionId = 449;
   const state = checkpoint.engine.testOnlyGameState;
   const agendas = state.corp.hq.filter(

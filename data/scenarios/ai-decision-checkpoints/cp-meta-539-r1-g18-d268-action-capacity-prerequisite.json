@@ -6058,7 +6058,7 @@
             "accessIndex": 2,
             "stealCost": 5,
             "stealAdditionalCost": 5,
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealBlockedByCost": true,
             "targets": {
@@ -8341,7 +8341,7 @@
           "accessIndex": 2,
           "stealCost": 5,
           "stealAdditionalCost": 5,
-          "stealCostSourceDefinitionIds": 578,
+          "stealCostSourceDefinitionIds": "578",
           "stealCostSourceTitles": "Red Herrings",
           "stealBlockedByCost": true,
           "targets": {
@@ -10648,7 +10648,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 267,
-      "sideSafePlanningFingerprint": "fnv1a:e8030078"
+      "sideSafePlanningFingerprint": "fnv1a:956cd904"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_mr96xg94_1.2.0",

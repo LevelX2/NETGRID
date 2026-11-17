@@ -66,10 +66,10 @@ export function currentRemoteReserveFixture(credits = 21, bank = true) {
     .withRunnerProgramInstalled(278)
     .withRunnerProgramInstalled(233)
     .withRunnerProgramInstalled(228)
-    .withRezzedCorpIceOnServer("remote_1", 69)
-    .withCorpIceOnServer("remote_1", 75)
-    .withCorpIceOnServer("remote_1", 490)
-    .withCorpRemoteAgenda("remote_1", 1);
+    .withRezzedCorpIceOnServer("r1", 69)
+    .withCorpIceOnServer("r1", 75)
+    .withCorpIceOnServer("r1", 490)
+    .withCorpRemoteAgenda("r1", 1);
   for (const card of runnerCards.slice(4)) fixture.withRunnerCardInGrip(card);
   if (bank)
     fixture.withRunnerResourceInstalled(366, { bit: 3 });

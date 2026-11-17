@@ -58,12 +58,12 @@ describe("baseline Seed 02 shared scoreline feasibility checkpoints", () => {
       ...corpReservedScoreServerIds(result.input, scoreProjects),
     ]).toEqual([]);
     expect(
-      corpReservedScoreServerIds(reachableInput, scoreProjects).has("remote_1"),
+      corpReservedScoreServerIds(reachableInput, scoreProjects).has("r1"),
     ).toBe(true);
     expect(
       corpReservedScoreServerIds(result.input, [
         { ...scoreProjects[0]!, feasible: true, sameTurnCloseout: true },
-      ]).has("remote_1"),
+      ]).has("r1"),
     ).toBe(true);
   });
 
@@ -84,7 +84,7 @@ describe("baseline Seed 02 shared scoreline feasibility checkpoints", () => {
       currentClicks: 3,
       currentTurnClosableActionIds: [],
     });
-    expect(result.selectedAction?.source).toBe("corp_522_2");
+    expect(result.selectedAction?.source).toBe("c386");
 
     const lastDrawInput = structuredClone(result.input);
     lastDrawInput.playerView.opponent.agendaPoints = 0;
@@ -140,7 +140,7 @@ function syntheticAgenda(): VisibleCard {
 
 function syntheticAgendaInstall(agenda: VisibleCard): LegalAction {
   return {
-    actionId: "corp.install.synthetic-one-advance-agenda.remote_1",
+    actionId: "corp.install.synthetic-one-advance-agenda.r1",
     side: "corp",
     type: "install_card",
     label: "Synthetic Agenda installieren",
@@ -152,7 +152,7 @@ function syntheticAgendaInstall(agenda: VisibleCard): LegalAction {
     expiresAtStateVersion: 413,
     payload: {
       cardId: agenda.instanceId,
-      serverId: "remote_1",
+      serverId: "r1",
       placement: "root",
     },
   } as LegalAction;

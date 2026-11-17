@@ -13,7 +13,7 @@ import {
 } from "../../runtime/ai-decision-input";
 import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
 
-const remoteRoot = "plan:runner.contest_remote:remote%3Aremote_1";
+const remoteRoot = "plan:runner.contest_remote:remote%3Ar1";
 const wallExecutor = "plan:runner.rig_and_coverage:coverage%3Abreaker_wall";
 const aujourdOui = 363;
 afterEach(resetResidentPlanPortfolioMemory);
@@ -57,9 +57,9 @@ function searchInput(): AiDecisionInputWithDeckCapabilities {
     .withRunnerCardInGrip(333)
     .withRunnerCardInGrip(358)
     .withRunnerCardInGrip(224)
-    .withCorpRemoteRoot("remote_1", 408, 4)
-    .withRezzedCorpIceOnServer("remote_1", 457)
-    .withRezzedCorpIceOnServer("remote_1", 90);
+    .withCorpRemoteRoot("r1", 408, 4)
+    .withRezzedCorpIceOnServer("r1", 457)
+    .withRezzedCorpIceOnServer("r1", 90);
 
   for (const id of [...state.corp.hq, ...state.corp.rd]
     .filter((id) => state.cardInstances[id]?.definitionId === 62)
@@ -99,7 +99,7 @@ function decide(adjust?: (input: AiDecisionInputWithDeckCapabilities) => void) {
   )!;
   const targetRun = input.legalActions.find(
     (action) =>
-      action.type === "start_run" && action.payload?.serverId === "remote_1",
+      action.type === "start_run" && action.payload?.serverId === "r1",
   )!;
   const decision = chooseAiAction(input);
   return {

@@ -5,8 +5,8 @@ import projectBabylonCreditPoolJson from "../../../../../data/scenarios/ai-decis
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
-const PROJECT_BABYLON = "corp_426_1";
-const TYCHO_EXTENSION = "corp_432_1";
+const PROJECT_BABYLON = "c2mt";
+const TYCHO_EXTENSION = "c2o5";
 
 describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", () => {
   it("preserves the exposed agenda conversion clock before adding central ICE", () => {
@@ -20,7 +20,7 @@ describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", ()
       acceptablePlanKinds: ["corp.score_agenda"],
       acceptableCapabilities: ["advance_score_agenda"],
       requiredAssessmentEvidence: [
-        "corp_exposed_agenda_progress_preserves_conversion_clock:remote_1",
+        "corp_exposed_agenda_progress_preserves_conversion_clock:r1",
       ],
     };
 
@@ -33,7 +33,7 @@ describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", ()
       (checkpoint) => {
         const state = checkpoint.engine.testOnlyGameState;
         const remote = state.corp.servers.find(
-          (server) => server.id === "remote_1",
+          (server) => server.id === "r1",
         );
         if (!remote) throw new Error("Missing Remote 1 in EFA215 counterprobe");
         remote.root = remote.root.filter(
@@ -51,7 +51,7 @@ describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", ()
           ],
           forbiddenActions: [
             { type: "advance_card" },
-            { type: "install_card", targetServerId: "remote_1" },
+            { type: "install_card", targetServerId: "r1" },
           ],
           planExecution: {
             acceptablePlanKinds: ["corp.defend_servers"],
@@ -87,7 +87,7 @@ describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", ()
             },
           ],
           forbiddenActions: [
-            { type: "install_card", targetServerId: "remote_1" },
+            { type: "install_card", targetServerId: "r1" },
           ],
           planExecution: {
             acceptablePlanKinds: ["corp.defend_servers"],

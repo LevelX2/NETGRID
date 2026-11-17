@@ -181,7 +181,7 @@ describe("native cancellable encounter effect payment", () => {
       "plan:runner.pressure_central:central%3Ahq",
     );
     expect(plan.leafExecutorInstanceId).toBe(
-      "plan:runner.convert_run_window:run%3Arun_318",
+      "plan:runner.convert_run_window:run%3A318",
     );
     expect(plan.route?.actionId).toBe(decision.actionId);
     expect(plan.route?.stateVersion).toBe(328);

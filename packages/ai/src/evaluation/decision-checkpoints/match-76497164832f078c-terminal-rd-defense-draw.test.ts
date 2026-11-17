@@ -106,7 +106,7 @@ describe.each([
     );
     const decision = chooseAiAction(capture.input);
     expect(decision.actionId).toBe(
-      "corp.install_card.corp_577_1.remote_1.corp_577_1",
+      "corp.install_card.c3kd.r1.c3kd",
     );
     expect(decision.fallbackUsed).toBe(false);
     expect(

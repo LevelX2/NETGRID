@@ -25,7 +25,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
       const state = checkpoint.engine.testOnlyGameState;
       const rd = state.corp.servers.find((server) => server.id === "rd");
       const remote = state.corp.servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       );
       const outerIceId = rd?.ice[0];
       if (!rd || !remote || !outerIceId) {
@@ -35,7 +35,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
       remote.ice.push(outerIceId);
       state.cardInstances[outerIceId] = {
         ...state.cardInstances[outerIceId]!,
-        zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+        zone: { side: "corp", zone: "serverIce", serverId: "r1" },
       };
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "9D15-C01-BYPASS-LEAVES-BLOCKER";
@@ -43,14 +43,14 @@ describe("match 9D15 runner contest decision checkpoints", () => {
         forbiddenActions: [
           {
             actionId:
-              "runner.play_event.runner_306_2.remote_1.runner_306_2.onr_v1_094_inside-job:abilities_on_play_make_run",
+              "runner.play_event.c1w2.r1.c1w2.390",
           },
         ],
         runTargets: [
           {
             actionId:
-              "runner.play_event.runner_306_2.remote_1.runner_306_2.onr_v1_094_inside-job:abilities_on_play_make_run",
-            targetServerId: "remote_1",
+              "runner.play_event.c1w2.r1.c1w2.390",
+            targetServerId: "r1",
             pathPassability: "blocked_missing_coverage",
             recommendation: "find_breaker_first",
             requiredEvidence: ["run_action_projection_bypass_first_ice:true"],
@@ -84,7 +84,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
       (checkpoint) => {
         const state = checkpoint.engine.testOnlyGameState;
         const remote = state.corp.servers.find(
-          (server) => server.id === "remote_1",
+          (server) => server.id === "r1",
         );
         const rootId = remote?.root[0];
         if (!rootId) throw new Error("Expected Remote 1 root card");

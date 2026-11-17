@@ -52,7 +52,7 @@ function project(
     (c) =>
       c.sourceDefinitionId === 415 &&
       input.legalActions.find((a) => a.actionId === c.actionId)?.payload
-        ?.serverId === "remote_1",
+        ?.serverId === "r1",
   )!;
   const feasibility = corpScorelineFeasibilityForDecisionInput(input);
   if (!feasibility) throw Error("Native scoreline feasibility missing");
@@ -109,8 +109,8 @@ it("counts the native public bank cashout before certifying a matchpoint fort", 
   restore(cp);
   const { action, plan } = decide(cp);
   expect(action.type).toBe("install_card");
-  expect(action.payload?.cardId).toBe("corp_456_3");
-  expect(action.payload?.serverId).toBe("remote_1");
+  expect(action.payload?.cardId).toBe("c2tj");
+  expect(action.payload?.serverId).toBe("r1");
   expect(plan.selectedPlan?.moduleId).toBe("corp.defend_servers");
 });
 it("preserves the same native score admission with an empty public bank", () => {

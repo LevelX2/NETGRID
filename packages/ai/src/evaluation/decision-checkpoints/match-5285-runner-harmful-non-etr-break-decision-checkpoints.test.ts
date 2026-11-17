@@ -19,10 +19,10 @@ describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       selectedStep: {
-        planInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        planInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       },
     });
   });
@@ -112,8 +112,8 @@ describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
     expect(creditsSpent).toBe(10);
     expect(state.runner.credits).toBe(14);
     expect(breaks).toEqual([
-      { iceId: "corp_446_1", index: 0 },
-      { iceId: "corp_446_1", index: 1 },
+      { iceId: "c2r9", index: 0 },
+      { iceId: "c2r9", index: 1 },
     ]);
   });
 
@@ -135,7 +135,7 @@ describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
     );
     const input = nextInput(state, checkpoint);
     const next = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!.ice[0]!;
     if (kind === "unknown") {
       next.known = false;

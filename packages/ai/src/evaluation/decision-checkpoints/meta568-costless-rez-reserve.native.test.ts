@@ -93,7 +93,7 @@ it("executes that same native rez at the existing Defense owner", () => {
     input.legalActions.find((a) => a.actionId === result.actionId),
   ).toMatchObject({
     type: "rez_ice",
-    source: "corp_72_1",
+    source: "cg5",
     costs: [{ credits: 0 }],
   });
   expect(result.decisionDebug?.planFirstDecision).toMatchObject({

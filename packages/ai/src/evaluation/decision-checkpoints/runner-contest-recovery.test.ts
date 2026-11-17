@@ -60,7 +60,7 @@ function centralAndRemoteRoutes(input: AiDecisionInputWithDeckCapabilities) {
   });
   const hq = routes.find((route) => route.actionId === "runner.start_run.hq");
   const remote = routes.find(
-    (route) => route.actionId === "runner.start_run.remote_1",
+    (route) => route.actionId === "runner.start_run.r1",
   );
   if (!hq || !remote) throw new Error("Expected both recorded run routes.");
   return { hq, remote, routes };
@@ -299,7 +299,10 @@ describe("Runner contest recovery", () => {
       multipleAccessReplay.input as AiDecisionInputWithDeckCapabilities;
     const event = example.legalActions.find(
       (action) =>
-        action.type === "play_event" && action.actionId.includes("all-hands"),
+        action.type === "play_event" &&
+        example.playerView.own.gripOrHq.some(
+          (card) => card.instanceId === action.source && card.definitionId === 159,
+        ),
     )!;
     const card = example.playerView.own.gripOrHq.find(
       (card) => card.instanceId === event.source,
@@ -325,7 +328,7 @@ describe("Runner contest recovery", () => {
     const input = capturedInput(terminalSpendReplay);
     const view = input.playerView;
     view.opponent.agendaPoints = 4;
-    const remote = view.servers.find((server) => server.id === "remote_1")!;
+    const remote = view.servers.find((server) => server.id === "r1")!;
     remote.root = [
       { ...visibleOpponentAgenda(input, 1, remote.id), advancementCounters: 1 },
     ];
@@ -356,9 +359,9 @@ describe("Runner contest recovery", () => {
   it("keeps the HQ chance when a reachable second remote can only contain an upgrade", () => {
     const input = capturedInput(terminalSpendReplay);
     const view = input.playerView;
-    const id = "remote_2";
+    const id = "r2";
     const label = "Remote 2";
-    const remote = view.servers.find((server) => server.id === "remote_1")!;
+    const remote = view.servers.find((server) => server.id === "r1")!;
     view.servers.push({
       ...remote,
       id,
@@ -371,7 +374,7 @@ describe("Runner contest recovery", () => {
       },
     });
     const run = input.legalActions.find(
-      (action) => action.actionId === "runner.start_run.remote_1",
+      (action) => action.actionId === "runner.start_run.r1",
     )!;
     input.legalActions.push({
       ...run,
@@ -454,7 +457,7 @@ describe("Runner contest recovery", () => {
       view.own.credits = credits;
       const hqServer = view.servers.find((server) => server.id === "hq")!;
       const remoteServer = view.servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       )!;
       const hiddenIce = remoteServer.ice.find((card) => !card.known)!;
       hqServer.ice.push({ ...hiddenIce, instanceId: "review_hidden_hq_ice" });
@@ -584,7 +587,7 @@ describe("Runner contest recovery", () => {
       "rnd_freshness:stale_known_same_top",
     );
     expect(afterDraw.rd?.evidence).toContain(
-      "rd_known_top_drawn_by_corp:evt_corp_after_rd_access",
+      `rd_known_top_drawn_by_corp:${afterDraw.legalActions[0]!.expiresAtStateVersion + 1}`,
     );
     expect(afterDraw.rdDebug?.whyNot).toContain(
       "central_memory_payoff:invalidated",

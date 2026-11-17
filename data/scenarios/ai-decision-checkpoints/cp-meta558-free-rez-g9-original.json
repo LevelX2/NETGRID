@@ -10859,7 +10859,7 @@
           "accessIndex": 0,
           "stealCost": 2,
           "stealAdditionalCost": 2,
-          "stealCostSourceDefinitionIds": 62,
+          "stealCostSourceDefinitionIds": "62",
           "stealCostSourceTitles": "Fetal AI",
           "runPhase": "access",
           "agendaPoints": 3,
@@ -10901,7 +10901,7 @@
                 "cardId": "cdy",
                 "stealCost": 2,
                 "stealAdditionalCost": 2,
-                "stealCostSourceDefinitionIds": 62,
+                "stealCostSourceDefinitionIds": "62",
                 "stealCostSourceTitles": "Fetal AI",
                 "abilityFamily": "agenda-scoring",
                 "serverId": "rd",
@@ -23769,7 +23769,7 @@
                 "remainingCounters": 0,
                 "delayedInstallInstalledTarget": true,
                 "trashedCount": 1,
-                "trashedCardDefinitionIds": 273,
+                "trashedCardDefinitionIds": "273",
                 "shellCounterRemovalReason": "start_turn"
               },
               "resolvedEffects": [
@@ -26786,7 +26786,7 @@
                 "remainingCounters": 0,
                 "delayedInstallInstalledTarget": true,
                 "trashedCount": 1,
-                "trashedCardDefinitionIds": 259,
+                "trashedCardDefinitionIds": "259",
                 "shellCounterRemovalReason": "start_turn"
               },
               "resolvedEffects": [
@@ -29565,7 +29565,7 @@
                 "agendaInstallScoreHorizonQuoteComplete": true,
                 "effectKind": "install_card",
                 "replacedRootCardIds": "c3fx",
-                "replacedRootDefinitionIds": 557,
+                "replacedRootDefinitionIds": "557",
                 "replacedRootCardType": "asset"
               }
             }
@@ -29645,7 +29645,7 @@
                 "agendaInstallScoreHorizonQuoteReason": "not_completable_by_next_corp_turn",
                 "effectKind": "install_card",
                 "replacedRootCardIds": "c3et",
-                "replacedRootDefinitionIds": 552,
+                "replacedRootDefinitionIds": "552",
                 "replacedRootCardType": "asset"
               }
             }
@@ -30038,7 +30038,7 @@
                 "remainingCounters": 0,
                 "delayedInstallInstalledTarget": true,
                 "trashedCount": 1,
-                "trashedCardDefinitionIds": 259,
+                "trashedCardDefinitionIds": "259",
                 "shellCounterRemovalReason": "start_turn"
               },
               "resolvedEffects": [
@@ -38901,7 +38901,7 @@
               "accessIndex": 0,
               "stealCost": 2,
               "stealAdditionalCost": 2,
-              "stealCostSourceDefinitionIds": 62,
+              "stealCostSourceDefinitionIds": "62",
               "stealCostSourceTitles": "Fetal AI",
               "abilityFamily": "agenda-scoring",
               "targets": {
@@ -49772,7 +49772,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 390,
-        "sideSafePlanningFingerprint": "fnv1a:6e70da4d"
+        "sideSafePlanningFingerprint": "fnv1a:84db5b35"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_corp_express_shutdown_1.0.0",

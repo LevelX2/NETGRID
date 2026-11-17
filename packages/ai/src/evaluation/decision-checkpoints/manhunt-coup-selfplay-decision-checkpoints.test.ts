@@ -71,7 +71,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
     ).toBe(
-      "plan:corp.score_agenda:agenda%3Acorp_408_2%3Aremote_1",
+      "plan:corp.score_agenda:agenda%3Ac2iu%3Ar1",
     );
   });
 
@@ -87,7 +87,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
           acceptablePlanKinds: ["corp.economy"],
           acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_score_protection_required:remote_1",
+            "corp_score_protection_required:r1",
           ],
         },
       };

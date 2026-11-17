@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -33,7 +34,7 @@ it.each([
     resetResidentPlanPortfolioMemory();
     const input = currentRuleTagRemovalCounterInput(cp.input);
     const meat = input.legalActions.find((a: { actionId: string }) =>
-      a.actionId.includes("meat-upgrade"),
+      referencesDefaultDeckCard(a.actionId, 44),
     )!;
     expect(visibleRunnerDrawTaxSourceCount(input)).toBe(1);
     expect(runnerDrawTaxLiabilityProjection(input, meat)).toMatchObject({

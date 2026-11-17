@@ -138,7 +138,7 @@ it.each(["g5-d333", "g18-d237", "g19-d258", "g19-d259", "g19-d269", "completed-d
 
 it.each([
   ["cp-daed3ad-latest-02-start-score-remote-d19.json", "new_remote"],
-  ["cp-daed3ad-latest-03-harden-bound-remote-d88.json", "remote_1"],
+  ["cp-daed3ad-latest-03-harden-bound-remote-d88.json", "r1"],
 ])("preserves a native bound Remote protection window: %s", (name, target) => {
   const checkpoint = JSON.parse(
     readFileSync(

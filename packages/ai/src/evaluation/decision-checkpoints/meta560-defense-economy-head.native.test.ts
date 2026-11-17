@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { beforeEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
@@ -42,7 +43,7 @@ describe("pairing 560: current Defense draw-plus-credit head", () => {
           (a: any) => a.actionId === result.actionId,
         );
         expect(action).toBeDefined();
-        expect(action.source).toContain("silicon-saloon");
+        expect(referencesDefaultDeckCard(action.source, 391)).toBe(true);
         expect(action.payload).toMatchObject({
           gainCreditsAmount: 1,
           drawCardsAmount: 1,

@@ -79,14 +79,14 @@ describe("match 9FEF runner decision checkpoints", () => {
       portfolio.instances.find(
         (instance) =>
           instance.instanceId ===
-          "plan:runner.credit_bank:runner_366_2",
+          "plan:runner.credit_bank:c29e",
       )?.moduleState,
     ).toMatchObject({
       phase: "build",
       signal: {
         priorityClass: "P4",
         actionIds: expect.arrayContaining([
-          "runner.activated_card_ability.runner_366_2.runner_366_2.activated.onr_v1_154_broker:store_credits",
+          "runner.activated_card_ability.c29e.c29e.activated.440",
         ]),
       },
     });
@@ -125,7 +125,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
         acceptablePlanKinds: ["runner.pressure_central"],
         acceptableCapabilities: ["pressure_hq_access"],
         requiredAssessmentEvidence: [
-          "runner_hq_success_window_setup:onr_v1_080_core-command-jettison-ice",
+          "runner_hq_success_window_setup:292",
         ],
       },
     };
@@ -153,7 +153,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
         acceptablePlanKinds: ["runner.economy"],
         acceptableCapabilities: ["gain_general_liquid_credits"],
         requiredAssessmentEvidence: [
-          "runner_run_support_fund_concrete_gap:remote_1:concrete_funding_gap_admitted",
+          "runner_run_support_fund_concrete_gap:r1:concrete_funding_gap_admitted",
         ],
       },
     };

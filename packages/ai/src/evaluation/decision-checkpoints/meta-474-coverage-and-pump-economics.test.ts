@@ -70,21 +70,21 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
         signal: {
           assignedDomainPlanIds: [],
           actionIds: [
-            "runner.install_card.runner_233_2.runner_233_2",
+            "runner.install_card.c1fu.c1fu",
           ],
         },
       });
       const coverageInstanceId =
-        "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aefficiency%3Aremote_1%3Arun%3Arunner.start_run.remote_1";
+        "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aefficiency%3Ar1%3Arun%3Arunner.start_run.r1";
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject(
         name === "r9-g1-d142"
           ? {
               rootPlanInstanceId:
-                "plan:runner.develop_board_and_hand:card%3Arunner_233_2",
+                "plan:runner.develop_board_and_hand:card%3Ac1fu",
               leafExecutorInstanceId: development.instanceId,
               route: {
                 actionId:
-                  "runner.install_card.runner_233_2.runner_233_2",
+                  "runner.install_card.c1fu.c1fu",
               },
             }
           : {
@@ -92,7 +92,7 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
               leafExecutorInstanceId: coverageInstanceId,
               route: {
                 actionId:
-                  "runner.install_card.runner_286_1.runner_286_1",
+                  "runner.install_card.c1rl.c1rl",
               },
             },
       );
@@ -101,13 +101,13 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
         const remote = residentPlanPortfolioSnapshot(input)!.instances.find(
           (instance) =>
             instance.instanceId ===
-            "plan:runner.contest_remote:remote%3Aremote_1",
+            "plan:runner.contest_remote:remote%3Ar1",
         );
         expect(remote).toMatchObject({
           openNeedIds: [],
           evidenceRefs: expect.arrayContaining([
             expect.objectContaining({
-              code: "runner_direct_run_converts_now:remote_1",
+              code: "runner_direct_run_converts_now:r1",
             }),
           ]),
         });
@@ -119,11 +119,11 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
     const input = checkpoint("r9-g5-d256");
     const worm = input.legalActions.find(
       (a) =>
-        a.type === "pump_breaker" && a.source === "runner_286_1",
+        a.type === "pump_breaker" && a.source === "c1rl",
     )!;
     const krash = input.legalActions.find(
       (a) =>
-        a.type === "pump_breaker" && a.source === "runner_251_2",
+        a.type === "pump_breaker" && a.source === "c1ju",
     )!;
     expect(pureEndRunEncounterPayment(input, worm)?.cost).toBe(6);
     expect(pureEndRunEncounterPayment(input, krash)?.cost).toBe(10);
@@ -134,10 +134,10 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       stateVersion: 255,
       rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_251",
+      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A251",
       selectedStep: {
-        planInstanceId: "plan:runner.convert_run_window:run%3Arun_251",
-        stepId: "plan:runner.convert_run_window:run%3Arun_251:convert",
+        planInstanceId: "plan:runner.convert_run_window:run%3A251",
+        stepId: "plan:runner.convert_run_window:run%3A251:convert",
       },
       route: { actionId: worm.actionId },
     });
@@ -170,11 +170,11 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
     });
     const worm = input.legalActions.find(
       (a) =>
-        a.type === "pump_breaker" && a.source === "runner_286_1",
+        a.type === "pump_breaker" && a.source === "c1rl",
     )!;
     const krash = input.legalActions.find(
       (a) =>
-        a.type === "pump_breaker" && a.source === "runner_251_2",
+        a.type === "pump_breaker" && a.source === "c1ju",
     )!;
     const wormPayment = pureEndRunEncounterPayment(input, worm)!;
     const krashPayment = pureEndRunEncounterPayment(input, krash)!;

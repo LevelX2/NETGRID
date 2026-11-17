@@ -2137,7 +2137,7 @@
             "installPlacement": "root",
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "stealBlockedByCost": true,
             "targets": {
@@ -2609,7 +2609,7 @@
             "installPlacement": "root",
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "stealBlockedByCost": true,
             "targets": {
@@ -7322,7 +7322,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 163,
-      "sideSafePlanningFingerprint": "fnv1a:dbf8e13b"
+      "sideSafePlanningFingerprint": "fnv1a:1b1e86ab"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_prep_economy_pressure_2026_07_01_1.0.0",

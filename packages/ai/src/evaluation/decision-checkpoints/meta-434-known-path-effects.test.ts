@@ -33,7 +33,7 @@ it.each([37, 38, 40])(
     const { input } = checkpoint(11);
     input.playerView.own.credits = credits;
     const target = evaluateRunnerRunTargets({ input }).find(
-      (t) => t.actionId === "runner.start_run.remote_1",
+      (t) => t.actionId === "runner.start_run.r1",
     );
     // Neural Blade's next-ICE lock costs ten; its direct damage break adds
     // two when the whole path can fund it. Haunting costs twenty-eight.
@@ -56,15 +56,15 @@ it("uses the exact funded remote parent rather than searching for an already ins
   );
   const result = chooseAiAction(input);
   expect(result).toMatchObject({
-    actionId: "runner.start_run.remote_1",
+    actionId: "runner.start_run.r1",
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
         selectedStep: {
-          planInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          planInstanceId: "plan:runner.contest_remote:remote%3Ar1",
         },
         route: {
-          actionId: "runner.start_run.remote_1",
+          actionId: "runner.start_run.r1",
           stateVersion: input.playerView.stateVersion,
         },
       },
@@ -80,22 +80,22 @@ it("admits the exact terminal contest when the only remaining damage fits the cu
     runtime,
   );
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "runner.start_run.r1",
   );
   expect(target).toMatchObject({
     pathPassability: "reachable",
     routeQuote: { reachability: "guaranteed_access", fundingGap: 0 },
   });
   expect(chooseAiAction(input)).toMatchObject({
-    actionId: "runner.start_run.remote_1",
+    actionId: "runner.start_run.r1",
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
         selectedStep: {
-          planInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          planInstanceId: "plan:runner.contest_remote:remote%3Ar1",
         },
         route: {
-          actionId: "runner.start_run.remote_1",
+          actionId: "runner.start_run.r1",
           stateVersion: input.playerView.stateVersion,
         },
       },
@@ -107,7 +107,7 @@ it("does not certify damage-only access when the same known damage is lethal", (
   const { input } = checkpoint(6);
   input.playerView.own.gripOrHq = [];
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "runner.start_run.r1",
   );
   expect(target?.pathPassability).not.toBe("reachable");
   expect(target?.routeQuote?.reachability).toBe("no_access");
@@ -119,7 +119,7 @@ it("keeps actual missing coverage when the required breaker is absent", () => {
     (card) => card.definitionId !== 251,
   );
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "runner.start_run.r1",
   );
   expect(target?.pathPassability).toBe("blocked_missing_coverage");
   expect(target?.routeQuote?.reachability).toBe("no_access");

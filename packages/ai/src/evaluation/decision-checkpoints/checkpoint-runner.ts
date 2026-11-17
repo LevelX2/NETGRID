@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
   applyAction,
@@ -220,7 +221,7 @@ export function runAiDecisionCheckpoint(
                 item.startsWith("run_") ||
                 item.startsWith("visible_") ||
                 item.startsWith("known_") ||
-                item.startsWith("remote_") ||
+                isRemoteServerId(item) ||
                 item.startsWith("central_"),
             ),
           }))

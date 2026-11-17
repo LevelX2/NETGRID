@@ -4810,7 +4810,7 @@
           "publicRevealTitles": "Wall of Ice",
           "serverId": "archives",
           "archivesRevealCount": 1,
-          "archivesRevealDefinitionIds": 490,
+          "archivesRevealDefinitionIds": "490",
           "archivesRevealTitles": "Wall of Ice",
           "archivesRevealAgendaDefinitionIds": "",
           "redactedKind": "hidden_zone",
@@ -6158,7 +6158,7 @@
           "choiceId": "p3_34_advancement_distribution_126",
           "sourceDefinitionId": 512,
           "targetCount": 1,
-          "targetCardDefinitionIds": 432,
+          "targetCardDefinitionIds": "432",
           "targetCardDefinitionId": 432,
           "v1919OperationAbility": "add_advancement_counters",
           "targetCardId": "c2o6",
@@ -6170,7 +6170,7 @@
           "targets": {
             "sourceDefinitionId": 512,
             "targetCardDefinitionId": 432,
-            "targetCardDefinitionIds": 432,
+            "targetCardDefinitionIds": "432",
             "choiceVisibility": "public"
           },
           "visibility": {

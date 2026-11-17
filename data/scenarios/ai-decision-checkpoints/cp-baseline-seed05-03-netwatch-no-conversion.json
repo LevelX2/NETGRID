@@ -12161,7 +12161,7 @@
                   "cardDefinitionId": 287,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 287,
-                  "revealedCardDefinitionIds": 287,
+                  "revealedCardDefinitionIds": "287",
                   "revealedCount": 1
                 }
               }

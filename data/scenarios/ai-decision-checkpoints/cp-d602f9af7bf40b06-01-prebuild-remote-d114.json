@@ -4614,7 +4614,7 @@
             "installPlacement": "root",
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "abilityFamily": "agenda-scoring",
             "visibility": {
@@ -5768,7 +5768,7 @@
             "installPlacement": "root",
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "abilityFamily": "agenda-scoring",
             "visibility": {
@@ -8819,7 +8819,7 @@
           "installPlacement": "root",
           "stealCost": 2,
           "stealAdditionalCost": 2,
-          "stealCostSourceDefinitionIds": 62,
+          "stealCostSourceDefinitionIds": "62",
           "stealCostSourceTitles": "Fetal AI",
           "abilityFamily": "agenda-scoring",
           "visibility": {
@@ -11828,7 +11828,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 241,
-      "sideSafePlanningFingerprint": "fnv1a:1809c635"
+      "sideSafePlanningFingerprint": "fnv1a:5968afe9"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_dead_channel_1.1.0",

@@ -1,3 +1,6 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
+import { cardInstanceIdForCopy } from "../../../../engine/src/game/state/card-instance-id";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import jettison from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p745-g18-d72.json";
 import bypass from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p745-g31-d61.json";
 import search from "../../../../../data/scenarios/ai-decision-checkpoints/cp-p745-g39-d69.json";
@@ -20,7 +23,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 
 function decide(
   checkpoint: typeof jettison | typeof bypass | typeof search | typeof boundSearch,
-  event: string,
+  event: number,
   extraClick = false,
 ) {
   const input = structuredClone(
@@ -31,7 +34,7 @@ function decide(
   expect(input.playerView.own.clicks).toBe(1);
   if (extraClick) input.playerView.own.clicks += 1;
   const eventAction = input.legalActions.find(
-    (action) => action.type === "play_event" && action.actionId.includes(event),
+    (action) => action.type === "play_event" && referencesDefaultDeckCard(action.source, event),
   );
   expect(eventAction).toBeDefined();
   const actionId = eventAction!.actionId;
@@ -60,8 +63,8 @@ const protection = {
 };
 
 it.each([
-  ["ICE removal", jettison, "core-command-jettison-ice", "fnv1a:85b73d8a"],
-  ["bypass", bypass, "social-engineering", "fnv1a:1998f9b1"],
+  ["ICE removal", jettison, 292, "fnv1a:85b73d8a"],
+  ["bypass", bypass, 323, "fnv1a:1998f9b1"],
 ] as const)("keeps Grip over optional last-click %s", (label, cp, event, hash) => {
   expect(cp.stateHash).toBe(hash);
   const guarded = decide(cp, event);
@@ -100,7 +103,7 @@ it.each([
 
 it("keeps the Coverage rejection when a Grip-neutral search has no useful answer", () => {
   expect(search.stateHash).toBe("fnv1a:5f7140ae");
-  const guarded = decide(search, "mantis-fixer-at-large");
+  const guarded = decide(search, 311);
   expect(guarded.dispositions).toEqual([
     {
       actionId: guarded.actionId,
@@ -112,7 +115,7 @@ it("keeps the Coverage rejection when a Grip-neutral search has no useful answer
   expect(guarded.selectedActionId).toBe("runner.gain_credit");
 
   resetResidentPlanPortfolioMemory();
-  const canRefill = decide(search, "mantis-fixer-at-large", true);
+  const canRefill = decide(search, 311, true);
   expect(canRefill.dispositions).toEqual([
     {
       actionId: canRefill.actionId,
@@ -125,7 +128,7 @@ it("keeps the Coverage rejection when a Grip-neutral search has no useful answer
 
 it("executes a bound mandatory search that returns the spent card count to Grip", () => {
   expect(boundSearch.stateHash).toBe("fnv1a:afe9fa72");
-  const ready = decide(boundSearch, "mantis-fixer-at-large");
+  const ready = decide(boundSearch, 311);
   expect(ready.selectedActionId).toBe(ready.actionId);
   expect(ready.dispositions).toEqual([]);
   expect(ready.plan.rootPlanInstanceId).toBe("plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate");
@@ -133,12 +136,10 @@ it("executes a bound mandatory search that returns the spent card count to Grip"
     actionId: ready.actionId,
     stateVersion: boundSearch.input.playerView.stateVersion,
   });
-  expect(ready.plan.dispositions).toContainEqual(
-    expect.objectContaining({
-      ...protection,
-      actionId: expect.stringContaining("core-command-jettison-ice"),
-    }),
+  const guardedRemoval = ready.plan.dispositions.find((entry) =>
+    referencesDefaultDeckCard(entry.actionId, 292),
   );
+  expect(guardedRemoval).toMatchObject(protection);
 });
 
 it("credits the mandatory Grip return of an exact heap search on the final action", () => {
@@ -147,9 +148,9 @@ it("credits the mandatory Grip return of an exact heap search on the final actio
   ) as unknown as AiDecisionInputWithDeckCapabilities;
   const { playerView } = input;
   const definitionId = 301;
-  const instanceId = `runner_${definitionId}_1`;
-  const abilityKey = "abilities_on_play_search_trash_to_grip";
-  const abilityId = `${definitionId}:${abilityKey}`;
+  const instanceId = cardInstanceIdForCopy("runner", definitionId, 1);
+  const abilityKey = capabilityKey("abilities_on_play_search_trash_to_grip");
+  const abilityId = canonicalCapabilityId(definitionId, abilityKey);
   playerView.own.gripOrHq[0] = {
     ...playerView.own.gripOrHq[0]!,
     instanceId,

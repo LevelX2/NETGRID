@@ -47,7 +47,7 @@ it("funds current cumulative lethal damage mitigation even when the later access
     decisionDebug: {
       planFirstDecision: {
         rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_321",
+        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A321",
         route: {
           actionId: pump.actionId,
           stateVersion: input.playerView.stateVersion,

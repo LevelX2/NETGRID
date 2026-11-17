@@ -101,7 +101,7 @@ it("includes the known HQ agenda's self-cost before admitting access", () => {
 });
 it("quotes the complete native five-ICE path at nineteen credits, including a free Worm break", () => {
   const input = inputFor(g12),
-    server = input.playerView.servers.find((s) => s.id === "remote_1")!;
+    server = input.playerView.servers.find((s) => s.id === "r1")!;
   const path = assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig!,

@@ -26,7 +26,7 @@ describe("match B0B0 runner emergency discard checkpoint", () => {
     expect(applied.ok).toBe(true);
     if (!applied.ok) throw new Error("Native checkpoint discard was rejected");
     expect(applied.state.runner.grip).toContain(
-      "runner_290_1",
+      "c1sh",
     );
     expect(applied.state.runner.coreDamage).toBe(state.runner.coreDamage);
     expect(applied.state.runner.tags).toBe(state.runner.tags);

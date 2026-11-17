@@ -22652,7 +22652,7 @@
         },
         "targets": {
           "serverLabel": "HQ",
-          "spentAgendaDefinitionIds": 66
+          "spentAgendaDefinitionIds": "66"
         },
         "visibility": {
           "class": "hidden_info_barrier"
@@ -22689,7 +22689,7 @@
               "selfRezAdditionalCostKind": "agenda_point",
               "abilityFamily": "run-access",
               "agendaPointCostPaid": 1,
-              "spentAgendaDefinitionIds": 66
+              "spentAgendaDefinitionIds": "66"
             }
           }
         }
@@ -24434,7 +24434,7 @@
         },
         "targets": {
           "serverLabel": "R&D",
-          "spentAgendaDefinitionIds": 66
+          "spentAgendaDefinitionIds": "66"
         },
         "visibility": {
           "class": "hidden_info_barrier"
@@ -24471,7 +24471,7 @@
               "selfRezAdditionalCostKind": "agenda_point",
               "abilityFamily": "run-access",
               "agendaPointCostPaid": 1,
-              "spentAgendaDefinitionIds": 66
+              "spentAgendaDefinitionIds": "66"
             }
           }
         }
@@ -28116,7 +28116,7 @@
         "publicRevealTitles": "Crystal Palace Station Grid",
         "serverId": "archives",
         "archivesRevealCount": 1,
-        "archivesRevealDefinitionIds": 567,
+        "archivesRevealDefinitionIds": "567",
         "archivesRevealTitles": "Crystal Palace Station Grid",
         "archivesRevealAgendaDefinitionIds": "",
         "redactedKind": "hidden_zone",
@@ -28162,7 +28162,7 @@
               "hiddenZoneBarrier": true,
               "hiddenZoneAction": "archives_breach_reveal",
               "archivesRevealCount": 1,
-              "archivesRevealDefinitionIds": 567,
+              "archivesRevealDefinitionIds": "567",
               "archivesRevealTitles": "Crystal Palace Station Grid",
               "archivesRevealAgendaDefinitionIds": "",
               "publicRevealDefinitionIds": "567",
@@ -28814,7 +28814,7 @@
         "publicRevealTitles": "Dr. Dreff",
         "serverId": "archives",
         "archivesRevealCount": 1,
-        "archivesRevealDefinitionIds": 570,
+        "archivesRevealDefinitionIds": "570",
         "archivesRevealTitles": "Dr. Dreff",
         "archivesRevealAgendaDefinitionIds": "",
         "redactedKind": "hidden_zone",
@@ -28860,7 +28860,7 @@
               "hiddenZoneBarrier": true,
               "hiddenZoneAction": "archives_breach_reveal",
               "archivesRevealCount": 1,
-              "archivesRevealDefinitionIds": 570,
+              "archivesRevealDefinitionIds": "570",
               "archivesRevealTitles": "Dr. Dreff",
               "archivesRevealAgendaDefinitionIds": "",
               "publicRevealDefinitionIds": "570",
@@ -29775,7 +29775,7 @@
         "publicRevealTitles": "BBS Whispering Campaign",
         "serverId": "archives",
         "archivesRevealCount": 1,
-        "archivesRevealDefinitionIds": 521,
+        "archivesRevealDefinitionIds": "521",
         "archivesRevealTitles": "BBS Whispering Campaign",
         "archivesRevealAgendaDefinitionIds": "",
         "redactedKind": "hidden_zone",
@@ -29821,7 +29821,7 @@
               "hiddenZoneBarrier": true,
               "hiddenZoneAction": "archives_breach_reveal",
               "archivesRevealCount": 1,
-              "archivesRevealDefinitionIds": 521,
+              "archivesRevealDefinitionIds": "521",
               "archivesRevealTitles": "BBS Whispering Campaign",
               "archivesRevealAgendaDefinitionIds": "",
               "publicRevealDefinitionIds": "521",
@@ -32256,7 +32256,7 @@
         "publicRevealTitles": "Crystal Palace Station Grid",
         "serverId": "archives",
         "archivesRevealCount": 1,
-        "archivesRevealDefinitionIds": 567,
+        "archivesRevealDefinitionIds": "567",
         "archivesRevealTitles": "Crystal Palace Station Grid",
         "archivesRevealAgendaDefinitionIds": "",
         "redactedKind": "hidden_zone",
@@ -32302,7 +32302,7 @@
               "hiddenZoneBarrier": true,
               "hiddenZoneAction": "archives_breach_reveal",
               "archivesRevealCount": 1,
-              "archivesRevealDefinitionIds": 567,
+              "archivesRevealDefinitionIds": "567",
               "archivesRevealTitles": "Crystal Palace Station Grid",
               "archivesRevealAgendaDefinitionIds": "",
               "publicRevealDefinitionIds": "567",
@@ -33131,7 +33131,7 @@
         "publicRevealTitles": "BBS Whispering Campaign",
         "serverId": "archives",
         "archivesRevealCount": 1,
-        "archivesRevealDefinitionIds": 521,
+        "archivesRevealDefinitionIds": "521",
         "archivesRevealTitles": "BBS Whispering Campaign",
         "archivesRevealAgendaDefinitionIds": "",
         "redactedKind": "hidden_zone",
@@ -33177,7 +33177,7 @@
               "hiddenZoneBarrier": true,
               "hiddenZoneAction": "archives_breach_reveal",
               "archivesRevealCount": 1,
-              "archivesRevealDefinitionIds": 521,
+              "archivesRevealDefinitionIds": "521",
               "archivesRevealTitles": "BBS Whispering Campaign",
               "archivesRevealAgendaDefinitionIds": "",
               "publicRevealDefinitionIds": "521",
@@ -34162,7 +34162,7 @@
         "publicRevealTitles": "Wall of Static",
         "serverId": "archives",
         "archivesRevealCount": 1,
-        "archivesRevealDefinitionIds": 491,
+        "archivesRevealDefinitionIds": "491",
         "archivesRevealTitles": "Wall of Static",
         "archivesRevealAgendaDefinitionIds": "",
         "redactedKind": "hidden_zone",
@@ -34208,7 +34208,7 @@
               "hiddenZoneBarrier": true,
               "hiddenZoneAction": "archives_breach_reveal",
               "archivesRevealCount": 1,
-              "archivesRevealDefinitionIds": 491,
+              "archivesRevealDefinitionIds": "491",
               "archivesRevealTitles": "Wall of Static",
               "archivesRevealAgendaDefinitionIds": "",
               "publicRevealDefinitionIds": "491",

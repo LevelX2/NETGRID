@@ -45,7 +45,7 @@ function routeFor(input: AiDecisionInputWithDeckCapabilities, count: number) {
   const position = input.playerView.run?.position;
   if (!position || position.kind !== "ice")
     throw Error("Native ICE position required");
-  const sourceCard = input.playerView.servers.find((s) => s.id === "remote_1")!
+  const sourceCard = input.playerView.servers.find((s) => s.id === "r1")!
     .ice[position.iceIndex]!;
   const candidate = buildActionSemanticCandidates({
     cardSemanticProfilesByDefinitionId:
@@ -65,7 +65,7 @@ function routeFor(input: AiDecisionInputWithDeckCapabilities, count: number) {
     input,
     candidate,
     sourceCard,
-    targetServerId: "remote_1",
+    targetServerId: "r1",
   })!;
 }
 

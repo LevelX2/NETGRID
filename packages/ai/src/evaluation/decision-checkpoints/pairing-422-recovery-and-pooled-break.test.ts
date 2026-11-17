@@ -66,7 +66,7 @@ describe("pairing 422 recovery and pooled break checkpoints", () => {
             expect.objectContaining({
               actionId: decision.actionId,
               targetDefinitionId: 35,
-              targetCardInstanceId: "runner_35_1",
+              targetCardInstanceId: "c7t",
             }),
           ]),
         },
@@ -80,7 +80,7 @@ describe("pairing 422 recovery and pooled break checkpoints", () => {
     expect(action?.type).toBe("break_subroutine");
     expect(action?.payload).toMatchObject({
       subroutineIndex: 0,
-      iceId: "corp_449_1",
+      iceId: "c2rx",
     });
     expect(decision.fallbackUsed).toBe(false);
     expect(

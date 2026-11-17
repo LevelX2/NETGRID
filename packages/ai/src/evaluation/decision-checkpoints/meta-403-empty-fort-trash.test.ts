@@ -20,7 +20,7 @@ describe("meta 403 post-success fort sabotage", () => {
       const action = capture.input.legalActions.find(
         (entry) =>
           entry.abilityRef?.sourceAbilityId ===
-          "179:on_play_trash_last_run_fort_ice_add_tags",
+          242,
       )!;
       expect(action).toBeDefined();
       if (count !== "missing") {

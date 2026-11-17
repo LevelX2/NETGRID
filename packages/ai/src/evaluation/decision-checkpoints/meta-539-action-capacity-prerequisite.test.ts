@@ -59,7 +59,7 @@ it("publishes every agenda bound to the same actual action-capacity action", () 
   const first = candidates.find(
     (c) =>
       c.actionId ===
-      "corp.play_operation.corp_509_1.corp_509_1",
+      "corp.play_operation.c359.c359",
   )!;
   const expected = [
     ...new Set(
@@ -69,7 +69,7 @@ it("publishes every agenda bound to the same actual action-capacity action", () 
     ),
   ].sort();
   expect(expected.length).toBeGreaterThan(1);
-  expect(expected).toContain("corp_66_1");
+  expect(expected).toContain("cet");
   const projects = sameTurnScoreConversionProjectsForCandidate(
     input,
     first,

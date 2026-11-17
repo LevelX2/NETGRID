@@ -10,10 +10,10 @@ import {
 } from "../../plans/resident-plan-portfolio-memory";
 
 const rootId = "plan:runner.pressure_central:central%3Ard";
-const windowId = "plan:runner.convert_run_window:run%3Arun_164";
-const newTarget = "corp_490_1";
-const oldTarget = "corp_480_1";
-const sourceId = "runner_277_1";
+const windowId = "plan:runner.convert_run_window:run%3A164";
+const newTarget = "c311";
+const oldTarget = "c2yt";
+const sourceId = "c1pl";
 
 const checkpoints = {
   88: "cp-meta-736-r3-g24-d088.json",
@@ -82,7 +82,7 @@ describe("SP-469: a later approach window after a declined exposure", () => {
     expect(declined?.publicPayload.serverId).toBeUndefined();
     restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
     const selected = chooseAiAction(input);
-    const target = "corp_450_2";
+    const target = "c2s6";
     const expose = input.legalActions.find(
       (action) => action.payload?.approachIceExposeDecision === "expose",
     );
@@ -145,9 +145,9 @@ describe("SP-469: a later approach window after a declined exposure", () => {
 });
 
 describe("SP-469: nonterminal encounter and automatic movement", () => {
-  const runParent = "plan:runner.convert_run_window:run%3Arun_166";
+  const runParent = "plan:runner.convert_run_window:run%3A166";
   const pressureRoot = "plan:runner.pressure_central:central%3Ahq";
-  const target = "corp_434_1";
+  const target = "c2ol";
   beforeEach(resetResidentPlanPortfolioMemory);
 
   it("lets Smarteye expose the next ICE under the same run parent", () => {
@@ -220,8 +220,8 @@ describe("SP-469: nonterminal encounter and automatic movement", () => {
 
 describe("SP-469: an initial expose child directly under the pressure root", () => {
   const pressureRoot = "plan:runner.pressure_central:central%3Ahq";
-  const runParent = "plan:runner.convert_run_window:run%3Arun_83";
-  const target = "corp_449_3";
+  const runParent = "plan:runner.convert_run_window:run%3A83";
+  const target = "c2rz";
   beforeEach(resetResidentPlanPortfolioMemory);
 
   it("moves the next exact ICE window under the resident same-run parent", () => {
@@ -235,7 +235,7 @@ describe("SP-469: an initial expose child directly under the pressure root", () 
       .toMatchObject({
         moduleId: "runner.convert_run_window",
         parentInstanceId: pressureRoot,
-        target: { kind: "window", id: "run:run_83" },
+        target: { kind: "window", id: "run:83" },
       });
     restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
     const selected = chooseAiAction(input);

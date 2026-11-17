@@ -3456,7 +3456,7 @@
             "accessIndex": 0,
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "agendaPoints": 3,
             "totalAgendaPoints": 3,
@@ -3498,7 +3498,7 @@
                   "cardId": "cdx",
                   "stealCost": 2,
                   "stealAdditionalCost": 2,
-                  "stealCostSourceDefinitionIds": 62,
+                  "stealCostSourceDefinitionIds": "62",
                   "stealCostSourceTitles": "Fetal AI",
                   "abilityFamily": "agenda-scoring",
                   "serverId": "r1",
@@ -3811,7 +3811,7 @@
             "hiddenZoneBarrier": true,
             "hiddenZoneAction": "proteus_breaker_strength_penalty_access_counters",
             "choiceVisibility": "hidden_info_barrier",
-            "targetCardDefinitionIds": 251,
+            "targetCardDefinitionIds": "251",
             "targetCount": 1,
             "counterType": "pattel",
             "addedCounterAmount": 1,
@@ -3824,7 +3824,7 @@
               "corpCreditsAfter": 2
             },
             "targets": {
-              "targetCardDefinitionIds": 251,
+              "targetCardDefinitionIds": "251",
               "choiceVisibility": "hidden_info_barrier",
               "redactedKind": "hidden_zone"
             },
@@ -3900,7 +3900,7 @@
                   "counterType": "pattel",
                   "addedCounterAmount": 1,
                   "targetCount": 1,
-                  "targetCardDefinitionIds": 251
+                  "targetCardDefinitionIds": "251"
                 },
                 "resolvedEffects": [
                   {
@@ -4776,7 +4776,7 @@
             "accessIndex": 0,
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "agendaPoints": 3,
             "totalAgendaPoints": 6,
@@ -4818,7 +4818,7 @@
                   "cardId": "cdy",
                   "stealCost": 2,
                   "stealAdditionalCost": 2,
-                  "stealCostSourceDefinitionIds": 62,
+                  "stealCostSourceDefinitionIds": "62",
                   "stealCostSourceTitles": "Fetal AI",
                   "abilityFamily": "agenda-scoring",
                   "serverId": "r1",
@@ -10127,7 +10127,7 @@
             "publicRevealTitles": "Bel-Digmo Antibody",
             "serverId": "archives",
             "archivesRevealCount": 1,
-            "archivesRevealDefinitionIds": 112,
+            "archivesRevealDefinitionIds": "112",
             "archivesRevealTitles": "Bel-Digmo Antibody",
             "archivesRevealAgendaDefinitionIds": "",
             "redactedKind": "hidden_zone",
@@ -10187,7 +10187,7 @@
                   "hiddenZoneBarrier": true,
                   "hiddenZoneAction": "archives_breach_reveal",
                   "archivesRevealCount": 1,
-                  "archivesRevealDefinitionIds": 112,
+                  "archivesRevealDefinitionIds": "112",
                   "archivesRevealTitles": "Bel-Digmo Antibody",
                   "archivesRevealAgendaDefinitionIds": "",
                   "publicRevealDefinitionIds": "112",
@@ -10830,7 +10830,7 @@
           "installPlacement": "root",
           "stealCost": 2,
           "stealAdditionalCost": 2,
-          "stealCostSourceDefinitionIds": 62,
+          "stealCostSourceDefinitionIds": "62",
           "stealCostSourceTitles": "Fetal AI",
           "abilityFamily": "agenda-scoring",
           "visibility": {
@@ -11338,7 +11338,7 @@
           "installPlacement": "root",
           "stealCost": 2,
           "stealAdditionalCost": 2,
-          "stealCostSourceDefinitionIds": 62,
+          "stealCostSourceDefinitionIds": "62",
           "stealCostSourceTitles": "Fetal AI",
           "abilityFamily": "agenda-scoring",
           "visibility": {

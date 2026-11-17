@@ -56,8 +56,8 @@ it.each([5, 6])(
     expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_387",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A387",
       route: {
         actionId: action.actionId,
         stateVersion: input.playerView.stateVersion,
@@ -173,7 +173,7 @@ it("still admits optional damage protection when current breaks and the bound re
   expect(action.type).toBe("break_subroutine");
   expect(action.payload?.subroutineIndex).toBe(0);
   expect(decision.evidence).toContain(
-    "plan_first_root:plan:runner.contest_remote:remote%3Aremote_1",
+    "plan_first_root:plan:runner.contest_remote:remote%3Ar1",
   );
   expect(decision.fallbackUsed).toBe(false);
 });

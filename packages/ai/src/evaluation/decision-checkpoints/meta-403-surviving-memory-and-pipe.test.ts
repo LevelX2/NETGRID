@@ -102,17 +102,17 @@ describe("meta 403 surviving observations and persistent action denial", () => {
       reconstructBeliefState(
         input,
       ).runnerOpponentModel?.knownPositionMemory.filter(
-        (e) => e.zone === "remote_1" && e.positionKey.startsWith("root:"),
+        (e) => e.zone === "r1" && e.positionKey.startsWith("root:"),
       ),
     ).toEqual([
       expect.objectContaining({
         positionKey: "root:0",
         definitionId: 565,
-        sourceEventId: 375,
+          sourceEventId: 376,
       }),
     ]);
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(input, "r1"),
     ).toMatchObject({
       applies: true,
       suppressesPlanBonus: true,
@@ -131,7 +131,7 @@ describe("meta 403 surviving observations and persistent action denial", () => {
       reconstructBeliefState(
         input,
       ).runnerOpponentModel?.knownPositionMemory.filter(
-        (e) => e.zone === "remote_1" && e.positionKey.startsWith("root:"),
+        (e) => e.zone === "r1" && e.positionKey.startsWith("root:"),
       ),
     ).toEqual([
       expect.objectContaining({
@@ -143,16 +143,16 @@ describe("meta 403 surviving observations and persistent action denial", () => {
   it("does not let a remembered sibling answer a new unknown root", () => {
     const { input } = capture(memoryJson);
     const root = input.playerView.servers.find(
-      (s) => s.id === "remote_1",
+      (s) => s.id === "r1",
     )!.root;
     root.push({ ...root[0]!, instanceId: "new-unobserved-root" });
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(input, "r1"),
     ).toBeUndefined();
   });
   it("does not repeat the known declined remote after stealing its sibling", () => {
     const result = choose(memoryJson);
-    expect(result.actionId).not.toBe("runner.start_run.remote_1");
+    expect(result.actionId).not.toBe("runner.start_run.r1");
     const plan = result.decisionDebug?.planFirstDecision;
     expect(plan?.selectedStep?.planInstanceId).toBe(
       plan?.selectedPlan?.instanceId,

@@ -9420,7 +9420,7 @@
           "choiceId": "p3_34_advancement_distribution_216",
           "sourceDefinitionId": 516,
           "targetCount": 1,
-          "targetCardDefinitionIds": 418,
+          "targetCardDefinitionIds": "418",
           "targetCardDefinitionId": 418,
           "targetCardId": "c2l2",
           "addedAdvancementCounters": 2,
@@ -9431,7 +9431,7 @@
           "targets": {
             "sourceDefinitionId": 516,
             "targetCardDefinitionId": 418,
-            "targetCardDefinitionIds": 418,
+            "targetCardDefinitionIds": "418",
             "choiceVisibility": "public"
           },
           "visibility": {

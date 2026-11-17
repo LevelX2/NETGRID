@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -30,7 +31,7 @@ function checkpoint() {
 it("funds the exact last-chance contest while preserving all ten exit credits", () => {
   const { input, runtime } = checkpoint();
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "runner.start_run.r1",
   );
   expect(target).toMatchObject({
     pathPassability: "blocked_unpayable",
@@ -48,13 +49,13 @@ it("funds the exact last-chance contest while preserving all ten exit credits", 
     (a) => a.actionId === result.actionId,
   );
   expect(selected?.type).toBe("install_card");
-  expect(selected?.source).toContain("loan-from-chiba");
+  expect(selected?.source).toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 380));
   expect(result).toMatchObject({
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
         selectedStep: {
-          parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
         },
         route: {
           actionId: result.actionId,
@@ -83,6 +84,6 @@ it.each([
     const result = chooseAiAction(input);
     expect(
       input.legalActions.find((a) => a.actionId === result.actionId)?.source,
-    ).not.toContain("loan-from-chiba");
+    ).not.toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 380));
   },
 );

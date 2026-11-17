@@ -155,7 +155,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
           acceptablePlanKinds: ["runner.contest_remote"],
           acceptableCapabilities: ["contest_remote"],
           requiredAssessmentEvidence: [
-            "runner_targeted_ice_trash_preflight:remote_1:hidden_77be81d8",
+            "runner_targeted_ice_trash_preflight:r1:h32qnf",
           ],
         },
       };

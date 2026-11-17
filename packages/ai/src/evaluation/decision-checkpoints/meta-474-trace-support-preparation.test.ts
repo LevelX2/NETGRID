@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
@@ -61,7 +62,7 @@ it("consumes actual trace-credit effects and installs global support under the e
   )!;
   expect(action.type).toBe("install_card");
   expect(action.payload).toMatchObject({
-    cardId: "corp_537_1",
+    cardId: "c3bh",
     serverId: "new_remote",
   });
   expect(decision.fallbackUsed).toBe(false);
@@ -100,14 +101,14 @@ it("holds global support when no visible trace source remains", () => {
       (c) => !corpDefinitionIsTraceSource(c.definitionId),
     );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).not.toContain("hacker-tracker");
+  expect(referencesDefaultDeckCard(decision.actionId, 537)).toBe(false);
   expect(decision.fallbackUsed).toBe(false);
 });
 
 it("keeps canonical fort support bound to the fort containing the trace source", () => {
   const input = fixture();
   const sourceAction = input.legalActions.find((a) =>
-    a.actionId.includes("hacker-tracker"),
+    referencesDefaultDeckCard(a.actionId, 537),
   )!;
   const forServer = (serverId: string) =>
     buildActionSemanticCandidates({

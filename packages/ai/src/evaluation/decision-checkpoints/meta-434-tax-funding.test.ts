@@ -28,7 +28,7 @@ it.each([8, 9, 10, 11])(
     const input = structuredClone(checkpoint.input);
     input.playerView.own.credits = credits;
     const target = evaluateRunnerRunTargets({ input }).find(
-      (candidate) => candidate.actionId === "runner.start_run.remote_1",
+      (candidate) => candidate.actionId === "runner.start_run.r1",
     );
     // Wall of Static: six; Ball and Chain's tax: two; inner Data Wall: two.
     expect(target).toMatchObject({
@@ -54,13 +54,13 @@ it.each([
     if (loanAvailable && !bankAvailable) input.playerView.own.clicks = 2;
     if (!bankAvailable)
       input.legalActions = input.legalActions.filter(
-        (candidate) => !candidate.actionId.includes("withdraw_credits"),
+        (candidate) => candidate.payload?.cardImplementationAbilityId !== 441,
       );
     if (!loanAvailable)
       input.legalActions = input.legalActions.filter(
         (candidate) =>
           !candidate.actionId.includes(
-            "install_card.runner_onr_v1_168_loan-from-chiba",
+            "install_card.runner_380",
           ),
       );
     restoreAiRuntimeCheckpoint(
@@ -71,15 +71,15 @@ it.each([
     const action = input.legalActions.find((candidate) =>
       bankAvailable
         ? candidate.actionId ===
-          "runner.activated_card_ability.runner_366_1.runner_366_1.activated.onr_v1_154_broker:withdraw_credits"
+          "runner.activated_card_ability.c29d.c29d.activated.441"
         : loanAvailable
           ? candidate.actionId ===
-            "runner.install_card.runner_380_1.runner_380_1"
+            "runner.install_card.c2ch.c2ch"
           : candidate.actionId === "runner.gain_credit",
     )!;
     if (bankAvailable || loanAvailable) {
       const target = evaluateRunnerRunTargets({ input }).find(
-        (candidate) => candidate.actionId === "runner.start_run.remote_1",
+        (candidate) => candidate.actionId === "runner.start_run.r1",
       )!;
       expect(target.pathCost).toBe(10);
       expect(
@@ -92,11 +92,11 @@ it.each([
       decisionDebug: {
         planFirstDecision: {
           selectedStep: {
-            parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+            parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
             planInstanceId: bankAvailable
-              ? "plan:runner.credit_bank:runner_366_1"
-              : "plan:runner.economy:run-support%3Aremote%3Aremote_1",
-            needId: "run-support:remote:remote_1",
+              ? "plan:runner.credit_bank:c29d"
+              : "plan:runner.economy:run-support%3Aremote%3Ar1",
+            needId: "run-support:remote:r1",
           },
           route: {
             actionId: action.actionId,
@@ -112,7 +112,7 @@ it("preserves the native debt-free two-credit route when three clicks remain", (
   const { input, runtime } = structuredClone(checkpoint);
   bindPublicBoardStealQuoteCompanion(input);
   input.legalActions = input.legalActions.filter(
-    (candidate) => !candidate.actionId.includes("withdraw_credits"),
+    (candidate) => candidate.payload?.cardImplementationAbilityId !== 441,
   );
   restoreAiRuntimeCheckpoint(
     input,
@@ -125,7 +125,7 @@ it("preserves the native debt-free two-credit route when three clicks remain", (
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       },
     },
   });

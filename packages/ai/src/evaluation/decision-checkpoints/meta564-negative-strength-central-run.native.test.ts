@@ -79,7 +79,7 @@ it("funds the native negative-strength route before starting another known faile
   );
   expect(action).toMatchObject({
     type: "play_event",
-    source: "runner_182_2",
+    source: "c14i",
     expiresAtStateVersion: 328,
   });
   expect(decision.fallbackUsed).toBe(false);

@@ -3388,7 +3388,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -3729,7 +3729,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -4066,7 +4066,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -4491,7 +4491,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -6321,7 +6321,7 @@
           "corpMandatoryOptionalAgendaCardCount": 1,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 411,
+          "corpMandatoryAdditionalSourceDefinitionIds": "411",
           "visibility": {
             "class": "private_to_side"
           },
@@ -6662,7 +6662,7 @@
           "corpMandatoryOptionalAgendaCardCount": 1,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 411,
+          "corpMandatoryAdditionalSourceDefinitionIds": "411",
           "visibility": {
             "class": "private_to_side"
           },
@@ -6999,7 +6999,7 @@
           "corpMandatoryOptionalAgendaCardCount": 1,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 411,
+          "corpMandatoryAdditionalSourceDefinitionIds": "411",
           "visibility": {
             "class": "private_to_side"
           },
@@ -7424,7 +7424,7 @@
           "corpMandatoryOptionalAgendaCardCount": 1,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 411,
+          "corpMandatoryAdditionalSourceDefinitionIds": "411",
           "visibility": {
             "class": "private_to_side"
           },
@@ -8089,7 +8089,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 116,
-      "sideSafePlanningFingerprint": "fnv1a:7bf38631"
+      "sideSafePlanningFingerprint": "fnv1a:43889af9"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_dr_dreffs_letzte_visite_1.3.0",

@@ -34,7 +34,7 @@ it("uses the compiled breaker role when native affordable-coverage losses tie", 
       actionId: "corp.resolve_choice",
       selectedChoices: {
         choiceId: "trash_installed_program_104",
-        selectedOptionIds: ["card_runner_251_2"],
+        selectedOptionIds: ["card_c1ju"],
       },
       fallbackUsed: false,
       timeoutUsed: false,

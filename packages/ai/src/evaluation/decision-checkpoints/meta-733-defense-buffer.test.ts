@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { afterEach, expect, it } from "vitest";
 import game12 from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-733-g12-defense-buffer.json";
 import game13 from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-733-g13-defense-buffer.json";
@@ -21,7 +22,7 @@ it.each([game12, game13])(
     restoreAiRuntimeCheckpoint(input, deckSnapshotId, fixture.runtime as unknown as AiRuntimeCheckpointV1);
 
     const install = input.legalActions.find(
-      (action) => action.type === "install_card" && action.actionId.includes("phone-freak"),
+      (action) => action.type === "install_card" && referencesDefaultDeckCard(action.actionId, 58),
     );
     expect(install).toBeDefined();
     const decision = chooseAiAction(input);

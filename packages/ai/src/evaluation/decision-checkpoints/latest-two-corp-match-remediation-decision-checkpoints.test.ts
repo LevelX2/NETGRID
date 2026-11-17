@@ -31,7 +31,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["develop_score_protection"],
         requiredAssessmentEvidence: [
-          "score_plan_requires_effective_ice_draw:agenda:corp_415_1:remote_1:remote_1",
+          "score_plan_requires_effective_ice_draw:agenda:c2kd:r1:r1",
         ],
       };
     }
@@ -91,7 +91,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_577_1.remote_1.corp_577_1",
+              "corp.install_card.c3kd.r1.c3kd",
           },
         ],
         forbiddenActions: [{ type: "draw_card" }],
@@ -115,7 +115,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       state.runnerActionsPerTurnOverride = 1;
       state.corp.credits = 20;
       const remote = state.corp.servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       );
       if (!remote) throw new Error("Missing agenda-risk control remote");
       for (const server of state.corp.servers) {
@@ -137,14 +137,14 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_407_1.remote_1.corp_407_1",
+              "corp.install_card.c2il.r1.c2il",
           },
         ],
         planExecution: {
           acceptablePlanKinds: ["corp.score_agenda"],
           acceptableCapabilities: ["install_score_agenda"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_mature_remote_score_install:remote_1",
+            "corp_engine_certified_mature_remote_score_install:r1",
           ],
         },
         selectedScoreBreakdown: {
@@ -175,7 +175,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_448_1.rd.corp_448_1.0",
+              "corp.install_card.c2rp.rd.c2rp.0",
           },
         ],
         planExecution: {
@@ -215,14 +215,14 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_443_2.hq.corp_443_2.1",
+              "corp.install_card.c2qm.hq.c2qm.1",
           },
         ],
         planExecution: {
           acceptablePlanKinds: ["corp.defend_servers"],
           acceptableCapabilities: ["allocate_server_defense"],
           requiredAssessmentEvidence: [
-            "corp_terminal_central_additional_layer_staging:hq:corp.install_card.corp_443_2.hq.corp_443_2.1:rez_gap_2",
+            "corp_terminal_central_additional_layer_staging:hq:corp.install_card.c2qm.hq.c2qm.1:rez_gap_2",
           ],
         },
       };

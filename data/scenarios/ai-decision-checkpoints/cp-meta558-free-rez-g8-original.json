@@ -5624,7 +5624,7 @@
           "accessIndex": 0,
           "stealCost": 2,
           "stealAdditionalCost": 2,
-          "stealCostSourceDefinitionIds": 62,
+          "stealCostSourceDefinitionIds": "62",
           "stealCostSourceTitles": "Fetal AI",
           "agendaPoints": 3,
           "totalAgendaPoints": 3,
@@ -5665,7 +5665,7 @@
                 "cardId": "cdx",
                 "stealCost": 2,
                 "stealAdditionalCost": 2,
-                "stealCostSourceDefinitionIds": 62,
+                "stealCostSourceDefinitionIds": "62",
                 "stealCostSourceTitles": "Fetal AI",
                 "abilityFamily": "agenda-scoring",
                 "serverId": "hq",
@@ -9228,7 +9228,7 @@
                 "agendaInstallScoreHorizonQuoteReason": "not_completable_by_next_corp_turn",
                 "effectKind": "install_card",
                 "replacedRootCardIds": "c3fz",
-                "replacedRootDefinitionIds": 557,
+                "replacedRootDefinitionIds": "557",
                 "replacedRootCardType": "asset"
               }
             }
@@ -12841,7 +12841,7 @@
               "accessIndex": 0,
               "stealCost": 2,
               "stealAdditionalCost": 2,
-              "stealCostSourceDefinitionIds": 62,
+              "stealCostSourceDefinitionIds": "62",
               "stealCostSourceTitles": "Fetal AI",
               "abilityFamily": "agenda-scoring",
               "targets": {
@@ -15009,7 +15009,7 @@
             "accessIndex": 0,
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "abilityFamily": "agenda-scoring",
             "targets": {
@@ -17129,7 +17129,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 121,
-        "sideSafePlanningFingerprint": "fnv1a:599b9fd2"
+        "sideSafePlanningFingerprint": "fnv1a:7aaf5de2"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_corp_express_shutdown_1.0.0",

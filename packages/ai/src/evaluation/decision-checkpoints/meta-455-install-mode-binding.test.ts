@@ -39,7 +39,7 @@ it.each(["sentry", "wall", "code_gate"] as const)(
     );
     const modes = input.legalActions.filter(
       (action) =>
-        action.payload?.cardId === "runner_150_2",
+        action.payload?.cardId === "cxe",
     );
     expect(modes.length).toBe(6);
     for (const action of modes) {
@@ -62,7 +62,7 @@ it("projects the chosen Gate mode when valuing its known Quandary path", () => {
   const action = input.legalActions.find(
     (a) =>
       a.type === "install_card" &&
-      a.payload?.cardId === "runner_150_2" &&
+      a.payload?.cardId === "cxe" &&
       a.payload?.selectedSubtype === "code_gate" &&
       !a.payload.runnerProgramTrashBeforeInstall,
   )!;

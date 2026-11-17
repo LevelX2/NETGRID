@@ -92,7 +92,7 @@ describe("pairing 474: open Trace base strength is already funded", () => {
     expect(plan).toMatchObject({
       stateVersion: 249,
       lane: "engine_window",
-      rootPlanInstanceId: "run:run_239",
+      rootPlanInstanceId: "run:239",
       leafExecutorInstanceId: "rules.window_resolution",
       selectedStep: {
         planInstanceId: "rules.window_resolution",

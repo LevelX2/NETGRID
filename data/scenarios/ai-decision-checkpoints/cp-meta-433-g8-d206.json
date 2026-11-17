@@ -5258,7 +5258,7 @@
             "installedPositionKey": "installed-position-v1:aa9d64b7",
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "abilityFamily": "agenda-scoring",
             "effectKind": "gain_credits",
@@ -7715,7 +7715,7 @@
           "installedPositionKey": "installed-position-v1:aa9d64b7",
           "stealCost": 2,
           "stealAdditionalCost": 2,
-          "stealCostSourceDefinitionIds": 62,
+          "stealCostSourceDefinitionIds": "62",
           "stealCostSourceTitles": "Fetal AI",
           "abilityFamily": "agenda-scoring",
           "effectKind": "gain_credits",
@@ -9127,7 +9127,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 205,
-      "sideSafePlanningFingerprint": "fnv1a:1ecd98dd"
+      "sideSafePlanningFingerprint": "fnv1a:edafed4d"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",

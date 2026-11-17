@@ -7509,7 +7509,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 7,
+            "corpMandatoryAdditionalSourceDefinitionIds": "7",
             "visibility": {
               "class": "private_to_side"
             },
@@ -8016,7 +8016,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 7,
+            "corpMandatoryAdditionalSourceDefinitionIds": "7",
             "visibility": {
               "class": "private_to_side"
             },
@@ -9094,7 +9094,7 @@
             "iceInstallBaseCost": 0,
             "iceInstallAdditionalCost": 2,
             "iceInstallReduction": 2,
-            "iceInstallReductionSourceDefinitionIds": 385,
+            "iceInstallReductionSourceDefinitionIds": "385",
             "iceInstallTotalCost": 2,
             "postInstallRezQuoteCardId": "c3i",
             "postInstallRezQuoteTargetServerId": "archives",
@@ -9314,7 +9314,7 @@
             "iceInstallBaseCost": 0,
             "iceInstallAdditionalCost": 2,
             "iceInstallReduction": 2,
-            "iceInstallReductionSourceDefinitionIds": 385,
+            "iceInstallReductionSourceDefinitionIds": "385",
             "iceInstallTotalCost": 2,
             "postInstallRezQuoteCardId": "c2e",
             "postInstallRezQuoteTargetServerId": "archives",
@@ -9628,7 +9628,7 @@
             "iceInstallBaseCost": 0,
             "iceInstallAdditionalCost": 2,
             "iceInstallReduction": 2,
-            "iceInstallReductionSourceDefinitionIds": 385,
+            "iceInstallReductionSourceDefinitionIds": "385",
             "iceInstallTotalCost": 2,
             "postInstallRezQuoteCardId": "c3b",
             "postInstallRezQuoteTargetServerId": "archives",
@@ -10033,7 +10033,7 @@
             "iceInstallBaseCost": 0,
             "iceInstallAdditionalCost": 2,
             "iceInstallReduction": 2,
-            "iceInstallReductionSourceDefinitionIds": 385,
+            "iceInstallReductionSourceDefinitionIds": "385",
             "iceInstallTotalCost": 2,
             "postInstallRezQuoteCardId": "c4d",
             "postInstallRezQuoteTargetServerId": "archives",
@@ -10921,7 +10921,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 7,
+          "corpMandatoryAdditionalSourceDefinitionIds": "7",
           "visibility": {
             "class": "private_to_side"
           },
@@ -11428,7 +11428,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 7,
+          "corpMandatoryAdditionalSourceDefinitionIds": "7",
           "visibility": {
             "class": "private_to_side"
           },
@@ -12506,7 +12506,7 @@
           "iceInstallBaseCost": 0,
           "iceInstallAdditionalCost": 2,
           "iceInstallReduction": 2,
-          "iceInstallReductionSourceDefinitionIds": 385,
+          "iceInstallReductionSourceDefinitionIds": "385",
           "iceInstallTotalCost": 2,
           "postInstallRezQuoteCardId": "c3i",
           "postInstallRezQuoteTargetServerId": "archives",
@@ -12726,7 +12726,7 @@
           "iceInstallBaseCost": 0,
           "iceInstallAdditionalCost": 2,
           "iceInstallReduction": 2,
-          "iceInstallReductionSourceDefinitionIds": 385,
+          "iceInstallReductionSourceDefinitionIds": "385",
           "iceInstallTotalCost": 2,
           "postInstallRezQuoteCardId": "c2e",
           "postInstallRezQuoteTargetServerId": "archives",
@@ -13040,7 +13040,7 @@
           "iceInstallBaseCost": 0,
           "iceInstallAdditionalCost": 2,
           "iceInstallReduction": 2,
-          "iceInstallReductionSourceDefinitionIds": 385,
+          "iceInstallReductionSourceDefinitionIds": "385",
           "iceInstallTotalCost": 2,
           "postInstallRezQuoteCardId": "c3b",
           "postInstallRezQuoteTargetServerId": "archives",
@@ -13445,7 +13445,7 @@
           "iceInstallBaseCost": 0,
           "iceInstallAdditionalCost": 2,
           "iceInstallReduction": 2,
-          "iceInstallReductionSourceDefinitionIds": 385,
+          "iceInstallReductionSourceDefinitionIds": "385",
           "iceInstallTotalCost": 2,
           "postInstallRezQuoteCardId": "c4d",
           "postInstallRezQuoteTargetServerId": "archives",
@@ -13589,7 +13589,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 277,
-      "sideSafePlanningFingerprint": "fnv1a:f776054f"
+      "sideSafePlanningFingerprint": "fnv1a:8f6c768f"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_corp_remote_lab_deflection_2026_07_01_1.2.0",

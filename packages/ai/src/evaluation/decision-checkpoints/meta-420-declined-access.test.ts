@@ -29,15 +29,15 @@ describe("meta 420 declined access run ownership", () => {
     expect(
       input.legalActions.some((action) => action.actionId === result.actionId),
     ).toBe(true);
-    expect(result.actionId).not.toBe("runner.start_run.remote_1");
+    expect(result.actionId).not.toBe("runner.start_run.r1");
     const plan = result.decisionDebug!.planFirstDecision!;
     expect(plan.selectedStep!.planInstanceId).toBe(
       plan.selectedPlan!.instanceId,
     );
     expect(
       result.decisionDebug?.actionAlternatives
-        ?.find((action) => action.actionId === "runner.start_run.remote_1")
+        ?.find((action) => action.actionId === "runner.start_run.r1")
         ?.whyNot?.join(" "),
-    ).toContain("runner_remote_run_declined_trash_memory_active:remote_1");
+    ).toContain("runner_remote_run_declined_trash_memory_active:r1");
   });
 });

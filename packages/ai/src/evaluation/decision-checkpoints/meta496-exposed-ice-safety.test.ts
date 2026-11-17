@@ -45,7 +45,7 @@ describe("exposed ICE safety in the selected Run window (SP-520)", () => {
       effectivePostRezRunQuote: { complete: true },
     });
     expect(
-      dto.playerView.servers.find((s) => s.id === "remote_1")!.ice[0]!
+      dto.playerView.servers.find((s) => s.id === "r1")!.ice[0]!
         .effectivePostRezRunQuote,
     ).toBeUndefined();
   });
@@ -80,8 +80,8 @@ describe("exposed ICE safety in the selected Run window (SP-520)", () => {
     const selected = chooseAiAction(projected);
     expect(selected.actionId).toBe(input.legalActions[1]!.actionId);
     expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_104",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A104",
     });
     expect(
       selected.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes.join(
@@ -137,7 +137,7 @@ describe("exposed ICE safety in the selected Run window (SP-520)", () => {
   it("does not certify unfunded ICE safe while public during-run rez support is present", () => {
     const { input } = checkpoint();
     input.playerView.opponent.credits = 0;
-    input.playerView.servers.find((s) => s.id === "remote_1")!.statuses = [
+    input.playerView.servers.find((s) => s.id === "r1")!.statuses = [
       {
         id: "counterline_visible_rez_support",
         kind: "during_run_ice_rez_support",
@@ -145,7 +145,7 @@ describe("exposed ICE safety in the selected Run window (SP-520)", () => {
         costModel: "half_rez_cost_rounded_down",
         target: "unrezzed_ice_on_this_fort",
         limit: "once_per_run_per_source",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: "counterline_dreff",
         sourceTitle: "Dr. Dreff",
         sourceSide: "corp",

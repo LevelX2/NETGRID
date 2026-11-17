@@ -16247,7 +16247,7 @@
           "publicRevealTitles": "Day Shift",
           "serverId": "archives",
           "archivesRevealCount": 1,
-          "archivesRevealDefinitionIds": 500,
+          "archivesRevealDefinitionIds": "500",
           "archivesRevealTitles": "Day Shift",
           "archivesRevealAgendaDefinitionIds": "",
           "redactedKind": "hidden_zone",

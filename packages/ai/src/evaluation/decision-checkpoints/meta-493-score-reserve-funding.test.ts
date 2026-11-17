@@ -59,7 +59,7 @@ it("does not reserve an unaffordable central route after the native Runner prepa
   const cp = checkpoint(2);
   expect(corpFundedCentralProtectionReserve(cp.input)).toBe(0);
   expect(decide(cp).actionId).toBe(
-    "corp.advance_card.corp_405_1.corp_405_1",
+    "corp.advance_card.c2i5.c2i5",
   );
 });
 it("funds the installed same-turn score and funded central reserve jointly under the same Score parent", () => {
@@ -70,7 +70,7 @@ it("funds the installed same-turn score and funded central reserve jointly under
   const p = r.decisionDebug!.planFirstDecision!;
   expect(p.selectedPlan?.moduleId).toBe("corp.economy");
   expect(p.rootPlanInstanceId).toContain(
-    "plan:corp.score_agenda:agenda%3Acorp_405_1%3Aremote_1",
+    "plan:corp.score_agenda:agenda%3Ac2i5%3Ar1",
   );
   expect(p.selectedStep?.planInstanceId).toBe(p.leafExecutorInstanceId);
 });
@@ -79,7 +79,7 @@ it("keeps the current advance when the entire score already leaves the funded re
   cp.input.playerView.own.credits = 7;
   const r = decide(cp);
   expect(r.actionId).toBe(
-    "corp.advance_card.corp_405_1.corp_405_1",
+    "corp.advance_card.c2i5.c2i5",
   );
   expect(r.decisionDebug!.planFirstDecision!.selectedPlan?.moduleId).toBe(
     "corp.score_agenda",
@@ -107,7 +107,7 @@ it("keeps the terminal own score ahead of the joint reserve funding", () => {
   cp.input.playerView.own.agendaPoints = 5;
   const r = decide(cp);
   expect(r.actionId).toBe(
-    "corp.advance_card.corp_405_1.corp_405_1",
+    "corp.advance_card.c2i5.c2i5",
   );
   expect(r.decisionDebug!.planFirstDecision!.priority?.effectiveClass).toBe(
     "P1",
@@ -129,11 +129,11 @@ it.each(["missing", "stale", "zero_click"] as const)(
       else basic.costs = [{ clicks: 0 }];
     }
     const signal: CorpScoreProjectSignal = {
-      projectId: "agenda:corp_405_1:remote_1",
+      projectId: "agenda:c2i5:r1",
       agendaDefinitionId: 405,
-      agendaInstanceId: "corp_405_1",
+      agendaInstanceId: "c2i5",
       agendaPoints: 2,
-      serverId: "remote_1",
+      serverId: "r1",
       phase: "advance_agenda",
       feasible: true,
       terminalScore: false,

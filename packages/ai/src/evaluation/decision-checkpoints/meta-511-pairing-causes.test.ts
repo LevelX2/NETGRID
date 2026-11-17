@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -91,7 +92,7 @@ it("SP-565 admits the original free ETR when every paid continuation is inadmiss
     "plan:runner.pressure_central:central%3Ahq",
   );
   expect(r.pf.leafExecutorInstanceId).toBe(
-    "plan:runner.convert_run_window:run%3Arun_163",
+    "plan:runner.convert_run_window:run%3A163",
   );
   const state = applySelected(r);
   expect(state.run).toBeUndefined();
@@ -134,12 +135,12 @@ it("SP-566 allows cash conversion when it preserves the known buffer", () => {
     state.cardInstances[card]!.zone = { side: "runner", zone: "grip" };
   });
   expect(r.input.playerView.own.gripOrHq).toHaveLength(5);
-  expect(r.decision.actionId).toContain("livewires-contacts");
+  expect(r.decision.actionId).toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 309));
   expect(applySelected(r).runner.grip).toHaveLength(4);
 });
 it("SP-566 preserves the buffer after the original Stakeout draw without resetting turn memory", () => {
   const first = decisionAt("g16d28");
-  expect(first.decision.actionId).toContain("stakeout");
+  expect(referencesDefaultDeckCard(first.decision.actionId, 182)).toBe(true);
   const state = applySelected(first);
   const cp = load("g16d29", "native");
   expect(hashGameState(state)).toBe(cp.stateHash);
@@ -173,7 +174,7 @@ it("SP-566 preserves the buffer after the original Stakeout draw without resetti
 });
 it("SP-564 selects the native guaranteed Chance punish route above printed Trace 5", () => {
   const r = decisionAt("g12d79");
-  expect(r.decision.actionId).toContain("chance-observation_3");
+  expect(r.decision.actionId).toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 496, 3));
   expect(r.pf.selectedPlan?.moduleId).toBe("corp.execute_punish_sequence");
   const state = applySelected(r);
   expect(state.pendingChoice?.kind).toBe("bid_amount");

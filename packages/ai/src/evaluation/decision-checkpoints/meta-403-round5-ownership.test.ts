@@ -85,7 +85,7 @@ describe("meta 403 round 5 exact owner regressions", () => {
       input.playerView.pendingChoice?.choiceId,
     );
     expect(result.selectedChoices?.selectedOptionIds).not.toContain(
-      "card_runner_186_1",
+      "card_c15d",
     );
     expect(result.selectedChoices?.selectedOptionIds).toHaveLength(1);
     const selectedOptionIds = result.selectedChoices
@@ -103,7 +103,7 @@ describe("meta 403 round 5 exact owner regressions", () => {
     expect(selected.payload?.subroutineIndex).toBe(0);
     expect(plan?.selectedPlan?.moduleId).toBe("runner.convert_run_window");
     expect(plan?.leafExecutorInstanceId).toBe(
-      "plan:runner.convert_run_window:run%3Arun_29",
+      "plan:runner.convert_run_window:run%3A29",
     );
   });
 

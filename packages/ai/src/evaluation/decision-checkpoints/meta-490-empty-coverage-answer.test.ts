@@ -14,9 +14,13 @@ import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 
 afterEach(resetResidentPlanPortfolioMemory);
 
-it.each(["g25-d46", "g38-d208"])(
-  "binds current coverage or known central funding in native %s",
-  (name) => {
+it.each([
+  { name: "g25-d46", onlyHq: false },
+  { name: "g25-d46", onlyHq: true },
+  { name: "g38-d208", onlyHq: false },
+])(
+  "binds coverage or HQ funding in $name with only HQ offered=$onlyHq",
+  ({ name, onlyHq }) => {
     const fixture = JSON.parse(
       readFileSync(
         new URL(`fixtures/meta490-${name}.json`, import.meta.url),
@@ -32,9 +36,17 @@ it.each(["g25-d46", "g38-d208"])(
       ...buildAiDecisionInputDto(fixture.input),
     } as AiDecisionInput;
     bindPublicBoardStealQuoteCompanion(input);
+    if (onlyHq) {
+      // Isolate the certified HQ need from the other current run offers.
+      input.legalActions = input.legalActions.filter(
+        (action) => action.payload?.serverId !== "rd" &&
+          action.payload?.serverId !== "archives",
+      );
+      input.playerView.legalActions = input.legalActions;
+    }
     if (name === "g38-d208") {
       const target = evaluateRunnerRunTargets({ input }).find(
-        (entry) => entry.actionId === "runner.start_run.remote_1",
+        (entry) => entry.actionId === "runner.start_run.r1",
       )!;
       expect(target).toMatchObject({
         pathPassability: "blocked_unpayable",
@@ -43,7 +55,7 @@ it.each(["g25-d46", "g38-d208"])(
       });
       const unquoted = structuredClone(input);
       delete unquoted.playerView.servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       )!.runnerAgendaStealCostQuote;
       expect(
         evaluateRunnerRunTargets({ input: unquoted }).find(
@@ -64,7 +76,7 @@ it.each(["g25-d46", "g38-d208"])(
 
     const decision = chooseAiAction(input);
     expect(decision.fallbackUsed).toBe(false);
-    if (name === "g25-d46") {
+    if (onlyHq) {
       expect(decision.actionId).toBe("runner.gain_credit");
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
         rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",

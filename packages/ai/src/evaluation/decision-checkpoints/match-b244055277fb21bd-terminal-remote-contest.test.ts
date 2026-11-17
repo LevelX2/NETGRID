@@ -19,14 +19,14 @@ describe("match b244055277fb21bd terminal remote contest", () => {
       capture.runtime,
     );
     const target = evaluateRunnerRunTargets({ input: capture.input }).find(
-      (t) => t.targetServerId === "remote_1",
+      (t) => t.targetServerId === "r1",
     );
     expect(target?.prerunReserveQuote).toMatchObject({
       status: "blocked",
     });
     expect(target?.prerunReserveQuote?.creditGap).toBeGreaterThan(0);
     const decision = chooseAiAction(capture.input);
-    expect(decision.actionId).not.toBe("runner.start_run.remote_1");
+    expect(decision.actionId).not.toBe("runner.start_run.r1");
     expect(
       capture.input.legalActions.some(
         (action) => action.actionId === decision.actionId,
@@ -38,7 +38,7 @@ describe("match b244055277fb21bd terminal remote contest", () => {
     const capture = currentRemoteReserveFixture(31, false);
     expect(
       evaluateRunnerRunTargets({ input: capture.input }).find(
-        (t) => t.targetServerId === "remote_1",
+        (t) => t.targetServerId === "r1",
       )?.prerunReserveQuote?.creditGap,
     ).toBe(0);
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -48,12 +48,12 @@ describe("match b244055277fb21bd terminal remote contest", () => {
 
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
-    expect(decision.actionId).toBe("runner.start_run.remote_1");
+    expect(decision.actionId).toBe("runner.start_run.r1");
     expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_step_capability:contest_remote",
-        "plan_assessment_evidence:runner_terminal_remote_contest_mandatory:remote_1:runner.start_run.remote_1",
+        "plan_assessment_evidence:runner_terminal_remote_contest_mandatory:r1:runner.start_run.r1",
       ]),
     );
     expect(decision.evidence).not.toEqual(
@@ -62,7 +62,7 @@ describe("match b244055277fb21bd terminal remote contest", () => {
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan,
     ).toMatchObject({
-      instanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      instanceId: "plan:runner.contest_remote:remote%3Ar1",
       moduleId: "runner.contest_remote",
     });
     expect(
@@ -70,7 +70,7 @@ describe("match b244055277fb21bd terminal remote contest", () => {
         0,
       ),
     ).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       rootModuleId: "runner.contest_remote",
       nodes: [{ semanticActionType: "run.start" }],
     });

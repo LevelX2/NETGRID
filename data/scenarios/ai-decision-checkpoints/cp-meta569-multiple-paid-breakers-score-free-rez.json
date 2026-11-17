@@ -26206,9 +26206,9 @@
           "sourceDefinitionId": 41,
           "creditGainBaseAmount": 9,
           "creditGainBonusAmount": 1,
-          "creditGainModifierSourceDefinitionIds": 49,
+          "creditGainModifierSourceDefinitionIds": "49",
           "firstPrepCreditGainBonus": 1,
-          "firstPrepCreditGainBonusSourceDefinitionIds": 49,
+          "firstPrepCreditGainBonusSourceDefinitionIds": "49",
           "randomDiceLoopRolls": "1,3,5",
           "randomDiceLoopRolledDice": 3,
           "randomDiceLoopComplete": true,
@@ -26266,9 +26266,9 @@
                 "gainedCredits": 10,
                 "creditGainBaseAmount": 9,
                 "creditGainBonusAmount": 1,
-                "creditGainModifierSourceDefinitionIds": 49,
+                "creditGainModifierSourceDefinitionIds": "49",
                 "firstPrepCreditGainBonus": 1,
-                "firstPrepCreditGainBonusSourceDefinitionIds": 49,
+                "firstPrepCreditGainBonusSourceDefinitionIds": "49",
                 "randomCounterAfter": 108
               }
             }

@@ -127,10 +127,10 @@ it.each([2, 3])(
         abilityRef: {
           sourceCardInstanceId: breaker.instanceId,
           sourceAbilityId:
-            "35:break_any_subroutine_and_trash_after_run",
+            48,
         },
         effectRef:
-          "effect.onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
+          "effect.48",
         payload: {
           breakerId: breaker.instanceId,
           iceId: input.playerView.run!.encounteredIce!.instanceId,
@@ -138,7 +138,7 @@ it.each([2, 3])(
           cardId: breaker.instanceId,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "35:break_any_subroutine_and_trash_after_run",
+            48,
           cardImplementationAbilityKey:
             "break_any_subroutine_and_trash_after_run",
         },

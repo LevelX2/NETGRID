@@ -82,7 +82,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 it("retains the native unused universal source at equal complete current path cost", () => {
   const d = decide("g8d112");
   expect(d.actionId).toBe(
-    "runner.pump_breaker.runner_31_2.runner_31_2.runner_31_2.corp_457_2.onr_classic_027_early-worm:pump_strength_three",
+    "runner.pump_breaker.c6y.c6y.c6y.c2tq.41",
   );
   const selected = economics(d.input, d.actionId);
   const rent = economics(d.input, load("g8d112-before").decision.actionId);
@@ -156,8 +156,8 @@ it("does not count preservation when actual visible inner Gate coverage still co
   const state = load("g8d112-engine") as GameState;
   const hq = state.corp.servers.find((s) => s.id === "hq")!;
   const rd = state.corp.servers.find((s) => s.id === "rd")!;
-  const gate = "corp_97_2",
-    snow = "corp_96_3";
+  const gate = "clq",
+    snow = "clj";
   expect(hq.ice[1]).toBe(gate);
   expect(rd.ice[0]).toBe(snow);
   hq.ice[1] = snow;
@@ -178,12 +178,12 @@ it("does not count preservation when actual visible inner Gate coverage still co
   const early = input.legalActions.find(
     (a: { type: string; source: string }) =>
       a.type === "pump_breaker" &&
-      a.source === "runner_31_2",
+      a.source === "c6y",
   )!;
   const rent = input.legalActions.find(
     (a: { type: string; source: string }) =>
       a.type === "pump_breaker" &&
-      a.source === "runner_35_2",
+      a.source === "c7u",
   )!;
   expect(economics(input, early.actionId).newRunEndTrashSourceCount).toBe(1);
   expect(economics(input, rent.actionId).newRunEndTrashSourceCount).toBe(1);
@@ -256,13 +256,13 @@ it("requires exact offered open continuation payment and rejects an unknown inne
     ).toBeUndefined();
   }
   const state = load("g8d112-engine") as GameState;
-  state.cardInstances["corp_96_3"]!.rezzed = false;
-  state.cardInstances["corp_96_3"]!.faceup = false;
+  state.cardInstances["clj"]!.rezzed = false;
+  state.cardInstances["clj"]!.faceup = false;
   const unknown = engineInput("g8d112", state).input;
   const early = unknown.legalActions.find(
     (a: { type: string; source: string }) =>
       a.type === "pump_breaker" &&
-      a.source === "runner_31_2",
+      a.source === "c6y",
   )!;
   const payment = pureEndRunEncounterPayment(unknown, early);
   expect(payment).toBeDefined();

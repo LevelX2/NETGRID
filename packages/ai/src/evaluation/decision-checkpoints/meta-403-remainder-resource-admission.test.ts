@@ -18,9 +18,9 @@ it.each([
     checkpoint: purgeCheckpoint as unknown,
     stateVersion: 232,
     actionId:
-      "corp.advance_card.corp_421_1.corp_421_1",
-    leaf: "plan:corp.score_agenda:agenda%3Acorp_421_1%3Aremote_1",
-    root: "plan:corp.score_agenda:agenda%3Acorp_421_1%3Aremote_1",
+      "corp.advance_card.c2lp.c2lp",
+    leaf: "plan:corp.score_agenda:agenda%3Ac2lp%3Ar1",
+    root: "plan:corp.score_agenda:agenda%3Ac2lp%3Ar1",
     semanticActionType: "score.advance_card",
     step: "advance_agenda",
     capability: "advance_score_agenda",
@@ -30,9 +30,9 @@ it.each([
     checkpoint: creditCheckpoint as unknown,
     stateVersion: 152,
     actionId:
-      "corp.play_operation.corp_493_2.corp_493_2.onr_v1_281_accounts-receivable:abilities_on_play_gain_credits",
-    leaf: "plan:corp.economy:score-support%3Aagenda%3Acorp_414_2%3Aremote_1",
-    root: "plan:corp.score_agenda:agenda%3Acorp_414_2%3Aremote_1",
+      "corp.play_operation.c31q.c31q.607",
+    leaf: "plan:corp.economy:score-support%3Aagenda%3Ac2k6%3Ar1",
+    root: "plan:corp.score_agenda:agenda%3Ac2k6%3Ar1",
     semanticActionType: "economy.gain_credit",
     step: "fund",
     capability: "develop_or_convert_corp_economy",
@@ -106,7 +106,7 @@ it.each([
       expect(fundingTarget(root)).toBe(12);
       expect(
         fundingTarget(
-          "plan:corp.score_agenda:agenda%3Acorp_421_1%3Aremote_1",
+          "plan:corp.score_agenda:agenda%3Ac2lp%3Ar1",
         ),
       ).toBe(13);
     }

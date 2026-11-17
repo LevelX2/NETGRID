@@ -5281,7 +5281,7 @@
         "runnerInstallHostedCreditsPaid": 2,
         "runnerInstallRecurringCreditsPaid": 0,
         "runnerInstallTemporaryCreditsPaid": 0,
-        "runnerInstallPaymentSourceDefinitionIds": 287,
+        "runnerInstallPaymentSourceDefinitionIds": "287",
         "runnerCreditsAfter": 4,
         "effectKind": "install_card",
         "amounts": {
@@ -5324,7 +5324,7 @@
               "runnerInstallPaymentSourceAmounts": "2",
               "runnerInstallPaymentHostedCredits": 2,
               "runnerInstallPaymentLabel": "Mit Zetatech Software Installer: 2 Bits",
-              "runnerInstallPaymentSourceDefinitionIds": 287,
+              "runnerInstallPaymentSourceDefinitionIds": "287",
               "installCostPaid": 2,
               "runnerInstallNormalCreditsPaid": 0,
               "runnerInstallHostedCreditsPaid": 2,
@@ -12496,7 +12496,7 @@
         "accessTrashBaseCost": 1,
         "accessTrashCostModifier": 0,
         "accessTrashTotalCost": 1,
-        "stealCostSourceDefinitionIds": 578,
+        "stealCostSourceDefinitionIds": "578",
         "stealCostSourceTitles": "Red Herrings",
         "stealCostPersistedForCurrentAccess": true,
         "runPhase": "access",
@@ -12545,7 +12545,7 @@
               "effectKind": "trash_card",
               "serverId": "rd",
               "stealCostPersistedForCurrentAccess": true,
-              "stealCostSourceDefinitionIds": 578,
+              "stealCostSourceDefinitionIds": "578",
               "stealCostSourceTitles": "Red Herrings",
               "breachId": "131.breach",
               "accessIndex": 0,
@@ -12713,7 +12713,7 @@
         "accessIndex": 2,
         "stealCost": 5,
         "stealAdditionalCost": 5,
-        "stealCostSourceDefinitionIds": 578,
+        "stealCostSourceDefinitionIds": "578",
         "stealCostSourceTitles": "Red Herrings",
         "stealCostPersistedForCurrentAccess": true,
         "counterType": "thought",
@@ -12772,7 +12772,7 @@
               "cardId": "c2jh",
               "stealCost": 5,
               "stealAdditionalCost": 5,
-              "stealCostSourceDefinitionIds": 578,
+              "stealCostSourceDefinitionIds": "578",
               "stealCostSourceTitles": "Red Herrings",
               "stealCostPersistedForCurrentAccess": true,
               "abilityFamily": "agenda-scoring",
@@ -16767,7 +16767,7 @@
         },
         "targets": {
           "serverLabel": "Remote 1",
-          "spentAgendaDefinitionIds": 411
+          "spentAgendaDefinitionIds": "411"
         },
         "visibility": {
           "class": "hidden_info_barrier"
@@ -16804,7 +16804,7 @@
               "selfRezAdditionalCostKind": "agenda_point",
               "abilityFamily": "run-access",
               "agendaPointCostPaid": 1,
-              "spentAgendaDefinitionIds": 411
+              "spentAgendaDefinitionIds": "411"
             }
           }
         }
@@ -17935,7 +17935,7 @@
         "runnerInstallHostedCreditsPaid": 2,
         "runnerInstallRecurringCreditsPaid": 0,
         "runnerInstallTemporaryCreditsPaid": 0,
-        "runnerInstallPaymentSourceDefinitionIds": 287,
+        "runnerInstallPaymentSourceDefinitionIds": "287",
         "runnerCreditsAfter": 12,
         "effectKind": "install_card",
         "amounts": {
@@ -17978,7 +17978,7 @@
               "runnerInstallPaymentSourceAmounts": "2",
               "runnerInstallPaymentHostedCredits": 2,
               "runnerInstallPaymentLabel": "Mit Zetatech Software Installer: 2 Bits",
-              "runnerInstallPaymentSourceDefinitionIds": 287,
+              "runnerInstallPaymentSourceDefinitionIds": "287",
               "installCostPaid": 4,
               "runnerInstallNormalCreditsPaid": 2,
               "runnerInstallHostedCreditsPaid": 2,

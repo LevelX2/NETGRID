@@ -691,7 +691,7 @@
             "temporaryDerezAfterRun": true,
             "rezCostPaid": 0,
             "rezCostReductionAmount": 1,
-            "rezCostReductionSourceDefinitionIds": 575,
+            "rezCostReductionSourceDefinitionIds": "575",
             "abilityFamily": "run-access",
             "cardId": "c2rz"
           }
@@ -1045,7 +1045,7 @@
           "temporaryDerezAfterRun": true,
           "rezCostPaid": 0,
           "rezCostReductionAmount": 1,
-          "rezCostReductionSourceDefinitionIds": 575,
+          "rezCostReductionSourceDefinitionIds": "575",
           "abilityFamily": "run-access",
           "cardId": "c2rz"
         }
@@ -1105,7 +1105,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 9,
-      "sideSafePlanningFingerprint": "fnv1a:58641a48"
+      "sideSafePlanningFingerprint": "fnv1a:781b2bda"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_siren_fortress_1.1.0",

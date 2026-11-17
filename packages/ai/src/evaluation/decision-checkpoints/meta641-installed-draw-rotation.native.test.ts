@@ -34,7 +34,7 @@ it("uses an installed single-card draw for the native full-hand rotation", () =>
   );
   const before = JSON.stringify(input.playerView);
   const action = input.legalActions.find(
-    (a) => a.payload?.cardId === "runner_391_1",
+    (a) => a.payload?.cardId === "c2ex",
   );
   expect(action).toBeDefined();
   const decision = chooseAiAction(input);

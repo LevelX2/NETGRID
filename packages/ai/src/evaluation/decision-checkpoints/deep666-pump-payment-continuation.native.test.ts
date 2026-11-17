@@ -61,7 +61,7 @@ it("finishes the already bound native pump payment under its original run owner"
     "plan:runner.pressure_central:central%3Ahq",
   );
   expect(plan.leafExecutorInstanceId).toBe(
-    "plan:runner.convert_run_window:run%3Arun_107",
+    "plan:runner.convert_run_window:run%3A107",
   );
   expect(plan.lane).toBe("engine_window");
   expect(plan.engineWindowAction).toMatchObject({

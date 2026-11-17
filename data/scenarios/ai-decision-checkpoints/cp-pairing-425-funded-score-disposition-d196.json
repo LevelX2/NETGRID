@@ -6520,7 +6520,7 @@
             "iceInstallBaseCost": 0,
             "iceInstallAdditionalCost": 2,
             "iceInstallReduction": 2,
-            "iceInstallReductionSourceDefinitionIds": 385,
+            "iceInstallReductionSourceDefinitionIds": "385",
             "iceInstallTotalCost": 2,
             "postInstallRezQuoteCardId": "chp",
             "postInstallRezQuoteTargetServerId": "archives",
@@ -8864,7 +8864,7 @@
           "iceInstallBaseCost": 0,
           "iceInstallAdditionalCost": 2,
           "iceInstallReduction": 2,
-          "iceInstallReductionSourceDefinitionIds": 385,
+          "iceInstallReductionSourceDefinitionIds": "385",
           "iceInstallTotalCost": 2,
           "postInstallRezQuoteCardId": "chp",
           "postInstallRezQuoteTargetServerId": "archives",
@@ -9021,7 +9021,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 195,
-      "sideSafePlanningFingerprint": "fnv1a:4a46f802"
+      "sideSafePlanningFingerprint": "fnv1a:64ebd386"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_mr96xg94_1.2.0",

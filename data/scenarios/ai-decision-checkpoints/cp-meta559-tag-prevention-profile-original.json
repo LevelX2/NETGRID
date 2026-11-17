@@ -3616,7 +3616,7 @@
           "accessIndex": 0,
           "stealCost": 2,
           "stealAdditionalCost": 2,
-          "stealCostSourceDefinitionIds": 62,
+          "stealCostSourceDefinitionIds": "62",
           "stealCostSourceTitles": "Fetal AI",
           "agendaPoints": 3,
           "totalAgendaPoints": 3,
@@ -3657,7 +3657,7 @@
                 "cardId": "cdx",
                 "stealCost": 2,
                 "stealAdditionalCost": 2,
-                "stealCostSourceDefinitionIds": 62,
+                "stealCostSourceDefinitionIds": "62",
                 "stealCostSourceTitles": "Fetal AI",
                 "abilityFamily": "agenda-scoring",
                 "serverId": "rd",
@@ -20084,7 +20084,7 @@
               "accessIndex": 0,
               "stealCost": 2,
               "stealAdditionalCost": 2,
-              "stealCostSourceDefinitionIds": 62,
+              "stealCostSourceDefinitionIds": "62",
               "stealCostSourceTitles": "Fetal AI",
               "abilityFamily": "agenda-scoring",
               "targets": {
@@ -29236,7 +29236,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 223,
-        "sideSafePlanningFingerprint": "fnv1a:857aef10"
+        "sideSafePlanningFingerprint": "fnv1a:16ec7b3c"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_runner_inside_forgery_loop_1.0.0",

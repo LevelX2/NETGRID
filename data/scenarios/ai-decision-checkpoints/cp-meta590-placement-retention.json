@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "corp",
   "stateVersion": 255,
-  "stateHash": "fnv1a:7cb020bb",
+  "stateHash": "fnv1a:3175f8d4",
   "input": {
     "matchId": "match_1e18b1352132ecf0",
     "side": "corp",
@@ -29899,7 +29899,7 @@
                 "agendaInstallScoreHorizonQuoteComplete": true,
                 "effectKind": "install_card",
                 "replacedRootCardIds": "c3gd",
-                "replacedRootDefinitionIds": 559,
+                "replacedRootDefinitionIds": "559",
                 "replacedRootCardType": "asset"
               }
             }
@@ -36454,7 +36454,7 @@
           "sourceDefinitionId": 137,
           "installedProgramDefinitionId": 137,
           "installed": true,
-          "trashedCardDefinitionIds": 148,
+          "trashedCardDefinitionIds": "148",
           "trashedCount": 1,
           "memoryUsedAfter": 4,
           "memoryLimitAfter": 4,
@@ -36479,7 +36479,7 @@
             "installedProgramDefinitionId": 137,
             "choiceVisibility": "hidden_info_barrier",
             "redactedKind": "hidden_zone",
-            "trashedCardDefinitionIds": 148,
+            "trashedCardDefinitionIds": "148",
             "installed": true
           },
           "visibility": {
@@ -36535,7 +36535,7 @@
                 "runnerProgramTrashBeforeInstallResolved": true,
                 "runnerProgramTrashBeforeInstallCostsPrepaid": true,
                 "trashedCount": 1,
-                "trashedCardDefinitionIds": 148,
+                "trashedCardDefinitionIds": "148",
                 "installCostPaid": 2,
                 "runnerInstallNormalCreditsPaid": 2,
                 "runnerInstallHostedCreditsPaid": 0,

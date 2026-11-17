@@ -123,12 +123,12 @@ describe("match FD7671 runner decision checkpoints", () => {
       const pendingChoice = checkpoint.engine.testOnlyGameState.pendingChoice;
       if (!pendingChoice) throw new Error("Expected expose choice");
       pendingChoice.options = pendingChoice.options.filter(
-        (option) => option.id === "card_hidden_4ff3e639",
+        (option) => option.id === "card_h12xsk9g",
       );
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "FD7671-C04-SOLE-EXPOSE-TARGET";
       checkpoint.expectation = {
-        choice: { mustSelectOptionIds: ["card_hidden_4ff3e639"] },
+        choice: { mustSelectOptionIds: ["card_h12xsk9g"] },
       };
     });
 
@@ -146,7 +146,7 @@ function expectProspectiveCampaignTrash(
       {
         type: "trash_accessed_card",
         actionId:
-          "runner.trash_accessed_card.corp_549_1.3",
+          "runner.trash_accessed_card.c3e5.3",
       },
     ],
     planExecution: { acceptablePlanKinds: ["runner.convert_run_window"] },

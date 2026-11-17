@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { ORIGINALSET_DEFAULT_DECKS, type AiDecisionInput, type GameState, type LegalAction } from "@netgrid/shared";
 import { applyAction, createGameAfterSetup, getLegalActions, hashGameState, replayEvents } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
@@ -41,19 +42,19 @@ describe("selfplay cycle 245 decision checkpoints", () => {
     );
 
     expect(decision).toMatchObject({
-      actionId: "runner.start_run.remote_2",
+      actionId: "runner.start_run.r2",
       reasonCode: "plan_first.runner.contest_remote",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:runner.contest_remote:remote%3Aremote_2",
+            "plan:runner.contest_remote:remote%3Ar2",
           leafExecutorInstanceId:
-            "plan:runner.contest_remote:remote%3Aremote_2",
+            "plan:runner.contest_remote:remote%3Ar2",
           dispositions: expect.arrayContaining([
             expect.objectContaining({
               actionId:
-                "runner.play_event.runner_309_3.runner_309_3.onr_v1_097_livewires-contacts:abilities_on_play_gain_credits",
+                "runner.play_event.c1wr.c1wr.393",
               disposition: "explicitly_nonproductive",
               ownerModuleId: "runner.economy",
               evidenceCode:
@@ -91,7 +92,7 @@ describe("selfplay cycle 245 decision checkpoints", () => {
       decision.decisionDebug?.planFirstDecision?.dispositions ?? [];
 
     expect(decision).toMatchObject({
-      actionId: "runner.start_run.remote_2",
+      actionId: "runner.start_run.r2",
       reasonCode: "plan_first.runner.contest_remote",
       fallbackUsed: false,
     });
@@ -105,12 +106,12 @@ describe("selfplay cycle 245 decision checkpoints", () => {
       }),
     ]);
     expect(
-      dispositions.filter((entry) => entry.actionId.includes("jack-n-joe")),
+      dispositions.filter((entry) => referencesDefaultDeckCard(entry.actionId, 307)),
     ).toEqual([
       expect.objectContaining({
         disposition: "explicitly_nonproductive",
         ownerModuleId: "runner.develop_board_and_hand",
-        evidenceCode: "runner_hand_development_rejected:no_current_need:runner_307_3",
+        evidenceCode: "runner_hand_development_rejected:no_current_need:c1wb",
       }),
     ]);
   });
@@ -124,7 +125,7 @@ describe("selfplay cycle 245 decision checkpoints", () => {
     const decision = chooseAiAction(input);
     expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
     const dispositions = decision.decisionDebug?.planFirstDecision?.dispositions ?? [];
-    expect(dispositions.filter((d) => d.actionId.includes("jack-n-joe"))).toEqual([
+    expect(dispositions.filter((d) => referencesDefaultDeckCard(d.actionId, 307))).toEqual([
       expect.objectContaining({
         disposition: "explicitly_nonproductive", ownerModuleId: "runner.defense_and_recovery",
         evidenceCode: "runner_confirmed_damage_draw_tax_tag_unsafe",
@@ -166,8 +167,8 @@ function activeDrawTaxFixture(overflow: number) {
   // Each asset needs its own legal one-slot root. Generate the whole view and
   // LegalActions from this Engine state instead of editing a captured DTO.
   removeEverywhere(state, setupId);
-  state.corp.servers.push({ id: "remote_2", kind: "remote", label: "Remote 2", ice: [], root: [setupId] });
-  state.cardInstances[setupId]!.zone = { side: "corp", zone: "serverRoot", serverId: "remote_2" };
+  state.corp.servers.push({ id: "r2", kind: "remote", label: "Remote 2", ice: [], root: [setupId] });
+  state.cardInstances[setupId]!.zone = { side: "corp", zone: "serverRoot", serverId: "r2" };
   for (const id of [cityId, setupId]) Object.assign(state.cardInstances[id]!, { rezzed: true, faceup: true });
   Object.assign(state.runner, { credits: 0, clicks: 3, coreDamage: 2 });
   const input = buildAiDecisionInput(state, "runner", { difficulty: "hard", ownDeckSnapshot: {

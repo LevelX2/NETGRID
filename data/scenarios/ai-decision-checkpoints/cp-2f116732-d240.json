@@ -7186,7 +7186,7 @@
             "serverId": "rd",
             "serverLabel": "R&D",
             "installPlacement": "root",
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealCostPersistedForCurrentAccess": true,
             "abilityFamily": "run-access",
@@ -7241,7 +7241,7 @@
             "serverLabel": "R&D",
             "stealCost": 5,
             "stealAdditionalCost": 5,
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealCostPersistedForCurrentAccess": true,
             "stealBlockedByCost": true,
@@ -13365,7 +13365,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 389,
-      "sideSafePlanningFingerprint": "fnv1a:0ef4df0e"
+      "sideSafePlanningFingerprint": "fnv1a:14a29756"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rd_express_1.1.0",

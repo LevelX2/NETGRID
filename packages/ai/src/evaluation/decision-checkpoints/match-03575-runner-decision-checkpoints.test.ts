@@ -63,12 +63,12 @@ describe("match 03575 runner decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "03575-C02-STALE-RD-TOP";
         checkpoint.expectation = {
-          acceptableActions: [{ actionId: "runner.start_run.remote_1" }],
+          acceptableActions: [{ actionId: "runner.start_run.r1" }],
           planExecution: {
             acceptablePlanKinds: ["runner.contest_remote"],
             acceptableCapabilities: ["contest_remote"],
             requiredAssessmentEvidence: [
-              "runner_productive_remote_probe_converts_now:remote_1",
+              "runner_productive_remote_probe_converts_now:r1",
             ],
           },
         };
@@ -86,7 +86,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
   );
   if (checkpoint.checkpointId === "cp-03575-02-rd-repeat-fresh-matchpoint") {
     checkpoint.expectation.planExecution!.requiredAssessmentEvidence = [
-      "runner_productive_remote_probe_converts_now:remote_1",
+      "runner_productive_remote_probe_converts_now:r1",
     ];
   }
   return checkpoint;

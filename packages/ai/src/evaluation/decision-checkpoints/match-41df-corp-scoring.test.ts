@@ -172,7 +172,7 @@ describe("match 41df Corp scoring", () => {
     expect(
       selected.type === "install_card" &&
         selected.payload?.placement === "root" &&
-        selected.payload?.serverId === "remote_2" &&
+        selected.payload?.serverId === "r2" &&
         input.playerView.own.gripOrHq.some(
           (card) =>
             card.instanceId === selected.source && card.type === "agenda",
@@ -237,11 +237,11 @@ describe("match 41df Corp scoring", () => {
         expect(decision.evidence).toEqual(
           expect.arrayContaining([
             "plan_priority_delegated_from:plan:corp.defend_servers:server-defense-portfolio",
-            "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:hq:corp_73_1:gap_4",
+            "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:hq:cgd:gap_4",
           ]),
         );
         const remote = projects.find(
-          (project) => project.serverId === "remote_2",
+          (project) => project.serverId === "r2",
         );
         expect(remote).toBeDefined();
         expect(
@@ -263,7 +263,7 @@ describe("match 41df Corp scoring", () => {
         knowledge: "known",
         runnerCreditsRemaining: remaining,
       });
-      expect(selected.payload?.serverId).toBe("remote_2");
+      expect(selected.payload?.serverId).toBe("r2");
     },
   );
 });

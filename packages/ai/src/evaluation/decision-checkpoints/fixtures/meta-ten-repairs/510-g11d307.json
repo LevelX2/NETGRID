@@ -11024,7 +11024,7 @@
             "iceInstallBaseCost": 6,
             "iceInstallAdditionalCost": 0,
             "iceInstallReduction": 2,
-            "iceInstallReductionSourceDefinitionIds": 564,
+            "iceInstallReductionSourceDefinitionIds": "564",
             "iceInstallTotalCost": 4,
             "postInstallRezQuoteCardId": "c2s5",
             "postInstallRezQuoteTargetServerId": "hq",
@@ -13589,7 +13589,7 @@
           "iceInstallBaseCost": 6,
           "iceInstallAdditionalCost": 0,
           "iceInstallReduction": 2,
-          "iceInstallReductionSourceDefinitionIds": 564,
+          "iceInstallReductionSourceDefinitionIds": "564",
           "iceInstallTotalCost": 4,
           "postInstallRezQuoteCardId": "c2s5",
           "postInstallRezQuoteTargetServerId": "hq",
@@ -13790,7 +13790,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 306,
-      "sideSafePlanningFingerprint": "fnv1a:b39bfe77"
+      "sideSafePlanningFingerprint": "fnv1a:05f412e5"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_siren_fortress_1.1.0",

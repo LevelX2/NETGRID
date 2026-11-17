@@ -6761,7 +6761,7 @@
           "zoneLabel": "ICE",
           "rezCostPaid": 3,
           "rezCostReductionAmount": 2,
-          "rezCostReductionSourceDefinitionIds": 572,
+          "rezCostReductionSourceDefinitionIds": "572",
           "runPhase": "encounter_ice",
           "amounts": {
             "rezCostPaid": 3

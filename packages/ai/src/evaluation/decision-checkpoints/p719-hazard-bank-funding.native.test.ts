@@ -25,11 +25,11 @@ it.each([true, false])(
         (card) => card.definitionId !== 347,
       );
     }
-    const runActionId = "runner.start_run.remote_1";
+    const runActionId = "runner.start_run.r1";
     const { target } = quoteRunnerRunTarget({
       input: cp.input,
       runActionId,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       deckCapabilities:
         createDeckCapabilitiesContext().deckCapabilitiesForInput(cp.input),
     })!;
@@ -43,7 +43,7 @@ it.each([true, false])(
       ]),
     );
     const bank = cp.input.legalActions.find((action) =>
-      action.actionId.endsWith(":withdraw_credits"),
+      action.payload?.cardImplementationAbilityId === 441,
     )!;
     expect(bank).toBeDefined();
     resetResidentPlanPortfolioMemory();
@@ -59,13 +59,13 @@ it.each([true, false])(
     const expectedActionId = installed ? runActionId : bank.actionId;
     expect(decision.actionId).toBe(expectedActionId);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       selectedPlan: installed
         ? { moduleId: "runner.contest_remote" }
         : {
             moduleId: "runner.credit_bank",
-            parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-            parentNeedId: "run-support:remote:remote_1",
+            parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+            parentNeedId: "run-support:remote:r1",
           },
       route: {
         actionId: expectedActionId,

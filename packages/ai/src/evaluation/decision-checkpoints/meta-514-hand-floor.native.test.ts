@@ -81,7 +81,6 @@ function apply(
     clientKnownStateVersion: state.stateVersion,
     ...(selectedChoices ? { selectedChoices } : {}),
   });
-  expect(r.ok).toBe(true);
   if (!r.ok) throw Error(JSON.stringify(r.error));
   return r.state;
 }
@@ -150,15 +149,15 @@ it("rejects G27/D109 optional installation and an automatic load with no margina
     "runner_credit_bank_automatic_load_not_profitable_within_horizon",
   );
   expect(
-    input.legalActions.some((action) =>
-      action.actionId.includes("runner_main_add_three_hosted_credits"),
+    input.legalActions.some(
+      (action) => action.payload?.cardImplementationAbilityId === 271,
     ),
   ).toBe(true);
   expect(pf.dispositions).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         actionId:
-          "runner.install_card.runner_389_2.runner_389_2",
+          "runner.install_card.c2ei.c2ei",
         ownerModuleId: "runner.develop_board_and_hand",
         disposition: "explicitly_nonproductive",
       }),
@@ -169,7 +168,7 @@ it("retains G34/D307 development with a genuine spare hand and followup action",
   const { input } = native("g34d307"),
     { d, pf } = decide(input);
   expect(d.actionId).toBe(
-    "runner.install_card.runner_389_1.runner_389_1",
+    "runner.install_card.c2eh.c2eh",
   );
   expect(pf.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
 });
@@ -181,7 +180,7 @@ it("keeps safe last-action development after an actual native G34 credit action"
   expect(input.playerView.own.clicks).toBe(1);
   expect(input.playerView.own.gripOrHq).toHaveLength(8);
   expect(d.actionId).toBe(
-    "runner.install_card.runner_389_1.runner_389_1",
+    "runner.install_card.c2eh.c2eh",
   );
   expect(pf.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
   expect(apply(afterGain, "runner", d.actionId!).runner.grip).toHaveLength(7);
@@ -231,7 +230,7 @@ it("admits the real G9/D16 bank after Draw when installation preserves the four-
   );
   expect(facts.minimumHandBuffer).toBe(4);
   const id =
-    "runner.install_card.runner_208_1.runner_208_1";
+    "runner.install_card.c1a9.c1a9";
   expect(signals).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
@@ -256,20 +255,20 @@ it.each(["g9d18", "g27d109"])(
     expect(state.runner.grip).toHaveLength(4);
     state = apply(state, "corp", "corp.mandatory_draw");
     if (key === "g9d18") state = apply(state, "corp", "corp.gain_credit");
-    else state = operation(state, "corp_502_3");
+    else state = operation(state, "c33r");
     state = traceZero(
       operation(
         state,
         key === "g9d18"
-          ? "corp_108_1"
-          : "corp_108_2",
+          ? "co5"
+          : "co6",
       ),
     );
     state = operation(
       state,
       key === "g9d18"
-        ? "corp_514_1"
-        : "corp_514_3",
+        ? "c36d"
+        : "c36f",
     );
     expect(state.runner.grip).toHaveLength(0);
     expect(state.winner).toBeNull();

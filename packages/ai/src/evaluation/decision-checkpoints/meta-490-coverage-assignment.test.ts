@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it, vi } from "vitest";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
@@ -86,13 +87,13 @@ it.each([
     )!;
     expect(gap.handAnswerDefinitionId).toBe(286);
     expect(
-      gap.installActionIds?.every((action) => action.includes("worm")),
+      gap.installActionIds?.every((action) => referencesDefaultDeckCard(action, 286)),
     ).toBe(true);
     const dwarf = domain.developments.find(
       (signal) => signal.definitionId === 233,
     )!;
     expect(dwarf.assignedDomainPlanIds).toEqual([]);
-    expect(dwarf.actionIds.some((action) => action.includes("dwarf"))).toBe(
+    expect(dwarf.actionIds.some((action) => referencesDefaultDeckCard(action, 233))).toBe(
       true,
     );
   } else {

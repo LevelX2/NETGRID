@@ -33,7 +33,7 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
-const cinderella = "corp_440_1";
+const cinderella = "c2px";
 const archivesInstall = `corp.install_card.${cinderella}.archives.${cinderella}.0`;
 
 function inputForDecision(): AiDecisionInputWithDeckCapabilities {

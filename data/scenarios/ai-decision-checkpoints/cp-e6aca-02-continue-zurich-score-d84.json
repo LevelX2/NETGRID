@@ -5838,7 +5838,7 @@
           "choiceId": "p3_34_advancement_distribution_98",
           "sourceDefinitionId": 516,
           "targetCount": 1,
-          "targetCardDefinitionIds": 428,
+          "targetCardDefinitionIds": "428",
           "targetCardDefinitionId": 428,
           "targetCardId": "c2n9",
           "addedAdvancementCounters": 2,
@@ -5849,7 +5849,7 @@
           "targets": {
             "sourceDefinitionId": 516,
             "targetCardDefinitionId": 428,
-            "targetCardDefinitionIds": 428,
+            "targetCardDefinitionIds": "428",
             "choiceVisibility": "public"
           },
           "visibility": {
@@ -5964,7 +5964,7 @@
           "agendaPurgeInstallContract": "corp_server_choice_per_ice",
           "installedIceDefinitionIds": "464,474",
           "installedIceServerLabels": "HQ,HQ",
-          "trashedDefinitionIds": 493,
+          "trashedDefinitionIds": "493",
           "revealedIceCount": 2,
           "pendingTrashCount": 0,
           "agendaPurgeWaivesPrintedRezCosts": true,

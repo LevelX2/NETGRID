@@ -51,7 +51,7 @@ export function sp082KnownProtectionFundingCompanion(): AiDecisionCheckpointV1 {
     .withCorpIceOnServer("hq", CREDIT_BLOCKS)
     .withCorpIceOnServer("rd", DOG_PILE)
     .withCorpIceOnServer("rd", RIDDLER)
-    .withRezzedCorpIceOnServer("remote_1", MOBILE_BARRICADE);
+    .withRezzedCorpIceOnServer("r1", MOBILE_BARRICADE);
 
   for (const definitionId of [
     HUNTING_PACK,

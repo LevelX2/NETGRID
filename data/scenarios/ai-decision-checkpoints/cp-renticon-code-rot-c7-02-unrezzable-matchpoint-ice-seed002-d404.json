@@ -3691,7 +3691,7 @@
                   "cardDefinitionId": 35,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 35,
-                  "revealedCardDefinitionIds": 35,
+                  "revealedCardDefinitionIds": "35",
                   "revealedCount": 1
                 }
               }
@@ -6605,7 +6605,7 @@
                   "cardDefinitionId": 35,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 35,
-                  "revealedCardDefinitionIds": 35,
+                  "revealedCardDefinitionIds": "35",
                   "revealedCount": 1
                 }
               }
@@ -11793,7 +11793,7 @@
             "hiddenZoneBarrier": true,
             "hiddenZoneAction": "temporary_program_install_end_turn_return",
             "returnedCount": 1,
-            "returnedCardDefinitionIds": 35,
+            "returnedCardDefinitionIds": "35",
             "redactedKind": "hidden_zone",
             "abilityId": "temporary_program_install_end_turn_return",
             "effectKind": "hidden_zone",
@@ -11801,7 +11801,7 @@
               "returnedCount": 1
             },
             "targets": {
-              "returnedCardDefinitionIds": 35,
+              "returnedCardDefinitionIds": "35",
               "redactedKind": "hidden_zone"
             },
             "visibility": {
@@ -11834,7 +11834,7 @@
                   "hiddenZoneBarrier": true,
                   "hiddenZoneAction": "temporary_program_install_end_turn_return",
                   "returnedCount": 1,
-                  "returnedCardDefinitionIds": 35
+                  "returnedCardDefinitionIds": "35"
                 }
               }
             }
@@ -13878,7 +13878,7 @@
                   "cardDefinitionId": 35,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 35,
-                  "revealedCardDefinitionIds": 35,
+                  "revealedCardDefinitionIds": "35",
                   "revealedCount": 1
                 }
               }
@@ -16445,7 +16445,7 @@
                   "runnerCreditsAfter": 10,
                   "gainedCredits": 4,
                   "firstPrepCreditGainBonus": 1,
-                  "firstPrepCreditGainBonusSourceDefinitionIds": 49
+                  "firstPrepCreditGainBonusSourceDefinitionIds": "49"
                 },
                 "resolvedEffects": [
                   {
@@ -17083,7 +17083,7 @@
                   "runnerCreditsAfter": 9,
                   "gainedCredits": 4,
                   "firstPrepCreditGainBonus": 1,
-                  "firstPrepCreditGainBonusSourceDefinitionIds": 49
+                  "firstPrepCreditGainBonusSourceDefinitionIds": "49"
                 },
                 "resolvedEffects": [
                   {
@@ -18235,7 +18235,7 @@
                   "cardDefinitionId": 35,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 35,
-                  "revealedCardDefinitionIds": 35,
+                  "revealedCardDefinitionIds": "35",
                   "revealedCount": 1
                 }
               }
@@ -21129,7 +21129,7 @@
                   "drawnCount": 2,
                   "runnerGripAfter": 7,
                   "firstPrepCreditGainBonus": 1,
-                  "firstPrepCreditGainBonusSourceDefinitionIds": 49
+                  "firstPrepCreditGainBonusSourceDefinitionIds": "49"
                 },
                 "resolvedEffects": [
                   {
@@ -22859,7 +22859,7 @@
                   "drawnCount": 2,
                   "runnerGripAfter": 5,
                   "firstPrepCreditGainBonus": 1,
-                  "firstPrepCreditGainBonusSourceDefinitionIds": 49
+                  "firstPrepCreditGainBonusSourceDefinitionIds": "49"
                 },
                 "resolvedEffects": [
                   {
@@ -23088,7 +23088,7 @@
                   "cardDefinitionId": 223,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 223,
-                  "revealedCardDefinitionIds": 223,
+                  "revealedCardDefinitionIds": "223",
                   "revealedCount": 1
                 }
               }
@@ -24133,7 +24133,7 @@
             "archivesRevealCount": 6,
             "archivesRevealDefinitionIds": "113,497,577,568,514,409",
             "archivesRevealTitles": "Cybertech Think Tank|Closed Accounts|Paris City Grid|Dedicated Response Team|Scorched Earth|Data Fort Reclamation",
-            "archivesRevealAgendaDefinitionIds": 409,
+            "archivesRevealAgendaDefinitionIds": "409",
             "redactedKind": "hidden_zone",
             "archivesAutoAccessedCount": 13,
             "runPhase": "access",
@@ -24177,7 +24177,7 @@
                   "archivesRevealCount": 6,
                   "archivesRevealDefinitionIds": "113,497,577,568,514,409",
                   "archivesRevealTitles": "Cybertech Think Tank|Closed Accounts|Paris City Grid|Dedicated Response Team|Scorched Earth|Data Fort Reclamation",
-                  "archivesRevealAgendaDefinitionIds": 409,
+                  "archivesRevealAgendaDefinitionIds": "409",
                   "publicRevealDefinitionIds": "113,497,577,568,514,409",
                   "publicRevealTitles": "Cybertech Think Tank|Closed Accounts|Paris City Grid|Dedicated Response Team|Scorched Earth|Data Fort Reclamation",
                   "baseAccessCount": 14,
@@ -24951,9 +24951,9 @@
             "publicRevealDefinitionIds": "409",
             "publicRevealTitles": "Data Fort Reclamation",
             "archivesRevealCount": 1,
-            "archivesRevealDefinitionIds": 409,
+            "archivesRevealDefinitionIds": "409",
             "archivesRevealTitles": "Data Fort Reclamation",
-            "archivesRevealAgendaDefinitionIds": 409,
+            "archivesRevealAgendaDefinitionIds": "409",
             "redactedKind": "hidden_zone",
             "archivesAutoAccessedCount": 13,
             "runPhase": "access",
@@ -24995,9 +24995,9 @@
                   "hiddenZoneBarrier": true,
                   "hiddenZoneAction": "archives_breach_reveal",
                   "archivesRevealCount": 1,
-                  "archivesRevealDefinitionIds": 409,
+                  "archivesRevealDefinitionIds": "409",
                   "archivesRevealTitles": "Data Fort Reclamation",
-                  "archivesRevealAgendaDefinitionIds": 409,
+                  "archivesRevealAgendaDefinitionIds": "409",
                   "publicRevealDefinitionIds": "409",
                   "publicRevealTitles": "Data Fort Reclamation",
                   "baseAccessCount": 14,
@@ -25251,7 +25251,7 @@
                   "runnerCreditsAfter": 20,
                   "gainedCredits": 10,
                   "firstPrepCreditGainBonus": 1,
-                  "firstPrepCreditGainBonusSourceDefinitionIds": 49
+                  "firstPrepCreditGainBonusSourceDefinitionIds": "49"
                 },
                 "resolvedEffects": [
                   {
@@ -26057,7 +26057,7 @@
                   "cardDefinitionId": 35,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 35,
-                  "revealedCardDefinitionIds": 35,
+                  "revealedCardDefinitionIds": "35",
                   "revealedCount": 1
                 }
               }
@@ -27469,7 +27469,7 @@
                   "runnerCreditsAfter": 10,
                   "gainedCredits": 10,
                   "firstPrepCreditGainBonus": 1,
-                  "firstPrepCreditGainBonusSourceDefinitionIds": 49
+                  "firstPrepCreditGainBonusSourceDefinitionIds": "49"
                 },
                 "resolvedEffects": [
                   {

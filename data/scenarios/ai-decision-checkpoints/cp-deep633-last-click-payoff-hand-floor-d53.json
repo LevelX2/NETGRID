@@ -2098,7 +2098,7 @@
             "accessIndex": 0,
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "abilityFamily": "agenda-scoring",
             "targets": {
@@ -3982,7 +3982,7 @@
           "accessIndex": 0,
           "stealCost": 2,
           "stealAdditionalCost": 2,
-          "stealCostSourceDefinitionIds": 62,
+          "stealCostSourceDefinitionIds": "62",
           "stealCostSourceTitles": "Fetal AI",
           "abilityFamily": "agenda-scoring",
           "targets": {
@@ -4247,7 +4247,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 52,
-      "sideSafePlanningFingerprint": "fnv1a:868b9a48"
+      "sideSafePlanningFingerprint": "fnv1a:12db30c8"
     },
     "observedTurnPlanAction": {
       "matchId": "match_0c0deeea8d0e4683",

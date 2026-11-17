@@ -3467,7 +3467,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -4206,7 +4206,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -4509,7 +4509,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -4983,7 +4983,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -5599,7 +5599,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -6073,7 +6073,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -6487,7 +6487,7 @@
             "corpMandatoryOptionalAgendaCardCount": 1,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 411,
+            "corpMandatoryAdditionalSourceDefinitionIds": "411",
             "visibility": {
               "class": "private_to_side"
             },
@@ -7735,7 +7735,7 @@
           "corpMandatoryOptionalAgendaCardCount": 1,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 411,
+          "corpMandatoryAdditionalSourceDefinitionIds": "411",
           "visibility": {
             "class": "private_to_side"
           },
@@ -8351,7 +8351,7 @@
           "corpMandatoryOptionalAgendaCardCount": 1,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 411,
+          "corpMandatoryAdditionalSourceDefinitionIds": "411",
           "visibility": {
             "class": "private_to_side"
           },
@@ -8825,7 +8825,7 @@
           "corpMandatoryOptionalAgendaCardCount": 1,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 411,
+          "corpMandatoryAdditionalSourceDefinitionIds": "411",
           "visibility": {
             "class": "private_to_side"
           },
@@ -9239,7 +9239,7 @@
           "corpMandatoryOptionalAgendaCardCount": 1,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 411,
+          "corpMandatoryAdditionalSourceDefinitionIds": "411",
           "visibility": {
             "class": "private_to_side"
           },
@@ -10197,7 +10197,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 221,
-      "sideSafePlanningFingerprint": "fnv1a:2e700ea3"
+      "sideSafePlanningFingerprint": "fnv1a:ddce588b"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rd_express_1.1.0",

@@ -3706,7 +3706,7 @@
           "choiceId": "p3_34_advancement_distribution_34",
           "sourceDefinitionId": 504,
           "targetCount": 1,
-          "targetCardDefinitionIds": 406,
+          "targetCardDefinitionIds": "406",
           "targetCardDefinitionId": 406,
           "targetCardId": "c2id",
           "addedAdvancementCounters": 3,
@@ -3717,7 +3717,7 @@
           "targets": {
             "sourceDefinitionId": 504,
             "targetCardDefinitionId": 406,
-            "targetCardDefinitionIds": 406,
+            "targetCardDefinitionIds": "406",
             "choiceVisibility": "public"
           },
           "visibility": {
@@ -3782,14 +3782,14 @@
           "publicRevealKind": "reveal",
           "publicRevealDefinitionIds": "406",
           "publicRevealTitles": "Corporate Downsizing",
-          "revealedAgendaDefinitionIds": 406,
+          "revealedAgendaDefinitionIds": "406",
           "choiceVisibility": "hidden_info_barrier",
           "sourceTitle": "Corporate Downsizing",
           "shownCount": 1,
           "shuffledIntoRndCount": 1,
           "combinedAgendaPoints": 2,
           "randomDrawRecordPurpose": "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.c2id.37",
-          "shownCardDefinitionIds": 406,
+          "shownCardDefinitionIds": "406",
           "revealKind": "reveal",
           "abilityFamily": "hidden-zone",
           "abilityId": "scored_agenda_hq_agenda_shuffle_credits",
@@ -3804,7 +3804,7 @@
             "publicRevealKind": "reveal",
             "publicRevealDefinitionIds": "406",
             "publicRevealTitles": "Corporate Downsizing",
-            "revealedAgendaDefinitionIds": 406,
+            "revealedAgendaDefinitionIds": "406",
             "choiceVisibility": "hidden_info_barrier",
             "redactedKind": "hidden_zone"
           },
@@ -9221,7 +9221,7 @@
           "hiddenZoneBarrier": true,
           "hiddenZoneAction": "temporary_program_install_end_turn_return",
           "returnedCount": 1,
-          "returnedCardDefinitionIds": 35,
+          "returnedCardDefinitionIds": "35",
           "redactedKind": "hidden_zone",
           "abilityId": "temporary_program_install_end_turn_return",
           "effectKind": "hidden_zone",
@@ -9229,7 +9229,7 @@
             "returnedCount": 1
           },
           "targets": {
-            "returnedCardDefinitionIds": 35,
+            "returnedCardDefinitionIds": "35",
             "redactedKind": "hidden_zone"
           },
           "visibility": {
@@ -9741,7 +9741,7 @@
           "choiceId": "p3_34_advancement_distribution_233",
           "sourceDefinitionId": 516,
           "targetCount": 1,
-          "targetCardDefinitionIds": 408,
+          "targetCardDefinitionIds": "408",
           "targetCardDefinitionId": 408,
           "targetCardId": "c2iu",
           "addedAdvancementCounters": 2,
@@ -9752,7 +9752,7 @@
           "targets": {
             "sourceDefinitionId": 516,
             "targetCardDefinitionId": 408,
-            "targetCardDefinitionIds": 408,
+            "targetCardDefinitionIds": "408",
             "choiceVisibility": "public"
           },
           "visibility": {

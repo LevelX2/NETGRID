@@ -24,20 +24,20 @@ describe("run target action alignment", () => {
 
   it("aligns remote target context without implying pilot eligibility", () => {
     expect(
-      alignRunTargetAction(runCandidate("run-remote-1", "remote_1"), {
-        targetServerId: "remote_1",
+      alignRunTargetAction(runCandidate("run-remote-1", "r1"), {
+        targetServerId: "r1",
         targetKind: "remote",
       }),
     ).toMatchObject({
       actionId: "run-remote-1",
-      serverId: "remote_1",
-      runTargetId: "remote_1",
+      serverId: "r1",
+      runTargetId: "r1",
       targetKind: "remote",
       aligned: true,
       evidence: expect.arrayContaining([
         "candidate_semantic:run.start",
-        "candidate_server:remote_1",
-        "run_target:remote_1",
+        "candidate_server:r1",
+        "run_target:r1",
         "aligned:true",
       ]),
     });
@@ -45,19 +45,19 @@ describe("run target action alignment", () => {
 
   it("normalizes exact remote server ids without reading free-text suffixes", () => {
     expect(
-      alignRunTargetAction(runCandidate("run-remote-1", "server:remote-1"), {
-        targetServerId: "server.remote_1",
+      alignRunTargetAction(runCandidate("run-remote-1", "server:r1"), {
+        targetServerId: "server.r1",
         targetKind: "remote",
       }),
     ).toMatchObject({
-      serverId: "remote_1",
-      runTargetId: "remote_1",
+      serverId: "r1",
+      runTargetId: "r1",
       aligned: true,
     });
 
     expect(
-      alignRunTargetAction(runCandidate("run-remote-noise", "remote_1_bonus"), {
-        targetServerId: "remote_1",
+      alignRunTargetAction(runCandidate("run-remote-noise", "r1_bonus"), {
+        targetServerId: "r1",
         targetKind: "remote",
       }),
     ).toMatchObject({
@@ -69,7 +69,7 @@ describe("run target action alignment", () => {
 
   it("does not let evidence override structured target context", () => {
     const candidate = {
-      ...runCandidate("run-remote-1", "remote_1"),
+      ...runCandidate("run-remote-1", "r1"),
       evidence: ["run_action_projection_target:hq"],
     };
 
@@ -80,11 +80,11 @@ describe("run target action alignment", () => {
       }),
     ).toMatchObject({
       actionId: "run-remote-1",
-      serverId: "remote_1",
+      serverId: "r1",
       runTargetId: "hq",
       aligned: false,
       evidence: expect.arrayContaining([
-        "candidate_server:remote_1",
+        "candidate_server:r1",
         "candidate_server_source:target_context",
         "run_target:hq",
         "aligned:false",
@@ -112,7 +112,7 @@ describe("run target action alignment", () => {
 
   it("prefers structured run projection summary over target context", () => {
     const candidate = {
-      ...runCandidate("run-hq-summary", "remote_1"),
+      ...runCandidate("run-hq-summary", "r1"),
       runProjectionSummary: {
         serverId: "hq",
         serverKind: "hq",
@@ -235,7 +235,7 @@ describe("run target action alignment", () => {
     const trace = buildSemanticShadowDecision(
       frame({
         candidates: [
-          runCandidate("run-remote-1", "remote_1"),
+          runCandidate("run-remote-1", "r1"),
           runCandidate("run-hq", "hq"),
         ],
         goals: [
@@ -246,7 +246,7 @@ describe("run target action alignment", () => {
         ],
         runTargets: [
           {
-            targetServerId: "remote_1",
+            targetServerId: "r1",
             targetKind: "remote",
             recommendation: "run_now",
             pathPassability: "reachable",

@@ -42,7 +42,7 @@ describe("match 2f116732 Runner decisions", () => {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
           leafExecutorInstanceId:
-            "plan:runner.convert_run_window:run%3Arun_177",
+            "plan:runner.convert_run_window:run%3A177",
           route: { semanticActionType: "run.continue", stateVersion: 191 },
         },
       },
@@ -62,7 +62,7 @@ describe("match 2f116732 Runner decisions", () => {
   it("D112 never turns an unknown root or an unfinished ICE path into a safe reward", () => {
     const capture = structuredClone(successJson) as Capture;
     const server = capture.input.playerView.servers.find(
-      (s) => s.id === "remote_1",
+      (s) => s.id === "r1",
     )!;
     server.root = [
       {
@@ -78,7 +78,7 @@ describe("match 2f116732 Runner decisions", () => {
     const unfinished = structuredClone(successJson) as Capture;
     unfinished.input.playerView.run!.position = {
       kind: "ice",
-      serverId: "remote_1",
+      serverId: "r1",
       iceIndex: 0,
     };
     expect(
@@ -126,7 +126,7 @@ describe("match 2f116732 Runner decisions", () => {
       runnerCurrentRunHasSafeCompletionReward(paid.input as AiDecisionInput),
     ).toBe(false);
     const danger = structuredClone(successJson) as Capture;
-    danger.input.playerView.servers.find((s) => s.id === "remote_1")!.root = [
+    danger.input.playerView.servers.find((s) => s.id === "r1")!.root = [
       {
         ...danger.input.playerView.opponent.scoreArea[0]!,
         instanceId: "visible_damage_control",
@@ -152,7 +152,7 @@ describe("match 2f116732 Runner decisions", () => {
     });
     const threatened = structuredClone(endgameJson) as Capture;
     const agenda = threatened.input.playerView.opponent.scoreArea[0]!;
-    threatened.input.playerView.servers.find((s) => s.id === "remote_1")!.root =
+    threatened.input.playerView.servers.find((s) => s.id === "r1")!.root =
       [
         {
           ...agenda,

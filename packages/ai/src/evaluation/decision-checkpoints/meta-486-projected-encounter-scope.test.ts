@@ -36,7 +36,7 @@ it("SP-459 consumes the real next-encounter lock at Canis before the deeper Keep
   });
   expect(path(input)).toMatchObject({ canReachAccess: true, visibleBreakCost: 8 });
   expect(path(input).paidSubroutineBreaks).toEqual([
-    { iceInstanceId: "corp_470_3", subroutineId: "printed_subroutines_damage_net" },
+    { iceInstanceId: "c2wn", subroutineId: "printed_subroutines_damage_net" },
   ]);
   const decision = chooseAiAction(input);
   expect(decision.fallbackUsed).toBe(false);
@@ -104,7 +104,7 @@ it("SP-460 binds remainder demand to the actual still-open Engine subroutine IDs
   expect(input.legalActions.some((a) => a.actionId === decision.actionId)).toBe(true);
   expect(decision).toMatchObject({ fallbackUsed: false, decisionDebug: { planFirstDecision: {
     rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-    leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_257",
+    leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A257",
   } } });
 });
 

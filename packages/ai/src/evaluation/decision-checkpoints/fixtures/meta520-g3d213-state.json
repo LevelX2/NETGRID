@@ -5418,7 +5418,7 @@
               "cardDefinitionId": 278,
               "publicRevealKind": "reveal",
               "publicRevealDefinitionId": 278,
-              "revealedCardDefinitionIds": 278,
+              "revealedCardDefinitionIds": "278",
               "revealedCount": 1
             }
           }
@@ -15710,7 +15710,7 @@
               "postInstallRezQuoteBaseCredits": 3,
               "postInstallRezQuoteFinalCredits": 1,
               "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-              "postInstallRezQuoteReductionSourceDefinitionIds": 572,
+              "postInstallRezQuoteReductionSourceDefinitionIds": "572",
               "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c319\",\"iceDefinitionId\":491,\"effectiveStrength\":3,\"encounterStrength\":2,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":491,\"sourceTitle\":\"Wall of Static\"}]}",
               "effectKind": "install_card"
             }

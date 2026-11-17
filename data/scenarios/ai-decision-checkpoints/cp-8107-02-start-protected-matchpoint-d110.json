@@ -5340,7 +5340,7 @@
           "choiceId": "p3_34_advancement_distribution_100",
           "sourceDefinitionId": 516,
           "targetCount": 1,
-          "targetCardDefinitionIds": 426,
+          "targetCardDefinitionIds": "426",
           "targetCardDefinitionId": 426,
           "v1919OperationAbility": "add_advancement_counters",
           "targetCardId": "c2mt",
@@ -5352,7 +5352,7 @@
           "targets": {
             "sourceDefinitionId": 516,
             "targetCardDefinitionId": 426,
-            "targetCardDefinitionIds": 426,
+            "targetCardDefinitionIds": "426",
             "choiceVisibility": "public"
           },
           "visibility": {

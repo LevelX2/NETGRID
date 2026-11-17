@@ -87,10 +87,10 @@ describe("pairing 556 last central counter", () => {
     );
     expect(cp.provenance).toBe("synthetic_engine_derived_terminal_companion");
     expect(
-      cp.input.playerView.servers.find((s: any) => s.id === "remote_1").root[0],
+      cp.input.playerView.servers.find((s: any) => s.id === "r1").root[0],
     ).toMatchObject({ known: false, advancementCounters: 3 });
     expect(
-      cp.input.playerView.servers.find((s: any) => s.id === "remote_1").root[0],
+      cp.input.playerView.servers.find((s: any) => s.id === "r1").root[0],
     ).not.toHaveProperty("definitionId");
     restoreAiRuntimeCheckpoint(
       cp.input,
@@ -98,7 +98,7 @@ describe("pairing 556 last central counter", () => {
       cp.runtime,
     );
     const result = chooseAiAction(cp.input);
-    expect(result.actionId).toBe("runner.start_run.remote_1");
+    expect(result.actionId).toBe("runner.start_run.r1");
     expect(
       result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.contest_remote");

@@ -26,8 +26,8 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
-const parentId = "plan:runner.contest_remote:remote%3Aremote_1";
-const needId = "run-support:remote:remote_1";
+const parentId = "plan:runner.contest_remote:remote%3Ar1";
+const needId = "run-support:remote:r1";
 
 function engineFactsHash(input: AiDecisionInputWithDeckCapabilities) {
   return createHash("sha256")
@@ -59,7 +59,7 @@ function capture(game: 11 | 20) {
     validation: Record<string, boolean>;
   };
   // Explicit current companion with no active public steal surcharge.
-  bindSyntheticAgendaStealQuotes(f.input, "remote_1", 0, {});
+  bindSyntheticAgendaStealQuotes(f.input, "r1", 0, {});
   return { ...f, input: { ...f.input, ...buildAiDecisionInputDto(f.input) } };
 }
 
@@ -72,7 +72,7 @@ function facts(input: AiDecisionInputWithDeckCapabilities) {
   });
   const targets = evaluateRunnerRunTargets({ input, deckCapabilities: caps });
   const target = targets.find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "runner.start_run.r1",
   )!;
   const economy = buildRunnerEconomyPosture({ input, deckCapabilities: caps });
   const banks = candidates
@@ -133,7 +133,7 @@ describe("native unknown-ICE reserve bank support", () => {
         (a) => a.actionId === result.actionId,
       )!;
       if (game === 20) {
-        expect(action.actionId).toBe("runner.start_run.remote_1");
+        expect(action.actionId).toBe("runner.start_run.r1");
         expect(result.fallbackUsed).toBe(false);
         expect(result.decisionDebug?.planFirstDecision).toMatchObject({
           rootPlanInstanceId: parentId,
@@ -266,7 +266,7 @@ describe("native unknown-ICE reserve bank support", () => {
     if (boundary === "no_run_click") input.playerView.own.clicks = 1;
     if (boundary === "missing_cashout")
       input.legalActions = input.legalActions.filter(
-        (a) => !a.actionId.includes("withdraw_credits"),
+        (a) => a.payload?.cardImplementationAbilityId !== 441,
       );
     if (boundary === "missing_hand_buffer")
       input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.slice(0, 1);
@@ -277,7 +277,7 @@ describe("native unknown-ICE reserve bank support", () => {
     );
     const result = chooseAiAction(input);
     expect(result.fallbackUsed).toBe(false);
-    expect(result.actionId).not.toBe("runner.start_run.remote_1");
+    expect(result.actionId).not.toBe("runner.start_run.r1");
     expect(
       residentPlanPortfolioSnapshot(input)!.instances.filter(
         (p) => p.parentNeedId === needId && p.moduleId === "runner.credit_bank",

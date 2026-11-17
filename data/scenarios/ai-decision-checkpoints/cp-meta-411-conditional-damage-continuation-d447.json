@@ -12526,7 +12526,7 @@
             "serverLabel": "Archives",
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "abilityFamily": "agenda-scoring",
             "targets": {
@@ -14761,7 +14761,7 @@
           "serverLabel": "Archives",
           "stealCost": 2,
           "stealAdditionalCost": 2,
-          "stealCostSourceDefinitionIds": 62,
+          "stealCostSourceDefinitionIds": "62",
           "stealCostSourceTitles": "Fetal AI",
           "abilityFamily": "agenda-scoring",
           "targets": {
@@ -15667,7 +15667,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 446,
-      "sideSafePlanningFingerprint": "fnv1a:25e4fcb1"
+      "sideSafePlanningFingerprint": "fnv1a:8dc239fd"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_redline_riot_1.0.0",

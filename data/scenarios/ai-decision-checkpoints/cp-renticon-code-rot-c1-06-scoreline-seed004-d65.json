@@ -3676,7 +3676,7 @@
                   "cardDefinitionId": 35,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 35,
-                  "revealedCardDefinitionIds": 35,
+                  "revealedCardDefinitionIds": "35",
                   "revealedCount": 1
                 }
               }
@@ -6343,7 +6343,7 @@
                   "runnerCreditsAfter": 6,
                   "gainedCredits": 4,
                   "firstPrepCreditGainBonus": 1,
-                  "firstPrepCreditGainBonusSourceDefinitionIds": 49
+                  "firstPrepCreditGainBonusSourceDefinitionIds": "49"
                 },
                 "resolvedEffects": [
                   {

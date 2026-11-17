@@ -42,7 +42,7 @@ it.each([8, 9])(
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-          leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_78",
+          leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A78",
           route: {
             actionId: action.actionId,
             stateVersion: input.playerView.stateVersion,
@@ -62,7 +62,7 @@ it("retains a funded damage-mitigation pump under the same run owner", () => {
     decisionDebug: {
       planFirstDecision: {
         rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_78",
+        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A78",
         route: {
           actionId: action.actionId,
           stateVersion: input.playerView.stateVersion,

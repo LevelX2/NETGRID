@@ -2930,7 +2930,7 @@
           "hiddenZoneBarrier": true,
           "hiddenZoneAction": "temporary_program_install_end_turn_return",
           "returnedCount": 1,
-          "returnedCardDefinitionIds": 35,
+          "returnedCardDefinitionIds": "35",
           "redactedKind": "hidden_zone",
           "abilityId": "temporary_program_install_end_turn_return",
           "effectKind": "hidden_zone",
@@ -2938,7 +2938,7 @@
             "returnedCount": 1
           },
           "targets": {
-            "returnedCardDefinitionIds": 35,
+            "returnedCardDefinitionIds": "35",
             "redactedKind": "hidden_zone"
           },
           "visibility": {
@@ -5281,7 +5281,7 @@
           "choiceId": "p3_34_advancement_distribution_99",
           "sourceDefinitionId": 504,
           "targetCount": 1,
-          "targetCardDefinitionIds": 421,
+          "targetCardDefinitionIds": "421",
           "targetCardDefinitionId": 421,
           "targetCardId": "c2lp",
           "addedAdvancementCounters": 3,
@@ -5292,7 +5292,7 @@
           "targets": {
             "sourceDefinitionId": 504,
             "targetCardDefinitionId": 421,
-            "targetCardDefinitionIds": 421,
+            "targetCardDefinitionIds": "421",
             "choiceVisibility": "public"
           },
           "visibility": {

@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { expect, it } from "vitest";
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-422-score-before-reserve-d189.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -51,7 +52,7 @@ it("preserves current terminal R&D defense instead of emptying its bank for a no
   const scoreOwner = portfolio.instances.find(
     (p) =>
       p.moduleId === "corp.score_agenda" &&
-      p.instanceId.includes("corporate-war"),
+      referencesDefaultDeckCard(p.instanceId, 408),
   )!;
   expect(scoreOwner.moduleState).toMatchObject({
     signal: {

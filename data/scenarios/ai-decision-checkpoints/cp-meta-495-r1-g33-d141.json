@@ -4658,7 +4658,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 7,
+            "corpMandatoryAdditionalSourceDefinitionIds": "7",
             "visibility": {
               "class": "private_to_side"
             },
@@ -7962,7 +7962,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 7,
+          "corpMandatoryAdditionalSourceDefinitionIds": "7",
           "visibility": {
             "class": "private_to_side"
           },
@@ -9030,7 +9030,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 140,
-      "sideSafePlanningFingerprint": "fnv1a:add12e6d"
+      "sideSafePlanningFingerprint": "fnv1a:45333095"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_corp_remote_lab_deflection_2026_07_01_1.2.0",

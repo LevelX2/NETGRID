@@ -3735,7 +3735,7 @@
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:c9d7dad8",
             "accessIndex": 0,
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealCostPersistedForCurrentAccess": true,
             "abilityFamily": "run-access",
@@ -3823,7 +3823,7 @@
             "accessIndex": 2,
             "stealCost": 5,
             "stealAdditionalCost": 5,
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealCostPersistedForCurrentAccess": true,
             "stealBlockedByCost": true,
@@ -5924,7 +5924,7 @@
           "installPlacement": "root",
           "installedPositionKey": "installed-position-v1:c9d7dad8",
           "accessIndex": 0,
-          "stealCostSourceDefinitionIds": 578,
+          "stealCostSourceDefinitionIds": "578",
           "stealCostSourceTitles": "Red Herrings",
           "stealCostPersistedForCurrentAccess": true,
           "abilityFamily": "run-access",
@@ -6012,7 +6012,7 @@
           "accessIndex": 2,
           "stealCost": 5,
           "stealAdditionalCost": 5,
-          "stealCostSourceDefinitionIds": 578,
+          "stealCostSourceDefinitionIds": "578",
           "stealCostSourceTitles": "Red Herrings",
           "stealCostPersistedForCurrentAccess": true,
           "stealBlockedByCost": true,
@@ -7202,7 +7202,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 158,
-      "sideSafePlanningFingerprint": "fnv1a:a5968bdd"
+      "sideSafePlanningFingerprint": "fnv1a:a854be05"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_adb10896_1.1.0",

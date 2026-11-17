@@ -4430,7 +4430,7 @@
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:ccd7df91",
             "accessIndex": 2,
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealCostPersistedForCurrentAccess": true,
             "abilityFamily": "run-access",
@@ -17385,7 +17385,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 390,
-      "sideSafePlanningFingerprint": "fnv1a:9be9a27b"
+      "sideSafePlanningFingerprint": "fnv1a:1f71cc1b"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_salazar_toll_road_1.1.0",

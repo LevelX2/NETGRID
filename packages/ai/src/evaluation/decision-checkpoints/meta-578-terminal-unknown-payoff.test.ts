@@ -70,7 +70,7 @@ it.each(["nonterminal", "information", "decline", "no-contract"] as const)(
     if (kind === "no-contract") delete origin.runRiskContract;
     expect(runnerRunWindowEncounterRequiredHandFloor(origin)).toBeUndefined();
     expect(currentRunAbortAssessment(cp.input, origin)).toMatchObject({
-      evidenceCode: "runner_current_run_remaining_path_unreachable:remote_1",
+      evidenceCode: "runner_current_run_remaining_path_unreachable:r1",
     });
   },
 );

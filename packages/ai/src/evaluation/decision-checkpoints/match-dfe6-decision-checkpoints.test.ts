@@ -68,7 +68,7 @@ describe("match DFE6 exact decision checkpoints", () => {
       checkpoint.source.findingId = "DFE6-F01-CORP-DECK-PRESSURE";
       checkpoint.expectation = {
         acceptableActions: [
-          { type: "start_run", targetServerId: "remote_1" },
+          { type: "start_run", targetServerId: "r1" },
           { type: "start_run", targetServerId: "rd" },
         ],
         forbiddenActions: [{ type: "start_run", targetServerId: "archives" }],

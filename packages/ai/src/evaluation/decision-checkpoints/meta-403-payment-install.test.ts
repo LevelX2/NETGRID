@@ -23,7 +23,7 @@ function fixture(index = 0) {
     runtime: AiRuntimeCheckpointV1;
   };
   // Explicit current companion: no public steal surcharge or known agenda.
-  bindSyntheticAgendaStealQuotes(fixture.input, "remote_1", 0, {});
+  bindSyntheticAgendaStealQuotes(fixture.input, "r1", 0, {});
   return fixture;
 }
 function candidates(input: AiDecisionInputWithDeckCapabilities) {
@@ -62,17 +62,17 @@ describe("SP-286 prospective payment setup for the exact run", () => {
       expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
       expect(result.fallbackUsed).toBe(false);
       expect(result.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-        "plan:runner.contest_remote:remote%3Aremote_1",
+        "plan:runner.contest_remote:remote%3Ar1",
       );
       expect(
         result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
       ).toContain(executor);
       if (index === 1)
         expect(action.source).toBe(
-          "runner_191_1",
+          "c16h",
         );
       if (index === 2)
-        expect(action.actionId).toBe("runner.start_run.remote_1");
+        expect(action.actionId).toBe("runner.start_run.r1");
     },
   );
 
@@ -119,7 +119,7 @@ describe("SP-286 prospective payment setup for the exact run", () => {
       searchFundingRoutes({
         demand: createRunnerCreditDemand({
           demandId: "bound-run",
-          sourcePlanId: "plan:runner.contest_remote:remote%3Aremote_1",
+          sourcePlanId: "plan:runner.contest_remote:remote%3Ar1",
           purpose,
           priority: "acute_hard_plan_blocker",
           hardness: "hard",
@@ -142,7 +142,7 @@ describe("SP-286 prospective payment setup for the exact run", () => {
     const exact = route(10, 14, 3);
     expect(runnerFundingPaymentWindowQuote(exact, setups)).toEqual({
       creditGain: 4,
-      installedCardIds: ["runner_191_1"],
+      installedCardIds: ["c16h"],
     });
     expect(runnerFundingPaymentWindowQuote(exact, [])).toBeUndefined();
     for (const boundary of [

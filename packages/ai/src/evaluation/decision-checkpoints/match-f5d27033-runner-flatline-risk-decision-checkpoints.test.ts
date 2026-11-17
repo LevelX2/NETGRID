@@ -54,7 +54,7 @@ describe("match F5D27033 runner flatline-risk checkpoints", () => {
     const checkpoint = fixture(marginalMemoryInstallJson);
     const state = checkpoint.engine.testOnlyGameState;
     const remote = state.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!;
     for (const id of remote.ice) {
       state.corp.archives.push(id);

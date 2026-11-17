@@ -15,7 +15,7 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
       result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
         ?.rootPlanInstanceId,
     ).toBe(
-      "plan:runner.develop_board_and_hand:card%3Arunner_351_2",
+      "plan:runner.develop_board_and_hand:card%3Ac262",
     );
   });
 
@@ -35,7 +35,7 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
           ],
           planExecution: {
             acceptablePlanKinds: ["runner.pressure_central"],
-            acceptableCapabilities: ["develop_onr_v1_139_r-and-d-interface"],
+            acceptableCapabilities: ["develop_351"],
             requiredAssessmentEvidence: [
               "central_pressure_preparation_actions:1",
             ],

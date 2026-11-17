@@ -27,7 +27,7 @@ describe("selfplay cycle 096 decision checkpoints", () => {
       (action) => action.payload?.encounterContinue === true,
     )!;
     continuation.payload!.encounterSubroutineIds =
-      "printed_subroutines_end_the_run,card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays";
+      "printed_subroutines_end_the_run,card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays";
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
     resetResidentPlanPortfolioMemory();
@@ -45,17 +45,17 @@ describe("selfplay cycle 096 decision checkpoints", () => {
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       selectionAuthority: "turn_plan_commitment",
       rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_68",
+      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A68",
       executionOrigin: {
         rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafPlanInstanceId: "plan:runner.convert_run_window:run%3Arun_68",
+        leafPlanInstanceId: "plan:runner.convert_run_window:run%3A68",
       },
       selectedStep: {
-        planInstanceId: "plan:runner.convert_run_window:run%3Arun_68",
+        planInstanceId: "plan:runner.convert_run_window:run%3A68",
         parentInstanceId: "plan:runner.pressure_central:central%3Ahq",
       },
       route: {
-        planInstanceId: "plan:runner.convert_run_window:run%3Arun_68",
+        planInstanceId: "plan:runner.convert_run_window:run%3A68",
         capabilityId: "convert_active_run_window",
         actionId: selectedAction?.actionId,
         actionType: "break_subroutine",

@@ -40,14 +40,14 @@ describe("match 678d D50 central opening", () => {
 
     const decision = chooseAiAction(input);
     expect(decision.actionId).toBe(
-      "runner.install_card.runner_280_1.runner_280_1",
+      "runner.install_card.c1q9.c1q9",
     );
     const plan = decision.decisionDebug?.planFirstDecision;
     expect(plan?.route).toMatchObject({
       planInstanceId: expect.stringMatching(
         /^plan:runner\.pressure_central:central%3A(hq|rd)$/,
       ),
-      capabilityId: "develop_onr_v1_068_startup-immolator",
+      capabilityId: "develop_280",
     });
     expect(plan?.portfolio).toEqual(
       expect.arrayContaining([

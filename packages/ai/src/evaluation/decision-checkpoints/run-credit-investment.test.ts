@@ -1,4 +1,5 @@
 import { afterEach, expect, it } from "vitest";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import fixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-run-credit-investment.json";
 import deferredFixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-run-credit-deferred.json";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -54,9 +55,9 @@ it("develops the real run-income source through its existing owner without spend
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     stateVersion: input.playerView.stateVersion,
     rootPlanInstanceId:
-      "plan:runner.develop_board_and_hand:card%3Arunner_378_1",
+      "plan:runner.develop_board_and_hand:card%3Ac2c1",
     leafExecutorInstanceId:
-      "plan:runner.develop_board_and_hand:card%3Arunner_378_1",
+      "plan:runner.develop_board_and_hand:card%3Ac2c1",
     route: {
       actionId: decision.actionId,
       stateVersion: input.playerView.stateVersion,
@@ -68,7 +69,7 @@ it("does not re-admit a deferred late investment through generic hand developmen
     deferredFixture.input,
   ) as unknown as AiDecisionInputWithDeckCapabilities;
   const install = input.legalActions.find(
-    (a) => a.type === "install_card" && a.source.includes("corporate-stooge"),
+    (a) => a.type === "install_card" && referencesDefaultDeckCard(a.source, 378),
   )!;
   expect(install).toBeDefined();
   const decision = chooseAiAction(input);

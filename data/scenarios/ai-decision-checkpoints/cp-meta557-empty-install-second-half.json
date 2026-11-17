@@ -2602,7 +2602,7 @@
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:ccd7df91",
             "accessIndex": 0,
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealCostPersistedForCurrentAccess": true,
             "abilityFamily": "run-access",
@@ -2663,7 +2663,7 @@
             "accessIndex": 1,
             "stealCost": 5,
             "stealAdditionalCost": 5,
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealCostPersistedForCurrentAccess": true,
             "abilityFamily": "agenda-scoring",
@@ -5688,7 +5688,7 @@
           "installPlacement": "root",
           "installedPositionKey": "installed-position-v1:ccd7df91",
           "accessIndex": 0,
-          "stealCostSourceDefinitionIds": 578,
+          "stealCostSourceDefinitionIds": "578",
           "stealCostSourceTitles": "Red Herrings",
           "stealCostPersistedForCurrentAccess": true,
           "abilityFamily": "run-access",
@@ -5749,7 +5749,7 @@
           "accessIndex": 1,
           "stealCost": 5,
           "stealAdditionalCost": 5,
-          "stealCostSourceDefinitionIds": 578,
+          "stealCostSourceDefinitionIds": "578",
           "stealCostSourceTitles": "Red Herrings",
           "stealCostPersistedForCurrentAccess": true,
           "abilityFamily": "agenda-scoring",
@@ -8175,7 +8175,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 111,
-      "sideSafePlanningFingerprint": "fnv1a:4d28178e"
+      "sideSafePlanningFingerprint": "fnv1a:d8039dae"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_corp_salazar_toll_road_1.1.0",

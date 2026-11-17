@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
@@ -16,7 +17,7 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
-const remote = "plan:runner.contest_remote:remote%3Aremote_1";
+const remote = "plan:runner.contest_remote:remote%3Ar1";
 function fixture(name = "first-prefix") {
   return JSON.parse(
     readFileSync(
@@ -46,7 +47,7 @@ function facts(input: AiDecisionInputWithDeckCapabilities) {
   });
   const targets = evaluateRunnerRunTargets({ input, deckCapabilities });
   const target = targets.find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "runner.start_run.r1",
   )!;
   const economy = buildRunnerEconomyPosture({ input, deckCapabilities });
   return {
@@ -102,7 +103,7 @@ it.each(["first-prefix", "last-actions"])(
     const { selected, result } = choose(f);
     expect(selected).toMatchObject({
       type: "install_card",
-      source: "runner_380_1",
+      source: "c2ch",
       payload: { gainCreditsAmount: 12 },
     });
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({
@@ -134,14 +135,14 @@ it.each([
   }
   if (kind === "no_run_action_left") f.input.playerView.own.clicks = 1;
   if (kind === "nonterminal") f.input.playerView.opponent.agendaPoints = 0;
-  expect(choose(f).selected.source).not.toContain("loan-from-chiba");
+  expect(choose(f).selected.source).not.toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 380));
 });
 
 it("includes a basic credit after debt when only the complete route covers the known cost", () => {
   const f = fixture();
   f.input.playerView.own.credits = 13;
   f.input.playerView.own.clicks = 3;
-  expect(choose(f).selected.source).toBe("runner_380_1");
+  expect(choose(f).selected.source).toBe("c2ch");
   expect(facts(f.input).support?.routeAssessment).toMatchObject({
     status: "covered_guaranteed",
     totalClickCost: 2,
@@ -154,7 +155,7 @@ it("uses the already funded run without taking a loan", () => {
   f.input.playerView.own.credits = 26;
   expect(choose(f).selected).toMatchObject({
     type: "start_run",
-    payload: { serverId: "remote_1" },
+    payload: { serverId: "r1" },
   });
 });
 
@@ -172,7 +173,7 @@ it("keeps an already sufficient Broker payout ahead of debt", () => {
 
 it("requires the same current run binding before certifying any terminal funding", () => {
   const { input } = fixture();
-  input.legalActions.find((a) => a.actionId === "runner.start_run.remote_1")!
+  input.legalActions.find((a) => a.actionId === "runner.start_run.r1")!
     .expiresAtStateVersion--;
   expect(facts(input).support?.routeActionIds ?? []).toEqual([]);
 });

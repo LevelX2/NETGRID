@@ -23,10 +23,10 @@ it("uses a presently effective fort-strength variant under the native score owne
   const decision = chooseAiAction(input);
   const action = input.legalActions.find(a => a.actionId === decision.actionId)!;
   expect(action.type).toBe("score_agenda");
-  expect(action.source).toBe("corp_427_2");
+  expect(action.source).toBe("c2n2");
   expect(input.playerView.servers.find(s => s.id === action.payload!.selectedServerId)!.ice.length).toBeGreaterThan(0);
   const plan = decision.decisionDebug!.planFirstDecision!;
-  expect(plan.rootPlanInstanceId).toBe("plan:corp.score_agenda:agenda%3Acorp_427_2%3Aremote_1");
+  expect(plan.rootPlanInstanceId).toBe("plan:corp.score_agenda:agenda%3Ac2n2%3Ar1");
   expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
   expect(plan.route).toMatchObject({ actionId: action.actionId, stateVersion: 54, capabilityId: "score_agenda" });
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);

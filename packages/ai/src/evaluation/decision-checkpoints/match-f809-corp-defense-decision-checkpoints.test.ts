@@ -39,7 +39,7 @@ describe("match f809 Corp defense decision checkpoints", () => {
     const checkpoint = fixture(retainDefenseD30Json);
     const state = checkpoint.engine.testOnlyGameState;
     const remote = state.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     const rd = state.corp.servers.find((server) => server.id === "rd");
     const movedIce = remote?.ice[0];
@@ -183,7 +183,7 @@ function derivedRezSupportFixture(credits: number): AiDecisionCheckpointV1 {
     (action) =>
       action.type === "install_card" &&
       action.payload?.serverId === "rd" &&
-      action.payload.cardId === "corp_75_2",
+      action.payload.cardId === "cgu",
   );
   if (!installAction) throw new Error("Missing historical R&D install action");
   const result = applyAction(state, {

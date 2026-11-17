@@ -88,7 +88,7 @@ it("admits and materializes the native terminal Coverage draw to a remaining hea
   );
   expect(coverage).toMatchObject({
     viability: "ready",
-    parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+    parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
     moduleState: {
       phase: "draw_for_answer",
       gap: {

@@ -58,7 +58,7 @@ describe("meta 403 round 7 concrete plan feasibility", () => {
   it("does not value an unfunded duplicated ICE suffix above the already protected score server", () => {
     const { action, plan } = decide(protection);
     expect(action.type).toBe("install_card");
-    expect(action.payload?.serverId).toBe("remote_1");
+    expect(action.payload?.serverId).toBe("r1");
     expect(plan?.selectedPlan?.moduleId).toBe("corp.score_agenda");
     expect(plan?.rootPlanInstanceId).toBe(plan?.leafExecutorInstanceId);
   });

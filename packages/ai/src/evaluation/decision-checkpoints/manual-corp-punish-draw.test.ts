@@ -301,8 +301,8 @@ function fixture(
   if (!options.defense) builder.withCorpIceOnServer("rd", HUNTER);
   if (options.score)
     builder
-      .withCorpRemoteRoot("remote_1", POLITICAL, 3)
-      .withRezzedCorpIceOnServer("remote_1", WALL);
+      .withCorpRemoteRoot("r1", POLITICAL, 3)
+      .withRezzedCorpIceOnServer("r1", WALL);
   if (options.fallGuy)
     builder.withRunnerResourceInstalled(fallGuy).withRunnerGripSize(5);
   const score = (definitionId: number, side: "corp" | "runner") => {

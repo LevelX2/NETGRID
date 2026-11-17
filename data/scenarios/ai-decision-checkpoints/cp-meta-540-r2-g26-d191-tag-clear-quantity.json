@@ -1219,7 +1219,7 @@
               "accessIndex": 2,
               "stealCost": 2,
               "stealAdditionalCost": 2,
-              "stealCostSourceDefinitionIds": 62,
+              "stealCostSourceDefinitionIds": "62",
               "stealCostSourceTitles": "Fetal AI",
               "abilityFamily": "agenda-scoring",
               "targets": {
@@ -8111,7 +8111,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 190,
-        "sideSafePlanningFingerprint": "fnv1a:2fdac56d"
+        "sideSafePlanningFingerprint": "fnv1a:ef49d715"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_classic_runner_prep_economy_pressure_2026_07_01_1.0.0",
@@ -17172,7 +17172,7 @@
               "accessIndex": 2,
               "stealCost": 2,
               "stealAdditionalCost": 2,
-              "stealCostSourceDefinitionIds": 62,
+              "stealCostSourceDefinitionIds": "62",
               "stealCostSourceTitles": "Fetal AI",
               "abilityFamily": "agenda-scoring",
               "targets": {
@@ -23881,7 +23881,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 189,
-        "sideSafePlanningFingerprint": "fnv1a:c081907f"
+        "sideSafePlanningFingerprint": "fnv1a:c8923a5b"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_classic_runner_prep_economy_pressure_2026_07_01_1.0.0",

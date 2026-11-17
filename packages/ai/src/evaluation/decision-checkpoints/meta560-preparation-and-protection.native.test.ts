@@ -105,7 +105,7 @@ describe("pairing 560: purpose-bound preparation and honest protection facts", (
       const action = input.legalActions.find(
         (a: any) => a.actionId === result.actionId,
       );
-      expect(action.source).toContain("software-installer");
+      expect(f.state.cardInstances[action.source]?.definitionId).toBe(287);
       const plan = result.decisionDebug!.planFirstDecision!;
       expect(plan.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
       expect(plan.route).toMatchObject({
@@ -198,12 +198,12 @@ describe("pairing 560: purpose-bound preparation and honest protection facts", (
     const hand = native.input.playerView.own.gripOrHq;
     expect(
       visibleRunnerInitialProgramInstallCredits(
-        hand.find((c: any) => c.definitionId.includes("software-installer")),
+        hand.find((c: any) => c.definitionId === 287),
       ),
     ).toBe(2);
     expect(
       visibleRunnerInitialProgramInstallCredits(
-        hand.find((c: any) => c.definitionId.includes("codecracker")),
+        hand.find((c: any) => c.definitionId === 226),
       ),
     ).toBe(0);
   });
@@ -255,7 +255,7 @@ describe("pairing 560: purpose-bound preparation and honest protection facts", (
       );
       expect(action).toMatchObject({
         type: "install_card",
-        source: "corp_529_1",
+        source: "c39p",
         payload: { serverId: "new_remote" },
       });
       expect(
@@ -274,14 +274,14 @@ describe("pairing 560: purpose-bound preparation and honest protection facts", (
           (c) =>
             c.sourceCardInstanceId === action.source &&
             input.legalActions.find((a: any) => a.actionId === c.actionId)
-              ?.payload?.serverId === "remote_1",
+              ?.payload?.serverId === "r1",
         )!;
       expect(
         corpGlobalIceSupportAssetInstallSignal(input, old, projects, all),
       ).toBeUndefined();
       expect(
         corpGlobalIceSupportAssetInstallSignal(input, old, [], all),
-      ).toMatchObject({ serverId: "remote_1" });
+      ).toMatchObject({ serverId: "r1" });
       let current = apply(state, action.actionId, "corp");
       for (let i = 0; i < 3 && current.activeSide === "corp"; i++) {
         const nextInput = {
@@ -325,7 +325,7 @@ describe("pairing 560: purpose-bound preparation and honest protection facts", (
       result.decisionDebug!.planFirstDecision!.priority?.effectiveClass,
     ).toBe("P2");
     input.playerView.opponent.rig = input.playerView.opponent.rig.filter(
-      (c: any) => !c.definitionId.includes("worm"),
+      (c: any) => ![31, 286, 321].includes(c.definitionId),
     );
     expect(corpInstalledIceHasFreeFullBreak(input, ice, "rd")).toBe(false);
     expect(

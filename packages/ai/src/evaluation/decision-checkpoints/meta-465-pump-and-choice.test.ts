@@ -45,7 +45,7 @@ it.each([
     expect(result.actionId).toBe(pump.actionId);
     expect(result.fallbackUsed).toBe(false);
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       route: {
         actionId: pump.actionId,
         stateVersion: input.playerView.stateVersion,
@@ -102,11 +102,11 @@ it("uses the exact printed X payment to fund the unaffordable central ICE", () =
   )!;
   expect(action).toMatchObject({
     type: "play_operation",
-    source: "corp_107_1",
+    source: "cnx",
     costs: [{ clicks: 1, credits: 3 }],
     payload: {
       xValue: 3,
-      targetCardId: "corp_73_2",
+      targetCardId: "cge",
     },
   });
   expect(result.fallbackUsed).toBe(false);
@@ -129,7 +129,7 @@ it("uses the exact printed X payment to fund the unaffordable central ICE", () =
   if (!applied.ok) throw new Error(applied.error.message);
   expect(applied.state.corp.credits).toBe(state.corp.credits - 3);
   expect(
-    applied.state.cardInstances["corp_73_2"],
+    applied.state.cardInstances["cge"],
   ).toMatchObject({
     rezzed: true,
     counters: { kludge: 3 },

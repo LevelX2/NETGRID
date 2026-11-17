@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { describe, expect, it } from "vitest";
 
 import disgruntledArchivesJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-four-match-01-disgruntled-archives.json";
@@ -65,7 +66,7 @@ describe("four-match card-hint decision checkpoints", () => {
     );
     const insideJobAction = result.input.legalActions.find(
       (action) =>
-        action.actionId.includes("inside-job") &&
+        referencesDefaultDeckCard(action.actionId, 306) &&
         action.actionId.includes(".rd."),
     );
     if (!insideJobAction)

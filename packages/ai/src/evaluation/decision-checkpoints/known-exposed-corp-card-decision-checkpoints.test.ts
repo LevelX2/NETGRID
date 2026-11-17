@@ -18,7 +18,7 @@ import {
 
 describe("known exposed Corp card decision checkpoints", () => {
   it("known TRAP prevents an unsafe Remote run", () => {
-    const serverId = runnerCheckpoint.serverId as `remote_${number}`;
+    const serverId = runnerCheckpoint.serverId as `r${number}`;
     const input = aiInput("runner", []);
     input.playerView.own.gripOrHq = Array.from(
       { length: runnerCheckpoint.runnerHandCount },
@@ -55,7 +55,7 @@ describe("known exposed Corp card decision checkpoints", () => {
   });
 
   it("exposed weak TRAP is returned through Cowboy's exact legal action", () => {
-    const serverId = corpCheckpoint.serverId as `remote_${number}`;
+    const serverId = corpCheckpoint.serverId as `r${number}`;
     const trap = visibleCard(corpCheckpoint.cardInstanceId, "corp", "asset", {
       definitionId: corpCheckpoint.cardDefinitionId,
       advancementCounters: 0,

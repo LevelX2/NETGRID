@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { expect, it } from "vitest";
 import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-406-funded-consultants-d308.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -24,7 +25,7 @@ it("SP-301 funds the exact Accounts → Tycho → Consultants terminal score thr
     runtime,
   );
   const funding = input.legalActions.find((a) =>
-    a.source.includes("accounts-receivable"),
+    referencesDefaultDeckCard(a.source, 493),
   )!;
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(funding.actionId);
@@ -48,7 +49,7 @@ it.each([
     checkpoint.input,
   ) as unknown as AiDecisionInputWithDeckCapabilities;
   const action = input.legalActions.find((a) =>
-    a.source.includes("accounts-receivable"),
+    referencesDefaultDeckCard(a.source, 493),
   )!;
   if (variant === "insufficient_clicks") input.playerView.own.clicks = 2;
   if (variant === "unaffordable_upfront") input.playerView.own.credits = 4;

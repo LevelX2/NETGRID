@@ -27,7 +27,7 @@ it.each([17, 21, 22, 24])(
     const { input } = fixture();
     input.playerView.own.credits = credits;
     const target = evaluateRunnerRunTargets({ input }).find(
-      (t) => t.actionId === "runner.start_run.remote_1",
+      (t) => t.actionId === "runner.start_run.r1",
     )!;
     expect(target.routeQuote?.reachability).toBe("no_access");
     expect(target.pathPassability).toBe("blocked_unpayable");
@@ -72,7 +72,7 @@ it("preserves actual missing coverage when the installed breaker is absent", () 
     (c: VisibleCard) => c.type !== "program",
   );
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "runner.start_run.r1",
   )!;
   expect(["blocked_unbreakable", "blocked_missing_coverage"]).toContain(
     target.pathPassability,
@@ -84,7 +84,7 @@ it("retains the same installed breaker and admits its fully funded path", () => 
   const { input } = fixture();
   input.playerView.own.credits = 26;
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "runner.start_run.r1",
   )!;
   expect(target.pathPassability).toBe("reachable");
   expect(target.routeQuote?.reachability).toBe("guaranteed_access");

@@ -716,7 +716,7 @@
             "accessIndex": 0,
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "agendaPoints": 3,
             "totalAgendaPoints": 3,
@@ -1335,7 +1335,7 @@
           "accessIndex": 0,
           "stealCost": 2,
           "stealAdditionalCost": 2,
-          "stealCostSourceDefinitionIds": 62,
+          "stealCostSourceDefinitionIds": "62",
           "stealCostSourceTitles": "Fetal AI",
           "agendaPoints": 3,
           "totalAgendaPoints": 3,
@@ -1566,7 +1566,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 13,
-      "sideSafePlanningFingerprint": "fnv1a:f6f415e7"
+      "sideSafePlanningFingerprint": "fnv1a:a74095b7"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

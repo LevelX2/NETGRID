@@ -2824,7 +2824,7 @@
             "accessIndex": 0,
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "abilityFamily": "agenda-scoring",
             "visibility": {
@@ -7310,7 +7310,7 @@
             "accessIndex": 0,
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "stealBlockedByCost": true,
             "targets": {
@@ -9316,7 +9316,7 @@
           "accessIndex": 0,
           "stealCost": 2,
           "stealAdditionalCost": 2,
-          "stealCostSourceDefinitionIds": 62,
+          "stealCostSourceDefinitionIds": "62",
           "stealCostSourceTitles": "Fetal AI",
           "stealBlockedByCost": true,
           "targets": {
@@ -10792,7 +10792,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 297,
-      "sideSafePlanningFingerprint": "fnv1a:b60cf70a"
+      "sideSafePlanningFingerprint": "fnv1a:28f7fd82"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_purge_window_1.0.0",

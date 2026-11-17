@@ -123,7 +123,11 @@ describe("pairing 561 native Trace payment and installed-source memory", () => {
       if (step === 1) expect(state.runner.credits).toBe(9);
     }
     expect(actions[0]).toBe("runner.resolve_choice");
-    expect(actions[1]).toContain("pay_three_trash_source_gain_six");
+    expect(actions[1]).toBe(
+      f.payment.input.legalActions.find(
+        (action) => action.payload?.cardImplementationAbilityId === 272,
+      )?.actionId,
+    );
     expect(actions[2]).toBe(actions[0]);
     expect(state.runner.credits).toBe(2);
     expect(state.runner.tags).toBe(0);
@@ -198,7 +202,7 @@ describe("pairing 561 native Trace payment and installed-source memory", () => {
     const before = JSON.stringify(input);
     const belief = reconstructBeliefState(input);
     const memory = belief.knownPositionMemory!.filter(
-      (m) => m.zone === "remote_1",
+      (m) => m.zone === "r1",
     );
     expect(
       memory.some(
@@ -211,7 +215,7 @@ describe("pairing 561 native Trace payment and installed-source memory", () => {
     const target = evaluateRunnerRunTargets({
       input,
       beliefState: belief,
-    }).find((t) => t.targetServerId === "remote_1")!;
+    }).find((t) => t.targetServerId === "r1")!;
     expect(target.accessFacts.knownTargetDefinitionIds).toEqual([]);
     expect(target.accessPayoff).toBe("score_threat");
     restoreAiRuntimeCheckpoint(

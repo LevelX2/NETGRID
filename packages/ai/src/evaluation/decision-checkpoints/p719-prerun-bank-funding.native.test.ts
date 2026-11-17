@@ -23,7 +23,7 @@ it.each([
       runtime: AiRuntimeCheckpointV1;
     };
     const bank = cp.input.legalActions.find((action) =>
-      action.actionId.endsWith(":withdraw_credits"),
+      action.payload?.cardImplementationAbilityId === 441,
     )!;
     expect(bank).toBeDefined();
     resetResidentPlanPortfolioMemory();
@@ -36,11 +36,11 @@ it.each([
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.actionId).toBe(bank.actionId);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       selectedPlan: {
         moduleId: "runner.credit_bank",
-        parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-        parentNeedId: "run-support:remote:remote_1",
+        parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        parentNeedId: "run-support:remote:r1",
       },
       route: {
         actionId: bank.actionId,
@@ -58,7 +58,7 @@ it("preserves the funded run and holds the bank once the concrete need is gone",
   expect(cp.input.playerView.own.clicks).toBe(3);
   expect(
     cp.input.legalActions.some((action) =>
-      action.actionId.endsWith(":withdraw_credits"),
+      action.payload?.cardImplementationAbilityId === 441,
     ),
   ).toBe(true);
   resetResidentPlanPortfolioMemory();
@@ -68,7 +68,7 @@ it("preserves the funded run and holds the bank once the concrete need is gone",
     cp.runtime,
   );
   const decision = chooseAiAction(cp.input);
-  expect(decision.actionId).toBe("runner.start_run.remote_1");
+  expect(decision.actionId).toBe("runner.start_run.r1");
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("runner.contest_remote");

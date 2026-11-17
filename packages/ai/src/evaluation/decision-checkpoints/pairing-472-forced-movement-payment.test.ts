@@ -48,7 +48,7 @@ function restore(captured: CapturedCheckpoint) {
 }
 
 const root = "plan:runner.pressure_central:central%3Ahq";
-const executor = "plan:runner.convert_run_window:run%3Arun_242";
+const executor = "plan:runner.convert_run_window:run%3A242";
 
 function expectPaymentContinuation() {
   const captured = checkpoint(260);

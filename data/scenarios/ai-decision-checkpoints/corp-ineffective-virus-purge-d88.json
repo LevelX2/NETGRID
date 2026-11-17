@@ -4176,7 +4176,7 @@
           "choiceId": "p3_34_advancement_distribution_74",
           "sourceDefinitionId": 516,
           "targetCount": 1,
-          "targetCardDefinitionIds": 406,
+          "targetCardDefinitionIds": "406",
           "targetCardDefinitionId": 406,
           "targetCardId": "c2if",
           "addedAdvancementCounters": 2,
@@ -4187,7 +4187,7 @@
           "targets": {
             "sourceDefinitionId": 516,
             "targetCardDefinitionId": 406,
-            "targetCardDefinitionIds": 406,
+            "targetCardDefinitionIds": "406",
             "choiceVisibility": "public"
           },
           "visibility": {
@@ -6937,7 +6937,7 @@
           "choiceId": "p3_34_advancement_distribution_181",
           "sourceDefinitionId": 516,
           "targetCount": 1,
-          "targetCardDefinitionIds": 408,
+          "targetCardDefinitionIds": "408",
           "targetCardDefinitionId": 408,
           "targetCardId": "c2iu",
           "addedAdvancementCounters": 2,
@@ -6948,7 +6948,7 @@
           "targets": {
             "sourceDefinitionId": 516,
             "targetCardDefinitionId": 408,
-            "targetCardDefinitionIds": 408,
+            "targetCardDefinitionIds": "408",
             "choiceVisibility": "public"
           },
           "visibility": {

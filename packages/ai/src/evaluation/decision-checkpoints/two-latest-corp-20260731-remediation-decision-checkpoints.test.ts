@@ -1,3 +1,4 @@
+import { cardInstanceIdForCopy } from "../../../../engine/src/game/state/card-instance-id";
 import { describe, expect, it } from "vitest";
 
 import earlyDefenseD3Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-723d40-latest-01-early-defense-d3.json";
@@ -39,7 +40,7 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
       acceptableActions: [
         {
           actionId:
-            "corp.rez_card.corp_521_2.remote_1.corp_521_2",
+            "corp.rez_card.c37y.r1.c37y",
         },
       ],
       forbiddenActions: [{ type: "draw_card" }],
@@ -59,7 +60,7 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
         "plan_priority_delegated_from:plan:corp.defend_servers:server-defense-portfolio",
-        "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:rd:corp_466_2:gap_2",
+        "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:rd:c2vq:gap_2",
       ]),
     );
     expect(
@@ -134,7 +135,7 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     )!;
     expect(selected).toMatchObject({
       type: "install_card",
-      payload: { placement: "ice", serverId: "remote_1" },
+      payload: { placement: "ice", serverId: "r1" },
     });
     // Revalidation may move an uninstalled agenda; it must rebind the support
     // parent and route together, never transplant the historical D89 state.
@@ -142,7 +143,8 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
       [hardening.decision!, hardening.selectedAction!, initial.stateVersion],
       [decision, selected, first.state.stateVersion],
     ] as const) {
-      const parent = `plan:corp.score_agenda:agenda%3Acorp_onr_v1_188_ai-chief-financial-officer_1%3A${action.payload!.serverId}`;
+      const agenda = cardInstanceIdForCopy("corp", 400, 1);
+      const parent = `plan:corp.score_agenda:agenda%3A${agenda}%3A${action.payload!.serverId}`;
       expect(current.decisionDebug?.planFirstDecision).toMatchObject({
         rootPlanInstanceId: parent,
         selectedPlan: {
@@ -188,7 +190,7 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
             {
               type: "install_card",
               sourceDefinitionId: 459,
-              targetServerId: "remote_1",
+              targetServerId: "r1",
             },
           ],
           planExecution: {
@@ -200,7 +202,7 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
       const result = runAiDecisionCheckpoint(checkpoint);
       expect(result.ok, result.message).toBe(true);
       const parent =
-        "plan:corp.score_agenda:agenda%3Acorp_400_1%3Aremote_1";
+        "plan:corp.score_agenda:agenda%3Ac2h1%3Ar1";
       expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
         rootPlanInstanceId: parent,
         selectedPlan: { parentInstanceId: parent },

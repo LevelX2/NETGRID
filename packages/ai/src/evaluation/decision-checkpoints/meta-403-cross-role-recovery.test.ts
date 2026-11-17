@@ -15,7 +15,7 @@ it("SP-288 installs the visible Code Gate answer that funds the whole mixed ICE 
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
-  bindSyntheticAgendaStealQuotes(input, "remote_1", 0, {});
+  bindSyntheticAgendaStealQuotes(input, "r1", 0, {});
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(
     input,
@@ -26,7 +26,7 @@ it("SP-288 installs the visible Code Gate answer that funds the whole mixed ICE 
   const install = input.legalActions.find(
     (action) =>
       action.type === "install_card" &&
-      action.source === "runner_226_1" &&
+      action.source === "c1e9" &&
       !action.payload?.runnerProgramTrashBeforeInstall,
   )!;
   expect(install).toBeDefined();
@@ -35,9 +35,9 @@ it("SP-288 installs the visible Code Gate answer that funds the whole mixed ICE 
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
         leafExecutorInstanceId:
-          "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate%3Aefficiency%3Aremote_1%3Arun%3Arunner.start_run.remote_1",
+          "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate%3Aefficiency%3Ar1%3Arun%3Arunner.start_run.r1",
         route: { actionId: install.actionId },
       },
     },
@@ -49,9 +49,9 @@ it("searches cheaper Wall coverage without inventing the absent Code Gate instal
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
-  bindSyntheticAgendaStealQuotes(input, "remote_1", 0, {});
+  bindSyntheticAgendaStealQuotes(input, "r1", 0, {});
   input.legalActions = input.legalActions.filter(
-    (action) => action.source !== "runner_226_1",
+    (action) => action.source !== "c1e9",
   );
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(
@@ -64,9 +64,9 @@ it("searches cheaper Wall coverage without inventing the absent Code Gate instal
     actionId: "runner.draw_card",
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
         leafExecutorInstanceId:
-          "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aefficiency%3Aremote_1",
+          "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aefficiency%3Ar1",
         route: {
           capabilityId: "draw_for_answer_breaker_wall",
           actionId: "runner.draw_card",
@@ -76,7 +76,7 @@ it("searches cheaper Wall coverage without inventing the absent Code Gate instal
   });
   expect(
     input.legalActions.some(
-      (action) => action.source === "runner_226_1",
+      (action) => action.source === "c1e9",
     ),
   ).toBe(false);
   expect(result.evidence).toContain(
@@ -84,7 +84,7 @@ it("searches cheaper Wall coverage without inventing the absent Code Gate instal
   );
   expect(
     evaluateRunnerRunTargets({ input }).find(
-      (target) => target.targetServerId === "remote_1",
+      (target) => target.targetServerId === "r1",
     ),
   ).toMatchObject({
     pathPassability: "blocked_unpayable",
@@ -104,7 +104,7 @@ it("does not invent a contest budget for the unmodified capture", () => {
   ) as unknown as AiDecisionInputWithDeckCapabilities;
   expect(
     evaluateRunnerRunTargets({ input }).find(
-      (target) => target.targetServerId === "remote_1",
+      (target) => target.targetServerId === "r1",
     ),
   ).toMatchObject({ accessPayoffContestable: false });
 });

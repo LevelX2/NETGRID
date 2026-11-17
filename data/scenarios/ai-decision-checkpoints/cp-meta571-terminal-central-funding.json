@@ -2395,7 +2395,7 @@
             "accessIndex": 0,
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "abilityFamily": "agenda-scoring",
             "targets": {
@@ -2499,7 +2499,7 @@
             "accessIndex": 0,
             "stealCost": 2,
             "stealAdditionalCost": 2,
-            "stealCostSourceDefinitionIds": 62,
+            "stealCostSourceDefinitionIds": "62",
             "stealCostSourceTitles": "Fetal AI",
             "abilityFamily": "agenda-scoring",
             "targets": {
@@ -5392,7 +5392,7 @@
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:c9d7dad8",
             "accessIndex": 0,
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealCostPersistedForCurrentAccess": true,
             "abilityFamily": "run-access",
@@ -7803,7 +7803,7 @@
           "installPlacement": "root",
           "installedPositionKey": "installed-position-v1:c9d7dad8",
           "accessIndex": 0,
-          "stealCostSourceDefinitionIds": 578,
+          "stealCostSourceDefinitionIds": "578",
           "stealCostSourceTitles": "Red Herrings",
           "stealCostPersistedForCurrentAccess": true,
           "abilityFamily": "run-access",
@@ -8682,7 +8682,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 179,
-      "sideSafePlanningFingerprint": "fnv1a:46edf26e"
+      "sideSafePlanningFingerprint": "fnv1a:d113aa7a"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",

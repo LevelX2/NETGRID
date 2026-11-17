@@ -36,7 +36,7 @@ describe("match 7BFE exact decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_521_2.new_remote.corp_521_2",
+              "corp.install_card.c37y.new_remote.c37y",
           },
         ],
       };
@@ -46,7 +46,7 @@ describe("match 7BFE exact decision checkpoints", () => {
     expect(corpSameTurnScoreConversionPaths(result.input)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          agendaCardId: "corp_408_3",
+          agendaCardId: "c2iv",
           sameTurnGuaranteed: true,
           creditsRequired: 6,
           clicksRequired: 3,
@@ -57,7 +57,7 @@ describe("match 7BFE exact decision checkpoints", () => {
       residentPlanPortfolioSnapshot(result.input)!.instances.find(
         (plan) =>
           plan.instanceId ===
-          "plan:corp.score_agenda:agenda%3Acorp_408_3%3Aremote_1",
+          "plan:corp.score_agenda:agenda%3Ac2iv%3Ar1",
       )?.moduleState,
     ).toMatchObject({
       signal: {
@@ -143,7 +143,7 @@ describe("match 7BFE exact decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_456_1.rd.corp_456_1.4",
+              "corp.install_card.c2th.rd.c2th.4",
           },
         ],
         planExecution: {

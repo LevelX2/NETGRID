@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { cardInstanceIdForCopy } from "../../../../engine/src/game/state/card-instance-id";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
@@ -68,7 +69,7 @@ function replay(
           evidenceCodes: expect.arrayContaining(
             ordinaryCompanion
               ? [
-                  "runner_funding_consumer_buffer_budget_uncovered:runner.play_event.runner_40_1.runner_40_1.1",
+                  "runner_funding_consumer_buffer_budget_uncovered:runner.play_event.c8x.c8x.1",
                   "runner_funding_consumer_hand_after_funding:2|required:4",
                   "runner_funding_consumer_buffer_repair_reserved:2|clicks:2|credits:0|action:runner.draw_card",
                 ]
@@ -88,7 +89,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 
 it("rejects self-damage funding when buffer repair and the bound run cannot fit: G7 D420", () => {
   expect(replay(7, 420).actionId).not.toContain(
-    "runner_onr_classic_036_do-the-drine",
+    "runner_40",
   );
 });
 
@@ -105,24 +106,24 @@ it.each([
   (game, number, amount, ordinaryCompanion) => {
     const decision = replay(game, number, game === 33, ordinaryCompanion);
     if (amount === 0) {
-      expect(decision.actionId).toBe("runner.start_run.remote_1");
+      expect(decision.actionId).toBe("runner.start_run.r1");
       expect(
         decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toBe("plan:runner.contest_remote:remote%3Aremote_1");
+      ).toBe("plan:runner.contest_remote:remote%3Ar1");
       expect(
         decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-      ).toBe("plan:runner.contest_remote:remote%3Aremote_1");
+      ).toBe("plan:runner.contest_remote:remote%3Ar1");
       return;
     }
-    const copy = game === 33 ? 2 : 1;
+    const source = cardInstanceIdForCopy("runner", 40, game === 33 ? 2 : 1);
     expect(decision.actionId).toBe(
-      `runner.play_event.runner_onr_classic_036_do-the-drine_${copy}.runner_onr_classic_036_do-the-drine_${copy}.${amount}`,
+      `runner.play_event.${source}.${source}.${amount}`,
     );
     expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:runner.contest_remote:remote%3Aremote_1",
+      "plan:runner.contest_remote:remote%3Ar1",
     );
     expect(
       decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toBe("plan:runner.economy:run-support%3Aremote%3Aremote_1");
+    ).toBe("plan:runner.economy:run-support%3Aremote%3Ar1");
   },
 );

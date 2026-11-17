@@ -30,7 +30,7 @@ describe("Threat and Opportunity projections", () => {
   it("projects remote score threat as contest window and corp score threat", () => {
     const frame = frameWithRunTargets([
       runTarget({
-        targetServerId: "remote-1",
+        targetServerId: "r1",
         targetKind: "remote",
         accessPayoff: "score_threat",
         recommendation: "find_breaker_first",

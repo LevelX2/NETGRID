@@ -37,9 +37,9 @@ it("keeps the currently funded score instead of scattering the last two clicks a
     (a) => a.actionId === decision.actionId,
   )!;
   const parent =
-    "plan:corp.score_agenda:agenda%3Acorp_415_3%3Aremote_1";
+    "plan:corp.score_agenda:agenda%3Ac2kf%3Ar1";
   expect(action.type).toBe("advance_card");
-  expect(action.source).toBe("corp_415_3");
+  expect(action.source).toBe("c2kf");
   expect(decision.fallbackUsed).toBe(false);
   expect(
     decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,

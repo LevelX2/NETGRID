@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -32,7 +33,7 @@ it("rejects original R3 G2 D102 before exposing Tycho across the already funded 
   );
   const path = corpSameTurnScoreConversionPaths(input).find(
     (p) =>
-      p.agendaCardId.includes("tycho-extension") &&
+      referencesDefaultDeckCard(p.agendaCardId, 432) &&
       p.targetServerId === "new_remote",
   )!;
   expect(path).toMatchObject({ creditsRequired: 8, clicksRequired: 3 });
@@ -42,7 +43,7 @@ it("rejects original R3 G2 D102 before exposing Tycho across the already funded 
   const before = JSON.stringify(input),
     decision = chooseAiAction(input),
     action = input.legalActions.find((a) => a.actionId === decision.actionId)!;
-  expect(action.source).not.toContain("tycho-extension");
+  expect(action.source).not.toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 432));
   expect(decision.fallbackUsed).toBe(false);
   expect(JSON.stringify(input)).toBe(before);
 });

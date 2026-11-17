@@ -32,7 +32,7 @@ describe("selfplay cycle 100 decision checkpoints", () => {
       capture.input.playerView.servers
         .find((server) => server.id === "rd")
         ?.ice.find(
-          (ice) => ice.instanceId === "corp_72_2",
+          (ice) => ice.instanceId === "cg6",
         )?.effectivePostRezRunQuote,
     ).toMatchObject({
       complete: false,
@@ -47,7 +47,7 @@ describe("selfplay cycle 100 decision checkpoints", () => {
     );
     expect(selectedAction).toMatchObject({
       type: "rez_ice",
-      source: "corp_72_2",
+      source: "cg6",
       costs: [{ credits: 0 }],
     });
     expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
@@ -105,14 +105,14 @@ describe("selfplay cycle 100 decision checkpoints", () => {
     );
     const cashout = capture.input.legalActions.find(
       (action) =>
-        action.payload?.targetCardId === "corp_17_2" &&
+        action.payload?.targetCardId === "c3y" &&
         action.payload?.gainedCredits === 4,
     );
     expect(cashout).toMatchObject({
       type: "activated_card_ability",
-      source: "corp_134_3",
+      source: "ctz",
       payload: {
-        targetCardId: "corp_17_2",
+        targetCardId: "c3y",
         gainedCredits: 4,
       },
     });
@@ -127,9 +127,9 @@ describe("selfplay cycle 100 decision checkpoints", () => {
     });
     expect(selectedAction?.actionId).not.toBe(cashout!.actionId);
     const root =
-      "plan:corp.score_agenda:agenda%3Acorp_65_1%3Aremote_1";
+      "plan:corp.score_agenda:agenda%3Acel%3Ar1";
     const executor =
-      "plan:corp.economy:score-support%3Aagenda%3Acorp_65_1%3Aremote_1";
+      "plan:corp.economy:score-support%3Aagenda%3Acel%3Ar1";
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: root,
       leafExecutorInstanceId: executor,

@@ -149,7 +149,7 @@ it.each(["executor", "state", "origin", "target"])(
     if (kind === "executor") portfolio.executorInstanceId = "missing_executor";
     if (kind === "state") resolution.sourceStateVersion--;
     if (kind === "origin")
-      resolution.origin = { kind: "encounter", runId: "run_92" };
+      resolution.origin = { kind: "encounter", runId: 92 };
     if (kind === "target") resolution.targetCardInstanceId = "missing_program";
     const choice = input.playerView.pendingChoice!;
     expect(() =>

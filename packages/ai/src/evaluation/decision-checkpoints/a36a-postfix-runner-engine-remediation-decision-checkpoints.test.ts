@@ -22,8 +22,8 @@ describe("A36A postfix runner engine remediation checkpoints", () => {
 
   it("still permits the draw engine when enough cleanup capacity exists", () => {
     const checkpoint = mutateFixture(overflowBeforeCoverageJson, (result) => {
-      const installedCoverageId = "runner_35_3";
-      const competingDevelopmentId = "runner_283_1";
+      const installedCoverageId = "c7v";
+      const competingDevelopmentId = "c1qx";
       result.source.kind = "synthetic_companion";
       result.source.findingId = "A36A-POSTFIX-D45-ROOMY-HAND-CONTROL";
       result.engine.testOnlyGameState.runner.maxHandSize = 10;

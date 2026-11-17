@@ -41,7 +41,7 @@ describe("match 5201 runner decision checkpoints", () => {
         portfolio.instances.some(
           (instance) =>
             instance.instanceId ===
-            "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Arun%3Arunner.start_run.remote_1",
+            "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Arun%3Arunner.start_run.r1",
         ),
       ).toBe(true);
       const state = structuredClone(cp.engine.testOnlyGameState);
@@ -80,7 +80,7 @@ describe("match 5201 runner decision checkpoints", () => {
     if (!applied.ok) throw new Error("Native checkpoint draw was rejected");
     expect(applied.state.runner.grip).toHaveLength(4);
     expect(applied.state.runner.grip).toContain(
-      "runner_31_2",
+      "c6y",
     );
     expect(applied.state.runner.coreDamage).toBe(state.runner.coreDamage);
     expect(applied.state.runner.rig).toEqual(state.runner.rig);

@@ -24,7 +24,7 @@ function capture(json: unknown) {
 describe("meta 420 known ambush run admission", () => {
   it("leaves a missing rez state explicitly unresolved", () => {
     const { input } = capture(checkpointJson);
-    const source = input.playerView.servers.find((s) => s.id === "remote_1")!
+    const source = input.playerView.servers.find((s) => s.id === "r1")!
       .root[0]!;
     delete source.rezzed;
     expect(
@@ -44,7 +44,7 @@ describe("meta 420 known ambush run admission", () => {
     "does not infer a sole known damage ambush from a %s root",
     (state) => {
       const { input } = capture(checkpointJson);
-      const server = input.playerView.servers.find((s) => s.id === "remote_1")!;
+      const server = input.playerView.servers.find((s) => s.id === "r1")!;
       const source = server.root[0]!;
       if (state === "unknown") {
         source.known = false;
@@ -70,7 +70,7 @@ describe("meta 420 known ambush run admission", () => {
     "projects the active installed variant with rezzed=%s",
     (rezzed, amount) => {
       const { input } = capture(checkpointJson);
-      const source = input.playerView.servers.find((s) => s.id === "remote_1")!
+      const source = input.playerView.servers.find((s) => s.id === "r1")!
         .root[0]!;
       source.rezzed = rezzed;
       expect(
@@ -92,7 +92,7 @@ describe("meta 420 known ambush run admission", () => {
       runtime,
     );
     const result = chooseAiAction(input);
-    expect(result.actionId).not.toBe("runner.start_run.remote_1");
+    expect(result.actionId).not.toBe("runner.start_run.r1");
     expect(input.legalActions.some((a) => a.actionId === result.actionId)).toBe(
       true,
     );
@@ -103,7 +103,7 @@ describe("meta 420 known ambush run admission", () => {
     );
     expect(
       result.decisionDebug?.actionAlternatives
-        ?.find((a) => a.actionId === "runner.start_run.remote_1")
+        ?.find((a) => a.actionId === "runner.start_run.r1")
         ?.whyNot?.join(" "),
     ).toContain("known_access_damage_ambush");
   });
@@ -111,7 +111,7 @@ describe("meta 420 known ambush run admission", () => {
   it("keeps the real in-run safety response bound to its original remote parent", () => {
     const { input, runtime } = capture(windowJson);
     expect(runnerKnownAccessDamageJackOutAssessment(input)).toMatchObject({
-      serverId: "remote_1",
+      serverId: "r1",
     });
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(
@@ -124,7 +124,7 @@ describe("meta 420 known ambush run admission", () => {
     expect(result.decisionDebug?.planFirstDecision?.selectedPlan).toMatchObject(
       {
         moduleId: "runner.convert_run_window",
-        parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       },
     );
     expect(result.fallbackUsed).toBe(false);

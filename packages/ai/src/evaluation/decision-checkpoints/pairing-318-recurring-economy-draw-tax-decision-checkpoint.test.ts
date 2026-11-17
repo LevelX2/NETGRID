@@ -53,9 +53,9 @@ describe("pairing 318 recurring-economy draw-tax checkpoint", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:runner.develop_board_and_hand:card%3Arunner_291_1",
+            "plan:runner.develop_board_and_hand:card%3Ac1sp",
           leafExecutorInstanceId:
-            "plan:runner.economy:development-support%3Arunner_291_1",
+            "plan:runner.economy:development-support%3Ac1sp",
           route: {
             actionType: "gain_credit",
             semanticActionType: "economy.gain_credit",

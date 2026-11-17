@@ -24,7 +24,7 @@ const fixture = JSON.parse(
   ),
 );
 const actionId =
-  "runner.play_event.runner_40_1.runner_40_1.4";
+  "runner.play_event.c8x.c8x.4";
 function scenario(amount = 4) {
   expect(Object.values(fixture.validation).every(Boolean)).toBe(true);
   expect(Object.values(fixture.actualAfter.validation).every(Boolean)).toBe(
@@ -149,10 +149,10 @@ describe("native deep676 current self-damage projection", () => {
     expect(decision.fallbackUsed).toBe(false);
     const plan = decision.decisionDebug?.planFirstDecision;
     expect(plan?.rootPlanInstanceId).toBe(
-      "plan:runner.contest_remote:remote%3Aremote_1",
+      "plan:runner.contest_remote:remote%3Ar1",
     );
     expect(plan?.leafExecutorInstanceId).toBe(
-      "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+      "plan:runner.economy:run-support%3Aremote%3Ar1",
     );
     const lines = plan?.turnPlanning?.consideredLines?.filter(
       (line) => line.firstActionId === actionId,

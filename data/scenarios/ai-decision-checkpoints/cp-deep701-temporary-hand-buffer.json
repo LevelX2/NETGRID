@@ -13503,7 +13503,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 7,
+            "corpMandatoryAdditionalSourceDefinitionIds": "7",
             "visibility": {
               "class": "private_to_side"
             },
@@ -13900,7 +13900,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 7,
+            "corpMandatoryAdditionalSourceDefinitionIds": "7",
             "visibility": {
               "class": "private_to_side"
             },
@@ -14320,7 +14320,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 7,
+            "corpMandatoryAdditionalSourceDefinitionIds": "7",
             "visibility": {
               "class": "private_to_side"
             },
@@ -14710,7 +14710,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 7,
+            "corpMandatoryAdditionalSourceDefinitionIds": "7",
             "visibility": {
               "class": "private_to_side"
             },
@@ -15105,7 +15105,7 @@
             "corpMandatoryOptionalAgendaCardCount": 0,
             "corpMandatorySkivvissCardCount": 0,
             "corpMandatoryAdditionalSourceCount": 1,
-            "corpMandatoryAdditionalSourceDefinitionIds": 7,
+            "corpMandatoryAdditionalSourceDefinitionIds": "7",
             "visibility": {
               "class": "private_to_side"
             },
@@ -15881,7 +15881,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 7,
+          "corpMandatoryAdditionalSourceDefinitionIds": "7",
           "visibility": {
             "class": "private_to_side"
           },
@@ -16278,7 +16278,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 7,
+          "corpMandatoryAdditionalSourceDefinitionIds": "7",
           "visibility": {
             "class": "private_to_side"
           },
@@ -16698,7 +16698,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 7,
+          "corpMandatoryAdditionalSourceDefinitionIds": "7",
           "visibility": {
             "class": "private_to_side"
           },
@@ -17088,7 +17088,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 7,
+          "corpMandatoryAdditionalSourceDefinitionIds": "7",
           "visibility": {
             "class": "private_to_side"
           },
@@ -17483,7 +17483,7 @@
           "corpMandatoryOptionalAgendaCardCount": 0,
           "corpMandatorySkivvissCardCount": 0,
           "corpMandatoryAdditionalSourceCount": 1,
-          "corpMandatoryAdditionalSourceDefinitionIds": 7,
+          "corpMandatoryAdditionalSourceDefinitionIds": "7",
           "visibility": {
             "class": "private_to_side"
           },
@@ -18061,7 +18061,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 533,
-      "sideSafePlanningFingerprint": "fnv1a:5bbdd5ce"
+      "sideSafePlanningFingerprint": "fnv1a:c208ca2e"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_blink_pressure_rig_1.0.0",

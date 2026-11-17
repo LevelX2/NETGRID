@@ -31,7 +31,7 @@ it.each([5, 7])(
       runtime,
     );
     const recovery = input.legalActions.find(
-      (a) => a.payload?.targetCardId === "runner_356_1",
+      (a) => a.payload?.targetCardId === "c275",
     )!;
     const result = chooseAiAction(input);
     expect(result.actionId).not.toBe(recovery.actionId);
@@ -43,7 +43,7 @@ it.each([5, 7])(
             moduleId: "runner.develop_board_and_hand",
             viability: "ready",
             evidenceCodes: expect.arrayContaining([
-              "runner_recovery_search_target:runner_356_1:card_specific_purpose:generic_heap_recovery",
+              "runner_recovery_search_target:c275:card_specific_purpose:generic_heap_recovery",
             ]),
           }),
         ]),

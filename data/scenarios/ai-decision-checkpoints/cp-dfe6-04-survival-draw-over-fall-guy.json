@@ -4812,7 +4812,7 @@
           "publicRevealTitles": "Wall of Ice",
           "serverId": "archives",
           "archivesRevealCount": 1,
-          "archivesRevealDefinitionIds": 490,
+          "archivesRevealDefinitionIds": "490",
           "archivesRevealTitles": "Wall of Ice",
           "archivesRevealAgendaDefinitionIds": "",
           "redactedKind": "hidden_zone",

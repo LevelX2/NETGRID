@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "corp",
   "stateVersion": 200,
-  "stateHash": "fnv1a:cbdf9798",
+  "stateHash": "fnv1a:c3090293",
   "input": {
     "matchId": "match_671a921cdf5cd7a4",
     "side": "corp",
@@ -32449,7 +32449,7 @@
                 "preventedTrashCount": 0,
                 "trashedCount": 1,
                 "trashedCardDefinitionId": 35,
-                "trashedCardDefinitionIds": 35,
+                "trashedCardDefinitionIds": "35",
                 "v1922RunnerProgramAbility": "run_end_trash_used_breaker",
                 "runEndTrashEffectCount": 1,
                 "runEndTrashPreventedOrReplacedCount": 0,
@@ -34565,7 +34565,7 @@
                 "postInstallRezQuoteBaseCredits": 4,
                 "postInstallRezQuoteFinalCredits": 2,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallRezQuoteReductionSourceDefinitionIds": 529,
+                "postInstallRezQuoteReductionSourceDefinitionIds": "529",
                 "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2qu\",\"iceDefinitionId\":444,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":444,\"sourceTitle\":\"Crystal Wall\"}]}",
                 "effectKind": "install_card"
               }
@@ -35589,7 +35589,7 @@
                 "postInstallRezQuoteBaseCredits": 2,
                 "postInstallRezQuoteFinalCredits": 0,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallRezQuoteReductionSourceDefinitionIds": 529,
+                "postInstallRezQuoteReductionSourceDefinitionIds": "529",
                 "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2s6\",\"iceDefinitionId\":450,\"effectiveStrength\":3,\"encounterStrength\":3,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":450,\"sourceTitle\":\"Data Wall 2.0\"}]}",
                 "effectKind": "install_card"
               }
@@ -35732,7 +35732,7 @@
                 "postInstallRezQuoteBaseCredits": 6,
                 "postInstallRezQuoteFinalCredits": 4,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallRezQuoteReductionSourceDefinitionIds": 529,
+                "postInstallRezQuoteReductionSourceDefinitionIds": "529",
                 "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2y5\",\"iceDefinitionId\":477,\"effectiveStrength\":7,\"encounterStrength\":7,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":477,\"sourceTitle\":\"Rock Is Strong\"}]}",
                 "effectKind": "install_card"
               }
@@ -35811,9 +35811,9 @@
           "normalCreditsSpent": 3,
           "creditGainBaseAmount": 9,
           "creditGainBonusAmount": 1,
-          "creditGainModifierSourceDefinitionIds": 49,
+          "creditGainModifierSourceDefinitionIds": "49",
           "firstPrepCreditGainBonus": 1,
-          "firstPrepCreditGainBonusSourceDefinitionIds": 49,
+          "firstPrepCreditGainBonusSourceDefinitionIds": "49",
           "gainCreditsAmount": 9,
           "abilityFamily": "payment-costs",
           "effectKind": "gain_credits",
@@ -35868,9 +35868,9 @@
                 "gainedCredits": 10,
                 "creditGainBaseAmount": 9,
                 "creditGainBonusAmount": 1,
-                "creditGainModifierSourceDefinitionIds": 49,
+                "creditGainModifierSourceDefinitionIds": "49",
                 "firstPrepCreditGainBonus": 1,
-                "firstPrepCreditGainBonusSourceDefinitionIds": 49
+                "firstPrepCreditGainBonusSourceDefinitionIds": "49"
               },
               "resolvedEffects": [
                 {
@@ -40522,7 +40522,7 @@
           "publicRevealKind": "reveal",
           "publicRevealDefinitionIds": "494,567,405",
           "publicRevealTitles": "Annual Reviews||Crystal Palace Station Grid||Corporate Coup",
-          "revealedAgendaDefinitionIds": 405,
+          "revealedAgendaDefinitionIds": "405",
           "revealedNonAgendaCount": 2,
           "agendaStoredInHq": false,
           "choiceVisibility": "hidden_info_barrier",
@@ -40541,7 +40541,7 @@
             "publicRevealKind": "reveal",
             "publicRevealDefinitionIds": "494,567,405",
             "publicRevealTitles": "Annual Reviews||Crystal Palace Station Grid||Corporate Coup",
-            "revealedAgendaDefinitionIds": 405,
+            "revealedAgendaDefinitionIds": "405",
             "agendaStoredInHq": false,
             "choiceVisibility": "hidden_info_barrier",
             "redactedKind": "hidden_zone"
@@ -40596,7 +40596,7 @@
                 "publicRevealKind": "reveal",
                 "publicRevealDefinitionIds": "494,567,405",
                 "publicRevealTitles": "Annual Reviews||Crystal Palace Station Grid||Corporate Coup",
-                "revealedAgendaDefinitionIds": 405,
+                "revealedAgendaDefinitionIds": "405",
                 "revealedCount": 3,
                 "revealedNonAgendaCount": 2,
                 "agendaStoredInHq": false,
@@ -40631,7 +40631,7 @@
           "publicRevealKind": "reveal",
           "publicRevealDefinitionIds": "494,567,405",
           "publicRevealTitles": "Annual Reviews||Crystal Palace Station Grid||Corporate Coup",
-          "revealedAgendaDefinitionIds": 405,
+          "revealedAgendaDefinitionIds": "405",
           "storedAgendaDefinitionId": 405,
           "revealedNonAgendaCount": 2,
           "shuffledIntoRdCount": 2,
@@ -40653,7 +40653,7 @@
             "publicRevealKind": "reveal",
             "publicRevealDefinitionIds": "494,567,405",
             "publicRevealTitles": "Annual Reviews||Crystal Palace Station Grid||Corporate Coup",
-            "revealedAgendaDefinitionIds": 405,
+            "revealedAgendaDefinitionIds": "405",
             "storedAgendaDefinitionId": 405,
             "agendaStoredInHq": true,
             "choiceVisibility": "hidden_info_barrier",
@@ -40710,7 +40710,7 @@
                 "revealedCount": 3,
                 "agendaStoredInHq": true,
                 "storedAgendaDefinitionId": 405,
-                "revealedAgendaDefinitionIds": 405,
+                "revealedAgendaDefinitionIds": "405",
                 "publicRevealDefinitionIds": "494,567,405",
                 "publicRevealTitles": "Annual Reviews||Crystal Palace Station Grid||Corporate Coup",
                 "revealedNonAgendaCount": 2,

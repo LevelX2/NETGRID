@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-405-configurable-breaker-coverage.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -23,7 +24,7 @@ it("SP-250 binds the legal configurable breaker installation to the missing deco
   const install = input.legalActions.find(
     (a) =>
       a.type === "install_card" &&
-      a.actionId.includes("fubar") &&
+      referencesDefaultDeckCard(a.source, 146) &&
       a.payload?.runnerProgramTrashBeforeInstall !== true,
   )!;
   expect(install.expiresAtStateVersion).toBe(281);
@@ -33,7 +34,7 @@ it("SP-250 binds the legal configurable breaker installation to the missing deco
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
         route: {
           actionId: install.actionId,
           stateVersion: 281,

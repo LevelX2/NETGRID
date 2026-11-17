@@ -49,14 +49,14 @@ describe("King of the Road remote run regressions", () => {
       (action) =>
         action.type === "play_event" &&
         action.payload?.bypassFirstIce === true &&
-        action.payload?.serverId === "remote_1",
+        action.payload?.serverId === "r1",
     );
 
     expect(bypass).toBeDefined();
     expect(selectedAction).toBe(bypass);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       route: { actionType: "play_event" },
     });
   });
@@ -65,7 +65,7 @@ describe("King of the Road remote run regressions", () => {
     const { input, decision, selectedAction } =
       replayDecision(rezzedBypassReplay);
     const fort = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(input.playerView.own).toMatchObject({ credits: 3, clicks: 1 });
     expect(fort?.ice).toEqual([
@@ -100,8 +100,8 @@ describe("King of the Road remote run regressions", () => {
       creditsAfterRun: 1,
     });
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
       route: { actionId: bypass?.actionId, actionType: "play_event" },
     });
   });
@@ -117,11 +117,11 @@ describe("King of the Road remote run regressions", () => {
     );
     const targets = evaluateRunnerRunTargets({ input });
     const direct = targets.find(
-      (target) => target.actionId === "runner.start_run.remote_1",
+      (target) => target.actionId === "runner.start_run.r1",
     );
     const bypass = targets.find(
       (target) =>
-        target.targetServerId === "remote_1" &&
+        target.targetServerId === "r1" &&
         target.runActionProjection.bypassFirstIce,
     );
     expect(direct).toMatchObject({
@@ -136,7 +136,7 @@ describe("King of the Road remote run regressions", () => {
   it("still requires payment of the visible steal cost after a rezzed-ICE bypass", () => {
     const { input } = replayDecision(rezzedBypassReplay);
     const fort = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     if (!fort?.runnerAgendaStealCostQuote)
       throw new Error("Expected the captured Engine steal quote.");
@@ -158,7 +158,7 @@ describe("King of the Road remote run regressions", () => {
   it("keeps the normal reserve if rezzed ICE hides a second, unknown encounter", () => {
     const { input } = replayDecision(rezzedBypassReplay);
     const fort = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     if (!fort) throw new Error("Expected the captured remote.");
     fort.ice.unshift({
@@ -184,7 +184,7 @@ describe("King of the Road remote run regressions", () => {
   it("keeps the normal reserve if a second unknown ICE remains after the bypass", () => {
     const { input } = replayDecision(remoteBypassReplay);
     const fort = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     const outerIce = fort?.ice.at(-1);
     if (!fort || outerIce?.known !== false)
@@ -208,7 +208,7 @@ describe("King of the Road remote run regressions", () => {
 
     expect(selectedAction?.type).toBe("continue_run");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_2",
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar2",
       leafExecutorInstanceId: expect.stringContaining(
         "runner.convert_run_window",
       ),

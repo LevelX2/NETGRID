@@ -21,18 +21,18 @@ function input() {
 describe("meta 403 remembered unrezzed remote access", () => {
   it("keeps the two observed declined roots known when the PlayerView hides them again", () => {
     const current = input();
-    const remote = current.playerView.servers.find((s) => s.id === "remote_1")!;
+    const remote = current.playerView.servers.find((s) => s.id === "r1")!;
     expect(remote.root).toHaveLength(2);
     expect(remote.root.every((card) => !card.known)).toBe(true);
     expect(
       reconstructBeliefState(current)
         .runnerOpponentModel?.knownPositionMemory.filter(
-          (entry) => entry.zone === "remote_1",
+          (entry) => entry.zone === "r1",
         )
         .map((entry) => entry.positionKey),
     ).toEqual(["root:0", "root:1"]);
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(current, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(current, "r1"),
     ).toMatchObject({
       applies: true,
       suppressesPlanBonus: true,
@@ -42,13 +42,13 @@ describe("meta 403 remembered unrezzed remote access", () => {
 
   it("does not suppress a remote with an additional unanswered root position", () => {
     const current = input();
-    const remote = current.playerView.servers.find((s) => s.id === "remote_1")!;
+    const remote = current.playerView.servers.find((s) => s.id === "r1")!;
     remote.root.push({
       ...remote.root[0]!,
       instanceId: "unobserved-third-root",
     });
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(current, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(current, "r1"),
     ).toBeUndefined();
   });
 
@@ -58,7 +58,7 @@ describe("meta 403 remembered unrezzed remote access", () => {
     const known = reconstructBeliefState(
       current,
     ).runnerOpponentModel!.knownPositionMemory.find(
-      (entry) => entry.zone === "remote_1",
+      (entry) => entry.zone === "r1",
     )!;
     for (const event of [
       ...current.eventTail,
@@ -75,7 +75,7 @@ describe("meta 403 remembered unrezzed remote access", () => {
       ]),
     );
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(current, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(current, "r1"),
     ).toBeUndefined();
   });
 
@@ -99,10 +99,10 @@ describe("meta 403 remembered unrezzed remote access", () => {
       runnerTurnPlannerMode: "cutover",
     });
     expect(result.actionId).toBe(
-      "runner.install_card.runner_208_1.runner_208_1",
+      "runner.install_card.c1a9.c1a9",
     );
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(current, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(current, "r1"),
     ).toMatchObject({
       applies: true,
       suppressesPlanBonus: true,

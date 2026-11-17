@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { expect, it } from "vitest";
 import first from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-455-r8-g3-d414.json";
 import repeated from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-455-r8-g3-d459.json";
@@ -38,11 +39,11 @@ it.each([
     expect(decision.fallbackUsed).toBe(false);
     expect(a.type).toBe("install_card");
     expect(a.payload).toMatchObject({
-      cardId: "corp_415_1",
-      serverId: "remote_1",
+      cardId: "c2kd",
+      serverId: "r1",
     });
     const parent =
-      "plan:corp.score_agenda:agenda%3Acorp_415_1%3Aremote_1";
+      "plan:corp.score_agenda:agenda%3Ac2kd%3Ar1";
     expect(
       decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
     ).toBe(parent);
@@ -68,7 +69,7 @@ function facts() {
     first.runtime.residentPlanPortfolio.instances.find(
       (x) =>
         x.moduleId === "corp.score_agenda" &&
-        x.instanceId.includes("hostile-takeover_1"),
+        referencesDefaultDeckCard(x.instanceId, 415, 1),
     )!.moduleState,
   ) as unknown as { signal: CorpScoreProjectSignal };
   const defense = structuredClone(
@@ -168,9 +169,9 @@ it("retains the complete cost certificate after installing the score target", ()
   const d = chooseAiAction(input),
     a = input.legalActions.find((a) => a.actionId === d.actionId)!;
   expect(a.type).toBe("advance_card");
-  expect(a.source).toBe("corp_415_1");
+  expect(a.source).toBe("c2kd");
   const parent =
-    "plan:corp.score_agenda:agenda%3Acorp_415_1%3Aremote_1";
+    "plan:corp.score_agenda:agenda%3Ac2kd%3Ar1";
   expect(d.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe(
     parent,
   );
@@ -213,8 +214,8 @@ it.each([
     installed.input,
   ) as unknown as AiDecisionInputWithDeckCapabilities;
   const agenda = input.playerView.servers
-    .find((s) => s.id === "remote_1")!
-    .root.find((c) => c.instanceId === "corp_415_1")!;
+    .find((s) => s.id === "r1")!
+    .root.find((c) => c.instanceId === "c2kd")!;
   const q = agenda.scoreContinuationQuote!;
   if (!q.complete)
     throw new Error("Expected a complete installed score fixture quote");
@@ -231,7 +232,7 @@ it.each([
   if (kind === "missing") delete agenda.scoreContinuationQuote;
   if (kind === "negative")
     Object.assign(q, { advancementCreditCostPerCounter: -1 });
-  const cost = corpInstalledScoreResourceCost(input, agenda, "remote_1");
+  const cost = corpInstalledScoreResourceCost(input, agenda, "r1");
   if (kind === "current")
     expect(cost).toEqual({ stateVersion: 414, credits: 2, clicks: 2 });
   else expect(cost).toBeUndefined();

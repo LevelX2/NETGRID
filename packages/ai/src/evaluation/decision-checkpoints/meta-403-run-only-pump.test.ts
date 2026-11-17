@@ -38,7 +38,7 @@ describe("meta 403 run-only credits survive the pump viability quote", () => {
       expect(decision.fallbackUsed).toBe(false);
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
         rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_223",
+        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A223",
       });
     },
   );

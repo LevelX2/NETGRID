@@ -3,7 +3,7 @@
   "provenance": "reconstructed_from_persisted_decision_sources",
   "actor": "runner",
   "stateVersion": 369,
-  "stateHash": "fnv1a:dd2df371",
+  "stateHash": "fnv1a:5bcba203",
   "input": {
     "matchId": "match_815dda7b41f706cb",
     "side": "runner",
@@ -27145,7 +27145,7 @@
                 "preventedTrashCount": 0,
                 "trashedCount": 1,
                 "trashedCardDefinitionId": 35,
-                "trashedCardDefinitionIds": 35,
+                "trashedCardDefinitionIds": "35",
                 "v1922RunnerProgramAbility": "run_end_trash_used_breaker",
                 "runEndTrashEffectCount": 2,
                 "runEndTrashPreventedOrReplacedCount": 0,
@@ -45464,7 +45464,7 @@
                 "postInstallRezQuoteBaseCredits": 5,
                 "postInstallRezQuoteFinalCredits": 3,
                 "postInstallRezQuoteMandatoryAgendaPointCost": 0,
-                "postInstallRezQuoteReductionSourceDefinitionIds": 572,
+                "postInstallRezQuoteReductionSourceDefinitionIds": "572",
                 "postInstallEffectiveRunQuoteJson": "{\"iceInstanceId\":\"c2tp\",\"iceDefinitionId\":457,\"effectiveStrength\":5,\"encounterStrength\":5,\"subroutines\":[{\"id\":\"printed_subroutines_end_the_run\",\"type\":\"end_the_run\",\"sourceDefinitionId\":457,\"sourceTitle\":\"Fire Wall\"},{\"id\":\"card_implementation.582.additional_subroutine.1.end_the_run_unless_runner_pays\",\"type\":\"end_the_run_unless_runner_pays\",\"amount\":1,\"sourceDefinitionId\":582,\"sourceTitle\":\"Tesseract Fort Construction\",\"dynamicSourceKind\":\"additional_subroutine\"}]}",
                 "effectKind": "install_card"
               }

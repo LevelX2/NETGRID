@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { afterEach, expect, it } from "vitest";
 import {
   applyAction,
@@ -69,9 +70,9 @@ function fixture(sourceDefinitionId = corporateWar) {
   const state = result.state;
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
-    .withCorpRemoteRoot("remote_1", corporateWar)
-    .withRezzedCorpIceOnServer("remote_1", fireWall)
-    .withCorpIceOnServer("remote_1", sphinx)
+    .withCorpRemoteRoot("r1", corporateWar)
+    .withRezzedCorpIceOnServer("r1", fireWall)
+    .withCorpIceOnServer("r1", sphinx)
     .withCorpCredits(11)
     .withRunnerCredits(11)
     .withRunnerProgramInstalled(228)
@@ -195,7 +196,7 @@ it("does not count a bare remote whose current run restriction blocks access", (
   const { input, agenda, install } = fixture();
   const existing = input.playerView.servers.find(
     (server) =>
-      server.id.startsWith("remote_") &&
+      isRemoteServerId(server.id) &&
       server.root.length === 1 &&
       server.root[0]?.type === "agenda",
   )!;

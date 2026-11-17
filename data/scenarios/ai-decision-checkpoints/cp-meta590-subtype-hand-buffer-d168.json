@@ -1715,7 +1715,7 @@
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:c9d7dad8",
             "accessIndex": 0,
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealCostPersistedForCurrentAccess": true,
             "abilityFamily": "run-access",
@@ -8625,7 +8625,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 167,
-      "sideSafePlanningFingerprint": "fnv1a:bce4da3c"
+      "sideSafePlanningFingerprint": "fnv1a:5f4665a0"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",

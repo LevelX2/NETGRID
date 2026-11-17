@@ -1501,7 +1501,7 @@
             "installPlacement": "root",
             "installedPositionKey": "installed-position-v1:c9d7dad8",
             "accessIndex": 0,
-            "stealCostSourceDefinitionIds": 578,
+            "stealCostSourceDefinitionIds": "578",
             "stealCostSourceTitles": "Red Herrings",
             "stealCostPersistedForCurrentAccess": true,
             "abilityFamily": "run-access",
@@ -8444,7 +8444,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 174,
-      "sideSafePlanningFingerprint": "fnv1a:c84ccebf"
+      "sideSafePlanningFingerprint": "fnv1a:70d5de8f"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_last_call_at_rd_1.0.0",

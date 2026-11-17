@@ -23,7 +23,7 @@ function capture(json: unknown) {
 function choose(json: unknown) {
   const { input, runtime } = capture(json);
   if (json === replacementJson)
-    bindSyntheticAgendaStealQuotes(input, "remote_1", 0, {});
+    bindSyntheticAgendaStealQuotes(input, "r1", 0, {});
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(
     input,
@@ -47,10 +47,14 @@ describe("meta 410 current remote identity and access purpose", () => {
     (knownPrefix) => {
       const { input } = capture(replacementJson);
       const asset = structuredClone(
-        input.eventTail.find((e) => e.eventId === 334)!,
+        input.eventTail.find(
+          (e) => e.type === "access_card" && e.stateVersionAfter === 334,
+        )!,
       );
       const replacement = structuredClone(
-        input.eventTail.find((e) => e.eventId === 339)!,
+        input.eventTail.find(
+          (e) => e.publicPayload.rootReplacement === "asset_to_agenda",
+        )!,
       );
       const upgrade = {
         ...structuredClone(asset),
@@ -68,7 +72,7 @@ describe("meta 410 current remote identity and access purpose", () => {
       const roots = reconstructBeliefState(
         input,
       ).runnerOpponentModel!.knownPositionMemory.filter(
-        (x) => x.zone === "remote_1" && x.positionKey.startsWith("root:"),
+        (x) => x.zone === "r1" && x.positionKey.startsWith("root:"),
       );
       expect(roots.map((x) => [x.positionKey, x.definitionId])).toEqual(
         knownPrefix ? [["root:0", 578]] : [],
@@ -84,23 +88,23 @@ describe("meta 410 current remote identity and access purpose", () => {
       ),
     ).toBe(true);
     expect(
-      input.playerView.servers.find((s) => s.id === "remote_1")!.root[0]!.known,
+      input.playerView.servers.find((s) => s.id === "r1")!.root[0]!.known,
     ).toBe(false);
     const belief = reconstructBeliefState(input);
     expect(
       belief.runnerOpponentModel?.knownPositionMemory.filter(
-        (x) => x.zone === "remote_1" && x.positionKey.startsWith("root:"),
+        (x) => x.zone === "r1" && x.positionKey.startsWith("root:"),
       ),
     ).toEqual([]);
     expect(
-      evaluateKnownRemoteAccessPayoff(input, "remote_1", belief)
+      evaluateKnownRemoteAccessPayoff(input, "r1", belief)
         .knownNoCurrentPayoff,
     ).toBe(false);
   });
 
   it("lets the existing contest owner use the payable last-click threat route", () => {
     const result = choose(replacementJson);
-    expect(result.actionId).toBe("runner.start_run.remote_1");
+    expect(result.actionId).toBe("runner.start_run.r1");
     expect(
       result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.contest_remote");

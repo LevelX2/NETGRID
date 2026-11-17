@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -45,8 +46,8 @@ it("admits the original side-safe G26 D299 Main Office conversion with two Chica
     (a) => a.actionId === decision.actionId,
   )!;
   expect(action.type).toBe("install_card");
-  expect(action.source).toContain("main-office-relocation");
-  expect(action.payload?.serverId).not.toBe("remote_1");
+  expect(action.source).toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 417));
+  expect(action.payload?.serverId).not.toBe("r1");
   expect(decision.reasonCode).toBe("plan_first.corp.score_agenda");
   expect(JSON.stringify(input)).toBe(before);
 });

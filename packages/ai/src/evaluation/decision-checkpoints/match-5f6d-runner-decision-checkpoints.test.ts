@@ -13,11 +13,11 @@ import { bindHistoricalRunEventCadence, publishOpenTraceBid } from "./checkpoint
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
-const NEWSGROUP_INSTANCE_ID = "runner_257_1";
+const NEWSGROUP_INSTANCE_ID = "c1l5";
 const SHATTERED_REMAINS_INSTANCE_ID =
-  "corp_527_1";
+  "c399";
 const VISIBLE_TAG_PUNISH_INSTANCE_ID =
-  "corp_onr_classic_026_street-enforcer_fixture_1";
+  "corp_30_fixture_1";
 const VISIBLE_TAG_PUNISH_DEFINITION_ID = 30;
 
 describe("match 5F6D runner decision checkpoints", () => {
@@ -63,7 +63,7 @@ describe("match 5F6D runner decision checkpoints", () => {
         (instanceId) => instanceId !== SHATTERED_REMAINS_INSTANCE_ID,
       );
       const remote = state.corp.servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       );
       if (!remote) throw new Error("Expected Remote 1");
       remote.root.push(VISIBLE_TAG_PUNISH_INSTANCE_ID);
@@ -71,7 +71,7 @@ describe("match 5F6D runner decision checkpoints", () => {
         ...state.cardInstances[SHATTERED_REMAINS_INSTANCE_ID]!,
         instanceId: VISIBLE_TAG_PUNISH_INSTANCE_ID,
         definitionId: VISIBLE_TAG_PUNISH_DEFINITION_ID,
-        zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+        zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
         faceup: true,
         rezzed: true,
       };
@@ -148,7 +148,7 @@ describe("match 5F6D runner decision checkpoints", () => {
         forbiddenActions: [
           {
             actionId:
-              "runner.activated_card_ability.runner_257_1.runner_257_1.activated.0",
+              "runner.activated_card_ability.c1l5.c1l5.activated.0",
           },
         ],
       };
@@ -168,7 +168,7 @@ describe("match 5F6D runner decision checkpoints", () => {
         checkpoint.source.findingId = "5F6D-C03-FUNDED-CLOAK-FIRST";
         checkpoint.expectation = {
           choice: {
-            selectedOptionIdsPrefix: ["card_runner_223_2"],
+            selectedOptionIdsPrefix: ["card_c1dm"],
           },
         };
       },

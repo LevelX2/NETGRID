@@ -48,7 +48,7 @@ it("owns the original public hardware-trash access choice at the Ambush executor
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.selectedChoices).toEqual({
     choiceId: input.playerView.pendingChoice!.choiceId,
-    selectedOptionIds: ["target_runner_341_2"],
+    selectedOptionIds: ["target_c23u"],
   });
   expect(executor.moduleId).toBe("corp.ambush_and_bluff");
   expect(executor.moduleState).toMatchObject({
@@ -58,7 +58,7 @@ it("owns the original public hardware-trash access choice at the Ambush executor
         actionId: decision.actionId,
         targetCardType: "hardware",
         observedAtStateVersion: 166,
-        targetCardInstanceIds: ["runner_341_2"],
+        targetCardInstanceIds: ["c23u"],
       },
     },
   });

@@ -57,13 +57,13 @@ describe("pairing563 native owner regressions", () => {
       reconstructBeliefState(f.input).runnerOpponentModel!.knownPositionMemory,
     ).toContainEqual(
       expect.objectContaining({
-        zone: "remote_1",
+        zone: "r1",
         positionKey: "root:0",
         definitionId: 565,
-        sourceEventId: "evt_231",
+        sourceEventId: 232,
       }),
     );
-    expect(runnerTargetHasTerminalContestThreat(f.input, "remote_1")).toBe(
+    expect(runnerTargetHasTerminalContestThreat(f.input, "r1")).toBe(
       false,
     );
     const decision = choose(f);
@@ -81,11 +81,11 @@ describe("pairing563 native owner regressions", () => {
   ])("does not certify an uncertain root through %s", (change) => {
     const f = original("known-root-sibling");
     const witnessedIdentity = f.input.eventTail.find(
-      (e: any) => e.eventId === "evt_231",
+      (e: any) => e.eventId === 232,
     ).publicPayload.installedPositionKey;
     if (change === "unknown_sibling" || change === "lower_gap")
       f.input.playerView.servers
-        .find((s: any) => s.id === "remote_1")
+        .find((s: any) => s.id === "r1")
         .root.push({
           instanceId: "counterfactual-unknown",
           known: false,
@@ -96,8 +96,8 @@ describe("pairing563 native owner regressions", () => {
       f.input.eventTail,
       f.input.playerView.publicEvents ?? [],
     ]) {
-      const seen = events.find((e: any) => e.eventId === "evt_231");
-      const removed = events.find((e: any) => e.eventId === "evt_248");
+      const seen = events.find((e: any) => e.eventId === 232);
+      const removed = events.find((e: any) => e.eventId === 249);
       if (change === "missing_identity" && seen)
         delete seen.publicPayload.installedPositionKey;
       if (change === "same_card" && removed)
@@ -112,7 +112,7 @@ describe("pairing563 native owner regressions", () => {
         removed.publicPayload.actionType = "trash_accessed_card";
       }
     }
-    expect(runnerTargetHasTerminalContestThreat(f.input, "remote_1")).toBe(
+    expect(runnerTargetHasTerminalContestThreat(f.input, "r1")).toBe(
       true,
     );
   });
@@ -231,7 +231,7 @@ describe("pairing563 native owner regressions", () => {
     if (change === "wrong_server")
       previous.instances.find(
         (i: any) => i.instanceId === pending.executorInstanceId,
-      ).moduleState.gap.targetServerId = "remote_2";
+      ).moduleState.gap.targetServerId = "r2";
     if (change === "wrong_child_side")
       previous.instances.find(
         (i: any) => i.instanceId === pending.executorInstanceId,
@@ -327,7 +327,7 @@ describe("pairing563 native owner regressions", () => {
     )!;
     expect(action.type).toBe("activated_card_ability");
     expect(action.source).toBe(
-      "corp_530_1",
+      "c39x",
     );
     const quote = JSON.parse(action.payload.hostedCreditBankCycleQuoteJson);
     expect(quote).toMatchObject({

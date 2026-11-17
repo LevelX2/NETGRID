@@ -11,7 +11,7 @@ import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decis
 
 it.each([
   ["rd", before, "code_gate"],
-  ["remote_1", after, "wall"],
+  ["r1", after, "wall"],
 ] as const)(
   "SP-295 does not prepare a %s information run rejected by its own parent policy",
   (server, checkpoint, subtype) => {

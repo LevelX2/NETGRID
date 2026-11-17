@@ -3506,7 +3506,7 @@
           "choiceId": "p3_34_advancement_distribution_38",
           "sourceDefinitionId": 512,
           "targetCount": 1,
-          "targetCardDefinitionIds": 415,
+          "targetCardDefinitionIds": "415",
           "targetCardDefinitionId": 415,
           "targetCardId": "c2kd",
           "addedAdvancementCounters": 4,
@@ -3517,7 +3517,7 @@
           "targets": {
             "sourceDefinitionId": 512,
             "targetCardDefinitionId": 415,
-            "targetCardDefinitionIds": 415,
+            "targetCardDefinitionIds": "415",
             "choiceVisibility": "public"
           },
           "visibility": {

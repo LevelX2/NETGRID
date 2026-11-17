@@ -56,7 +56,7 @@ function assessment(
   const action = input.legalActions.find(
     (a) =>
       a.type === "rez_ice" &&
-      a.actionId.includes("olivia-salazar") === discounted,
+      (a.payload?.discountedRezSourceDefinitionId === 575) === discounted,
   )!;
   const route = projectExactCorpIceRezRoute({
     input,

@@ -36,7 +36,7 @@ describe("match 978d Corp remediation checkpoints", () => {
       expect.arrayContaining([
         "plan_module:corp.economy",
         "plan_step_capability:develop_or_convert_corp_economy",
-        "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:rd:corp_448_1:gap_2",
+        "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:rd:c2rp:gap_2",
         "plan_priority_delegated_from:plan:corp.defend_servers:server-defense-portfolio",
       ]),
     );
@@ -51,7 +51,7 @@ describe("match 978d Corp remediation checkpoints", () => {
         expect.objectContaining({
           signal: expect.objectContaining({
             feasible: false,
-            evidenceCode: "corp_last_click_score_install_deferred:remote_1",
+            evidenceCode: "corp_last_click_score_install_deferred:r1",
           }),
         }),
       ]),

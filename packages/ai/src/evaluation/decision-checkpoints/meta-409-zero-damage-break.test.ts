@@ -55,11 +55,11 @@ describe("meta 409 zero-damage encounter purpose", () => {
         reasonCode: "plan_first.runner.convert_run_window",
         decisionDebug: {
           planFirstDecision: {
-            rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+            rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
             leafExecutorInstanceId:
-              "plan:runner.convert_run_window:run%3Arun_455",
+              "plan:runner.convert_run_window:run%3A455",
             selectedStep: {
-              planInstanceId: "plan:runner.convert_run_window:run%3Arun_455",
+              planInstanceId: "plan:runner.convert_run_window:run%3A455",
             },
             route: {
               actionId: expected,

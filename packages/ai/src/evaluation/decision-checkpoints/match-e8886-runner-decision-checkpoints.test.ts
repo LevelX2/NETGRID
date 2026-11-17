@@ -1,5 +1,6 @@
 import { hashGameState } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 
 import zeroCreditRdJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e8886-01-zero-credit-rd-risk.json";
 import junkyardJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e8886-02-junkyard-not-economy.json";
@@ -48,7 +49,7 @@ describe("match E8886 runner decision checkpoints", () => {
       result.input.legalActions.some(
         (action) =>
           action.type === "play_event" &&
-          action.actionId.includes(".runner_306_") &&
+          referencesDefaultDeckCard(action.source, 306) &&
           action.payload?.serverId === "rd",
       ),
     ).toBe(true);
@@ -79,7 +80,7 @@ describe("match E8886 runner decision checkpoints", () => {
           acceptablePlanKinds: ["runner.economy"],
           acceptableCapabilities: ["gain_general_liquid_credits"],
           requiredAssessmentEvidence: [
-            "runner_development_funding:card:runner_377_1",
+            "runner_development_funding:card:c2bt",
           ],
         },
       };
@@ -91,7 +92,7 @@ describe("match E8886 runner decision checkpoints", () => {
       result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
         ?.rootPlanInstanceId,
     ).toBe(
-      "plan:runner.develop_board_and_hand:card%3Arunner_377_1",
+      "plan:runner.develop_board_and_hand:card%3Ac2bt",
     );
     const portfolioItems =
       result.decision?.decisionDebug?.detailSections?.find(
@@ -101,7 +102,7 @@ describe("match E8886 runner decision checkpoints", () => {
       portfolioItems.some(
         (item) =>
           item.includes("module:runner.develop_board_and_hand") &&
-          item.includes("card%3Arunner_377_1") &&
+          item.includes("card%3Ac2bt") &&
           item.includes("phase:fund") &&
           item.includes("viability:ready"),
       ),

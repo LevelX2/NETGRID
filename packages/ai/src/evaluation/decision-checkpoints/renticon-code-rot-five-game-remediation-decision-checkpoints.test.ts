@@ -148,7 +148,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
       const hq = state.corp.servers.find((server) => server.id === "hq")!;
       hq.ice = hq.ice.filter((cardId) => cardId !== innerIceId);
       state.corp.servers.push({
-        id: "remote_1",
+        id: "r1",
         kind: "remote",
         label: "Remote 1",
         ice: [innerIceId],
@@ -156,7 +156,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
       });
       state.cardInstances[innerIceId] = {
         ...state.cardInstances[innerIceId]!,
-        zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+        zone: { side: "corp", zone: "serverIce", serverId: "r1" },
       };
       state.corp.credits = 12;
       candidate.expectation = {
@@ -164,14 +164,14 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
           {
             type: "install_card",
             sourceDefinitionId: 405,
-            targetServerId: "remote_1",
+            targetServerId: "r1",
           },
         ],
         planExecution: {
           acceptablePlanKinds: ["corp.score_agenda"],
           acceptableCapabilities: ["install_score_agenda"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_mature_remote_score_install:remote_1",
+            "corp_engine_certified_mature_remote_score_install:r1",
           ],
         },
       };
@@ -192,12 +192,12 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
         ],
         planExecution: {
           acceptablePlanIds: [
-            "plan:corp.economy:economy-immediate-operation%3Acorp_502_3",
+            "plan:corp.economy:economy-immediate-operation%3Ac33r",
           ],
           acceptablePlanKinds: ["corp.economy"],
           acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_immediate_operation_conversion:onr_v1_290_efficiency-experts",
+            "corp_engine_certified_immediate_operation_conversion:502",
           ],
         },
       };
@@ -206,8 +206,8 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     const result = expectCheckpointToPass(checkpoint);
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
-        "plan_first_root:plan:corp.economy:economy-immediate-operation%3Acorp_502_3",
-        "plan_first_executor:plan:corp.economy:economy-immediate-operation%3Acorp_502_3",
+        "plan_first_root:plan:corp.economy:economy-immediate-operation%3Ac33r",
+        "plan_first_executor:plan:corp.economy:economy-immediate-operation%3Ac33r",
       ]),
     );
   });
@@ -232,7 +232,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
           {
             type: "install_card",
             sourceDefinitionId: 463,
-            targetServerId: "remote_1",
+            targetServerId: "r1",
           },
         ],
         planExecution: {

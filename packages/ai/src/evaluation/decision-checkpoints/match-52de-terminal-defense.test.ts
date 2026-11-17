@@ -40,7 +40,7 @@ function installedSupport(input: AiDecisionInputWithDeckCapabilities) {
     (other) => other !== card,
   );
   input.playerView.servers
-    .find((server) => server.id === "remote_1")!
+    .find((server) => server.id === "r1")!
     .root.push({ ...card, rezzed: true });
   input.legalActions = input.legalActions.filter(
     (action) => action.source !== card.instanceId,
@@ -50,14 +50,14 @@ function project(
   input: AiDecisionInputWithDeckCapabilities,
 ): CorpScoreProjectSignal {
   const agenda = input.playerView.servers
-    .find((server) => server.id === "remote_1")!
+    .find((server) => server.id === "r1")!
     .root.find((card) => card.type === "agenda")!;
   return {
     projectId: "terminal-test",
     agendaInstanceId: agenda.instanceId,
     agendaDefinitionId: agenda.definitionId!,
     agendaPoints: agenda.agendaPoints!,
-    serverId: "remote_1",
+    serverId: "r1",
     phase: "advance_agenda",
     sameTurnCloseout: false,
     actionIds: input.legalActions
@@ -81,7 +81,7 @@ describe("match 52de terminal agenda defense", () => {
       input.playerView.own.credits = credits;
       expect(corpServerProtectionClaims(input).claims).toContainEqual(
         expect.objectContaining({
-          serverId: "remote_1",
+          serverId: "r1",
           terminal: true,
           credits: reserve,
         }),
@@ -89,7 +89,7 @@ describe("match 52de terminal agenda defense", () => {
       input.playerView.opponent.agendaPoints = 3;
       expect(
         corpServerProtectionClaims(input).claims.some(
-          (claim) => claim.serverId === "remote_1",
+          (claim) => claim.serverId === "r1",
         ),
       ).toBe(false);
     },
@@ -97,7 +97,7 @@ describe("match 52de terminal agenda defense", () => {
   it("quotes the exact D34 partial protection and installs it through the Score parent", () => {
     const replay = capture();
     const { input } = replay;
-    const quote = assessCorpTerminalAgendaDefense(input, "remote_1", "test");
+    const quote = assessCorpTerminalAgendaDefense(input, "r1", "test");
     expect(quote?.install?.sourceDefinitionId).toBe(
       579,
     );
@@ -133,7 +133,7 @@ describe("match 52de terminal agenda defense", () => {
       const { input } = capture();
       input.playerView.own.credits = credits;
       input.playerView.own.clicks = clicks;
-      const quote = assessCorpTerminalAgendaDefense(input, "remote_1", "test");
+      const quote = assessCorpTerminalAgendaDefense(input, "r1", "test");
       expect(quote?.best.protection.runnerAccessSuccessProbability).toEqual({
         numerator,
         denominator,
@@ -221,10 +221,10 @@ describe("match 52de terminal agenda defense", () => {
   });
   it("does not invent a usable ICE, activation, or stale installation", () => {
     const { input } = capture();
-    input.playerView.servers.find((server) => server.id === "remote_1")!.ice =
+    input.playerView.servers.find((server) => server.id === "r1")!.ice =
       [];
     expect(
-      assessCorpTerminalAgendaDefense(input, "remote_1", "test")?.install,
+      assessCorpTerminalAgendaDefense(input, "r1", "test")?.install,
     ).toBeUndefined();
     const stale = capture().input;
     stale.legalActions = stale.legalActions.map((action) =>
@@ -233,13 +233,13 @@ describe("match 52de terminal agenda defense", () => {
         : action,
     );
     expect(
-      assessCorpTerminalAgendaDefense(stale, "remote_1", "test")?.install,
+      assessCorpTerminalAgendaDefense(stale, "r1", "test")?.install,
     ).toBeUndefined();
   });
   it("keeps a deterministic existing stop ahead of probabilistic support", () => {
     const { input } = capture();
     input.playerView.opponent.rig = [];
-    const quote = assessCorpTerminalAgendaDefense(input, "remote_1", "test");
+    const quote = assessCorpTerminalAgendaDefense(input, "r1", "test");
     expect(quote?.install).toBeUndefined();
     expect(quote?.best.protection.runnerAccessSuccessProbability).toEqual({
       numerator: 0,
@@ -264,14 +264,14 @@ describe("match 52de terminal agenda defense", () => {
       input.playerView.timingPoint = "run.approach_ice";
       input.playerView.run = {
         runId: "test-run",
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         phase: "approach_ice",
-        position: { kind: "ice", serverId: "remote_1", iceIndex: 1 },
+        position: { kind: "ice", serverId: "r1", iceIndex: 1 },
         badPublicityCredits: 0,
         successful: false,
       };
       const server = input.playerView.servers.find(
-        (entry) => entry.id === "remote_1",
+        (entry) => entry.id === "r1",
       )!;
       const outer = server.ice[1]!;
       input.legalActions = [
@@ -286,7 +286,7 @@ describe("match 52de terminal agenda defense", () => {
           targetRequirements: [],
           visibility: "public",
           expiresAtStateVersion: input.playerView.stateVersion,
-          payload: { serverId: "remote_1", cardId: outer.instanceId },
+          payload: { serverId: "r1", cardId: outer.instanceId },
         },
       ];
       const candidate = buildActionSemanticCandidates({
@@ -302,7 +302,7 @@ describe("match 52de terminal agenda defense", () => {
         input,
         candidate,
         sourceCard: outer,
-        targetServerId: "remote_1",
+        targetServerId: "r1",
       });
       expect(route).toBeDefined();
       const admission = assessCorpExactIceRezAgainstScoreReserves({

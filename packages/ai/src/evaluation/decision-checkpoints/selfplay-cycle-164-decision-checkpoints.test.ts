@@ -44,14 +44,14 @@ describe("selfplay cycle 164 decision checkpoints", () => {
 
     expect(decision).toMatchObject({
       actionId:
-        "runner.pump_breaker.runner_266_1.runner_266_1.runner_266_1.corp_11_1.onr_v1_054_raptor:icebreaker_abilities_increase_strength",
+        "runner.pump_breaker.c1n5.c1n5.c1n5.c2l.348",
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
           leafExecutorInstanceId:
-            "plan:runner.convert_run_window:run%3Arun_196",
+            "plan:runner.convert_run_window:run%3A196",
           route: {
             actionType: "pump_breaker",
             capabilityId: "convert_active_run_window",
@@ -61,7 +61,7 @@ describe("selfplay cycle 164 decision checkpoints", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_assessment_evidence:runner_visible_encounter_requires_mitigation:onr_classic_007_brain-drain",
+        "plan_assessment_evidence:runner_visible_encounter_requires_mitigation:11",
       ]),
     );
   });

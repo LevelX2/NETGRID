@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { expect, it } from "vitest";
 import captureJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-432-priority-wreck-d306.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -40,7 +41,7 @@ it.each([0, 1, 8])(
     input.playerView.opponent.credits = credits;
     const evaluations = evaluateRunnerRunTargets({ input });
     const denial = evaluations.find((x) =>
-      x.actionId.includes("priority-wreck"),
+      referencesDefaultDeckCard(x.actionId, 317),
     )!;
     const basic = evaluations.find(
       (x) => x.actionId === "runner.start_run.hq",

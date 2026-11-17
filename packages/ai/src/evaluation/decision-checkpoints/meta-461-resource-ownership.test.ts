@@ -35,7 +35,7 @@ describe("meta461 round6 causal resource ownership", () => {
   it("requests the source breaker for a downstream no-break lock", () => {
     const input = fixture("g8-d193"),
       v = input.playerView,
-      s = v.servers.find((s) => s.id === "remote_1")!;
+      s = v.servers.find((s) => s.id === "r1")!;
     expect(
       assessKnownRezzedIcePath(
         s.ice,
@@ -53,7 +53,7 @@ describe("meta461 round6 causal resource ownership", () => {
       input.legalActions.find((a) => a.actionId === decision.actionId),
     ).toMatchObject({
       type: "install_card",
-      source: "runner_32_1",
+      source: "c75",
     });
     expect(decision.fallbackUsed).toBe(false);
   });
@@ -73,7 +73,7 @@ describe("meta461 round6 causal resource ownership", () => {
       a = input.legalActions.find((a) => a.actionId === decision.actionId)!;
     expect(a).not.toMatchObject({
       type: "advance_card",
-      source: "corp_559_1",
+      source: "c3gd",
     });
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
@@ -86,7 +86,7 @@ describe("meta461 round6 causal resource ownership", () => {
 describe("source-lock coverage contrasts", () => {
   it("keeps an independently uncovered inner ICE as the real barrier", () => {
     const v = fixture("g8-d193").playerView,
-      s = v.servers.find((s) => s.id === "remote_1")!;
+      s = v.servers.find((s) => s.id === "r1")!;
     const rig = v.own.rig!.filter(
       (c) => c.definitionId !== 34,
     );
@@ -97,7 +97,7 @@ describe("source-lock coverage contrasts", () => {
   });
   it("does not invent a downstream lock without a future ICE", () => {
     const v = fixture("g8-d193").playerView,
-      s = v.servers.find((s) => s.id === "remote_1")!;
+      s = v.servers.find((s) => s.id === "r1")!;
     const result = assessKnownRezzedIcePath(
       s.ice.slice(1),
       v.own.rig!,
@@ -109,7 +109,7 @@ describe("source-lock coverage contrasts", () => {
   });
   it("opens the path with the source breaker and keeps lack of credits a funding need", () => {
     const v = fixture("g8-d193").playerView,
-      s = v.servers.find((s) => s.id === "remote_1")!,
+      s = v.servers.find((s) => s.id === "r1")!,
       matador = v.own.gripOrHq.find(
         (c) => c.definitionId === 32,
       )!,

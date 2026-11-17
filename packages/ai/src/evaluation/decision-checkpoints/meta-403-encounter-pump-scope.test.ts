@@ -24,7 +24,7 @@ describe("meta 403 pump strength lasts through all subroutines in one encounter"
   it("quotes the live mixed ETR/run-lock route once per encounter", () => {
     const input = captureInput();
     const route = evaluateRunnerRunTargets({ input }).find(
-      (q) => q.actionId === "runner.start_run.remote_1",
+      (q) => q.actionId === "runner.start_run.r1",
     )!;
     expect(route.routeQuote!.guaranteedKnownCost).toBe(9);
     expect(route.routeQuote!.reachability).toBe("guaranteed_access");
@@ -32,7 +32,7 @@ describe("meta 403 pump strength lasts through all subroutines in one encounter"
 
   it("charges encounter-only strength again on the next ICE", () => {
     const input = captureInput();
-    const ice = input.playerView.servers.find((s) => s.id === "remote_1")!
+    const ice = input.playerView.servers.find((s) => s.id === "r1")!
       .ice[0]!;
     const copy = structuredClone(ice);
     copy.instanceId = "scope_second_haunting";
@@ -64,7 +64,7 @@ describe("meta 403 pump strength lasts through all subroutines in one encounter"
       runtime.residentPlanPortfolio,
     );
     const result = chooseAiAction(input, { runnerTurnPlannerMode: "cutover" });
-    expect(result.actionId).toBe("runner.start_run.remote_1");
+    expect(result.actionId).toBe("runner.start_run.r1");
     expect(input.legalActions.some((a) => a.actionId === result.actionId)).toBe(
       true,
     );
@@ -73,10 +73,10 @@ describe("meta 403 pump strength lasts through all subroutines in one encounter"
       {
         moduleId: "runner.contest_remote",
         phase: "execute",
-        target: { kind: "server", id: "remote_1" },
+        target: { kind: "server", id: "r1" },
       },
     );
-    const server = input.playerView.servers.find((s) => s.id === "remote_1")!;
+    const server = input.playerView.servers.find((s) => s.id === "r1")!;
     expect(
       assessKnownRezzedIcePath(server.ice, input.playerView.own.rig!, 8)
         .canReachAccess,
@@ -86,7 +86,7 @@ describe("meta 403 pump strength lasts through all subroutines in one encounter"
   it("shares a selected pump across sequential trace breaks in one encounter", () => {
     const input = captureInput();
     const ice = structuredClone(
-      input.playerView.servers.find((s) => s.id === "remote_1")!.ice[0]!,
+      input.playerView.servers.find((s) => s.id === "r1")!.ice[0]!,
     );
     ice.effectiveRunQuote!.subroutines = [1, 2].map((n) => ({
       id: `trace_${n}`,

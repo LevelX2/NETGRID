@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import { describe, expect, it } from "vitest";
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-reachable-rez-reserve-d80.json";
@@ -29,7 +30,7 @@ describe("meta 403 reachable central rez reserve", () => {
       const install = input.legalActions.find(
         (a) =>
           a.type === "install_card" &&
-          a.actionId.includes("bolter-cluster") &&
+          referencesDefaultDeckCard(a.actionId, 436) &&
           a.payload?.serverId === "hq",
       )!;
       const source = input.playerView.own.gripOrHq.find(
@@ -132,7 +133,7 @@ describe("meta 403 reachable central rez reserve", () => {
     const reserveDestroyingInstalls = input.legalActions.filter(
       (action) =>
         action.type === "install_card" &&
-        action.actionId.includes("bolter-cluster") &&
+        referencesDefaultDeckCard(action.actionId, 436) &&
         action.payload?.serverId === "hq",
     );
     expect(reserveDestroyingInstalls.length).toBeGreaterThan(0);

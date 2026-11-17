@@ -6630,7 +6630,7 @@
                   "cardDefinitionId": 35,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 35,
-                  "revealedCardDefinitionIds": 35,
+                  "revealedCardDefinitionIds": "35",
                   "revealedCount": 1
                 }
               }
@@ -8633,7 +8633,7 @@
             "hiddenZoneBarrier": true,
             "hiddenZoneAction": "temporary_program_install_end_turn_return",
             "returnedCount": 1,
-            "returnedCardDefinitionIds": 247,
+            "returnedCardDefinitionIds": "247",
             "redactedKind": "hidden_zone",
             "abilityId": "temporary_program_install_end_turn_return",
             "effectKind": "hidden_zone",
@@ -8641,7 +8641,7 @@
               "returnedCount": 1
             },
             "targets": {
-              "returnedCardDefinitionIds": 247,
+              "returnedCardDefinitionIds": "247",
               "redactedKind": "hidden_zone"
             },
             "visibility": {
@@ -8674,7 +8674,7 @@
                   "hiddenZoneBarrier": true,
                   "hiddenZoneAction": "temporary_program_install_end_turn_return",
                   "returnedCount": 1,
-                  "returnedCardDefinitionIds": 247
+                  "returnedCardDefinitionIds": "247"
                 }
               }
             }
@@ -11351,7 +11351,7 @@
                   "cardDefinitionId": 35,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 35,
-                  "revealedCardDefinitionIds": 35,
+                  "revealedCardDefinitionIds": "35",
                   "revealedCount": 1
                 }
               }
@@ -13762,7 +13762,7 @@
                   "cardDefinitionId": 247,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 247,
-                  "revealedCardDefinitionIds": 247,
+                  "revealedCardDefinitionIds": "247",
                   "revealedCount": 1
                 }
               }
@@ -15433,7 +15433,7 @@
                   "cardDefinitionId": 35,
                   "publicRevealKind": "reveal",
                   "publicRevealDefinitionId": 35,
-                  "revealedCardDefinitionIds": 35,
+                  "revealedCardDefinitionIds": "35",
                   "revealedCount": 1
                 }
               }

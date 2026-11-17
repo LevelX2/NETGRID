@@ -56,7 +56,7 @@ describe("match B008 older decision checkpoints", () => {
         (action) =>
           action.type === "play_event" &&
           action.source ===
-            "runner_42_2",
+            "c9e",
       ),
     ).toBe(true);
   });
