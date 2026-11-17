@@ -151,7 +151,7 @@ function makeHost(input: HostInput = {}) {
             type: "activated_card_ability",
             abilityRef: {
               sourceCardInstanceId: cardId,
-              sourceAbilityId: "test_card:a1",
+              sourceAbilityId: 272,
             },
           } as LegalAction);
         }
@@ -164,7 +164,7 @@ function makeHost(input: HostInput = {}) {
             type: "activated_card_ability",
             abilityRef: {
               sourceCardInstanceId: cardId,
-              sourceAbilityId: "test_card:a1",
+              sourceAbilityId: 272,
             },
           } as LegalAction);
         }

@@ -663,14 +663,14 @@ describe("PublicContext golden payload gate", () => {
         type: "activated_card_ability",
         abilityRef: {
           sourceCardInstanceId: "visible-source",
-          sourceAbilityId: "test_card:gain",
+          sourceAbilityId: 272,
         },
         payload: {
           cardId: "visible-source",
           cardImplementationAbility: "activated",
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-          cardImplementationAbilityId: "test_card:gain",
-          cardImplementationAbilityKey: "gain",
+          cardImplementationAbilityId: 272,
+          cardImplementationAbilityKey: "pay_three_trash_source_gain_six",
         },
       }),
     );
