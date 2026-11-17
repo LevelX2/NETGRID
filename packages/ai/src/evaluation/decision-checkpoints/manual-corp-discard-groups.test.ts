@@ -1,25 +1,22 @@
-import { readFileSync } from "node:fs";
 import { applyAction, createGame, getLegalActions } from "@netgrid/engine";
-import { ORIGINALSET_DEFAULT_DECKS, type DeckDefinition, type GameState } from "@netgrid/shared";
+import {
+  ORIGINALSET_DEFAULT_DECKS,
+  type DeckDefinition,
+  type GameState,
+} from "@netgrid/shared";
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { allocateCorpCentralDefenseFromAiFacts } from "../../corp/defense/corp-central-defense-facts-adapter";
 import { corpAcuteDefenseHandOptions } from "../../corp/defense/defense-hand-retention";
 import { prepareCorpPunishHandRetention } from "../../corp/punish/punish-hand-retention";
-import {
-  resetResidentPlanPortfolioMemory,
-  restoreResidentPlanPortfolioMemorySnapshot,
-} from "../../plans/resident-plan-portfolio-memory";
+import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import {
   buildAiDecisionInput,
   type AiDecisionInputWithDeckCapabilities,
 } from "../../runtime/ai-decision-input";
 import { releaseAiMatchRuntime } from "../../runtime/match-runtime-memory";
 import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
-import {
-  restoreAiRuntimeCheckpoint,
-  type AiRuntimeCheckpointV1,
-} from "./runtime-checkpoint";
+import { shadoeTagAndBagDeckForTest } from "../meta-ten-standard-decks.test-support";
 
 const TROJAN = 518;
 const AUDIT = 495;
@@ -33,6 +30,9 @@ const FALL_GUY = 373;
 const CREDIT = 493;
 const FILLER = 404;
 const ON_CALL = 420;
+const HUNTER = 461;
+const SHOCK = 480;
+const CHANCE = 496;
 
 const matchIds = new Set<string>();
 afterEach(() => {
@@ -41,37 +41,24 @@ afterEach(() => {
   resetResidentPlanPortfolioMemory();
 });
 
-it("keeps the last tag source with real R&D complements at manual D45", () => {
-  const { input, runtime, validation, stateHash, stateVersion } = JSON.parse(
-    readFileSync(
-      new URL(
-        "../../../../../data/scenarios/ai-decision-checkpoints/cp-manual-20261113-corp-discard-d45.json",
-        import.meta.url,
-      ),
-      "utf8",
-    ),
-  ) as {
-    input: AiDecisionInputWithDeckCapabilities;
-    runtime: AiRuntimeCheckpointV1;
-    validation: Record<string, boolean>;
-    stateHash: string;
-    stateVersion: number;
-  };
-  expect(stateHash).toBe("fnv1a:231077bd");
-  expect(stateVersion).toBe(93);
-  expect(Object.values(validation).every(Boolean)).toBe(true);
-  expect(input.matchId).toBe("match_f9840b7522f5d61e");
+it("keeps the last tag source when R&D still contains compatible damage", () => {
+  const { input, state } = cleanup({
+    corpDeck: shadoeTagAndBagDeckForTest(),
+    hand: [FILLER, POLITICAL_COUP, TROJAN, OVERTIME, SHOCK, ON_CALL, OVERTIME],
+    archives: [
+      CREDIT,
+      CHANCE,
+      CHANCE,
+      AUDIT,
+      PUNITIVE,
+      HUNTER,
+      PUNITIVE,
+      AUDIT,
+    ],
+    credits: 9,
+  });
   expect(input.playerView.opponent).not.toHaveProperty("gripOrHq");
-  restoreAiRuntimeCheckpoint(
-    input,
-    input.ownDeckSnapshot!.deckSnapshotId,
-    runtime,
-  );
-  restoreResidentPlanPortfolioMemorySnapshot(
-    input,
-    runtime.residentPlanPortfolio,
-  );
-  const { discarded, retained } = resolveCleanup(input);
+  const { discarded, retained } = resolveCleanup(input, state);
   expect(discarded).toEqual([OVERTIME, OVERTIME]);
   expect(retained.map((card) => card.definitionId)).toContain(TROJAN);
   const retention = prepareCorpPunishHandRetention(input);
@@ -105,8 +92,9 @@ describe("native cleanup choice", () => {
         type: "resource",
         known: true,
       }));
-      const retained = input.playerView.own.gripOrHq.filter((card) =>
-        card.definitionId === TROJAN || card.definitionId === SCORCHED,
+      const retained = input.playerView.own.gripOrHq.filter(
+        (card) =>
+          card.definitionId === TROJAN || card.definitionId === SCORCHED,
       );
       expect(prepareCorpPunishHandRetention(input)(retained).damage).toBe(
         damage,
@@ -272,6 +260,7 @@ function resolveCleanup(
 }
 
 function cleanup(options: {
+  corpDeck?: DeckDefinition;
   hand: number[];
   archives?: number[];
   deckExtras?: number[];
@@ -281,17 +270,16 @@ function cleanup(options: {
   fallGuy?: boolean;
   grip?: number;
 }) {
-  const corpDeck = deck("corp", [
-    ...options.hand,
-    ...(options.archives ?? []),
-    ...(options.deckExtras ?? []),
-    ...(options.scored ?? []),
-    ...Array<number>(6).fill(FILLER),
-  ]);
-  const runnerDeck = deck("runner", [
-    FALL_GUY,
-    ...Array<number>(7).fill(251),
-  ]);
+  const corpDeck =
+    options.corpDeck ??
+    deck("corp", [
+      ...options.hand,
+      ...(options.archives ?? []),
+      ...(options.deckExtras ?? []),
+      ...(options.scored ?? []),
+      ...Array<number>(6).fill(FILLER),
+    ]);
+  const runnerDeck = deck("runner", [FALL_GUY, ...Array<number>(7).fill(251)]);
   const state = createGame({
     seed: "manual-corp-discard-groups",
     setupMode: "completed",
