@@ -1,3 +1,5 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
   type AiDecisionInput,
@@ -59,11 +61,12 @@ export function publicEvent(
   actionType: "start_run" | "access_card",
   serverId: "hq" | "rd",
 ): AiDecisionInput["eventTail"][number] {
+  const stateVersionAfter = actionType === "start_run" ? 1 : 2;
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type: actionType,
-    stateVersionBefore: 1,
-    stateVersionAfter: 2,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
     stateHashAfter: `fnv1a:${eventId}`,
     visibilityClass: "public",
     publicPayload: {
@@ -79,11 +82,12 @@ export function publicLabelEvent(
   actionType: "start_run" | "access_card",
   serverLabel: "HQ" | "R&D",
 ): AiDecisionInput["eventTail"][number] {
+  const stateVersionAfter = actionType === "start_run" ? 1 : 2;
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type: actionType,
-    stateVersionBefore: 1,
-    stateVersionAfter: 2,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
     stateHashAfter: `fnv1a:${eventId}`,
     visibilityClass: "public",
     publicPayload: {
@@ -101,7 +105,7 @@ export function remoteEvent(
   payload: Record<string, unknown>,
 ): AiDecisionInput["eventTail"][number] {
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type: actionType,
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,
@@ -309,7 +313,7 @@ export function genericIce(instanceId: string): VisibleCard {
     instanceId,
     known: true,
     type: "ice",
-    definitionId: instanceId,
+    definitionId: syntheticCardDefinitionId(instanceId),
     rezzed: false,
     rezCost: 2,
     owner: "corp",
@@ -324,13 +328,13 @@ export function blankIce(
     instanceId,
     known: true,
     type: "ice",
-    definitionId: "blank_remote_ice",
+    definitionId: syntheticCardDefinitionId("blank_remote_ice"),
     rezzed: false,
     rezCost: 0,
     owner: "corp",
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "blank_remote_ice",
+      iceDefinitionId: syntheticCardDefinitionId("blank_remote_ice"),
       effectiveStrength: 0,
       subroutines: [],
     },
@@ -542,7 +546,7 @@ export function runnerCentralPressureCard(
     known: true,
     type: "program",
     title: instanceId,
-    definitionId: instanceId,
+    definitionId: syntheticCardDefinitionId(instanceId),
     rulesText,
     owner: "runner",
   } as VisibleCard;
@@ -603,7 +607,7 @@ export function testDependencies() {
           (card.advancementCounters ?? 0) > 0,
       ) === true,
     isRemoteServerTarget: (serverId: string | undefined) =>
-      serverId?.startsWith("remote_") === true,
+      isRemoteServerId(serverId) === true,
     actionSourceCard: (input: AiDecisionInput, action: LegalAction) =>
       findVisibleCard(input, String(action.source)),
   };

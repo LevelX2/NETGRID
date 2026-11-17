@@ -133,7 +133,7 @@ describe("plan-first information-probe reassessment", () => {
         server("archives"),
       ];
       input.playerView.run = {
-        runId: "probe-hq-run",
+        runId: 1,
         attackedServerId: "hq",
         phase: "encounter_ice",
         position: { kind: "ice", serverId: "hq", iceIndex: 0 },
@@ -172,10 +172,10 @@ describe("plan-first information-probe reassessment", () => {
       "start_run",
       "Run Remote 1",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const target = {
-      ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(startRun.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       knownAccessState: "unknown" as const,
@@ -206,7 +206,7 @@ describe("plan-first information-probe reassessment", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [unknownRemoteRoot]),
+      server("r1", [], [unknownRemoteRoot]),
     ];
 
     expect(context.chooseSemanticRuntimeAction(startInput, {})).toMatchObject({
@@ -278,13 +278,13 @@ describe("plan-first information-probe reassessment", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [dataWall], [unknownRemoteRoot]),
+      server("r1", [dataWall], [unknownRemoteRoot]),
     ];
     encounterInput.playerView.run = {
-      runId: "probe-remote-1",
-      attackedServerId: "remote_1",
+      runId: 2,
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       encounteredIce: dataWall,
       successful: false,
     };
@@ -406,13 +406,13 @@ describe("plan-first information-probe reassessment", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [keeperAfterDataWall, dataWall], [unknownRemoteRoot]),
+      server("r1", [keeperAfterDataWall, dataWall], [unknownRemoteRoot]),
     ];
     secondEncounterInput.playerView.run = {
-      runId: "probe-remote-1",
-      attackedServerId: "remote_1",
+      runId: 2,
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       encounteredIce: keeperAfterDataWall,
       successful: false,
     };
@@ -541,7 +541,7 @@ describe("plan-first information-probe reassessment", () => {
       server("archives"),
     ];
     encounterInput.playerView.run = {
-      runId: "probe-rd",
+      runId: 3,
       attackedServerId: "rd",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "rd", iceIndex: 0 },

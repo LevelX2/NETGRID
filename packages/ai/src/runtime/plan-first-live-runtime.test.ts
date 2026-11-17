@@ -4136,7 +4136,7 @@ describe("authoritative plan-first live runtime", () => {
       observerSide: "runner",
       stateVersion: input.playerView.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
-        [sourceCardId]: "test-program",
+        [sourceCardId]: syntheticCardDefinitionId("test-program"),
       },
     });
     const candidates = built.map((candidate) =>
@@ -16612,7 +16612,7 @@ describe("authoritative plan-first live runtime", () => {
       const card = visibleCard("invalid-card", "corp", "operation", {
         definitionId: removeType
           ? 507
-          : "missing-definition",
+          : syntheticCardDefinitionId("missing-definition"),
       });
       if (removeType) delete card.type;
       input.playerView.own.gripOrHq = [card];
@@ -17063,11 +17063,9 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 2;
     input.playerView.own.credits = 3;
     input.playerView.opponent.deckCount = 23;
-    input.playerView.own.rig = [
-      visibleCard("resource-1", "runner", "resource", {
-        definitionId: undefined,
-      }),
-    ];
+    const unquotedResource = visibleCard("resource-1", "runner", "resource");
+    delete unquotedResource.definitionId;
+    input.playerView.own.rig = [unquotedResource];
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
@@ -29599,7 +29597,7 @@ describe("authoritative plan-first live runtime", () => {
       rolesForCardId: (definitionId) =>
         definitionId === 35
           ? ["breaker_universal"]
-          : definitionId === "trace-breaker-definition"
+          : definitionId === syntheticCardDefinitionId("trace-breaker-definition")
             ? ["breaker_trace"]
             : [],
       effectsForCardId: () => [],
@@ -32068,7 +32066,7 @@ function handEvaluation(params: {
           persistentInstallEvaluation: {
             schemaVersion: "runner-persistent-install-evaluation-v3" as const,
             actionId: params.legalActionId,
-            cardId: params.cardInstanceId,
+            cardId: params.definitionId,
             cardType: params.cardType ?? "program",
             installCost: params.installCost ?? 0,
             creditsAfterInstall: params.creditsAfterInstall ?? 0,
