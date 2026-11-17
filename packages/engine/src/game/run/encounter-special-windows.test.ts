@@ -360,7 +360,6 @@ describe("encounter special windows boundary", () => {
     const trashed: CardInstanceId[] = [];
     const runnerTrashed: CardInstanceId[] = [];
     const host = encounterSpecialWindowHost(state, {
-      quoteIceRezCost: () => 3,
       spendCredits: (side, amount) => {
         state[side].credits -= amount;
       },
@@ -385,7 +384,7 @@ describe("encounter special windows boundary", () => {
       side: "runner",
       type: "trigger_ability",
       source: "startup_1",
-      costs: [{ credits: 3 }],
+      costs: [{ credits: 1 }],
       payload: {
         cardId: "startup_1",
         sourceDefinitionId: "onr_v1_068_startup-immolator",
@@ -398,9 +397,19 @@ describe("encounter special windows boundary", () => {
         abilityKind: "trash_fully_broken_passed_ice",
         cardImplementationTrashSourceCost: true,
         targetRezCost: true,
-        rezCostPaid: 3,
+        rezCostPaid: 1,
       },
     });
+
+    expect(() =>
+      resolveFullyBrokenPassedIceTrash(host, {
+        ...actions[0]!,
+        payload: { ...actions[0]!.payload, rezCostPaid: 0 },
+      }),
+    ).toThrow("muss exakt die Rez-Kosten zahlen");
+    expect(state.runner.credits).toBe(6);
+    expect(trashed).toEqual([]);
+    expect(runnerTrashed).toEqual([]);
 
     const result = resolveFullyBrokenPassedIceTrash(host, actions[0]!);
 
@@ -408,11 +417,11 @@ describe("encounter special windows boundary", () => {
       handled: true,
       sourceCardId: "startup_1",
       iceId: "ice_current",
-      paymentAmount: 3,
+      paymentAmount: 1,
       paid: true,
       iceTrashed: true,
     });
-    expect(state.runner.credits).toBe(3);
+    expect(state.runner.credits).toBe(5);
     expect(trashed).toEqual(["ice_current"]);
     expect(runnerTrashed).toEqual(["startup_1"]);
     expect(state.runner.rig.programs).not.toContain("startup_1");
@@ -422,7 +431,7 @@ describe("encounter special windows boundary", () => {
       sourceDefinitionId: "onr_v1_068_startup-immolator",
       trashedCount: 1,
       trashedCardDefinitionId: "onr_v1_272_too-many-doors",
-      runnerCreditsAfter: 3,
+      runnerCreditsAfter: 5,
       sourceTrashed: true,
       cardImplementationTrashSourceCost: true,
       targetRezCost: true,

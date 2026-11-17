@@ -81,6 +81,7 @@ export function runnerRunFundingSupport(
     runTargets,
     economy,
     urgentScoreThreat: urgentPayoff,
+    considerCombinedHandRepair: true,
     ...(requiredPostRunReserve !== undefined ? { requiredPostRunReserve } : {}),
   });
   if (

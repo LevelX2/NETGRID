@@ -13,6 +13,7 @@ import {
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { capabilityKey, canonicalCapabilityId } from "@netgrid/cards/engine";
+import { printedIceRezCost } from "../payment/corp-rez-cost";
 import { buildLegalAction } from "../turn/action-builders";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -22,7 +23,6 @@ export type EncounterSpecialWindowHost = {
   callbacks?: {
     derezCorpInstalledCard?: (cardId: CardInstanceId) => void;
     finishRun?: (successful: boolean, legalAction?: LegalAction) => void;
-    quoteIceRezCost?: (iceId: CardInstanceId) => number;
     resetBreakerStrength?: () => void;
     rollDie?: (purpose: string) => number;
     spendCredits?: (side: Side, amount: number) => void;
@@ -478,7 +478,7 @@ export function fullyBrokenPassedIceTrashPostPassActions(
   if (!run || !targetIceId || !state.cardInstances[targetIceId]) return [];
   if (!rezzedInstalledIceIds(state).includes(targetIceId)) return [];
   if (!run.fullyBrokenIceIds?.includes(targetIceId)) return [];
-  const rezCost = quoteIceRezCost(host, targetIceId);
+  const rezCost = printedIceRezCost(state, targetIceId);
   if (state.runner.credits < rezCost) return [];
   const targetDefinition = definitionFor(state, targetIceId);
   return state.runner.rig.programs
@@ -816,9 +816,8 @@ export function resolveFullyBrokenPassedIceTrash(
     !rezzedInstalledIceIds(state).includes(targetIceId as CardInstanceId)
   )
     throw new Error("Das Post-Pass-ICE-Ziel ist nicht legal.");
-  const rezCost = quoteIceRezCost(host, targetIceId as CardInstanceId);
-  const paid = Number(legalAction.payload?.rezCostPaid ?? rezCost);
-  if (!Number.isInteger(paid) || paid !== rezCost)
+  const rezCost = printedIceRezCost(state, targetIceId as CardInstanceId);
+  if (legalAction.payload?.rezCostPaid !== rezCost)
     throw new Error(
       "Die Post-Pass-Faehigkeit muss exakt die Rez-Kosten zahlen.",
     );
@@ -1063,15 +1062,6 @@ function rezzedInstalledIceIds(state: GameState): CardInstanceId[] {
     const instance = mustInstance(state.cardInstances, cardId);
     return instance.zone.zone === "serverIce" && instance.rezzed;
   });
-}
-
-function quoteIceRezCost(
-  host: EncounterSpecialWindowHost,
-  iceId: CardInstanceId,
-): number {
-  if (!host.callbacks?.quoteIceRezCost)
-    throw new Error("Rez-Kosten-Callback fehlt.");
-  return host.callbacks.quoteIceRezCost(iceId);
 }
 
 function spendCredits(

@@ -383,11 +383,11 @@ export function createAiGameSimulator(
         `ai-sim-${index}`,
       );
       const action =
-        randomizedResult === undefined
+        decision.selectionKind === undefined || decision.selectionKind === "direct"
           ? input.legalActions.find(
               (candidate) => candidate.actionId === decision.actionId,
             )
-          : randomizedResult.ok
+          : randomizedResult?.ok
             ? randomizedResult.receipt.selectedLegalAction
             : undefined;
       if (!action) {

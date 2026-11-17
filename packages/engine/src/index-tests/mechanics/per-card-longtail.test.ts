@@ -4278,7 +4278,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     });
   });
 
-  it("trashes fully-broken passed ice with Startup Immolator and revalidates the post-pass window", () => {
+  it("charges printed ICE rez cost for Startup Immolator despite Skälderviken's Corp discount", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-startup-immolator-trash-ice",
@@ -4289,6 +4289,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           name: "Spotcheck Startup Immolator Runner",
           cards: [
             { id: "onr_v1_068_startup-immolator", quantity: 1 },
+            { id: "onr_v1_039_krash", quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -4297,64 +4298,67 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "spotcheck_startup_immolator_corp",
           name: "Spotcheck Startup Immolator Corp",
           cards: [
-            { id: "simple_economy_asset", quantity: 1 },
-            { id: "simple_barrier_ice", quantity: 1 },
+            { id: "onr_v1_341_skalderviken-sa-beta-test-site", quantity: 1 },
+            { id: "onr_v1_280_zombie", quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
       }),
     );
-    state.runner.credits = 20;
+    state.runner.credits = 23;
     state.corp.credits = 10;
-    installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, "onr_v1_039_krash");
     const startupImmolatorId = installRunnerProgramForTest(
       state,
       "onr_v1_068_startup-immolator",
     );
-    putCorpRootInRemote(state, "simple_economy_asset");
-    const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    const nodeId = putCorpRootInRemote(
+      state,
+      "onr_v1_341_skalderviken-sa-beta-test-site",
+    );
+    state.cardInstances[nodeId]!.rezzed = true;
+    state.cardInstances[nodeId]!.faceup = true;
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_280_zombie");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    const isRunOnRd = (action: LegalAction) =>
+      action.type === "start_run" && action.payload?.serverId === "rd";
+    expect(mustAction(state, "runner", isRunOnRd).payload).not.toHaveProperty(
+      "runnerPostBreakTrashQuoteJson",
     );
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "simple_barrier_ice",
+    state = apply(state, "runner", isRunOnRd);
+    const rez = mustAction(state, "corp", (action) => action.type === "rez_ice");
+    expect(rez.costs[0]?.credits).toBe(7);
+    state = apply(state, "corp", (action) => action.actionId === rez.actionId);
+    expect(state.corp.credits).toBe(3);
+    const preRunWithRezzedIce = structuredClone(initial);
+    preRunWithRezzedIce.cardInstances[iceId] = structuredClone(
+      state.cardInstances[iceId]!,
     );
+    const run = mustAction(preRunWithRezzedIce, "runner", isRunOnRd);
+    expect(
+      JSON.parse(String(run.payload?.runnerPostBreakTrashQuoteJson)),
+    ).toMatchObject({
+      targets: [{ targetIceInstanceId: iceId, trashCredits: 9 }],
+    });
     state = passCorpApproachRezWindowIfOpen(state);
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "pump_breaker" &&
-        sourceDefinition(state, action) === "simple_fracter",
-    );
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "simple_fracter",
-    );
+    for (const index of [0, 1, 2]) {
+      state = breakCurrentSubroutine(state, "onr_v1_039_krash", index);
+    }
     state = apply(state, "runner", (action) => action.type === "continue_run");
-    const startupAction = mustAction(
-      state,
-      "runner",
-      (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.runnerUtilityAbility ===
-          "trash_fully_broken_passed_ice",
-    );
+    expect(state.runner.credits).toBe(9);
+    const isStartupAction = (action: LegalAction) =>
+      action.type === "trigger_ability" &&
+      action.payload?.runnerUtilityAbility === "trash_fully_broken_passed_ice";
+    const insufficientCredits = structuredClone(state);
+    insufficientCredits.runner.credits = 8;
+    expect(
+      getLegalActions(insufficientCredits, "runner").some(isStartupAction),
+    ).toBe(false);
+    const startupAction = mustAction(state, "runner", isStartupAction);
     expect(startupAction.payload?.targetIceId).toBe(iceId);
-    expect(startupAction.costs[0]?.credits).toBe(3);
+    expect(startupAction.costs[0]?.credits).toBe(9);
     expect(startupAction.payload).toMatchObject({
       cardImplementationTrashSourceCost: true,
       targetRezCost: true,
@@ -4367,30 +4371,24 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(state.corp.archives).toContain(iceId);
     expect(
-      state.corp.servers.find((server) => server.id === "remote_1")?.ice,
+      state.corp.servers.find((server) => server.id === "rd")?.ice,
     ).not.toContain(iceId);
     expect(state.runner.heap).toContain(startupImmolatorId);
     expect(state.runner.rig.programs).not.toContain(startupImmolatorId);
-    expect(state.runner.credits).toBe(15);
-    expect(
-      getLegalActions(state, "runner").some(
-        (action) =>
-          action.type === "trigger_ability" &&
-          action.payload?.runnerUtilityAbility ===
-            "trash_fully_broken_passed_ice",
-      ),
-    ).toBe(false);
+    expect(state.runner.credits).toBe(0);
+    expect(getLegalActions(state, "runner").some(isStartupAction)).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "trigger_ability",
       runnerUtilityAbility: "trash_fully_broken_passed_ice",
       abilityKind: "trash_fully_broken_passed_ice",
-      rezCostPaid: 3,
-      trashedCardDefinitionId: "simple_barrier_ice",
+      rezCostPaid: 9,
+      serverId: "rd",
+      trashedCardDefinitionId: "onr_v1_280_zombie",
       trashedCount: 1,
       sourceTrashed: true,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
+      /"(?:privatePayload|cardInstances|grip|hq|rd)":/,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);

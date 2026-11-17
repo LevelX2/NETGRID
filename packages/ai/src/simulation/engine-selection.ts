@@ -39,13 +39,13 @@ export function applySimulationEngineSelection(
       ...decision.engineCommand,
       idempotencyKey,
     });
-  if (decision.selectionKind === "engine_randomized_trace_bid_selection")
-    return applyRandomizedTraceBidSelection(state, {
+  if (decision.selectionKind === "engine_randomized_turn_plan_selection")
+    return applyRandomizedTurnPlanSelection(state, {
       ...decision.engineCommand,
       idempotencyKey,
     });
-  if (decision.selectionKind === "engine_randomized_turn_plan_selection")
-    return applyRandomizedTurnPlanSelection(state, {
+  if (decision.selectionKind === "engine_randomized_trace_bid_selection")
+    return applyRandomizedTraceBidSelection(state, {
       ...decision.engineCommand,
       idempotencyKey,
     });

@@ -41,6 +41,8 @@ export type AssessRunnerRunFundingAdmissionParams = {
   economy: Pick<RunnerEconomyPosture, "minimumCreditFloor">;
   urgentScoreThreat?: boolean;
   requiredPostRunReserve?: number;
+  /** The consumer searches routes that certify both the credit and hand budgets. */
+  considerCombinedHandRepair?: true;
 };
 
 export function assessRunnerRunFundingAdmission(
@@ -124,7 +126,11 @@ export function assessRunnerRunFundingAdmission(
     return result(false, "no_concrete_funding_gap", context);
   }
   if (
-    !runnerRunTargetPathIsCreditConvertible(params.target, urgentScoreThreat)
+    !runnerRunTargetPathIsCreditConvertible(
+      params.target,
+      urgentScoreThreat,
+      params.considerCombinedHandRepair === true,
+    )
   ) {
     return result(false, "target_not_credit_convertible", context);
   }
@@ -218,10 +224,12 @@ function directAlternativeActionIds(params: {
 function runnerRunTargetPathIsCreditConvertible(
   target: RunnerRunTargetEvaluation,
   urgentScoreThreat: boolean,
+  considerCombinedHandRepair: boolean,
 ): boolean {
   return (
     (target.score > 0 || urgentScoreThreat) &&
-    (target.prerunReserveQuote?.handBufferGap ?? 0) === 0 &&
+    (considerCombinedHandRepair ||
+      (target.prerunReserveQuote?.handBufferGap ?? 0) === 0) &&
     target.knownAccessState !== "known_no_current_payoff" &&
     (target.pathPassability === "reachable" ||
       target.pathPassability === "blocked_unpayable")

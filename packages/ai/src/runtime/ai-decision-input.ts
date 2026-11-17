@@ -51,7 +51,10 @@ import {
   type PlanningStateIdentity,
   type ObservedTurnPlanAction,
 } from "../plans/turn-planning-contracts";
-import { observeTurnPlanAction } from "./turn-plan-observation";
+import {
+  observeRandomizedRunnerRunStart,
+  observeTurnPlanAction,
+} from "./turn-plan-observation";
 import {
   buildRemoteDoctrineProfile,
   type RemoteDoctrineProfile,
@@ -84,6 +87,7 @@ export type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
   planningRulesContext?: PlanningRulesContext;
   planningStateIdentity?: PlanningStateIdentity;
   observedTurnPlanAction?: ObservedTurnPlanAction;
+  observedRandomizedRunnerRunStart?: ObservedTurnPlanAction;
   ownDeckSnapshot?: AiDeckStrategyDeckSnapshot;
   ownDeckCapabilities?: DeckCapabilityProfile;
   ownDeckStrategyProfile?: AiDeckStrategyProfile;
@@ -261,6 +265,10 @@ export function buildAiDecisionInput(
     stateVersion: state.stateVersion,
     event: state.eventLog.at(-1),
   });
+  const observedRandomizedRunnerRunStart = observeRandomizedRunnerRunStart(
+    state,
+    side,
+  );
   const enriched: AiDecisionInputWithDeckCapabilities = {
     ...input,
     planningRulesContext: buildPlanningRulesContext({
@@ -276,6 +284,9 @@ export function buildAiDecisionInput(
     }),
     planningStateIdentity: buildPlanningStateIdentity(input),
     ...(observedTurnPlanAction ? { observedTurnPlanAction } : {}),
+    ...(observedRandomizedRunnerRunStart
+      ? { observedRandomizedRunnerRunStart }
+      : {}),
     ownDeckSnapshot,
     ownDeckCapabilities,
     ownDeckStrategyProfile,

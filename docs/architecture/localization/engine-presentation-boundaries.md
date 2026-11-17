@@ -79,6 +79,13 @@ Die Chronik blendet die Zugriffsbestätigung `decline_trash` aus und zeigt
 Der gemeinsame Formatter beschreibt die Aktion als Zugriffsabschluss, da sie
 auch bei Zugriffen ohne legale Trash-Option verwendet wird.
 
+Kartenname und Tooltip verwenden die tatsächlich betroffene oder auslösende
+Karte aus den sichtbaren Ereignisfeldern. Ein mit dem Spieleintrag
+zusammengefasster Karteneffekt darf dessen Namen über dieselbe Definitions-ID
+beisteuern. Beim Rezzen, Werten oder Trashen durch einen Folgeeffekt zählt
+die Karte des Effektergebnisses. Der Runstart von Social Engineering steht
+in der öffentlich aufgelösten Zielwahl, sofern sie denselben Server nennt.
+
 Nur öffentliche oder für die Betrachtungsseite freigegebene Ereignisfelder
 sind Datenquellen. Texte aus `label`, Regeltexten oder KI-Begründungen werden
 nicht als Mechanikergebnisse geparst. Verdeckte Bewegungen behalten ihre

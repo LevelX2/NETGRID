@@ -3179,6 +3179,7 @@ describe("authoritative plan-first live runtime", () => {
       returnToHq.expiresAtStateVersion = input.playerView.stateVersion;
       input.playerView.phase = "run";
       input.playerView.timingPoint = "run.jack_out_window";
+      bindFixtureActionsToCurrentDecision(input);
       input.playerView.own.credits = 5;
       input.playerView.run = {
         attackedServerId: "hq",
@@ -3300,6 +3301,7 @@ describe("authoritative plan-first live runtime", () => {
       returnToHq.expiresAtStateVersion = input.playerView.stateVersion;
       input.playerView.phase = "run";
       input.playerView.timingPoint = "run.jack_out_window";
+      bindFixtureActionsToCurrentDecision(input);
       input.playerView.run = {
         attackedServerId: "hq",
         phase: "movement",
@@ -4883,6 +4885,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [continueRun, jackOut]);
     input.playerView.timingPoint = "run.jack_out_window";
+    bindFixtureActionsToCurrentDecision(input);
     input.playerView.run = {
       runId: "social-engineering-rd",
       attackedServerId: "rd",
@@ -4956,6 +4959,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [continueRun, jackOut]);
     input.playerView.timingPoint = "run.jack_out_window";
+    bindFixtureActionsToCurrentDecision(input);
     input.playerView.own.credits = 4;
     input.playerView.own.rig = [
       visibleCard("blink-installed", "runner", "program", {
@@ -5019,6 +5023,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [continueRun, jackOut]);
     input.playerView.timingPoint = "run.jack_out_window";
+    bindFixtureActionsToCurrentDecision(input);
     input.playerView.own.credits = 4;
     input.playerView.own.rig = [
       visibleCard("blink-installed", "runner", "program", {
@@ -5090,6 +5095,7 @@ describe("authoritative plan-first live runtime", () => {
     const input = aiInput("runner", [resolveCurrentIce, breakCurrentEtr]);
     breakCurrentEtr.timingPoint = "run.encounter_ice";
     input.playerView.timingPoint = "run.encounter_ice";
+    bindFixtureActionsToCurrentDecision(input);
     input.playerView.own.credits = 4;
     input.playerView.own.rig = [
       visibleCard("blink-installed", "runner", "program", {
@@ -6090,6 +6096,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [continueRun]);
     input.playerView.timingPoint = "run.jack_out_window";
+    bindFixtureActionsToCurrentDecision(input);
     input.playerView.run = {
       attackedServerId: "hq",
       phase: "movement",
@@ -6851,6 +6858,7 @@ describe("authoritative plan-first live runtime", () => {
           actionType === "jack_out"
             ? "run.jack_out_window"
             : "run.encounter_ice";
+        bindFixtureActionsToCurrentDecision(input);
         input.playerView.run = {
           attackedServerId: "hq",
           phase: actionType === "jack_out" ? "movement" : "encounter_ice",
@@ -12268,6 +12276,7 @@ describe("authoritative plan-first live runtime", () => {
     const atWindow = (iceIndex: number) => {
       const input = aiInput("corp", [rez]);
       input.playerView.timingPoint = "run.approach_ice";
+      bindFixtureActionsToCurrentDecision(input);
       input.playerView.own.credits = 20;
       input.playerView.run = {
         attackedServerId: "remote_1",
@@ -12343,6 +12352,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const centralWindow = aiInput("corp", [centralRez]);
     centralWindow.playerView.timingPoint = "run.approach_ice";
+    bindFixtureActionsToCurrentDecision(centralWindow);
     centralWindow.playerView.own.credits = 20;
     centralWindow.playerView.own.stackOrRdCount = 5;
     centralWindow.playerView.run = {
@@ -12394,6 +12404,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const hqWindow = aiInput("corp", [hqRez]);
     hqWindow.playerView.timingPoint = "run.approach_ice";
+    bindFixtureActionsToCurrentDecision(hqWindow);
     hqWindow.playerView.own.credits = 20;
     hqWindow.playerView.own.gripOrHq = [
       visibleCard("hq-agenda", "corp", "agenda", {
@@ -17293,6 +17304,7 @@ describe("authoritative plan-first live runtime", () => {
     const later = aiInput("runner", [end]);
     later.decisionId = first.decisionId;
     later.playerView.stateVersion = first.playerView.stateVersion + 10;
+    bindFixtureActionsToCurrentDecision(later);
     later.playerView.own.clicks = 0;
     later.playerView.opponent.deckCount = 1;
 
@@ -24017,6 +24029,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [boost]);
     input.playerView.timingPoint = "run.jack_out_window";
+    bindFixtureActionsToCurrentDecision(input);
     input.playerView.run = {
       attackedServerId: "rd",
       phase: "movement",
@@ -24106,6 +24119,7 @@ describe("authoritative plan-first live runtime", () => {
       continueUnbroken,
     ]);
     input.playerView.timingPoint = "run.encounter_ice";
+    bindFixtureActionsToCurrentDecision(input);
     input.playerView.run = {
       attackedServerId: "remote_1",
       phase: "encounter_ice",
@@ -24309,6 +24323,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [continueRun, jackOut]);
     input.playerView.timingPoint = "run.jack_out_window";
+    bindFixtureActionsToCurrentDecision(input);
     input.playerView.own.gripOrHq = Array.from({ length: 4 }, (_, index) =>
       visibleCard(`grip-${index}`, "runner", "event"),
     );
@@ -24380,6 +24395,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [continueRun, jackOut]);
     input.playerView.timingPoint = "run.jack_out_window";
+    bindFixtureActionsToCurrentDecision(input);
     input.playerView.own.gripOrHq = [
       visibleCard("grip-1", "runner", "event"),
       visibleCard("grip-2", "runner", "event"),
@@ -24552,6 +24568,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [run, credit]);
     input.playerView.stateVersion = 21;
+    bindFixtureActionsToCurrentDecision(input);
     input.playerView.own.credits = 0;
     input.eventTail = [
       {
@@ -24766,6 +24783,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [run, credit]);
     input.playerView.stateVersion = 21;
+    bindFixtureActionsToCurrentDecision(input);
     input.playerView.own.credits = 0;
     input.playerView.own.clicks = 4;
     input.eventTail = [
@@ -24938,6 +24956,7 @@ describe("authoritative plan-first live runtime", () => {
       accessInput.playerView.stateVersion = 2;
       for (const action of [decline, trash]) action.expiresAtStateVersion = 2;
       accessInput.playerView.timingPoint = "access.resolve_card";
+      bindFixtureActionsToCurrentDecision(accessInput);
       accessInput.playerView.run = {
         attackedServerId: "hq",
         phase: "access",
@@ -25562,7 +25581,11 @@ describe("authoritative plan-first live runtime", () => {
       stateVersionAfter: stateVersion + 1,
       stateHashAfter: "hash_corp_draw",
       visibilityClass: "hidden_info_barrier",
-      publicPayload: { actor: "corp", actionType: "mandatory_draw" },
+      publicPayload: {
+        actor: "corp",
+        actionType: "mandatory_draw",
+        corpRdDrawnToHqCount: 1,
+      },
     } as PublicGameEvent);
     stateVersion += 1;
     input.playerView.stateVersion = stateVersion;
@@ -31586,6 +31609,13 @@ function reissueActionsAtStateVersion(
     ...action,
     expiresAtStateVersion: stateVersion,
   }));
+}
+
+function bindFixtureActionsToCurrentDecision(input: AiDecisionInput): void {
+  for (const action of input.legalActions) {
+    action.timingPoint = input.playerView.timingPoint;
+    action.expiresAtStateVersion = input.playerView.stateVersion;
+  }
 }
 
 function liveContext(overrides: Record<string, unknown> = {}) {

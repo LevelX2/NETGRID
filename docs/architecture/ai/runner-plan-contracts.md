@@ -627,6 +627,44 @@ Nullnutzen, unvermeidbare Gefahr, fehlende Zugriffskonversion und veraltete
 Actions begründen keine solche Alternative. Ein unbekanntes Root wird dadurch
 nicht als bekannte Agenda behandelt.
 
+Im letzten Klick vergleicht der Zentraldruck aktuelle Basis- und Kartenruns
+mit normalem Zugriff auf HQ oder R&D, wenn eine öffentlich begründete
+terminale Bedrohung im Remote ansteht. Eine bekannte Remote-Agenda muss
+genügend Punkte für den Corp-Sieg liefern. Ein finanzierter Remote mit
+relevantem Zugriff oder belegter Vorbereitung behält seinen Contest-Anspruch.
+Ein aus dem öffentlichen Verlauf abgeleiteter Remote ohne Agenda-Chance
+blockiert die Zentralroute nicht. Bei unbekanntem ICE bleibt eine bedingte
+Route mit vollständig finanzierter Vorabreserve und ohne weitere offene
+ICE-Wirkungen vergleichbar. Mindestreserve, Handpuffer und sichtbare
+Steal-Kosten bleiben bindend. D112 aus Match ce27c6b1 und die Gegenproben
+prüfen den HQ-Basisrun, Mehrfachzugriff und die Remote-Alternativen.
+
+Ein aktuell legaler Run auf das ungeschützte Archiv besitzt einen
+P1-Sieganspruch, wenn der Bestand vollständig sichtbar ist, der Zugriff
+keine offenen Effekte enthält und die aktuelle Engine-Quote einer sichtbaren
+Siegagenda ihren Steal finanziert. Der Zentraldruck bindet den Anspruch an
+die konkrete Archiv-Action. Normale und spekulative Zugriffe behalten ihre
+jeweiligen Prioritätsklassen.
+
+Die Aktionsdiagnostik jeder Zentralroute führt den ausgewerteten Belief-Stand.
+Ein öffentlich beobachteter Corp-Draw invalidiert die bekannte R&D-Spitze
+und verändert die Zugriffsbewertung. Die D112-Gegenprobe hält die LegalActions
+fest und prüft den Wechsel des tatsächlichen Zugriffsziels von R&D zu HQ.
+
+Der Pilot `runnerCentralAccessVariation` materialisiert im letzten Klick bei
+maximal zwei fehlenden Runner-Siegpunkten jeweils eine vollständige freie
+Basisrun-Linie auf ungeschütztes HQ und R&D mit unbekanntem Zugriffsertrag.
+Beide Linien haben P4, keine offene Pflicht, keinen bekannten Pfadrisiko-
+oder Ressourcenunterschied und höchstens 20 Punkte Abstand im TurnPlanner.
+Bei Gleichstand erhalten sie Gewicht eins. Innerhalb des Bandes erhält die
+höher bewertete Linie Gewicht zwei. Eine laufende Bindung, eine belegte
+Siegroute und ein relevanter Ressourcen- oder Sicherheitsunterschied
+begrenzen die Variation. Die Engine wendet genau eine Variante über
+`ai_turn_plan_selection` an. Der validierte Spielbeleg stellt vor dem ersten
+Run-Fenster die konkret gezogene Planinstanz und ihren Step wieder her.
+Die Runtime-Option ermöglicht einen Vergleich bei identischen Decks und
+Seeds. Der Pilot deckt vorerst das Auswahl- und Zugriffsfenster ab.
+
 Die Informationsroute bewertet ein öffentlich beobachtetes kostenloses
 Run-Ende im laufenden Zug: Folgt auf den Basisrun ausschließlich kostenloses
 ICE-Rezzen und ein von der Engine bestätigtes End-the-Run-Fenster ohne
@@ -1199,6 +1237,18 @@ garantierte Trace-/Breakreserve ist keine Betriebskostenersparnis einer
 neuen Installation. Zulassung verlangt niedrigere vollständige
 Installations- plus Pfadkosten als die so gequotete bestehende Abdeckung.
 Gleiche Kosten erzeugen keinen Effizienzbedarf, auch bei kostenloser Kopie.
+Das gilt auch für einen technisch finanzierten Zentralpfad, den seine
+allgemeine Nach-Run-Reserve zurückstellt. Hier bindet Coverage nur eine
+bereits legale Handinstallation, die den Pfad inklusive Installationskosten
+verbilligt und freien Speicher nutzt. Maßgeblich ist der bereits erreichte
+gemeinsame Defense-Handpuffer. Ein erforderlicher, aktuell belegter Ziehschritt
+muss neben dem Installations- und einem Run-Klick Platz finden. Installations-
+und Ziehklick gehen mit dem bestehenden Klickwert in den Vergleich ein.
+Öffentlich belegter Zentraldruck in mindestens zwei eigenen Zügen begründet
+einen auf zwei Zugriffe begrenzten Nutzungshorizont, solange der Corp mehr
+als zwei Siegpunkte fehlen. Ein späterer Run wird anhand seiner eigenen
+Quote neu zugelassen. D97 aus Match ce27c6b1 prüft Installation, Handaufbau
+und die erneute HQ-Pfadquote.
 
 Eine unbezahlbare vollständige Schadensvermeidung kann den vorhandenen
 Coverage-Owner ebenfalls mit einer günstigeren Handinstallation beauftragen.

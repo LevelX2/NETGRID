@@ -141,8 +141,20 @@ export type ResidentPlanPortfolio = {
   turnPlanCommitment?: TurnPlanCommitment;
   turnPlanExecutionLease?: TurnPlanExecutionLease;
   selectedActionOrigin?: ResidentSelectedActionOrigin;
+  pendingRunnerCentralAccessVariation?: PendingRunnerCentralAccessVariation;
   pendingRunnerCostPenaltySupportOrigin?: PendingRunnerCostPenaltySupportOrigin;
   runnerExposeInformationMemory?: RunnerExposeInformationMemoryRecord[];
+};
+
+export type PendingRunnerCentralAccessVariation = {
+  engineSelectionKey: string;
+  origins: Array<{
+    targetServerId: "hq" | "rd";
+    origin: Extract<
+      ResidentSelectedActionOrigin,
+      { immediateChoicePolicy: "resolve_runner_run_start_order" }
+    >;
+  }>;
 };
 
 export type PendingRunnerCostPenaltySupportOrigin = Readonly<{
@@ -243,7 +255,10 @@ export function reconcileResidentPlanPortfolio(
 
 /** Computes lifecycle transitions once, then binds roles for the requested phase. */
 export function prepareResidentPlanPortfolioReconciliation(
-  params: Omit<ReconcileResidentPlanPortfolioParams, "selectedExecutorInstanceId" | "selectionReason">,
+  params: Omit<
+    ReconcileResidentPlanPortfolioParams,
+    "selectedExecutorInstanceId" | "selectionReason"
+  >,
 ) {
   assertPortfolioInput(params);
   const proposals = deduplicatePlanProposals(
@@ -406,7 +421,12 @@ export function prepareResidentPlanPortfolioReconciliation(
     executorId?: string,
     reason: ReconcileResidentPlanPortfolioParams["selectionReason"] = "executor_selected",
   ): ResidentPlanPortfolio => {
-    const assigned = assignExecutor(portfolio, executorId, reason, params.timingPoint);
+    const assigned = assignExecutor(
+      portfolio,
+      executorId,
+      reason,
+      params.timingPoint,
+    );
     assertResidentPlanPortfolio(assigned, params.timingPoint);
     return assigned;
   };
@@ -777,6 +797,43 @@ export function assertResidentPlanPortfolio(
       );
     }
   }
+  const accessVariation = portfolio.pendingRunnerCentralAccessVariation;
+  if (
+    accessVariation &&
+    (portfolio.side !== "runner" ||
+      accessVariation.engineSelectionKey !==
+        portfolio.turnPlanExecutionLease?.engineSelectionKey ||
+      accessVariation.origins.length !== 2 ||
+      new Set(accessVariation.origins.map((entry) => entry.targetServerId))
+        .size !== 2 ||
+      new Set(
+        accessVariation.origins.map((entry) => entry.origin.selectedActionId),
+      ).size !== 2 ||
+      accessVariation.origins.some(
+        ({ targetServerId, origin }) =>
+          origin.selectedAtStateVersion !== portfolio.stateVersion ||
+          origin.continuedThroughStateVersion !== portfolio.stateVersion ||
+          origin.sourceActionType !== "start_run" ||
+          origin.rootPlanInstanceId !== origin.executorInstanceId ||
+          !portfolio.instances.some(
+            (instance) =>
+              instance.instanceId === origin.executorInstanceId &&
+              instance.moduleId === "runner.pressure_central" &&
+              instance.target?.kind === "server" &&
+              instance.target.id === targetServerId &&
+              instance.viability === "ready",
+          ),
+      ))
+  ) {
+    throw portfolioFailure(
+      "executor_invariant_broken",
+      portfolio,
+      timingPoint,
+      portfolio.executorInstanceId,
+      "Persist both current Runner central run origins with the exact Engine selection lease.",
+    );
+  }
+
   const paymentOrigin = portfolio.pendingRunnerCostPenaltySupportOrigin;
   if (
     paymentOrigin &&

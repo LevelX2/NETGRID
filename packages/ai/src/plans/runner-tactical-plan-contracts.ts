@@ -60,7 +60,7 @@ export type RunnerPressureSignal = {
   serverId: "hq" | "rd" | "archives";
   purpose: "access" | "multiaccess" | "information";
   strategyLineIds: string[];
-  priorityClass: "P2" | "P3" | "P4" | "P5" | "P6";
+  priorityClass: "P1" | "P2" | "P3" | "P4" | "P5" | "P6";
   reachable: boolean;
   marginalValue: number;
   evidenceCode: string;

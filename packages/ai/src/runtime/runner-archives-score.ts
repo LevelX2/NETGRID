@@ -1,4 +1,7 @@
+import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput } from "@netgrid/shared";
+import { runnerRunProjectionPreservesNormalAccess } from "../actions/run-action-projection";
+import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import {
   eventMayChangeArchives,
   findLastHistoryIndex,
@@ -6,6 +9,78 @@ import {
   mergedPublicHistory,
 } from "../public-event-history";
 import { runnerPressureVariationBucket } from "../runner-run-target-guidance";
+
+/** A visible, currently payable win with no ICE or unresolved Archives effects. */
+export function runnerVisibleArchivesWinningRun(
+  input: AiDecisionInput,
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  const view = input.playerView;
+  if (
+    evaluation.targetServerId !== "archives" ||
+    evaluation.accessServerId !== "archives" ||
+    evaluation.runActionProjection.sourceKind !== "basic_action" ||
+    !runnerRunProjectionPreservesNormalAccess(
+      input,
+      evaluation.runActionProjection,
+    ) ||
+    evaluation.pathPassability !== "reachable" ||
+    evaluation.routeQuote?.reachability !== "guaranteed_access" ||
+    evaluation.routeQuote.fundingGap !== 0 ||
+    evaluation.routeQuote.effects.length !== 0 ||
+    (evaluation.routeQuote.conditionalRiskReasons?.length ?? 0) !== 0 ||
+    !input.legalActions.some(
+      (action) =>
+        action.actionId === evaluation.actionId &&
+        action.side === "runner" &&
+        action.type === "start_run" &&
+        action.payload?.serverId === "archives" &&
+        action.expiresAtStateVersion === view.stateVersion,
+    )
+  )
+    return false;
+
+  const archives = view.servers.find((server) => server.id === "archives");
+  const pointsNeeded = view.agendaPointsToWin - view.own.agendaPoints;
+  if (
+    !archives ||
+    archives.ice.length !== 0 ||
+    archives.root.length !== view.opponent.discardCount ||
+    pointsNeeded <= 0 ||
+    archives.root.some((card) => {
+      const definition =
+        card.known && card.definitionId
+          ? cardSpecPlanningCardByDefinitionId(card.definitionId)
+          : undefined;
+      return (
+        !definition ||
+        definition.planning.engine.accessEffects?.some(
+          (effect) =>
+            effect.kind === "on_access" &&
+            effect.sourceZones.includes("archives") &&
+            !effect.ignoreIfAccessedFrom?.includes("archives"),
+        ) === true
+      );
+    })
+  )
+    return false;
+
+  return archives.root.some((card) => {
+    const quote = card.effectiveStealCostQuote;
+    return (
+      card.type === "agenda" &&
+      card.agendaPoints !== undefined &&
+      card.agendaPoints >= pointsNeeded &&
+      quote?.complete === true &&
+      quote.agendaInstanceId === card.instanceId &&
+      quote.serverId === archives.id &&
+      quote.stateVersion === view.stateVersion &&
+      Number.isSafeInteger(quote.creditCost) &&
+      quote.creditCost >= 0 &&
+      quote.creditCost <= evaluation.creditsAfterRun
+    );
+  });
+}
 
 export function runnerArchivesHasQualifiedHiddenPayoff(
   input: AiDecisionInput,

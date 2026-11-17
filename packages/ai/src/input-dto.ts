@@ -3767,6 +3767,17 @@ function sanitizePublicPayload(
     payload,
     PUBLIC_PAYLOAD_PRIMITIVE_KEYS,
   );
+  for (const key of [
+    "corpHqCountBefore",
+    "corpHqCountAfter",
+    "corpRdDrawnToHqCount",
+  ] as const) {
+    const count = payload[key];
+    if (typeof count === "number" && Number.isSafeInteger(count) && count >= 0)
+      result[key] = count;
+  }
+  if (payload.corpRdDrawOrderUnresolved === true)
+    result.corpRdDrawOrderUnresolved = true;
   for (const key of PUBLIC_PAYLOAD_STRING_ARRAY_KEYS) {
     const value = sanitizeStringArray(payload[key]);
     if (value) result[key] = value;

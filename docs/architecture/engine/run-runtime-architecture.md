@@ -263,6 +263,14 @@ ihnen aber nicht zurückimportiert.
 - Jeder Zufallspfad bleibt Seed-/RandomCounter-gesteuert; die Extraktionen
   fügen weder Ziehungen hinzu noch verändern sie deren Reihenfolge.
 
+## Startup Immolator: Rezkosten beim Trash nach dem Passieren
+
+Die Runstart-Vorschau für sichtbares ICE, die legale Trash-Aktion und ihre
+erneute Zahlungsprüfung verwenden die gedruckten Rezkosten des ICE. Rabatte
+wie Skälderviken SA Beta Test Site senken den Betrag, den die Corp beim Rezzen
+bezahlt. Die Regelquelle sind die Einträge zu Data Masons und Skälderviken in
+[Netrunner Errata 1.70](../../source/Netrunner%20Errata%201.70.md).
+
 ## Dr. Dreff: temporäre Begegnung und Rückkehr vor Trash
 
 Dr. Dreffs Kostenquote verwendet die halben gedruckten ICE-Rezkosten,

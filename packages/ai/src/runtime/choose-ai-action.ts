@@ -25,6 +25,8 @@ export type AiDecisionRuntimeOptions = {
    * while emitting the same complete planner diagnostics.
    */
   runnerTurnPlannerMode?: "cutover" | "legacy_compare";
+  /** Opt-in control for the Runner central access variation pilot. */
+  runnerCentralAccessVariation?: boolean;
   quoteCorpPunishRoute?: (
     request: CorpPunishRouteQuoteRequest,
   ) => CorpPunishRouteQuoteResult;
