@@ -1,3 +1,4 @@
+import type { MatchEventId } from "@netgrid/shared";
 import type { RunnerExposeInformationMemoryRecord } from "../runner/expose-information/expose-information-types";
 import type { Side } from "@netgrid/shared";
 import {
@@ -60,7 +61,7 @@ export const RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION =
 
 export type ResidentCorpCampaignPublicOutcome = {
   outcomeId: string;
-  eventId: string;
+  eventId: MatchEventId;
   eventType: string;
   stateVersionAfter: number;
   kind:
@@ -757,7 +758,7 @@ export function assertResidentPlanPortfolio(
       (selectedActionOrigin.immediateChoicePolicy ===
         "select_bound_corp_archives_cards_to_hq" &&
         selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&
-        selectedActionOrigin.sourceCardDefinitionId.trim().length > 0 &&
+        selectedActionOrigin.sourceCardDefinitionId > 0 &&
         (selectedActionOrigin.selectionMode === "one" ||
           selectedActionOrigin.selectionMode === "all") &&
         selectedActionOrigin.eligibleArchiveCardInstanceIds.length > 0 &&

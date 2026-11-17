@@ -46,7 +46,7 @@ export type CorpHandActionDispositionInput = {
 
 export type CorpHandRouteCoverageRecord = {
   sourceInstanceId: string;
-  sourceDefinitionId: number;
+  sourceDefinitionId?: number;
   duplicateCount: number;
   legalActionIds: string[];
   exactCurrentProjections: string[];
@@ -113,7 +113,7 @@ export function buildCorpHandInventoryFacts(params: {
 }): CorpHandInventoryFacts | undefined {
   if (params.input.side !== "corp") return undefined;
   const ownHqCards = params.input.playerView.own.gripOrHq;
-  const duplicateCounts = new Map<string, number>();
+  const duplicateCounts = new Map<number, number>();
   for (const card of ownHqCards) {
     if (!card.known || !card.definitionId) continue;
     duplicateCounts.set(
@@ -182,7 +182,9 @@ export function buildCorpHandInventoryFacts(params: {
     });
     return {
       sourceInstanceId: card.instanceId,
-      sourceDefinitionId: card.definitionId ?? "unknown-own-card",
+      ...(card.known && card.definitionId !== undefined
+        ? { sourceDefinitionId: card.definitionId }
+        : {}),
       duplicateCount,
       legalActionIds,
       exactCurrentProjections: sortedUnique(

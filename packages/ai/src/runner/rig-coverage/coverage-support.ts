@@ -9,7 +9,7 @@ import { runnerCandidateExecutesProgramSearch } from "../../runtime/runner-progr
 import { runnerCandidateSourceDefinitionId } from "../../runtime/runner-action-source-facts";
 import { uniqueBy } from "../../runtime/collection";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
-import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
+import type { AiDecisionInput, CardDefinitionId, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
@@ -380,7 +380,7 @@ export function coverageSupportActionIds(
   requiredRole: RunnerCoverageGapSignal["requiredRole"],
   options: Readonly<{
     deckHasStackAnswerOverride?: boolean;
-    targetDefinitionIdOverride?: string;
+    targetDefinitionIdOverride?: CardDefinitionId;
     handRotation?: Pick<
       RunnerHandRotationAssessment,
       "exactKnownNeedDrawAdmissible" | "stackHasCards"
@@ -623,7 +623,7 @@ function runnerDeckHasHeapRecoveryDrawAnswer(
       (card) =>
         card.known &&
         visibleCardCoversRequiredCoverage(card, requiredRole, (cardId) =>
-          rolesForDeckDoctrineCard(cardId ?? ""),
+          rolesForDeckDoctrineCard(cardId),
         ),
     )
   ) {
@@ -704,7 +704,7 @@ export function runnerPreferredCoverageSearchDefinitionId(
       (left, right) =>
         (left.installCost ?? Number.POSITIVE_INFINITY) -
           (right.installCost ?? Number.POSITIVE_INFINITY) ||
-        left.cardId.localeCompare(right.cardId),
+        (left.cardId - right.cardId),
     )[0]?.cardId;
 }
 
@@ -762,7 +762,7 @@ export function runnerCoverageRecoveryTarget(
       : visibleHeapCards;
   return targets.find((card) =>
     visibleCardCoversRequiredCoverage(card, requiredRole, (cardId) =>
-      rolesForDeckDoctrineCard(cardId ?? ""),
+      rolesForDeckDoctrineCard(cardId),
     ),
   );
 }

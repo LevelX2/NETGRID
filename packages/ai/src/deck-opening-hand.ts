@@ -130,8 +130,8 @@ type CorpOpeningStrategyAssessment = {
 };
 
 function corpOpeningCard(card: VisibleCard): CorpOpeningCard {
-  const hint = AI_HINTS_BY_CARD.get(card.definitionId ?? "");
-  const roles = rolesForDeckDoctrineCard(card.definitionId ?? "");
+  const hint = card.definitionId === undefined ? undefined : AI_HINTS_BY_CARD.get(card.definitionId);
+  const roles = rolesForDeckDoctrineCard(card.definitionId);
   const type = card.type ?? hint?.cardType ?? openingTypeFromExactRoles(roles);
   return {
     card,
@@ -302,7 +302,7 @@ export function evaluateRunnerOpeningHand(
 ): RunnerOpeningHandEvaluation {
   const handCards = input.playerView.own.gripOrHq;
   const handRoleGroups = handCards.map((card) =>
-    rolesForDeckDoctrineCard(card.definitionId ?? ""),
+    rolesForDeckDoctrineCard(card.definitionId),
   );
   const capabilityBreakerDefinitionIds =
     runnerOpeningCapabilityBreakerDefinitionIds(input);
@@ -432,7 +432,7 @@ function runnerExecutableDrawEconomyOpeningCount(
   input: AiDecisionInput,
 ): number {
   return input.playerView.own.gripOrHq.filter((card) => {
-    const hint = AI_HINTS_BY_CARD.get(card.definitionId ?? "");
+    const hint = card.definitionId === undefined ? undefined : AI_HINTS_BY_CARD.get(card.definitionId);
     if (!hint) return false;
     const immediateCost =
       card.type === "event" ? card.cost : (card.installCost ?? card.cost);

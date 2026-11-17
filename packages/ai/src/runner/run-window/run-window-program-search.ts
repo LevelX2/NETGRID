@@ -202,7 +202,7 @@ export function runnerRunProgramSearchAssessment(
           b.cost -
           b.currentCost -
           b.remainingCost ||
-        a.target.localeCompare(b.target),
+        a.target - b.target,
     );
   const best = alternatives[0];
   if (!best)

@@ -42,7 +42,7 @@ export function resolvePlanBoundRunnerHiddenDrawChoice(
       context.input.playerView.stateVersion &&
     continuation.originActionId.length > 0 &&
     continuation.sourceCardInstanceId.length > 0 &&
-    continuation.sourceCardDefinitionId.length > 0 &&
+    continuation.sourceCardDefinitionId > 0 &&
     continuation.drawnCardInstanceIds.length > 0 &&
     new Set(continuation.drawnCardInstanceIds).size ===
       continuation.drawnCardInstanceIds.length &&

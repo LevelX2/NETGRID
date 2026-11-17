@@ -15,7 +15,7 @@ export type RunnerMultiRunContextDependencies<
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined | undefined;
   targetServerId: (action: LegalAction) => string | undefined;
   payoffClass: (evaluation: RunnerRunTargetEvaluation | undefined) => string;
   canTakeRun: (evaluation: RunnerRunTargetEvaluation | undefined) => boolean;

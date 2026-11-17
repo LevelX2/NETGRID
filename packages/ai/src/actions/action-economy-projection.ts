@@ -454,7 +454,7 @@ function runnerHandSetAsideStatus(
     target.length > 0 &&
     target !== source &&
     typeof payload.targetCardDefinitionId === "number" &&
-    payload.targetCardDefinitionId.length > 0 &&
+    payload.targetCardDefinitionId > 0 &&
     action.targetRequirements.some(
       (requirement) =>
         requirement.kind === "card" &&

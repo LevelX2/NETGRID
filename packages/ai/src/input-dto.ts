@@ -1,3 +1,4 @@
+import { isCardDefinitionId, isMatchEventId } from "@netgrid/shared";
 import { sanitizeCurrentCorpPunishQuoteSet } from "./corp/punish/punish-route-quote-sanitizer";
 import { sanitizeCorpStartDrawQuote } from "./runtime/corp-start-draw-quote-input";
 import {
@@ -95,6 +96,8 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "runnerInstallPaymentSourceAmounts",
   "runnerInstallPaymentHostedCredits",
   "runnerProgramTrashBeforeInstall",
+  "actionEconomyAbility",
+  "restrictedActionFamily",
   "hostOnCardId",
   "restrictedCreditGainAmount",
   "restrictedCreditGainUsableFor",
@@ -2137,10 +2140,10 @@ function sanitizeInstalledCorpRezCostQuote(
     expiresAtStateVersion: quote.expiresAtStateVersion,
   };
   if (!quote.complete) return { ...binding, complete: false };
-  const reductionSourceDefinitionIds = sanitizedStringArray(
+  const reductionSourceDefinitionIds = sanitizedCardDefinitionIds(
     quote.reductionSourceDefinitionIds,
   );
-  const increaseSourceDefinitionIds = sanitizedStringArray(
+  const increaseSourceDefinitionIds = sanitizedCardDefinitionIds(
     quote.increaseSourceDefinitionIds,
   );
   const modifiersValid =
@@ -2486,7 +2489,7 @@ function sanitizeVisibleEffectiveIceRunQuote(
   const breakSubroutineCostSourceDefinitionIds =
     value.breakSubroutineCostSourceDefinitionIds === undefined
       ? undefined
-      : sanitizeNonEmptyStringArray(
+      : sanitizeCardDefinitionIds(
           value.breakSubroutineCostSourceDefinitionIds,
         );
   const breakSubroutineCostSourceTitles =
@@ -2501,7 +2504,7 @@ function sanitizeVisibleEffectiveIceRunQuote(
         );
   if (
     !isNonEmptyString(value.iceInstanceId) ||
-    !isNonEmptyString(value.iceDefinitionId) ||
+    !isCardDefinitionId(value.iceDefinitionId) ||
     !isNonNegativeSafeInteger(value.effectiveStrength) ||
     (value.encounterStrength !== undefined &&
       !isNonNegativeSafeInteger(value.encounterStrength)) ||
@@ -2593,7 +2596,7 @@ function sanitizeVisibleEffectiveSubroutine(
       typeof value.deflectorAutoBreakIfNoTarget !== "boolean") ||
     (value.breakTags !== undefined && breakTags === undefined) ||
     (value.sourceDefinitionId !== undefined &&
-      !isNonEmptyString(value.sourceDefinitionId)) ||
+      !isCardDefinitionId(value.sourceDefinitionId)) ||
     (value.sourceTitle !== undefined && !isNonEmptyString(value.sourceTitle)) ||
     (value.dynamicSourceKind !== undefined &&
       value.dynamicSourceKind !== "additional_subroutine" &&
@@ -2704,7 +2707,7 @@ function sanitizeVisibleCorpIcePostRezRunQuote(
     !isPlainObjectRecord(value) ||
     value.context !== "installed_post_rez" ||
     !isNonEmptyString(value.cardId) ||
-    !isNonEmptyString(value.iceDefinitionId) ||
+    !isCardDefinitionId(value.iceDefinitionId) ||
     !isExistingRunServerId(value.targetServerId) ||
     !isExistingRunServerId(value.projectedServerId) ||
     !isNonNegativeSafeInteger(value.expiresAtStateVersion)
@@ -2937,6 +2940,12 @@ function sanitizeNonEmptyStringArray(value: unknown): string[] | undefined {
     : undefined;
 }
 
+function sanitizeCardDefinitionIds(value: unknown): number[] | undefined {
+  return Array.isArray(value) && value.every(isCardDefinitionId)
+    ? value.slice()
+    : undefined;
+}
+
 function isPlainObjectRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -3092,7 +3101,7 @@ function sanitizeVisibleChoiceRequest(
       ? { sourceCardInstanceId: choice.sourceCardInstanceId }
       : {}),
     ...(playerViewSide === choice.side &&
-    isNonEmptyString(choice.sourceCardDefinitionId)
+    isCardDefinitionId(choice.sourceCardDefinitionId)
       ? { sourceCardDefinitionId: choice.sourceCardDefinitionId }
       : {}),
     ...(continuation ? { continuation } : {}),
@@ -3319,7 +3328,7 @@ function sanitizeChoiceContinuation(
     choiceSide === "runner" &&
     isNonEmptyString(value.sourceCardInstanceId) &&
     value.sourceCardInstanceId === sourceCardInstanceId &&
-    isNonEmptyString(value.sourceCardDefinitionId) &&
+    isCardDefinitionId(value.sourceCardDefinitionId) &&
     value.sourceCardDefinitionId === sourceCardDefinitionId &&
     value.drawnCardInstanceIds.length > 0 &&
     value.drawnCardInstanceIds.every(isNonEmptyString) &&
@@ -3338,7 +3347,7 @@ function sanitizeChoiceContinuation(
     typeof value.sourceCardInstanceId === "string" &&
     value.sourceCardInstanceId.length > 0 &&
     typeof value.sourceCardDefinitionId === "number" &&
-    value.sourceCardDefinitionId.length > 0 &&
+    value.sourceCardDefinitionId > 0 &&
     typeof value.sourceCapabilityKey === "string" &&
     value.sourceCapabilityKey.length > 0 &&
     Number.isSafeInteger(value.temporaryCredits) &&
@@ -3370,7 +3379,7 @@ function sanitizeChoiceContinuation(
     choiceSide === "runner" &&
     isNonEmptyString(value.sourceCardInstanceId) &&
     value.sourceCardInstanceId === sourceCardInstanceId &&
-    isNonEmptyString(value.sourceCardDefinitionId) &&
+    isCardDefinitionId(value.sourceCardDefinitionId) &&
     value.sourceCardDefinitionId === sourceCardDefinitionId &&
     (value.selectedCardId === undefined ||
       isNonEmptyString(value.selectedCardId)) &&
@@ -3422,7 +3431,7 @@ function sanitizeCorpOptionalRezChoiceQuote(
     quote.stateVersion !== expected.choiceStateVersion ||
     !isNonEmptyString(quote.sourceAgendaId) ||
     !isNonEmptyString(quote.cardId) ||
-    !isNonEmptyString(quote.cardDefinitionId) ||
+    !isCardDefinitionId(quote.cardDefinitionId) ||
     expected.optionValue !== quote.cardId ||
     expected.optionCard?.known !== true ||
     expected.optionCard.instanceId !== quote.cardId ||
@@ -3471,10 +3480,10 @@ function sanitizeCorpOptionalRezChoiceQuote(
 
   const cardType = quote.cardType;
   const mandatoryAdditionalCosts = quote.mandatoryAdditionalCosts;
-  const reductionSourceDefinitionIds = sanitizedStringArray(
+  const reductionSourceDefinitionIds = sanitizedCardDefinitionIds(
     quote.reductionSourceDefinitionIds,
   );
-  const increaseSourceDefinitionIds = sanitizedStringArray(
+  const increaseSourceDefinitionIds = sanitizedCardDefinitionIds(
     quote.increaseSourceDefinitionIds,
   );
   const optionalModifierIdsValid =
@@ -3568,9 +3577,19 @@ function sanitizedStringArray(value: unknown): string[] | undefined {
   return strings.slice();
 }
 
+function sanitizedCardDefinitionIds(value: unknown): number[] | undefined {
+  if (
+    !Array.isArray(value) ||
+    !value.every(isCardDefinitionId) ||
+    value.some((id, index) => index > 0 && value[index - 1]! >= id)
+  )
+    return undefined;
+  return value.slice();
+}
+
 function modifierDefinitionIdListsAreDisjoint(
-  reductionIds: readonly string[] | undefined,
-  increaseIds: readonly string[] | undefined,
+  reductionIds: readonly number[] | undefined,
+  increaseIds: readonly number[] | undefined,
 ): boolean {
   if (!reductionIds || !increaseIds) return true;
   const reductions = new Set(reductionIds);
@@ -3744,6 +3763,9 @@ function sanitizeResolvedGameEffect(
 }
 
 function sanitizePublicGameEvent(event: PublicGameEvent): PublicGameEvent {
+  if (!isMatchEventId(event.eventId)) {
+    throw new Error("invalid_public_game_event_id");
+  }
   return {
     eventId: event.eventId,
     type: event.type,

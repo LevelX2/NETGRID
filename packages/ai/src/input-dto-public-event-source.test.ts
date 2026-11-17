@@ -1,3 +1,6 @@
+import { capabilityKey } from "@netgrid/cards";
+import { canonicalCapabilityId } from "@netgrid/cards/planning";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { PublicGameEvent } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -17,7 +20,7 @@ describe("AI input DTO public event source binding", () => {
       { credits: 0, clicks: 1 },
     );
     const event: PublicGameEvent = {
-      eventId: "trace-complete",
+      eventId: 186,
       stateHashAfter: "fnv1a:trace-complete",
       type: "resolve_choice",
       stateVersionBefore: 184,
@@ -150,6 +153,10 @@ describe("AI input DTO public event source binding", () => {
   });
 
   it("preserves exact actor-side canonical capability binding and rejects hybrid AbilityRef", () => {
+    const sourceAbilityId = canonicalCapabilityId(
+      syntheticCardDefinitionId("test_card"),
+      capabilityKey("gain"),
+    );
     const action = legalAction(
       "canonical-action",
       "runner",
@@ -161,12 +168,12 @@ describe("AI input DTO public event source binding", () => {
     action.payload = {
       cardId: "source",
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-      cardImplementationAbilityId: "test_card:gain",
+      cardImplementationAbilityId: sourceAbilityId,
       cardImplementationAbilityKey: "gain",
     };
     action.abilityRef = {
       sourceCardInstanceId: "source",
-      sourceAbilityId: "test_card:gain",
+      sourceAbilityId,
     };
     const view = playerView("runner", [action]);
     const build = () =>
@@ -184,11 +191,11 @@ describe("AI input DTO public event source binding", () => {
     expect(build().legalActions[0]).toMatchObject({
       abilityRef: {
         sourceCardInstanceId: "source",
-        sourceAbilityId: "test_card:gain",
+        sourceAbilityId,
       },
       payload: {
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-        cardImplementationAbilityId: "test_card:gain",
+        cardImplementationAbilityId: sourceAbilityId,
         cardImplementationAbilityKey: "gain",
       },
     });
@@ -202,7 +209,7 @@ describe("AI input DTO public event source binding", () => {
     action.abilityRef = {
       sourceCardInstanceId: "source",
       abilityId: "legacy",
-      sourceAbilityId: "test_card:gain",
+      sourceAbilityId,
     } as never;
     expect(build).toThrow(/AbilityRef/);
   });
@@ -244,7 +251,7 @@ describe("AI input DTO public event source binding", () => {
       { credits: 0, clicks: 1 },
     );
     const event: PublicGameEvent = {
-      eventId: "actor-side-bank-load",
+      eventId: 3,
       type: "activated_card_ability",
       stateVersionBefore: 1,
       stateVersionAfter: 2,
@@ -293,7 +300,7 @@ describe("AI input DTO public event source binding", () => {
       { credits: 0, clicks: 1 },
     );
     const event: PublicGameEvent = {
-      eventId: "runner-payment-support-window",
+      eventId: 12,
       type: "play_event",
       stateVersionBefore: 10,
       stateVersionAfter: 11,
@@ -342,7 +349,7 @@ describe("AI input DTO public event source binding", () => {
       { credits: 0, clicks: 1 },
     );
     const event: PublicGameEvent = {
-      eventId: "agenda-access-cost",
+      eventId: 9,
       type: "decline_trash",
       stateVersionBefore: 7,
       stateVersionAfter: 8,
@@ -354,7 +361,7 @@ describe("AI input DTO public event source binding", () => {
         serverId: "remote_1",
         stealCost: 2,
         stealAdditionalCost: 2,
-        stealCostSourceDefinitionIds: "agenda-with-access-cost",
+        stealCostSourceDefinitionIds: String(syntheticCardDefinitionId("agenda-with-access-cost")),
         stealCostSourceTitles: "Agenda with access cost",
         stealCostPersistedForCurrentAccess: true,
         stealBlockedByCost: true,
@@ -379,7 +386,7 @@ describe("AI input DTO public event source binding", () => {
     expect(input.eventTail[0]?.publicPayload).toMatchObject({
       stealCost: 2,
       stealAdditionalCost: 2,
-      stealCostSourceDefinitionIds: "agenda-with-access-cost",
+      stealCostSourceDefinitionIds: String(syntheticCardDefinitionId("agenda-with-access-cost")),
       stealCostSourceTitles: "Agenda with access cost",
       stealCostPersistedForCurrentAccess: true,
       stealBlockedByCost: true,
@@ -398,7 +405,7 @@ describe("AI input DTO public event source binding", () => {
       { credits: 0, clicks: 1 },
     );
     const event: PublicGameEvent = {
-      eventId: "corp-extra-mandatory-draw",
+      eventId: 10,
       type: "mandatory_draw",
       stateVersionBefore: 8,
       stateVersionAfter: 9,

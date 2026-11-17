@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
@@ -15,8 +16,8 @@ export type RunnerVisibleCardDiscardCompositionDependencies = {
   isVisibleIcebreakerProgram: (card: VisibleCard) => boolean;
   assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
   visibleBreakerRolesForAi: (card: VisibleCard) => readonly string[];
-  rolesForCardId: (cardId: string | undefined) => readonly string[];
-  cardDefinitionTypeForAi: (cardId: string | undefined) => string | undefined;
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => readonly string[];
+  cardDefinitionTypeForAi: (cardId: CardDefinitionId | undefined) => string | undefined;
   isRunnerEconomyRole: (role: string) => boolean;
 };
 

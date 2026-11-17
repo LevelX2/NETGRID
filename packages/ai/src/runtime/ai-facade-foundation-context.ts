@@ -24,7 +24,7 @@ export type AiFacadeFoundationContextDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string;
+  ) => number | undefined;
 };
 
 export function createAiFacadeFoundationContext(

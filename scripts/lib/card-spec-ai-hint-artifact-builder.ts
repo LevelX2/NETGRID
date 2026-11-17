@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "../../packages/shared/src/index";
 import { fingerprint } from "../../packages/cards/src/index";
 import {
   cardSpecRuntimeDefinitionIds,
@@ -28,7 +29,7 @@ type AiSupportScenarioPack = {
   status: string;
   scenarios: Array<{
     id: string;
-    coversCards: string[];
+    coversCards: CardDefinitionId[];
   }>;
 };
 
@@ -40,7 +41,7 @@ export function buildCardSpecAiHintArtifact(options?: {
   const entries = options?.entries ?? canonicalEntries;
   const scenarioPack = options?.scenarioPack ?? aiSupportScenarioData;
   const activeIds = new Set(cardSpecRuntimeDefinitionIds());
-  const cs06Ids = new Set<string>(CS06_CARD_DEFINITION_IDS);
+  const cs06Ids = new Set<CardDefinitionId>(CS06_CARD_DEFINITION_IDS);
   const sourceRefs = cardSpecSourceRefs();
   const classicIds = sourceRefs
     .filter(
@@ -86,7 +87,7 @@ export function buildCardSpecAiHintArtifact(options?: {
     ...classicIds,
     ...proteusIds,
     ...originalsetIds,
-  ].sort(compareText);
+  ].sort(compareCardIds);
   if (
     CS06_CARD_DEFINITION_IDS.length !== 10 ||
     systemIds.length !== 2 ||
@@ -102,12 +103,12 @@ export function buildCardSpecAiHintArtifact(options?: {
     );
   assertExactIds(
     "card_spec_ai_hint_artifact_runtime_partition",
-    [...activeIds].sort(compareText),
+    [...activeIds].sort(compareCardIds),
     expectedIds,
   );
   const actualIds = entries
     .map((entry) => entry.definition.id)
-    .sort(compareText);
+    .sort(compareCardIds);
   assertExactIds("card_spec_ai_hint_artifact_input", actualIds, expectedIds);
 
   const scenario = scenarioPack.scenarios.find(
@@ -125,11 +126,13 @@ export function buildCardSpecAiHintArtifact(options?: {
     status: scenarioPack.status,
     scenario: {
       id: scenario.id,
-      coversCards: [...scenario.coversCards].sort(compareText),
+      coversCards: [...scenario.coversCards].sort(compareCardIds),
     },
   };
   const cards = [...entries]
-    .sort((left, right) => compareText(left.definition.id, right.definition.id))
+    .sort((left, right) =>
+      compareCardIds(left.definition.id, right.definition.id),
+    )
     .map((entry) => ({
       cardId: entry.definition.id,
       cardRulesFingerprint: entry.planning.cardRulesFingerprint,
@@ -160,8 +163,8 @@ export async function serializeCardSpecAiHintArtifact(
 
 function assertExactIds(
   field: string,
-  actual: readonly string[],
-  expected: readonly string[],
+  actual: readonly CardDefinitionId[],
+  expected: readonly CardDefinitionId[],
 ): void {
   if (
     actual.length !== expected.length ||
@@ -170,6 +173,9 @@ function assertExactIds(
     throw new Error(`${field}_mismatch: ${actual.join(",")}`);
 }
 
-function compareText(left: string, right: string): number {
-  return left < right ? -1 : left > right ? 1 : 0;
+function compareCardIds(
+  left: CardDefinitionId,
+  right: CardDefinitionId,
+): number {
+  return left - right;
 }

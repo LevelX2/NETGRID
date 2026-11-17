@@ -42,7 +42,7 @@ type NoFreshCentralDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined | undefined;
 };
 
 type TrueCentralCloseoutDependencies = {
@@ -51,7 +51,7 @@ type TrueCentralCloseoutDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined | undefined;
 };
 
 type RunnerNoFreshCentralContextDependencies =
@@ -325,7 +325,7 @@ export function centralRunEventGoodForTarget(
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined,
+  ) => number | undefined | undefined,
 ): boolean {
   if (input.side !== "runner") return false;
   return input.legalActions.some((action) => {

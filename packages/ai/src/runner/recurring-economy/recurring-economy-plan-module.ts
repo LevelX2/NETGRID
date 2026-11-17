@@ -32,7 +32,7 @@ export function createRunnerRecurringEconomyModule(): PlanModule {
             signal,
           } satisfies RecurringEconomyState,
           priorityClass: signal.priorityClass,
-          target: { kind: "card", id: signal.definitionId },
+          target: { kind: "card", id: String(signal.definitionId) },
           routeExists: recurringEconomyCandidates(context, signal).length > 0,
           blockerCode:
             signal.phase === "hold"
@@ -71,7 +71,7 @@ export function createRunnerRecurringEconomyModule(): PlanModule {
               : {}),
           },
           ...(signal.phase === "install"
-            ? { target: { kind: "card" as const, id: signal.definitionId } }
+            ? { target: { kind: "card" as const, id: String(signal.definitionId) } }
             : {}),
           purpose:
             signal.phase === "install"

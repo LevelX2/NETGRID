@@ -1,9 +1,11 @@
 import { programTrashCoverageLosses } from "./program-trash-coverage";
 import type {
   AiDecisionInput,
+  CardDefinitionId,
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import { parseCardDefinitionId } from "../../card-definition-id-input";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -22,7 +24,7 @@ type ProgramTrashChoiceContext = {
   contextId: string;
   sourceIceId: string;
   subroutineIndex: number;
-  sourceDefinitionId: number;
+  sourceDefinitionId: CardDefinitionId;
   subroutineId: string;
   subroutineType: string;
   continuation: "encounter" | "trace_success";
@@ -110,7 +112,7 @@ export function rankCorpProgramTrashChoiceOptionIds(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: readonly PendingChoiceOption[],
-  rolesForCardId: (cardId: string | undefined) => readonly string[],
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => readonly string[],
 ): string[] | undefined {
   const context = corpProgramTrashChoiceContext(input, choice);
   const requirement = action.choiceRequirements?.[0];
@@ -207,6 +209,8 @@ function parseProgramTrashChoiceSource(
   const decoded = parts.slice(1, 3).concat(parts.slice(4, 6)).map(decodePart);
   if (decoded.some((part) => part === undefined || part.length === 0))
     return undefined;
+  const sourceDefinitionId = parseCardDefinitionId(decoded[2]!);
+  if (sourceDefinitionId === undefined) return undefined;
   const subroutineType = parts[6]!;
   if (!PROGRAM_TRASH_SUBROUTINE_TYPES.has(subroutineType)) return undefined;
   const continuation = parts[7];
@@ -216,7 +220,7 @@ function parseProgramTrashChoiceSource(
     contextId: decoded[0]!,
     sourceIceId: decoded[1]!,
     subroutineIndex,
-    sourceDefinitionId: decoded[2]!,
+    sourceDefinitionId,
     subroutineId: decoded[3]!,
     subroutineType,
     continuation,
@@ -237,7 +241,7 @@ function isKnownInstalledRunnerProgram(card: VisibleCard): boolean {
     card.controller === "runner" &&
     (card.type === "program" || card.installedAsRunnerProgram !== undefined) &&
     typeof card.definitionId === "number" &&
-    card.definitionId.length > 0
+    card.definitionId > 0
   );
 }
 

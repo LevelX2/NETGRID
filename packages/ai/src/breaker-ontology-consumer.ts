@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { AI_HINTS_BY_CARD as AI_HINTS, type AiCardHint } from "./ai-hints";
 import type {
   AiHintBreakerProfile,
@@ -24,14 +25,14 @@ export type StructuredBreakerCostProfile = {
 };
 
 export function getStructuredBreakerProfileForCard(
-  cardId: string | undefined,
+  cardId: CardDefinitionId | undefined,
 ): AiHintBreakerProfile | undefined {
   if (!cardId) return undefined;
   return AI_HINTS.get(cardId)?.breakerProfile;
 }
 
 export function breakerCardBlocksAccessReachability(
-  cardId: string | undefined,
+  cardId: CardDefinitionId | undefined,
 ): boolean {
   return breakerProfileBlocksAccessReachability(
     getStructuredBreakerProfileForCard(cardId),
@@ -50,20 +51,20 @@ export function breakerProfileBlocksAccessReachability(
 }
 
 export function classifyBreakerCoverageFromOntology(
-  cardIdOrHint: string | AiCardHint | undefined,
+  cardIdOrHint: CardDefinitionId | AiCardHint | undefined,
 ): KnownHintBreakerCoverage[] {
   const hint =
-    typeof cardIdOrHint === "string"
+    typeof cardIdOrHint === "number"
       ? AI_HINTS.get(cardIdOrHint)
       : cardIdOrHint;
   return sortedUnique(hint?.breakerProfile?.coverage ?? []);
 }
 
 export function estimateBreakerCostProfileFromOntology(
-  cardIdOrHint: string | AiCardHint | undefined,
+  cardIdOrHint: CardDefinitionId | AiCardHint | undefined,
 ): StructuredBreakerCostProfile | undefined {
   const hint =
-    typeof cardIdOrHint === "string"
+    typeof cardIdOrHint === "number"
       ? AI_HINTS.get(cardIdOrHint)
       : cardIdOrHint;
   const profile = hint?.breakerProfile;

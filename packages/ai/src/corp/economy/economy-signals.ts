@@ -85,6 +85,9 @@ export function corpOptionalActionCapacityConversions(
 ): CorpCorePlanDomain["economyNeeds"] {
   return candidates.flatMap((candidate) => {
     const projection = candidate.actionCapacityProjection;
+    const accept = input.legalActions.find(
+      (action) => action.actionId === candidate.actionId,
+    );
     if (
       candidate.actorSide !== "corp" ||
       candidate.sourceKind !== "card" ||
@@ -98,17 +101,23 @@ export function corpOptionalActionCapacityConversions(
       projection.followupActionCapacity !== 1 ||
       projection.preExistingActionCost !== 0 ||
       projection.restriction === "unknown" ||
-      !candidate.actionId.endsWith(".accept_extra_action_offer")
+      accept?.payload?.actionEconomyAbility !== "accept_extra_action_offer"
     ) {
       return [];
     }
-    const declineActionId = candidate.actionId.replace(
-      /\.accept_extra_action_offer$/,
-      ".decline_extra_action_offer",
+    const decline = input.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.side === "corp" &&
+        action.source === accept.source &&
+        action.timingPoint === accept.timingPoint &&
+        action.expiresAtStateVersion === accept.expiresAtStateVersion &&
+        action.payload?.restrictedActionFamily === accept.payload?.restrictedActionFamily &&
+        action.payload?.actionEconomyAbility === "decline_extra_action_offer",
     );
     const declineCandidate = candidates.find(
       (entry) =>
-        entry.actionId === declineActionId &&
+        entry.actionId === decline?.actionId &&
         entry.actorSide === "corp" &&
         entry.sourceCardInstanceId === candidate.sourceCardInstanceId &&
         entry.sourceDefinitionId === candidate.sourceDefinitionId &&

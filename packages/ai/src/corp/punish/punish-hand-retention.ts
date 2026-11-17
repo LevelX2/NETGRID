@@ -105,7 +105,7 @@ export function prepareCorpPunishHandAssessment(input: AiDecisionInput) {
     input,
     turnSerial === undefined ? undefined : turnSerial - 1,
   );
-  const operationCache = new Map<string, Operations>();
+  const operationCache = new Map<number, Operations>();
   function operations(definitionId: number): Operations {
     const cached = operationCache.get(definitionId);
     if (cached) return cached;

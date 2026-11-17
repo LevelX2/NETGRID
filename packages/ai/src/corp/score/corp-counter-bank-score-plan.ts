@@ -612,7 +612,7 @@ function isKnownAgenda(
     card.known === true &&
     card.type === "agenda" &&
     typeof card.definitionId === "number" &&
-    card.definitionId.length > 0
+    card.definitionId > 0
   );
 }
 

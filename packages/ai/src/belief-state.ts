@@ -1,3 +1,8 @@
+import type { MatchEventId } from "@netgrid/shared";
+import { sortedUnique } from "./runtime/collection";
+import { cardDefinitionIdValue } from "./card-definition-id-input";
+import { isCardDefinitionId } from "@netgrid/shared";
+import { parseCardDefinitionIdCsv } from "./card-definition-id-input";
 import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
 import {
   type AiDecisionInput,
@@ -46,7 +51,7 @@ export type BeliefEventFamily =
   | "other";
 
 export type BeliefEventClassification = {
-  eventId: string;
+  eventId: MatchEventId;
   eventType: string;
   actionType: string;
   family: BeliefEventFamily;
@@ -60,7 +65,7 @@ export type BeliefEventClassification = {
   effectiveAccessCount?: number;
   installPlacement?: HqInstallPlacementMemory;
   hiddenZoneMutation?: PublicHiddenZoneMutation;
-  sourceEventIds: string[];
+  sourceEventIds: MatchEventId[];
   invalidationReason?: string;
 };
 
@@ -70,12 +75,12 @@ export type BeliefEntry = {
   kind: BeliefKnowledgeKind;
   subject: string;
   confidence: number;
-  sourceEventIds: string[];
+  sourceEventIds: MatchEventId[];
   invalidatedBy: string[];
 };
 
 export type RndTopFreshnessMemory = {
-  lastKnownAccessEventId: string;
+  lastKnownAccessEventId?: MatchEventId;
   knownToRunner: boolean;
   freshness:
     | "fresh"
@@ -95,7 +100,7 @@ export type KnownPositionMemory = {
   positionKey: string;
   definitionId: number;
   certainty: "observed";
-  sourceEventId: string;
+  sourceEventId: MatchEventId;
   sourceKind?: "access" | "reveal" | "expose" | "rd_top_to_hq_draw";
   invalidatedBy: string[];
 };
@@ -112,16 +117,16 @@ export type RunnerKnownCorpCardMemory = {
     | "reveal"
     | "public_rez"
     | "persistent_exposure";
-  sourceEventId: string;
+  sourceEventId: MatchEventId;
   learnedAtStateVersion: number;
 };
 
 export type KnownHqHandMemory = {
   handCount: number;
-  knownDefinitions: string[];
+  knownDefinitions: number[];
   knownCount: number;
   allCardsKnown: boolean;
-  sourceEventIds: string[];
+  sourceEventIds: MatchEventId[];
   invalidationReasons: string[];
   ledger: HqHandLedgerMemory;
 };
@@ -134,13 +139,13 @@ export type KnownDefinitionCountMemory = {
 export type HqHandSafeDefinitionMemory = {
   definitionId: number;
   count: number;
-  sourceEventIds: string[];
+  sourceEventIds: MatchEventId[];
 };
 
 export type HqHandCandidateGroupMemory = {
   groupId: string;
   reason: string;
-  sourceEventId: string;
+  sourceEventId: MatchEventId;
   serverId?: string;
   installedPositionKey?: string;
   installPlacement?: HqInstallPlacementMemory;
@@ -157,7 +162,7 @@ export type HqHandLedgerMemory = {
   safeDefinitions: HqHandSafeDefinitionMemory[];
   unknownRestCount: number;
   candidateGroups: HqHandCandidateGroupMemory[];
-  sourceEventIds: string[];
+  sourceEventIds: MatchEventId[];
   invalidationReasons: string[];
 };
 
@@ -170,7 +175,7 @@ export type HiddenRemoteCandidateMemory = {
   relevantTrashCandidateCount: number;
   candidateDefinitions: KnownDefinitionCountMemory[];
   exhaustive: boolean;
-  sourceEventId: string;
+  sourceEventId: MatchEventId;
   installPlacement?: HqInstallPlacementMemory;
   basis: string[];
 };
@@ -180,7 +185,7 @@ export type RemoteRootTypeDeduction = {
   unknownRootCount: number;
   candidateTypes: Array<"agenda" | "asset" | "upgrade">;
   confidence: 1;
-  sourceEventIds: string[];
+  sourceEventIds: MatchEventId[];
   basis: string[];
 };
 
@@ -194,7 +199,7 @@ export type RunnerOpponentModel = {
     serverId: string;
     hypothesis: string;
     confidence: number;
-    sourceEventIds: string[];
+    sourceEventIds: MatchEventId[];
   }>;
   unrezzedIceRiskModel: Array<{
     serverId: string;
@@ -253,13 +258,13 @@ const HQ_ALL_KNOWN_CONTRADICTION_WARNING =
 type KnownHqHandEntry = {
   key: string;
   definitionId: number;
-  eventId: string;
+  eventId: MatchEventId;
 };
 
 type KnownRndDrawMemory = {
-  drawEventId: string;
+  drawEventId: MatchEventId;
   definitionIds: readonly number[];
-  sourceEventId: string;
+  sourceEventId: MatchEventId;
 };
 
 type RndKnowledgeTimeline = {
@@ -481,7 +486,7 @@ function activeBeliefUncertaintyCount(uncertainty: readonly string[]): number {
 }
 
 function beliefHistory(input: AiDecisionInput): PublicGameEvent[] {
-  const eventById = new Map<string, PublicGameEvent>();
+  const eventById = new Map<MatchEventId, PublicGameEvent>();
   for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
     const previous = eventById.get(event.eventId);
     if (!previous || previous.stateVersionAfter <= event.stateVersionAfter)
@@ -490,7 +495,7 @@ function beliefHistory(input: AiDecisionInput): PublicGameEvent[] {
   return [...eventById.values()].sort(
     (left, right) =>
       left.stateVersionBefore - right.stateVersionBefore ||
-      left.eventId.localeCompare(right.eventId),
+      left.eventId - right.eventId,
   );
 }
 
@@ -948,18 +953,20 @@ function deriveKnownPositionMemory(
     if (entry.zone === "rd" && /^top(?::\d+)?$/.test(entry.positionKey))
       memory.delete(key);
   }
-  for (const [index, definitionId] of (
-    rndTopFreshness?.knownSequenceDefinitionIds ?? []
-  ).entries()) {
-    const positionKey = index === 0 ? "top" : `top:${index}`;
-    memory.set(`rd:${positionKey}`, {
-      zone: "rd",
-      positionKey,
-      definitionId,
-      certainty: "observed",
-      sourceEventId: rndTopFreshness?.lastKnownAccessEventId ?? "none",
-      invalidatedBy: [],
-    });
+  if (rndTopFreshness?.lastKnownAccessEventId !== undefined) {
+    for (const [index, definitionId] of (
+      rndTopFreshness.knownSequenceDefinitionIds ?? []
+    ).entries()) {
+      const positionKey = index === 0 ? "top" : `top:${index}`;
+      memory.set(`rd:${positionKey}`, {
+        zone: "rd",
+        positionKey,
+        definitionId,
+        certainty: "observed",
+        sourceEventId: rndTopFreshness.lastKnownAccessEventId,
+        invalidatedBy: [],
+      });
+    }
   }
 
   return normalizeKnownPositionMemory([...memory.values()])
@@ -1189,7 +1196,7 @@ function gypsyStoredAgendaInHqDefinitionId(
   ) {
     return undefined;
   }
-  const definitionId = stringValue(
+  const definitionId = cardDefinitionIdValue(
     event.publicPayload.storedAgendaDefinitionId,
   );
   return definitionId && definitionLooksAgenda(definitionId)
@@ -1203,7 +1210,7 @@ function deriveHqHandLedger(
   invalidationReasons: string[],
   candidateGroups: HqHandCandidateGroupMemory[] = [],
 ): HqHandLedgerMemory {
-  const sourceEventIdsByDefinition = new Map<string, string[]>();
+  const sourceEventIdsByDefinition = new Map<number, MatchEventId[]>();
   for (const entry of knownEntries) {
     sourceEventIdsByDefinition.set(entry.definitionId, [
       ...(sourceEventIdsByDefinition.get(entry.definitionId) ?? []),
@@ -1465,8 +1472,8 @@ function subtractOneKnownDefinitionCount(
 
 function rememberCandidateDefinitionsAsSafeHqEntries(
   knownCards: KnownHqHandEntry[],
-  eventId: string,
-  candidateSourceEventId: string,
+  eventId: MatchEventId,
+  candidateSourceEventId: MatchEventId,
   definitions: KnownDefinitionCountMemory[],
 ): void {
   let index = 0;
@@ -1724,7 +1731,7 @@ function positionInvalidatesKey(
 function reconcileObservedRootReplacement(
   memory: Map<string, KnownPositionMemory>,
   event: BeliefEventClassification,
-  eventsById: Map<string, PublicGameEvent>,
+  eventsById: Map<MatchEventId, PublicGameEvent>,
 ): void {
   const raw = eventsById.get(event.eventId);
   if (
@@ -1768,7 +1775,7 @@ function reconcileObservedRootReplacement(
 function reconcileObservedRootRemoval(
   memory: Map<string, KnownPositionMemory>,
   event: BeliefEventClassification,
-  eventsById: Map<string, PublicGameEvent>,
+  eventsById: Map<MatchEventId, PublicGameEvent>,
 ): void {
   if (
     !event.serverId ||
@@ -1919,8 +1926,8 @@ function observedHqHandCountAfter(
 }
 
 function rememberObservedHqAccessDefinition(
-  knownCards: Array<{ key: string; definitionId: number; eventId: string }>,
-  eventId: string,
+  knownCards: Array<{ key: string; definitionId: number; eventId: MatchEventId }>,
+  eventId: MatchEventId,
   definitionId: number,
 ): void {
   if (knownCards.some((card) => card.definitionId === definitionId)) return;
@@ -1935,7 +1942,7 @@ function rememberObservedHqAccessDefinitionWithConsistencyCheck(
   knownCards: KnownHqHandEntry[],
   candidateGroups: HqHandCandidateGroupMemory[],
   handCount: number | undefined,
-  eventId: string,
+  eventId: MatchEventId,
   definitionId: number,
   invalidationReasons?: string[],
 ): void {
@@ -1974,16 +1981,16 @@ function hqAccessContradictsCompleteHandMemory(
 function countKnownDefinitionEntries(
   definitionIds: number[],
 ): KnownDefinitionCountMemory[] {
-  const counts = new Map<string, number>();
+  const counts = new Map<number, number>();
   for (const definitionId of definitionIds) {
     counts.set(definitionId, (counts.get(definitionId) ?? 0) + 1);
   }
   return [...counts.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
+    .sort(([left], [right]) => left - right)
     .map(([definitionId, count]) => ({ definitionId, count }));
 }
 
-function hqPrivateLookDefinitions(event: PublicGameEvent): string[] {
+function hqPrivateLookDefinitions(event: PublicGameEvent): number[] {
   if (
     event.publicPayload.actor !== "runner" ||
     event.publicPayload.hiddenZoneAction !== "p3_33_private_look" ||
@@ -1993,20 +2000,15 @@ function hqPrivateLookDefinitions(event: PublicGameEvent): string[] {
   }
   const raw = event.publicPayload.knownHqDefinitionIds;
   if (typeof raw === "string") {
-    return raw
-      .split(",")
-      .map((value) => value.trim())
-      .filter((value) => value.length > 0);
+    return parseCardDefinitionIdCsv(raw) ?? [];
   }
   if (Array.isArray(raw)) {
-    return raw.filter(
-      (value): value is string => typeof value === "string" && value.length > 0,
-    );
+    return raw.filter(isCardDefinitionId);
   }
   return [];
 }
 
-function rndPrivateLookDefinitions(event: PublicGameEvent): string[] {
+function rndPrivateLookDefinitions(event: PublicGameEvent): number[] {
   if (
     event.publicPayload.actor !== "runner" ||
     event.publicPayload.hiddenZoneAction !== "p3_33_private_look" ||
@@ -2016,20 +2018,15 @@ function rndPrivateLookDefinitions(event: PublicGameEvent): string[] {
   }
   const raw = event.publicPayload.knownRndDefinitionIds;
   if (typeof raw === "string") {
-    const definitions = raw
-      .split(",")
-      .map((value) => value.trim())
-      .filter((value) => value.length > 0);
+    const definitions = parseCardDefinitionIdCsv(raw) ?? [];
     if (definitions.length > 0) return definitions;
   }
   if (Array.isArray(raw)) {
-    const definitions = raw.filter(
-      (value): value is string => typeof value === "string" && value.length > 0,
-    );
+    const definitions = raw.filter(isCardDefinitionId);
     if (definitions.length > 0) return definitions;
   }
   const rawTop = event.publicPayload.knownRndTopDefinitionId;
-  if (typeof rawTop === "string" && rawTop.length > 0) return [rawTop];
+  if (isCardDefinitionId(rawTop)) return [rawTop];
   return [];
 }
 
@@ -2037,7 +2034,7 @@ function rndTopDefinitionFromEvent(
   event: PublicGameEvent,
   classification: BeliefEventClassification,
   definitionId: number | undefined,
-): string | undefined {
+): number | undefined {
   const privateLookTop = rndPrivateLookDefinitions(event)[0];
   if (privateLookTop) return privateLookTop;
   if (
@@ -2058,22 +2055,22 @@ function publicKnownCardDefinitionId(
   event: PublicGameEvent,
   classification: BeliefEventClassification,
 ): number | undefined {
-  const cardDefinitionId = stringValue(event.publicPayload.cardDefinitionId);
+  const cardDefinitionId = cardDefinitionIdValue(event.publicPayload.cardDefinitionId);
   if (cardDefinitionId) return cardDefinitionId;
   if (classification.actor !== "corp") return undefined;
   if (
     classification.actionType === "play_operation" ||
     classification.actionType === "install_card"
   ) {
-    return stringValue(event.publicPayload.sourceDefinitionId);
+    return cardDefinitionIdValue(event.publicPayload.sourceDefinitionId);
   }
   if (
     classification.actionType === "rez_ice" ||
     classification.actionType === "rez_card"
   ) {
     return (
-      stringValue(event.publicPayload.rezzedCardDefinitionId) ??
-      stringValue(event.publicPayload.sourceDefinitionId)
+      cardDefinitionIdValue(event.publicPayload.rezzedCardDefinitionId) ??
+      cardDefinitionIdValue(event.publicPayload.sourceDefinitionId)
     );
   }
   return undefined;
@@ -2083,8 +2080,8 @@ function publicCardOrSourceDefinitionId(
   event: PublicGameEvent,
 ): number | undefined {
   return (
-    stringValue(event.publicPayload.cardDefinitionId) ??
-    stringValue(event.publicPayload.sourceDefinitionId)
+    cardDefinitionIdValue(event.publicPayload.cardDefinitionId) ??
+    cardDefinitionIdValue(event.publicPayload.sourceDefinitionId)
   );
 }
 
@@ -2139,8 +2136,8 @@ function knownDefinitionsFromEvent(
     ];
   }
   const exposedDefinition =
-    stringValue(event.publicPayload.exposedCardDefinitionId) ??
-    stringValue(event.publicPayload.publicRevealDefinitionId) ??
+    cardDefinitionIdValue(event.publicPayload.exposedCardDefinitionId) ??
+    cardDefinitionIdValue(event.publicPayload.publicRevealDefinitionId) ??
     definitionId;
   if (classification.family === "expose" && exposedDefinition) {
     const exposedArea = stringValue(event.publicPayload.exposedArea);
@@ -2399,7 +2396,6 @@ function deriveRunnerOpponentModel(
     rndTopFreshness:
       rndTopFreshness ??
       ({
-        lastKnownAccessEventId: "none",
         knownToRunner: false,
         freshness: "invalidated",
         invalidationReasons: [],
@@ -2489,7 +2485,7 @@ type ActivePersistentCorpCardExposure = {
   counterType: string;
   activeAtOrAbove: number;
   counterAmount: number;
-  sourceEventId: string;
+  sourceEventId: MatchEventId;
   learnedAtStateVersion: number;
 };
 
@@ -2704,7 +2700,7 @@ function publicVisibilityTransitionsFromEvent(
       return [];
     const cards = transition.cards.flatMap((rawCard) => {
       const card = objectValue(rawCard);
-      const definitionId = stringValue(card?.definitionId);
+      const definitionId = cardDefinitionIdValue(card?.definitionId);
       const cardServerId = stringValue(card?.serverId);
       const area = stringValue(card?.area);
       const positionKey = stringValue(card?.positionKey);
@@ -2740,11 +2736,11 @@ function runnerKnownCorpCardEvidence(
 ): RunnerKnownCorpCardEvidence | undefined {
   if (event.publicPayload.exposePreventionDecision === "use") return undefined;
   const definitionId =
-    stringValue(event.publicPayload.exposedCardDefinitionId) ??
-    stringValue(event.publicPayload.publicRevealDefinitionId) ??
-    stringValue(event.publicPayload.cardDefinitionId) ??
-    stringValue(event.publicPayload.rezzedCardDefinitionId) ??
-    stringValue(event.publicPayload.sourceDefinitionId);
+    cardDefinitionIdValue(event.publicPayload.exposedCardDefinitionId) ??
+    cardDefinitionIdValue(event.publicPayload.publicRevealDefinitionId) ??
+    cardDefinitionIdValue(event.publicPayload.cardDefinitionId) ??
+    cardDefinitionIdValue(event.publicPayload.rezzedCardDefinitionId) ??
+    cardDefinitionIdValue(event.publicPayload.sourceDefinitionId);
   const serverId =
     stringValue(event.publicPayload.exposedServerId) ?? classification.serverId;
   if (!definitionId || !serverId) return undefined;
@@ -2903,11 +2899,11 @@ function deriveRndKnowledgeTimeline(
   };
   type AccessBatch = {
     entries: AccessBatchEntry[];
-    previousKnownSequence: string[];
+    previousKnownSequence: number[];
     lastAccessIndex: number;
     knownPrefixStillMatches: boolean;
   };
-  let lastKnownAccessEventId: string | undefined;
+  let lastKnownAccessEventId: MatchEventId | undefined;
   let freshness: RndTopFreshnessMemory["freshness"] = "invalidated";
   let knownSequenceDefinitionIds: number[] = [];
   let freshenedByRunnerAccess = false;
@@ -2915,7 +2911,7 @@ function deriveRndKnowledgeTimeline(
   const knownDraws: KnownRndDrawMemory[] = [];
   let accessBatch: AccessBatch | undefined;
 
-  const knownSequenceForBatch = (batch: AccessBatch): string[] => {
+  const knownSequenceForBatch = (batch: AccessBatch): number[] => {
     const observedRemaining = batch.entries
       .filter((entry) => !entry.removed)
       .map((entry) => entry.definitionId);
@@ -2928,7 +2924,7 @@ function deriveRndKnowledgeTimeline(
   for (const event of classifications) {
     const publicEvent = eventsById.get(event.eventId);
     const definitionId = publicEvent
-      ? stringValue(publicEvent.publicPayload.cardDefinitionId)
+      ? cardDefinitionIdValue(publicEvent.publicPayload.cardDefinitionId)
       : undefined;
     const privateLookDefinitions = publicEvent
       ? rndPrivateLookDefinitions(publicEvent)
@@ -3079,7 +3075,7 @@ function deriveRndKnowledgeTimeline(
 
   return {
     freshness: {
-      lastKnownAccessEventId: lastKnownAccessEventId ?? "none",
+      ...(lastKnownAccessEventId === undefined ? {} : { lastKnownAccessEventId }),
       knownToRunner:
         knownSequenceDefinitionIds.length > 0 ||
         Boolean(lastKnownAccessEventId),
@@ -3523,10 +3519,6 @@ function fnv1a(value: string): string {
     hash = Math.imul(hash, 0x01000193);
   }
   return (hash >>> 0).toString(16).padStart(8, "0");
-}
-
-function sortedUnique(values: string[]): string[] {
-  return [...new Set(values)].sort();
 }
 
 function clamp01(value: number): number {

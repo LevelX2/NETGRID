@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { cardSpecPlanningCards } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
@@ -5,7 +6,7 @@ import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
 const planningEntries = cardSpecPlanningCards();
 
-function planningEntry(cardId: string) {
+function planningEntry(cardId: CardDefinitionId) {
   const entry = planningEntries.find(
     (candidate) => candidate.definition.id === cardId,
   );
@@ -13,11 +14,11 @@ function planningEntry(cardId: string) {
   return entry;
 }
 
-function hint(cardId: string) {
+function hint(cardId: CardDefinitionId) {
   return deriveCardSpecAiHint(planningEntry(cardId));
 }
 
-function forgedHint(cardId: string, mutate: (entry: any) => void) {
+function forgedHint(cardId: CardDefinitionId, mutate: (entry: any) => void) {
   const entry = structuredClone(planningEntry(cardId));
   mutate(entry);
   return () => deriveCardSpecAiHint(entry as never);
@@ -449,7 +450,7 @@ describe("generic CardSpec AI-hint repair block", () => {
         (effect) => effect.kind === "trace",
       );
       for (const effect of traceEffects)
-        expect(effect, entry.definition.id).not.toHaveProperty("amount");
+        expect(effect, String(entry.definition.id)).not.toHaveProperty("amount");
     }
   });
 

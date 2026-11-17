@@ -1,3 +1,4 @@
+import { isCardDefinitionId } from "@netgrid/shared";
 import { cardSupportAiSupportedData } from "@netgrid/runtime-data/card-support";
 import {
   CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION,
@@ -33,7 +34,7 @@ export function validateGeneratedArtifact(
       "fnv1a64x2:card-spec-ai-hint-evidence-v2:",
     ) ||
     !Array.isArray(artifact.cardIds) ||
-    artifact.cardIds.some((cardId) => typeof cardId !== "string") ||
+    artifact.cardIds.some((cardId) => !isCardDefinitionId(cardId)) ||
     !Array.isArray(artifact.cards) ||
     supportedCardIds.size === 0 ||
     artifact.cardIds.length !== supportedCardIds.size ||
@@ -44,17 +45,17 @@ export function validateGeneratedArtifact(
     artifact.cards.some(
       (record: unknown) =>
         !isRecord(record) ||
-        typeof record.cardId !== "string" ||
+        !isCardDefinitionId(record.cardId) ||
         typeof record.cardRulesFingerprint !== "string" ||
         typeof record.planningAnnotationsFingerprint !== "string" ||
         !isRecord(record.hint),
     )
   )
     throw new Error("invalid_card_spec_ai_hint_artifact_rows");
-  const expectedIds = [...artifact.cardIds].sort(compareText);
+  const expectedIds = [...artifact.cardIds].sort((left, right) => left - right);
   const actualIds = artifact.cards
     .map((record) => record.cardId)
-    .sort(compareText);
+    .sort((left, right) => left - right);
   if (
     new Set(expectedIds).size !== expectedIds.length ||
     expectedIds.some(
@@ -101,8 +102,4 @@ export function validateGeneratedArtifact(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
-function compareText(left: string, right: string): number {
-  return left < right ? -1 : left > right ? 1 : 0;
 }

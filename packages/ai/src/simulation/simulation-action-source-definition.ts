@@ -12,7 +12,7 @@ export function createSourceDefinitionIdForSimulationAction(
     input: AiDecisionInput,
     instanceId: string,
   ) => VisibleCard | undefined,
-): (input: AiDecisionInput, action: LegalAction) => string | undefined {
+): (input: AiDecisionInput, action: LegalAction) => number | undefined {
   return (input, action) =>
     sourceDefinitionIdForSimulationSource(action, (id) =>
       findVisibleCard(input, id),
@@ -23,7 +23,7 @@ export function createDefinitionForSimulationAction(
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined,
+  ) => number | undefined | undefined,
 ) {
   return (input: AiDecisionInput, action: LegalAction) => {
     const definitionId = sourceDefinitionIdForAction(input, action);

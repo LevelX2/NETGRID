@@ -593,7 +593,7 @@ export function runnerCoverageRepairDiagnostic(
     sourceDefinitionIdForAction: (
       input: AiDecisionInput,
       action: LegalAction,
-    ) => string | undefined;
+    ) => number | undefined | undefined;
     rolesForCardId: (definitionId: number | undefined) => string[];
   },
 ): RunnerCoverageRepairDiagnostic {

@@ -17,7 +17,7 @@ describe("serverIdFromEvent", () => {
 
 function event(publicPayload: Record<string, unknown>): PublicGameEvent {
   return {
-    eventId: `event-${JSON.stringify(publicPayload)}`,
+    eventId: 3,
     type: "start_run",
     stateVersionBefore: 1,
     stateVersionAfter: 2,

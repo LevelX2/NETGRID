@@ -22,7 +22,7 @@ export type CorpVisibleTagPunishUnknownSkipDiagnosticsDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string;
+  ) => number | undefined;
   isCorpTraceTagSourceAction: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -108,9 +108,9 @@ export function createCorpVisibleTagPunishUnknownSkipDiagnosticsContext(
         input,
         action,
       );
-      const type =
-        RUNTIME_CARDS[definitionId]?.type ??
-        CARD_DEFINITIONS_BY_ID[definitionId]?.type;
+      const type = definitionId === undefined
+        ? undefined
+        : RUNTIME_CARDS[definitionId]?.type ?? CARD_DEFINITIONS_BY_ID[definitionId]?.type;
       if (type === "agenda") return "install_agenda";
       if (type === "ice" || action.payload?.placement === "ice")
         return "install_ice";

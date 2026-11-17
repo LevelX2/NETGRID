@@ -1,3 +1,4 @@
+import { uniqueBy } from "../../runtime/collection";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -183,8 +184,7 @@ export function runnerRecurringEconomySignals(
         {
           commitmentId:
             candidate.sourceCardInstanceId ??
-            candidate.sourceCardId ??
-            candidate.sourceDefinitionId,
+            String(candidate.sourceCardId ?? candidate.sourceDefinitionId),
           definitionId: candidate.sourceDefinitionId,
           commitmentActive: false,
           phase: setupWindow ? ("install" as const) : ("hold" as const),
@@ -300,8 +300,7 @@ export function runnerRecurringEconomySignals(
         {
           commitmentId:
             candidate.sourceCardInstanceId ??
-            candidate.sourceCardId ??
-            candidate.sourceDefinitionId,
+            String(candidate.sourceCardId ?? candidate.sourceDefinitionId),
           definitionId: candidate.sourceDefinitionId,
           commitmentActive: false,
           phase: installReady ? ("install" as const) : ("hold" as const),
@@ -354,7 +353,7 @@ function runnerInstalledCompatibleRestrictedCreditBreakerCount(
   );
   const supportsKiller = uses.includes("using_killer_during_run");
   return (input.playerView.own.rig ?? []).filter((card) => {
-    const roles = rolesForDeckDoctrineCard(card.definitionId ?? "");
+    const roles = rolesForDeckDoctrineCard(card.definitionId);
     const subtypes = new Set(
       (card.subtypes ?? []).map((subtype) =>
         subtype.trim().toLocaleLowerCase("en-US"),
@@ -464,13 +463,4 @@ function recurringEconomyRealization(
     }
   }
   return { payoutCount, value };
-}
-
-function uniqueBy<T>(
-  values: readonly T[],
-  keyForValue: (value: T) => string,
-): T[] {
-  return [
-    ...new Map(values.map((value) => [keyForValue(value), value])).values(),
-  ];
 }

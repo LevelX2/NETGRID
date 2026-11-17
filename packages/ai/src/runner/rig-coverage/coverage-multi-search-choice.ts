@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
@@ -186,7 +187,7 @@ export function bindSelectedRunnerCoverageMultiSearchChoice(
         option.card.instanceId === binding.targetCardInstanceId),
   );
   if (targetOptions.length === 0) throw failure(input, executor.instanceId);
-  const rolesForCardId = (id: string | undefined) =>
+  const rolesForCardId = (id: CardDefinitionId | undefined) =>
     id ? rolesForDeckDoctrineCard(id) : [];
   let scoring: SearchChoiceScoringContext = {
     features: extractAiFeatures(input, {

@@ -1,9 +1,11 @@
+import type { CardDefinitionId } from "@netgrid/shared";
+import { ORIGINALSET_V1_CARD_IDS } from "@netgrid/catalog";
 import { cardSpecPlanningCards } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
-function actionStrategyEntry(cardId: string) {
+function actionStrategyEntry(cardId: CardDefinitionId) {
   const entry = cardSpecPlanningCards().find(
     (candidate) => candidate.definition.id === cardId,
   );
@@ -33,7 +35,7 @@ function actionStrategyEntry(cardId: string) {
 describe("CardSpec action-strategy typed owners", () => {
   it("compiles all 41 Originalset capability bindings from their exact owner nodes", () => {
     const entries = cardSpecPlanningCards().filter((entry) =>
-      entry.definition.id.startsWith("onr_v1_"),
+      ORIGINALSET_V1_CARD_IDS.includes(entry.definition.id),
     );
     const bindingCount = entries.reduce(
       (count, entry) =>
@@ -90,7 +92,7 @@ describe("CardSpec action-strategy typed owners", () => {
   });
 
   it("rejects near-matching nodes that lack the asserted typed evidence", () => {
-    const forged = (cardId: string, engine: Record<string, unknown>) => {
+    const forged = (cardId: CardDefinitionId, engine: Record<string, unknown>) => {
       const entry = actionStrategyEntry(cardId);
       return () =>
         deriveCardSpecAiHint({

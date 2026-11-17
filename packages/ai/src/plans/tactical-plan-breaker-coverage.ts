@@ -50,7 +50,6 @@ export function missingBreakerCoverageKind(
 function visibleCardCoverageTokens(card: VisibleCard): string[] {
   return [
     card.title,
-    card.definitionId,
     ...(card.subtypes ?? []),
     card.rulesText,
   ]

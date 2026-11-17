@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { Side } from "@netgrid/shared";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import {
@@ -21,7 +22,7 @@ export type DeckDoctrineV2CardRoleDiagnosticStatus =
   | "complete";
 
 export type DeckDoctrineV2CardRoleDiagnostic = {
-  cardId: string;
+  cardId: CardDefinitionId;
   quantity: number;
   status: DeckDoctrineV2CardRoleDiagnosticStatus;
   roles: string[];
@@ -37,7 +38,7 @@ export type DeckDoctrineV2RoleDiagnosticSummary = {
   completeCards: number;
   partialCards: number;
   anchorlessCards: number;
-  cardsWithoutRoles: string[];
+  cardsWithoutRoles: number[];
   roleSignalCount: number;
   functionSignalCount: number;
   strategyAnchorCount: number;
@@ -171,7 +172,7 @@ function deckDoctrineV2CardRoles(
 ): DeckDoctrineV2CardRoleDiagnostic[] {
   return snapshot.cards
     .slice()
-    .sort((left, right) => left.cardId.localeCompare(right.cardId))
+    .sort((left, right) => (left.cardId - right.cardId))
     .filter((entry) => Math.max(0, entry.quantity) > 0)
     .map((entry) => {
       const hint = AI_HINTS_BY_CARD.get(entry.cardId);

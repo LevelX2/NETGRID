@@ -54,7 +54,8 @@ function reorderWindow(definitions: string[]) {
   state.corp.rd.unshift(...top);
   const operation = getLegalActions(state, "corp").find(
     (a) =>
-      a.type === "play_operation" && a.source?.includes("planning-consultants"),
+      a.type === "play_operation" &&
+      state.cardInstances[a.source]?.definitionId === 510,
   )!;
   const result = applyAction(state, {
     matchId: state.matchId,

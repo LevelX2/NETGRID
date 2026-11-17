@@ -12,7 +12,7 @@ export type CorpTagPunishActionContextDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string;
+  ) => number | undefined;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
 };
 

@@ -48,7 +48,7 @@ export function runnerCoverageHeapPreparation(
       (c) =>
         c.known &&
         visibleCardCoversRequiredCoverage(c, requiredRole, (id) =>
-          rolesForDeckDoctrineCard(id ?? ""),
+          rolesForDeckDoctrineCard(id),
         ),
     );
   const targetIndex = fromTop < 0 ? -1 : heap.length - 1 - fromTop;

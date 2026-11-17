@@ -110,7 +110,7 @@ function latestTraceContextFromEventTail(
     ) {
       return {
         ...(typeof sourceDefinitionId === "number" &&
-        sourceDefinitionId.length > 0
+        sourceDefinitionId > 0
           ? { sourceDefinitionId }
           : {}),
         ...(typeof traceLimit === "number" ? { traceLimit } : {}),

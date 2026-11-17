@@ -32,7 +32,7 @@ export type RunnerCentralPressureDiagnosticsDependencies = {
   sourceDefinitionIdForSimulationAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined;
   bestTrueCentralCloseoutProfileForMetrics: (
     input: AiDecisionInput,
   ) => BestTrueCentralCloseoutProfile;

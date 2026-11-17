@@ -45,10 +45,11 @@ type DevelopmentInstallMemorySacrificeBinding = {
   }>;
 };
 
-export type RunnerDevelopmentSignal = {
+export type RunnerDevelopmentSignal = (
+  | { targetKind?: "card"; definitionId: number }
+  | { targetKind: "capability"; definitionId: number | string }
+) & {
   developmentId: string;
-  definitionId: number;
-  targetKind?: "card" | "capability";
   phase:
     | "execute"
     | "fund"

@@ -22,7 +22,7 @@ describe("Originalset V1 CardSpec AI hint reviewed semantic golden", () => {
         cardId: entry.definition.id,
         hint: deriveCardSpecAiHint(entry),
       }))
-      .sort((left, right) => left.cardId.localeCompare(right.cardId));
+      .sort((left, right) => (left.cardId - right.cardId));
     expect(compiled).toEqual(reviewedGolden.cards);
     expect(
       generatedArtifact.cards

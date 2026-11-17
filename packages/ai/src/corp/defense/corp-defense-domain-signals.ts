@@ -93,7 +93,7 @@ export function corpScoredAgendaIceMarkDefenseTarget(params: {
             ice.type === "ice" &&
             ice.rezzed === true &&
             typeof ice.definitionId === "number" &&
-            ice.definitionId.length > 0,
+            ice.definitionId > 0,
         )
         .map((ice) => {
           const defense = visibleCorpIceDefenseProfile(ice);

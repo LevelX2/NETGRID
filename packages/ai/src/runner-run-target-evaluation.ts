@@ -1,3 +1,4 @@
+import type { MatchEventId } from "@netgrid/shared";
 import { visibleRunnerPathTraceContext } from "./run-analysis/trace-rules-profile-planning";
 import {
   hasRiskyUniversalPressure,
@@ -1868,12 +1869,17 @@ function accessReplacementPayoffForTarget(
     const fort = input.playerView.servers.find(
       (server) => server.id === projection.targetServerId,
     );
+    const sourceCard = input.playerView.own.gripOrHq.find(
+      (card) =>
+        card.instanceId === projection.action.source &&
+        card.definitionId === projection.sourceCardId,
+    );
     const rezzedIceCount = payload?.runnerFortIceTrashRezzedIceCount;
     const tags = payload?.runnerFortIceTrashTagsAdded;
     if (
       !fort ||
       fort.id !== targetServerId ||
-      !projection.sourceCardId ||
+      !sourceCard?.definitionId ||
       projection.action.expiresAtStateVersion !==
         input.playerView.stateVersion ||
       payload?.runnerFortIceTrashQuoteSchemaVersion !==
@@ -1953,7 +1959,7 @@ function accessReplacementPayoffForTarget(
             fortIceTrashObjective: {
               kind: projection.accessReplacement,
               actionId: projection.actionId,
-              sourceCardInstanceId: projection.sourceCardId,
+              sourceCardInstanceId: sourceCard.instanceId,
               serverId: fort.id,
               observedAtStateVersion: input.playerView.stateVersion,
               tagsAdded: tags,
@@ -2106,7 +2112,7 @@ function rdPrivateLookHasNoProvenStateInvalidation(
 }
 
 function aiVisibleEvents(input: AiDecisionInput): PublicGameEvent[] {
-  const byId = new Map<string, PublicGameEvent>();
+  const byId = new Map<MatchEventId, PublicGameEvent>();
   for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
     const previous = byId.get(event.eventId);
     if (!previous || previous.stateVersionAfter <= event.stateVersionAfter) {
@@ -2116,7 +2122,7 @@ function aiVisibleEvents(input: AiDecisionInput): PublicGameEvent[] {
   return [...byId.values()].sort(
     (left, right) =>
       left.stateVersionBefore - right.stateVersionBefore ||
-      left.eventId.localeCompare(right.eventId),
+      left.eventId - right.eventId,
   );
 }
 

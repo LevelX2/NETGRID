@@ -624,7 +624,8 @@ function defenseCandidates(
       }
       if (
         signal.sourceDefinitionIds.length > 0 &&
-        !signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId ?? "")
+        (candidate.sourceDefinitionId === undefined ||
+          !signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId))
       )
         return false;
       if (signal.phase === "install_defense_support")

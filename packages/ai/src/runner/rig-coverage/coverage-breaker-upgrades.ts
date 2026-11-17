@@ -288,7 +288,7 @@ export function runnerBreakerCoverageUpgrade(
           right.economicQuote.projectedPathCost ||
         left.economicQuote.totalInvestment -
           right.economicQuote.totalInvestment ||
-        left.targetDefinitionId.localeCompare(right.targetDefinitionId),
+        left.targetDefinitionId - right.targetDefinitionId,
     );
   return upgradeCandidates[0];
 }
@@ -383,8 +383,7 @@ export function runnerVisibleBreakerUpgradeInstallRoute(
       if (
         !action ||
         runnerInstallSourceInstanceId(candidate, action) !== card.instanceId ||
-        action.payload?.runnerProgramTrashBeforeInstall === true ||
-        candidate.actionId.endsWith(".runner_program_trash_before_install")
+        action.payload?.runnerProgramTrashBeforeInstall === true
       ) {
         return [];
       }
@@ -422,8 +421,7 @@ export function runnerVisibleBreakerUpgradeMemoryBlockedInstallRoute(
       if (
         !action ||
         runnerInstallSourceInstanceId(candidate, action) !== card.instanceId ||
-        (action.payload?.runnerProgramTrashBeforeInstall !== true &&
-          !candidate.actionId.endsWith(".runner_program_trash_before_install"))
+        action.payload?.runnerProgramTrashBeforeInstall !== true
       ) {
         return [];
       }
@@ -500,7 +498,7 @@ export function runnerBreakerUpgradeMemorySupportRoutes(
           left.clickCost -
           (right.creditCost + right.clickCost) ||
         left.additionalMu - right.additionalMu ||
-        left.definitionId.localeCompare(right.definitionId) ||
+        (left.definitionId - right.definitionId) ||
         left.actionId.localeCompare(right.actionId),
     );
 }

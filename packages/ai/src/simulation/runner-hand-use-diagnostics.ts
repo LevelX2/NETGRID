@@ -96,7 +96,7 @@ export type RunnerHandUseDiagnosticsDependencies = {
   sourceDefinitionIdForSimulationAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined;
   runnerRemoteTrashAccessContext: (
     input: AiDecisionInput,
     action: LegalAction,

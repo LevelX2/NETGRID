@@ -1,3 +1,5 @@
+import type { MatchEventId } from "@netgrid/shared";
+import { cardDefinitionIdValue } from "../card-definition-id-input";
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
 import { reconstructBeliefState } from "../belief-state";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
@@ -58,7 +60,7 @@ export function deriveObservedRemoteNoProgressAccessMemory(
       currentKnownRoots.some((root) =>
         root.sourceEventId
           ? root.sourceEventId === event.eventId
-          : root.definitionId === stringPayloadValue(event, "cardDefinitionId"),
+          : root.definitionId === cardDefinitionIdValue(event.publicPayload.cardDefinitionId),
       ),
   );
   if (lastAccessIndex < 0) return undefined;
@@ -91,7 +93,7 @@ export function deriveObservedRemoteNoProgressAccessMemory(
   const observedDecision = declineEvent ? "decline" : "access_only";
   const reason = declineEvent ? "unknown" : "target_unavailable";
   const accessedDefinitionId =
-    stringPayloadValue(accessEvent, "cardDefinitionId") ??
+    cardDefinitionIdValue(accessEvent.publicPayload.cardDefinitionId) ??
     currentKnownRoots[0]!.definitionId;
   return {
     applies: true,
@@ -128,7 +130,7 @@ export function deriveObservedRemoteNoProgressAccessMemory(
 function currentKnownRemoteRoots(
   input: AiDecisionInput,
   serverId: string,
-): Array<{ definitionId: number; sourceEventId?: string }> {
+): Array<{ definitionId: number; sourceEventId?: MatchEventId }> {
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );
@@ -140,7 +142,7 @@ function currentKnownRemoteRoots(
       )
       .map((entry) => [entry.positionKey, entry]),
   );
-  const definitions: Array<{ definitionId: number; sourceEventId?: string }> =
+  const definitions: Array<{ definitionId: number; sourceEventId?: MatchEventId }> =
     [];
   for (const [index, card] of server.root.entries()) {
     const remembered = rememberedRoots.get(`root:${index}`);

@@ -93,7 +93,7 @@ export function assessCorpIcePlacementForDiagnostics(
   if (existingIceCount === undefined) return undefined;
   return {
     definitionId,
-    title: sourceCard.title ?? definitionId,
+    title: sourceCard.title ?? String(definitionId),
     futureRunIceClass,
     serverId,
     existingIceCount,

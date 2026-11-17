@@ -39,7 +39,7 @@ export function developmentModule(): PlanModule {
             signal.assignedDomainPlanIds,
             {
               kind: signal.targetKind ?? "card",
-              id: signal.definitionId,
+              id: String(signal.definitionId),
             },
             signal.supportNeedId !== undefined || candidates.length > 0,
             `${signal.evidenceCode}:${admission.reasonCode}`,
@@ -143,7 +143,7 @@ export function developmentModule(): PlanModule {
             : {
                 target: {
                   kind: "card" as const,
-                  id: current.signal.definitionId,
+                  id: String(current.signal.definitionId),
                 },
               }),
           purpose: openingRestrictedSequence
@@ -213,8 +213,7 @@ function runnerOptionalProgramTrashInstallHasDirectSibling(
     (entry) => entry.actionId === candidate.actionId,
   );
   const optionalProgramTrashInstall =
-    action?.payload?.runnerProgramTrashBeforeInstall === true ||
-    candidate.actionId.endsWith(".runner_program_trash_before_install");
+    action?.payload?.runnerProgramTrashBeforeInstall === true;
   if (!optionalProgramTrashInstall) return false;
   const sourceCardInstanceId = runnerInstallSourceCardInstanceId(
     context,
@@ -234,8 +233,8 @@ function runnerOptionalProgramTrashInstallHasDirectSibling(
       (entry) => entry.actionId === alternative.actionId,
     );
     return (
-      alternativeAction?.payload?.runnerProgramTrashBeforeInstall !== true &&
-      !alternative.actionId.endsWith(".runner_program_trash_before_install")
+      alternativeAction !== undefined &&
+      alternativeAction.payload?.runnerProgramTrashBeforeInstall !== true
     );
   });
 }

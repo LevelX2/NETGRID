@@ -17,7 +17,7 @@ type RunnerEconomySetupActionClassDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined | undefined;
   definitionForAction: (
     input: AiDecisionInput,
     action: LegalAction,

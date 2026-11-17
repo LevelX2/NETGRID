@@ -15,6 +15,7 @@ export function corpPunishCampaignOwnsCandidate(
   candidate: ActionSemanticCandidate,
 ): boolean {
   if (candidate.actorSide !== "corp") return false;
+  const sourceDefinitionId = candidate.sourceDefinitionId;
   if (signal.routeContract) {
     return (
       signal.routeContract.quoteStatus === "complete" &&
@@ -26,7 +27,8 @@ export function corpPunishCampaignOwnsCandidate(
         candidate.semanticActionType,
       ) &&
       (signal.sourceDefinitionIds.length === 0 ||
-        signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId ?? ""))
+        (sourceDefinitionId !== undefined &&
+          signal.sourceDefinitionIds.includes(sourceDefinitionId)))
     );
   }
   if (
@@ -42,7 +44,8 @@ export function corpPunishCampaignOwnsCandidate(
   return (
     signal.sourceDefinitionIds.length === 0 ||
     candidate.semanticActionType === "choice.resolve" ||
-    signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId ?? "")
+    (sourceDefinitionId !== undefined &&
+      signal.sourceDefinitionIds.includes(sourceDefinitionId))
   );
 }
 

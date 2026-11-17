@@ -1,5 +1,5 @@
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
-import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import type { AiDecisionInput, CardDefinitionId, VisibleCard } from "@netgrid/shared";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 
 export type InstalledMemorySurplusQuote = Readonly<{
@@ -60,8 +60,8 @@ export function installedMemorySurplusQuote(
   )
     return undefined;
 
-  const programs = new Map<string, { quantity: number; memory: number }>();
-  const seen = new Set<string>();
+  const programs = new Map<CardDefinitionId, { quantity: number; memory: number }>();
+  const seen = new Set<CardDefinitionId>();
   let wholeOwnDeckProgramMemory = 0;
   for (const entry of deck.cards) {
     const definition = cardSpecPlanningCardByDefinitionId(entry.cardId);
@@ -86,7 +86,7 @@ export function installedMemorySurplusQuote(
     !Number.isSafeInteger(wholeOwnDeckProgramMemory)
   )
     return undefined;
-  const installedCounts = new Map<string, number>();
+  const installedCounts = new Map<CardDefinitionId, number>();
   for (const program of rig.filter((entry) => entry.type === "program")) {
     const bound = program.definitionId
       ? programs.get(program.definitionId)

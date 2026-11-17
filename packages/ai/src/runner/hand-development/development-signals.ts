@@ -71,7 +71,7 @@ export function runnerStackSearchResolvedThisTurn(
 
 function runnerUnrepresentedProgramDevelopmentTargets(
   input: AiDecisionInput,
-): string[] | undefined {
+): number[] | undefined {
   const deckSnapshot = (input as AiDecisionInputWithDeckCapabilities)
     .ownDeckSnapshot;
   if (!deckSnapshot) return undefined;
@@ -81,7 +81,7 @@ function runnerUnrepresentedProgramDevelopmentTargets(
       ...(input.playerView.own.rig ?? []),
     ].flatMap((card) => (card.definitionId ? [card.definitionId] : [])),
   );
-  const outsideStackByDefinition = new Map<string, Set<string>>();
+  const outsideStackByDefinition = new Map<number, Set<string>>();
   const ownUnavailable = [
     ...(input.playerView.specialZones?.setAside ?? []),
     ...(input.playerView.specialZones?.removedFromGame ?? []),
@@ -242,7 +242,7 @@ function runnerStrategicProgramSearchTargets(
     .sort(
       (left, right) =>
         right.rank - left.rank ||
-        left.definitionId.localeCompare(right.definitionId),
+        (left.definitionId - right.definitionId),
     );
 }
 
@@ -253,7 +253,7 @@ function runnerHasCompatibleNonNoisyBreakerDemand(
     ...input.playerView.own.gripOrHq,
     ...(input.playerView.own.rig ?? []),
   ].some((card) => {
-    const roles = rolesForDeckDoctrineCard(card.definitionId ?? "");
+    const roles = rolesForDeckDoctrineCard(card.definitionId);
     const subtypes = new Set(
       (card.subtypes ?? []).map((subtype) =>
         subtype.trim().toLocaleLowerCase("en-US"),
@@ -494,7 +494,7 @@ export function runnerEventInstallChoiceDevelopmentSignals(
     commitment.sourceCapabilityKey === continuation.sourceCapabilityKey &&
     continuation.originActionId.length > 0 &&
     continuation.sourceCardInstanceId.length > 0 &&
-    continuation.sourceCardDefinitionId.length > 0 &&
+    continuation.sourceCardDefinitionId > 0 &&
     continuation.sourceCapabilityKey.length > 0 &&
     Number.isSafeInteger(continuation.temporaryCredits) &&
     continuation.temporaryCredits > 0 &&

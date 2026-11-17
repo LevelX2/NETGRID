@@ -1,5 +1,9 @@
 import { parseRunnerProgramInstallMemoryContinuation } from "@netgrid/engine";
-import type { AiDecision, LegalAction } from "@netgrid/shared";
+import {
+  isCardDefinitionId,
+  type AiDecision,
+  type LegalAction,
+} from "@netgrid/shared";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 import { unresolvedChoiceFailure } from "../../runtime/plan-bound-choice-contract";
 import { runnerPartialProgramSearchProfile } from "../../runtime/runner-partial-program-search-facts";
@@ -552,10 +556,7 @@ export function bindSelectedRunnerProgramInstallTrashChoiceContinuation(
   if (
     selectedAction?.side !== "runner" ||
     selectedAction.type !== "install_card" ||
-    (selectedAction.payload?.runnerProgramTrashBeforeInstall !== true &&
-      !/(?:^|\.)runner_program_trash_before_install(?:\.|$)/.test(
-        selectedAction.actionId,
-      ))
+    selectedAction.payload?.runnerProgramTrashBeforeInstall !== true
   ) {
     return;
   }
@@ -1094,6 +1095,7 @@ export function runnerDevelopmentSearchChoiceBinding(
   const recoveryCommitment = signal?.recoverySearchCommitment;
   if (!programCommitment && !recoveryCommitment) return undefined;
   const commitment = recoveryCommitment ?? programCommitment;
+  const targetDefinitionId = commitment?.targetDefinitionId;
   const partialProfile =
     programCommitment &&
     typeof programCommitment.sourceDefinitionId === "number"
@@ -1123,11 +1125,11 @@ export function runnerDevelopmentSearchChoiceBinding(
               recoveryCommitment.targetCardInstanceId &&
             option.card?.definitionId === recoveryCommitment.targetDefinitionId,
         )
-      : typeof commitment?.targetDefinitionId === "number"
+      : isCardDefinitionId(targetDefinitionId)
         ? choice.options.filter(
             (option) =>
               option.selectable !== false &&
-              option.card?.definitionId === commitment.targetDefinitionId,
+              option.card?.definitionId === targetDefinitionId,
           )
         : [];
   const exactBinding =
@@ -1138,7 +1140,6 @@ export function runnerDevelopmentSearchChoiceBinding(
     Array.isArray(signal.actionIds) &&
     typeof commitment?.sourceCardInstanceId === "string" &&
     typeof commitment.sourceDefinitionId === "number" &&
-    typeof commitment.targetDefinitionId === "number" &&
     typeof commitment.selectedActionId === "string" &&
     signal.actionIds.includes(commitment.selectedActionId) &&
     commitment.plannedAtStateVersion === commitment.selectedAtStateVersion &&
@@ -1177,7 +1178,7 @@ export function runnerDevelopmentSearchChoiceBinding(
       : sourceChoice
         ? programCommitment !== undefined && stackOption !== undefined
         : matchingTargetOptions.length > 0);
-  if (!exactBinding || !commitment || !portfolio) {
+  if (!exactBinding || !commitment || !isCardDefinitionId(targetDefinitionId)) {
     throw unresolvedChoiceFailure(
       input,
       action,
@@ -1190,7 +1191,7 @@ export function runnerDevelopmentSearchChoiceBinding(
     ...(typeof recoveryCommitment?.targetCardInstanceId === "string"
       ? { targetCardInstanceId: recoveryCommitment.targetCardInstanceId }
       : {}),
-    targetDefinitionId: commitment.targetDefinitionId as string,
+    targetDefinitionId,
     optionalExactTargetOnly: partialProfile !== undefined,
   };
 }

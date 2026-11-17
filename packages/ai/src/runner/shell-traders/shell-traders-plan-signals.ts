@@ -1,3 +1,4 @@
+import { cardDefinitionIdValue } from "../../card-definition-id-input";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
@@ -80,7 +81,7 @@ export function buildRunnerShellTradersPipelineSignals({
     }
     const targetDefinitionId =
       targetCard.definitionId ??
-      stringValue(action.payload?.targetCardDefinitionId);
+      cardDefinitionIdValue(action.payload?.targetCardDefinitionId);
     if (!targetDefinitionId) return [];
     const roles = rolesForDeckDoctrineCard(targetDefinitionId);
     const coverageBinding = bestCoverageBinding(coverageGaps, roles);
@@ -412,7 +413,7 @@ export function assessShellTradersRigReplacement({
         visibleMemoryCost,
       );
       const values = loss.cards.map((lost) => {
-        const roles = rolesForDeckDoctrineCard(lost.definitionId ?? "");
+        const roles = rolesForDeckDoctrineCard(lost.definitionId);
         const protectsOtherGap = coverageGaps.some(
           (gap) =>
             gap.gapId !== coverageBinding?.gapId &&

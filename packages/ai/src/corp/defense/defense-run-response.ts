@@ -202,7 +202,7 @@ export function corpPostPassIceLifecycleDefenseSignal(
     typeof action.source !== "string" ||
     action.source.length === 0 ||
     typeof sourceDefinitionId !== "number" ||
-    sourceDefinitionId.length === 0 ||
+    sourceDefinitionId <= 0 ||
     typeof serverId !== "string" ||
     !isServerId(serverId) ||
     !(

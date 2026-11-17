@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { Side } from "@netgrid/shared";
 import { strategyGoalsData } from "@netgrid/runtime-data/strategy-goals";
 import {
@@ -33,7 +34,7 @@ export const DECK_STRATEGY_PROFILE_ANALYSIS_REVISION =
 export type DeckStrategyConfidence = "low" | "medium" | "high";
 
 export type DeckStrategyEvidence = {
-  cardId: string;
+  cardId: CardDefinitionId;
   quantity: number;
   source:
     | "cardHint"
@@ -266,7 +267,7 @@ type StrategyGoal = {
 };
 
 type AiCardHint = {
-  cardId: string;
+  cardId: CardDefinitionId;
   side: Side;
   cardType?: string;
   roles?: string[];
@@ -304,7 +305,7 @@ type RuntimeCardForStrategy = {
 };
 
 type DeckCardStrategyFacts = {
-  cardId: string;
+  cardId: CardDefinitionId;
   quantity: number;
   side: Side;
   cardType?: string;
@@ -571,7 +572,7 @@ function deckStrategyStats(
   const cards: DeckCardStrategyFacts[] = [];
   const sortedCards = snapshot.cards
     .slice()
-    .sort((left, right) => left.cardId.localeCompare(right.cardId));
+    .sort((left, right) => (left.cardId - right.cardId));
 
   for (const entry of sortedCards) {
     const quantity = Math.max(0, entry.quantity);
@@ -749,7 +750,7 @@ function lineSupportAnchorAllowed(
 }
 
 function scoreAnchors(evidence: DeckStrategyEvidence[]): number {
-  const evidenceByCard = new Map<string, DeckStrategyEvidence[]>();
+  const evidenceByCard = new Map<CardDefinitionId, DeckStrategyEvidence[]>();
   for (const entry of evidence) {
     const entries = evidenceByCard.get(entry.cardId) ?? [];
     entries.push(entry);
@@ -1930,7 +1931,6 @@ function buildCorpProfiles(
         (card.runtimeSubtypes.some((subtype) =>
           ["city grid", "region", "upgrade"].includes(subtype),
         ) ||
-          cardIdHasTokenPhrase(card.cardId, ["city", "grid"]) ||
           card.remoteRoleKind !== undefined),
     )
     .reduce((sum, card) => sum + card.quantity, 0);
@@ -2006,23 +2006,6 @@ function buildCorpProfiles(
         regionSupport > 0 ? regionSupport : "unknown",
     },
   };
-}
-
-function cardIdHasTokenPhrase(
-  cardId: string,
-  phrase: readonly string[],
-): boolean {
-  const tokens = cardId
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean);
-  return tokens.some(
-    (token, index) =>
-      token === phrase[0] &&
-      phrase.every(
-        (phraseToken, offset) => tokens[index + offset] === phraseToken,
-      ),
-  );
 }
 
 function deckWarnings(stats: DeckStrategyStats): string[] {
@@ -2118,7 +2101,7 @@ function sortedEvidence(
       `${entry.cardId}:${entry.quantity}:${entry.source}:${entry.signal ?? ""}:${entry.strategyId ?? ""}:${entry.role ?? ""}:${entry.reason}`,
   ).sort(
     (left, right) =>
-      left.cardId.localeCompare(right.cardId) ||
+      (left.cardId - right.cardId) ||
       left.source.localeCompare(right.source) ||
       (left.signal ?? "").localeCompare(right.signal ?? "") ||
       (left.strategyId ?? "").localeCompare(right.strategyId ?? "") ||

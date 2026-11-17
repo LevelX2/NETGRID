@@ -1,3 +1,5 @@
+import type { CardDefinitionId } from "@netgrid/shared";
+import { ORIGINALSET_V1_CARD_IDS } from "@netgrid/catalog";
 import { cardSpecPlanningCards } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
@@ -30,7 +32,7 @@ function syntheticHint(
   } as never);
 }
 
-function actualHint(cardId: string) {
+function actualHint(cardId: CardDefinitionId) {
   const entry = cardSpecPlanningCards().find(
     (candidate) => candidate.definition.id === cardId,
   );
@@ -45,7 +47,7 @@ function actualHint(cardId: string) {
   });
 }
 
-function targetAnnotatedEntry(cardId: string) {
+function targetAnnotatedEntry(cardId: CardDefinitionId) {
   const entry = cardSpecPlanningCards().find(
     (candidate) => candidate.definition.id === cardId,
   );
@@ -914,7 +916,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("keeps scored agenda placement and rez-support choices on their actual target dimensions", () => {
-    const hintFor = (cardId: string) => {
+    const hintFor = (cardId: CardDefinitionId) => {
       const entry = cardSpecPlanningCards().find(
         (candidate) => candidate.definition.id === cardId,
       );
@@ -981,7 +983,7 @@ describe("generic typed CardSpec AI translators", () => {
   it("compiles all Originalset target preferences through exact typed owner unions", () => {
     const entries = cardSpecPlanningCards().filter(
       (entry) =>
-        entry.definition.id.startsWith("onr_v1_") &&
+        ORIGINALSET_V1_CARD_IDS.includes(entry.definition.id) &&
         ((entry.planning.planningAnnotations?.card?.some(
           (annotation) => annotation.kind === "target_preference",
         ) ??
@@ -1084,7 +1086,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("rejects near-matching target families without the exact typed owner kind", () => {
-    const forged = (cardId: string, engine: Record<string, unknown>) => {
+    const forged = (cardId: CardDefinitionId, engine: Record<string, unknown>) => {
       const entry = targetAnnotatedEntry(cardId);
       return () =>
         deriveCardSpecAiHint({
@@ -1579,7 +1581,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("keeps Batch 12 strategy ownership proportional to each card", () => {
-    const fullHint = (cardId: string) => {
+    const fullHint = (cardId: CardDefinitionId) => {
       const entry = cardSpecPlanningCards().find(
         (candidate) => candidate.definition.id === cardId,
       );
@@ -1614,7 +1616,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("keeps Batch 14 choices on their actual target and information boundary", () => {
-    const fullHint = (cardId: string) => {
+    const fullHint = (cardId: CardDefinitionId) => {
       const entry = cardSpecPlanningCards().find(
         (candidate) => candidate.definition.id === cardId,
       );
@@ -1702,7 +1704,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("keeps Batch 14 roles, restricted resources, and liabilities mechanically exact", () => {
-    const fullHint = (cardId: string) => {
+    const fullHint = (cardId: CardDefinitionId) => {
       const entry = cardSpecPlanningCards().find(
         (candidate) => candidate.definition.id === cardId,
       );
@@ -1857,7 +1859,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("keeps Batch 15 choices on their mechanical owner and information boundary", () => {
-    const fullHint = (cardId: string) => {
+    const fullHint = (cardId: CardDefinitionId) => {
       const entry = cardSpecPlanningCards().find(
         (candidate) => candidate.definition.id === cardId,
       );
@@ -1915,7 +1917,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("projects Batch 15 run exchanges, liabilities, and breaker side effects generically", () => {
-    const fullHint = (cardId: string) => {
+    const fullHint = (cardId: CardDefinitionId) => {
       const entry = cardSpecPlanningCards().find(
         (candidate) => candidate.definition.id === cardId,
       );

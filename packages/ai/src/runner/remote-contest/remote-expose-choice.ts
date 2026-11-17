@@ -61,7 +61,7 @@ export function selectedRunnerRemoteExposeChoiceOptionIds(
     bound.observedAtStateVersion === portfolio?.stateVersion &&
     bound.observedAtStateVersion + 1 === input.playerView.stateVersion &&
     source[0] === bound.sourceCardInstanceId &&
-    source[1] === bound.sourceDefinitionId &&
+    source[1] === String(bound.sourceDefinitionId) &&
     Number(source.at(-1)) === input.playerView.stateVersion &&
     target?.instanceId === bound.targetCardInstanceId &&
     target.known === false;

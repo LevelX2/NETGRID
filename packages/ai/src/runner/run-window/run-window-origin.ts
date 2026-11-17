@@ -3,7 +3,7 @@ import {
   visibleRunnerRunOnlyCredits,
 } from "../../run-analysis/visible-run-credit-budget";
 
-import { type AiDecisionInput } from "@netgrid/shared";
+import { isCardDefinitionId, type AiDecisionInput } from "@netgrid/shared";
 import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
 import {
   assessRandomBreakOrDamageRiskForVisibleRunPath,
@@ -488,6 +488,7 @@ function accessCommitmentFromModuleState(
   if (
     !commitment ||
     !Array.isArray(commitment.knownTargetDefinitionIds) ||
+    !commitment.knownTargetDefinitionIds.every(isCardDefinitionId) ||
     !(
       commitment.trashBudget === "unknown" ||
       commitment.trashBudget === "not_applicable" ||

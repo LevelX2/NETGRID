@@ -152,13 +152,13 @@ function normalizeCandidateTargetIdentity(
     input.sourceDefinitionId &&
     input.abilityId
   ) {
-    return `ability:${slug(input.sourceDefinitionId)}:${slug(input.abilityId)}`;
+    return `ability:${input.sourceDefinitionId}:${slug(input.abilityId)}`;
   }
   if (
     input.sourceDefinitionId &&
     actorKnownSourceActions.has(input.actionType)
   ) {
-    return `installedOwnCard:actorKnownRef:${slug(input.sourceDefinitionId)}`;
+    return `installedOwnCard:actorKnownRef:${input.sourceDefinitionId}`;
   }
   return targetIdentity;
 }

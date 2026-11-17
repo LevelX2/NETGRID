@@ -42,7 +42,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
         cardId: entry.definition.id,
         hint: deriveCardSpecAiHint(entry),
       }))
-      .sort((left, right) => left.cardId.localeCompare(right.cardId));
+      .sort((left, right) => (left.cardId - right.cardId));
 
     expect(reviewedGolden.cards).toHaveLength(54);
     expect(reviewedIds.size).toBe(54);
@@ -77,7 +77,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     );
     const compiled = priorGeneratedCards.map((record) => {
       const entry = entriesById.get(record.cardId);
-      expect(entry, record.cardId).toBeDefined();
+      expect(entry, String(record.cardId)).toBeDefined();
       return {
         cardId: record.cardId,
         cardRulesFingerprint: entry!.planning.cardRulesFingerprint,
@@ -112,7 +112,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      "sha256:a250e731223ba1887bbfa7e423d922e989a0ae1c551b186d11954aabb70df81e",
+      "sha256:36697974efb10df777691a591d64f9546876cb3138726793d498aff01568c753",
     );
   });
 
@@ -310,7 +310,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     for (const { cardId, hint } of reviewedGolden.cards)
       expect(
         (hint.requiredMechanics ?? []).filter((token) => forbidden.has(token)),
-        cardId,
+        String(cardId),
       ).toEqual([]);
   });
 });

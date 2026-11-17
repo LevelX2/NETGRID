@@ -1,5 +1,6 @@
 import type { LegalAction } from "@netgrid/shared";
 import { delayedInstallAbilityForAction } from "./delayed-install-action";
+import { cardDefinitionIdValue } from "../card-definition-id-input";
 
 export type PersistentDevelopmentRoute =
   | "direct_install"
@@ -30,11 +31,10 @@ export function persistentDevelopmentActionProjection(
       action.payload?.targetCardId,
     );
     if (!targetCardId) return undefined;
-    const targetDefinitionId = firstString(
-      action.payload?.cardDefinitionId,
-      action.payload?.sourceDefinitionId,
-      action.payload?.targetCardDefinitionId,
-    );
+    const targetDefinitionId =
+      cardDefinitionIdValue(action.payload?.cardDefinitionId) ??
+      cardDefinitionIdValue(action.payload?.sourceDefinitionId) ??
+      cardDefinitionIdValue(action.payload?.targetCardDefinitionId);
     return projection({
       route: "direct_install",
       targetCardId,
@@ -53,7 +53,7 @@ export function persistentDevelopmentActionProjection(
   }
   const targetCardId = firstString(action.payload?.targetCardId);
   if (!targetCardId) return undefined;
-  const targetDefinitionId = firstString(
+  const targetDefinitionId = cardDefinitionIdValue(
     action.payload?.targetCardDefinitionId,
   );
   return projection({

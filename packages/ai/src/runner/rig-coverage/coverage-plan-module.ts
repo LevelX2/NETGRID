@@ -414,8 +414,7 @@ function coverageInstallCandidates(
       (entry) => entry.actionId === candidate.actionId,
     );
     const optionalProgramTrashInstall =
-      action?.payload?.runnerProgramTrashBeforeInstall === true ||
-      candidate.actionId.endsWith(".runner_program_trash_before_install");
+      action?.payload?.runnerProgramTrashBeforeInstall === true;
     const sourceCardInstanceId = runnerInstallSourceCardInstanceId(
       context,
       candidate,
@@ -435,9 +434,8 @@ function coverageInstallCandidates(
           (entry) => entry.actionId === alternative.actionId,
         );
         return (
-          alternativeAction?.payload?.runnerProgramTrashBeforeInstall !==
-            true &&
-          !alternative.actionId.endsWith(".runner_program_trash_before_install")
+          alternativeAction !== undefined &&
+          alternativeAction.payload?.runnerProgramTrashBeforeInstall !== true
         );
       })
     ) {

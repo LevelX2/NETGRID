@@ -1,3 +1,4 @@
+import { cardDefinitionIdValue } from "../card-definition-id-input";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
@@ -530,7 +531,7 @@ function runActionSourceKind(
   input: AiDecisionInput,
   action: LegalAction,
   candidate: ActionSemanticCandidate | undefined,
-  sourceCardId: string | undefined,
+  sourceCardId: number | undefined,
   hint: AiCardHint | undefined,
 ): RunnerRunActionSourceKind {
   if (action.type === "start_run" && action.source === "basic_action") {
@@ -771,20 +772,13 @@ function sourceCardIdForRunAction(
   input: AiDecisionInput,
   action: LegalAction,
   candidate: ActionSemanticCandidate | undefined,
-): string | undefined {
-  for (const id of payloadStringValues(action, [
-    "sourceDefinitionId",
-    "sourceCardDefinitionId",
-    "cardDefinitionId",
-    "definitionId",
-    "sourceId",
-    "cardId",
-  ])) {
-    if (AI_HINTS_BY_CARD.has(id)) return id;
+): number | undefined {
+  for (const key of ["sourceDefinitionId", "sourceCardDefinitionId", "cardDefinitionId", "definitionId"] as const) {
+    const id = cardDefinitionIdValue(action.payload?.[key]);
+    if (id !== undefined && AI_HINTS_BY_CARD.has(id)) return id;
   }
-  if (candidate?.sourceCardId && AI_HINTS_BY_CARD.has(candidate.sourceCardId)) {
-    return candidate.sourceCardId;
-  }
+  if (candidate?.sourceDefinitionId !== undefined && AI_HINTS_BY_CARD.has(candidate.sourceDefinitionId))
+    return candidate.sourceDefinitionId;
   for (const id of payloadStringValues(action, [
     "sourceCardInstanceId",
     "sourceInstanceId",
@@ -800,20 +794,15 @@ function sourceCardIdForRunAction(
     const card = visibleOwnCardById(input, candidate.sourceCardId);
     if (card?.definitionId) return card.definitionId;
   }
-  if (typeof action.source === "string") {
-    if (AI_HINTS_BY_CARD.has(action.source)) return action.source;
-    const sourceCard = visibleOwnCardById(input, action.source);
-    if (sourceCard?.definitionId) return sourceCard.definitionId;
-  }
-  return undefined;
+  return visibleOwnCardById(input, action.source)?.definitionId;
 }
 
 function visibleOwnCardById(
   input: AiDecisionInput,
-  id: string,
+  id: string | number,
 ): VisibleOwnCardLike | undefined {
-  return visibleOwnCards(input).find(
-    (card) => card.instanceId === id || card.definitionId === id,
+  return visibleOwnCards(input).find((card) =>
+    typeof id === "number" ? card.definitionId === id : card.instanceId === id,
   );
 }
 
@@ -836,7 +825,7 @@ function visibleOwnCards(input: AiDecisionInput): VisibleOwnCardLike[] {
 
 function sourceCardType(
   input: AiDecisionInput,
-  sourceCardId: string | undefined,
+  sourceCardId: number | undefined,
   candidate: ActionSemanticCandidate | undefined,
   hint: AiCardHint | undefined,
 ): string | undefined {

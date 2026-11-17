@@ -252,8 +252,9 @@ export function sacrificeCandidateLabel(
   return (
     candidate.option?.label ??
     candidate.card?.title ??
-    candidate.card?.definitionId ??
-    ""
+    (candidate.card?.definitionId !== undefined
+      ? String(candidate.card.definitionId)
+      : "")
   );
 }
 

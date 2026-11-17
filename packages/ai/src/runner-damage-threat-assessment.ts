@@ -1,3 +1,4 @@
+import { isCardDefinitionId, type MatchEventId } from "@netgrid/shared";
 import {
   runnerFortPassTollWindow,
   runnerRunExitAction,
@@ -875,7 +876,8 @@ export function runnerKnownRemoteAccessDamageAmbushAssessment(
     return undefined;
   }
   const root = server.root[0];
-  const hint = root.definitionId ? AI_HINTS.get(root.definitionId) : undefined;
+  if (root.definitionId === undefined) return undefined;
+  const hint = AI_HINTS.get(root.definitionId);
   const accessDamage = hint?.effects?.some(
     (effect) => effect.kind === "damage" && effect.timing === "on_access",
   );
@@ -895,7 +897,7 @@ export function runnerKnownRemoteAccessDamageAmbushAssessment(
     : Math.max(1, hint?.valueHints?.damage ?? 1);
   return {
     serverId: server.id,
-    sourceDefinitionId: root.definitionId ?? root.instanceId,
+    sourceDefinitionId: root.definitionId,
     advancementCounters,
     damageRisk,
     evidenceCode: [
@@ -1030,7 +1032,7 @@ function runnerDamageDeckBelief(
   damageEvents: CorpDamageEventEvidence,
   signals: VisibleOpponentDamageSignals,
 ): RunnerDamageDeckBelief {
-  const independentSignalDefinitionCount = signals.signalDefinitionIds.size;
+  const independentSignalDefinitionCount = signals.independentSignalCount;
   const independentDeliveryAndPayoff =
     signals.deliveryDefinitionIds.size > 0 &&
     signals.payoffDefinitionIds.size > 0 &&
@@ -1043,7 +1045,7 @@ function runnerDamageDeckBelief(
     (signals.score >= 4 && independentSignalDefinitionCount >= 2);
   const suspected =
     damageEvents.attempted.length > 0 ||
-    signals.signalDefinitionIds.size > 0 ||
+    signals.independentSignalCount > 0 ||
     signals.fallbackDamageSourceCount > 0;
   const level: RunnerDamageDeckBeliefLevel = confirmed
     ? "confirmed"
@@ -1088,7 +1090,7 @@ function runnerFlatlineRiskLevel(params: {
 }): RunnerFlatlineRiskLevel {
   const activeSignalScore = params.activeSignals.score;
   const activeDamageSources = params.activeSignals.damageSourceCount;
-  const activePunishSources = params.activeSignals.signalDefinitionIds.size;
+  const activePunishSources = params.activeSignals.independentSignalCount;
   const recentResolvedDamage = params.recentResolvedCorpDamageEvents > 0;
   const hasDamageEvidence =
     params.deckBelief.level !== "none" ||
@@ -1139,7 +1141,7 @@ function runnerDamageThreatHandFloor(level: RunnerFlatlineRiskLevel): number {
 }
 
 function mergedHistory(input: AiDecisionInput): PublicGameEvent[] {
-  const byId = new Map<string, PublicGameEvent>();
+  const byId = new Map<MatchEventId, PublicGameEvent>();
   for (const event of [
     ...(input.playerView.publicEvents ?? []),
     ...(input.eventTail ?? []),
@@ -1353,7 +1355,7 @@ type VisibleOpponentDamageSignals = {
   fallbackDamageSourceCount: number;
   score: number;
   kinds: string[];
-  signalDefinitionIds: Set<number>;
+  independentSignalCount: number;
   damageDefinitionIds: Set<number>;
   deliveryDefinitionIds: Set<number>;
   payoffDefinitionIds: Set<number>;
@@ -1368,7 +1370,7 @@ function visibleOpponentDamageSignals(
   const definitionIds = new Set(
     visibleCards
       .map((card) => card.definitionId)
-      .filter((definitionId): definitionId is string => Boolean(definitionId)),
+      .filter(isCardDefinitionId),
   );
   for (const event of history) {
     for (const definitionId of publicEventDefinitionIds(event)) {
@@ -1389,9 +1391,7 @@ function activeOpponentDamageSignals(
     new Set(
       visibleCards
         .map((card) => card.definitionId)
-        .filter((definitionId): definitionId is string =>
-          Boolean(definitionId),
-        ),
+        .filter(isCardDefinitionId),
     ),
     damageTypes,
   );
@@ -1404,10 +1404,10 @@ function damageSignalsForKnownSources(
 ): VisibleOpponentDamageSignals {
   let score = 0;
   const kinds = new Set<string>();
-  const signalDefinitionIds = new Set<string>();
-  const damageDefinitionIds = new Set<string>();
-  const deliveryDefinitionIds = new Set<string>();
-  const payoffDefinitionIds = new Set<string>();
+  let structuredSignalCount = 0;
+  const damageDefinitionIds = new Set<number>();
+  const deliveryDefinitionIds = new Set<number>();
+  const payoffDefinitionIds = new Set<number>();
   const compatibleDamage = (definitionId: number): boolean =>
     AI_HINTS.get(definitionId)?.effects?.some((effect) => {
       if (effect.kind !== "damage") return false;
@@ -1440,7 +1440,7 @@ function damageSignalsForKnownSources(
       effectKinds.has("tag_punish_payoff") &&
       (damageTypes === undefined || directDamage);
     if (!directDamage && !traceTag && !punishPayoff) continue;
-    signalDefinitionIds.add(definitionId);
+    structuredSignalCount++;
     if (directDamage) {
       damageDefinitionIds.add(definitionId);
       score += 2;
@@ -1458,7 +1458,7 @@ function damageSignalsForKnownSources(
     }
   }
 
-  const fallbackSignalIds = new Set<string>();
+  const fallbackSignalIds = new Set<number | string>();
   for (const card of visibleCards) {
     // Untyped text evidence still informs the general hand buffer, but cannot
     // certify a type-specific prevention provider.
@@ -1473,9 +1473,6 @@ function damageSignalsForKnownSources(
   if (fallbackSignalIds.size > 0) {
     score += fallbackSignalIds.size;
     kinds.add("text_damage_fallback");
-    for (const signalId of fallbackSignalIds) {
-      signalDefinitionIds.add(`fallback:${signalId}`);
-    }
   }
   if (damageDefinitionIds.size > 0 && deliveryDefinitionIds.size > 0) {
     score += 1;
@@ -1488,7 +1485,7 @@ function damageSignalsForKnownSources(
     fallbackDamageSourceCount: fallbackSignalIds.size,
     score,
     kinds: [...kinds].sort(),
-    signalDefinitionIds,
+    independentSignalCount: structuredSignalCount + fallbackSignalIds.size,
     damageDefinitionIds,
     deliveryDefinitionIds,
     payoffDefinitionIds,
@@ -1529,17 +1526,15 @@ function publicEventDefinitionIds(event: PublicGameEvent): number[] {
     payload.sourceDefinitionId,
     payload.cardDefinitionId,
     payload.rezzedCardDefinitionId,
-  ].filter((value): value is string => typeof value === "string");
+  ].filter(isCardDefinitionId);
 }
 
 function visibleCardShowsDamageSourceFallback(card: VisibleCard): boolean {
   if (card.known === false) return false;
-  const text = `${card.title ?? ""} ${card.rulesText ?? ""} ${
-    card.definitionId ?? ""
-  }`.toLowerCase();
+  const text = `${card.title ?? ""} ${card.rulesText ?? ""}`.toLowerCase();
   if (/\b(?:prevent|avoid|reduce)\b.{0,48}\bdamage\b/.test(text)) return false;
   return damageTokensIncludeAny(
-    damageTokens([card.title, card.rulesText, card.definitionId]),
+    damageTokens([card.title, card.rulesText]),
   );
 }
 

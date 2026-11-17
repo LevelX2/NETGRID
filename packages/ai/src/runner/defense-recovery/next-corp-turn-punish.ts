@@ -333,8 +333,8 @@ function assessObservedPayoff({
 
 function observedOperationDefinitions(
   input: AiDecisionInput,
-): ReadonlySet<string> {
-  const ids = new Set<string>();
+): ReadonlySet<number> {
+  const ids = new Set<number>();
   for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
     if (event.stateVersionAfter > input.playerView.stateVersion) continue;
     const { actor, cardDefinitionId, sourceDefinitionId } = event.publicPayload;

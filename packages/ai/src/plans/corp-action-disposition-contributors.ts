@@ -135,7 +135,7 @@ export type CorpActionDispositionContributorFacts = Readonly<{
     project: CorpScoreProjectSignal,
   ) => boolean;
   corpScoreProjectId: (
-    agendaInstanceOrDefinitionId: number,
+    agendaInstanceOrDefinitionId: number | string,
     serverId: string | undefined,
   ) => string;
   corpScoredAgendaRevealWithoutPurposeDispositionEvidence: (

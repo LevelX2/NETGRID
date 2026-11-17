@@ -1,3 +1,4 @@
+import { parseOptionalCardDefinitionIdCsv, validOptionalCardDefinitionIds } from "../card-definition-id-input";
 import { readPostInstallEffectiveRunQuote } from "./post-install-ice-run-quote";
 import {
   traceComparisonIsSuccessful,
@@ -1222,8 +1223,8 @@ function readCompleteFundedRezQuote(
     !nonNegativeSafeInteger(quote.baseCredits) ||
     !nonNegativeSafeInteger(quote.finalCredits) ||
     !validMandatoryRezCosts(quote.mandatoryAdditionalCosts) ||
-    !validDefinitionIdList(quote.reductionSourceDefinitionIds) ||
-    !validDefinitionIdList(quote.increaseSourceDefinitionIds)
+    !validOptionalCardDefinitionIds(quote.reductionSourceDefinitionIds) ||
+    !validOptionalCardDefinitionIds(quote.increaseSourceDefinitionIds)
   ) {
     return { status: "unknown", reason: "rez_cost_quote_drift" };
   }
@@ -1443,10 +1444,10 @@ function readPostInstallRezQuote(
   const mandatoryAgendaPointCost =
     payload.postInstallRezQuoteMandatoryAgendaPointCost;
   const mandatoryKind = payload.postInstallRezQuoteMandatoryAdditionalCostKind;
-  const reductionSourceDefinitionIds = commaSeparatedIds(
+  const reductionSourceDefinitionIds = parseOptionalCardDefinitionIdCsv(
     payload.postInstallRezQuoteReductionSourceDefinitionIds,
   );
-  const increaseSourceDefinitionIds = commaSeparatedIds(
+  const increaseSourceDefinitionIds = parseOptionalCardDefinitionIdCsv(
     payload.postInstallRezQuoteIncreaseSourceDefinitionIds,
   );
   const variableParameter =
@@ -1667,21 +1668,6 @@ function validMandatoryRezCosts(
     costs !== null &&
     nonNegativeSafeInteger(costs.agendaPoints)
   );
-}
-
-function validDefinitionIdList(ids: readonly string[] | undefined): boolean {
-  return (
-    ids === undefined ||
-    (Array.isArray(ids) &&
-      ids.every((id) => typeof id === "string" && id.length > 0))
-  );
-}
-
-function commaSeparatedIds(value: unknown): string[] | undefined {
-  if (value === undefined) return [];
-  if (typeof value !== "string" || value.length === 0) return undefined;
-  const ids = value.split(",");
-  return validDefinitionIdList(ids) ? ids : undefined;
 }
 
 function canonicalCommaSeparatedSubtypes(value: unknown): string[] | undefined {

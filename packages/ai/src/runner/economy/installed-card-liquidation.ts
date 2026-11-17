@@ -36,7 +36,7 @@ export function runnerInstalledCardLiquidationChoiceSignal(
           card.known &&
           card.type === "resource" &&
           typeof card.definitionId === "number" &&
-          card.definitionId.length > 0,
+          card.definitionId > 0,
       )
     : undefined;
   const action = input.legalActions.find(
@@ -96,7 +96,7 @@ export function runnerInstalledCardLiquidationChoiceSignal(
   ) {
     return undefined;
   }
-  const copiesByDefinition = new Map<string, number>();
+  const copiesByDefinition = new Map<number, number>();
   const childrenByHost = new Map<string, number>();
   for (const card of rig) {
     if (card.definitionId)

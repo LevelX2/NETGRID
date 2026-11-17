@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { LegalAction } from "@netgrid/shared";
 import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
 import type {
@@ -44,27 +45,27 @@ export type StructuredTagPunishLegalActionAssessment = {
 };
 
 export function getStructuredTagPunishProfileForCard(
-  cardId: string | undefined,
+  cardId: CardDefinitionId | undefined,
 ): StructuredTagPunishProfile | undefined {
   if (!cardId) return undefined;
   return tagPunishProfileFromHint(AI_HINTS_BY_CARD.get(cardId));
 }
 
 export function classifyTagSourceFromOntology(
-  cardIdOrHint: string | AiCardHint | undefined,
+  cardIdOrHint: CardDefinitionId | AiCardHint | undefined,
 ): StructuredTagPunishProfile | undefined {
   const profile =
-    typeof cardIdOrHint === "string"
+    typeof cardIdOrHint === "number"
       ? getStructuredTagPunishProfileForCard(cardIdOrHint)
       : tagPunishProfileFromHint(cardIdOrHint);
   return profile?.tagSource ? profile : undefined;
 }
 
 export function classifyTagPunishPayoffFromOntology(
-  cardIdOrHint: string | AiCardHint | undefined,
+  cardIdOrHint: CardDefinitionId | AiCardHint | undefined,
 ): StructuredTagPunishProfile | undefined {
   const profile =
-    typeof cardIdOrHint === "string"
+    typeof cardIdOrHint === "number"
       ? getStructuredTagPunishProfileForCard(cardIdOrHint)
       : tagPunishProfileFromHint(cardIdOrHint);
   return profile?.payoff ? profile : undefined;
@@ -79,6 +80,7 @@ export function classifyTagPunishLegalActionFromOntology(
     scoredAgendaKind?: "trace_tag" | "damage_punish" | undefined;
   },
 ): StructuredTagPunishLegalActionAssessment | undefined {
+  if (sourceDefinitionId === undefined) return undefined;
   const profile = getStructuredTagPunishProfileForCard(sourceDefinitionId);
   if (!profile) return undefined;
   const legalActionCanCarryTagPunish = canActionCarryTagPunish(action);
@@ -101,7 +103,7 @@ export function classifyTagPunishLegalActionFromOntology(
   );
   return {
     profile,
-    sourceDefinitionId: sourceDefinitionId ?? "",
+    sourceDefinitionId,
     isTagSource,
     isPunishPayoff,
     isTraceTagSource,

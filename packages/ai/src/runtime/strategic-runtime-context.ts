@@ -1,3 +1,4 @@
+import { cardDefinitionIdValue } from "../card-definition-id-input";
 import type {
   CardDefinitionId,
   CardInstanceId,
@@ -1083,8 +1084,8 @@ function sourceDefinitionIdForAction(
   visibleDefinitions: Readonly<Record<CardInstanceId, CardDefinitionId>>,
 ): CardDefinitionId | undefined {
   const payloadSourceDefinitionId =
-    stringPayload(action, "sourceDefinitionId") ??
-    stringPayload(action, "sourceCardDefinitionId");
+    cardDefinitionIdValue(action.payload?.sourceDefinitionId) ??
+    cardDefinitionIdValue(action.payload?.sourceCardDefinitionId);
   if (payloadSourceDefinitionId !== undefined) return payloadSourceDefinitionId;
   const sourceCardInstanceId =
     action.abilityRef?.sourceCardInstanceId ??

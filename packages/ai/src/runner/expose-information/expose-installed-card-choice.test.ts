@@ -37,7 +37,7 @@ describe("runner installed-card expose choice", () => {
   it("forgets the ICE slot replaced by a public Singapore City Grid swap", () => {
     const current = input();
     current.eventTail.push(exposeEvent("remote_1", "ice", 0), {
-      eventId: "swap",
+      eventId: 4,
       type: "resolve_choice",
       stateVersionBefore: 2,
       stateVersionAfter: 3,
@@ -79,8 +79,8 @@ describe("runner installed-card expose choice", () => {
     const current = input();
     current.eventTail.push(
       exposeEvent("hq", "ice", 0),
-      exposeEvent("remote_1", "ice", 0),
-      exposeEvent("remote_1", "root", 0),
+      exposeEvent("remote_1", "ice", 0, 3),
+      exposeEvent("remote_1", "root", 0, 4),
     );
 
     expect(runnerExposeInstalledOpportunity(current).unseenPositions).toEqual(
@@ -91,7 +91,7 @@ describe("runner installed-card expose choice", () => {
   it("remembers the aligned outermost ICE positions exposed by one Guide event", () => {
     const current = input();
     current.eventTail.push({
-      eventId: "guide-expose",
+      eventId: 3,
       type: "play_event",
       stateVersionBefore: 1,
       stateVersionAfter: 2,
@@ -190,12 +190,13 @@ function exposeEvent(
   serverId: string,
   area: "ice" | "root",
   index: number,
+  stateVersionAfter = 2,
 ): AiDecisionInput["eventTail"][number] {
   return {
-    eventId: `expose-${serverId}-${area}-${index}`,
+    eventId: stateVersionAfter + 1,
     type: "resolve_choice",
-    stateVersionBefore: 1,
-    stateVersionAfter: 2,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
     stateHashAfter: `hash-${serverId}-${area}-${index}`,
     publicPayload: {
       actor: "runner",
@@ -211,7 +212,7 @@ function legacyExposeEvent(
   serverId: string,
 ): AiDecisionInput["eventTail"][number] {
   return {
-    eventId: `legacy-expose-${serverId}`,
+    eventId: 2,
     type: "resolve_choice",
     stateVersionBefore: 0,
     stateVersionAfter: 1,
@@ -229,7 +230,7 @@ function installEvent(
   placement: "ice" | "root",
 ): AiDecisionInput["eventTail"][number] {
   return {
-    eventId: `install-${serverId}-${placement}`,
+    eventId: 4,
     type: "install_card",
     stateVersionBefore: 2,
     stateVersionAfter: 3,

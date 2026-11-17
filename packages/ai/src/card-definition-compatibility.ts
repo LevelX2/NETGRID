@@ -15,21 +15,20 @@ export class AiCardDefinitionAuthorityError extends Error {
 
   constructor(
     readonly code: AiCardDefinitionAuthorityErrorCode,
-    readonly definitionId: CardDefinitionId,
+    readonly definitionId?: CardDefinitionId,
   ) {
-    super(`${code}: ${definitionId}`);
+    super(definitionId === undefined ? code : `${code}: ${definitionId}`);
   }
 }
 
 const cardSpecEntries = cardSpecPlanningCards();
 const planningEntries = planningCards();
-const expectedCardSpecIds = new Set<string>(
+const expectedCardSpecIds = new Set(
   planningEntries.map(({ cardDefinitionId }) => cardDefinitionId),
 );
 if (expectedCardSpecIds.size !== planningEntries.length)
   throw new AiCardDefinitionAuthorityError(
     "overlapping_definition_authority",
-    "unknown_duplicate_planning_card",
   );
 const cardSpecDefinitions = cardSpecEntries.map(({ definition }) =>
   mutableCompatibilityDefinition(definition),
@@ -42,7 +41,7 @@ if (cardSpecIds.size !== cardSpecDefinitions.length)
       (definition, index) =>
         cardSpecDefinitions.findIndex(({ id }) => id === definition.id) !==
         index,
-    )?.id ?? "unknown_duplicate_card_spec",
+    )?.id,
   );
 for (const definitionId of expectedCardSpecIds)
   if (!cardSpecIds.has(definitionId))

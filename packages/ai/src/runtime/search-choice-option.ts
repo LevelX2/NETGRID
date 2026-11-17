@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { type AiDecisionInput } from "@netgrid/shared";
 
 import { matchingBreakerRoleNeedles } from "./breaker-role-match";
@@ -19,14 +20,14 @@ export type SearchChoiceFeatureSnapshot = {
   readonly hasInstalledNonNoisyIcebreaker: boolean;
   readonly rigRoles: ReadonlySet<string>;
   readonly rigDefinitionIds: ReadonlySet<number>;
-  readonly gripDefinitionCounts?: ReadonlyMap<string, number>;
+  readonly gripDefinitionCounts?: ReadonlyMap<CardDefinitionId, number>;
 };
 
 export type SearchChoiceScoringContext = {
   readonly features: SearchChoiceFeatureSnapshot;
-  readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
+  readonly rolesForCardId: (cardId: CardDefinitionId | undefined) => readonly string[];
   readonly effectsForCardId: (
-    cardId: string | undefined,
+    cardId: CardDefinitionId | undefined,
   ) => readonly AiHintStructuredEffect[];
   readonly requiredCoverage?: RequiredCapabilityKind;
   readonly preferredServerId?: string;

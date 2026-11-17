@@ -12,13 +12,16 @@
   },
   "cards": [
     {
-      "cardId": "corp_identity_001",
+      "cardId": 3,
       "hint": {
-        "cardId": "corp_identity_001",
+        "cardId": 3,
         "side": "corp",
         "cardType": "identity",
         "aiSupportStatus": "ai_supported",
-        "roles": ["corp_identity", "setup"],
+        "roles": [
+          "corp_identity",
+          "setup"
+        ],
         "planRoles": [],
         "valueHints": {},
         "quality": {
@@ -29,13 +32,15 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["identity_setup"]
+        "requiredMechanics": [
+          "identity_setup"
+        ]
       }
     },
     {
-      "cardId": "efficient_fracter",
+      "cardId": 4,
       "hint": {
-        "cardId": "efficient_fracter",
+        "cardId": 4,
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
@@ -45,10 +50,14 @@
           "breaker_fracter",
           "efficient_breaker"
         ],
-        "planRoles": ["build_rig"],
+        "planRoles": [
+          "build_rig"
+        ],
         "valueHints": {},
         "breakerProfile": {
-          "coverage": ["wall"],
+          "coverage": [
+            "wall"
+          ],
           "breakCost": 1,
           "baseStrength": 3,
           "maxSubroutinesPerBreak": 1,
@@ -58,16 +67,28 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
-        "functionSignals": ["breaker.wall"],
+        "functionSignals": [
+          "breaker.wall"
+        ],
         "actionTacticSignals": [
           "effect:breaker",
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
-        "riskTags": ["encounter"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
+        "riskTags": [
+          "encounter"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -85,13 +106,16 @@
       }
     },
     {
-      "cardId": "runner_identity_001",
+      "cardId": 587,
       "hint": {
-        "cardId": "runner_identity_001",
+        "cardId": 587,
         "side": "runner",
         "cardType": "identity",
         "aiSupportStatus": "ai_supported",
-        "roles": ["runner_identity", "setup"],
+        "roles": [
+          "runner_identity",
+          "setup"
+        ],
         "planRoles": [],
         "valueHints": {},
         "quality": {
@@ -102,20 +126,32 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["identity_setup"]
+        "requiredMechanics": [
+          "identity_setup"
+        ]
       }
     },
     {
-      "cardId": "simple_agenda",
+      "cardId": 588,
       "hint": {
-        "cardId": "simple_agenda",
+        "cardId": 588,
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_2pt", "no_ability_agenda"],
-        "planRoles": ["build_scoring_remote", "score_next_turn"],
+        "roles": [
+          "agenda",
+          "score_plan",
+          "agenda_2pt",
+          "no_ability_agenda"
+        ],
+        "planRoles": [
+          "build_scoring_remote",
+          "score_next_turn"
+        ],
         "valueHints": {},
-        "riskTags": ["hidden_until_score_or_access"],
+        "riskTags": [
+          "hidden_until_score_or_access"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -135,14 +171,20 @@
       }
     },
     {
-      "cardId": "simple_barrier_ice",
+      "cardId": 589,
       "hint": {
-        "cardId": "simple_barrier_ice",
+        "cardId": 589,
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "etr_ice", "barrier_ice"],
-        "planRoles": ["protect_rnd"],
+        "roles": [
+          "ice",
+          "etr_ice",
+          "barrier_ice"
+        ],
+        "planRoles": [
+          "protect_rnd"
+        ],
         "valueHints": {},
         "effects": [
           {
@@ -152,19 +194,32 @@
             "target": "corp_ice.end_run"
           }
         ],
-        "functionSignals": ["corp_ice.end_run", "ice.etr"],
-        "tacticSignals": ["corp_ice.end_run"],
+        "functionSignals": [
+          "corp_ice.end_run",
+          "ice.etr"
+        ],
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
         "actionTacticSignals": [
           "effect:etr",
           "effect_scope:run_path",
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 3 },
-        "riskTags": ["hidden_ice"],
+        "costProfile": {
+          "credits": 3
+        },
+        "riskTags": [
+          "hidden_ice"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -183,14 +238,20 @@
       }
     },
     {
-      "cardId": "simple_code_gate_ice",
+      "cardId": 590,
       "hint": {
-        "cardId": "simple_code_gate_ice",
+        "cardId": 590,
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "etr_ice", "code_gate_ice"],
-        "planRoles": ["protect_rnd"],
+        "roles": [
+          "ice",
+          "etr_ice",
+          "code_gate_ice"
+        ],
+        "planRoles": [
+          "protect_rnd"
+        ],
         "valueHints": {},
         "effects": [
           {
@@ -229,11 +290,19 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 2 },
-        "riskTags": ["hidden_ice"],
+        "costProfile": {
+          "credits": 2
+        },
+        "riskTags": [
+          "hidden_ice"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -253,9 +322,9 @@
       }
     },
     {
-      "cardId": "simple_decoder",
+      "cardId": 591,
       "hint": {
-        "cardId": "simple_decoder",
+        "cardId": 591,
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
@@ -265,10 +334,14 @@
           "breaker_decoder",
           "efficient_breaker"
         ],
-        "planRoles": ["build_rig"],
+        "planRoles": [
+          "build_rig"
+        ],
         "valueHints": {},
         "breakerProfile": {
-          "coverage": ["code_gate"],
+          "coverage": [
+            "code_gate"
+          ],
           "breakCost": 1,
           "baseStrength": 2,
           "maxSubroutinesPerBreak": 1,
@@ -278,16 +351,28 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
-        "functionSignals": ["breaker.code_gate"],
+        "functionSignals": [
+          "breaker.code_gate"
+        ],
         "actionTacticSignals": [
           "effect:breaker",
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
-        "riskTags": ["encounter"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
+        "riskTags": [
+          "encounter"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -305,14 +390,20 @@
       }
     },
     {
-      "cardId": "simple_draw_event",
+      "cardId": 592,
       "hint": {
-        "cardId": "simple_draw_event",
+        "cardId": 592,
         "side": "runner",
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
-        "roles": ["draw", "event"],
-        "planRoles": ["draw_for_answers", "setup"],
+        "roles": [
+          "draw",
+          "event"
+        ],
+        "planRoles": [
+          "draw_for_answers",
+          "setup"
+        ],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
@@ -328,7 +419,9 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["setup.draw"]
+            "functionSignals": [
+              "setup.draw"
+            ]
           }
         ],
         "effects": [
@@ -350,15 +443,25 @@
             "finite": true
           }
         ],
-        "functionSignals": ["draw.runner_draw", "setup.draw"],
-        "tacticSignals": ["draw.runner_draw"],
+        "functionSignals": [
+          "draw.runner_draw",
+          "setup.draw"
+        ],
+        "tacticSignals": [
+          "draw.runner_draw"
+        ],
         "actionTacticSignals": [
           "effect:draw",
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
-        "riskTags": ["hidden_zone_change"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
+        "riskTags": [
+          "hidden_zone_change"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -367,18 +470,27 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["play_event"]
+        "requiredMechanics": [
+          "play_event"
+        ]
       }
     },
     {
-      "cardId": "simple_draw_operation",
+      "cardId": 593,
       "hint": {
-        "cardId": "simple_draw_operation",
+        "cardId": 593,
         "side": "corp",
         "cardType": "operation",
         "aiSupportStatus": "ai_supported",
-        "roles": ["draw", "operation", "draw_operation"],
-        "planRoles": ["draw_for_answers", "setup"],
+        "roles": [
+          "draw",
+          "operation",
+          "draw_operation"
+        ],
+        "planRoles": [
+          "draw_for_answers",
+          "setup"
+        ],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
@@ -394,7 +506,9 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["setup.draw"]
+            "functionSignals": [
+              "setup.draw"
+            ]
           }
         ],
         "effects": [
@@ -416,16 +530,27 @@
             "finite": true
           }
         ],
-        "functionSignals": ["draw.corp_draw", "setup.draw"],
-        "tacticSignals": ["draw.card", "draw.corp_draw"],
+        "functionSignals": [
+          "draw.corp_draw",
+          "setup.draw"
+        ],
+        "tacticSignals": [
+          "draw.card",
+          "draw.corp_draw"
+        ],
         "actionTacticSignals": [
           "draw.card",
           "effect:draw",
           "effect_scope:corp",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
-        "riskTags": ["hidden_zone_change"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
+        "riskTags": [
+          "hidden_zone_change"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -434,19 +559,30 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["play_operation"]
+        "requiredMechanics": [
+          "play_operation"
+        ]
       }
     },
     {
-      "cardId": "simple_economy_asset",
+      "cardId": 594,
       "hint": {
-        "cardId": "simple_economy_asset",
+        "cardId": 594,
         "side": "corp",
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
-        "roles": ["asset_trash_target", "economy_asset"],
-        "planRoles": ["bait_runner", "recover_economy"],
-        "valueHints": { "economy": 3, "remoteRootValue": 3 },
+        "roles": [
+          "asset_trash_target",
+          "economy_asset"
+        ],
+        "planRoles": [
+          "bait_runner",
+          "recover_economy"
+        ],
+        "valueHints": {
+          "economy": 3,
+          "remoteRootValue": 3
+        },
         "effects": [
           {
             "kind": "economy",
@@ -455,16 +591,26 @@
             "amount": 3
           }
         ],
-        "functionSignals": ["economy.corp_credit_burst", "economy.generic"],
-        "tacticSignals": ["economy.card", "economy.corp_credit_burst"],
+        "functionSignals": [
+          "economy.corp_credit_burst",
+          "economy.generic"
+        ],
+        "tacticSignals": [
+          "economy.card",
+          "economy.corp_credit_burst"
+        ],
         "actionTacticSignals": [
           "economy.card",
           "effect:economy",
           "effect_scope:corp",
           "effect_timing:on_rez"
         ],
-        "costProfile": { "credits": 1 },
-        "riskTags": ["hidden_root"],
+        "costProfile": {
+          "credits": 1
+        },
+        "riskTags": [
+          "hidden_root"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -483,15 +629,22 @@
       }
     },
     {
-      "cardId": "simple_economy_event",
+      "cardId": 595,
       "hint": {
-        "cardId": "simple_economy_event",
+        "cardId": 595,
         "side": "runner",
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
-        "roles": ["economy", "event"],
-        "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 3 },
+        "roles": [
+          "economy",
+          "event"
+        ],
+        "planRoles": [
+          "recover_economy"
+        ],
+        "valueHints": {
+          "economy": 3
+        },
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "simple_economy_event_on_play",
@@ -506,7 +659,10 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["economy.burst_credit", "economy.generic"]
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic"
+            ]
           }
         ],
         "effects": [
@@ -532,13 +688,18 @@
           "economy.runner_credit_burst",
           "economy.burst_credit"
         ],
-        "tacticSignals": ["economy.runner_credit_burst"],
+        "tacticSignals": [
+          "economy.runner_credit_burst"
+        ],
         "actionTacticSignals": [
           "effect:economy",
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -547,19 +708,29 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["play_event"]
+        "requiredMechanics": [
+          "play_event"
+        ]
       }
     },
     {
-      "cardId": "simple_economy_operation",
+      "cardId": 596,
       "hint": {
-        "cardId": "simple_economy_operation",
+        "cardId": 596,
         "side": "corp",
         "cardType": "operation",
         "aiSupportStatus": "ai_supported",
-        "roles": ["economy", "operation", "economy_operation"],
-        "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 3 },
+        "roles": [
+          "economy",
+          "operation",
+          "economy_operation"
+        ],
+        "planRoles": [
+          "recover_economy"
+        ],
+        "valueHints": {
+          "economy": 3
+        },
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "simple_economy_operation_on_play",
@@ -574,7 +745,10 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["economy.burst_credit", "economy.generic"]
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic"
+            ]
           }
         ],
         "effects": [
@@ -600,14 +774,20 @@
           "economy.generic",
           "economy.burst_credit"
         ],
-        "tacticSignals": ["economy.card", "economy.corp_credit_burst"],
+        "tacticSignals": [
+          "economy.card",
+          "economy.corp_credit_burst"
+        ],
         "actionTacticSignals": [
           "economy.card",
           "effect:economy",
           "effect_scope:corp",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -616,13 +796,15 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["play_operation"]
+        "requiredMechanics": [
+          "play_operation"
+        ]
       }
     },
     {
-      "cardId": "simple_fracter",
+      "cardId": 597,
       "hint": {
-        "cardId": "simple_fracter",
+        "cardId": 597,
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
@@ -632,10 +814,14 @@
           "breaker_fracter",
           "efficient_breaker"
         ],
-        "planRoles": ["build_rig"],
+        "planRoles": [
+          "build_rig"
+        ],
         "valueHints": {},
         "breakerProfile": {
-          "coverage": ["wall"],
+          "coverage": [
+            "wall"
+          ],
           "breakCost": 1,
           "baseStrength": 2,
           "maxSubroutinesPerBreak": 1,
@@ -645,16 +831,28 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
-        "functionSignals": ["breaker.wall"],
+        "functionSignals": [
+          "breaker.wall"
+        ],
         "actionTacticSignals": [
           "effect:breaker",
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 2, "memory": 1 },
-        "riskTags": ["encounter"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2,
+          "memory": 1
+        },
+        "riskTags": [
+          "encounter"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -672,9 +870,9 @@
       }
     },
     {
-      "cardId": "simple_killer",
+      "cardId": 598,
       "hint": {
-        "cardId": "simple_killer",
+        "cardId": 598,
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
@@ -684,10 +882,14 @@
           "breaker_killer",
           "efficient_breaker"
         ],
-        "planRoles": ["build_rig"],
+        "planRoles": [
+          "build_rig"
+        ],
         "valueHints": {},
         "breakerProfile": {
-          "coverage": ["sentry"],
+          "coverage": [
+            "sentry"
+          ],
           "breakCost": 1,
           "baseStrength": 1,
           "maxSubroutinesPerBreak": 1,
@@ -697,16 +899,28 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
-        "functionSignals": ["breaker.sentry"],
+        "functionSignals": [
+          "breaker.sentry"
+        ],
         "actionTacticSignals": [
           "effect:breaker",
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
-        "riskTags": ["encounter"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
+        "riskTags": [
+          "encounter"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -724,16 +938,25 @@
       }
     },
     {
-      "cardId": "simple_priority_agenda",
+      "cardId": 599,
       "hint": {
-        "cardId": "simple_priority_agenda",
+        "cardId": 599,
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_3pt", "no_ability_agenda"],
-        "planRoles": ["score_next_turn"],
+        "roles": [
+          "agenda",
+          "score_plan",
+          "agenda_3pt",
+          "no_ability_agenda"
+        ],
+        "planRoles": [
+          "score_next_turn"
+        ],
         "valueHints": {},
-        "riskTags": ["hidden_until_score_or_access"],
+        "riskTags": [
+          "hidden_until_score_or_access"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -753,13 +976,16 @@
       }
     },
     {
-      "cardId": "simple_run_event",
+      "cardId": 600,
       "hint": {
-        "cardId": "simple_run_event",
+        "cardId": 600,
         "side": "runner",
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
-        "roles": ["event", "run_pressure"],
+        "roles": [
+          "event",
+          "run_pressure"
+        ],
         "planRoles": [],
         "valueHints": {},
         "actionCapabilitySemantics": [
@@ -840,8 +1066,13 @@
           "effect_timing:action",
           "effect_timing:successful_run"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
-        "riskTags": ["run"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
+        "riskTags": [
+          "run"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -850,18 +1081,29 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["play_event", "start_run", "successful_run_bonus"]
+        "requiredMechanics": [
+          "play_event",
+          "start_run",
+          "successful_run_bonus"
+        ]
       }
     },
     {
-      "cardId": "simple_sentry_ice",
+      "cardId": 601,
       "hint": {
-        "cardId": "simple_sentry_ice",
+        "cardId": 601,
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "taxing_ice", "etr_ice", "sentry_ice"],
-        "planRoles": ["protect_rnd"],
+        "roles": [
+          "ice",
+          "taxing_ice",
+          "etr_ice",
+          "sentry_ice"
+        ],
+        "planRoles": [
+          "protect_rnd"
+        ],
         "valueHints": {},
         "effects": [
           {
@@ -901,11 +1143,19 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 4 },
-        "riskTags": ["hidden_ice"],
+        "costProfile": {
+          "credits": 4
+        },
+        "riskTags": [
+          "hidden_ice"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -925,17 +1175,25 @@
       }
     },
     {
-      "cardId": "simple_setup_hardware",
+      "cardId": 602,
       "hint": {
-        "cardId": "simple_setup_hardware",
+        "cardId": 602,
         "side": "runner",
         "cardType": "hardware",
         "aiSupportStatus": "ai_supported",
-        "roles": ["memory", "setup"],
+        "roles": [
+          "memory",
+          "setup"
+        ],
         "planRoles": [],
         "valueHints": {},
-        "costProfile": { "clicks": 1, "credits": 2 },
-        "riskTags": ["install_runner"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2
+        },
+        "riskTags": [
+          "install_runner"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -952,14 +1210,22 @@
       }
     },
     {
-      "cardId": "simple_tag_ice",
+      "cardId": 603,
       "hint": {
-        "cardId": "simple_tag_ice",
+        "cardId": 603,
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "tag_ice", "etr_ice", "sentry_ice"],
-        "planRoles": ["protect_hq", "protect_rnd"],
+        "roles": [
+          "ice",
+          "tag_ice",
+          "etr_ice",
+          "sentry_ice"
+        ],
+        "planRoles": [
+          "protect_hq",
+          "protect_rnd"
+        ],
         "valueHints": {},
         "effects": [
           {
@@ -996,11 +1262,20 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 3 },
-        "riskTags": ["hidden_ice", "tag"],
+        "costProfile": {
+          "credits": 3
+        },
+        "riskTags": [
+          "hidden_ice",
+          "tag"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1020,18 +1295,28 @@
       }
     },
     {
-      "cardId": "simple_tag_punishment_operation",
+      "cardId": 604,
       "hint": {
-        "cardId": "simple_tag_punishment_operation",
+        "cardId": 604,
         "side": "corp",
         "cardType": "operation",
         "aiSupportStatus": "ai_supported",
-        "roles": ["tag_punishment"],
-        "planRoles": ["punish_tagged_runner"],
+        "roles": [
+          "tag_punishment"
+        ],
+        "planRoles": [
+          "punish_tagged_runner"
+        ],
         "valueHints": {},
-        "strategicRole": ["punish_payoff"],
-        "strategyAnchors": ["corp.tag_trace_punish"],
-        "lineSupport": ["corp.tag_trace_punish"],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategyAnchors": [
+          "corp.tag_trace_punish"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
         "strategySupportPairs": [
           {
             "strategyId": "corp.tag_trace_punish",
@@ -1061,7 +1346,11 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "simple_tag_punishment_operation_on_play",
-            "conditions": [{ "kind": "requires_runner_tagged" }]
+            "conditions": [
+              {
+                "kind": "requires_runner_tagged"
+              }
+            ]
           }
         ],
         "effects": [
@@ -1073,7 +1362,10 @@
             "finite": true
           }
         ],
-        "functionSignals": ["risk.requires_tagged_runner", "tag.payoff"],
+        "functionSignals": [
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
         "tacticSignals": [
           "punish.payoff",
           "risk.requires_tagged_runner",
@@ -1086,9 +1378,18 @@
           "punish.payoff",
           "tag.payoff"
         ],
-        "conditions": [{ "kind": "requires_runner_tagged" }],
-        "costProfile": { "clicks": 1, "credits": 1 },
-        "riskTags": ["tag"],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
+        "riskTags": [
+          "tag"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1098,18 +1399,27 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["play_operation"]
+        "requiredMechanics": [
+          "play_operation"
+        ]
       }
     },
     {
-      "cardId": "simple_taxing_barrier_ice",
+      "cardId": 605,
       "hint": {
-        "cardId": "simple_taxing_barrier_ice",
+        "cardId": 605,
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "taxing_ice", "etr_ice", "barrier_ice"],
-        "planRoles": ["protect_rnd"],
+        "roles": [
+          "ice",
+          "taxing_ice",
+          "etr_ice",
+          "barrier_ice"
+        ],
+        "planRoles": [
+          "protect_rnd"
+        ],
         "valueHints": {},
         "effects": [
           {
@@ -1149,11 +1459,19 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 4 },
-        "riskTags": ["hidden_ice"],
+        "costProfile": {
+          "credits": 4
+        },
+        "riskTags": [
+          "hidden_ice"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1173,17 +1491,26 @@
       }
     },
     {
-      "cardId": "simple_upgrade",
+      "cardId": 606,
       "hint": {
-        "cardId": "simple_upgrade",
+        "cardId": 606,
         "side": "corp",
         "cardType": "upgrade",
         "aiSupportStatus": "ai_supported",
-        "roles": ["remote_support", "upgrade"],
+        "roles": [
+          "remote_support",
+          "upgrade"
+        ],
         "planRoles": [],
-        "valueHints": { "remoteRootValue": 1 },
-        "costProfile": { "credits": 0 },
-        "riskTags": ["hidden_root"],
+        "valueHints": {
+          "remoteRootValue": 1
+        },
+        "costProfile": {
+          "credits": 0
+        },
+        "riskTags": [
+          "hidden_root"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1201,9 +1528,9 @@
       }
     },
     {
-      "cardId": "v08_adaptive_killer",
+      "cardId": 607,
       "hint": {
-        "cardId": "v08_adaptive_killer",
+        "cardId": 607,
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
@@ -1213,10 +1540,14 @@
           "breaker_killer",
           "efficient_breaker"
         ],
-        "planRoles": ["build_rig"],
+        "planRoles": [
+          "build_rig"
+        ],
         "valueHints": {},
         "breakerProfile": {
-          "coverage": ["sentry"],
+          "coverage": [
+            "sentry"
+          ],
           "breakCost": 1,
           "baseStrength": 3,
           "maxSubroutinesPerBreak": 1,
@@ -1226,16 +1557,28 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
-        "functionSignals": ["breaker.sentry"],
+        "functionSignals": [
+          "breaker.sentry"
+        ],
         "actionTacticSignals": [
           "effect:breaker",
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 4, "memory": 1 },
-        "riskTags": ["encounter"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 4,
+          "memory": 1
+        },
+        "riskTags": [
+          "encounter"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1253,14 +1596,21 @@
       }
     },
     {
-      "cardId": "v08_archive_planning_operation",
+      "cardId": 608,
       "hint": {
-        "cardId": "v08_archive_planning_operation",
+        "cardId": 608,
         "side": "corp",
         "cardType": "operation",
         "aiSupportStatus": "ai_supported",
-        "roles": ["draw", "operation", "draw_operation"],
-        "planRoles": ["draw_for_answers", "setup"],
+        "roles": [
+          "draw",
+          "operation",
+          "draw_operation"
+        ],
+        "planRoles": [
+          "draw_for_answers",
+          "setup"
+        ],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
@@ -1276,7 +1626,9 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["setup.draw"]
+            "functionSignals": [
+              "setup.draw"
+            ]
           }
         ],
         "effects": [
@@ -1298,16 +1650,27 @@
             "finite": true
           }
         ],
-        "functionSignals": ["draw.corp_draw", "setup.draw"],
-        "tacticSignals": ["draw.card", "draw.corp_draw"],
+        "functionSignals": [
+          "draw.corp_draw",
+          "setup.draw"
+        ],
+        "tacticSignals": [
+          "draw.card",
+          "draw.corp_draw"
+        ],
         "actionTacticSignals": [
           "draw.card",
           "effect:draw",
           "effect_scope:corp",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
-        "riskTags": ["hidden_zone_change"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
+        "riskTags": [
+          "hidden_zone_change"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1316,19 +1679,29 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["play_operation"]
+        "requiredMechanics": [
+          "play_operation"
+        ]
       }
     },
     {
-      "cardId": "v08_burst_credit_event",
+      "cardId": 609,
       "hint": {
-        "cardId": "v08_burst_credit_event",
+        "cardId": 609,
         "side": "runner",
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
-        "roles": ["economy", "event"],
-        "planRoles": ["recover_economy", "tempo"],
-        "valueHints": { "economy": 3 },
+        "roles": [
+          "economy",
+          "event"
+        ],
+        "planRoles": [
+          "recover_economy",
+          "tempo"
+        ],
+        "valueHints": {
+          "economy": 3
+        },
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "v08_burst_credit_event_on_play",
@@ -1343,7 +1716,10 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["economy.burst_credit", "economy.generic"]
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic"
+            ]
           }
         ],
         "effects": [
@@ -1369,13 +1745,18 @@
           "economy.runner_credit_burst",
           "economy.burst_credit"
         ],
-        "tacticSignals": ["economy.runner_credit_burst"],
+        "tacticSignals": [
+          "economy.runner_credit_burst"
+        ],
         "actionTacticSignals": [
           "effect:economy",
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1384,19 +1765,30 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["play_event"]
+        "requiredMechanics": [
+          "play_event"
+        ]
       }
     },
     {
-      "cardId": "v08_cashout_asset",
+      "cardId": 610,
       "hint": {
-        "cardId": "v08_cashout_asset",
+        "cardId": 610,
         "side": "corp",
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
-        "roles": ["asset_trash_target", "economy_asset"],
-        "planRoles": ["bait_runner", "recover_economy"],
-        "valueHints": { "economy": 3, "remoteRootValue": 3 },
+        "roles": [
+          "asset_trash_target",
+          "economy_asset"
+        ],
+        "planRoles": [
+          "bait_runner",
+          "recover_economy"
+        ],
+        "valueHints": {
+          "economy": 3,
+          "remoteRootValue": 3
+        },
         "effects": [
           {
             "kind": "economy",
@@ -1405,16 +1797,26 @@
             "amount": 4
           }
         ],
-        "functionSignals": ["economy.corp_credit_burst", "economy.generic"],
-        "tacticSignals": ["economy.card", "economy.corp_credit_burst"],
+        "functionSignals": [
+          "economy.corp_credit_burst",
+          "economy.generic"
+        ],
+        "tacticSignals": [
+          "economy.card",
+          "economy.corp_credit_burst"
+        ],
         "actionTacticSignals": [
           "economy.card",
           "effect:economy",
           "effect_scope:corp",
           "effect_timing:on_rez"
         ],
-        "costProfile": { "credits": 2 },
-        "riskTags": ["hidden_root"],
+        "costProfile": {
+          "credits": 2
+        },
+        "riskTags": [
+          "hidden_root"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1433,15 +1835,24 @@
       }
     },
     {
-      "cardId": "v08_credit_surge_operation",
+      "cardId": 611,
       "hint": {
-        "cardId": "v08_credit_surge_operation",
+        "cardId": 611,
         "side": "corp",
         "cardType": "operation",
         "aiSupportStatus": "ai_supported",
-        "roles": ["economy", "operation", "economy_operation"],
-        "planRoles": ["recover_economy", "tempo"],
-        "valueHints": { "economy": 3 },
+        "roles": [
+          "economy",
+          "operation",
+          "economy_operation"
+        ],
+        "planRoles": [
+          "recover_economy",
+          "tempo"
+        ],
+        "valueHints": {
+          "economy": 3
+        },
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "v08_credit_surge_operation_on_play",
@@ -1456,7 +1867,10 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["economy.burst_credit", "economy.generic"]
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic"
+            ]
           }
         ],
         "effects": [
@@ -1482,14 +1896,20 @@
           "economy.generic",
           "economy.burst_credit"
         ],
-        "tacticSignals": ["economy.card", "economy.corp_credit_burst"],
+        "tacticSignals": [
+          "economy.card",
+          "economy.corp_credit_burst"
+        ],
         "actionTacticSignals": [
           "economy.card",
           "effect:economy",
           "effect_scope:corp",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1498,18 +1918,26 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["play_operation"]
+        "requiredMechanics": [
+          "play_operation"
+        ]
       }
     },
     {
-      "cardId": "v08_deep_draw_event",
+      "cardId": 612,
       "hint": {
-        "cardId": "v08_deep_draw_event",
+        "cardId": 612,
         "side": "runner",
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
-        "roles": ["draw", "event"],
-        "planRoles": ["draw_for_answers", "setup"],
+        "roles": [
+          "draw",
+          "event"
+        ],
+        "planRoles": [
+          "draw_for_answers",
+          "setup"
+        ],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
@@ -1525,7 +1953,9 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["setup.draw"]
+            "functionSignals": [
+              "setup.draw"
+            ]
           }
         ],
         "effects": [
@@ -1547,15 +1977,25 @@
             "finite": true
           }
         ],
-        "functionSignals": ["draw.runner_draw", "setup.draw"],
-        "tacticSignals": ["draw.runner_draw"],
+        "functionSignals": [
+          "draw.runner_draw",
+          "setup.draw"
+        ],
+        "tacticSignals": [
+          "draw.runner_draw"
+        ],
         "actionTacticSignals": [
           "effect:draw",
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 1 },
-        "riskTags": ["hidden_zone_change"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
+        "riskTags": [
+          "hidden_zone_change"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1564,18 +2004,27 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["play_event"]
+        "requiredMechanics": [
+          "play_event"
+        ]
       }
     },
     {
-      "cardId": "v08_gate_ice",
+      "cardId": 613,
       "hint": {
-        "cardId": "v08_gate_ice",
+        "cardId": 613,
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "taxing_ice", "etr_ice", "code_gate_ice"],
-        "planRoles": ["protect_rnd"],
+        "roles": [
+          "ice",
+          "taxing_ice",
+          "etr_ice",
+          "code_gate_ice"
+        ],
+        "planRoles": [
+          "protect_rnd"
+        ],
         "valueHints": {},
         "effects": [
           {
@@ -1614,11 +2063,19 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 4 },
-        "riskTags": ["hidden_ice"],
+        "costProfile": {
+          "credits": 4
+        },
+        "riskTags": [
+          "hidden_ice"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1638,17 +2095,25 @@
       }
     },
     {
-      "cardId": "v08_memory_chip",
+      "cardId": 614,
       "hint": {
-        "cardId": "v08_memory_chip",
+        "cardId": 614,
         "side": "runner",
         "cardType": "hardware",
         "aiSupportStatus": "ai_supported",
-        "roles": ["memory", "setup"],
+        "roles": [
+          "memory",
+          "setup"
+        ],
         "planRoles": [],
         "valueHints": {},
-        "costProfile": { "clicks": 1, "credits": 2 },
-        "riskTags": ["install_runner"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2
+        },
+        "riskTags": [
+          "install_runner"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1665,15 +2130,23 @@
       }
     },
     {
-      "cardId": "v08_overclock_run_event",
+      "cardId": 615,
       "hint": {
-        "cardId": "v08_overclock_run_event",
+        "cardId": 615,
         "side": "runner",
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
-        "roles": ["event", "run_pressure", "economy"],
-        "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 3 },
+        "roles": [
+          "event",
+          "run_pressure",
+          "economy"
+        ],
+        "planRoles": [
+          "recover_economy"
+        ],
+        "valueHints": {
+          "economy": 3
+        },
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "v08_overclock_run_event_on_play",
@@ -1752,8 +2225,13 @@
           "effect_timing:action",
           "effect_timing:successful_run"
         ],
-        "costProfile": { "clicks": 1, "credits": 1 },
-        "riskTags": ["run"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
+        "riskTags": [
+          "run"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1762,13 +2240,17 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["play_event", "start_run", "successful_run_bonus"]
+        "requiredMechanics": [
+          "play_event",
+          "start_run",
+          "successful_run_bonus"
+        ]
       }
     },
     {
-      "cardId": "v08_precise_decoder",
+      "cardId": 616,
       "hint": {
-        "cardId": "v08_precise_decoder",
+        "cardId": 616,
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
@@ -1778,10 +2260,14 @@
           "breaker_decoder",
           "efficient_breaker"
         ],
-        "planRoles": ["build_rig"],
+        "planRoles": [
+          "build_rig"
+        ],
         "valueHints": {},
         "breakerProfile": {
-          "coverage": ["code_gate"],
+          "coverage": [
+            "code_gate"
+          ],
           "breakCost": 1,
           "baseStrength": 3,
           "maxSubroutinesPerBreak": 1,
@@ -1791,16 +2277,28 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
-        "functionSignals": ["breaker.code_gate"],
+        "functionSignals": [
+          "breaker.code_gate"
+        ],
         "actionTacticSignals": [
           "effect:breaker",
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
-        "riskTags": ["encounter"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
+        "riskTags": [
+          "encounter"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1818,16 +2316,25 @@
       }
     },
     {
-      "cardId": "v08_project_agenda",
+      "cardId": 617,
       "hint": {
-        "cardId": "v08_project_agenda",
+        "cardId": 617,
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
-        "roles": ["agenda", "score_plan", "agenda_2pt", "no_ability_agenda"],
-        "planRoles": ["score_next_turn"],
+        "roles": [
+          "agenda",
+          "score_plan",
+          "agenda_2pt",
+          "no_ability_agenda"
+        ],
+        "planRoles": [
+          "score_next_turn"
+        ],
         "valueHints": {},
-        "riskTags": ["hidden_until_score_or_access"],
+        "riskTags": [
+          "hidden_until_score_or_access"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1847,9 +2354,9 @@
       }
     },
     {
-      "cardId": "v08_steady_fracter",
+      "cardId": 618,
       "hint": {
-        "cardId": "v08_steady_fracter",
+        "cardId": 618,
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
@@ -1859,10 +2366,14 @@
           "breaker_fracter",
           "efficient_breaker"
         ],
-        "planRoles": ["build_rig"],
+        "planRoles": [
+          "build_rig"
+        ],
         "valueHints": {},
         "breakerProfile": {
-          "coverage": ["wall"],
+          "coverage": [
+            "wall"
+          ],
           "breakCost": 1,
           "baseStrength": 4,
           "maxSubroutinesPerBreak": 1,
@@ -1872,16 +2383,28 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
-        "functionSignals": ["breaker.wall"],
+        "functionSignals": [
+          "breaker.wall"
+        ],
         "actionTacticSignals": [
           "effect:breaker",
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 4, "memory": 1 },
-        "riskTags": ["encounter"],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 4,
+          "memory": 1
+        },
+        "riskTags": [
+          "encounter"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1899,14 +2422,20 @@
       }
     },
     {
-      "cardId": "v08_wall_ice",
+      "cardId": 619,
       "hint": {
-        "cardId": "v08_wall_ice",
+        "cardId": 619,
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "etr_ice", "barrier_ice"],
-        "planRoles": ["protect_rnd"],
+        "roles": [
+          "ice",
+          "etr_ice",
+          "barrier_ice"
+        ],
+        "planRoles": [
+          "protect_rnd"
+        ],
         "valueHints": {},
         "effects": [
           {
@@ -1916,19 +2445,32 @@
             "target": "corp_ice.end_run"
           }
         ],
-        "functionSignals": ["corp_ice.end_run", "ice.etr"],
-        "tacticSignals": ["corp_ice.end_run"],
+        "functionSignals": [
+          "corp_ice.end_run",
+          "ice.etr"
+        ],
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
         "actionTacticSignals": [
           "effect:etr",
           "effect_scope:run_path",
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 5 },
-        "riskTags": ["hidden_ice"],
+        "costProfile": {
+          "credits": 5
+        },
+        "riskTags": [
+          "hidden_ice"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1947,14 +2489,21 @@
       }
     },
     {
-      "cardId": "v08_watchdog_ice",
+      "cardId": 620,
       "hint": {
-        "cardId": "v08_watchdog_ice",
+        "cardId": 620,
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "tag_ice", "etr_ice", "sentry_ice"],
-        "planRoles": ["protect_rnd"],
+        "roles": [
+          "ice",
+          "tag_ice",
+          "etr_ice",
+          "sentry_ice"
+        ],
+        "planRoles": [
+          "protect_rnd"
+        ],
         "valueHints": {},
         "effects": [
           {
@@ -1991,11 +2540,20 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 4 },
-        "riskTags": ["hidden_ice", "tag"],
+        "costProfile": {
+          "credits": 4
+        },
+        "riskTags": [
+          "hidden_ice",
+          "tag"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,

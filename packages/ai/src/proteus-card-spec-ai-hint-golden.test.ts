@@ -62,7 +62,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         cardId: entry.definition.id,
         hint: deriveCardSpecAiHint(entry),
       }))
-      .sort((left, right) => left.cardId.localeCompare(right.cardId));
+      .sort((left, right) => (left.cardId - right.cardId));
 
     expect(reviewedGolden.cards).toHaveLength(151);
     expect(reviewedIds.size).toBe(151);
@@ -92,7 +92,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     expect(compatibility).toHaveLength(151);
     for (const entry of compatibility) {
       const production = productionById.get(entry.definition.id);
-      expect(production, entry.definition.id).toBeDefined();
+      expect(production, String(entry.definition.id)).toBeDefined();
       expect(entry.planning.cardDefinitionId).toBe(entry.definition.id);
       expect(entry.planning.cardRulesFingerprint).toBe(
         production!.cardRulesFingerprint,
@@ -120,7 +120,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     );
     const compiled = priorGeneratedCards.map((record) => {
       const entry = entriesById.get(record.cardId);
-      expect(entry, record.cardId).toBeDefined();
+      expect(entry, String(record.cardId)).toBeDefined();
       return {
         cardId: record.cardId,
         cardRulesFingerprint: entry!.planning.cardRulesFingerprint,
@@ -138,7 +138,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         .digest("hex")}`,
     ).toBe(
       // Includes exact counter-removal costs and Schematics' installed-card-only disclosure.
-      "sha256:77a47b0ffaaaa2ce8366f8e8f39a0e0fae374fdead438d29377d2a1ac31ab2d6",
+      "sha256:96d18b068b125a5a5c245605414c634e85021cddcb6fd08205a3e5cae61daf61",
     );
   });
 
@@ -169,7 +169,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     ]) {
       expect(
         actionPairs.filter((entry) => entry.cardId === cardId),
-        cardId,
+        String(cardId),
       ).toEqual([]);
     }
     expect(
@@ -236,7 +236,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     const entries = new Map(
       cardSpecPlanningCards().map((entry) => [entry.definition.id, entry]),
     );
-    const hint = (cardId: string) => deriveCardSpecAiHint(entries.get(cardId)!);
+    const hint = (cardId: number) => deriveCardSpecAiHint(entries.get(cardId)!);
 
     expect(hint(176)).toMatchObject({
       effects: expect.arrayContaining([
@@ -312,7 +312,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
       ]),
     });
 
-    const mutations: Array<[string, (entry: any) => void]> = [
+    const mutations: Array<[number, (entry: any) => void]> = [
       [
         176,
         (entry) => (entry.planning.engine.abilities[0].effects[0].amount = 0),
@@ -347,7 +347,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     for (const [cardId, mutate] of mutations) {
       const mutated = structuredClone(entries.get(cardId)!);
       mutate(mutated);
-      expect(() => deriveCardSpecAiHint(mutated), cardId).toThrow(
+      expect(() => deriveCardSpecAiHint(mutated), String(cardId)).toThrow(
         /card_spec_(unknown_|invalid_card_strategy_evidence_profile)/,
       );
     }
@@ -616,7 +616,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("rejects malformed dynamic subroutine bindings instead of compiling placeholders", () => {
-    const mutations: Array<[string, (entry: any) => void]> = [
+    const mutations: Array<[number, (entry: any) => void]> = [
       [
         70,
         (entry) =>
@@ -645,7 +645,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         )!,
       );
       mutate(entry);
-      expect(() => deriveCardSpecAiHint(entry), cardId).toThrow(
+      expect(() => deriveCardSpecAiHint(entry), String(cardId)).toThrow(
         /card_spec_(unknown_relative_ice|invalid_card_strategy_evidence_profile|unknown_trace_run_lock_shape)/,
       );
     }
@@ -710,7 +710,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("fails closed when a longtail mechanical witness is mutated", () => {
-    const mutations: Array<[string, (entry: any) => void]> = [
+    const mutations: Array<[number, (entry: any) => void]> = [
       [
         113,
         (entry) => (entry.planning.engine.corpUtility.amount = 2),
@@ -757,17 +757,17 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         const canonical = reviewedGolden.cards.find(
           (record) => record.cardId === cardId,
         )!.hint;
-        expect(deriveCardSpecAiHint(entry), cardId).not.toEqual(canonical);
+        expect(deriveCardSpecAiHint(entry), String(cardId)).not.toEqual(canonical);
         continue;
       }
-      expect(() => deriveCardSpecAiHint(entry), cardId).toThrow(
+      expect(() => deriveCardSpecAiHint(entry), String(cardId)).toThrow(
         /card_spec_unknown_/,
       );
     }
   });
 
   it("binds card evidence profiles and trace-tag anchors to exact typed witnesses", () => {
-    const profileMutations: Array<[string, (entry: any) => void]> = [
+    const profileMutations: Array<[number, (entry: any) => void]> = [
       [
         88,
         (entry) =>
@@ -803,7 +803,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         )!,
       );
       mutate(entry);
-      expect(() => deriveCardSpecAiHint(entry), cardId).toThrow(
+      expect(() => deriveCardSpecAiHint(entry), String(cardId)).toThrow(
         /card_spec_(invalid_card_strategy_evidence_profile|unknown_trace_run_lock_shape)/,
       );
     }

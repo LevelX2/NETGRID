@@ -1,6 +1,6 @@
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
-import type { AiDecisionInput } from "@netgrid/shared";
+import { isCardDefinitionId, type AiDecisionInput } from "@netgrid/shared";
 import {
   assessment,
   domain,
@@ -298,14 +298,15 @@ export function corpScorePlanTarget(signal: CorpScoreProjectSignal) {
     signal.phase === "install_agenda_from_counter_bank"
     ? {
         kind: "card" as const,
-        id: signal.agendaDefinitionId ?? signal.projectId,
+        id: String(signal.agendaDefinitionId ?? signal.projectId),
       }
     : {
         kind: "card" as const,
-        id:
+        id: String(
           signal.agendaInstanceId ??
           signal.agendaDefinitionId ??
           signal.projectId,
+        ),
       };
 }
 
@@ -375,8 +376,10 @@ function scoreCandidates(
       const agendaId = signal.agendaInstanceId ?? signal.agendaDefinitionId;
       if (!agendaId) return false;
       return (
-        candidate.sourceCardInstanceId === agendaId ||
-        candidateTargetIds(candidate).includes(agendaId)
+        typeof agendaId === "number"
+          ? candidate.sourceDefinitionId === agendaId
+          : candidate.sourceCardInstanceId === agendaId ||
+            candidateTargetIds(candidate).includes(agendaId)
       );
     })
     .map((candidate) => ({
@@ -465,7 +468,7 @@ function scoreResourceGaps(
       signal.phase === "select_agenda" ||
       signal.setupNeed.needId !== expectedNeedId ||
       !signal.setupNeed.actionId.trim() ||
-      !signal.setupNeed.sourceDefinitionId.trim()
+      !isCardDefinitionId(signal.setupNeed.sourceDefinitionId)
     ) {
       throw new PlanResolutionFailure("invalid_support_graph", {
         side: context.input.side,

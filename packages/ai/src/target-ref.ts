@@ -1,3 +1,4 @@
+import { cardDefinitionIdValue, parseCardDefinitionId } from "./card-definition-id-input";
 export type TargetRefRedactionPolicy =
   | "public"
   | "actor_private"
@@ -172,7 +173,7 @@ export function buildTargetRef(input: TargetRefInput): TargetRef {
     );
   }
   if (input.kind === "abilitySource") {
-    const sourceDefinitionId = sanitizeId(input.sourceDefinitionId);
+    const sourceDefinitionId = cardDefinitionIdValue(input.sourceDefinitionId);
     const abilityId = sanitizeId(input.abilityId);
     if (!sourceDefinitionId || !abilityId) {
       return unknownTargetRef(
@@ -277,9 +278,13 @@ export function targetRefFromIdentity(
     });
   }
   if (parts[0] === "ability" || parts[0] === "abilitySource") {
+    const sourceDefinitionId = parseCardDefinitionId(parts[1] ?? "");
+    if (sourceDefinitionId === undefined) {
+      return unknownTargetRef("ability_source_missing", evidence, "abilitySource");
+    }
     return buildTargetRef({
       kind: "abilitySource",
-      sourceDefinitionId: parts[1] ?? "",
+      sourceDefinitionId,
       abilityId: parts.slice(2).join(":"),
       evidence,
     });

@@ -1,4 +1,9 @@
-import type { DeckDefinition, DeckPublicMetadata, Side } from "@netgrid/shared";
+import type {
+  CardDefinitionId,
+  DeckDefinition,
+  DeckPublicMetadata,
+  Side,
+} from "@netgrid/shared";
 
 export type AiBenchmarkDeckSlotType =
   | "smoke"
@@ -82,10 +87,10 @@ export type AiBenchmarkLocalEditableDeckResult =
         agendaPoints: number | null;
         influenceSpent?: number | null;
       };
-      missingCards: string[];
+      missingCards: CardDefinitionId[];
       ambiguousNames: string[];
-      unsupportedCards: string[];
-      nonDeckLegalCards: string[];
+      unsupportedCards: CardDefinitionId[];
+      nonDeckLegalCards: CardDefinitionId[];
     }
   | {
       ok: false;
@@ -95,10 +100,10 @@ export type AiBenchmarkLocalEditableDeckResult =
       filePath?: string;
       reason: string;
       validationErrors: string[];
-      missingCards: string[];
+      missingCards: CardDefinitionId[];
       ambiguousNames: string[];
-      unsupportedCards: string[];
-      nonDeckLegalCards: string[];
+      unsupportedCards: CardDefinitionId[];
+      nonDeckLegalCards: CardDefinitionId[];
     };
 
 export type DeckSnapshotRecord = {
@@ -106,8 +111,8 @@ export type DeckSnapshotRecord = {
   sourceDeckId: string;
   name: string;
   side: Side;
-  identityCardId: number;
-  cards: Array<{ cardId: string; quantity: number }>;
+  identityCardId: CardDefinitionId;
+  cards: Array<{ cardId: CardDefinitionId; quantity: number }>;
   publicMetadata?: DeckPublicMetadata;
 };
 
@@ -118,7 +123,7 @@ export type FrozenLocalBenchmarkDeckSnapshot = {
   deckVersion: string;
   name: string;
   side: Side;
-  identityCardId: number;
+  identityCardId: CardDefinitionId;
   cardPoolSnapshotId: string;
   cardPoolVersion?: string;
   formatProfileId: string;
@@ -126,7 +131,7 @@ export type FrozenLocalBenchmarkDeckSnapshot = {
   deckHash: string;
   classification: AiLocalBenchmarkDeckClassification;
   role: string;
-  cards: Array<{ cardId: string; quantity: number }>;
+  cards: Array<{ cardId: CardDefinitionId; quantity: number }>;
 };
 
 export type LocalRealisticBenchmarkDeckManifest = {

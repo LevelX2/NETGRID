@@ -1,3 +1,4 @@
+import { cardDefinitionIdValue } from "../card-definition-id-input";
 import type { LegalAction } from "@netgrid/shared";
 import { breakSubroutineIndexesForAction } from "../runtime/subroutine-indexes";
 import type {
@@ -467,7 +468,7 @@ function cardPayloadTargetForAction(
     action.type === "trigger_ability" &&
     typeof action.payload?.delayedInstallAbility === "string"
   ) {
-    const targetDefinitionId = stringPayload(action, "targetCardDefinitionId");
+    const targetDefinitionId = cardDefinitionIdValue(action.payload?.targetCardDefinitionId);
     return {
       targetId: cardId,
       targetKind: "card",

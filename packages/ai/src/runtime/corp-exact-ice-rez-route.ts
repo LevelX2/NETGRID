@@ -1,9 +1,15 @@
-import type {
-  AiDecisionInput,
-  VisibleCard,
-  VisibleCorpRezCostQuote,
-  VisibleCorpTraceIceRezQuote,
+import {
+  isCardDefinitionId,
+  type AiDecisionInput,
+  type CardDefinitionId,
+  type VisibleCard,
+  type VisibleCorpRezCostQuote,
+  type VisibleCorpTraceIceRezQuote,
 } from "@netgrid/shared";
+import {
+  parseCardDefinitionIdCsv,
+  validOptionalCardDefinitionIds,
+} from "../card-definition-id-input";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import {
@@ -118,8 +124,8 @@ export function readExactCurrentInstalledCorpIceRezQuote(params: {
     !nonNegativeSafeInteger(quote.baseCredits) ||
     !nonNegativeSafeInteger(quote.finalCredits) ||
     !nonNegativeSafeInteger(quote.mandatoryAdditionalCosts?.agendaPoints) ||
-    !validDefinitionIdList(quote.reductionSourceDefinitionIds) ||
-    !validDefinitionIdList(quote.increaseSourceDefinitionIds) ||
+    !validOptionalCardDefinitionIds(quote.reductionSourceDefinitionIds) ||
+    !validOptionalCardDefinitionIds(quote.increaseSourceDefinitionIds) ||
     !definitionIdListsDisjoint(
       quote.reductionSourceDefinitionIds,
       quote.increaseSourceDefinitionIds,
@@ -1297,7 +1303,7 @@ function discountedRezActionQuote(
     ordinaryQuote.costKind !== "fixed" ||
     !payload ||
     !nonBlankString(payload.discountedRezSourceCardId) ||
-    !nonBlankString(payload.discountedRezSourceDefinitionId) ||
+    !isCardDefinitionId(payload.discountedRezSourceDefinitionId) ||
     payload.temporaryDerezAfterRun !== true ||
     payload.serverId !== ordinaryQuote.targetServerId ||
     !nonNegativeSafeInteger(payload.discountedRezCostBase) ||
@@ -1338,7 +1344,7 @@ function discountedRezActionQuote(
   const increaseSourceDefinitionIds = ordinaryQuote.increaseSourceDefinitionIds;
   if (surchargeAmount > 0) {
     if (
-      !nonBlankString(payload.corpRezCostSurchargeSourceDefinitionId) ||
+      !isCardDefinitionId(payload.corpRezCostSurchargeSourceDefinitionId) ||
       !increaseSourceDefinitionIds?.includes(
         payload.corpRezCostSurchargeSourceDefinitionId,
       )
@@ -1350,7 +1356,7 @@ function discountedRezActionQuote(
   }
   const sortedReductionSourceDefinitionIds = [
     ...reductionSourceDefinitionIds,
-  ].sort();
+  ].sort((left, right) => left - right);
   if (
     !definitionIdListsDisjoint(
       sortedReductionSourceDefinitionIds,
@@ -1366,10 +1372,10 @@ function discountedRezActionQuote(
   };
 }
 
-function commaSeparatedDefinitionIds(value: unknown): number[] | undefined {
+function commaSeparatedDefinitionIds(value: unknown): CardDefinitionId[] | undefined {
   if (typeof value !== "string" || value.length === 0) return undefined;
-  const values = value.split(",");
-  return values.every(nonBlankString) && new Set(values).size === values.length
+  const values = parseCardDefinitionIdCsv(value);
+  return values !== undefined && new Set(values).size === values.length
     ? values
     : undefined;
 }
@@ -1549,22 +1555,9 @@ function nonNegativeSafeInteger(value: unknown): value is number {
   return Number.isSafeInteger(value) && (value as number) >= 0;
 }
 
-function validDefinitionIdList(values: readonly string[] | undefined): boolean {
-  return (
-    values === undefined ||
-    (Array.isArray(values) &&
-      values.every(
-        (value, index) =>
-          typeof value === "string" &&
-          value.length > 0 &&
-          (index === 0 || values[index - 1]! < value),
-      ))
-  );
-}
-
 function definitionIdListsDisjoint(
-  reductionIds: readonly string[] | undefined,
-  increaseIds: readonly string[] | undefined,
+  reductionIds: readonly CardDefinitionId[] | undefined,
+  increaseIds: readonly CardDefinitionId[] | undefined,
 ): boolean {
   if (!reductionIds || !increaseIds) return true;
   const reductions = new Set(reductionIds);
@@ -1572,8 +1565,8 @@ function definitionIdListsDisjoint(
 }
 
 function definitionIdListsEqual(
-  left: readonly string[] | undefined,
-  right: readonly string[] | undefined,
+  left: readonly CardDefinitionId[] | undefined,
+  right: readonly CardDefinitionId[] | undefined,
 ): boolean {
   return (
     (left === undefined && right === undefined) ||

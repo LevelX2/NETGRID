@@ -45,7 +45,7 @@ type RunnerEconomySetupActionClassCompositionDependencies = {
   sourceDefinitionIdForSimulationAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined;
 };
 
 export type RunnerSimulationDiagnosticsCompositionDependencies =

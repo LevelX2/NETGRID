@@ -1,9 +1,11 @@
+import type { CardDefinitionId } from "@netgrid/shared";
+import { ORIGINALSET_V1_CARD_IDS } from "@netgrid/catalog";
 import { cardSpecPlanningCards } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
-function cardStrategyEntry(cardId: string) {
+function cardStrategyEntry(cardId: CardDefinitionId) {
   const entry = cardSpecPlanningCards().find(
     (candidate) => candidate.definition.id === cardId,
   );
@@ -27,7 +29,7 @@ function cardStrategyEntry(cardId: string) {
 describe("CardSpec card-level strategy typed evidence", () => {
   it("compiles all 148 Originalset bindings from typed Engine evidence", () => {
     const entries = cardSpecPlanningCards().filter((entry) =>
-      entry.definition.id.startsWith("onr_v1_"),
+      ORIGINALSET_V1_CARD_IDS.includes(entry.definition.id),
     );
     expect(
       entries.reduce(
@@ -82,7 +84,7 @@ describe("CardSpec card-level strategy typed evidence", () => {
   });
 
   it("rejects near-matching mechanics without the asserted strategy evidence", () => {
-    const forged = (cardId: string, engine: Record<string, unknown>) => {
+    const forged = (cardId: CardDefinitionId, engine: Record<string, unknown>) => {
       const entry = cardStrategyEntry(cardId);
       return () =>
         deriveCardSpecAiHint({

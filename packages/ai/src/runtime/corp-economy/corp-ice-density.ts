@@ -1,5 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
-import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
+import { isCardDefinitionId, type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
 import { RUNTIME_CARDS } from "../../ai-hints";
 import type { AiDeckStrategyDeckSnapshot } from "../../deck-strategy-snapshot";
@@ -170,11 +170,11 @@ function readExactCorpDeckSnapshotCounts(
   if (!Array.isArray(snapshot.cards)) {
     return { status: "unknown", reason: "invalid_cards" };
   }
-  const cardIds = new Set<string>();
+  const cardIds = new Set<number>();
   let initialDeckCount = 0;
   let initialIceCount = 0;
   for (const entry of snapshot.cards) {
-    if (typeof entry.cardId !== "string" || entry.cardId.length === 0) {
+    if (!isCardDefinitionId(entry.cardId)) {
       return { status: "unknown", reason: "invalid_card_id" };
     }
     if (cardIds.has(entry.cardId)) {

@@ -69,13 +69,15 @@ export function remoteHasNearFinalAgenda(
   serverId: string,
 ): boolean {
   const server = view.servers.find((candidate) => candidate.id === serverId);
-  return server?.root.some(
-    (card) =>
-      card.known === true &&
-      card.type === "agenda" &&
-      card.advancementRequirement !== undefined &&
-      card.advancementRequirement - (card.advancementCounters ?? 0) <= 2,
-  ) === true;
+  return (
+    server?.root.some(
+      (card) =>
+        card.known === true &&
+        card.type === "agenda" &&
+        card.advancementRequirement !== undefined &&
+        card.advancementRequirement - (card.advancementCounters ?? 0) <= 2,
+    ) === true
+  );
 }
 
 export function rezCostForDefinitionId(
@@ -92,7 +94,7 @@ export function rezCostForDefinitionId(
 export function sourceDefinitionIdForSimulationAction(
   action: LegalAction,
   findVisibleCard: (instanceId: string) => VisibleCard | undefined,
-): string | undefined {
+): number | undefined {
   if (action.source === "basic_action" || action.source === "game_rule")
     return undefined;
   return findVisibleCard(action.source)?.definitionId;

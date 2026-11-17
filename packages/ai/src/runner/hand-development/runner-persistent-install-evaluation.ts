@@ -1,3 +1,5 @@
+import { sortedUnique } from "../../runtime/collection";
+import type { CardDefinitionId } from "@netgrid/shared";
 import { visibleRunnerThreat } from "../visible-runner-threat";
 import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 import { visibleRunnerPreparationIncomePerClick } from "@netgrid/engine";
@@ -376,7 +378,7 @@ export function persistentDeckReplacementAssessment(params: {
     conflicting
       .map(({ card }) => card.definitionId)
       .filter(
-        (definitionId): definitionId is string => definitionId !== undefined,
+        (definitionId) => definitionId !== undefined,
       ),
   );
   const unassessedDefinitionIds = sortedUnique(
@@ -384,7 +386,7 @@ export function persistentDeckReplacementAssessment(params: {
       .filter(({ profile }) => profile.functionalCoverage.length === 0)
       .map(({ card }) => card.definitionId)
       .filter(
-        (definitionId): definitionId is string => definitionId !== undefined,
+        (definitionId) => definitionId !== undefined,
       ),
   );
   let status: RunnerPersistentDeckReplacementAssessment["status"];
@@ -1961,7 +1963,7 @@ type RuntimeCardInfo = {
   >;
 };
 
-export function runtimeDefinition(cardId: string): RuntimeCardInfo | undefined {
+export function runtimeDefinition(cardId: CardDefinitionId): RuntimeCardInfo | undefined {
   return RUNTIME_CARDS[cardId] as RuntimeCardInfo | undefined;
 }
 
@@ -2211,6 +2213,4 @@ export function clampPriority(value: number): number {
   return Math.max(0, Math.min(1000, value));
 }
 
-export function sortedUnique(values: readonly string[]): string[] {
-  return [...new Set(values)].sort();
-}
+export { sortedUnique };

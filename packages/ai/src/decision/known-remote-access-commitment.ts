@@ -324,7 +324,7 @@ function knownRemoteTrashCreditSupport(
         ? "trash_upgrades"
         : undefined;
   let dedicatedCredits = 0;
-  const sources = new Set<string>();
+  const sources = new Set<number>();
   if (use) {
     for (const card of input.playerView.own.rig ?? []) {
       if (!card.known || !card.definitionId) continue;

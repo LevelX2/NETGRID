@@ -177,7 +177,7 @@ export function createRunnerPressureMetricContext(
     const heapCards = input.playerView.own.heapOrArchives.filter(
       (card) => card.known && card.definitionId,
     );
-    const missingIceDefinitionIds = new Set<string>();
+    const missingIceDefinitionIds = new Set<number>();
     const blockedServers = new Set<string>();
     const knownIceBlockedServers = new Set<string>();
     for (const server of input.playerView.servers) {

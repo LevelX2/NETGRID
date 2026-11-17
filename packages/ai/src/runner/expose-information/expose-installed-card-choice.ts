@@ -161,7 +161,7 @@ function exposeHistory(input: AiDecisionInput): ExposeHistory {
   const events = [...eventsById.values()].sort(
     (left, right) =>
       left.stateVersionAfter - right.stateVersionAfter ||
-      left.eventId.localeCompare(right.eventId),
+      left.eventId - right.eventId,
   );
   for (const event of events) {
     const exposedServerIds = commaSeparatedValues(

@@ -234,7 +234,7 @@ export type RunnerRunStartRandomStrengthSourceProfile = Readonly<{
 }>;
 
 export function runnerInstalledDebtFinancingLiability(
-  definitionIds: readonly (string | undefined)[],
+  definitionIds: readonly (number | undefined)[],
 ): RunnerDebtFinancingLiability {
   const profiles = definitionIds.flatMap((definitionId) => {
     const profile = runnerDebtFinancingProfile(definitionId);

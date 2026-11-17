@@ -160,7 +160,7 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
     (input.playerView.own.rig ?? [])
       .filter((card) =>
         runnerRolesCoverCoverageGap(
-          rolesForDeckDoctrineCard(card.definitionId ?? ""),
+          rolesForDeckDoctrineCard(card.definitionId),
           role,
         ),
       )
@@ -196,7 +196,7 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
         Number.isSafeInteger(card.installCost) &&
         (card.installCost ?? -1) >= 0 &&
         visibleCardCoversRequiredCoverage(card, role, (definitionId) =>
-          rolesForDeckDoctrineCard(definitionId ?? ""),
+          rolesForDeckDoctrineCard(definitionId),
         ),
     )
     .flatMap((card) => {
@@ -494,7 +494,7 @@ export function runnerCostEffectiveDeckCoverageAlternative(
     .sort(
       (left, right) =>
         left.totalCost - right.totalCost ||
-        left.breaker.cardId.localeCompare(right.breaker.cardId),
+        (left.breaker.cardId - right.breaker.cardId),
     )[0];
 }
 

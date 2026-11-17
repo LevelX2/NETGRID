@@ -1,3 +1,5 @@
+import { parseCardDefinitionId, validOptionalCardDefinitionIds } from "../card-definition-id-input";
+import { isCardDefinitionId } from "@netgrid/shared";
 import { parseRunnerProgramInstallMemoryContinuation } from "@netgrid/engine";
 import {
   isRunnerProgramTrashBackupWindow,
@@ -16,6 +18,7 @@ import {
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
   type AiDecision,
   type AiDecisionInput,
+  type CardDefinitionId,
   type CorpOptionalRezChoiceQuote,
   type LegalAction,
   type VisibleCard,
@@ -142,9 +145,9 @@ export type SelectedChoicesForDecisionDependencies = {
   readonly extractAiFeatures: (
     input: AiDecisionInput,
   ) => SearchChoiceFeatureSnapshot;
-  readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
+  readonly rolesForCardId: (cardId: CardDefinitionId | undefined) => readonly string[];
   readonly effectsForCardId: (
-    cardId: string | undefined,
+    cardId: CardDefinitionId | undefined,
   ) => readonly AiHintStructuredEffect[];
 };
 
@@ -2176,9 +2179,11 @@ function runnerHiddenSearchProgramInstallSourceBinding(source: string):
       source,
     );
   if (stackOrTrash) {
+    const sourceDefinitionId = parseCardDefinitionId(stackOrTrash[2]!);
+    if (sourceDefinitionId === undefined) return undefined;
     return {
       sourceCardInstanceId: stackOrTrash[1]!,
-      sourceDefinitionId: stackOrTrash[2]!,
+      sourceDefinitionId,
       selectedAtStateVersion: Number(stackOrTrash[4]),
     };
   }
@@ -2187,9 +2192,11 @@ function runnerHiddenSearchProgramInstallSourceBinding(source: string):
       source,
     );
   if (!directStack) return undefined;
+  const sourceDefinitionId = parseCardDefinitionId(directStack[2]!);
+  if (sourceDefinitionId === undefined) return undefined;
   return {
     sourceCardInstanceId: directStack[1]!,
-    sourceDefinitionId: directStack[2]!,
+    sourceDefinitionId,
     selectedAtStateVersion: Number(directStack[5]),
   };
 }
@@ -2850,7 +2857,7 @@ function runnerCoverageSearchChoiceBinding(
     );
   }
   const binding = bindings[0];
-  if (!binding || typeof binding.actionId !== "string") {
+  if (!binding || typeof binding.actionId !== "string" || !isCardDefinitionId(binding.sourceDefinitionId)) {
     throw coverageSearchChoiceBindingFailure(
       input,
       executor.instanceId,
@@ -2859,7 +2866,7 @@ function runnerCoverageSearchChoiceBinding(
   }
   const partialProfile = runnerPartialProgramSearchProfile(
     input,
-    binding.sourceDefinitionId as string,
+    binding.sourceDefinitionId,
   );
   if (
     partialProfile &&
@@ -3030,7 +3037,7 @@ function isExactOptionalRezChoiceQuoteBinding(
     quote.stateVersion !== input.playerView.stateVersion ||
     !nonEmptyString(quote.sourceAgendaId) ||
     !nonEmptyString(quote.cardId) ||
-    !nonEmptyString(quote.cardDefinitionId) ||
+    !isCardDefinitionId(quote.cardDefinitionId) ||
     option.value !== quote.cardId ||
     option.card?.known !== true ||
     option.card.instanceId !== quote.cardId ||
@@ -3062,8 +3069,8 @@ function isExactOptionalRezChoiceQuoteBinding(
     nonNegativeSafeInteger(quote.baseCredits) &&
     nonNegativeSafeInteger(quote.finalCredits) &&
     nonNegativeSafeInteger(quote.mandatoryAdditionalCosts.agendaPoints) &&
-    validDefinitionIdList(quote.reductionSourceDefinitionIds) &&
-    validDefinitionIdList(quote.increaseSourceDefinitionIds) &&
+    validOptionalCardDefinitionIds(quote.reductionSourceDefinitionIds) &&
+    validOptionalCardDefinitionIds(quote.increaseSourceDefinitionIds) &&
     modifierDefinitionIdListsAreDisjoint(
       quote.reductionSourceDefinitionIds,
       quote.increaseSourceDefinitionIds,
@@ -3092,21 +3099,12 @@ function isExactOptionalRezChoiceQuoteBinding(
 }
 
 function modifierDefinitionIdListsAreDisjoint(
-  reductionIds: readonly string[] | undefined,
-  increaseIds: readonly string[] | undefined,
+  reductionIds: readonly CardDefinitionId[] | undefined,
+  increaseIds: readonly CardDefinitionId[] | undefined,
 ): boolean {
   if (!reductionIds || !increaseIds) return true;
   const reductions = new Set(reductionIds);
   return increaseIds.every((id) => !reductions.has(id));
-}
-
-function validDefinitionIdList(value: readonly string[] | undefined): boolean {
-  return (
-    value === undefined ||
-    (value.every(nonEmptyString) &&
-      new Set(value).size === value.length &&
-      value.every((entry, index) => index === 0 || value[index - 1]! < entry))
-  );
 }
 
 function nonEmptyString(value: unknown): value is string {

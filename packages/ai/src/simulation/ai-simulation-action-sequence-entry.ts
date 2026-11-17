@@ -558,7 +558,7 @@ export type AiSimulationActionSequenceEntry = {
   runnerTaggedAtCorpDecisionWithoutPayoffKnown?: boolean;
   corpVisibleTagPunishLegalActions?: number;
   corpVisibleTagPayoffLegalActionKinds?: string[];
-  corpVisibleTagPayoffLegalActionCards?: string[];
+  corpVisibleTagPayoffLegalActionCards?: number[];
   corpVisibleTagDamagePunishLegalActions?: boolean;
   corpVisibleTagEconomicPunishLegalActions?: boolean;
   corpVisibleTagTrashPunishLegalActions?: boolean;
@@ -571,7 +571,7 @@ export type AiSimulationActionSequenceEntry = {
   corpVisibleTagPunishUnknownSkipPlausibility?: CorpTagPunishUnknownSkipPlausibility;
   corpVisibleTagPunishUnknownSkipChosenFamily?: CorpTagPunishUnknownChosenFamily;
   corpVisibleTagPunishUnknownSkipChosenActionType?: string;
-  corpVisibleTagPunishUnknownSkipChosenCardId?: string;
+  corpVisibleTagPunishUnknownSkipChosenCardId?: number;
   corpVisibleTagPunishUnknownSkipChosenCardTitle?: string;
   corpVisibleTagPunishUnknownSkipFixGateEligible?: boolean;
   corpVisibleTagPunishUnknownSkipFixGateBlockedBy?:

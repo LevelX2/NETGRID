@@ -14,7 +14,7 @@ export type CorpTagCreationDiagnosticsDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string;
+  ) => number | undefined;
 };
 
 export function createCorpTagCreationDiagnosticsContext(
@@ -31,11 +31,11 @@ export function createCorpTagCreationDiagnosticsContext(
   function classifySource(
     diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
     action: LegalAction,
-    sourceDefinitionId: number,
+    sourceDefinitionId: number | undefined,
   ): void {
-    const sourceType =
-      RUNTIME_CARDS[sourceDefinitionId]?.type ??
-      CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.type;
+    const sourceType = sourceDefinitionId === undefined
+      ? undefined
+      : RUNTIME_CARDS[sourceDefinitionId]?.type ?? CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.type;
     const tagSourceProfile = classifyTagSourceFromOntology(sourceDefinitionId);
     if (sourceType === "agenda" && tagSourceProfile?.traceTagSource)
       diagnostics.corpTagCreatedByScoredAgendaAction = true;

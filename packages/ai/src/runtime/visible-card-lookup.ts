@@ -1,4 +1,5 @@
 import {
+  isCardDefinitionId,
   type AiDecisionInput,
   type LegalAction,
   type VisibleCard,
@@ -36,16 +37,13 @@ export function semanticRuntimeVisibleSourceCard(
   }
   const payload = action.payload ?? {};
   const definitionId =
-    typeof payload.cardDefinitionId === "number"
+    isCardDefinitionId(payload.cardDefinitionId)
       ? payload.cardDefinitionId
-      : typeof payload.sourceDefinitionId === "number"
+      : isCardDefinitionId(payload.sourceDefinitionId)
         ? payload.sourceDefinitionId
-        : typeof payload.sourceCardDefinitionId === "number"
+        : isCardDefinitionId(payload.sourceCardDefinitionId)
           ? payload.sourceCardDefinitionId
-          : actionSource?.startsWith("onr_") ||
-              actionSource?.startsWith("simple_")
-            ? actionSource
-            : undefined;
+          : undefined;
   const allVisibleCards = [
     ...input.playerView.own.gripOrHq,
     ...input.playerView.own.heapOrArchives,
@@ -86,16 +84,15 @@ export function findVisibleCorpServerCard(
 export function sourceDefinitionIdForAction(
   input: AiDecisionInput,
   action: LegalAction,
-): string {
+): number | undefined {
   const actionSource =
     typeof action.source === "string" ? action.source : undefined;
   if (actionSource === "basic_action" || actionSource === "game_rule")
-    return "";
+    return undefined;
   return (
     (actionSource
       ? findVisibleCard(input, actionSource)?.definitionId
       : undefined) ??
-    semanticRuntimeVisibleSourceCard(input, action)?.definitionId ??
-    ""
+    semanticRuntimeVisibleSourceCard(input, action)?.definitionId
   );
 }

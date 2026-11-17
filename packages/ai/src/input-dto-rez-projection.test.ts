@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
@@ -623,7 +624,7 @@ describe("AI input DTO Corp rez projection contract", () => {
       "visible definition",
       (view: PlayerView) => {
         view.pendingChoice!.options[0]!.card!.definitionId =
-          "different-definition";
+          Number.MAX_SAFE_INTEGER;
       },
     ],
   ])("drops an optional-rez quote with mismatched %s", (_label, mutate) => {
@@ -689,15 +690,15 @@ function iceInstallAction(): LegalAction {
       iceInstallBaseCost: 1,
       iceInstallAdditionalCost: 2,
       iceInstallReduction: 1,
-      iceInstallReductionSourceDefinitionIds: "rez-reducer",
-      iceInstallIncreaseSourceDefinitionIds: "rez-increaser",
+      iceInstallReductionSourceDefinitionIds: String(syntheticCardDefinitionId("rez-reducer")),
+      iceInstallIncreaseSourceDefinitionIds: String(syntheticCardDefinitionId("rez-increaser")),
       iceInstallTotalCost: 2,
       postInstallRezQuoteCardId: "ice-in-hq",
       postInstallRezQuoteTargetServerId: "hq",
       postInstallRezQuoteProjectedServerId: "hq",
       postInstallEffectiveRunQuoteJson: JSON.stringify({
         iceInstanceId: "ice-in-hq",
-        iceDefinitionId: "ice-definition",
+        iceDefinitionId: syntheticCardDefinitionId("ice-definition"),
         effectiveStrength: 3,
         subroutines: [{ id: "sub-1", type: "end_the_run" }],
       }),
@@ -708,8 +709,8 @@ function iceInstallAction(): LegalAction {
       postInstallRezQuoteFinalCredits: 3,
       postInstallRezQuoteMandatoryAgendaPointCost: 1,
       postInstallRezQuoteMandatoryAdditionalCostKind: "agenda_point",
-      postInstallRezQuoteReductionSourceDefinitionIds: "rez-reducer",
-      postInstallRezQuoteIncreaseSourceDefinitionIds: "rez-increaser",
+      postInstallRezQuoteReductionSourceDefinitionIds: String(syntheticCardDefinitionId("rez-reducer")),
+      postInstallRezQuoteIncreaseSourceDefinitionIds: String(syntheticCardDefinitionId("rez-increaser")),
     },
   };
 }
@@ -751,7 +752,7 @@ function playerView(action: LegalAction): PlayerView {
   const runnerIdentity = identity("runner");
   const installedIce: VisibleCard = {
     instanceId: "installed-ice",
-    definitionId: "installed-ice-definition",
+    definitionId: syntheticCardDefinitionId("installed-ice-definition"),
     title: "Installed ICE",
     owner: "corp",
     controller: "corp",
@@ -770,8 +771,8 @@ function playerView(action: LegalAction): PlayerView {
       baseCredits: 5,
       finalCredits: 3,
       mandatoryAdditionalCosts: { agendaPoints: 1 },
-      reductionSourceDefinitionIds: ["rez-reducer"],
-      increaseSourceDefinitionIds: ["rez-increaser"],
+      reductionSourceDefinitionIds: [syntheticCardDefinitionId("rez-reducer")],
+      increaseSourceDefinitionIds: [syntheticCardDefinitionId("rez-increaser")],
     },
   };
   return {
@@ -845,7 +846,7 @@ function optionalRezChoiceView(
         value: "installed-ice",
         card: {
           instanceId: "installed-ice",
-          definitionId: "installed-ice-definition",
+          definitionId: syntheticCardDefinitionId("installed-ice-definition"),
           title: "Installed ICE",
           known: true,
           type: "ice",
@@ -887,7 +888,7 @@ function optionalRezQuote(): Extract<
     optionId: "card_installed-ice",
     sourceAgendaId: "data-fort",
     cardId: "installed-ice",
-    cardDefinitionId: "installed-ice-definition",
+    cardDefinitionId: syntheticCardDefinitionId("installed-ice-definition"),
     targetServerId: "remote_1",
     installedZone: "serverIce",
     sequencePosition: 1,
@@ -897,7 +898,7 @@ function optionalRezQuote(): Extract<
     baseCredits: 5,
     finalCredits: 3,
     mandatoryAdditionalCosts: { agendaPoints: 0 },
-    reductionSourceDefinitionIds: ["rez-reducer"],
+    reductionSourceDefinitionIds: [syntheticCardDefinitionId("rez-reducer")],
     temporaryCreditsAvailable: 2,
     temporaryCreditsApplied: 2,
     regularCreditsAvailable: 5,
@@ -924,8 +925,8 @@ function variableInstalledRezQuote(
     baseCredits: 5,
     finalCredits: 3,
     mandatoryAdditionalCosts: { agendaPoints: 1 },
-    reductionSourceDefinitionIds: ["rez-reducer"],
-    increaseSourceDefinitionIds: ["rez-increaser"],
+    reductionSourceDefinitionIds: [syntheticCardDefinitionId("rez-reducer")],
+    increaseSourceDefinitionIds: [syntheticCardDefinitionId("rez-increaser")],
   };
   if (kind === "x_strength") {
     return {
@@ -971,7 +972,7 @@ function variableInstalledRezQuote(
 function identity(side: "corp" | "runner"): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: syntheticCardDefinitionId(`${side}-identity`),
     title: `${side} identity`,
     owner: side,
     controller: side,

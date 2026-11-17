@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
@@ -50,9 +51,9 @@ export type DiscardCandidateScore = {
 };
 
 export type DiscardKeepScoreDependencies = {
-  readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
+  readonly rolesForCardId: (cardId: CardDefinitionId | undefined) => readonly string[];
   readonly definitionTypeForCardId: (
-    cardId: string | undefined,
+    cardId: CardDefinitionId | undefined,
   ) => string | undefined;
   readonly visibleCardPlayOrInstallCost: (card: VisibleCard) => number;
   readonly runnerCardAddressesVisibleBreakerNeed: (
@@ -700,7 +701,7 @@ function corpHasReachableCardMatching(
     ...input.playerView.own.scoreArea,
     ...input.playerView.opponent.scoreArea,
   ];
-  const visibleCountByDefinitionId = new Map<string, number>();
+  const visibleCountByDefinitionId = new Map<CardDefinitionId, number>();
   for (const card of allVisibleCards) {
     if (!card.definitionId) continue;
     visibleCountByDefinitionId.set(

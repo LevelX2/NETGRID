@@ -23,7 +23,7 @@ export type RunnerCoverageSearchSaturation = {
   readonly handAnswerTitle?: string;
 };
 
-type RolesForCardId = (cardId: string | undefined) => readonly string[];
+type RolesForCardId = (cardId: number | undefined) => readonly string[];
 
 export function runnerVisibleSearchCoverageNeed(
   input: AiDecisionInput,

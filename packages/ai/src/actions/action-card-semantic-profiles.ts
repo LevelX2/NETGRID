@@ -45,7 +45,7 @@ export function buildActionCardSemanticProfilesByDefinitionId(): Readonly<
 }
 
 function actionCardSemanticProfileFromHint(
-  cardId: string,
+  cardId: CardDefinitionId,
   hint: AiCardHint,
 ): ActionCardSemanticProfile {
   const abilitySemantics = (hint.actionCapabilitySemantics ?? []).map(
@@ -140,7 +140,7 @@ function riskTagsFromHint(hint: AiCardHint): SemanticRisk[] {
 }
 
 function abilitySemanticProfile(
-  cardId: string,
+  cardId: CardDefinitionId,
   semantics: AiHintActionCapabilitySemantics,
 ): ActionCardAbilitySemanticProfile {
   const mechanicalSignals = (semantics.effects ?? []).flatMap((effect) => [
@@ -150,7 +150,7 @@ function abilitySemanticProfile(
   ]);
   return {
     abilityId: canonicalCapabilityId(
-      cardId as CardDefinitionId,
+      cardId,
       semantics.capabilityKey as Parameters<typeof canonicalCapabilityId>[1],
     ),
     tacticSignals: uniqueStrings([

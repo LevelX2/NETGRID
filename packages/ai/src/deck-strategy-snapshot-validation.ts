@@ -1,4 +1,8 @@
-import type { Side } from "@netgrid/shared";
+import {
+  isCardDefinitionId,
+  type CardDefinitionId,
+  type Side,
+} from "@netgrid/shared";
 import { RUNTIME_CARDS } from "./ai-hints";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 
@@ -84,16 +88,16 @@ export function assertValidAiDeckSnapshotForRuntime(
     );
   }
 
-  const seenCards = new Set<string>();
+  const seenCards = new Set<CardDefinitionId>();
   for (const entry of snapshot.cards) {
     if (
       entry === null ||
       typeof entry !== "object" ||
-      !isNonEmptyString(entry.cardId)
+      !isCardDefinitionId(entry.cardId)
     ) {
       throw new AiDeckSnapshotRuntimeError(
         "ai_deck_snapshot_invalid",
-        `Deck snapshot ${snapshot.deckSnapshotId} contains a card entry without cardId.`,
+        `Deck snapshot ${snapshot.deckSnapshotId} contains an invalid cardId.`,
       );
     }
     if (

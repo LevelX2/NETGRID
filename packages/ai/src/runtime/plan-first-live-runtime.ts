@@ -1681,8 +1681,13 @@ export function runnerActionDispositions(
         candidate,
         candidates,
         coverageGaps: domain.coverageGaps,
-        developments: cardDevelopmentAdmissions.map(
-          ({ development }) => development,
+        developments: cardDevelopmentAdmissions.flatMap(({ development }) =>
+          typeof development.definitionId === "number"
+            ? [{
+                definitionId: development.definitionId,
+                assignedDomainPlanIds: development.assignedDomainPlanIds,
+              }]
+            : [],
         ),
       },
     );
@@ -2804,7 +2809,7 @@ function discoverRunnerCoverageForFrame(
   } = context;
   const installedRoles = new Set(
     (input.playerView.own.rig ?? []).flatMap((card) =>
-      rolesForDeckDoctrineCard(card.definitionId ?? ""),
+      rolesForDeckDoctrineCard(card.definitionId),
     ),
   );
   const discoveredCoverageGaps = uniqueCoverageGaps(
@@ -4356,6 +4361,9 @@ function decisionFromScheduler(
     const candidateTargets = semanticCandidate
       ? candidateTargetIds(semanticCandidate)
       : [];
+    const sourceDefinitionTargetId = semanticCandidate?.sourceDefinitionId !== undefined
+      ? String(semanticCandidate.sourceDefinitionId)
+      : undefined;
     const relatedResidentPlans = (result.portfolio?.instances ?? []).filter(
       (instance) =>
         instance.instanceId !== planId &&
@@ -4363,10 +4371,10 @@ function decisionFromScheduler(
         ((instance.target.kind === "server" &&
           candidateTargets.includes(instance.target.id)) ||
           (instance.target.kind === "bank" &&
-            (semanticCandidate?.sourceDefinitionId === instance.target.id ||
+            (sourceDefinitionTargetId === instance.target.id ||
               semanticCandidate?.sourceCardId === instance.target.id)) ||
           (instance.target.kind === "card" &&
-            semanticCandidate?.sourceDefinitionId === instance.target.id)),
+            sourceDefinitionTargetId === instance.target.id)),
     );
     const residentPlanEvidence = relatedResidentPlans.flatMap((instance) => [
       `candidate_plan:${instance.instanceId}:${instance.viability}`,

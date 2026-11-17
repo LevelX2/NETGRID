@@ -1,3 +1,4 @@
+import type { MatchEventId } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   PublicGameEvent,
@@ -28,7 +29,7 @@ export function mergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
 }
 
 function buildMergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
-  const byId = new Map<string, PublicGameEvent>();
+  const byId = new Map<MatchEventId, PublicGameEvent>();
   const publicEvents = input.playerView.publicEvents ?? [];
   const eventTail = input.eventTail ?? [];
   for (const event of publicEvents) {

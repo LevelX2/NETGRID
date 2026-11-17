@@ -23,7 +23,7 @@ export function runnerSurvivalCounterContextForInput(
     visibleRunnerCards
       .filter((card) => card.known)
       .map((card) => card.definitionId)
-      .filter((definitionId): definitionId is string => Boolean(definitionId)),
+      .filter((definitionId) => definitionId !== undefined),
   );
   const link = [...definitionIds].some((id) =>
     RUNNER_TRACE_LINK_CONTEXT_IDS.has(id),

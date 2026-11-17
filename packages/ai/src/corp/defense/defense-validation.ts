@@ -1,3 +1,5 @@
+import { isCardDefinitionId } from "@netgrid/shared";
+import { parseCardDefinitionIdCsv } from "../../card-definition-id-input";
 import type { AiDecisionInput, VisibleCorpRezCostQuote } from "@netgrid/shared";
 import { validCorpRezOrTrashChoiceResolution } from "./rez-or-trash-choice";
 import {
@@ -365,16 +367,15 @@ export function validDefinitionIdArray(value: unknown): boolean {
     Array.isArray(value) &&
     value.every(
       (id, index) =>
-        typeof id === "string" &&
-        id.length > 0 &&
+        isCardDefinitionId(id) &&
         (index === 0 || value[index - 1]! < id),
     )
   );
 }
 
 export function definitionIdListsAreDisjoint(
-  left: readonly string[],
-  right: readonly string[],
+  left: readonly number[],
+  right: readonly number[],
 ): boolean {
   const leftIds = new Set(left);
   return right.every((id) => !leftIds.has(id));
@@ -411,16 +412,14 @@ export function validPostInstallProjectedServerBinding(
 function validCommaSeparatedDefinitionIds(value: unknown): boolean {
   if (value === undefined) return true;
   if (typeof value !== "string" || value.length === 0) return false;
-  const ids = value.split(",");
-  return ids.every(
-    (id, index) => id.length > 0 && (index === 0 || ids[index - 1]! < id),
-  );
+  const ids = parseCardDefinitionIdCsv(value);
+  return ids !== undefined && validDefinitionIdArray(ids);
 }
 
 function commaSeparatedDefinitionIds(value: unknown): number[] | undefined {
   if (value === undefined) return [];
   if (!validCommaSeparatedDefinitionIds(value)) return undefined;
-  return (value as string).split(",");
+  return parseCardDefinitionIdCsv(value as string);
 }
 
 export function knownExactInstallRouteCreditCost(
@@ -551,7 +550,7 @@ export function validClassicDeflectorDefenseChoiceResolution(
     knownNonNegativeInteger(resolution.sourceStateVersion) &&
     nonEmptyString(resolution.runId) &&
     nonEmptyString(resolution.sourceIceInstanceId) &&
-    nonEmptyString(resolution.sourceDefinitionId) &&
+    isCardDefinitionId(resolution.sourceDefinitionId) &&
     knownNonNegativeInteger(resolution.subroutineIndex) &&
     nonEmptyString(resolution.subroutineId) &&
     (resolution.targetProfile === "archives" ||
@@ -704,7 +703,7 @@ export function validKnownInstallProjection(
       projection.effect === "satisfied") &&
     nonEmptyString(projection.actionId) &&
     nonEmptyString(projection.sourceCardInstanceId) &&
-    nonEmptyString(projection.sourceDefinitionId) &&
+    isCardDefinitionId(projection.sourceDefinitionId) &&
     nonEmptyString(projection.targetServerId) &&
     before?.knowledge === "known" &&
     after?.knowledge === "known" &&
@@ -719,7 +718,7 @@ export function validKnownInstallProjection(
       const rezCost = selected as Record<string, unknown>;
       return (
         nonEmptyString(rezCost.iceInstanceId) &&
-        nonEmptyString(rezCost.iceDefinitionId) &&
+        isCardDefinitionId(rezCost.iceDefinitionId) &&
         knownNonNegativeInteger(rezCost.credits) &&
         (rezCost.agendaPoints === undefined ||
           knownNonNegativeInteger(rezCost.agendaPoints)) &&
@@ -765,7 +764,7 @@ export function validExactIceRezRoute(value: unknown): boolean {
       resourceExchange.runnerNormalCreditsLostOnAccessPath,
     ) &&
     nonEmptyString(resourceExchange.runnerBreakerInstanceId) &&
-    nonEmptyString(resourceExchange.runnerBreakerDefinitionId) &&
+    isCardDefinitionId(resourceExchange.runnerBreakerDefinitionId) &&
     Array.isArray(resourceExchange.runnerConsumedCardInstanceIds) &&
     resourceExchange.runnerConsumedCardInstanceIds.every(nonEmptyString) &&
     (resourceExchange.layeredCentralPathTax === undefined ||
@@ -780,7 +779,7 @@ export function validExactIceRezRoute(value: unknown): boolean {
           return (
             consequence.kind === "post_encounter_self_trash_check" &&
             nonEmptyString(consequence.cardId) &&
-            nonEmptyString(consequence.definitionId) &&
+            isCardDefinitionId(consequence.definitionId) &&
             knownNonNegativeInteger(consequence.numerator) &&
             (consequence.numerator as number) > 0 &&
             knownNonNegativeInteger(consequence.denominator) &&
@@ -899,7 +898,7 @@ export function validExactIceRezRoute(value: unknown): boolean {
     hasRouteEvidence &&
     nonEmptyString(route.actionId) &&
     nonEmptyString(route.sourceCardInstanceId) &&
-    nonEmptyString(route.sourceDefinitionId) &&
+    isCardDefinitionId(route.sourceDefinitionId) &&
     nonEmptyString(route.targetServerId) &&
     quote?.context === "installed" &&
     quote.complete === true &&
@@ -1168,7 +1167,7 @@ export function isValidDefenseSignal(
           ) &&
           signal.actionIds?.length === 0)) &&
       Array.isArray(value.sourceDefinitionIds) &&
-      value.sourceDefinitionIds.every(nonEmptyString) &&
+      value.sourceDefinitionIds.every(isCardDefinitionId) &&
       (value.actionIds === undefined ||
         (Array.isArray(value.actionIds) &&
           value.actionIds.every(nonEmptyString))) &&
@@ -1244,7 +1243,7 @@ export function isValidDefenseSignal(
       scorePriorityClass(value.delegatedPriorityClass) &&
       nonEmptyString(value.actionId) &&
       nonEmptyString(value.sourceCardInstanceId) &&
-      nonEmptyString(value.sourceDefinitionId) &&
+      isCardDefinitionId(value.sourceDefinitionId) &&
       (value.effect === "progress" || value.effect === "satisfied") &&
       validExactProbability(value.runnerAccessSuccessProbability) &&
       knownNonNegativeInteger(value.totalInstallAndRezCredits) &&
@@ -1287,7 +1286,7 @@ export function isValidDefenseSignal(
       scorePriorityClass(value.delegatedPriorityClass) &&
       nonEmptyString(value.actionId) &&
       nonEmptyString(value.sourceCardInstanceId) &&
-      nonEmptyString(value.sourceDefinitionId)
+      isCardDefinitionId(value.sourceDefinitionId)
     );
   }
   if (value.kind === "score_protection_draw") {

@@ -1,4 +1,5 @@
 import { actionClickCost, actionCreditCost } from "../runtime/action-cost";
+import { requireVisibleCardDefinition } from "../runtime/visible-agenda-facts";
 import { quoteAgendaDefinitionScorePoints } from "@netgrid/engine";
 import { corpInstalledAdvancementPreparations } from "./corp-installed-advancement-preparation";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
@@ -1196,7 +1197,7 @@ function projectedBonusAgendaScore(
   advancementCounters: number,
 ) {
   const quote = quoteAgendaDefinitionScorePoints(
-    card.definitionId ?? "",
+    requireVisibleCardDefinition(input, card, "agenda").id,
     requirement,
     advancementCounters,
     Math.max(

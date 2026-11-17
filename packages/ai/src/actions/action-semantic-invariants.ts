@@ -4,6 +4,7 @@ import type {
   StrategySupportPair,
   TargetProfileMatch,
 } from "../action-semantic-candidate";
+import { RUNTIME_CARDS } from "../ai-hints";
 
 export const ACTION_SEMANTIC_INVARIANT_REPORT_SCHEMA_VERSION =
   "action-semantic-invariants-v1" as const;
@@ -82,7 +83,7 @@ function profileInvariantIssues(
 
   if (
     options.allowFixtureProfiles !== true &&
-    fixtureLikeCardId(profile.cardId)
+    !Object.hasOwn(RUNTIME_CARDS, profile.cardId)
   ) {
     issues.push(
       issue(
@@ -90,7 +91,7 @@ function profileInvariantIssues(
         "error",
         `${basePath}.cardId`,
         "Fixture or harness semantic profiles must not be mixed into production-profile checks.",
-        [profile.cardId],
+        [String(profile.cardId)],
       ),
     );
   }
@@ -456,37 +457,6 @@ function tokensIncludePhrase(
       (phraseToken, offset) => tokens[index + offset] === phraseToken,
     ),
   );
-}
-
-function fixtureLikeCardId(cardId: string): boolean {
-  const segments = splitIdentifierSegments(cardId.toLocaleLowerCase("en-US"));
-  const segmentSet = new Set(segments);
-  return (
-    segments[0] === "test" ||
-    segments[0] === "fixture" ||
-    segmentSet.has("fixture") ||
-    segmentSet.has("harness")
-  );
-}
-
-function splitIdentifierSegments(value: string): string[] {
-  const segments: string[] = [];
-  let current = "";
-  for (const character of value) {
-    if (
-      character === "_" ||
-      character === "-" ||
-      character === "." ||
-      character === ":"
-    ) {
-      if (current.length > 0) segments.push(current);
-      current = "";
-      continue;
-    }
-    current += character;
-  }
-  if (current.length > 0) segments.push(current);
-  return segments;
 }
 
 function nonEmptyString(value: unknown): value is string {

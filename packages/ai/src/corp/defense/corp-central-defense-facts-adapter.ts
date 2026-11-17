@@ -1,4 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { validOptionalCardDefinitionIds } from "../../card-definition-id-input";
 import {
   type AiDecisionInput,
   type CardDefinitionId,
@@ -226,7 +227,8 @@ function quotesForCurrentView(
     )
       return undefined;
     if (
-      !sortedUnique(quote.sourceDefinitionIds) ||
+      !Array.isArray(quote.sourceDefinitionIds) ||
+      !validOptionalCardDefinitionIds(quote.sourceDefinitionIds) ||
       !sortedUnique(quote.serverBoundEffects.map((effect) => effect.id))
     )
       return undefined;

@@ -2,6 +2,7 @@ import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import {
   CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
+  type CardDefinitionId,
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
@@ -230,7 +231,7 @@ export function corpNextTurnScoreContinuationProjects(
       return [
         {
           projectId: corpScoreProjectId(agenda.instanceId, server.id),
-          agendaDefinitionId: agenda.definitionId ?? agenda.instanceId,
+          agendaDefinitionId: requireVisibleCardDefinition(input, agenda, "agenda").id,
           agendaPoints,
           agendaInstanceId: agenda.instanceId,
           serverId: server.id,
@@ -293,7 +294,7 @@ export function corpRemoteCreationUnlockScoreProjects(
     return [
       {
         projectId,
-        agendaDefinitionId: card.definitionId ?? card.instanceId,
+        agendaDefinitionId: requireVisibleCardDefinition(input, card, "agenda").id,
         agendaPoints,
         agendaInstanceId: card.instanceId,
         serverId: "new_remote",
@@ -980,8 +981,7 @@ export function scoreProjectForCandidate(
     return [
       {
         projectId,
-        agendaDefinitionId:
-          installedCard.definitionId ?? candidate.sourceDefinitionId ?? target,
+        agendaDefinitionId: requireVisibleCardDefinition(input, installedCard, "agenda").id,
         agendaPoints,
         agendaInstanceId: target,
         actionIds: [candidate.actionId],
@@ -1787,7 +1787,7 @@ export function corpScoreHorizonCertificationIsCurrent(
 }
 
 export function corpScoreProjectId(
-  agendaInstanceOrDefinitionId: number,
+  agendaInstanceOrDefinitionId: string | CardDefinitionId,
   serverId: string | undefined,
 ): string {
   return `agenda:${agendaInstanceOrDefinitionId}:${serverId ?? "unbound"}`;

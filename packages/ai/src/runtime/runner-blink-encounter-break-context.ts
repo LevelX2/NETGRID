@@ -17,7 +17,7 @@ export type RunnerRandomBreakOrDamageEncounterContextDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string;
+  ) => number | undefined;
   randomBreakOrDamageRiskProfileForDefinitionId: (
     definitionId: number | undefined,
   ) => RandomBreakOrDamageRiskProfile | undefined;

@@ -1,3 +1,4 @@
+import { cardDefinitionIdValue } from "../card-definition-id-input";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { type CardDefinitionId, type LegalAction } from "@netgrid/shared";
 import type {
@@ -339,10 +340,10 @@ function stringPayload(action: LegalAction, key: string): string | undefined {
   return value;
 }
 
-function sourceDefinitionIdForAction(action: LegalAction): string | undefined {
+function sourceDefinitionIdForAction(action: LegalAction): CardDefinitionId | undefined {
   return (
-    stringPayload(action, "sourceDefinitionId") ??
-    stringPayload(action, "sourceCardDefinitionId")
+    cardDefinitionIdValue(action.payload?.sourceDefinitionId) ??
+    cardDefinitionIdValue(action.payload?.sourceCardDefinitionId)
   );
 }
 

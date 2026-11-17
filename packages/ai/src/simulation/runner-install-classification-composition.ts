@@ -8,7 +8,7 @@ export type RunnerInstallClassificationCompositionDependencies = {
   sourceDefinitionIdForSimulationAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined;
   isSearchChoice: (
     choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
   ) => boolean;

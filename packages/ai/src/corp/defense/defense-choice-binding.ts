@@ -1,4 +1,5 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
+import { parseCardDefinitionId } from "../../card-definition-id-input";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 import type { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
@@ -91,12 +92,17 @@ export function selectedCorpClassicDeflectorOptionId(
     sourceParts[5]
   ) {
     try {
-      decoded = {
-        runId: decodeURIComponent(sourceParts[1]),
-        sourceIceInstanceId: decodeURIComponent(sourceParts[2]),
-        sourceDefinitionId: decodeURIComponent(sourceParts[4]),
-        subroutineId: decodeURIComponent(sourceParts[5]),
-      };
+      const sourceDefinitionId = parseCardDefinitionId(
+        decodeURIComponent(sourceParts[4]),
+      );
+      if (sourceDefinitionId !== undefined) {
+        decoded = {
+          runId: decodeURIComponent(sourceParts[1]),
+          sourceIceInstanceId: decodeURIComponent(sourceParts[2]),
+          sourceDefinitionId,
+          subroutineId: decodeURIComponent(sourceParts[5]),
+        };
+      }
     } catch {
       decoded = undefined;
     }

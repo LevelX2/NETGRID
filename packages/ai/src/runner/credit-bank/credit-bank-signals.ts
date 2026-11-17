@@ -202,7 +202,7 @@ export function runnerCreditBankSignals(
       )
         return [
           {
-            bankId: tool.sourceCardInstanceId ?? tool.cardId,
+            bankId: tool.sourceCardInstanceId ?? String(tool.cardId),
             phase: "hold" as const,
             actionIds: [],
             rejectedActionIds: installActionIds,
@@ -239,7 +239,7 @@ export function runnerCreditBankSignals(
       if (!plausibleFollowupWindow)
         return [
           {
-            bankId: tool.sourceCardInstanceId ?? tool.cardId,
+            bankId: tool.sourceCardInstanceId ?? String(tool.cardId),
             phase: "install" as const,
             actionIds: installActionIds,
             priorityClass: "P5" as const,
@@ -256,7 +256,7 @@ export function runnerCreditBankSignals(
         ];
       return [
         {
-          bankId: tool.sourceCardInstanceId ?? tool.cardId,
+          bankId: tool.sourceCardInstanceId ?? String(tool.cardId),
           phase: "install" as const,
           actionIds: installActionIds,
           priorityClass: "P5" as const,
@@ -448,7 +448,7 @@ export function runnerCreditBankSignals(
         matureBankDevelopmentFundingNeed;
       return [
         {
-          bankId: tool.sourceCardInstanceId ?? tool.cardId,
+          bankId: tool.sourceCardInstanceId ?? String(tool.cardId),
           phase: "cash_out" as const,
           actionIds: cashOutActionIds,
           rejectedActionIds: buildActionIds,
@@ -539,7 +539,7 @@ export function runnerCreditBankSignals(
     if (!shouldBuild)
       return [
         {
-          bankId: tool.sourceCardInstanceId ?? tool.cardId,
+          bankId: tool.sourceCardInstanceId ?? String(tool.cardId),
           phase: "hold" as const,
           actionIds: [],
           rejectedActionIds: [
@@ -584,7 +584,7 @@ export function runnerCreditBankSignals(
       ];
     return [
       {
-        bankId: tool.sourceCardInstanceId ?? tool.cardId,
+        bankId: tool.sourceCardInstanceId ?? String(tool.cardId),
         phase: "build" as const,
         actionIds: automaticBuildCandidate
           ? [automaticBuildCandidate.actionId]

@@ -693,10 +693,7 @@ function buildCardContext(
 
 function runnerHandDevelopmentActionRouteRank(action: LegalAction): number {
   if (action.type !== "install_card") return 1;
-  if (
-    action.payload?.runnerProgramTrashBeforeInstall === true ||
-    action.actionId.endsWith(".runner_program_trash_before_install")
-  ) {
+  if (action.payload?.runnerProgramTrashBeforeInstall === true) {
     return 0;
   }
   return typeof action.payload?.hostOnCardId === "string" ? 2 : 3;
@@ -1021,7 +1018,7 @@ function doctrineSupportsProspectiveRecoveryInfrastructure(
   const installedProviderIds = new Set(
     (params.input.playerView.own.rig ?? [])
       .map((card) => card.definitionId)
-      .filter((entry): entry is string => entry !== undefined),
+      .filter((entry) => entry !== undefined),
   );
   return !params.strategicIntent.engineProviders?.some(
     (entry) =>

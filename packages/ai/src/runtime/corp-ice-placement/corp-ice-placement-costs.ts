@@ -1,3 +1,4 @@
+import { parseOptionalCardDefinitionIdCsv } from "../../card-definition-id-input";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { visibleSourceCardForCorpIcePlacement } from "./corp-ice-placement";
@@ -169,10 +170,10 @@ export function corpIcePlacementPostInstallRezCostFact(
   const mandatoryAgendaPointCost =
     payload.postInstallRezQuoteMandatoryAgendaPointCost;
   const mandatoryKind = payload.postInstallRezQuoteMandatoryAdditionalCostKind;
-  const reductionIds = canonicalCommaSeparatedDefinitionIds(
+  const reductionIds = parseOptionalCardDefinitionIdCsv(
     payload.postInstallRezQuoteReductionSourceDefinitionIds,
   );
-  const increaseIds = canonicalCommaSeparatedDefinitionIds(
+  const increaseIds = parseOptionalCardDefinitionIdCsv(
     payload.postInstallRezQuoteIncreaseSourceDefinitionIds,
   );
   if (
@@ -238,22 +239,9 @@ function validTargetProjectedServerBinding(
   return projectedServerId === targetServerId;
 }
 
-function canonicalCommaSeparatedDefinitionIds(
-  value: unknown,
-): number[] | undefined {
-  if (value === undefined) return [];
-  if (typeof value !== "string" || value.length === 0) return undefined;
-  const ids = value.split(",");
-  return ids.every(
-    (id, index) => id.length > 0 && (index === 0 || ids[index - 1]! < id),
-  )
-    ? ids
-    : undefined;
-}
-
 function definitionIdListsDisjoint(
-  reductionIds: readonly string[],
-  increaseIds: readonly string[],
+  reductionIds: readonly number[],
+  increaseIds: readonly number[],
 ): boolean {
   if (reductionIds.length === 0 || increaseIds.length === 0) return true;
   const reductions = new Set(reductionIds);

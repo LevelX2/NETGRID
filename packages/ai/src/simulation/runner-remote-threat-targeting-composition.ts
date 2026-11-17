@@ -29,7 +29,7 @@ export type RunnerRemoteThreatTargetingCompositionDependencies = {
   sourceDefinitionIdForSimulationAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined;
 };
 
 export function createRunnerRemoteThreatTargetingComposition(

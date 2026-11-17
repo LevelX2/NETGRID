@@ -13,7 +13,7 @@ export type CorpVisibleTagPunishOpportunity = {
   action: LegalAction;
   kind: CorpPunishKind;
   category: CorpVisibleTagPayoffCategory;
-  cardId: string | undefined;
+  cardId: number | undefined;
 };
 
 export type CorpVisibleTagPunishOpportunityContextDependencies = {
@@ -29,7 +29,7 @@ export type CorpVisibleTagPunishOpportunityContextDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string;
+  ) => number | undefined;
 };
 
 export function createCorpVisibleTagPunishOpportunityContext(

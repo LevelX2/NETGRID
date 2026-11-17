@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { VisibleCard } from "@netgrid/shared";
 import { AI_HINTS_BY_CARD as AI_HINTS, type AiCardHint } from "./ai-hints";
 import type {
@@ -16,17 +17,17 @@ export type StructuredRemoteRoleSafetyAssessment = {
 };
 
 export function getStructuredRemoteRoleForCard(
-  cardId: string | undefined,
+  cardId: CardDefinitionId | undefined,
 ): AiHintRemoteRole | undefined {
   if (!cardId) return undefined;
   return AI_HINTS.get(cardId)?.remoteRole;
 }
 
 export function classifyRemoteRoleFromOntology(
-  cardIdOrHint: string | AiCardHint | undefined,
+  cardIdOrHint: CardDefinitionId | AiCardHint | undefined,
 ): AiHintRemoteRole | undefined {
   const hint =
-    typeof cardIdOrHint === "string"
+    typeof cardIdOrHint === "number"
       ? AI_HINTS.get(cardIdOrHint)
       : cardIdOrHint;
   return hint?.remoteRole;
@@ -148,7 +149,7 @@ function remoteRoleSafetyBonus(
   }
 }
 
-function remoteRoleTaxAmount(cardId: string | undefined): number {
+function remoteRoleTaxAmount(cardId: CardDefinitionId | undefined): number {
   const hint = cardId ? AI_HINTS.get(cardId) : undefined;
   const taxAmounts = (hint?.effects ?? [])
     .filter(isRunTaxEffect)

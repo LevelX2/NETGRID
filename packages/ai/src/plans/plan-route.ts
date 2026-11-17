@@ -315,7 +315,8 @@ function candidateMatchesTarget(
   }
   if (
     candidate.sourceCardInstanceId === target.id ||
-    candidate.sourceDefinitionId === target.id
+    (candidate.sourceDefinitionId !== undefined &&
+      String(candidate.sourceDefinitionId) === target.id)
   ) {
     return true;
   }

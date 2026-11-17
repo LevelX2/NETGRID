@@ -1,3 +1,4 @@
+import { isCardDefinitionId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
@@ -9,6 +10,7 @@ import {
   corpVisibleSingleSubroutineIsUnbreakable,
 } from "../../runtime/corp-score-protection-assessment";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { parseCardDefinitionId } from "../../card-definition-id-input";
 import { preferredAgendaPurgeArchivesOptions } from "./agenda-purge-archives-defense";
 import {
   knownNonNegativeInteger,
@@ -45,7 +47,7 @@ export function corpAgendaPurgeDefenseChoiceSignal(
           card.instanceId === sourceAgendaId &&
           card.known &&
           card.type === "agenda" &&
-          nonEmptyString(card.definitionId),
+          isCardDefinitionId(card.definitionId),
       )
     : undefined;
   const action = exactCurrentChoiceAction(input, choice);
@@ -555,11 +557,15 @@ function parseClassicDeflectorChoiceContext(
     return undefined;
   }
   try {
+    const sourceDefinitionId = parseCardDefinitionId(
+      decodeURIComponent(parts[4]),
+    );
+    if (sourceDefinitionId === undefined) return undefined;
     return {
       runId: decodeURIComponent(parts[1]),
       sourceIceInstanceId: decodeURIComponent(parts[2]),
       subroutineIndex,
-      sourceDefinitionId: decodeURIComponent(parts[4]),
+      sourceDefinitionId,
       subroutineId: decodeURIComponent(parts[5]),
       targetProfile: parts[6],
       creditCost,

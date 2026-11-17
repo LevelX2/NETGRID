@@ -1,9 +1,10 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { cardSpecPlanningCards } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
-function hint(cardId: string) {
+function hint(cardId: CardDefinitionId) {
   const entry = cardSpecPlanningCards().find(
     (candidate) => candidate.definition.id === cardId,
   );
@@ -233,7 +234,7 @@ describe("random production-card sample semantic corrections", () => {
       100,
       564,
     ]) {
-      expect(hint(cardId).strategyAnchors ?? [], cardId).not.toContain(
+      expect(hint(cardId).strategyAnchors ?? [], String(cardId)).not.toContain(
         "corp.ice_tax_glacier",
       );
     }

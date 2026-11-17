@@ -1,4 +1,4 @@
-import { type AiDecisionInput } from "@netgrid/shared";
+import { isCardDefinitionId, type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import {
@@ -14,9 +14,7 @@ export function accessCommitmentForEvaluation(
   if (
     !facts ||
     !Array.isArray(facts.knownTargetDefinitionIds) ||
-    !facts.knownTargetDefinitionIds.every(
-      (id) => typeof id === "string" && id.length > 0,
-    ) ||
+    !facts.knownTargetDefinitionIds.every(isCardDefinitionId) ||
     !(
       facts.trashBudget === "unknown" ||
       facts.trashBudget === "not_applicable" ||
@@ -56,7 +54,7 @@ export function accessCommitmentForEvaluation(
     ...(fortIceTrashObjective ? { fortIceTrashObjective } : {}),
     knownTargetDefinitionIds: [
       ...new Set(facts.knownTargetDefinitionIds),
-    ].sort(),
+    ].sort((left, right) => left - right),
     trashBudget: facts.trashBudget,
     evidenceCode: `access_payoff:${evaluation.accessPayoff}`,
   };
@@ -211,7 +209,7 @@ export function runnerKnownAgendaRunEvaluationIsCertified(
 export function sourceDefinitionForEvaluation(
   evaluation: RunnerRunTargetEvaluation,
   candidates: readonly ActionSemanticCandidate[],
-): string | undefined {
+): number | undefined {
   return candidates.find(
     (candidate) => candidate.actionId === evaluation.actionId,
   )?.sourceDefinitionId;

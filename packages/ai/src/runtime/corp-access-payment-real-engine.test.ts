@@ -55,7 +55,7 @@ function apply(s: GameState, side: Side, type: string, serverId = "hq") {
   return r.state;
 }
 function fixture(
-  program?: string,
+  program?: number,
   source = 126,
   zone = "hq",
 ) {
@@ -191,7 +191,7 @@ it.each([
       altered.playerView.pendingChoice!.source += "-stale";
     if (changed === "sourceDefinition")
       altered.playerView.pendingChoice!.sourceCardDefinitionId =
-        "different-definition";
+        Number.MAX_SAFE_INTEGER;
     if (changed === "sourceInstance")
       altered.playerView.pendingChoice!.sourceCardInstanceId =
         "different-instance";

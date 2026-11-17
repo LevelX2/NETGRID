@@ -1,3 +1,4 @@
+import type { MatchEventId } from "@netgrid/shared";
 import type { CorpPlanDomain } from "./corp-tactical-plan-contracts";
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
 
@@ -810,7 +811,7 @@ function uniqueOutcomes(
 }
 
 function uniquePublicEvents(input: AiDecisionInput): PublicGameEvent[] {
-  const byId = new Map<string, PublicGameEvent>();
+  const byId = new Map<MatchEventId, PublicGameEvent>();
   for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
     byId.set(event.eventId, event);
   }
@@ -823,7 +824,7 @@ function comparePublicEvents(
 ): number {
   return (
     left.stateVersionAfter - right.stateVersionAfter ||
-    left.eventId.localeCompare(right.eventId)
+    left.eventId - right.eventId
   );
 }
 

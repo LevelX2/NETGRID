@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
   isRunnerEconomyRole,
@@ -12,8 +13,8 @@ type RunnerInstallClassificationDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
-  rolesForCardId: (cardId: string | undefined) => string[];
+  ) => number | undefined | undefined;
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => string[];
 };
 
 type RunnerActionRoleDependencies = {
@@ -166,7 +167,7 @@ export function isRunnerDuplicateInstallForSimulation(
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined,
+  ) => number | undefined | undefined,
 ): boolean {
   const definitionId = sourceDefinitionIdForAction(input, action);
   if (!definitionId || action.type !== "install_card") return false;
@@ -204,7 +205,7 @@ export function isRunnerLowValueDuplicateInstallForSimulation(
 export function runnerDiscardChoiceRolesForSimulation(
   input: AiDecisionInput,
   decision: { selectedChoices?: unknown },
-  discardRolesForCardId: (cardId: string | undefined) => string[],
+  discardRolesForCardId: (cardId: CardDefinitionId | undefined) => string[],
 ): string[] {
   if (
     input.playerView.pendingChoice?.source !== "discard_phase" ||
@@ -232,11 +233,11 @@ export function runnerDiscardChoiceRolesForSimulation(
 
 export function createRunnerInstallClassificationContext(dependencies: {
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
-  rolesForCardId: (cardId: string | undefined) => string[];
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => string[];
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined | undefined;
   isSearchChoice: (
     choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
   ) => boolean;

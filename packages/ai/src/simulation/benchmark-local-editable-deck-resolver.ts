@@ -7,6 +7,7 @@ import {
   validateEditableDeck,
   type EditableDeck,
 } from "@netgrid/decks";
+import { isCardDefinitionId } from "@netgrid/shared";
 import type {
   AiBenchmarkDeckReference,
   AiBenchmarkLocalEditableDeckResult,
@@ -109,13 +110,15 @@ export function benchmarkDeckFromLocalEditableDeck(
     ...(rawDeck.side !== "runner" && rawDeck.side !== "corp"
       ? [`Deck side is invalid: ${String(rawDeck.side)}.`]
       : []),
+    ...(!isCardDefinitionId(rawDeck.identityCardId)
+      ? ["Deck has an invalid identity card identifier."]
+      : []),
     ...(!Array.isArray(rawDeck.cards) || rawDeck.cards.length === 0
       ? ["Deck has no cards."]
       : rawDeck.cards.some(
             (entry) =>
               !isRecord(entry) ||
-              typeof entry.cardId !== "string" ||
-              entry.cardId.length === 0 ||
+              !isCardDefinitionId(entry.cardId) ||
               typeof entry.quantity !== "number",
           )
         ? ["Deck contains a malformed card entry."]

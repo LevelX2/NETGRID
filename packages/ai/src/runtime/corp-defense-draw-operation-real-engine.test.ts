@@ -72,6 +72,9 @@ function input(state: GameState) {
     },
   });
 }
+function operationFor(state: GameState, actions: ReturnType<typeof getLegalActions>, definitionId: number) {
+  return actions.find((action) => action.type === "play_operation" && state.cardInstances[action.source]?.definitionId === definitionId)!;
+}
 function apply(
   state: GameState,
   actionId: string,
@@ -97,7 +100,7 @@ it.each([false, true])(
       (a) => a.actionId === decision.actionId,
     )!;
     expect(action.type).toBe("play_operation");
-    expect(action.actionId).toContain(DAY);
+    expect(state.cardInstances[action.source]?.definitionId).toBe(DAY);
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("corp.defend_servers");
@@ -116,7 +119,7 @@ it("prefers an admitted three-card operation for the same defense search", () =>
   const state = fixture(ANNUAL),
     i = input(state),
     decision = chooseCorpAction(i);
-  expect(decision.actionId).toContain(ANNUAL);
+  expect(decision.actionId).toBe(operationFor(state, i.legalActions, ANNUAL).actionId);
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("corp.defend_servers");
@@ -139,7 +142,7 @@ it.each([DAY, ANNUAL])(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("corp.defend_servers");
     if (drawCard === DAY) {
-      expect(decision.actionId).toContain(DAY);
+      expect(decision.actionId).toBe(operationFor(state, i.legalActions, DAY).actionId);
       expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
         actionId: decision.actionId,
         stateVersion: state.stateVersion,
@@ -201,7 +204,7 @@ it("admits a net-one draw operation for the full-hand score-protection parent", 
     },
   });
   const decision = chooseCorpAction(i);
-  expect(decision.actionId).toContain(DAY);
+  expect(decision.actionId).toBe(operationFor(state, i.legalActions, DAY).actionId);
   const plan = decision.decisionDebug?.planFirstDecision;
   expect(plan?.selectedPlan?.moduleId).toBe("corp.defend_servers");
   expect(plan?.selectedStep?.parentInstanceId).toContain("corp.score_agenda");
@@ -216,7 +219,7 @@ it("admits a net-one draw operation for the full-hand score-protection parent", 
 it("retains the basic draw when a three-card operation would overflow HQ", () => {
   const state = fixture(ANNUAL, true),
     i = input(state);
-  const operation = i.legalActions.find((a) => a.actionId.includes(ANNUAL))!;
+  const operation = operationFor(state, i.legalActions, ANNUAL);
   expect(corpOptionalDrawCapacity(i, operation).eligible).toBe(false);
   expect(chooseCorpAction(i).actionId).toBe("corp.draw_card");
 });
@@ -264,12 +267,11 @@ it("does not consume the mandatory-draw reserve through the multi-draw operation
   }
   const i = input(state),
     decision = chooseCorpAction(i);
-  expect(decision.actionId).not.toContain(DAY);
+  expect(decision.actionId).not.toBe(operationFor(state, i.legalActions, DAY).actionId);
   expect(decision.decisionDebug?.planFirstDecision?.dispositions).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
-        actionId: i.legalActions.find((a) => a.actionId.includes(DAY))!
-          .actionId,
+        actionId: operationFor(state, i.legalActions, DAY).actionId,
         disposition: "explicitly_nonproductive",
         evidenceCode: expect.stringContaining(
           "corp_voluntary_draw_blocked_deckout_horizon",

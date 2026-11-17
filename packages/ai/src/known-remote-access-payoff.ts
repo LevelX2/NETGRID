@@ -1,3 +1,4 @@
+import type { MatchEventId } from "@netgrid/shared";
 import { visibleRunnerPathTraceContext } from "./run-analysis/trace-rules-profile-planning";
 import { currentRunPathContext } from "./run-analysis/current-run-path-context";
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
@@ -71,7 +72,7 @@ type KnownRemoteRoot = {
   definitionId: number;
   positionKey: string;
   source: "player_view" | "position_memory";
-  sourceEventId?: string;
+  sourceEventId?: MatchEventId;
   visibleCard?: VisibleCard;
 };
 
@@ -202,7 +203,7 @@ export function evaluateKnownRemoteAccessPayoff(
     .sort(
       (left, right) =>
         right.threatValue - left.threatValue ||
-        left.sourceDefinitionId.localeCompare(right.sourceDefinitionId),
+        (left.sourceDefinitionId - right.sourceDefinitionId),
     )[0];
   const accessThreatUnknown = accessThreatProjections.some(
     (projection) => projection.status === "unknown",
@@ -533,7 +534,7 @@ function observedRemoteAccessDamage(
       publicActionType(event) !== "access_card" ||
       publicActor(event) !== "runner" ||
       remoteEventServerId(event) !== serverId ||
-      stringPayloadValue(event, "cardDefinitionId") !== root.definitionId ||
+      event.publicPayload.cardDefinitionId !== root.definitionId ||
       stringPayloadValue(event, "accessedCardPositionKey") !==
         root.positionKey ||
       event.publicPayload.damageResolved !== true

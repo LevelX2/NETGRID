@@ -96,7 +96,8 @@ export function corpHandSignalMatchesCandidate(
     return signal.actionIds.includes(candidate.actionId);
   }
   return (
-    signal.sourceDefinitionIds?.includes(candidate.sourceDefinitionId ?? "") ===
+    candidate.sourceDefinitionId !== undefined &&
+    signal.sourceDefinitionIds?.includes(candidate.sourceDefinitionId) ===
       true &&
     (!signal.sourceInstanceId ||
       signal.sourceInstanceId === candidate.sourceCardInstanceId)

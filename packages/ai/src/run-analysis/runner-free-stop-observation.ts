@@ -1,3 +1,4 @@
+import type { MatchEventId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import {
   mergedPublicHistory,
@@ -9,7 +10,7 @@ import {
 export function runnerObservedFreeStopEventId(
   input: AiDecisionInput,
   targetServerId: string,
-): string | undefined {
+): MatchEventId | undefined {
   const view = input.playerView;
   if (
     input.side !== "runner" ||
@@ -19,7 +20,7 @@ export function runnerObservedFreeStopEventId(
     return undefined;
 
   let active: { serverId: string; zeroRezObserved: boolean } | undefined;
-  let stoppedEventId: string | undefined;
+  let stoppedEventId: MatchEventId | undefined;
   for (const event of mergedPublicHistory(input)) {
     if (event.turnSerial !== view.turnSerial) continue;
     const p = event.publicPayload;

@@ -232,7 +232,7 @@ export function planPortfolioTurnKey(input: AiDecisionInput): string {
   const history = [...byId.values()].sort(
     (left, right) =>
       left.stateVersionAfter - right.stateVersionAfter ||
-      left.eventId.localeCompare(right.eventId),
+      left.eventId - right.eventId,
   );
   const turnStarts = history.filter((event) => {
     const actionType =

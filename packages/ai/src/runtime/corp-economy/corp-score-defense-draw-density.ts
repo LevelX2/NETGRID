@@ -70,7 +70,7 @@ export function corpScoreDefenseEffectSuitableIceDensity(
   const outsideByDefinitionId = visibleCorpCardsOutsideRdByDefinition(input);
   let remainingSuitableIceCount = 0;
   const suitableDefinitionIds: number[] = [];
-  const deckDefinitionIds = new Set<string>();
+  const deckDefinitionIds = new Set<number>();
   for (const entry of snapshot.cards) {
     if (!Number.isSafeInteger(entry.quantity) || entry.quantity < 0) {
       return unknownScoreDefenseDensity(
@@ -181,8 +181,8 @@ function resolvedEngineDefinitionId(definitionId: number): number | undefined {
 
 function visibleCorpCardsOutsideRdByDefinition(
   input: AiDecisionInput,
-): Map<string, number> {
-  const counts = new Map<string, number>();
+): Map<number, number> {
+  const counts = new Map<number, number>();
   for (const card of visibleCorpCardsOutsideRd(input)) {
     const definitionId =
       card.definitionId && resolvedEngineDefinitionId(card.definitionId);

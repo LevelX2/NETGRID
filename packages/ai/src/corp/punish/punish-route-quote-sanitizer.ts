@@ -1,6 +1,7 @@
 import { parseCanonicalCapabilityId } from "@netgrid/cards/planning";
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+  isCardDefinitionId,
   type CorpPunishRouteIncompleteReason,
   type CorpPunishRouteQuote,
   type CorpPunishRouteQuoteSet,
@@ -466,7 +467,7 @@ function validOrderedPunishSteps(
       (step, index) =>
         step.order !== index ||
         !nonblank(step.sourceCardInstanceId) ||
-        !nonblank(step.sourceCardDefinitionId) ||
+        !isCardDefinitionId(step.sourceCardDefinitionId) ||
         !nonblank(step.sourceCapabilityId) ||
         !validPunishStepKind(step.kind) ||
         !nonNegativeInteger(step.clicks) ||

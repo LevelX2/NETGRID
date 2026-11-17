@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,7 +18,7 @@ describe("Action semantic invariants", () => {
   it("accepts behavior-based signals, complete StrategySupportPairs and side-safe TargetProfiles", () => {
     const report = buildActionSemanticInvariantReport([
       {
-        cardId: "onr_v1_valid_semantic_profile",
+        cardId: 299,
         tacticSignals: ["card.context.economy"],
         abilitySemantics: [
           {
@@ -68,7 +69,7 @@ describe("Action semantic invariants", () => {
       confidence: "medium",
     } as unknown as StrategySupportPair;
     const invalidProfile: ActionCardSemanticProfile = {
-      cardId: "fixture_hidden_profile",
+      cardId: syntheticCardDefinitionId("fixture_hidden_profile"),
       tacticSignals: ["card.name.hidden_fixture"],
       strategySupport: [incompletePair],
       abilitySemantics: [
@@ -121,7 +122,7 @@ describe("Action semantic invariants", () => {
       sideSafeProfile("onr_v1_marker_token", [
         "hidden_info_projection would be required.",
       ]),
-    ]);
+    ], { allowFixtureProfiles: true });
 
     const hiddenIssues = report.issues.filter(
       (issue) => issue.issueId === "target_profile_hidden_info",
@@ -136,7 +137,7 @@ describe("Action semantic invariants", () => {
   it("matches support-only signals by bounded marker segments", () => {
     const report = buildActionSemanticInvariantReport([
       {
-        cardId: "onr_v1_support_only_segment",
+        cardId: syntheticCardDefinitionId("onr_v1_support_only_segment"),
         tacticSignals: ["trace_defense.support-only"],
         strategySupport: [
           {
@@ -148,7 +149,7 @@ describe("Action semantic invariants", () => {
         ],
       },
       {
-        cardId: "onr_v1_support_only_noise",
+        cardId: syntheticCardDefinitionId("onr_v1_support_only_noise"),
         tacticSignals: ["trace_defense.not_support_only_noise"],
         strategySupport: [
           {
@@ -159,7 +160,7 @@ describe("Action semantic invariants", () => {
           },
         ],
       },
-    ]);
+    ], { allowFixtureProfiles: true });
 
     expect(
       report.issues.filter(
@@ -175,7 +176,7 @@ describe("Action semantic invariants", () => {
   it("bounds structural-only signal markers by explicit delimiters", () => {
     const report = buildActionSemanticInvariantReport([
       {
-        cardId: "onr_v1_structural_marker_noise",
+        cardId: syntheticCardDefinitionId("onr_v1_structural_marker_noise"),
         tacticSignals: [
           "cardinal_nameplate",
           "own_typeless",
@@ -183,10 +184,10 @@ describe("Action semantic invariants", () => {
         ],
       },
       {
-        cardId: "onr_v1_structural_marker",
+        cardId: syntheticCardDefinitionId("onr_v1_structural_marker"),
         tacticSignals: ["own-subtype-only"],
       },
-    ]);
+    ], { allowFixtureProfiles: true });
 
     const structuralIssues = report.issues.filter(
       (issue) => issue.issueId === "pure_type_subtype_name_signal",
@@ -200,14 +201,14 @@ describe("Action semantic invariants", () => {
     expect(JSON.stringify(structuralIssues)).not.toContain("subtype_onlyish");
   });
 
-  it("bounds fixture-like card ids by identifier segments", () => {
+  it("requires catalog card identifiers in production profiles", () => {
     const report = buildActionSemanticInvariantReport([
       {
-        cardId: "onr_v1_nonfixture_name",
+        cardId: 299,
         tacticSignals: ["economy.burst"],
       },
       {
-        cardId: "onr_v1_fixture_profile",
+        cardId: syntheticCardDefinitionId("onr_v1_fixture_profile"),
         tacticSignals: ["economy.burst"],
       },
     ]);
@@ -218,13 +219,13 @@ describe("Action semantic invariants", () => {
 
     expect(fixtureIssues).toHaveLength(1);
     expect(fixtureIssues[0]?.path).toBe("profiles[1].cardId");
-    expect(JSON.stringify(fixtureIssues)).not.toContain("nonfixture");
+    expect(fixtureIssues[0]?.evidence).toEqual([String(syntheticCardDefinitionId("onr_v1_fixture_profile"))]);
   });
 
   it("reports forbidden static signals and broad primary signals without precise peers", () => {
     const report = buildActionSemanticInvariantReport([
       {
-        cardId: "onr_v1_static_signal_misuse",
+        cardId: syntheticCardDefinitionId("onr_v1_static_signal_misuse"),
         tacticSignals: [
           "hardware.chip",
           "setup.vehicle",
@@ -233,7 +234,7 @@ describe("Action semantic invariants", () => {
         ],
       },
       {
-        cardId: "onr_v1_broad_damage_anchor",
+        cardId: syntheticCardDefinitionId("onr_v1_broad_damage_anchor"),
         tacticSignals: ["damage.payoff"],
         strategySupport: [
           {
@@ -245,14 +246,14 @@ describe("Action semantic invariants", () => {
         ],
       },
       {
-        cardId: "onr_v1_broad_search_only",
+        cardId: syntheticCardDefinitionId("onr_v1_broad_search_only"),
         tacticSignals: ["setup.search"],
       },
       {
-        cardId: "onr_v1_broad_access_punish_only",
+        cardId: syntheticCardDefinitionId("onr_v1_broad_access_punish_only"),
         tacticSignals: ["access.punish"],
       },
-    ]);
+    ], { allowFixtureProfiles: true });
     const issueIds = report.issues.map((issue) => issue.issueId);
 
     expect(report.valid).toBe(false);
@@ -275,7 +276,7 @@ describe("Action semantic invariants", () => {
   it("does not treat substring-only broad signal evidence as strategy anchor evidence", () => {
     const report = buildActionSemanticInvariantReport([
       {
-        cardId: "onr_v1_broad_damage_anchor_noise",
+        cardId: syntheticCardDefinitionId("onr_v1_broad_damage_anchor_noise"),
         tacticSignals: ["damage.payoff", "damage.corp_tagged_meat_payoff"],
         strategySupport: [
           {
@@ -286,7 +287,7 @@ describe("Action semantic invariants", () => {
           },
         ],
       },
-    ]);
+    ], { allowFixtureProfiles: true });
 
     expect(report.valid).toBe(true);
     expect(
@@ -300,7 +301,7 @@ describe("Action semantic invariants", () => {
   it("allows broad aggregation signals when precise primary signals carry the semantics", () => {
     const report = buildActionSemanticInvariantReport([
       {
-        cardId: "onr_v1_precise_multiaccess_profile",
+        cardId: syntheticCardDefinitionId("onr_v1_precise_multiaccess_profile"),
         tacticSignals: ["access.payoff", "access.hq_multiaccess"],
         compatibilitySignals: [
           "setup.search",
@@ -317,10 +318,10 @@ describe("Action semantic invariants", () => {
         ],
       },
       {
-        cardId: "onr_v1_precise_damage_profile",
+        cardId: syntheticCardDefinitionId("onr_v1_precise_damage_profile"),
         tacticSignals: ["damage.payoff", "damage.corp_tagged_meat_payoff"],
       },
-    ]);
+    ], { allowFixtureProfiles: true });
 
     expect(report.valid).toBe(true);
     expect(report.issues).toEqual([]);
@@ -362,7 +363,7 @@ describe("Action semantic invariants", () => {
       ]),
     ];
 
-    const report = buildActionSemanticInvariantReport(profiles);
+    const report = buildActionSemanticInvariantReport(profiles, { allowFixtureProfiles: true });
 
     expect(report.valid).toBe(true);
     expect(report.productiveUseAllowed).toBe(false);
@@ -392,7 +393,7 @@ describe("Action semantic invariants", () => {
       ]),
     ];
 
-    const report = buildActionSemanticInvariantReport(profiles);
+    const report = buildActionSemanticInvariantReport(profiles, { allowFixtureProfiles: true });
 
     expect(report.valid).toBe(true);
     expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
@@ -420,7 +421,7 @@ describe("Action semantic invariants", () => {
       corpSemanticProfile("Project Venice", ["advance.overadvance_support"]),
     ];
 
-    const report = buildActionSemanticInvariantReport(profiles);
+    const report = buildActionSemanticInvariantReport(profiles, { allowFixtureProfiles: true });
 
     expect(report.valid).toBe(true);
     expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
@@ -449,7 +450,7 @@ describe("Action semantic invariants", () => {
       corpSemanticProfile("Solo Squad", ["tag.payoff.runner_resource_trash"]),
     ];
 
-    const report = buildActionSemanticInvariantReport(profiles);
+    const report = buildActionSemanticInvariantReport(profiles, { allowFixtureProfiles: true });
 
     expect(report.valid).toBe(true);
     expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
@@ -499,7 +500,7 @@ describe("Action semantic invariants", () => {
       corpSemanticProfile("Wall of Ice", ["corp_ice.end_the_run_tax"]),
     ];
 
-    const report = buildActionSemanticInvariantReport(profiles);
+    const report = buildActionSemanticInvariantReport(profiles, { allowFixtureProfiles: true });
 
     expect(report.valid).toBe(true);
     expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
@@ -535,7 +536,7 @@ describe("Action semantic invariants", () => {
       runnerAccessPayoffProfile("Vienna 22", ["access.central_payoff"]),
     ];
 
-    const report = buildActionSemanticInvariantReport(profiles);
+    const report = buildActionSemanticInvariantReport(profiles, { allowFixtureProfiles: true });
 
     expect(report.valid).toBe(true);
     expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
@@ -582,7 +583,7 @@ describe("Action semantic invariants", () => {
       ]),
     ];
 
-    const report = buildActionSemanticInvariantReport(profiles);
+    const report = buildActionSemanticInvariantReport(profiles, { allowFixtureProfiles: true });
 
     expect(report.valid).toBe(true);
     expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
@@ -634,7 +635,7 @@ describe("Action semantic invariants", () => {
       ]),
     ];
 
-    const report = buildActionSemanticInvariantReport(profiles);
+    const report = buildActionSemanticInvariantReport(profiles, { allowFixtureProfiles: true });
 
     expect(report.valid).toBe(true);
     expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
@@ -669,7 +670,7 @@ describe("Action semantic invariants", () => {
       corpIceTaxProfile("Newsgroup Taunting", ["run_tax"]),
     ];
 
-    const report = buildActionSemanticInvariantReport(profiles);
+    const report = buildActionSemanticInvariantReport(profiles, { allowFixtureProfiles: true });
 
     expect(report.valid).toBe(true);
     expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
@@ -692,7 +693,7 @@ function runnerAccessPayoffProfile(
   tacticSignals: string[],
 ): ActionCardSemanticProfile {
   return {
-    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    cardId: syntheticCardDefinitionId(`onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`),
     tacticSignals,
     abilitySemantics: [
       {
@@ -726,7 +727,7 @@ function runnerEconomyCommitmentProfile(
   tacticSignals: string[],
 ): ActionCardSemanticProfile {
   return {
-    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    cardId: syntheticCardDefinitionId(`onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`),
     tacticSignals,
     abilitySemantics: [
       {
@@ -760,7 +761,7 @@ function corpRemoteEconomyAssetProfile(
   tacticSignals: string[],
 ): ActionCardSemanticProfile {
   return {
-    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    cardId: syntheticCardDefinitionId(`onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`),
     tacticSignals,
     abilitySemantics: [
       {
@@ -794,7 +795,7 @@ function corpIceTaxProfile(
   tacticSignals: string[],
 ): ActionCardSemanticProfile {
   return {
-    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    cardId: syntheticCardDefinitionId(`onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`),
     tacticSignals,
     abilitySemantics: [
       {
@@ -828,7 +829,7 @@ function runnerBreakerSearchProfile(
   tacticSignals: string[],
 ): ActionCardSemanticProfile {
   return {
-    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    cardId: syntheticCardDefinitionId(`onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`),
     tacticSignals,
     abilitySemantics: [
       {
@@ -860,7 +861,7 @@ function runnerRiskProfile(
   tacticSignals: string[],
 ): ActionCardSemanticProfile {
   return {
-    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    cardId: syntheticCardDefinitionId(`onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`),
     tacticSignals,
     abilitySemantics: [
       {
@@ -888,9 +889,10 @@ function runnerRiskProfile(
 }
 
 function sideSafeProfile(
-  cardId: string,
+  profileLabel: string,
   targetEvidence: readonly string[],
 ): ActionCardSemanticProfile {
+  const cardId = syntheticCardDefinitionId(profileLabel);
   return {
     cardId,
     tacticSignals: ["card.context.economy"],
@@ -925,7 +927,7 @@ function corpSemanticProfile(
   strategyId = "corp.doctrine.remote_scoring_scoreline",
 ): ActionCardSemanticProfile {
   return {
-    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    cardId: syntheticCardDefinitionId(`onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`),
     tacticSignals,
     abilitySemantics: [
       {

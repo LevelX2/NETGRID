@@ -1,4 +1,5 @@
-import type { Side } from "@netgrid/shared";
+import type { CardDefinitionId, Side } from "@netgrid/shared";
+import { sortedUnique } from "./runtime/collection";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import {
   type AiHintBreakerProfile,
@@ -22,7 +23,7 @@ import {
 export type AiDeckOntologyDeckSnapshot = {
   deckSnapshotId: string;
   side: Side;
-  cards: Array<{ cardId: string; quantity: number }>;
+  cards: Array<{ cardId: CardDefinitionId; quantity: number }>;
 };
 
 export type AiDeckOntologyCountMap<T extends string = string> = Partial<
@@ -34,7 +35,7 @@ export type AiDeckOntologyEffectCounts = {
   byTiming: AiDeckOntologyCountMap<KnownHintEffectTiming>;
   byScope: AiDeckOntologyCountMap<KnownHintEffectScope>;
   byResource: AiDeckOntologyCountMap<KnownHintEffectResource>;
-  cardIdsByKind: Partial<Record<KnownHintEffectKind, string[]>>;
+  cardIdsByKind: Partial<Record<KnownHintEffectKind, CardDefinitionId[]>>;
 };
 
 export type AiDeckOntologyConditionCounts = {
@@ -43,13 +44,13 @@ export type AiDeckOntologyConditionCounts = {
 
 export type AiDeckOntologyLineSupportCounts = {
   byKind: AiDeckOntologyCountMap<KnownHintLineSupport>;
-  cardIdsByKind: Partial<Record<KnownHintLineSupport, string[]>>;
+  cardIdsByKind: Partial<Record<KnownHintLineSupport, CardDefinitionId[]>>;
 };
 
 export type AiDeckOntologyBreakerCoverageSummary = {
   coverageCounts: AiDeckOntologyCountMap<KnownHintBreakerCoverage>;
   breakerCards: Array<{
-    cardId: string;
+    cardId: CardDefinitionId;
     quantity: number;
     coverage: KnownHintBreakerCoverage[];
     baseStrength?: number;
@@ -63,7 +64,7 @@ export type AiDeckOntologyBreakerCoverageSummary = {
 export type AiDeckOntologyRemoteRoleSummary = {
   roleCounts: AiDeckOntologyCountMap<KnownHintRemoteRoleKind>;
   remoteRoleCards: Array<{
-    cardId: string;
+    cardId: CardDefinitionId;
     quantity: number;
     kind: KnownHintRemoteRoleKind;
     threatLevel?: string;
@@ -77,26 +78,26 @@ export type AiDeckOntologyQualitySummary = {
   strategyCoveredCardCount: number;
   needsHumanReviewCardCount: number;
   lowConfidenceCardCount: number;
-  needsHumanReviewCardIds: string[];
-  lowConfidenceCardIds: string[];
+  needsHumanReviewCardIds: CardDefinitionId[];
+  lowConfidenceCardIds: CardDefinitionId[];
 };
 
 export type AiDeckOntologyScoredAgendaActionSummary = {
-  cardIds: string[];
+  cardIds: CardDefinitionId[];
   effectKindCounts: AiDeckOntologyCountMap<KnownHintEffectKind>;
 };
 
 export type AiDeckOntologyTagPunishSummary = {
-  tagSourceCardIds: string[];
-  tagPunishPayoffCardIds: string[];
+  tagSourceCardIds: CardDefinitionId[];
+  tagPunishPayoffCardIds: CardDefinitionId[];
   hasTagSourceAndPayoff: boolean;
 };
 
 export type AiDeckOntologyValidationSummary = {
   errorCount: number;
   warningCount: number;
-  cardIdsWithErrors: string[];
-  cardIdsWithWarnings: string[];
+  cardIdsWithErrors: CardDefinitionId[];
+  cardIdsWithWarnings: CardDefinitionId[];
 };
 
 export type AiDeckOntologySummary = {
@@ -119,7 +120,7 @@ export type AiDeckOntologySummary = {
 };
 
 type AiHintWithOntology = AiHintOntologyExtension & {
-  cardId: string;
+  cardId: CardDefinitionId;
   side: Side;
 };
 
@@ -130,7 +131,7 @@ const ACTIVE_HINT_ONTOLOGY_BY_CARD = new Map(
 export function buildAiDeckOntologySummary(
   snapshot: AiDeckOntologyDeckSnapshot,
 ): AiDeckOntologySummary {
-  const quantities = new Map<string, number>();
+  const quantities = new Map<CardDefinitionId, number>();
   for (const entry of snapshot.cards) {
     const quantity = requiredDeckQuantity(entry.quantity, entry.cardId);
     if (quantity === 0) continue;
@@ -142,9 +143,7 @@ export function buildAiDeckOntologySummary(
       ),
     );
   }
-  const sortedCards = [...quantities].sort(([left], [right]) =>
-    left.localeCompare(right),
-  );
+  const sortedCards = [...quantities].sort(([left], [right]) => left - right);
   const effectCounts: AiDeckOntologyEffectCounts = {
     byKind: {},
     byTiming: {},
@@ -284,7 +283,7 @@ export function buildAiDeckOntologySummary(
   };
 }
 
-function requiredDeckQuantity(quantity: number, cardId: string): number {
+function requiredDeckQuantity(quantity: number, cardId: CardDefinitionId): number {
   if (!Number.isSafeInteger(quantity) || quantity < 0) {
     throw new RangeError(
       `deck ontology quantity must be a non-negative safe integer: ${cardId}:${quantity}`,
@@ -295,7 +294,7 @@ function requiredDeckQuantity(quantity: number, cardId: string): number {
 
 function aggregateEffects(
   effects: AiHintStructuredEffect[],
-  cardId: string,
+  cardId: CardDefinitionId,
   quantity: number,
   counts: AiDeckOntologyEffectCounts,
   scoredAgendaActions: AiDeckOntologyScoredAgendaActionSummary,
@@ -333,7 +332,7 @@ function aggregateConditions(
 
 function aggregateLineSupport(
   lineSupport: KnownHintLineSupport[],
-  cardId: string,
+  cardId: CardDefinitionId,
   quantity: number,
   counts: AiDeckOntologyLineSupportCounts,
 ): void {
@@ -345,7 +344,7 @@ function aggregateLineSupport(
 
 function aggregateBreakerProfile(
   breakerProfile: AiHintBreakerProfile | undefined,
-  cardId: string,
+  cardId: CardDefinitionId,
   quantity: number,
   summary: AiDeckOntologyBreakerCoverageSummary,
 ): void {
@@ -378,7 +377,7 @@ function aggregateBreakerProfile(
 
 function aggregateRemoteRole(
   remoteRole: AiHintRemoteRole | undefined,
-  cardId: string,
+  cardId: CardDefinitionId,
   quantity: number,
   summary: AiDeckOntologyRemoteRoleSummary,
 ): void {
@@ -395,7 +394,7 @@ function aggregateRemoteRole(
 
 function aggregateQuality(
   quality: AiHintQuality | undefined,
-  cardId: string,
+  cardId: CardDefinitionId,
   summary: AiDeckOntologyQualitySummary,
 ): void {
   if (!quality) return;
@@ -454,9 +453,9 @@ function increment<T extends string>(
 }
 
 function pushCardId<T extends string>(
-  values: Partial<Record<T, string[]>>,
+  values: Partial<Record<T, CardDefinitionId[]>>,
   key: T,
-  cardId: string,
+  cardId: CardDefinitionId,
 ): void {
   const entries = values[key] ?? [];
   entries.push(cardId);
@@ -472,15 +471,11 @@ function sortCountMap<T extends string>(
 }
 
 function sortCardIdMap<T extends string>(
-  values: Partial<Record<T, string[]>>,
-): Partial<Record<T, string[]>> {
+  values: Partial<Record<T, CardDefinitionId[]>>,
+): Partial<Record<T, CardDefinitionId[]>> {
   return Object.fromEntries(
-    (Object.entries(values) as Array<[T, string[]]>)
+    (Object.entries(values) as Array<[T, CardDefinitionId[]]>)
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([key, cardIds]) => [key, sortedUnique(cardIds)]),
-  ) as Partial<Record<T, string[]>>;
-}
-
-function sortedUnique(values: string[]): string[] {
-  return [...new Set(values)].sort();
+  ) as Partial<Record<T, CardDefinitionId[]>>;
 }

@@ -815,9 +815,8 @@ function dispositionsForUnmaterializedSpecializedLines(params: {
             (!signal.sourceInstanceId ||
               candidate.sourceCardInstanceId === signal.sourceInstanceId) &&
             (!signal.sourceDefinitionIds ||
-              signal.sourceDefinitionIds.includes(
-                candidate.sourceDefinitionId ?? "",
-              )),
+              (candidate.sourceDefinitionId !== undefined &&
+                signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId))),
         )
         .map((candidate) => candidate.actionId);
     for (const actionId of actionIds) {

@@ -81,7 +81,7 @@ export function createRunnerEconomyModule(): PlanModule {
             priorityClass: signal.priorityClass,
             target: {
               kind: "card",
-              id: signal.sourceResourceDefinitionId,
+              id: String(signal.sourceResourceDefinitionId),
             },
             routeExists:
               installedCardLiquidationChoiceCandidates(context, signal).length >

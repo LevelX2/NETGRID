@@ -35,7 +35,7 @@ export function handModule(): PlanModule {
             handCandidates(context, signal),
             signal.evidenceCode,
             signal.sourceDefinitionIds?.[0]
-              ? { kind: "card", id: signal.sourceDefinitionIds[0] }
+              ? { kind: "card", id: String(signal.sourceDefinitionIds[0]) }
               : { kind: "player", id: "corp" },
             signal.parentPlanInstanceId && signal.parentNeedId
               ? "flexible_support"

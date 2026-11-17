@@ -222,7 +222,7 @@ export function buildRunnerDefenseSignals(params: {
             ((strategicIntent.riskProfile ?? []).includes(
               "runner.risky_universal_breaker_pressure",
             ) ||
-              rolesForDeckDoctrineCard(ice.definitionId ?? "").includes(
+              rolesForDeckDoctrineCard(ice.definitionId).includes(
                 "sentry_ice",
               )),
         ),

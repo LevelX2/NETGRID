@@ -157,7 +157,7 @@ export type RunnerPersistentDeckReplacementAssessment = {
 export type RunnerPersistentInstallEvaluation = {
   schemaVersion: typeof RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION;
   actionId: string;
-  cardId?: string;
+  cardId?: number;
   title?: string;
   cardType?: VisibleCard["type"];
   installCost: number;

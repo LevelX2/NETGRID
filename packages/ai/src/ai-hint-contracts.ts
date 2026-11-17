@@ -1,4 +1,4 @@
-import type { Side } from "@netgrid/shared";
+import type { CardDefinitionId, Side } from "@netgrid/shared";
 
 import type { AiHintOntologyExtension } from "./hint-ontology";
 
@@ -15,7 +15,7 @@ export type {
 } from "./action-plan-owner-contracts";
 
 export type AiCardHint = AiHintOntologyExtension & {
-  cardId: string;
+  cardId: CardDefinitionId;
   side: Side;
   cardType?: string;
   roles: string[];
@@ -60,9 +60,9 @@ export type CardSpecAiHintArtifact = {
     status: "ai_supported";
     fingerprint: string;
   };
-  cardIds: string[];
+  cardIds: CardDefinitionId[];
   cards: Array<{
-    cardId: string;
+    cardId: CardDefinitionId;
     cardRulesFingerprint: string;
     planningAnnotationsFingerprint: string;
     hint: AiCardHint;

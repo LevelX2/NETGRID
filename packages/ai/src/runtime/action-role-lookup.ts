@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -9,7 +10,7 @@ export type ActionRoleLookupDependencies = {
     input: AiDecisionInput,
     instanceId: string,
   ) => VisibleCard | undefined;
-  readonly rolesForCardId: (cardId: string | undefined) => string[];
+  readonly rolesForCardId: (cardId: CardDefinitionId | undefined) => string[];
 };
 
 export function rolesForAction(

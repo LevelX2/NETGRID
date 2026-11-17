@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import {
@@ -15,7 +16,7 @@ import { remoteTrashRoleForVisibleCard } from "./remote-trash-role";
 
 export function runnerCreditReserveTargetForInput(
   input: AiDecisionInput,
-  rolesForCardId: (cardId: string | undefined) => string[],
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => string[],
 ): number {
   if (input.side !== "runner") return 0;
   let target = 4;
@@ -80,7 +81,7 @@ export function runnerCreditReserveTargetForInput(
 }
 
 export function createRunnerCreditReserveTargetForInput(dependencies: {
-  rolesForCardId: (cardId: string | undefined) => string[];
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => string[];
 }): (input: AiDecisionInput) => number {
   return (input) =>
     runnerCreditReserveTargetForInput(input, dependencies.rolesForCardId);
@@ -94,7 +95,7 @@ export function runnerPostRunReserveTargetForRemoteInput(
       input: AiDecisionInput,
       serverId: string,
     ) => boolean;
-    rolesForCardId: (cardId: string | undefined) => string[];
+    rolesForCardId: (cardId: CardDefinitionId | undefined) => string[];
   },
 ): number {
   const server = input.playerView.servers.find(
@@ -134,7 +135,7 @@ export function createRunnerPostRunReserveTargetForRemoteInput(dependencies: {
     input: AiDecisionInput,
     serverId: string,
   ) => boolean;
-  rolesForCardId: (cardId: string | undefined) => string[];
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => string[];
 }): (input: AiDecisionInput, serverId: string) => number {
   return (input, serverId) =>
     runnerPostRunReserveTargetForRemoteInput(input, serverId, dependencies);

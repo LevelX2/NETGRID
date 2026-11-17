@@ -50,7 +50,7 @@ export function selectedRunnerHiddenDrawReplacementOptionId(
             option.card?.instanceId === cardId &&
             option.card.known !== false &&
             typeof option.card.definitionId === "number" &&
-            option.card.definitionId.length > 0,
+            option.card.definitionId > 0,
         )
       );
     });

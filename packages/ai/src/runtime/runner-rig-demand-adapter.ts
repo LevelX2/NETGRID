@@ -556,7 +556,7 @@ function memorySupportProviders(
     visible
       .map((provider) => provider.definitionId)
       .filter(
-        (definitionId): definitionId is string => definitionId !== undefined,
+        (definitionId) => definitionId !== undefined,
       ),
   );
   const deck = (input.ownDeckSnapshot?.cards ?? []).flatMap((entry) => {

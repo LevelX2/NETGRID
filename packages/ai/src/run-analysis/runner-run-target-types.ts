@@ -91,7 +91,7 @@ export type RunActionProjection = {
   actionId: string;
   actionType: string;
   sourceKind: RunnerRunActionSourceKind;
-  sourceCardId?: string;
+  sourceCardId?: number;
   targetServerId?: string;
   targetKind?: RunnerRunTargetKind;
   accessServerId?: string;

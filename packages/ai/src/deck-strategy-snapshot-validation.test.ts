@@ -1,6 +1,6 @@
 import { createGameAfterSetup } from "@netgrid/engine";
+import { ORIGINALSET_DEFAULT_DECKS, type Side } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
-import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import {
   assertValidAiDeckSnapshotForRuntime,
   buildAiDecisionInput,
@@ -9,6 +9,7 @@ import {
   type AiDeckStrategyDeckSnapshot,
   type AiDeckSnapshotRuntimeErrorCode,
 } from "./index";
+import { deckSnapshotForSimulation } from "./simulation/simulation-config-helpers";
 
 describe("AI deck snapshot runtime validation", () => {
   it("builds a normal AI decision input with a valid ownDeckSnapshot", () => {
@@ -16,7 +17,7 @@ describe("AI deck snapshot runtime validation", () => {
       matchId: "ai-deck-snapshot-valid",
       seed: "ai-deck-snapshot-valid",
     });
-    const snapshot = snapshotById("demo_corp_008_snapshot_v0_8");
+    const snapshot = snapshotForSide("corp");
 
     const input = buildAiDecisionInput(state, "corp", {
       difficulty: "normal",
@@ -49,7 +50,7 @@ describe("AI deck snapshot runtime validation", () => {
       () =>
         buildAiDecisionInput(state, "corp", {
           difficulty: "normal",
-          ownDeckSnapshot: snapshotById("demo_runner_008_snapshot_v0_8"),
+          ownDeckSnapshot: snapshotForSide("runner"),
         }),
       "ai_deck_snapshot_side_mismatch",
     );
@@ -60,12 +61,8 @@ describe("AI deck snapshot runtime validation", () => {
       matchId: "ai-deck-snapshot-unknown-card",
       seed: "ai-deck-snapshot-unknown-card",
     });
-    const snapshot = structuredClone(
-      snapshotById("demo_corp_008_snapshot_v0_8"),
-    );
-    snapshot.cards = [
-      { cardId: "unknown_runtime_card_for_snapshot_test", quantity: 1 },
-    ];
+    const snapshot = snapshotForSide("corp");
+    snapshot.cards = [{ cardId: Number.MAX_SAFE_INTEGER, quantity: 1 }];
 
     expectSnapshotError(
       () =>
@@ -77,22 +74,30 @@ describe("AI deck snapshot runtime validation", () => {
     );
   });
 
-  it.each(["duplicate", "malformed"])("rejects %s card rows", (invalidity) => {
-    const snapshot = snapshotById("demo_corp_008_snapshot_v0_8");
-    if (invalidity === "duplicate") {
-      snapshot.cards.push({ ...snapshot.cards[0]! });
-    } else {
-      snapshot.cards.push(null as never);
-    }
+  it.each(["duplicate", "malformed", "string card identifier"])(
+    "rejects %s card rows",
+    (invalidity) => {
+      const snapshot = snapshotForSide("corp");
+      if (invalidity === "duplicate") {
+        snapshot.cards.push({ ...snapshot.cards[0]! });
+      } else if (invalidity === "string card identifier") {
+        snapshot.cards[0] = {
+          ...snapshot.cards[0]!,
+          cardId: String(snapshot.cards[0]!.cardId) as never,
+        };
+      } else {
+        snapshot.cards.push(null as never);
+      }
 
-    expectSnapshotError(
-      () => assertValidAiDeckSnapshotForRuntime(snapshot, { side: "corp" }),
-      "ai_deck_snapshot_invalid",
-    );
-  });
+      expectSnapshotError(
+        () => assertValidAiDeckSnapshotForRuntime(snapshot, { side: "corp" }),
+        "ai_deck_snapshot_invalid",
+      );
+    },
+  );
 
   it("rejects stale ownDeckSnapshot metadata for normal runtime", () => {
-    const snapshot = snapshotById("demo_corp_008_snapshot_v0_8");
+    const snapshot = snapshotForSide("corp");
 
     expectSnapshotError(
       () =>
@@ -105,12 +110,8 @@ describe("AI deck snapshot runtime validation", () => {
   });
 });
 
-function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
-  const snapshot = (
-    snapshotsData08.snapshots as AiDeckStrategyDeckSnapshot[]
-  ).find((candidate) => candidate.deckSnapshotId === snapshotId);
-  if (!snapshot) throw new Error(`Missing test deck snapshot ${snapshotId}`);
-  return structuredClone(snapshot);
+function snapshotForSide(side: Side): AiDeckStrategyDeckSnapshot {
+  return deckSnapshotForSimulation(ORIGINALSET_DEFAULT_DECKS[side]);
 }
 
 function expectSnapshotError(

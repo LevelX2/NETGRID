@@ -1,4 +1,8 @@
-import type { CorpScoreRecoveryQuote, LegalAction } from "@netgrid/shared";
+import {
+  isCardDefinitionId,
+  type CorpScoreRecoveryQuote,
+  type LegalAction,
+} from "@netgrid/shared";
 
 export function sanitizeCorpScoreRecoveryQuote(
   action: LegalAction,
@@ -24,8 +28,7 @@ export function sanitizeCorpScoreRecoveryQuote(
         !o ||
         typeof o.cardId !== "string" ||
         o.cardId.length === 0 ||
-        typeof o.definitionId !== "number" ||
-        o.definitionId.length === 0 ||
+        !isCardDefinitionId(o.definitionId) ||
         o.cardId === q.sourceCardId ||
         ![o.playClicks, o.playCredits, o.advancementAmount].every(
           (n) => Number.isSafeInteger(n) && n >= 0,

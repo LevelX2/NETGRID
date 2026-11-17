@@ -129,7 +129,7 @@ export function blockedPathAssessment(
       ? {
           unbreakableIceTitle:
             visibleRunCardDefinition(unpayableIceDefinitionId)?.title ??
-            unpayableIceDefinitionId,
+            String(unpayableIceDefinitionId),
         }
       : {}),
     ...(missingCoverage && missingCoverage.length > 0
@@ -167,7 +167,7 @@ export function hardUnbrokenEffectBlockedPathAssessment(params: {
     : undefined;
   const title = params.iceDefinitionId
     ? (visibleRunCardDefinition(params.iceDefinitionId)?.title ??
-      params.iceDefinitionId)
+      String(params.iceDefinitionId))
     : undefined;
   return {
     blocked: true,
@@ -408,7 +408,7 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
     pendingFreeBreaks,
     breakerStrengths,
     targetSubroutines ??
-      (visibleRunCardDefinition(ice.definitionId ?? "")?.subroutines ?? [])
+      (visibleRunCardDefinition(ice.definitionId)?.subroutines ?? [])
         .filter(
           (subroutine) =>
             subroutine.type === "end_the_run" ||
@@ -436,7 +436,7 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
     .filter((cost): cost is BreakAssessment => cost !== undefined);
   const allTargets =
     targetSubroutines ??
-    (visibleRunCardDefinition(ice.definitionId ?? "")?.subroutines ?? [])
+    (visibleRunCardDefinition(ice.definitionId)?.subroutines ?? [])
       .filter((subroutine) => subroutine.type === "end_the_run")
       .map((subroutine) => ({ id: subroutine.id, type: subroutine.type }));
   const withPendingFreeBreak: BreakAssessment[] = (

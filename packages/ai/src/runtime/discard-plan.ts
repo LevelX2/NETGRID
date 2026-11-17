@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
 import { sortedUnique } from "./collection";
@@ -5,9 +6,9 @@ import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import { rolesHaveBreakerRole } from "./breaker-role-match";
 
 export type DiscardPlanDependencies = {
-  readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
+  readonly rolesForCardId: (cardId: CardDefinitionId | undefined) => readonly string[];
   readonly definitionTypeForCardId: (
-    cardId: string | undefined,
+    cardId: CardDefinitionId | undefined,
   ) => string | undefined;
 };
 

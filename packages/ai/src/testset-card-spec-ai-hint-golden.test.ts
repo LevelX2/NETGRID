@@ -36,7 +36,7 @@ describe("Testset CardSpec AI hint reviewed semantic golden", () => {
         cardId: entry.definition.id,
         hint: deriveCardSpecAiHint(entry),
       }))
-      .sort((left, right) => left.cardId.localeCompare(right.cardId));
+      .sort((left, right) => (left.cardId - right.cardId));
 
     expect(reviewedGolden.cards).toHaveLength(36);
     expect(compiled).toEqual(reviewedGolden.cards);
@@ -65,7 +65,7 @@ describe("Testset CardSpec AI hint reviewed semantic golden", () => {
     for (const { cardId, hint } of reviewedGolden.cards)
       expect(
         (hint.requiredMechanics ?? []).filter((token) => forbidden.has(token)),
-        cardId,
+        String(cardId),
       ).toEqual([]);
   });
 

@@ -627,7 +627,7 @@ function evaluateKnownHqAccessPayoff(
     const cheapestTrashCard = [...currentlyProductiveTrashCards].sort(
       (left, right) =>
         left.trashCost - right.trashCost ||
-        left.definitionId.localeCompare(right.definitionId),
+        (left.definitionId - right.definitionId),
     )[0]!;
     return {
       payoff: "trash_affordable",
@@ -1110,7 +1110,7 @@ function recentRunnerDeclinedKnownRdTopTrash(
       publicActor(event) === "runner" &&
       publicActionType(event) === "access_card" &&
       eventServerId(event) === "rd" &&
-      stringPayloadValue(event, "cardDefinitionId") === definitionId,
+      event.publicPayload.cardDefinitionId === definitionId,
   );
   if (accessIndex < 0) return false;
   const accessEvent = history[accessIndex];
@@ -1156,7 +1156,7 @@ function recentRunnerDeclinedKnownHqTrash(
       publicActor(event) === "runner" &&
       publicActionType(event) === "access_card" &&
       eventServerId(event) === "hq" &&
-      stringPayloadValue(event, "cardDefinitionId") === definitionId,
+      event.publicPayload.cardDefinitionId === definitionId,
   );
   if (accessIndex < 0) return false;
   const accessEvent = history[accessIndex];

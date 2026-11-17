@@ -97,7 +97,7 @@ export function createTagPunishWindowDiagnosticsContext(
       const visiblePayoffCards = sortedUnique(
         visiblePunishOpportunities
           .map((opportunity) => opportunity.cardId)
-          .filter((cardId): cardId is string => Boolean(cardId)),
+          .filter((cardId) => cardId !== undefined),
       );
       const survivalContext =
         dependencies.runnerSurvivalCounterContextForInput(input);
