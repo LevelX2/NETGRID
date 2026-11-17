@@ -2,6 +2,8 @@ import type { DeckDefinition } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import proteusDeckData from "../../../../data/decks/proteus-playtest-decks-2026-05-25.json";
 import { simulateAiGame } from "../simulation";
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
+import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
 
 describe("Proteus Fetal AI install plan coverage", () => {
   const decks = proteusDeckData.decks as DeckDefinition[];
@@ -12,8 +14,9 @@ describe("Proteus Fetal AI install plan coverage", () => {
     "proteus_runner_rd_bad_publicity_2026_05_25",
   ]) {
     it(`covers both open centrals without donating a nonlethal agenda Ambush against ${runnerDeckId}`, () => {
+      let opening: AiSimulationDecisionCheckpointCapture | undefined;
       const summary = simulateAiGame({
-        seed: "proteus-pilot-qualifier-02",
+        seed: "proteus-fetal-central-coverage-21",
         maxActions: 6,
         runnerDeck: requireDeck(runnerDeckId),
         corpDeck,
@@ -22,8 +25,20 @@ describe("Proteus Fetal AI install plan coverage", () => {
         aiDecisionRuntimeOptions: {
           runnerTurnPlannerMode: "legacy_compare",
         },
+        testOnlyDecisionCheckpointCapture: {
+          actionIndices: [3],
+          capture: (snapshot) => {
+            opening = snapshot;
+          },
+        },
       });
 
+      expect(opening?.side).toBe("corp");
+      const openingHq = opening?.input.playerView.own.gripOrHq ?? [];
+      expect(openingHq.map((card) => card.definitionId)).toContain(62);
+      expect(
+        openingHq.filter((card) => card.type === "ice").length,
+      ).toBeGreaterThanOrEqual(2);
       expect(summary.terminationKind, fetalDiagnostic(summary)).toBe(
         "action_limit",
       );
@@ -56,6 +71,7 @@ describe("Proteus Fetal AI install plan coverage", () => {
   }
 
   it("does not donate Fetal AI while the score remote still lacks certified defense [legacy_compare]", () => {
+    let fetalAvailable = false;
     const summary = simulateAiGame({
       seed: "proteus-pilot-qualifier-10",
       maxActions: 23,
@@ -66,6 +82,18 @@ describe("Proteus Fetal AI install plan coverage", () => {
       aiDecisionRuntimeOptions: {
         runnerTurnPlannerMode: "legacy_compare",
       },
+      testOnlyDecisionCheckpointCapture: {
+        actionIndices: Array.from({ length: 23 }, (_, index) => index),
+        capture: (snapshot) => {
+          if (
+            snapshot.side === "corp" &&
+            snapshot.input.playerView.own.gripOrHq.some(
+              (card) => card.definitionId === 62,
+            )
+          )
+            fetalAvailable = true;
+        },
+      },
     });
 
     expect(summary.terminationKind, fetalDiagnostic(summary)).toBe(
@@ -74,11 +102,16 @@ describe("Proteus Fetal AI install plan coverage", () => {
     expect(summary.errors).toEqual([]);
     expect(summary.runtimeFailures).toEqual([]);
     expect(summary.replayOk).toBe(true);
-    const admittedAmbushEvidence =
-      "plan_scheduler:assess:validated:plan:corp.ambush_and_bluff:ambush%3Acorp_62_1%3Asetup%3Anew_remote";
+    expect(fetalAvailable, fetalDiagnostic(summary)).toBe(true);
+    const admittedAmbushPrefix =
+      "plan_scheduler:assess:validated:plan:corp.ambush_and_bluff:";
     expect(
       summary.actionSequence.some((entry) =>
-        entry.evidence.includes(admittedAmbushEvidence),
+        entry.evidence.some(
+          (value) =>
+            value.startsWith(admittedAmbushPrefix) &&
+            referencesDefaultDeckCard(value, 62),
+        ),
       ),
       fetalDiagnostic(summary),
     ).toBe(false);

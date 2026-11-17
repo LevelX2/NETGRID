@@ -12,7 +12,7 @@ describe("Proteus restricted multi-run plan-first coverage", () => {
   it("converts Pirate Broadcast's exact R&D and Archives sequence legs through the generic run-window plan [legacy_compare]", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateAiGame({
-      seed: "proteus-pilot-qualifier-01",
+      seed: "pirate-broadcast-sequence-5",
       maxActions: 105,
       runnerDeck: deck("proteus_runner_rd_bad_publicity_2026_05_25"),
       corpDeck: pirateBroadcastCoverageCorpDeck(),

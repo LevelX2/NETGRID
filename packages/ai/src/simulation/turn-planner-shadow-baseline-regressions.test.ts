@@ -15,7 +15,7 @@ const TOP_RUNNERS_CONFERENCE = 396;
 describe("turn-planner shadow behavior-baseline regressions", () => {
   it("keeps Top Runners' Conference install plan-owned at the captured opening state [legacy_compare]", () => {
     const { summary, capture } = runCapturedSeed(
-      "ai-behavior-baseline-v1-05",
+      "top-conference-opening-11",
       8,
     );
     const installations = capture.input.legalActions.filter(
