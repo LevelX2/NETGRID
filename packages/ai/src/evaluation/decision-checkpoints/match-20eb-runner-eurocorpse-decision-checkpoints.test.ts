@@ -14,6 +14,7 @@ import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfol
 
 const KRASH_INSTANCE_ID = "c1jt";
 const STREETWARE_DEFINITION_ID = 208;
+const TEMPLE_MICROCODE_OUTLET_DEFINITION_ID = 326;
 
 describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
   it.each([
@@ -47,6 +48,12 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
       // inside the existing three-turn automatic payout horizon.
       checkpoint.engine.testOnlyGameState.runner.credits = 7;
       checkpoint.source.kind = "synthetic_companion";
+      checkpoint.expectation.acceptableActions = [
+        {
+          type: "play_event",
+          sourceDefinitionId: TEMPLE_MICROCODE_OUTLET_DEFINITION_ID,
+        },
+      ];
     });
     const result = runAiDecisionCheckpoint(control);
     expect(result.ok, result.message).toBe(true);
