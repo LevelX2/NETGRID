@@ -3352,8 +3352,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
   });
 
   it.each([
-    { seed: "rio-visible-7", expectedRoll: 1, expectedRunEnded: true },
-    { seed: "rio-visible-5", expectedRoll: 4, expectedRunEnded: false },
+    { seed: "rio-visible-4", expectedRoll: 1, expectedRunEnded: true },
+    { seed: "rio-visible-6", expectedRoll: 4, expectedRunEnded: false },
   ])(
     "rolls Rio de Janeiro City Grid visibly after passed ICE on roll $expectedRoll",
     ({ seed, expectedRoll, expectedRunEnded }) => {

@@ -27,11 +27,10 @@ Werte aus Engine-Daten. Die Engine verwendet im öffentlichen Verlauf
 die Nummer des Übergangs plus eins und der Server für terminalen
 Zeitablauf die nächste Nummer.
 
-`codex/compact-runtime-run-ids` ergänzt positive Run-IDs aus der
-StateVersion des eröffnenden Übergangs. Engine, Spieleransicht, KI und
-SQLite führen diese Referenz als Zahl. Der Branch enthält den separaten
-Speicherschnitt mit Schema 7. Kartenlisten in SQLite referenzieren
-bereits die Position der zugehörigen Instanzzeile.
+Run-IDs werden aus der StateVersion des eröffnenden Übergangs vergeben.
+Engine, Spieleransicht, KI und SQLite führen diese Referenz als Zahl.
+Der gemeinsame Worktree verwendet SQLite-Schema 7. Kartenlisten
+referenzieren die Position der zugehörigen Instanzzeile.
 
 Die Abnahme umfasst noch die KI-Regressionen und ihre aktiven
 Aufzeichnungen. Die weiteren Schritte betreffen insbesondere

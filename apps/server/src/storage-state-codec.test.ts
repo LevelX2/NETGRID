@@ -149,6 +149,16 @@ describe("SQLite game state codec", () => {
       ).run(row.gameStateJson, created.matchId);
 
       db.prepare(
+        "UPDATE game_states SET game_state_json = json_set(game_state_json, '$.run.runId', ?) WHERE match_id = ?",
+      ).run("run_1", created.matchId);
+      await expect(storage.load(created.matchId)).rejects.toMatchObject({
+        code: "stored_match_invalid",
+      });
+      db.prepare(
+        "UPDATE game_states SET game_state_json = ? WHERE match_id = ?",
+      ).run(row.gameStateJson, created.matchId);
+
+      db.prepare(
         "UPDATE game_states SET game_state_json = json_set(game_state_json, '$.randomDrawRecords[0][1]', -1) WHERE match_id = ?",
       ).run(created.matchId);
       await expect(storage.load(created.matchId)).rejects.toMatchObject({

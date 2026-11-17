@@ -222,7 +222,7 @@ function openAccess(
   state.phase = "run";
   state.timingPoint = "access.resolve_card";
   state.run = {
-    runId: `run_${state.stateVersion + 1}`,
+    runId: state.stateVersion + 1,
     attackedServerId: serverId,
     phase: "access",
     position: { kind: "server", serverId },

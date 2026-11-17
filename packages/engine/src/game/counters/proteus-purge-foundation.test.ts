@@ -43,7 +43,7 @@ function proteusPurgeFixture(): GameState {
   state.timingPoint = "run.jack_out_window";
   state.corp.clicks = 0;
   state.runnerVirusPurgeWindow = {
-    windowId: "run_1.special_effect.1",
+    windowId: "1.special_effect.1",
     timingFamily: "run_special_effect",
   };
   state.purgeableRunnerVirusCounters = {
@@ -85,7 +85,7 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
         purgeModel: "future_action_debt",
         actionDebtAdded: 3,
         actionCapacityMinimumAvailableActions: 0,
-        timingWindowId: "run_1.special_effect.1",
+        timingWindowId: "1.special_effect.1",
       },
     });
     expect(legalActions.map((action) => action.type)).not.toContain(
@@ -148,7 +148,7 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
       purgedRunnerVirusCounters: 4,
       actionDebtAdded: 3,
       corpActionDebtTotalAfter: 3,
-      timingWindowId: "run_1.special_effect.1",
+      timingWindowId: "1.special_effect.1",
       timingFamily: "run_special_effect",
     });
     expect(

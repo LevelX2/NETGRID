@@ -43,7 +43,7 @@ describe("hidden resource payment preselection", () => {
       sourceAbilityId: "test_hidden_resource:withdraw-1",
       capabilityKey: "withdraw-1",
       selectedTurnSerial: 7,
-      selectedRunId: "run-1",
+      selectedRunId: 1,
     });
     expect(
       hiddenResourcePaymentPreselectionIsAvailable(
@@ -328,7 +328,7 @@ function view(
     },
     servers: [],
     run: {
-      runId: "run-1",
+      runId: 1,
       attackedServerId: "hq",
       phase: "encounter_ice",
       successful: false,

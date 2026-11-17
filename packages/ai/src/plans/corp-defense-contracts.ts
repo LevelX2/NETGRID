@@ -1,3 +1,4 @@
+import type { RunId } from "@netgrid/shared";
 import type { CorpRestrictedCreditRouteQuote } from "@netgrid/shared";
 import type { CorpDefenseScoreReserveAssessment } from "../corp/defense/corp-defense-score-reserve";
 import { type CorpExactIceRezRouteProjection } from "../runtime/corp-exact-ice-rez-route";
@@ -91,7 +92,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
         choiceSource: string;
         sourceStateVersion: number;
         traceId: string;
-        runId: string;
+        runId: RunId;
         sourceIceInstanceId: string;
         sourceDefinitionId: number;
         subroutineIndex: number;
@@ -104,7 +105,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
         choiceSource: string;
         sourceStateVersion: number;
         origin:
-          | { kind: "encounter"; runId: string }
+          | { kind: "encounter"; runId: RunId }
           | { kind: "trace_success"; traceId: string };
         sourceIceInstanceId: string;
         selectedOptionId: string;
@@ -126,7 +127,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
         kind: "classic_deflector_redirect";
         choiceId: string;
         sourceStateVersion: number;
-        runId: string;
+        runId: RunId;
         sourceIceInstanceId: string;
         sourceDefinitionId: number;
         subroutineIndex: number;

@@ -1,3 +1,4 @@
+import type { RunId } from "@netgrid/shared";
 import {
   type RunnerInformationBoundaryReassessmentSignal,
   type RunnerPlanDomain,
@@ -13,7 +14,7 @@ export type RunnerRunOrigin = {
     sourceCardInstanceId: string;
     targetIceInstanceId: string;
     serverId: string;
-    runId: string;
+    runId: RunId;
     stateVersion: number;
   }>;
   postBreakTrashCommitment?: RunnerPressureSignal["postBreakTrashCommitment"];

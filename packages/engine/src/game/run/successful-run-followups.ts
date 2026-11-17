@@ -1,3 +1,4 @@
+import { parseRunIdToken } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -99,7 +100,7 @@ export function resolveCorpShuffleRunnerGripAfterSuccessfulRunChoice(
   )
     throw new Error("Es ist keine Indiscriminate-Response-Team-Choice offen.");
   const [, sourceCardId = "", choiceRunId = ""] = choice.source.split(":");
-  if (!sourceCardId || choiceRunId !== run.runId)
+  if (!sourceCardId || parseRunIdToken(choiceRunId) !== run.runId)
     throw new Error(
       "Die Indiscriminate-Response-Team-Choice passt nicht zum Run.",
     );

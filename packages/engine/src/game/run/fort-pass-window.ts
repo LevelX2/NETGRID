@@ -1,3 +1,4 @@
+import { parseRunIdToken } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardInstance,
@@ -750,7 +751,7 @@ export function resolveHqIceSwapChoice(
   const serverId = serverIdRaw as Exclude<ServerId, "new_remote">;
   const iceIndex = Number(iceIndexRaw ?? -1);
   const run = mustRun(host.state);
-  if (run.runId !== runId || run.attackedServerId !== serverId)
+  if (run.runId !== parseRunIdToken(runId) || run.attackedServerId !== serverId)
     throw new Error("Die HQ-Ice-Swap-Choice gehoert nicht zu diesem Run.");
   const server = host.servers.mustServer(serverId);
   if (!server.root.includes(sourceCardId))

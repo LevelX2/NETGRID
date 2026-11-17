@@ -1,4 +1,4 @@
-import { isCardDefinitionId, isMatchEventId } from "@netgrid/shared";
+import { isCardDefinitionId, isMatchEventId, isRunId, type RunId } from "@netgrid/shared";
 import { sanitizeCurrentCorpPunishQuoteSet } from "./corp/punish/punish-route-quote-sanitizer";
 import { sanitizeCorpStartDrawQuote } from "./runtime/corp-start-draw-quote-input";
 import {
@@ -778,6 +778,8 @@ function sanitizePlayerView(
   view: PlayerView,
   publicEvents: PublicGameEvent[],
 ): PlayerView {
+  if (view.run?.runId !== undefined && !isRunId(view.run.runId))
+    throw new Error("invalid_current_run_id");
   const fortTrash = view.run?.successfulRunFortIceTrashQuote;
   if (
     fortTrash &&
@@ -2739,7 +2741,7 @@ function sanitizeVisibleCorpIcePostRezRunQuote(
   if (
     bypassContinuation !== undefined &&
     (!isPlainObjectRecord(bypassContinuation) ||
-      !isNonEmptyString(bypassContinuation.runId) ||
+      !isRunId(bypassContinuation.runId) ||
       !isNonEmptyString(bypassContinuation.outerIceId) ||
       !isNonNegativeSafeInteger(bypassContinuation.rezCredits))
   )
@@ -2802,7 +2804,7 @@ function sanitizeVisibleCorpIcePostRezRunQuote(
     ...(bypassContinuation
       ? {
           bypassContinuation: {
-            runId: bypassContinuation.runId as string,
+            runId: bypassContinuation.runId as RunId,
             outerIceId: bypassContinuation.outerIceId as string,
             rezCredits: bypassContinuation.rezCredits as number,
           },

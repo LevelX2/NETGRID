@@ -40,7 +40,7 @@ describe("PublicContext golden payload gate", () => {
     const next = structuredClone(previous);
     next.stateVersion = previous.stateVersion + 1;
     const run: NonNullable<GameState["run"]> = {
-      runId: "run_public_context_golden",
+      runId: 147662,
       attackedServerId: "rd",
       phase: "approach_ice",
       accessCount: 3,

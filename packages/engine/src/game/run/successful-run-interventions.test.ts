@@ -194,7 +194,7 @@ function makeHost(
     },
     cardInstances,
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "remote_1",
       phase: "access",
       position: { kind: "server", serverId: "remote_1" },

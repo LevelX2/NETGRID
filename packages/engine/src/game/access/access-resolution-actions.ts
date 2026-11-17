@@ -1,3 +1,4 @@
+import { parseRunIdToken } from "@netgrid/shared";
 import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import { delayedAgendaAccessReplacementEffect } from "./access-run-effects";
 import type {
@@ -244,7 +245,7 @@ export function resolveMercenaryCurrentAccessTrashChoice(
     sourceDefinitionIdToken,
   );
   const run = mustRun(host);
-  if (run.runId !== runId)
+  if (run.runId !== parseRunIdToken(runId))
     throw new Error(
       "Die Current-Access-Trash-Choice gehoert zu einem anderen Run.",
     );

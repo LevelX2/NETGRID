@@ -275,7 +275,7 @@ function forceRunAtServer(
 ): void {
   const server = remoteServer(state, serverId);
   state.run = {
-    runId: `${state.matchId}_${serverId}_forced_run`,
+    runId: state.stateVersion + 1,
     attackedServerId: serverId,
     phase: "movement",
     position: { kind: "server", serverId },
@@ -845,7 +845,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     addCorpRoot(beforeServer, PAVIT, "pavit_before", "remote_1", false);
     addCorpIce(beforeServer, WALL, "pavit_before_ice", "remote_1", true);
     beforeServer.run = {
-      runId: "pavit_before_run",
+      runId: 189855,
       attackedServerId: "remote_1",
       phase: "approach_ice",
       position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
@@ -1290,7 +1290,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     );
     state.runner.credits = 5;
     state.run = {
-      runId: "obfuscated_trace_run",
+      runId: 604039,
       attackedServerId: "remote_1",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },

@@ -273,7 +273,7 @@ describe("run-core-execution", () => {
     expect(state.activeSide).toBe("runner");
     expect(state.runnerTurnFlags?.runAttemptsThisTurn).toBe(1);
     expect(state.run).toMatchObject({
-      runId: "run_42",
+      runId: 42,
       attackedServerId: serverId,
       phase: "encounter_ice",
       position: { kind: "ice", serverId, iceIndex },

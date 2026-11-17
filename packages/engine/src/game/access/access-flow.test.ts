@@ -123,7 +123,7 @@ function makeHost(
   } as unknown as GameState;
   if (options.run === undefined) {
     state.run = {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "remote_1",
     } as unknown as NonNullable<GameState["run"]>;
   } else if (options.run) {
@@ -357,7 +357,7 @@ describe("access flow execution", () => {
       zone: "hq",
     });
     const breach = {
-      breachId: "run_hq.breach",
+      breachId: "709564.breach",
       serverId: "hq" as Exclude<ServerId, "new_remote">,
       accessMode: "multi" as const,
       queue: [
@@ -384,7 +384,7 @@ describe("access flow execution", () => {
     };
     const { host, state } = makeHost({
       run: {
-        runId: "run_hq",
+        runId: 709564,
         attackedServerId: "hq",
         breach,
       } as unknown as NonNullable<GameState["run"]>,
@@ -443,7 +443,7 @@ describe("access flow execution", () => {
   it("exposes installed corp cards when Schematics Search Engine accesses HQ", () => {
     const { host, state, effects } = makeHost({
       run: {
-        runId: "run_1",
+        runId: 1,
         attackedServerId: "hq",
       } as unknown as NonNullable<GameState["run"]>,
       definitions: {
@@ -539,7 +539,7 @@ describe("access flow execution", () => {
   it("steals an accessed agenda after revalidating the current steal cost", () => {
     const { host, state, spentRunnerCredits, finishedRuns } = makeHost({
       run: {
-        runId: "run_1",
+        runId: 1,
         attackedServerId: "remote_1",
         accessedCardId: "agenda",
       } as unknown as NonNullable<GameState["run"]>,
@@ -581,7 +581,7 @@ describe("access flow execution", () => {
     const swissId = "steal_support_swiss" as CardInstanceId;
     const { host, state, spentRunnerCredits } = makeHost({
       run: {
-        runId: "run_support",
+        runId: 724938,
         attackedServerId: "rd",
         accessedCardId: "fetal",
       } as unknown as NonNullable<GameState["run"]>,
@@ -636,7 +636,7 @@ describe("access flow execution", () => {
     const { host, state, trashPayments, trashedCards, finishedRuns } = makeHost(
       {
         run: {
-          runId: "run_1",
+          runId: 1,
           attackedServerId: "remote_1",
           accessedCardId: "asset",
         } as unknown as NonNullable<GameState["run"]>,
@@ -678,7 +678,7 @@ describe("access flow execution", () => {
     const { host, state, spentRunnerCredits, trashPayments, trashedCards } =
       makeHost({
         run: {
-          runId: "run_1",
+          runId: 1,
           attackedServerId: "rd",
           accessedCardId: "operation",
         } as unknown as NonNullable<GameState["run"]>,
@@ -795,7 +795,7 @@ describe("access flow execution", () => {
     };
     const wrongKind = makeHost({
       run: {
-        runId: "run_2",
+        runId: 2,
         attackedServerId: "rd",
         accessedCardId: "operation",
       } as unknown as NonNullable<GameState["run"]>,
@@ -827,7 +827,7 @@ describe("access flow execution", () => {
 
     const agendaState = makeHost({
       run: {
-        runId: "run_3",
+        runId: 3,
         attackedServerId: "rd",
         accessedCardId: "agenda",
       } as unknown as NonNullable<GameState["run"]>,
@@ -881,7 +881,7 @@ describe("access flow execution", () => {
 
     const poorState = makeHost({
       run: {
-        runId: "run_4",
+        runId: 4,
         attackedServerId: "rd",
         accessedCardId: "operation",
       } as unknown as NonNullable<GameState["run"]>,
@@ -920,16 +920,16 @@ describe("access flow execution", () => {
       mercenary: definition(203, "resource"),
     };
     const run = {
-      runId: "run_multi",
+      runId: 151144,
       attackedServerId: "rd",
       accessedCardId: "agenda",
       breach: {
-        breachId: "run_multi.breach",
+        breachId: "151144.breach",
         serverId: "rd",
         accessMode: "multi",
         queue: [
           {
-            entryId: "run_multi.breach.0",
+            entryId: "151144.breach.0",
             cardInstanceId: "asset",
             serverId: "rd",
             zone: "rd",
@@ -937,7 +937,7 @@ describe("access flow execution", () => {
             hiddenInfo: true,
           },
           {
-            entryId: "run_multi.breach.1",
+            entryId: "151144.breach.1",
             cardInstanceId: "agenda",
             serverId: "rd",
             zone: "rd",
@@ -949,7 +949,7 @@ describe("access flow execution", () => {
         completed: false,
         accessedSummaries: [
           {
-            entryId: "run_multi.breach.0",
+            entryId: "151144.breach.0",
             status: "declined",
             cardDefinitionId: 1151438755,
           },
@@ -1046,7 +1046,7 @@ describe("access flow execution", () => {
 
   it("adds Highlighter access context to each breached R&D access", () => {
     const breach = {
-      breachId: "run_1.breach",
+      breachId: "1.breach",
       serverId: "rd" as Exclude<ServerId, "new_remote">,
       accessMode: "multi" as const,
       queue: [
@@ -1081,7 +1081,7 @@ describe("access flow execution", () => {
     };
     const { host, state } = makeHost({
       run: {
-        runId: "run_1",
+        runId: 1,
         attackedServerId: "rd",
         breach,
       } as unknown as NonNullable<GameState["run"]>,
@@ -1116,7 +1116,7 @@ describe("access flow execution", () => {
 
   it("defers Garbage counter spending until the run ends", () => {
     const breach = {
-      breachId: "run_1.breach",
+      breachId: "1.breach",
       serverId: "rd" as Exclude<ServerId, "new_remote">,
       accessMode: "single" as const,
       queue: [
@@ -1135,7 +1135,7 @@ describe("access flow execution", () => {
     };
     const { host, state, trashPayments, trashedCards } = makeHost({
       run: {
-        runId: "run_1",
+        runId: 1,
         attackedServerId: "rd",
         accessedCardId: "operation",
         breach,
@@ -1185,7 +1185,7 @@ describe("access flow execution", () => {
 
   it("advances breach queue on decline without finishing the run", () => {
     const breach = {
-      breachId: "run_1.breach",
+      breachId: "1.breach",
       serverId: "remote_1" as Exclude<ServerId, "new_remote">,
       accessMode: "multi" as const,
       queue: [
@@ -1212,7 +1212,7 @@ describe("access flow execution", () => {
     };
     const { host, state, finishedRuns } = makeHost({
       run: {
-        runId: "run_1",
+        runId: 1,
         attackedServerId: "remote_1",
         accessedCardId: "asset",
         breach,
@@ -1241,7 +1241,7 @@ describe("access flow execution", () => {
 
   it("auto-advances archives breach cards that need no decision", () => {
     const breach = {
-      breachId: "run_1.breach",
+      breachId: "1.breach",
       serverId: "archives" as Exclude<ServerId, "new_remote">,
       accessMode: "multi" as const,
       queue: [
@@ -1268,7 +1268,7 @@ describe("access flow execution", () => {
     };
     const { host, state, finishedRuns } = makeHost({
       run: {
-        runId: "run_1",
+        runId: 1,
         attackedServerId: "archives",
         breach,
       } as unknown as NonNullable<GameState["run"]>,

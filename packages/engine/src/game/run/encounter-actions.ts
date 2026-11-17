@@ -542,7 +542,7 @@ export function buildRunnerEncounterActions(
   return {
     handled: true,
     legalActions: actions,
-    encounterId: run.runId,
+    encounterId: String(run.runId),
     iceId: encounteredIceId,
   };
 }

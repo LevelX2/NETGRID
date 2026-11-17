@@ -108,7 +108,7 @@ function makeState(): GameState {
       rd_2: instance("rd_2", 1095506807, { side: "corp", zone: "rd" }),
     },
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "rd", iceIndex: 0 },

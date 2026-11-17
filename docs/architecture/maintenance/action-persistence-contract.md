@@ -43,7 +43,8 @@ Fehlgeschlagene KI-Versuche führen ihren Diagnosecode im Fehlerdatensatz.
 Ereignisblobs beziehen ihre ID aus der Tabellenzeile. Öffentliche
 Ereignisblobs beziehen daraus auch StateVersions und StateHash.
 
-Das Match-Schema 6 erfordert einen passenden Matchdatenpfad. Ein konfigurierter
+Das Match-Schema 7 speichert aktive Runs mit einer numerischen Run-ID
+und erfordert einen passenden Matchdatenpfad. Ein konfigurierter
 separater Accountpfad kann die Konto-Tabellen einer Datenbank mit Schema 3
 weiterverwenden.
 

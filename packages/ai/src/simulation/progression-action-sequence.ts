@@ -124,7 +124,7 @@ export function countPressureTargetSwitches(
 export function successfulRunAccessTargets(
   sequence: AiSimulationSummary["actionSequence"],
 ): string[] {
-  const byRun = new Map<string, string>();
+  const byRun = new Map<number, string>();
   for (const entry of sequence) {
     if (
       entry.side === "runner" &&

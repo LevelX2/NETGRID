@@ -2,7 +2,7 @@
   "sourceCommit": "773fd24e36f40684159dcbb80f222b43761b0634",
   "seed": "meta-ten-20261103-592-r2-039",
   "checkedStates": 350,
-  "stateHash": "fnv1a:b835c6b4",
+  "stateHash": "fnv1a:50ccd662",
   "state": {
     "matchId": "match_2b18796b0c6a67fe",
     "baseline": {
@@ -28010,7 +28010,7 @@
           "encounterWillEndRun": false,
           "traceStarted": true,
           "traceRulesProfile": "modern_open",
-          "traceId": "run_333.corp_440_1.0.trace",
+          "traceId": "333.corp_440_1.0.trace",
           "sourceCardId": "corp_440_1",
           "sourceDefinitionId": 440,
           "traceLimit": 6,
@@ -28058,7 +28058,7 @@
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "traceStarted": true,
-                "traceId": "run_333.corp_440_1.0.trace",
+                "traceId": "333.corp_440_1.0.trace",
                 "sourceCardId": "corp_440_1",
                 "traceLimit": 6,
                 "effectiveTraceLimit": 6,
@@ -28095,11 +28095,11 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "choiceKind": "bid_amount",
-          "choiceId": "run_333.corp_440_1.0.trace.corp.bid.348",
+          "choiceId": "333.corp_440_1.0.trace.corp.bid.348",
           "traceRulesProfile": "modern_open",
           "traceBidsRevealed": true,
           "sourceDefinitionId": 440,
-          "traceId": "run_333.corp_440_1.0.trace",
+          "traceId": "333.corp_440_1.0.trace",
           "traceStep": "corp_bid",
           "traceLimit": 6,
           "effectiveTraceLimit": 6,
@@ -28128,7 +28128,7 @@
               "actionId": "corp.resolve_choice",
               "clientKnownStateVersion": 348,
               "selectedChoices": {
-                "choiceId": "run_333.corp_440_1.0.trace.corp.bid.348",
+                "choiceId": "333.corp_440_1.0.trace.corp.bid.348",
                 "selectedOptionIds": [
                   "bid_0"
                 ]
@@ -28147,7 +28147,7 @@
               "expiresAtStateVersion": 348,
               "choiceRequirements": [
                 {
-                  "choiceId": "run_333.corp_440_1.0.trace.corp.bid.348",
+                  "choiceId": "333.corp_440_1.0.trace.corp.bid.348",
                   "minSelections": 1,
                   "maxSelections": 1,
                   "optionIds": [
@@ -28158,10 +28158,10 @@
                 }
               ],
               "payload": {
-                "choiceId": "run_333.corp_440_1.0.trace.corp.bid.348",
+                "choiceId": "333.corp_440_1.0.trace.corp.bid.348",
                 "choiceVisibility": "public",
                 "choiceKind": "bid_amount",
-                "traceId": "run_333.corp_440_1.0.trace",
+                "traceId": "333.corp_440_1.0.trace",
                 "traceStep": "corp_bid",
                 "traceLimit": 6,
                 "effectiveTraceLimit": 6,
@@ -28277,7 +28277,7 @@
     "turnSerial": 45,
     "temporaryProgramInstallReturns": [],
     "run": {
-      "runId": "run_333",
+      "runId": 333,
       "runnerActionOrdinal": 91,
       "attackedServerId": "rd",
       "phase": "encounter_ice",
@@ -28305,8 +28305,8 @@
       "futureEncounterIceStrengthBonus": 2,
       "lastPassedIceId": "corp_478_1",
       "rootRezWindowPassedKeys": [
-        "run_333:ice:rd:0",
-        "run_333:ice:rd:1"
+        "333:ice:rd:0",
+        "333:ice:rd:1"
       ],
       "breakerState": {
         "strengthModifiersByBreakerInstanceId": {},
@@ -28327,7 +28327,7 @@
       "traceAttemptedThisRun": true
     },
     "trace": {
-      "traceId": "run_333.corp_440_1.0.trace",
+      "traceId": "333.corp_440_1.0.trace",
       "sourceCardInstanceId": "corp_440_1",
       "sourceDefinitionId": 440,
       "traceRulesProfile": "modern_open",
@@ -28346,9 +28346,9 @@
       "runnerLink": 0
     },
     "pendingChoice": {
-      "choiceId": "run_333.corp_440_1.0.trace.runner.bid.349",
+      "choiceId": "333.corp_440_1.0.trace.runner.bid.349",
       "side": "runner",
-      "source": "trace:run_333.corp_440_1.0.trace",
+      "source": "trace:333.corp_440_1.0.trace",
       "prompt": "Runner Link-Payment wählen (Trace-Stärke 6, Link 0; 4 Credits verfügbar)",
       "kind": "bid_amount",
       "options": [
@@ -28395,7 +28395,7 @@
     "actionId": "runner.resolve_choice",
     "clientKnownStateVersion": 349,
     "selectedChoices": {
-      "choiceId": "run_333.corp_440_1.0.trace.runner.bid.349",
+      "choiceId": "333.corp_440_1.0.trace.runner.bid.349",
       "selectedOptionIds": [
         "bid_0"
       ]

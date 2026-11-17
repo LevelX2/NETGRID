@@ -125,7 +125,7 @@ function makeState(
       }),
     },
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: options.phase ?? "movement",
       position:
@@ -293,7 +293,7 @@ describe("fort pass window", () => {
       "source_root",
     ]);
     expect(state.run?.fortPassWindowPassedKeys).toEqual([
-      "fort-pass:run_1:server:rd",
+      "fort-pass:1:server:rd",
     ]);
   });
 
@@ -340,7 +340,7 @@ describe("fort pass window", () => {
 
     expect(state.pendingChoice).toMatchObject({
       source:
-        "card_implementation.hq_ice_swap:source_root:rd:ice_inner:0:run_1",
+        "card_implementation.hq_ice_swap:source_root:rd:ice_inner:0:1",
       kind: "select_cards",
       visibility: "hidden_info_barrier",
       options: [

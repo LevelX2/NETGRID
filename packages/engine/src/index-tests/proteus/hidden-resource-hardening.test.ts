@@ -278,7 +278,7 @@ function payableBreakerEncounter(seed: string): {
   state.timingPoint = "run.encounter_ice";
   state.activeSide = "runner";
   state.run = {
-    runId: `${seed}_run`,
+    runId: state.stateVersion + 1,
     attackedServerId: "hq",
     phase: "encounter_ice",
     position: { kind: "ice", serverId: "hq", iceIndex: 0 },
@@ -535,7 +535,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       state.timingPoint = "run.jack_out_window";
       state.activeSide = "runner";
       state.run = {
-        runId: "entry_tax_run",
+        runId: 870011,
         attackedServerId: "hq",
         phase: "movement",
         position: { kind: "ice", serverId: "hq", iceIndex: 0 },
@@ -694,7 +694,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     encounter.timingPoint = "run.encounter_ice";
     encounter.activeSide = "runner";
     encounter.run = {
-      runId: "pro011_airport_locker_run",
+      runId: 910281,
       attackedServerId: "hq",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "hq", iceIndex: 0 },
@@ -1188,7 +1188,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       "root",
     );
     state.run = {
-      runId: "pro011_access_run",
+      runId: 903955,
       attackedServerId: "remote_1",
       phase: "access",
       position: { kind: "server", serverId: "remote_1" },
@@ -1388,7 +1388,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       "pro011_hq_mole",
     );
     state.run = {
-      runId: "pro011_hq_run",
+      runId: 610706,
       attackedServerId: "hq",
       phase: "encounter_ice",
       position: { kind: "server", serverId: "hq" },
@@ -1467,7 +1467,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       "pro011_rd_mole_second",
     );
     state.run = {
-      runId: "pro011_rush_hour_rd_run",
+      runId: 293233,
       attackedServerId: "rd",
       phase: "movement",
       position: { kind: "server", serverId: "rd" },
@@ -1567,7 +1567,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       "pro011_hq_mole_second",
     );
     state.run = {
-      runId: "pro011_hq_mole_stack_run",
+      runId: 790211,
       attackedServerId: "hq",
       phase: "movement",
       position: { kind: "server", serverId: "hq" },
@@ -1926,7 +1926,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       ),
     ];
     state.run = {
-      runId: "deep667_success",
+      runId: 580136,
       attackedServerId: "remote_1",
       phase: "access",
       position: { kind: "server", serverId: "remote_1" },
@@ -1971,7 +1971,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       "ice",
     );
     state.run = {
-      runId: "deep667_empty_success",
+      runId: 559110,
       attackedServerId: "remote_1",
       phase: "access",
       position: { kind: "server", serverId: "remote_1" },
@@ -2002,7 +2002,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     );
     creditState.corp.credits = 2;
     creditState.run = {
-      runId: "pro012_hq_success",
+      runId: 795803,
       attackedServerId: "hq",
       phase: "access",
       position: { kind: "server", serverId: "hq" },
@@ -2142,7 +2142,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     );
     wrongHqTiming.run = {
       ...creditState.run!,
-      runId: "pro012_rd_success",
+      runId: 978722,
       attackedServerId: "rd",
       position: { kind: "server", serverId: "rd" },
     };
@@ -2184,7 +2184,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       "ice",
     );
     deathState.run = {
-      runId: "pro012_remote_success",
+      runId: 698738,
       attackedServerId: "remote_1",
       phase: "access",
       position: { kind: "server", serverId: "remote_1" },
@@ -2291,7 +2291,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       root: [],
     });
     emptyDeathState.run = {
-      runId: "pro012_empty_remote_success",
+      runId: 425268,
       attackedServerId: "remote_1",
       phase: "access",
       position: { kind: "server", serverId: "remote_1" },
@@ -2319,7 +2319,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
         `pro012_death_${serverId}`,
       );
       wrongServerState.run = {
-        runId: `pro012_${serverId}_success`,
+        runId: wrongServerState.stateVersion + 1,
         attackedServerId: serverId,
         phase: "access",
         position: { kind: "server", serverId },
@@ -2365,7 +2365,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       zone: "rd",
     };
     mercenaryState.run = {
-      runId: "pro012_current_access",
+      runId: 183972,
       attackedServerId: "rd",
       phase: "access",
       position: { kind: "server", serverId: "rd" },
@@ -2428,7 +2428,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       agendaRdServer.root = agendaRdServer.root.filter((id) => id !== agendaId);
     agendaState.cardInstances[agendaId]!.zone = { side: "corp", zone: "rd" };
     agendaState.run = {
-      runId: "pro012_agenda_current_access",
+      runId: 549441,
       attackedServerId: "rd",
       phase: "access",
       position: { kind: "server", serverId: "rd" },

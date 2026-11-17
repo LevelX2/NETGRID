@@ -1,3 +1,4 @@
+import { parseRunIdToken, type RunId } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -1076,7 +1077,7 @@ function gypsyRdRevealChoice(
 }
 
 function gypsyRdRevealChoiceSource(
-  runId: string,
+  runId: RunId,
   revealedIds: CardInstanceId[],
   stateVersion: number,
 ): string {
@@ -1084,11 +1085,12 @@ function gypsyRdRevealChoiceSource(
 }
 
 function parseGypsyRdRevealChoiceSource(source: string): {
-  runId: string;
+  runId: RunId;
   revealedIds: CardInstanceId[];
 } {
-  const [prefix, runId = "", revealedIdCsv = ""] = source.split(":");
-  if (prefix !== GYPSY_RD_REVEAL_CHOICE_SOURCE || !runId)
+  const [prefix, runIdToken, revealedIdCsv = ""] = source.split(":");
+  const runId = parseRunIdToken(runIdToken);
+  if (prefix !== GYPSY_RD_REVEAL_CHOICE_SOURCE || runId === undefined)
     throw new Error("Die Gypsy-R&D-Reveal-Choice ist ungueltig.");
   const revealedIds = revealedIdCsv
     .split(",")

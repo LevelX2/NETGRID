@@ -219,7 +219,7 @@ describe("runner special trigger execution", () => {
     state.phase = "run";
     state.timingPoint = "run.encounter_ice";
     state.run = {
-      runId: "run_shell",
+      runId: 632195,
       attackedServerId: "rd",
       phase: "encounter",
       position: { kind: "ice", iceId: "ice_1", serverId: "rd" },
@@ -263,7 +263,7 @@ describe("runner special trigger execution", () => {
 
     expect(counter(state, targetId, "shell")).toBe(1);
     expect(state.runner.credits).toBe(0);
-    expect(state.run?.runId).toBe("run_shell");
+    expect(state.run?.runId).toBe(632195);
   });
 
   it("pays additional install costs on the final Shell counter or removes the target from the game", () => {
@@ -644,7 +644,7 @@ describe("runner special trigger execution", () => {
     const state = baseState();
     state.timingPoint = "run.encounter_ice";
     state.run = {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       encounteredIceId: "ice_1" as CardInstanceId,
     } as any;

@@ -1,3 +1,4 @@
+import { isRunId } from "@netgrid/shared";
 import { isCardDefinitionId } from "@netgrid/shared";
 import { parseCardDefinitionIdCsv } from "../../card-definition-id-input";
 import type { AiDecisionInput, VisibleCorpRezCostQuote } from "@netgrid/shared";
@@ -548,7 +549,7 @@ export function validClassicDeflectorDefenseChoiceResolution(
     resolution.kind === "classic_deflector_redirect" &&
     nonEmptyString(resolution.choiceId) &&
     knownNonNegativeInteger(resolution.sourceStateVersion) &&
-    nonEmptyString(resolution.runId) &&
+    isRunId(resolution.runId) &&
     nonEmptyString(resolution.sourceIceInstanceId) &&
     isCardDefinitionId(resolution.sourceDefinitionId) &&
     knownNonNegativeInteger(resolution.subroutineIndex) &&
@@ -801,7 +802,7 @@ export function validExactIceRezRoute(value: unknown): boolean {
     trace.sourceCardInstanceId === route.sourceCardInstanceId &&
     trace.targetServerId === route.targetServerId &&
     trace.stateVersion === quote?.expiresAtStateVersion &&
-    nonEmptyString(trace.runId) &&
+    isRunId(trace.runId) &&
     trace.rezCredits === quote?.finalCredits &&
     (quote?.costKind === "variable"
       ? knownNonNegativeInteger(trace.variableValue)
@@ -1366,12 +1367,12 @@ function validTraceHardwareTrashResolution(value: unknown): boolean {
     r.kind === "trace_hardware_trash" &&
     knownNonNegativeInteger(r.sourceStateVersion) &&
     knownNonNegativeInteger(r.subroutineIndex) &&
+    isRunId(r.runId) &&
     isCardDefinitionId(r.sourceDefinitionId) &&
     [
       r.choiceId,
       r.choiceSource,
       r.traceId,
-      r.runId,
       r.sourceIceInstanceId,
       r.selectedOptionId,
       r.targetCardInstanceId,
@@ -1392,7 +1393,7 @@ function validProgramTrashResolution(value: unknown): boolean {
   return (
     r.kind === "program_trash" &&
     !!origin &&
-    ((origin.kind === "encounter" && nonEmptyString(origin.runId)) ||
+    ((origin.kind === "encounter" && isRunId(origin.runId)) ||
       (origin.kind === "trace_success" && nonEmptyString(origin.traceId))) &&
     knownNonNegativeInteger(r.sourceStateVersion) &&
     [

@@ -428,7 +428,7 @@ function resourceExchangeState(): {
     strengthModifier: 0,
   };
   state.run = {
-    runId: "resource_exchange_run",
+    runId: 317781,
     attackedServerId: "rd",
     phase: "approach_ice",
     position: { kind: "ice", serverId: "rd", iceIndex: 0 },

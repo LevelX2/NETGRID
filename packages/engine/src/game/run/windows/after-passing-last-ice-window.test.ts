@@ -52,7 +52,7 @@ function stateAtServer(
     },
     cardInstances: {},
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId,
       phase: "approach_server",
       position: input.position ?? {

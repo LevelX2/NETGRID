@@ -215,7 +215,7 @@ describe("zone-mutation", () => {
     expect(current.corp.servers).toContain(created);
 
     current.run = {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "remote_2",
       brokenSubroutineIndexes: [],
       phase: "approach_server",

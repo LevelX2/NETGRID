@@ -1,3 +1,4 @@
+import type { RunId } from "@netgrid/shared";
 import type {
   LegalAction,
   PlayerView,
@@ -18,7 +19,7 @@ export type HiddenResourcePaymentPreselection =
     sourceCardId: string;
     timing: "runner_cost_penalty_support";
     selectedTurnSerial: number;
-    selectedRunId?: string;
+    selectedRunId?: RunId;
   };
 
 function samePaymentSupportAbilityIdentity(

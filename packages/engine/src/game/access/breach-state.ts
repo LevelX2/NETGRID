@@ -1,3 +1,4 @@
+import type { RunId } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -198,7 +199,7 @@ function isBreachEntryHidden(
 
 function randomHqAccessQueue(
   host: BreachStateHost,
-  runId: string,
+  runId: RunId,
   accessCount: number,
 ): CardInstanceId[] {
   const available = host.state.corp.hq.slice();

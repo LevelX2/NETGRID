@@ -124,7 +124,7 @@ function makeState(
     },
     cardInstances,
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: options.phase ?? "approach_ice",
       position:

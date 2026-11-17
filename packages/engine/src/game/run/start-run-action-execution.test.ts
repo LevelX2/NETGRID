@@ -94,7 +94,7 @@ function hostFor(
       startRun: (serverId, legalAction) => {
         calls.push(`start:${serverId}:${legalAction.type}`);
         gameState.run = {
-          runId: "run_11",
+          runId: 11,
           attackedServerId: serverId,
           phase: "approach_ice",
           position: { kind: "server", serverId },

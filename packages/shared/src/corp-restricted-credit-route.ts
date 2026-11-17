@@ -1,3 +1,4 @@
+import type { RunId } from "./index";
 import type { CardDefinitionId } from "./index";
 
 export const CORP_RESTRICTED_CREDIT_ROUTE_QUOTE_VERSION =
@@ -67,7 +68,7 @@ export type CorpRestrictedCreditRouteQuote = {
     generalCreditsRemainingAfterConsumer: number;
     /** Current visible break route only, not a guarantee against later Runner choices. */
     currentRunAccessBlock?: {
-      runId: string;
+      runId: RunId;
       hardEndTheRunSubroutineCount: number;
       reason:
         | "no_visible_eligible_breaker"

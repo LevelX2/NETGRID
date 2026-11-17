@@ -91,7 +91,7 @@ function accessFixture(
   state.phase = "run";
   state.timingPoint = "access.resolve_card";
   state.run = {
-    runId: "run_1",
+    runId: 1,
     attackedServerId: zone,
     phase: "access",
     position: { kind: "server", serverId: zone },
@@ -148,7 +148,7 @@ function installedAccessFixture(
   state.phase = "run";
   state.timingPoint = "access.resolve_card";
   state.run = {
-    runId: "run_1",
+    runId: 1,
     attackedServerId: serverId,
     phase: "access",
     position: { kind: "server", serverId },
@@ -332,7 +332,7 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
     state.phase = "run";
     state.timingPoint = "run.movement_rez_window";
     state.run = {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: serverId,
       phase: "movement",
       position: { kind: "server", serverId },

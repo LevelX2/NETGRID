@@ -153,13 +153,13 @@ describe("breach state builder", () => {
   it("builds R&D queue in current R&D order and marks hidden entries", () => {
     const host = makeHost();
     const breach = buildBreachState(host, {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       accessCount: 2,
     } as NonNullable<GameState["run"]>);
 
     expect(breach).toMatchObject({
-      breachId: "run_1.breach",
+      breachId: "1.breach",
       serverId: "rd",
       accessMode: "multi",
       currentIndex: 0,
@@ -180,7 +180,7 @@ describe("breach state builder", () => {
       host,
       server,
       {
-        runId: "run_hq",
+        runId: 709564,
         attackedServerId: "hq",
         accessCount: 1,
       } as NonNullable<GameState["run"]>,
@@ -210,7 +210,7 @@ describe("breach state builder", () => {
     );
 
     const breach = buildBreachState(host, {
-      runId: "run_rd_root_policy",
+      runId: 576477,
       attackedServerId: "rd",
       accessCount: 1,
     } as NonNullable<GameState["run"]>);
@@ -239,12 +239,12 @@ describe("breach state builder", () => {
     expect(runnerHqAccessBonus(host)).toBe(1);
 
     const rd = buildBreachState(host, {
-      runId: "run_rd_highlighter",
+      runId: 726617,
       attackedServerId: "rd",
       accessCount: 3,
     } as NonNullable<GameState["run"]>);
     const hq = buildBreachState(host, {
-      runId: "run_hq_vienna",
+      runId: 850294,
       attackedServerId: "hq",
       accessCount: 1,
     } as NonNullable<GameState["run"]>);
@@ -261,11 +261,11 @@ describe("breach state builder", () => {
     const host = makeHost();
 
     const archives = buildBreachState(host, {
-      runId: "run_archives",
+      runId: 335396,
       attackedServerId: "archives",
     } as NonNullable<GameState["run"]>);
     const remote = buildBreachState(host, {
-      runId: "run_remote",
+      runId: 342749,
       attackedServerId: "remote_1",
     } as unknown as NonNullable<GameState["run"]>);
 

@@ -81,7 +81,7 @@ function state(): GameState {
       } as unknown as CardInstance,
     },
     run: {
-      runId: "run_4",
+      runId: 4,
       attackedServerId: "hq",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "hq", iceIndex: 0 },

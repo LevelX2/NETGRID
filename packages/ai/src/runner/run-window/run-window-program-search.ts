@@ -1,3 +1,4 @@
+import { isRunId } from "@netgrid/shared";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -53,8 +54,7 @@ export function runnerRunProgramSearchAssessment(
   if (
     input.side !== "runner" ||
     run?.phase !== "encounter_ice" ||
-    typeof run.runId !== "string" ||
-    run.runId.length === 0 ||
+    !isRunId(run.runId) ||
     input.playerView.timingPoint !== "run.encounter_ice" ||
     !actionMatchesCurrentDecision(input, continuation) ||
     continuation.payload?.encounterWillEndRun !== true ||

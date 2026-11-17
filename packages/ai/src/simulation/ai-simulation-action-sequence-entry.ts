@@ -1,3 +1,4 @@
+import type { RunId } from "@netgrid/shared";
 import type { RunnerAdvancedRemoteThreatObservation } from "./remote-server-threat";
 import type {
   AiDecisionActionAlternative,
@@ -461,7 +462,7 @@ export type AiSimulationActionSequenceEntry = {
   runnerLowValueSpendBelowReserve?: boolean;
   runnerExpensiveInstallBelowReserve?: boolean;
   runnerReservePreservingEconomy?: boolean;
-  runnerReserveRunId?: string;
+  runnerReserveRunId?: RunId;
   runnerReserveAccessTarget?: string;
   runnerReserveAfterSuccessfulRun?: number;
   runnerReserveAfterRemoteAccess?: number;

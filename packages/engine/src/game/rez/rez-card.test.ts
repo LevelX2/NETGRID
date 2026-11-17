@@ -469,7 +469,7 @@ function testHost(
     run: {
       mustRun: () => {
         state.run ??= {
-          runId: "run_1",
+          runId: 1,
           attackedServerId: "remote_1",
           phase: "encounter_ice",
           approachedIceId: undefined,

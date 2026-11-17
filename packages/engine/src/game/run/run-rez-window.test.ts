@@ -127,7 +127,7 @@ function makeState(
     },
     cardInstances,
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: "movement",
       position:
@@ -553,7 +553,7 @@ describe("run rez window", () => {
       serverId: "rd",
     });
     expect(state.activeSide).toBe("corp");
-    expect(state.run?.rootRezWindowPassedKeys).toEqual(["run_1:ice:rd:0"]);
+    expect(state.run?.rootRezWindowPassedKeys).toEqual(["1:ice:rd:0"]);
     expect(calls.continued).toEqual([actions[1]]);
   });
 
@@ -712,7 +712,7 @@ describe("run rez window", () => {
 
     handleRunRootRezPostRez(host, "root_1" as CardInstanceId, action);
 
-    expect(state.run?.rootRezWindowPassedKeys).toEqual(["run_1:ice:rd:0"]);
+    expect(state.run?.rootRezWindowPassedKeys).toEqual(["1:ice:rd:0"]);
     expect(state.run?.rootRezWindowPendingPassKeys).toBeUndefined();
     expect(buildCorpRunRootRezWindowActions(host)).toEqual([]);
     expect(calls.continued).toEqual([action]);
@@ -734,7 +734,7 @@ describe("run rez window", () => {
     handleRunRootRezPostRez(host, "root_1" as CardInstanceId, action);
 
     expect(state.run?.rootRezWindowPassedKeys).toBeUndefined();
-    expect(state.run?.rootRezWindowPendingPassKeys).toEqual(["run_1:ice:rd:0"]);
+    expect(state.run?.rootRezWindowPendingPassKeys).toEqual(["1:ice:rd:0"]);
     expect(
       buildCorpRunRootRezWindowActions(host).map((entry) => entry.type),
     ).toEqual(["rez_card", "decline_rez"]);

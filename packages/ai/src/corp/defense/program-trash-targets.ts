@@ -1,3 +1,4 @@
+import { parseRunIdToken } from "@netgrid/shared";
 import { programTrashCoverageLosses } from "./program-trash-coverage";
 import type {
   AiDecisionInput,
@@ -40,11 +41,13 @@ export function corpProgramTrashChoiceContext(
   if (!context) return undefined;
   const run = input.playerView.run;
   if (context.continuation === "encounter") {
+    const runId = parseRunIdToken(context.contextId);
     const ice = run?.encounteredIce;
     const quote = ice?.effectiveRunQuote;
     const subroutine = quote?.subroutines[context.subroutineIndex];
     if (
-      run?.runId !== context.contextId ||
+      runId === undefined ||
+      run?.runId !== runId ||
       ice?.instanceId !== context.sourceIceId ||
       ice.definitionId !== context.sourceDefinitionId ||
       quote?.iceInstanceId !== context.sourceIceId ||
@@ -57,11 +60,11 @@ export function corpProgramTrashChoiceContext(
     return {
       ...context,
       serverId: run.attackedServerId,
-      origin: { kind: "encounter" as const, runId: context.contextId },
+      origin: { kind: "encounter" as const, runId },
     };
   }
   const trace = input.playerView.trace;
-  const traceParts = /^(run_[0-9]+)\.(.+)\.([0-9]+)\.trace$/.exec(
+  const traceParts = /^([1-9][0-9]*)\.(.+)\.([0-9]+)\.trace$/.exec(
     context.contextId,
   );
   const sources = input.playerView.servers.flatMap((server) =>
@@ -80,6 +83,7 @@ export function corpProgramTrashChoiceContext(
     trace.sourceCardInstanceId !== context.sourceIceId ||
     trace.sourceDefinitionId !== context.sourceDefinitionId ||
     !traceParts ||
+    parseRunIdToken(traceParts[1]) === undefined ||
     traceParts[2] !== context.sourceIceId ||
     traceParts[3] !== String(context.subroutineIndex) ||
     ice.known !== true ||

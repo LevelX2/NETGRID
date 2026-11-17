@@ -674,7 +674,7 @@ function decisionWindowId(input: AiDecisionInput, semantic: string): string {
     (semantic.startsWith("run.") || semantic.startsWith("breaker.")) &&
     input.playerView.run?.runId
   ) {
-    return input.playerView.run.runId;
+    return String(input.playerView.run.runId);
   }
   return `${input.playerView.timingPoint}:${input.playerView.stateVersion}`;
 }
