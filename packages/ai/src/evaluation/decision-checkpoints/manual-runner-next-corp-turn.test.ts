@@ -906,7 +906,10 @@ function capacityFixture() {
     .withCorpCredits(10)
     .withRunnerCredits(5)
     .withRunnerClicks(2)
-    .withRunnerGripSize(3)
+    .withRunnerGripSize(0)
+    .withRunnerCardInGrip(226)
+    .withRunnerCardInGrip(227)
+    .withRunnerCardInGrip(233)
     .withRunnerCardInGrip(MRAM)
     .withRunnerCardInGrip(BODYWEIGHT);
   state.runnerTurnFlags!.runAttemptsThisTurn = 2;
