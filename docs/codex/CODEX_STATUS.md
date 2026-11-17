@@ -376,6 +376,9 @@ Führend ist
 
 ## Aktuelle Arbeit
 
+- [Planung für GitHub-Fehlermeldungen aus NETGRID](../architecture/live-match/github-bug-reporting-plan.md)
+  mit lokalem ZIP-Fehlerbericht auf Basis der kompakten Laufzeit-IDs und
+  manuell eingereichtem GitHub-Issue als Meldeweg für V1.0.
 - `docs/activities/inbox/`: offene kleine Findings und Nacharbeiten.
 - `docs/activities/in-progress/`: aktuell beanspruchte Pakete.
 - `docs/activities/done/`: nur kurzlebiger Abschluss-Slot; abgeschlossene Einzelpakete werden nach Rückführung des Ergebnisses entfernt.
