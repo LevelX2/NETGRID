@@ -121,7 +121,7 @@ describe("AI game simulator Engine-randomized decisions", () => {
                   kind: "meat_damage",
                   sourceCardInstanceId: "missing-source",
                   sourceCapabilityBindingKind: "card_spec_capability_key",
-                  sourceCapabilityId: "missing_definition:missing_capability",
+                  sourceCapabilityId: Number.MAX_SAFE_INTEGER,
                 },
               ],
             },
@@ -165,10 +165,10 @@ describe("AI game simulator Engine-randomized decisions", () => {
       },
     });
 
-    expect(stateBoundQuotes).toBe(1);
-    expect(foreignQuotes).toBe(0);
     expect(summary.errors).toEqual([]);
     expect(summary.runtimeFailures).toEqual([]);
+    expect(stateBoundQuotes).toBe(1);
+    expect(foreignQuotes).toBe(0);
     expect(summary.replayOk).toBe(true);
     expect(JSON.stringify(summary)).not.toMatch(
       /simulation-state-bound-punish|missing-source-route|requestEcho/,
