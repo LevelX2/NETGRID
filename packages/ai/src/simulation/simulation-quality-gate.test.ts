@@ -98,7 +98,7 @@ describe("current simulation quality gate", () => {
       id: "custom-runner",
       name: "Custom Runner",
       side: "runner" as const,
-      identity: "runner_identity",
+      identity: 587,
       cards: [{ id: 597, quantity: 2 }],
     };
     const customId = runSimulationProfile(randomProfile, seeds, {

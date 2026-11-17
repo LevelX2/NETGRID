@@ -80,7 +80,7 @@ function missingCoverageForSubroutineType(type: string) {
             ice: [
               {
                 known: true,
-                definitionId: "synthetic_ice",
+                definitionId: 9101,
                 effectiveRunQuote: {
                   subroutines: [{ type }],
                 },

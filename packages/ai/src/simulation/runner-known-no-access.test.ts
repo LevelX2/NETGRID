@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
@@ -109,7 +110,7 @@ function diagnosticForRoles(roles: string[]) {
         assessment: {} as never,
       },
     ],
-    sourceDefinitionIdForAction: () => "source",
+    sourceDefinitionIdForAction: () => syntheticCardDefinitionId("source"),
     rolesForCardId: () => roles,
   });
 }

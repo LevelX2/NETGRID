@@ -20,82 +20,82 @@
       "id": "standard_standard_runner_bit_denial_lock_1.0.0",
       "name": "Bit-Denial Lock",
       "side": "runner",
-      "identity": "runner_identity_001",
+      "identity": 587,
       "cards": [
         {
-          "id": "onr_v1_039_krash",
+          "id": 251,
           "quantity": 2
         },
         {
-          "id": "onr_v1_068_startup-immolator",
+          "id": 280,
           "quantity": 3
         },
         {
-          "id": "onr_v1_080_core-command-jettison-ice",
+          "id": 292,
           "quantity": 3
         },
         {
-          "id": "onr_v1_084_edited-shipping-manifests",
+          "id": 296,
           "quantity": 3
         },
         {
-          "id": "onr_v1_086_forged-activation-orders",
+          "id": 298,
           "quantity": 3
         },
         {
-          "id": "onr_v1_095_jack-n-joe",
+          "id": 307,
           "quantity": 2
         },
         {
-          "id": "onr_v1_097_livewires-contacts",
+          "id": 309,
           "quantity": 3
         },
         {
-          "id": "onr_v1_105_priority-wreck",
+          "id": 317,
           "quantity": 3
         },
         {
-          "id": "onr_v1_108_score",
+          "id": 320,
           "quantity": 3
         },
         {
-          "id": "onr_v1_109_security-code-worm-chip",
+          "id": 321,
           "quantity": 1
         },
         {
-          "id": "onr_v1_118_weather-to-finance-pipe",
+          "id": 330,
           "quantity": 3
         },
         {
-          "id": "onr_v1_135_nasuko-cycle",
+          "id": 347,
           "quantity": 2
         },
         {
-          "id": "onr_v1_144_tycho-mem-chip",
+          "id": 356,
           "quantity": 1
         },
         {
-          "id": "onr_v1_145_wutech-mem-chip",
+          "id": 357,
           "quantity": 1
         },
         {
-          "id": "onr_v1_154_broker",
+          "id": 366,
           "quantity": 2
         },
         {
-          "id": "onr_v1_161_fall-guy",
+          "id": 373,
           "quantity": 2
         },
         {
-          "id": "onr_v1_165_junkyard-bbs",
+          "id": 377,
           "quantity": 3
         },
         {
-          "id": "onr_v1_168_loan-from-chiba",
+          "id": 380,
           "quantity": 2
         },
         {
-          "id": "onr_v1_173_restrictive-net-zoning",
+          "id": 385,
           "quantity": 3
         }
       ]
@@ -104,129 +104,129 @@
       "id": "standard_standard_corp_ivory_bastion_1.1.0",
       "name": "Ivory Bastion",
       "side": "corp",
-      "identity": "corp_identity_001",
+      "identity": 3,
       "cards": [
         {
-          "id": "onr_v1_193_corporate-coup",
+          "id": 405,
           "quantity": 1
         },
         {
-          "id": "onr_v1_212_priority-requisition",
+          "id": 424,
           "quantity": 2
         },
         {
-          "id": "onr_v1_215_security-net-optimization",
+          "id": 427,
           "quantity": 1
         },
         {
-          "id": "onr_v1_219_superior-net-barriers",
+          "id": 431,
           "quantity": 1
         },
         {
-          "id": "onr_v1_220_tycho-extension",
+          "id": 432,
           "quantity": 2
         },
         {
-          "id": "onr_v1_230_cortical-scanner",
+          "id": 442,
           "quantity": 1
         },
         {
-          "id": "onr_v1_232_crystal-wall",
+          "id": 444,
           "quantity": 2
         },
         {
-          "id": "onr_v1_237_data-wall",
+          "id": 449,
           "quantity": 2
         },
         {
-          "id": "onr_v1_238_data-wall-2-0",
+          "id": 450,
           "quantity": 2
         },
         {
-          "id": "onr_v1_239_endless-corridor",
+          "id": 451,
           "quantity": 2
         },
         {
-          "id": "onr_v1_245_fire-wall",
+          "id": 457,
           "quantity": 2
         },
         {
-          "id": "onr_v1_263_reinforced-wall",
+          "id": 475,
           "quantity": 2
         },
         {
-          "id": "onr_v1_265_rock-is-strong",
+          "id": 477,
           "quantity": 2
         },
         {
-          "id": "onr_v1_278_wall-of-ice",
+          "id": 490,
           "quantity": 1
         },
         {
-          "id": "onr_v1_279_wall-of-static",
+          "id": 491,
           "quantity": 2
         },
         {
-          "id": "onr_v1_281_accounts-receivable",
+          "id": 493,
           "quantity": 3
         },
         {
-          "id": "onr_v1_282_annual-reviews",
+          "id": 494,
           "quantity": 2
         },
         {
-          "id": "onr_v1_290_efficiency-experts",
+          "id": 502,
           "quantity": 3
         },
         {
-          "id": "onr_v1_297_overtime-incentives",
+          "id": 509,
           "quantity": 2
         },
         {
-          "id": "onr_v1_309_bbs-whispering-campaign",
+          "id": 521,
           "quantity": 2
         },
         {
-          "id": "onr_v1_311_braindance-campaign",
+          "id": 523,
           "quantity": 2
         },
         {
-          "id": "onr_v1_317_data-masons",
+          "id": 529,
           "quantity": 2
         },
         {
-          "id": "onr_v1_324_fortress-architects",
+          "id": 536,
           "quantity": 2
         },
         {
-          "id": "onr_v1_329_investment-firm",
+          "id": 541,
           "quantity": 2
         },
         {
-          "id": "onr_v1_350_antiquated-interface-routines",
+          "id": 562,
           "quantity": 2
         },
         {
-          "id": "onr_v1_355_crystal-palace-station-grid",
+          "id": 567,
           "quantity": 1
         },
         {
-          "id": "onr_v1_360_jerusalem-city-grid",
+          "id": 572,
           "quantity": 1
         },
         {
-          "id": "onr_v1_366_red-herrings",
+          "id": 578,
           "quantity": 2
         },
         {
-          "id": "onr_v1_370_tesseract-fort-construction",
+          "id": 582,
           "quantity": 1
         }
       ]
     },
     "runnerDeckMetadata": {
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "deckName": "Bit-Denial Lock",
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
@@ -236,7 +236,7 @@
     },
     "corpDeckMetadata": {
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "deckName": "Ivory Bastion",
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
@@ -297,19 +297,19 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.play_operation.corp_onr_v1_281_accounts-receivable_1.corp_onr_v1_281_accounts-receivable_1.onr_v1_281_accounts-receivable:abilities_on_play_gain_credits",
+      "actionId": "corp.play_operation.corp_493_1.corp_493_1.493:abilities_on_play_gain_credits",
       "actionType": "play_operation"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.play_operation.corp_onr_v1_281_accounts-receivable_3.corp_onr_v1_281_accounts-receivable_3.onr_v1_281_accounts-receivable:abilities_on_play_gain_credits",
+      "actionId": "corp.play_operation.corp_493_3.corp_493_3.493:abilities_on_play_gain_credits",
       "actionType": "play_operation"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.play_operation.corp_onr_v1_290_efficiency-experts_2.corp_onr_v1_290_efficiency-experts_2.onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+      "actionId": "corp.play_operation.corp_502_2.corp_502_2.502:abilities_on_play_gain_credits",
       "actionType": "play_operation"
     },
     {
@@ -321,7 +321,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.install_card.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2",
+      "actionId": "runner.install_card.runner_251_2.runner_251_2",
       "actionType": "install_card"
     },
     {
@@ -375,13 +375,13 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.play_operation.corp_onr_v1_290_efficiency-experts_1.corp_onr_v1_290_efficiency-experts_1.onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+      "actionId": "corp.play_operation.corp_502_1.corp_502_1.502:abilities_on_play_gain_credits",
       "actionType": "play_operation"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.play_operation.corp_onr_v1_290_efficiency-experts_3.corp_onr_v1_290_efficiency-experts_3.onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+      "actionId": "corp.play_operation.corp_502_3.corp_502_3.502:abilities_on_play_gain_credits",
       "actionType": "play_operation"
     },
     {
@@ -399,7 +399,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.play_event.runner_onr_v1_105_priority-wreck_2.hq.runner_onr_v1_105_priority-wreck_2.onr_v1_105_priority-wreck:abilities_on_play_make_run",
+      "actionId": "runner.play_event.runner_317_2.hq.runner_317_2.317:abilities_on_play_make_run",
       "actionType": "play_event"
     },
     {
@@ -465,7 +465,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_279_wall-of-static_1.rd.corp_onr_v1_279_wall-of-static_1.0",
+      "actionId": "corp.install_card.corp_491_1.rd.corp_491_1.0",
       "actionType": "install_card"
     },
     {
@@ -507,7 +507,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.play_event.runner_onr_v1_086_forged-activation-orders_2.runner_onr_v1_086_forged-activation-orders_2.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+      "actionId": "runner.play_event.runner_298_2.runner_298_2.298:abilities_on_play_corp_choice_rez_or_trash_ice",
       "actionType": "play_event"
     },
     {
@@ -543,7 +543,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.install_card.runner_onr_v1_173_restrictive-net-zoning_1.archives.runner_onr_v1_173_restrictive-net-zoning_1",
+      "actionId": "runner.install_card.runner_385_1.archives.runner_385_1",
       "actionType": "install_card"
     },
     {
@@ -561,7 +561,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.play_operation.corp_onr_v1_281_accounts-receivable_2.corp_onr_v1_281_accounts-receivable_2.onr_v1_281_accounts-receivable:abilities_on_play_gain_credits",
+      "actionId": "corp.play_operation.corp_493_2.corp_493_2.493:abilities_on_play_gain_credits",
       "actionType": "play_operation"
     },
     {
@@ -705,7 +705,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_245_fire-wall_1.new_remote.corp_onr_v1_245_fire-wall_1",
+      "actionId": "corp.install_card.corp_457_1.new_remote.corp_457_1",
       "actionType": "install_card"
     },
     {
@@ -717,7 +717,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_263_reinforced-wall_1.rd.corp_onr_v1_263_reinforced-wall_1.1",
+      "actionId": "corp.install_card.corp_475_1.rd.corp_475_1.1",
       "actionType": "install_card"
     },
     {
@@ -777,13 +777,13 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_317_data-masons_2.remote_1.corp_onr_v1_317_data-masons_2",
+      "actionId": "corp.install_card.corp_529_2.remote_1.corp_529_2",
       "actionType": "install_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.rez_card.corp_onr_v1_317_data-masons_2.remote_1.corp_onr_v1_317_data-masons_2",
+      "actionId": "corp.rez_card.corp_529_2.remote_1.corp_529_2",
       "actionType": "rez_card"
     },
     {
@@ -813,7 +813,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.rez_ice.corp_onr_v1_245_fire-wall_1.corp_onr_v1_245_fire-wall_1",
+      "actionId": "corp.rez_ice.corp_457_1.corp_457_1",
       "actionType": "rez_ice"
     },
     {
@@ -867,7 +867,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_366_red-herrings_1.rd.corp_onr_v1_366_red-herrings_1",
+      "actionId": "corp.install_card.corp_578_1.rd.corp_578_1",
       "actionType": "install_card"
     },
     {
@@ -891,7 +891,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.play_event.runner_onr_v1_118_weather-to-finance-pipe_2.hq.runner_onr_v1_118_weather-to-finance-pipe_2.onr_v1_118_weather-to-finance-pipe:abilities_on_play_make_run",
+      "actionId": "runner.play_event.runner_330_2.hq.runner_330_2.330:abilities_on_play_make_run",
       "actionType": "play_event"
     },
     {
@@ -962,7 +962,7 @@
       "selectedChoices": {
         "choiceId": "discard_runner_110",
         "selectedOptionIds": [
-          "card_runner_onr_v1_068_startup-immolator_2"
+          "card_runner_280_2"
         ]
       }
     },
@@ -975,7 +975,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_263_reinforced-wall_2.new_remote.corp_onr_v1_263_reinforced-wall_2",
+      "actionId": "corp.install_card.corp_475_2.new_remote.corp_475_2",
       "actionType": "install_card"
     },
     {
@@ -1029,7 +1029,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.install_card.runner_onr_v1_165_junkyard-bbs_2.runner_onr_v1_165_junkyard-bbs_2",
+      "actionId": "runner.install_card.runner_377_2.runner_377_2",
       "actionType": "install_card"
     },
     {
@@ -1059,7 +1059,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_279_wall-of-static_2.rd.corp_onr_v1_279_wall-of-static_2.2",
+      "actionId": "corp.install_card.corp_491_2.rd.corp_491_2.2",
       "actionType": "install_card"
     },
     {
@@ -1107,7 +1107,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.trash_accessed_card.corp_onr_v1_350_antiquated-interface-routines_2.1",
+      "actionId": "runner.trash_accessed_card.corp_562_2.1",
       "actionType": "trash_accessed_card"
     },
     {
@@ -1143,13 +1143,13 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.install_card.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1",
+      "actionId": "runner.install_card.runner_366_1.runner_366_1",
       "actionType": "install_card"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1167,7 +1167,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_309_bbs-whispering-campaign_1.remote_2.corp_onr_v1_309_bbs-whispering-campaign_1",
+      "actionId": "corp.install_card.corp_521_1.remote_2.corp_521_1",
       "actionType": "install_card"
     },
     {
@@ -1179,13 +1179,13 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.rez_card.corp_onr_v1_309_bbs-whispering-campaign_1.remote_2.corp_onr_v1_309_bbs-whispering-campaign_1",
+      "actionId": "corp.rez_card.corp_521_1.remote_2.corp_521_1",
       "actionType": "rez_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_1.corp_521_1.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1197,7 +1197,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:withdraw_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1209,7 +1209,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.rez_ice.corp_onr_v1_263_reinforced-wall_2.corp_onr_v1_263_reinforced-wall_2",
+      "actionId": "corp.rez_ice.corp_475_2.corp_475_2",
       "actionType": "rez_ice"
     },
     {
@@ -1269,19 +1269,19 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_1.corp_521_1.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_355_crystal-palace-station-grid_1.hq.corp_onr_v1_355_crystal-palace-station-grid_1",
+      "actionId": "corp.install_card.corp_567_1.hq.corp_567_1",
       "actionType": "install_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_1.corp_521_1.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1293,7 +1293,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1341,7 +1341,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.play_event.runner_onr_v1_095_jack-n-joe_1.runner_onr_v1_095_jack-n-joe_1.onr_v1_095_jack-n-joe:abilities_on_play_draw_cards",
+      "actionId": "runner.play_event.runner_307_1.runner_307_1.307:abilities_on_play_draw_cards",
       "actionType": "play_event"
     },
     {
@@ -1358,8 +1358,8 @@
       "selectedChoices": {
         "choiceId": "discard_runner_175",
         "selectedOptionIds": [
-          "card_runner_onr_v1_135_nasuko-cycle_1",
-          "card_runner_onr_v1_086_forged-activation-orders_1"
+          "card_runner_347_1",
+          "card_runner_298_1"
         ]
       }
     },
@@ -1372,19 +1372,19 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_1.corp_521_1.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_1.corp_521_1.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_360_jerusalem-city-grid_1.rd.corp_onr_v1_360_jerusalem-city-grid_1",
+      "actionId": "corp.install_card.corp_572_1.rd.corp_572_1",
       "actionType": "install_card"
     },
     {
@@ -1438,13 +1438,13 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.play_event.runner_onr_v1_095_jack-n-joe_2.runner_onr_v1_095_jack-n-joe_2.onr_v1_095_jack-n-joe:abilities_on_play_draw_cards",
+      "actionId": "runner.play_event.runner_307_2.runner_307_2.307:abilities_on_play_draw_cards",
       "actionType": "play_event"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1467,8 +1467,8 @@
       "selectedChoices": {
         "choiceId": "discard_runner_192",
         "selectedOptionIds": [
-          "card_runner_onr_v1_109_security-code-worm-chip_1",
-          "card_runner_onr_v1_118_weather-to-finance-pipe_1"
+          "card_runner_321_1",
+          "card_runner_330_1"
         ]
       }
     },
@@ -1481,19 +1481,19 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_245_fire-wall_2.hq.corp_onr_v1_245_fire-wall_2.0",
+      "actionId": "corp.install_card.corp_457_2.hq.corp_457_2.0",
       "actionType": "install_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_1.corp_521_1.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_1.corp_521_1.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1505,7 +1505,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.play_event.runner_onr_v1_086_forged-activation-orders_3.runner_onr_v1_086_forged-activation-orders_3.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+      "actionId": "runner.play_event.runner_298_3.runner_298_3.298:abilities_on_play_corp_choice_rez_or_trash_ice",
       "actionType": "play_event"
     },
     {
@@ -1535,7 +1535,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1547,7 +1547,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_165_junkyard-bbs_2.runner_onr_v1_165_junkyard-bbs_2.runner_onr_v1_086_forged-activation-orders_3.activated.onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip.runner_onr_v1_086_forged-activation-orders_3",
+      "actionId": "runner.activated_card_ability.runner_377_2.runner_377_2.runner_298_3.activated.377:abilities_activated_runner_main_move_top_trash_to_grip.runner_298_3",
       "actionType": "activated_card_ability"
     },
     {
@@ -1564,7 +1564,7 @@
       "selectedChoices": {
         "choiceId": "discard_runner_205",
         "selectedOptionIds": [
-          "card_runner_onr_v1_161_fall-guy_1"
+          "card_runner_373_1"
         ]
       }
     },
@@ -1577,25 +1577,25 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_366_red-herrings_2.hq.corp_onr_v1_366_red-herrings_2",
+      "actionId": "corp.install_card.corp_578_2.hq.corp_578_2",
       "actionType": "install_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_1.corp_521_1.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_309_bbs-whispering-campaign_2.remote_2.corp_onr_v1_309_bbs-whispering-campaign_2",
+      "actionId": "corp.install_card.corp_521_2.remote_2.corp_521_2",
       "actionType": "install_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.rez_card.corp_onr_v1_309_bbs-whispering-campaign_2.remote_2.corp_onr_v1_309_bbs-whispering-campaign_2",
+      "actionId": "corp.rez_card.corp_521_2.remote_2.corp_521_2",
       "actionType": "rez_card"
     },
     {
@@ -1607,7 +1607,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:withdraw_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1642,7 +1642,7 @@
       "selectedChoices": {
         "choiceId": "discard_runner_217",
         "selectedOptionIds": [
-          "card_runner_onr_v1_161_fall-guy_2"
+          "card_runner_373_2"
         ]
       }
     },
@@ -1655,7 +1655,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_2.corp_521_2.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1667,7 +1667,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_2.corp_521_2.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1684,7 +1684,7 @@
       "selectedChoices": {
         "choiceId": "discard_corp_223",
         "selectedOptionIds": [
-          "card_corp_onr_v1_297_overtime-incentives_2"
+          "card_corp_509_2"
         ]
       }
     },
@@ -1703,37 +1703,37 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_457_1.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_457_1.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_457_1.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_457_1.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_457_1.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_1.0.printed_subroutines_end_the_run.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+      "actionId": "runner.break_subroutine.runner_251_2.runner_251_2.runner_251_2.corp_457_1.0.printed_subroutines_end_the_run.251:icebreaker_abilities_break_subroutine",
       "actionType": "break_subroutine"
     },
     {
@@ -1763,13 +1763,13 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.trash_accessed_card.corp_onr_v1_317_data-masons_2.1",
+      "actionId": "runner.trash_accessed_card.corp_529_2.1",
       "actionType": "trash_accessed_card"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1799,19 +1799,19 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_230_cortical-scanner_1.rd.corp_onr_v1_230_cortical-scanner_1.3",
+      "actionId": "corp.install_card.corp_442_1.rd.corp_442_1.3",
       "actionType": "install_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_2.corp_521_2.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_2.corp_521_2.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1823,7 +1823,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:withdraw_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1858,7 +1858,7 @@
       "selectedChoices": {
         "choiceId": "discard_runner_251",
         "selectedOptionIds": [
-          "card_runner_onr_v1_165_junkyard-bbs_1"
+          "card_runner_377_1"
         ]
       }
     },
@@ -1871,19 +1871,19 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_278_wall-of-ice_1.rd.corp_onr_v1_278_wall-of-ice_1.4",
+      "actionId": "corp.install_card.corp_490_1.rd.corp_490_1.4",
       "actionType": "install_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_2.corp_521_2.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_2.corp_521_2.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1895,7 +1895,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -1930,7 +1930,7 @@
       "selectedChoices": {
         "choiceId": "discard_runner_262",
         "selectedOptionIds": [
-          "card_runner_onr_v1_135_nasuko-cycle_2"
+          "card_runner_347_2"
         ]
       }
     },
@@ -1943,19 +1943,19 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_237_data-wall_2.rd.corp_onr_v1_237_data-wall_2.5",
+      "actionId": "corp.install_card.corp_449_2.rd.corp_449_2.5",
       "actionType": "install_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_2.corp_521_2.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionId": "corp.activated_card_ability.corp_521_2.corp_521_2.activated.521:abilities_activated_corp_main_take_hosted_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -2002,7 +2002,7 @@
       "selectedChoices": {
         "choiceId": "discard_runner_273",
         "selectedOptionIds": [
-          "card_runner_onr_v1_086_forged-activation-orders_3"
+          "card_runner_298_3"
         ]
       }
     },
@@ -2015,7 +2015,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_311_braindance-campaign_1.remote_1.corp_onr_v1_311_braindance-campaign_1",
+      "actionId": "corp.install_card.corp_523_1.remote_1.corp_523_1",
       "actionType": "install_card"
     },
     {
@@ -2045,7 +2045,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.play_event.runner_onr_v1_097_livewires-contacts_2.runner_onr_v1_097_livewires-contacts_2.onr_v1_097_livewires-contacts:abilities_on_play_gain_credits",
+      "actionId": "runner.play_event.runner_309_2.runner_309_2.309:abilities_on_play_gain_credits",
       "actionType": "play_event"
     },
     {
@@ -2063,31 +2063,31 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_457_2.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_457_2.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_457_2.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_457_2.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.0.printed_subroutines_end_the_run.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+      "actionId": "runner.break_subroutine.runner_251_2.runner_251_2.runner_251_2.corp_457_2.0.printed_subroutines_end_the_run.251:icebreaker_abilities_break_subroutine",
       "actionType": "break_subroutine"
     },
     {
@@ -2129,7 +2129,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.trash_accessed_card.corp_onr_v1_366_red-herrings_2.1",
+      "actionId": "runner.trash_accessed_card.corp_578_2.1",
       "actionType": "trash_accessed_card"
     },
     {
@@ -2147,7 +2147,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -2165,7 +2165,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_237_data-wall_1.new_remote.corp_onr_v1_237_data-wall_1",
+      "actionId": "corp.install_card.corp_449_1.new_remote.corp_449_1",
       "actionType": "install_card"
     },
     {
@@ -2189,7 +2189,7 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -2224,7 +2224,7 @@
       "selectedChoices": {
         "choiceId": "discard_runner_309",
         "selectedOptionIds": [
-          "card_runner_onr_v1_165_junkyard-bbs_3"
+          "card_runner_377_3"
         ]
       }
     },
@@ -2237,7 +2237,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_238_data-wall-2-0_1.rd.corp_onr_v1_238_data-wall-2-0_1.6",
+      "actionId": "corp.install_card.corp_450_1.rd.corp_450_1.6",
       "actionType": "install_card"
     },
     {
@@ -2296,7 +2296,7 @@
       "selectedChoices": {
         "choiceId": "discard_runner_320",
         "selectedOptionIds": [
-          "card_runner_onr_v1_084_edited-shipping-manifests_1"
+          "card_runner_296_1"
         ]
       }
     },
@@ -2338,7 +2338,7 @@
       "selectedChoices": {
         "choiceId": "discard_corp_326",
         "selectedOptionIds": [
-          "card_corp_onr_v1_282_annual-reviews_1"
+          "card_corp_494_1"
         ]
       }
     },
@@ -2380,7 +2380,7 @@
       "selectedChoices": {
         "choiceId": "discard_runner_332",
         "selectedOptionIds": [
-          "card_runner_onr_v1_118_weather-to-finance-pipe_3"
+          "card_runner_330_3"
         ]
       }
     },
@@ -2422,8 +2422,8 @@
       "selectedChoices": {
         "choiceId": "discard_corp_338",
         "selectedOptionIds": [
-          "card_corp_onr_v1_282_annual-reviews_2",
-          "card_corp_onr_v1_324_fortress-architects_1"
+          "card_corp_494_2",
+          "card_corp_536_1"
         ]
       }
     },
@@ -2465,7 +2465,7 @@
       "selectedChoices": {
         "choiceId": "discard_runner_344",
         "selectedOptionIds": [
-          "card_runner_onr_v1_144_tycho-mem-chip_1"
+          "card_runner_356_1"
         ]
       }
     },
@@ -2484,7 +2484,7 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_232_crystal-wall_1.hq.corp_onr_v1_232_crystal-wall_1.1",
+      "actionId": "corp.install_card.corp_444_1.hq.corp_444_1.1",
       "actionType": "install_card"
     },
     {
@@ -2507,20 +2507,20 @@
       "selectedChoices": {
         "choiceId": "discard_corp_350",
         "selectedOptionIds": [
-          "card_corp_onr_v1_324_fortress-architects_2"
+          "card_corp_536_2"
         ]
       }
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.play_event.runner_onr_v1_105_priority-wreck_1.hq.runner_onr_v1_105_priority-wreck_1.onr_v1_105_priority-wreck:abilities_on_play_make_run",
+      "actionId": "runner.play_event.runner_317_1.hq.runner_317_1.317:abilities_on_play_make_run",
       "actionType": "play_event"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.rez_ice.corp_onr_v1_232_crystal-wall_1.corp_onr_v1_232_crystal-wall_1",
+      "actionId": "corp.rez_ice.corp_444_1.corp_444_1",
       "actionType": "rez_ice"
     },
     {
@@ -2532,25 +2532,25 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_232_crystal-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_444_1.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_232_crystal-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_444_1.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_232_crystal-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_444_1.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_232_crystal-wall_1.0.printed_subroutines_end_the_run.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+      "actionId": "runner.break_subroutine.runner_251_2.runner_251_2.runner_251_2.corp_444_1.0.printed_subroutines_end_the_run.251:icebreaker_abilities_break_subroutine",
       "actionType": "break_subroutine"
     },
     {
@@ -2580,31 +2580,31 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_457_2.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_457_2.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_457_2.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_457_2.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.0.printed_subroutines_end_the_run.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+      "actionId": "runner.break_subroutine.runner_251_2.runner_251_2.runner_251_2.corp_457_2.0.printed_subroutines_end_the_run.251:icebreaker_abilities_break_subroutine",
       "actionType": "break_subroutine"
     },
     {
@@ -2640,19 +2640,19 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:withdraw_credits",
       "actionType": "activated_card_ability"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.install_card.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2",
+      "actionId": "runner.install_card.runner_366_2.runner_366_2",
       "actionType": "install_card"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
+      "actionId": "runner.activated_card_ability.runner_366_2.runner_366_2.activated.366:store_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -2670,19 +2670,19 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_212_priority-requisition_1.remote_2.corp_onr_v1_212_priority-requisition_1",
+      "actionId": "corp.install_card.corp_424_1.remote_2.corp_424_1",
       "actionType": "install_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.install_card.corp_onr_v1_220_tycho-extension_1.remote_1.corp_onr_v1_220_tycho-extension_1",
+      "actionId": "corp.install_card.corp_432_1.remote_1.corp_432_1",
       "actionType": "install_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.advance_card.corp_onr_v1_212_priority-requisition_1.corp_onr_v1_212_priority-requisition_1",
+      "actionId": "corp.advance_card.corp_424_1.corp_424_1",
       "actionType": "advance_card"
     },
     {
@@ -2694,13 +2694,13 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits",
+      "actionId": "runner.activated_card_ability.runner_366_2.runner_366_2.activated.366:withdraw_credits",
       "actionType": "activated_card_ability"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -2730,37 +2730,37 @@
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.advance_card.corp_onr_v1_220_tycho-extension_1.corp_onr_v1_220_tycho-extension_1",
+      "actionId": "corp.advance_card.corp_432_1.corp_432_1",
       "actionType": "advance_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.play_operation.corp_onr_v1_297_overtime-incentives_1.corp_onr_v1_297_overtime-incentives_1",
+      "actionId": "corp.play_operation.corp_509_1.corp_509_1",
       "actionType": "play_operation"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.advance_card.corp_onr_v1_220_tycho-extension_1.corp_onr_v1_220_tycho-extension_1",
+      "actionId": "corp.advance_card.corp_432_1.corp_432_1",
       "actionType": "advance_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.advance_card.corp_onr_v1_220_tycho-extension_1.corp_onr_v1_220_tycho-extension_1",
+      "actionId": "corp.advance_card.corp_432_1.corp_432_1",
       "actionType": "advance_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.advance_card.corp_onr_v1_220_tycho-extension_1.corp_onr_v1_220_tycho-extension_1",
+      "actionId": "corp.advance_card.corp_432_1.corp_432_1",
       "actionType": "advance_card"
     },
     {
       "kind": "action",
       "side": "corp",
-      "actionId": "corp.score_agenda.corp_onr_v1_220_tycho-extension_1.corp_onr_v1_220_tycho-extension_1",
+      "actionId": "corp.score_agenda.corp_432_1.corp_432_1",
       "actionType": "score_agenda"
     },
     {
@@ -2790,37 +2790,37 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_263_reinforced-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_475_2.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_263_reinforced-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_475_2.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_263_reinforced-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_475_2.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_263_reinforced-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionId": "runner.pump_breaker.runner_251_2.runner_251_2.runner_251_2.corp_475_2.251:icebreaker_abilities_increase_strength",
       "actionType": "pump_breaker"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_263_reinforced-wall_2.0.printed_subroutines_end_the_run.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+      "actionId": "runner.break_subroutine.runner_251_2.runner_251_2.runner_251_2.corp_475_2.0.printed_subroutines_end_the_run.251:icebreaker_abilities_break_subroutine",
       "actionType": "break_subroutine"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_263_reinforced-wall_2.1.printed_subroutines_end_the_run_a.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+      "actionId": "runner.break_subroutine.runner_251_2.runner_251_2.runner_251_2.corp_475_2.1.printed_subroutines_end_the_run_a.251:icebreaker_abilities_break_subroutine",
       "actionType": "break_subroutine"
     },
     {
@@ -2850,19 +2850,19 @@
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.steal_agenda.corp_onr_v1_212_priority-requisition_1",
+      "actionId": "runner.steal_agenda.corp_424_1",
       "actionType": "steal_agenda"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:withdraw_credits",
       "actionType": "activated_card_ability"
     },
     {
       "kind": "action",
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
+      "actionId": "runner.activated_card_ability.runner_366_2.runner_366_2.activated.366:store_credits",
       "actionType": "activated_card_ability"
     },
     {
@@ -2881,12 +2881,12 @@
   "runnerReply": [
     {
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits",
+      "actionId": "runner.activated_card_ability.runner_366_2.runner_366_2.activated.366:withdraw_credits",
       "actionType": "activated_card_ability"
     },
     {
       "side": "runner",
-      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionId": "runner.activated_card_ability.runner_366_1.runner_366_1.activated.366:store_credits",
       "actionType": "activated_card_ability"
     },
     {

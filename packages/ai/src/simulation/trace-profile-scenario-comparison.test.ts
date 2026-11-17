@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   applyAction,
   applyRandomizedTraceBidSelection,
@@ -29,7 +30,7 @@ const PROFILES = [
 const SCENARIOS = [
   {
     id: "low",
-    sourceDefinitionId: "trace_comparison_low" as CardDefinitionId,
+    sourceDefinitionId: syntheticCardDefinitionId("trace_comparison_low"),
     traceLimit: 3,
     runnerLink: 1,
     corpCredits: 6,
@@ -347,7 +348,7 @@ function deckSnapshot(
     side === "corp"
       ? [...state.corp.hq, ...state.corp.rd, ...state.corp.archives]
       : [...state.runner.grip, ...state.runner.stack, ...state.runner.heap];
-  const counts = new Map<string, number>();
+  const counts = new Map<CardDefinitionId, number>();
   for (const instanceId of zones) {
     const definitionId = state.cardInstances[instanceId]?.definitionId;
     if (!definitionId) continue;

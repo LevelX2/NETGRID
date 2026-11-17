@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
@@ -26,7 +27,7 @@ function diagnosticsForTag(
 ) {
   const diagnostics: Record<string, unknown> = {};
   createCorpTagCreationDiagnosticsContext({
-    sourceDefinitionIdForAction: () => "source",
+    sourceDefinitionIdForAction: () => syntheticCardDefinitionId("source"),
   }).applyActualTagCreationDiagnostics(
     diagnostics,
     { side: "runner" } as AiDecisionInput,
@@ -49,7 +50,7 @@ describe("corp tag creation diagnostics", () => {
       },
       {
         traceSuccessful: true,
-        sourceDefinitionId: "onr_v1_257_viral-pipeline",
+        sourceDefinitionId: 157,
       },
     );
     expect(diagnostics).toMatchObject({

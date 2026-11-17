@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { createCorpVisibleTagPunishUnknownSkipDiagnosticsContext } from "./corp-visible-tag-punish-unknown-skip-diagnostics";
@@ -43,12 +44,12 @@ function attributionForEvidence(evidence: string[]) {
 function diagnose(
   evidence: string[],
   handCount: number,
-  cardId?: string,
+  cardId?: number,
   damagePrevention = false,
 ) {
   const diagnostics: Record<string, unknown> = {};
   createCorpVisibleTagPunishUnknownSkipDiagnosticsContext({
-    sourceDefinitionIdForAction: () => "operation",
+    sourceDefinitionIdForAction: () => syntheticCardDefinitionId("operation"),
     isCorpTraceTagSourceAction: () => false,
   }).applyCorpVisibleTagPunishUnknownSkipDiagnostics(
     diagnostics,

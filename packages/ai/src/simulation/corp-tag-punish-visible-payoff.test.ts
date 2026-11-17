@@ -53,7 +53,7 @@ function corpInput(): AiDecisionInput {
       activeSide: "corp",
       phase: "corp_action_phase",
       own: {
-        identity: card("corp-identity", "corp-identity"),
+        identity: card("corp-identity", 3),
         credits: 5,
         clicks: 3,
         agendaPoints: 0,
@@ -65,7 +65,7 @@ function corpInput(): AiDecisionInput {
         tags: 0,
       },
       opponent: {
-        identity: card("runner-identity", "runner-identity"),
+        identity: card("runner-identity", 587),
         credits: 5,
         clicks: 3,
         agendaPoints: 0,
@@ -89,7 +89,7 @@ function card(instanceId: string, definitionId: number): VisibleCard {
   return {
     instanceId,
     definitionId,
-    title: definitionId,
+    title: instanceId,
     type: "operation",
     known: true,
     owner: "corp",

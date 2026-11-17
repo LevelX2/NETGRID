@@ -13,6 +13,9 @@ const AI_BOARD_MEMBER = 59;
 describe("Proteus AI Board Member offer plan", () => {
   it("accepts guaranteed Basic Credit capacity through corp.economy", () => {
     const { input } = offerInput("gain_credit");
+    input.legalActions.forEach((action, index) => {
+      action.actionId = String(index + 1);
+    });
     const decision = chooseAiAction(input);
 
     expect(decision).toMatchObject({
@@ -20,7 +23,10 @@ describe("Proteus AI Board Member offer plan", () => {
       fallbackUsed: false,
       decisionDebug: { planKind: "corp.economy" },
     });
-    expect(decision.actionId).toMatch(/\.accept_extra_action_offer$/);
+    expect(
+      input.legalActions.find((action) => action.actionId === decision.actionId)
+        ?.payload?.actionEconomyAbility,
+    ).toBe("accept_extra_action_offer");
   });
 
   it("declines draw-only capacity when the draw has no admitted safe route", () => {
@@ -43,7 +49,11 @@ describe("Proteus AI Board Member offer plan", () => {
       fallbackUsed: false,
       decisionDebug: { planKind: "corp.economy" },
     });
-    expect(decision.actionId).toMatch(/\.decline_extra_action_offer$/);
+    expect(
+      constrainedInput.legalActions.find(
+        (action) => action.actionId === decision.actionId,
+      )?.payload?.actionEconomyAbility,
+    ).toBe("decline_extra_action_offer");
   });
 });
 

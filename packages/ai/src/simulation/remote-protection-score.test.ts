@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -73,7 +74,7 @@ describe("runnerContestRiskForSimulation", () => {
       "high",
     );
     expect(
-      contestRiskWithRunnerRig([runnerCard("local_icebreakerish_noise")]),
+      contestRiskWithRunnerRig([runnerCard(syntheticCardDefinitionId("local_icebreakerish_noise"))]),
     ).toBe("low");
   });
 });

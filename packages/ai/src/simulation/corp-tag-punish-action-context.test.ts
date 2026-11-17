@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { createCorpTagPunishActionContext } from "./corp-tag-punish-action-context";
@@ -5,7 +6,7 @@ import { createCorpTagPunishActionContext } from "./corp-tag-punish-action-conte
 describe("createCorpTagPunishActionContext", () => {
   it("matches tag-punish roles by bounded role terms", () => {
     const context = createCorpTagPunishActionContext({
-      sourceDefinitionIdForAction: () => "unknown",
+      sourceDefinitionIdForAction: () => syntheticCardDefinitionId("unknown"),
       rolesForAction: (_input, action) =>
         rolesByActionId[action.actionId] ?? [],
     });
@@ -33,7 +34,7 @@ describe("createCorpTagPunishActionContext", () => {
 
   it("rejects runner actions before legacy role or action-type classification", () => {
     const context = createCorpTagPunishActionContext({
-      sourceDefinitionIdForAction: () => "unknown",
+      sourceDefinitionIdForAction: () => syntheticCardDefinitionId("unknown"),
       rolesForAction: () => ["tag_source", "trace_tag", "tag_punishment"],
     });
     const input = corpInput();

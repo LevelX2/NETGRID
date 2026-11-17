@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it, vi } from "vitest";
 import type { VisibleCard } from "@netgrid/shared";
 import {
@@ -105,7 +106,7 @@ function roleForRoles(roles: string[]) {
 function card(): VisibleCard {
   return {
     instanceId: "test_card",
-    definitionId: "test_card",
+    definitionId: syntheticCardDefinitionId("test_card"),
     known: true,
     type: "asset",
   } as VisibleCard;

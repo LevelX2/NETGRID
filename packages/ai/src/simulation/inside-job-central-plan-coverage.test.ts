@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -67,7 +68,7 @@ describe("Inside Job central plan-first coverage", () => {
       }),
       ...Array.from({ length: 5 }, (_, index) =>
         visibleCard(`full-grip-${index}`, "runner", "event", {
-          definitionId: `full-grip-${index}`,
+          definitionId: syntheticCardDefinitionId(`full-grip-${index}`),
           title: `Full Grip ${index}`,
         }),
       ),

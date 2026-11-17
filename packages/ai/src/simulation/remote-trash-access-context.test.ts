@@ -238,7 +238,7 @@ function setupAmbush(): VisibleCard {
 function visibleIdentity(side: "runner" | "corp"): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: side === "runner" ? 587 : 3,
     title: `${side} identity`,
     owner: side,
     controller: side,

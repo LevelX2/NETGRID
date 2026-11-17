@@ -69,7 +69,7 @@ function apply(state: GameState, action: LegalAction): GameState {
 it("uses the Engine's discounted advancement requirement in the final-advance metric", () => {
   const state = createState();
   const printedDifficulty =
-    CARD_DEFINITIONS_BY_ID.simple_agenda!.advancementRequirement!;
+    CARD_DEFINITIONS_BY_ID[588]!.advancementRequirement!;
   RealEngineFixtureBuilder.forState(state)
     .withCorpRemoteAgenda(SERVER, printedDifficulty - 3)
     .withCorpRemoteRoot(SERVER, GRID, 0, { rezzed: true });

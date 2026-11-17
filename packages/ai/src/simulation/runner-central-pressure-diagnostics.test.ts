@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
@@ -124,10 +125,10 @@ function startRun(): LegalAction {
   };
 }
 
-function card(definitionId: number): VisibleCard {
+function card(id: number | string): VisibleCard {
   return {
-    instanceId: definitionId,
-    definitionId,
+    instanceId: typeof id === "number" ? "card_" + id : id,
+    definitionId: typeof id === "number" ? id : syntheticCardDefinitionId(id),
     known: true,
   } as VisibleCard;
 }

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import {
@@ -43,7 +44,7 @@ function input(activeRun = false): AiDecisionInput {
           root: [
             {
               instanceId: "root",
-              definitionId: "root_definition",
+              definitionId: syntheticCardDefinitionId("root_definition"),
               known: true,
               type: "agenda",
               advancementCounters: 1,

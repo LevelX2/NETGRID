@@ -48,7 +48,7 @@ function event(
   publicPayload: PublicGameEvent["publicPayload"],
 ): PublicGameEvent {
   return {
-    eventId: "event-" + version,
+    eventId: version + 1,
     type,
     stateVersionBefore: version - 1,
     stateVersionAfter: version,

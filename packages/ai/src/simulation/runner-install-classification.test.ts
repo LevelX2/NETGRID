@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
@@ -103,7 +104,7 @@ function lowValueDuplicateForRoles(roles: string[]): boolean {
     {} as AiDecisionInput,
     action("install_card"),
     {
-      sourceDefinitionIdForAction: () => "local-card",
+      sourceDefinitionIdForAction: () => syntheticCardDefinitionId("local-card"),
       rolesForCardId: () => roles,
     },
   );

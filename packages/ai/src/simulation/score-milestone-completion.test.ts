@@ -41,8 +41,8 @@ it("finishes the audited multi-turn campaign before the second Runner window", (
     cp.input.ownDeckSnapshot!.deckSnapshotId,
     cp.runtime,
   );
-  const root =
-    "plan:corp.score_agenda:agenda%3Acorp_405_1%3Aremote_1";
+  const coupInstanceId = "corp_405_1";
+  const root = "plan:corp.score_agenda:agenda%3Acorp_405_1%3Aremote_1";
   const selected: string[] = [];
   const corp = () => {
     const input = buildAiDecisionInput(state, "corp", {
@@ -53,7 +53,10 @@ it("finishes the audited multi-turn campaign before the second Runner window", (
     });
     const decision = chooseAiAction(input);
     expect(decision.fallbackUsed).toBe(false);
-    if (decision.actionId!.includes("corporate-coup")) {
+    const action = input.legalActions.find(
+      (candidate) => candidate.actionId === decision.actionId,
+    );
+    if (action?.payload?.cardId === coupInstanceId) {
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
         rootPlanInstanceId: root,
         leafExecutorInstanceId: root,
@@ -100,7 +103,7 @@ it("finishes the audited multi-turn campaign before the second Runner window", (
   expect(
     selected.filter(
       (id) =>
-        id.startsWith("corp.advance_card.") && id.includes("corporate-coup"),
+        id.startsWith(`corp.advance_card.${coupInstanceId}.`),
     ),
   ).toHaveLength(5);
   expect(selected).not.toContain("corp.draw_card");

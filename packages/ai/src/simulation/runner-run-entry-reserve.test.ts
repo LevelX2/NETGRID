@@ -78,7 +78,7 @@ it.each([4])(
     input.legalActions = input.legalActions.filter(
       (a) =>
         a.type === "play_event" &&
-        a.source.includes(INSIDE_JOB) &&
+        a.source.includes(String(INSIDE_JOB)) &&
         a.payload?.serverId === "rd",
     );
     input.playerView.legalActions = input.legalActions;
@@ -119,7 +119,7 @@ it("rejects an isolated event whose consumed card leaves the quoted hand buffer 
   input.legalActions = input.legalActions.filter(
     (a) =>
       a.type === "play_event" &&
-      a.source.includes(INSIDE_JOB) &&
+      a.source.includes(String(INSIDE_JOB)) &&
       a.payload?.serverId === "rd",
   );
   input.playerView.legalActions = input.legalActions;

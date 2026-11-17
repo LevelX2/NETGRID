@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
@@ -26,7 +27,7 @@ describe("runnerCentralRunPressureJustificationReasons", () => {
         rezzed: true,
         strength: 5,
         effectiveRunQuote: {
-          iceInstanceId: 461,
+          iceInstanceId: "card_461",
           iceDefinitionId: 461,
           effectiveStrength: 5,
           subroutines: [
@@ -92,10 +93,10 @@ function input(): AiDecisionInput {
   } as unknown as AiDecisionInput;
 }
 
-function card(definitionId: number): VisibleCard {
+function card(id: string | number): VisibleCard {
   return {
-    instanceId: definitionId,
-    definitionId,
+    instanceId: typeof id === "number" ? "card_" + id : id,
+    definitionId: typeof id === "number" ? id : syntheticCardDefinitionId(id),
     known: true,
   } as VisibleCard;
 }
