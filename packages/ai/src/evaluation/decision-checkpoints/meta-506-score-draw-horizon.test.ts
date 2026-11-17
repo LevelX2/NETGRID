@@ -1,3 +1,4 @@
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -71,9 +72,16 @@ it("retains the actual current Engine draw fact through the DTO and holds the no
 });
 it("rejects the raw unrelated Sterdroid rez without its current Engine pulse quote", () => {
   const { input } = native(true, false);
-  expect(() => chooseAiAction(input)).toThrow(
-    /missing_action_semantics.*sterdroid/,
-  );
+  const definitions = visibleSourceDefinitionsByInstanceId(input.playerView);
+  const rez = input.legalActions.find((a) => a.type === "rez_card" && definitions[a.source] === 28);
+  expect(rez).toBeDefined();
+  expect(() => chooseAiAction(input)).toThrow(expect.objectContaining({
+    code: "missing_action_semantics",
+    context: expect.objectContaining({
+      owner: "rules_contract",
+      unresolvedActionIds: [rez?.actionId],
+    }),
+  }));
 });
 it.each(["absent", "stale", "contradictory"])(
   "fails closed for the %s mandatory score fact",

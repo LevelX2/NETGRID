@@ -79,7 +79,8 @@ it("preserves the original terminal-run funding cashout instead of spending the 
   expect(capture.input.playerView.own.credits).toBe(3);
   const decision = chooseAiAction(capture.input);
   expect(decision).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
-  expect(decision.actionId).toContain("broker:withdraw_credits");
+  const action = capture.input.legalActions.find((a) => a.actionId === decision.actionId);
+  expect(action?.abilityRef?.sourceAbilityId).toBe(441);
   expect(decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "runner.credit_bank",
   );

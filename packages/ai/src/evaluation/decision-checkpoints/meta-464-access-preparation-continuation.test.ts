@@ -1,3 +1,4 @@
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { expect, it } from "vitest";
 import start from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-464-r2-g32-d9.json";
 import encounter from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-464-r2-g32-d11.json";
@@ -16,13 +17,34 @@ function fixture() {
     runtime: AiRuntimeCheckpointV1;
   };
 }
-it("retains the admitted HQ access contract when a committed run follows payoff preparation", () => {
+function prepareHqAccess(input: AiDecisionInputWithDeckCapabilities) {
+  const definitions = visibleSourceDefinitionsByInstanceId(input.playerView);
+  const preparation = input.legalActions.find((a) =>
+    a.type === "play_event" && definitions[a.source] === 176,
+  );
+  if (!preparation) throw new Error("Missing current Prearranged Drop offer");
+  return preparation;
+}
+it("develops the admitted payoff under the resident HQ pressure owner", () => {
   const { input, runtime } = fixture();
   resetResidentPlanPortfolioMemory();
-  restoreResidentPlanPortfolioMemorySnapshot(
-    input,
-    runtime.residentPlanPortfolio,
-  );
+  restoreResidentPlanPortfolioMemorySnapshot(input, runtime.residentPlanPortfolio);
+  const preparation = prepareHqAccess(input);
+  const decision = chooseAiAction(input);
+  expect(decision.actionId).toBe(preparation.actionId);
+  expect(decision.decisionDebug?.planFirstDecision?.selectedPlan).toMatchObject({
+    moduleId: "runner.pressure_central",
+    phase: "develop_payoff",
+  });
+});
+it("retains the admitted HQ access purpose through the original committed run and choice", () => {
+  const { input, runtime } = fixture();
+  const preparation = prepareHqAccess(input);
+  // Isolate the original run head while retaining the same admitted HQ purpose.
+  input.legalActions = input.legalActions.filter((a) => a.actionId !== preparation.actionId);
+  input.playerView.legalActions = input.legalActions;
+  resetResidentPlanPortfolioMemory();
+  restoreResidentPlanPortfolioMemorySnapshot(input, runtime.residentPlanPortfolio);
   expect(chooseAiAction(input).actionId).toBe("runner.start_run.hq");
   const p = residentPlanPortfolioSnapshot(input)!;
   const ex = p.instances.find((i) => i.instanceId === p.executorInstanceId)!;
