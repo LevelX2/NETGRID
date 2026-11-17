@@ -69,7 +69,7 @@ function ready(
   )!;
 }
 function fixture(
-  scored: readonly string[],
+  scored: readonly number[],
   remaining: number,
   withSibling = false,
 ) {
@@ -102,11 +102,11 @@ function fixture(
   for (const [i, id] of scored.entries())
     state = apply(
       state,
-      ready(state, id, `remote_${i + 1}` as Exclude<ServerId, "new_remote">)
+      ready(state, id, `r${i + 1}` as Exclude<ServerId, "new_remote">)
         .actionId,
     );
-  const score = ready(state, lab, "remote_10");
-  const sibling = withSibling ? ready(state, theorem, "remote_11") : undefined;
+  const score = ready(state, lab, "r10");
+  const sibling = withSibling ? ready(state, theorem, "r11") : undefined;
   // Move excess unseen own cards to Archives to control the real remaining draw horizon.
   const removed = state.corp.rd.splice(remaining);
   state.corp.archives.push(...removed);

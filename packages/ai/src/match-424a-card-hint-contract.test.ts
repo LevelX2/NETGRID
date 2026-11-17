@@ -11,7 +11,7 @@ type HintEffect = {
 };
 
 type HintCard = {
-  cardId: string;
+  cardId: number;
   roles: string[];
   planRoles: string[];
   requiredMechanics?: string[];
@@ -187,7 +187,7 @@ function readHints(_source: string): HintCard[] {
   return [...createAiHintsByCard().values()] as HintCard[];
 }
 
-function card(hints: HintCard[], cardId: string): HintCard {
+function card(hints: HintCard[], cardId: number): HintCard {
   const found = hints.find((hint) => hint.cardId === cardId);
   if (!found) throw new Error(`Missing AI hint ${cardId}`);
   return found;

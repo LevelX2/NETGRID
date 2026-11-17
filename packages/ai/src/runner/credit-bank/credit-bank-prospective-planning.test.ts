@@ -3,6 +3,9 @@ import { parseCanonicalCapabilityId } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
+import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/action-card-semantic-profiles";
+import { legalAction } from "../../semantic-ai-runtime-cutover.test-support";
 import {
   rematerializedRunnerCreditBankBuildCandidate,
   runnerCreditBankProspectivePlan,
@@ -246,17 +249,22 @@ function candidate(params: {
   abilityId: number;
   route: "build" | "cash_out";
 }): ActionSemanticCandidate {
-  return {
-    actorSide: "runner",
-    actionId: params.actionId,
-    sourceDefinitionId: 366,
-    sourceCardInstanceId: params.sourceCardInstanceId,
-    abilityId: params.abilityId,
-    abilityBindingMethod: "canonical_capability_id",
-    planOwnerBinding: {
-      capabilityKey: parseCanonicalCapabilityId(params.abilityId).capabilityKey,
-      owner: "runner.credit_bank",
-      route: params.route,
+  const ability = parseCanonicalCapabilityId(params.abilityId);
+  const action = legalAction(params.actionId, "runner", "activated_card_ability", "Broker", { credits: 0, clicks: 1 }, {
+    source: params.sourceCardInstanceId,
+    payload: {
+      cardId: params.sourceCardInstanceId,
+      sourceDefinitionId: ability.cardDefinitionId,
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+      cardImplementationAbilityId: params.abilityId,
+      cardImplementationAbilityKey: ability.capabilityKey,
     },
-  } as ActionSemanticCandidate;
+  });
+  const [candidate] = buildActionSemanticCandidates({
+    legalActions: [action],
+    observerSide: "runner",
+    cardSemanticProfilesByDefinitionId: buildActionCardSemanticProfilesByDefinitionId(),
+  });
+  expect(candidate?.planOwnerBinding?.route).toBe(params.route);
+  return candidate!;
 }

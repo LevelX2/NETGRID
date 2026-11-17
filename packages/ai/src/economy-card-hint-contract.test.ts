@@ -14,7 +14,7 @@ type EconomyEffect = {
 };
 
 type EconomyHint = {
-  cardId: string;
+  cardId: number;
   effects?: EconomyEffect[];
   functionSignals?: string[];
 };
@@ -194,7 +194,7 @@ describe("economy card hint contracts", () => {
   });
 });
 
-function hint(cardId: string): EconomyHint {
+function hint(cardId: number): EconomyHint {
   const result = hints.find((candidate) => candidate.cardId === cardId);
   if (!result) throw new Error(`Missing hint: ${cardId}`);
   return result;

@@ -61,6 +61,8 @@ function chooseDirect(input: AiDecisionInputWithDeckCapabilities) {
 it("loads before a recoverable floor payout and funds the same next-turn R&D target using two fewer actions", () => {
   const f = fixture();
   expect(f.provenance.checkedStates).toBe(128);
+  if (f.state.turnSerial === undefined) throw Error("Missing fixture turn serial");
+  const initialTurn = f.state.turnSerial;
   expect(hashGameState(f.state)).toBe(f.runner.stateHash);
   for (const cp of [f.runner, f.corp])
     expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
@@ -105,7 +107,7 @@ it("loads before a recoverable floor payout and funds the same next-turn R&D tar
         (action) => action.payload?.cardImplementationAbilityKey === "withdraw_credits",
       );
       // Compare both financing routes against the same next-turn R&D action.
-      const followingRunnerTurn = side === "runner" && state.turnSerial > f.state.turnSerial;
+      const followingRunnerTurn = side === "runner" && state.turnSerial !== undefined && state.turnSerial > initialTurn;
       const comparisonActionId = input.playerView.own.credits >= targetCredits
         ? targetActionId
         : oldCashout ? "runner.gain_credit" : cashout?.actionId;

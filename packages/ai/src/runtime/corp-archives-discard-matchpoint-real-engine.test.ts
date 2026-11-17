@@ -47,7 +47,7 @@ function fixture() {
   state = drawn.state;
   RealEngineFixtureBuilder.forState(state).withCorpHqSize(0).withCorpCredits(5);
   const moved = new Set<string>();
-  const place = (definition: string, zone: "hq" | "archives") => {
+  const place = (definition: number, zone: "hq" | "archives") => {
     const card = Object.values(state.cardInstances).find(
       (c) => c.definitionId === definition && !moved.has(c.instanceId),
     )!;

@@ -329,7 +329,7 @@ describe("runner rig-demand coverage adapter", () => {
     });
     const incomplete = deckCapabilities();
     incomplete.runner!.breakerInventory[0] = {
-      cardId: "unknown-decoder",
+      cardId: syntheticCardDefinitionId("unknown-decoder"),
       title: "Unknown Decoder",
       coverage: ["code_gate"],
       breakCost: 1,
@@ -751,7 +751,7 @@ function gap(
 
 function deckCapabilities(
   breaker: {
-    cardId: string;
+    cardId: number;
     coverage: "code_gate" | "sentry";
     memoryCost: number;
     noisy?: boolean;

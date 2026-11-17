@@ -260,6 +260,7 @@ it("discards the newly drawn duplicate Gate breaker when another copy is install
     choiceId: drawn.state.pendingChoice?.choiceId,
     selectedOptionIds: ["trash_" + duplicate.instanceId],
   });
+  if (!decision.selectedChoices) throw Error("Missing native draw replacement choice");
   const applied = applyAction(drawn.state, {
     matchId: state.matchId,
     side: "runner",
