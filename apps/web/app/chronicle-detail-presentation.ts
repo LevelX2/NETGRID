@@ -197,6 +197,7 @@ export function chronicleEventDetail(
   }
   if (b("strategicPlanningGroupChoiceResolved") === true) {
     return say("strategicPlanning", {
+      source: s("drawReplacementSourceTitle") ?? source,
       count: known(n("strategicPlanningGroupDrawnCardCount")),
       net: known(n("strategicPlanningGroupNetDrawCount")),
     });
@@ -381,19 +382,33 @@ export function chronicleEventDetail(
       ),
       importance: "critical",
     };
-  if (s("imminentEventType") === "add_tag" && s("eventModificationDecision"))
-    return say(
-      "tagPrevention",
-      {
-        prevented: known(n("preventedTags")),
-        final: known(n("finalAmount", "tagsAdded")),
-        decision: detail(
-          s("eventModificationDecision") === "apply" ? "used" : "declined",
-        ),
-      },
-      b("sourceTrashed") ? detail("sourceTrashed", { source }) : undefined,
-      "danger",
-    );
+  if (s("imminentEventType") === "add_tag" && s("eventModificationDecision")) {
+    const preventionId =
+      (b("sourceTrashed") ? s("trashedCardDefinitionId") : undefined) ??
+      sourceId;
+    const preventionTitle =
+      name(preventionId) ??
+      (b("sourceTrashed") ? s("trashedCardTitle") : undefined) ??
+      (preventionId === sourceId ? source : t("card.unknown"));
+    return {
+      ...say(
+        "tagPrevention",
+        {
+          source: preventionTitle,
+          prevented: known(n("preventedTags")),
+          final: known(n("finalAmount", "tagsAdded")),
+          decision: detail(
+            s("eventModificationDecision") === "apply" ? "used" : "declined",
+          ),
+        },
+        undefined,
+        "danger",
+      ),
+      chips: [preventionTitle],
+      cardDefinitionId: preventionId,
+      cardTitle: preventionTitle,
+    };
+  }
   if (
     s("eventModificationDecision") === "apply" &&
     n("preventedAmount") !== undefined
@@ -412,6 +427,9 @@ export function chronicleEventDetail(
     hidden === "search_stack" && s("searchDestination") === "install_program";
   if (
     hidden === "self_modifying_code_install_program" ||
+    (hidden === "hidden_stack_program_install" &&
+      s("publicRevealKind") === "reveal" &&
+      s("publicRevealDefinitionId") !== undefined) ||
     stackInstall ||
     hidden === "sneak_preview_install_program"
   ) {
@@ -422,13 +440,22 @@ export function chronicleEventDetail(
       b("installed") === true ||
       b("installSucceeded") === true ||
       s("searchDestination") === "runner_rig";
+    const publicStackSearch = stackInstall && s("searchReveal") === "public";
+    const searchSourceTitle = name(s("sourceDefinitionId")) ?? s("sourceTitle");
+    const showSearchSource =
+      !publicStackSearch || searchSourceTitle !== undefined;
     return say(
       deferred
         ? "programPendingMu"
         : installed
-          ? "programInstalled"
-          : "programNotInstalled",
+          ? showSearchSource
+            ? "programInstalled"
+            : "programInstalledFromStack"
+          : showSearchSource
+            ? "programNotInstalled"
+            : "programNotInstalledFromStack",
       {
+        ...(searchSourceTitle ? { source: searchSourceTitle } : {}),
         program:
           name(
             s(
@@ -437,6 +464,7 @@ export function chronicleEventDetail(
               "cardDefinitionId",
             ),
           ) ??
+          (publicStackSearch ? s("publicRevealTitle", "title") : undefined) ??
           context.cardTitle ??
           target,
       },
@@ -529,6 +557,7 @@ export function chronicleEventDetail(
       ...say(publicReveal ? "stackToHand" : "privateStackToHand", {
         card:
           name(s("publicRevealDefinitionId", "cardDefinitionId")) ??
+          (publicReveal ? s("publicRevealTitle", "title") : undefined) ??
           context.cardTitle ??
           target,
         count: known(n("selectedCount")),
@@ -549,7 +578,10 @@ export function chronicleEventDetail(
     return say("exposeReviewFinished");
   if (hidden === "expose_installed_card_review")
     return say("exposeSingle", {
-      card: name(s("publicRevealDefinitionId", "cardDefinitionId")) ?? target,
+      card:
+        name(s("publicRevealDefinitionId", "cardDefinitionId")) ??
+        s("publicRevealTitle", "title") ??
+        target,
       location:
         s("exposedServerLabel", "serverLabel", "targetServerLabel") ?? server,
     });
@@ -728,14 +760,10 @@ export function chronicleEventDetail(
       "run",
     );
   if (hidden === "v1911_aujourdoui_top5")
-    return say(
-      "aujourdhui",
-      {
-        count: known(n("selectedCount")),
-        cards: titles("publicRevealDefinitionIds").join(", "),
-      },
-      detail("stackShuffled"),
-    );
+    return say("aujourdhui", {
+      count: known(n("selectedCount")),
+      cards: titles("publicRevealDefinitionIds").join(", "),
+    });
   if (hidden === "p3_38_look_top_stack_show_to_corp_then_install_matching")
     return say(
       b("installed") === true ||
@@ -1449,10 +1477,7 @@ export function chronicleEffectDetail(
   const known = (v: number | undefined) => v ?? t("details.unknown");
   const sourceId = s("sourceDefinitionId") ?? ambush;
   const source =
-    s("sourceTitle") ??
-    publicCardTitle(sourceId, catalog) ??
-    base.cardTitle ??
-    t("card.unknown");
+    s("sourceTitle") ?? publicCardTitle(sourceId, catalog) ?? t("card.unknown");
   const subject = t(
     base.actor === side
       ? "actor.you"
@@ -1582,16 +1607,26 @@ export function chronicleEffectDetail(
       ...say("skivviss"),
       description: t("details.skivvissCounters", { amount }),
     };
-  if (effect.kind === "rez_card") return say("automaticRez");
-  if (effect.kind === "score_agenda" || effect.kind === "steal_agenda")
+  if (
+    effect.kind === "rez_card" ||
+    effect.kind === "score_agenda" ||
+    effect.kind === "steal_agenda"
+  ) {
+    const card =
+      publicCardTitle(s("cardDefinitionId"), catalog) ??
+      s("cardTitle") ??
+      t("card.unknown");
+    if (effect.kind === "rez_card")
+      return say("automaticRez", { source: card });
     return {
       ...say(
         effect.kind === "score_agenda" ? "automaticScore" : "automaticSteal",
-        { card: s("cardTitle") ?? source },
+        { card },
         "agenda",
       ),
       importance: "critical",
     };
+  }
   if (effect.kind === "add_hosted_credits")
     return say("hostedAdded", {}, "economy");
   if (

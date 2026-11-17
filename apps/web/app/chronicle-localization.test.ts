@@ -39,6 +39,138 @@ function event(
 }
 
 describe("semantic chronicle localization", () => {
+  it.each(["de", "en", "fr"] as const)(
+    "shows a run start once when its choice already shows the same start in %s",
+    (locale) => {
+      const t = translate(locale);
+      const result = event("resolve_choice", {
+        sourceDefinitionId: "onr_v1_111_social-engineering",
+        autoPassChosenIce: true,
+        chosenIcePosition: 0,
+        serverId: "rd",
+        resolvedEffects: [
+          {
+            effectId: "rd.start",
+            kind: "start_run",
+            visibility: "public",
+            side: "runner",
+            serverId: "rd",
+          },
+          {
+            effectId: "hq.start",
+            kind: "start_run",
+            visibility: "public",
+            side: "runner",
+            serverId: "hq",
+          },
+        ],
+      });
+      const choiceItem = formatChronicleEvent(result, "corp", { translate: t });
+      expect(choiceItem.title).toContain("R&D");
+      expect(choiceItem.title).toContain("Social Engineering");
+      const effects = formatChronicleEffectItems(result, "corp", undefined, t);
+      expect(effects).toHaveLength(1);
+      expect(effects[0]).toMatchObject({ category: "run" });
+      expect(effects[0]!.title).toContain("HQ");
+      expect(effects[0]!.cardTitle).toBeUndefined();
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
+    "uses the affected card for public rez, score and trash effects in %s",
+    (locale) => {
+      const t = translate(locale);
+      for (const kind of [
+        "rez_card",
+        "score_agenda",
+        "steal_agenda",
+        "trash_card",
+      ] as const) {
+        const outcome = event("end_turn", {
+          resolvedEffects: [
+            {
+              effectId: kind,
+              kind,
+              visibility: "public",
+              side: "runner",
+              cardTitle: "Public target",
+              cardDefinitionId: "public_target",
+              sourceTitle: "Public source",
+            },
+          ],
+        });
+        const [item] = formatChronicleEffectItems(
+          outcome,
+          "corp",
+          undefined,
+          t,
+        );
+        expect(item).toMatchObject({
+          cardTitle: "Public target",
+          cardDefinitionId: "public_target",
+        });
+        expect(item!.title).toContain("Public target");
+        if (kind === "rez_card")
+          expect(item!.title).not.toContain("Public source");
+        else expect(item!.title).toContain("Public source");
+
+        const [hidden] = formatChronicleEffectItems(
+          event("end_turn", {
+            resolvedEffects: [
+              {
+                ...outcome.publicPayload.resolvedEffects![0],
+                visibility: "private_to_side",
+              },
+            ],
+          }),
+          "corp",
+          undefined,
+          t,
+        );
+        expect(hidden).toMatchObject({ visibility: "redacted" });
+        expect(JSON.stringify(hidden)).not.toMatch(/Public (target|source)/);
+      }
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
+    "names the source and the publicly revealed program in a stack install in %s",
+    (locale) => {
+      const outcome = event("resolve_choice", {
+        hiddenZoneAction: "hidden_stack_program_install",
+        hiddenZoneBarrier: true,
+        sourceDefinitionId: "program_search",
+        publicRevealKind: "reveal",
+        publicRevealDefinitionId: "selected_program",
+        searchDestination: "runner_rig",
+        installed: true,
+      });
+      const item = formatChronicleEvent(outcome, "corp", {
+        translate: translate(locale),
+        cardPresentationsById: {
+          program_search: { title: "Program Search" },
+          selected_program: { title: "Selected Program" },
+        },
+      });
+      expect(item.title).toContain("Program Search");
+      expect(item.title).toContain("Selected Program");
+      expect(item.visibility).toBe("public");
+
+      const search = event("resolve_choice", {
+        hiddenZoneAction: "search_stack",
+        searchReveal: "public",
+        searchDestination: "install_program",
+        installSucceeded: true,
+        cardDefinitionId: "selected_program",
+        title: "Selected Program",
+      });
+      const summary = formatChronicleEvent(search, "corp", {
+        translate: translate(locale),
+      }).title;
+      expect(summary.match(/Selected Program/g)).toHaveLength(1);
+    },
+  );
+
   it.each([
     ["de", "Der Runner: den Zugriff auf R&D abgeschlossen."],
     ["en", "The Runner: finished accessing a card on R&D."],
