@@ -1,4 +1,4 @@
-import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
+import { assessVisibleRunnerServerPath } from "../run-analysis/visible-run-server-path";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -8,11 +8,8 @@ import {
 import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import type { KnownPositionMemory } from "../belief-state";
 import { actionCreditCost } from "../runtime/action-cost";
-import { centralServerId, serverBlocksStealthBitPayments } from "../runtime/server-target";
-import {
-  runnerRunPathCreditBudgetWithVisiblePools,
-  type assessKnownRezzedIcePath,
-} from "../visible-run-analysis";
+import { centralServerId } from "../runtime/server-target";
+import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import { centralPressureTargetIsGoodForMetrics } from "./central-pressure-card";
 import type {
   RunnerCoveragePressureForMetrics,
@@ -51,30 +48,6 @@ export type RunnerPressureMetricDependencies = {
 export function createRunnerPressureMetricContext(
   dependencies: RunnerPressureMetricDependencies,
 ) {
-  const assessVisibleServerPath = (
-    input: AiDecisionInput,
-    server: AiDecisionInput["playerView"]["servers"][number],
-    liquidCredits = input.playerView.own.credits,
-  ) => {
-    const { own, opponent } = input.playerView;
-    const excludeStealthCredits = serverBlocksStealthBitPayments(server);
-    return dependencies.assessKnownRezzedIcePath(
-      server.ice,
-      own.rig ?? [],
-      runnerRunPathCreditBudgetWithVisiblePools(
-        liquidCredits + (own.availableBadPublicityRunCredits ?? 0),
-        own.rig ?? [],
-        { liquidCredits, excludeStealthCredits },
-      ),
-      server.root,
-      opponent.credits,
-      {
-        ...visibleRunnerPathTraceContext(input),
-        ...(excludeStealthCredits ? { excludeStealthTraceCredits: true } : {}),
-      },
-    );
-  };
-
   const runnerRemotePressureReadyForMetrics = (
     input: AiDecisionInput,
     server: AiDecisionInput["playerView"]["servers"][number],
@@ -142,11 +115,10 @@ export function createRunnerPressureMetricContext(
         !dependencies.runnerStrategicBreakerTargetForMetrics(server)
       )
         continue;
-      const assessment = assessVisibleServerPath(
-        input,
-        server,
-        input.playerView.own.credits - actionCreditCost(action),
-      );
+      const assessment = assessVisibleRunnerServerPath(input, server, {
+        liquidCredits: input.playerView.own.credits - actionCreditCost(action),
+        assessKnownPath: dependencies.assessKnownRezzedIcePath,
+      });
       if (!assessment.blocked) broadReady = true;
       if (assessment.blocked) {
         blockers.add(
@@ -211,7 +183,9 @@ export function createRunnerPressureMetricContext(
     for (const server of input.playerView.servers) {
       if (!dependencies.runnerStrategicBreakerTargetForMetrics(server))
         continue;
-      const assessment = assessVisibleServerPath(input, server);
+      const assessment = assessVisibleRunnerServerPath(input, server, {
+        assessKnownPath: dependencies.assessKnownRezzedIcePath,
+      });
       const rezzedMissing = assessment.blocked
         ? server.ice
             .filter(

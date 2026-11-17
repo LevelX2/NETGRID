@@ -44,6 +44,7 @@ export function selectedRunnerHiddenDrawReplacementOptionId(
       );
       return (
         choices.length === 2 &&
+        new Set(choices.map((option) => option.value)).size === 2 &&
         choices.every(
           (option) =>
             option.card?.instanceId === cardId &&
@@ -75,15 +76,10 @@ export function selectedRunnerHiddenDrawReplacementOptionId(
     portfolio.executorInstanceId === origin.executorInstanceId &&
     root !== undefined &&
     executor !== undefined &&
-    action.side === "runner" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === selectableOptions.length &&
+    exactCurrentChoiceAction(input, choice) === action &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    requirement?.optionIds.length === selectableOptions.length &&
     selectableOptions.every((option) =>
       requirement.optionIds.includes(option.id),
     ) &&
@@ -175,15 +171,9 @@ export function selectedRunnerPostBreakStealthLossOptionIds(
     portfolio.executorInstanceId === origin.executorInstanceId &&
     root !== undefined &&
     executor !== undefined &&
-    action.side === "runner" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === choice.minSelections &&
-    requirement.maxSelections === choice.maxSelections &&
-    requirement.optionIds.length === selectableOptions.length &&
+    exactCurrentChoiceAction(input, choice) === action &&
+    expectedSelections <= selectableOptions.length &&
+    requirement?.optionIds.length === selectableOptions.length &&
     selectableOptions.every((option) =>
       requirement.optionIds.includes(option.id),
     );
@@ -211,8 +201,19 @@ export function selectedRunnerAccessProgramInstallMemoryOptionIds(
   const sourceParts = choice.source.split(":");
   const targetCardId = sourceParts[2];
   const automaticFreedMemory = Number(sourceParts[3]);
-  const originalChoiceId = decodeURIComponent(sourceParts[4] ?? "");
-  const originalChoiceSource = decodeURIComponent(sourceParts[5] ?? "");
+  let originalChoiceId: string;
+  let originalChoiceSource: string;
+  try {
+    originalChoiceId = decodeURIComponent(sourceParts[4] ?? "");
+    originalChoiceSource = decodeURIComponent(sourceParts[5] ?? "");
+  } catch (error) {
+    if (!(error instanceof URIError)) throw error;
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The accessed-agenda memory continuation requires the exact encoded Engine choice identity and source.",
+    );
+  }
   const originalSourceMatch =
     /^access\.agenda_install_as_runner_program:([^:]+):([0-9]+)$/.exec(
       originalChoiceSource,

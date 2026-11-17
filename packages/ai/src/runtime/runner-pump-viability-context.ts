@@ -6,12 +6,10 @@ import type {
 
 import {
   canVisibleBreakerBreakQuotedSubroutines,
-  creditsToBreakEndTheRunSubroutinesWithBreaker,
   creditsToBreakVisibleSubroutinesWithBreaker,
   requireEffectiveRunQuoteForKnownRezzedIce,
   type RunnerRunPathCreditBudget,
   visibleDeflectorSubroutineCanResolve,
-  visibleRunnerRunPathCreditBudgetForRig,
 } from "../visible-run-analysis";
 import {
   currentEncounteredIceCard,
@@ -44,23 +42,14 @@ import type {
   RunnerEncounterActionConstraint,
   RunnerEncounterViabilityAssessment,
 } from "./runner-encounter-action-exclusion";
-import type { MutableRunnerRunPathCreditBudget } from "../run-analysis/visible-run-analysis-contracts";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
+import { runnerRunPathCreditBudgetAfterEncounter } from "../run-analysis/visible-run-credit-budget";
 import {
-  fundRunnerRunPathPayment,
-  runnerPaymentSupportBudgetForRig,
-  visibleRunnerRunOnlyCredits,
-  runnerRunPathCreditBudgetAfterEncounter,
-} from "../run-analysis/visible-run-credit-budget";
+  runnerEncounterCreditBudgetForInput,
+  spendRunnerEncounterBreakerCost,
+} from "./runner-encounter-credit-budget";
 
 type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
-type MutableEncounterCreditBudget = Omit<
-  MutableRunnerRunPathCreditBudget,
-  "traceEligibleCredits" | "runOnlyCredits"
-> & {
-  runOnlyCredits: number;
-};
-
 export type RunnerPumpViabilityContextDependencies = {
   findVisibleCard: (
     input: AiDecisionInput,
@@ -254,11 +243,13 @@ export function createRunnerPumpViabilityContext(
     );
     const requiredPumps = Math.max(1, Math.ceil(missingStrength / pumpAmount));
     const totalPumpCost = requiredPumps * pumpCost;
-    const pumpPayment = spendIcebreakerCredits(
-      encounterCreditBudget(input),
-      breaker,
-      totalPumpCost,
-    );
+    const spend = (
+      budget: ReturnType<typeof runnerEncounterCreditBudgetForInput>,
+      cost: number,
+    ) => spendRunnerEncounterBreakerCost({
+      input, breakerId: breaker.instanceId, budget, cost,
+    });
+    const pumpPayment = spend(runnerEncounterCreditBudgetForInput(input), totalPumpCost);
     if (!pumpPayment.affordable)
       return {
         canLeadToBreak: false,
@@ -299,8 +290,7 @@ export function createRunnerPumpViabilityContext(
               (encounterContinue?.payload?.encounterWillEndRun === true &&
                 isEndRunSubroutine(subroutine))),
     );
-    const requiredBreakCount = requiredBreakSubroutines?.length ?? 0;
-    let estimatedBreakCost = requiredBreakSubroutines?.length
+    let estimatedBreakCost = requiredBreakSubroutines.length
       ? creditsToBreakVisibleSubroutinesWithBreaker(
           breaker,
           encounteredIce,
@@ -308,14 +298,7 @@ export function createRunnerPumpViabilityContext(
           (breaker.strength ?? 0) + requiredPumps * pumpAmount,
           currentQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
         )?.cost
-      : requiredBreakCount > 0
-        ? creditsToBreakEndTheRunSubroutinesWithBreaker(
-            breaker,
-            encounteredIce,
-            requiredBreakCount,
-            (breaker.strength ?? 0) + requiredPumps * pumpAmount,
-          )?.cost
-        : minimumRemainingBreakCost();
+      : minimumRemainingBreakCost();
 
     function minimumRemainingBreakCost(): number | undefined {
       // Even an optional mitigation pump must leave enough to break at least
@@ -337,14 +320,14 @@ export function createRunnerPumpViabilityContext(
     }
     const partialMitigation =
       estimatedBreakCost === undefined ||
-      !spendIcebreakerCredits(pumpPayment.budget, breaker, estimatedBreakCost)
+      !spend(pumpPayment.budget, estimatedBreakCost)
         .affordable
         ? currentEncounterMitigationForAction(input, action, requiredHandFloor)
         : undefined;
     if (partialMitigation) estimatedBreakCost = partialMitigation.breakCost;
     if (
       estimatedBreakCost === undefined ||
-      !spendIcebreakerCredits(pumpPayment.budget, breaker, estimatedBreakCost)
+      !spend(pumpPayment.budget, estimatedBreakCost)
         .affordable
     )
       return {
@@ -355,11 +338,7 @@ export function createRunnerPumpViabilityContext(
         ],
       };
 
-    let breakPayment = spendIcebreakerCredits(
-      pumpPayment.budget,
-      breaker,
-      estimatedBreakCost,
-    );
+    let breakPayment = spend(pumpPayment.budget, estimatedBreakCost);
     let creditsAfterPumpAndBreak = breakPayment.budget.credits;
     const pumpAndBreakCost = totalPumpCost + estimatedBreakCost;
     const cheaperTraceCost = cheaperSafeCurrentTracePayment(
@@ -476,12 +455,7 @@ export function createRunnerPumpViabilityContext(
           currentQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
         );
         const completePayment =
-          completeQuote &&
-          spendIcebreakerCredits(
-            pumpPayment.budget,
-            breaker,
-            completeQuote.cost,
-          );
+          completeQuote && spend(pumpPayment.budget, completeQuote.cost);
         if (completePayment?.affordable) {
           const completeFuture =
             dependencies.encounterFuturePathAfterPumpBreakAssessment(
@@ -604,124 +578,4 @@ export function createRunnerPumpViabilityContext(
   };
 
   return { pumpViabilityAssessment };
-}
-
-function encounterCreditBudget(
-  input: AiDecisionInput,
-): MutableEncounterCreditBudget {
-  const visiblePools = visibleRunnerRunPathCreditBudgetForRig(
-    input.playerView.own.rig ?? [],
-  );
-  return {
-    credits: normalizeCreditAmount(input.playerView.own.credits),
-    runOnlyCredits: visibleRunnerRunOnlyCredits(input.playerView.run),
-    ...runnerPaymentSupportBudgetForRig(
-      input.playerView.own.credits,
-      input.playerView.own.rig ?? [],
-    ),
-    icebreakerCredits: visiblePools.icebreakerCredits,
-    nonNoisyIcebreakerCredits: visiblePools.nonNoisyIcebreakerCredits,
-    nonStealthNonNoisyIcebreakerCredits:
-      visiblePools.nonStealthNonNoisyIcebreakerCredits,
-    killerCredits: visiblePools.killerCredits,
-    stealthNonNoisyIcebreakerCredits:
-      visiblePools.stealthNonNoisyIcebreakerCredits,
-    stealthCreditsBySourceId: { ...visiblePools.stealthCreditsBySourceId },
-    hostedIcebreakerCreditsByBreakerInstanceId: {
-      ...visiblePools.hostedIcebreakerCreditsByBreakerInstanceId,
-    },
-  };
-}
-
-function spendIcebreakerCredits(
-  budget: MutableEncounterCreditBudget,
-  breaker: VisibleCard,
-  cost: number,
-): {
-  affordable: boolean;
-  budget: MutableEncounterCreditBudget;
-  restrictedSpent: number;
-} {
-  const next = {
-    ...budget,
-    hostedIcebreakerCreditsByBreakerInstanceId: {
-      ...budget.hostedIcebreakerCreditsByBreakerInstanceId,
-    },
-    stealthCreditsBySourceId: { ...budget.stealthCreditsBySourceId },
-  };
-  let remaining = normalizeCreditAmount(cost);
-  fundRunnerRunPathPayment(next, remaining);
-  let restrictedSpent = 0;
-  const runOnlySpent = Math.min(next.runOnlyCredits, remaining);
-  next.runOnlyCredits -= runOnlySpent;
-  remaining -= runOnlySpent;
-  restrictedSpent += runOnlySpent;
-  const hostedCredits = Math.min(
-    next.hostedIcebreakerCreditsByBreakerInstanceId[breaker.instanceId] ?? 0,
-    remaining,
-  );
-  next.hostedIcebreakerCreditsByBreakerInstanceId[breaker.instanceId] =
-    Math.max(
-      0,
-      (next.hostedIcebreakerCreditsByBreakerInstanceId[breaker.instanceId] ??
-        0) - hostedCredits,
-    );
-  remaining -= hostedCredits;
-  restrictedSpent += hostedCredits;
-  const spendRestricted = (key: "icebreakerCredits" | "killerCredits") => {
-    const spent = Math.min(next[key], remaining);
-    next[key] -= spent;
-    remaining -= spent;
-    restrictedSpent += spent;
-  };
-  if (breakerHasSubtype(breaker, "killer")) spendRestricted("killerCredits");
-  if (!breakerHasSubtype(breaker, "noisy")) {
-    const ordinarySpent = Math.min(
-      next.nonStealthNonNoisyIcebreakerCredits,
-      remaining,
-    );
-    next.nonStealthNonNoisyIcebreakerCredits -= ordinarySpent;
-    next.nonNoisyIcebreakerCredits -= ordinarySpent;
-    remaining -= ordinarySpent;
-    restrictedSpent += ordinarySpent;
-    for (const sourceId of Object.keys(next.stealthCreditsBySourceId).sort()) {
-      const spent = Math.min(
-        next.stealthCreditsBySourceId[sourceId] ?? 0,
-        remaining,
-      );
-      next.stealthCreditsBySourceId[sourceId] =
-        (next.stealthCreditsBySourceId[sourceId] ?? 0) - spent;
-      next.stealthNonNoisyIcebreakerCredits -= spent;
-      next.nonNoisyIcebreakerCredits -= spent;
-      remaining -= spent;
-      restrictedSpent += spent;
-      if (remaining === 0) break;
-    }
-  }
-  spendRestricted("icebreakerCredits");
-  const cashSpent = Math.min(next.credits, remaining);
-  next.credits -= cashSpent;
-  remaining -= cashSpent;
-  return {
-    affordable: remaining === 0,
-    budget: next,
-    restrictedSpent,
-  };
-}
-
-function breakerHasSubtype(breaker: VisibleCard, subtype: string): boolean {
-  return (breaker.subtypes ?? []).some(
-    (candidate) => subtypeKey(candidate) === subtype,
-  );
-}
-
-function subtypeKey(subtype: string): string {
-  return subtype
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
-
-function normalizeCreditAmount(value: number): number {
-  return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
 }

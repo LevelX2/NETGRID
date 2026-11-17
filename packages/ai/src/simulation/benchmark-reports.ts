@@ -1,3 +1,4 @@
+import { formatMarkdownTableRow as formatSuiteMetricRow } from "../reports/markdown-table";
 import type {
   AiBenchmarkCorpArchetype,
   AiBenchmarkDeckSlotType,
@@ -223,7 +224,16 @@ export function formatAiSelfplayTraceMiningReport(
     result.topFindings.length > 0
       ? result.topFindings.map(
           (finding) =>
-            `| ${finding.severity} | ${finding.seed} | ${finding.stateVersion} | ${finding.side} | ${finding.selectedActionType} | ${finding.detectorIds.join(", ")} | ${escapeMarkdownTableCell(finding.shortReason)} | ${escapeMarkdownTableCell(finding.relevantDebugFacts.slice(0, 4).join("; "))} |`,
+            formatSuiteMetricRow([
+              finding.severity,
+              finding.seed,
+              finding.stateVersion,
+              finding.side,
+              finding.selectedActionType,
+              finding.detectorIds.join(", "),
+              finding.shortReason,
+              finding.relevantDebugFacts.slice(0, 4).join("; "),
+            ]),
         )
       : ["| none | none | 0 | unknown | none | none | Keine Funde. |  |"];
   return [
@@ -951,14 +961,6 @@ function suiteMetricHeader(): string {
   return [formatSuiteMetricRow(labels), formatSuiteMetricRow(alignment)].join(
     "\n",
   );
-}
-
-function escapeMarkdownTableCell(value: string): string {
-  return value.replace(/\|/g, "\\|").replace(/\r?\n/g, " ");
-}
-
-function formatSuiteMetricRow(row: readonly (string | number)[]): string {
-  return `| ${row.map((value) => escapeMarkdownTableCell(String(value))).join(" | ")} |`;
 }
 
 function summarizeCorpStrategyPanelCoverage(

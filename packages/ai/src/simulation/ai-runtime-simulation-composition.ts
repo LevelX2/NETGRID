@@ -6,7 +6,10 @@ import {
   createRunnerSemanticSupportComposition,
   type RunnerSemanticSupportCompositionDependencies,
 } from "../runtime/runner-semantic-support-composition";
-import { createAiContextDiagnosticsComposition } from "../runtime/ai-context-diagnostics-composition";
+import {
+  aiContextDiagnosticDependencies,
+  createAiContextDiagnosticsComposition,
+} from "../runtime/ai-context-diagnostics-composition";
 import {
   createCorpTagPunishWindowComposition,
   type CorpTagPunishWindowCompositionDependencies,
@@ -37,18 +40,9 @@ type RuntimeRunnerSupportDependencyKeys =
   | "runnerMultiRunEventExclusion"
   | "runnerRunTargetEvaluationForAction";
 
-type AiContextDiagnosticsOutputs = ReturnType<
-  typeof createAiContextDiagnosticsComposition
+type RuntimeContextDiagnosticsDependencyKeys = keyof ReturnType<
+  typeof aiContextDiagnosticDependencies
 >;
-
-type RuntimeContextDiagnosticsDependencyKeys =
-  | keyof AiContextDiagnosticsOutputs
-  | "closeout"
-  | "extractFeatures"
-  | "hasKnownUnaffordableLegalRun"
-  | "remoteTrashAccessContext"
-  | "tagPunishAssessmentForAction"
-  | "trashAccessContext";
 
 export type AiRuntimeSimulationCompositionDependencies =
   AiLiveRuntimeCompositionDependencies &
@@ -70,36 +64,20 @@ export type AiRuntimeSimulationCompositionDependencies =
       RuntimeContextDiagnosticsDependencyKeys
     >;
 
-function createRuntimeComposedDependencies(
-  dependencies: AiRuntimeSimulationCompositionDependencies,
-  contextDiagnostics: AiContextDiagnosticsOutputs,
-) {
-  return {
-    ...dependencies,
-    ...contextDiagnostics,
-    closeout: contextDiagnostics.bestTrueCentralCloseoutProfileForMetrics,
-    extractFeatures: contextDiagnostics.extractAiFeatures,
-    hasKnownUnaffordableLegalRun:
-      contextDiagnostics.runnerHasKnownUnaffordableLegalRun,
-    remoteTrashAccessContext: contextDiagnostics.runnerRemoteTrashAccessContext,
-    tagPunishAssessmentForAction:
-      contextDiagnostics.corpTagPunishOntologyAssessmentForAction,
-    trashAccessContext: contextDiagnostics.runnerRemoteTrashAccessContext,
-  };
-}
-
 export function createAiRuntimeSimulationComposition(
   dependencies: AiRuntimeSimulationCompositionDependencies,
 ) {
   const contextDiagnostics =
     createAiContextDiagnosticsComposition(dependencies);
+  const diagnosticDependencies = {
+    ...dependencies,
+    ...aiContextDiagnosticDependencies(contextDiagnostics),
+  };
   const runnerSupport = createRunnerSemanticSupportComposition(
-    createRuntimeComposedDependencies(dependencies, contextDiagnostics),
+    diagnosticDependencies,
   );
   const { tagPunishWindowDiagnosticsForSimulationAction } =
-    createCorpTagPunishWindowComposition(
-      createRuntimeComposedDependencies(dependencies, contextDiagnostics),
-    );
+    createCorpTagPunishWindowComposition(diagnosticDependencies);
   const runtimeEntrypoints = createAiLiveRuntimeComposition(dependencies);
   const simulationEntrypoints = createAiSimulationComposition({
     ...dependencies,

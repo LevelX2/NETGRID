@@ -65,12 +65,12 @@ export function prepareCorpScoreHandRetention(input: AiDecisionInput) {
       if (
         !card.known ||
         definition?.type !== "agenda" ||
-        definition.advancementRequirement === undefined
+        card.advancementRequirement === undefined
       )
         return;
       const advances = Math.max(
         0,
-        definition.advancementRequirement - (card.advancementCounters ?? 0),
+        card.advancementRequirement - (card.advancementCounters ?? 0),
       );
       const clicks = advances + installClicks;
       const points = card.agendaPoints ?? definition.agendaPoints;

@@ -6,6 +6,7 @@ import {
 } from "@netgrid/engine";
 import type { GameState, LegalAction } from "@netgrid/shared";
 import { expect, it } from "vitest";
+import { prepareCorpScoreHandRetention } from "../corp/score/score-hand-retention";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 import {
@@ -14,13 +15,17 @@ import {
 } from "./final-advance-assessment";
 
 const GRID = "onr_v1_374_washington-d-c-city-grid";
+const TYCHO = "onr_v1_220_tycho-extension";
+const OVERTIME = "onr_v1_297_overtime-incentives";
 const ICE = "simple_barrier_ice";
 const SERVER = "remote_1";
 const corpDeck = {
   ...DEMO_DECKS.demo_corp_001,
   cards: [
-    ...DEMO_DECKS.demo_corp_001.cards.filter((card) => card.id !== GRID),
-    { id: GRID, quantity: 1 },
+    ...DEMO_DECKS.demo_corp_001.cards.filter(
+      (card) => ![GRID, TYCHO, OVERTIME].includes(card.id),
+    ),
+    ...[GRID, TYCHO, OVERTIME].map((id) => ({ id, quantity: 1 })),
   ],
 };
 
@@ -111,4 +116,23 @@ it("attributes untargeted basic income when it makes near-score ICE affordable",
       undefined,
     ),
   ).toBe(true);
+});
+
+it("does not reserve an action burst for an installed agenda already within the ordinary three-click horizon", () => {
+  const state = createState();
+  RealEngineFixtureBuilder.forState(state)
+    .withCorpHqSize(0)
+    .withCorpCardInHq(OVERTIME)
+    .withCorpRemoteRoot(SERVER, TYCHO, 0)
+    .withCorpRemoteRoot(SERVER, GRID, 0, { rezzed: true })
+    .withCorpCredits(10);
+  const input = buildInput(state);
+  expect(
+    input.playerView.servers.find((server) => server.id === SERVER)?.root,
+  ).toContainEqual(
+    expect.objectContaining({ definitionId: TYCHO, advancementRequirement: 3 }),
+  );
+  expect(
+    prepareCorpScoreHandRetention(input)(input.playerView.own.gripOrHq),
+  ).toBe(0);
 });

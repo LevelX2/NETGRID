@@ -1077,7 +1077,7 @@ Horizontdaten verwenden [CreditDemand](../../../packages/ai/src/plans/credit-dem
 und [FundingRoute](../../../packages/ai/src/plans/funding-route.ts).
 Projected-Ressourcen stehen im
 [ProjectedDecisionFrame](../../../packages/ai/src/plans/turn-projection.ts),
-harte Fortsetzungen in [PlanCommitment](../../../packages/ai/src/plans/plan-continuation.ts).
+harte Fortsetzungen im produktiven [TurnPlanCommitment](../../../packages/ai/src/plans/turn-plan-commitment.ts).
 Deadline und Verbindlichkeit bleiben am konkreten Bedarf; diese Erläuterung
 fordert keine neue generische Ledger- oder Liability-API.
 
@@ -1302,6 +1302,9 @@ eine belastbare Machbarkeitsprüfung. Die Engine führt trotzdem jede Aktion und
 jede Zwischenentscheidung einzeln aus; der Vertrag ist keine Transaktion.
 
 ### 15.1 Commitment-Vertrag
+
+Das `TurnPlanCommitment` trägt den ausführbaren Verlauf. Das folgende Schema
+beschreibt die fachlichen Bindungen unabhängig von der Datenstruktur.
 
 ```ts
 type PlanCommitment = {

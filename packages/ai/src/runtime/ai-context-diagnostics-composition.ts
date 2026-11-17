@@ -36,3 +36,19 @@ export function createAiContextDiagnosticsComposition(
     ...diagnostics,
   };
 }
+
+export function aiContextDiagnosticDependencies(
+  diagnostics: ReturnType<typeof createAiContextDiagnosticsComposition>,
+) {
+  return {
+    ...diagnostics,
+    closeout: diagnostics.bestTrueCentralCloseoutProfileForMetrics,
+    extractFeatures: diagnostics.extractAiFeatures,
+    hasKnownUnaffordableLegalRun:
+      diagnostics.runnerHasKnownUnaffordableLegalRun,
+    remoteTrashAccessContext: diagnostics.runnerRemoteTrashAccessContext,
+    tagPunishAssessmentForAction:
+      diagnostics.corpTagPunishOntologyAssessmentForAction,
+    trashAccessContext: diagnostics.runnerRemoteTrashAccessContext,
+  };
+}

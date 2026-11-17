@@ -2,7 +2,10 @@ import {
   createAiLiveRuntimeComposition,
   type AiLiveRuntimeCompositionDependencies,
 } from "../runtime/ai-live-runtime-composition";
-import { createAiContextDiagnosticsComposition } from "../runtime/ai-context-diagnostics-composition";
+import {
+  aiContextDiagnosticDependencies,
+  createAiContextDiagnosticsComposition,
+} from "../runtime/ai-context-diagnostics-composition";
 import {
   createCorpTagPunishWindowComposition,
   type CorpTagPunishWindowCompositionDependencies,
@@ -14,17 +17,9 @@ import {
 import { createSimulationDecisionContext } from "./simulation-decision-context";
 import { createQualityTagsForAction } from "./simulation-quality-adapters";
 
-type ContextDiagnostics = ReturnType<
-  typeof createAiContextDiagnosticsComposition
+type ContextDependencyKeys = keyof ReturnType<
+  typeof aiContextDiagnosticDependencies
 >;
-type ContextDependencyKeys =
-  | keyof ContextDiagnostics
-  | "closeout"
-  | "extractFeatures"
-  | "hasKnownUnaffordableLegalRun"
-  | "remoteTrashAccessContext"
-  | "tagPunishAssessmentForAction"
-  | "trashAccessContext";
 
 export type AiProductSimulationCompositionDependencies =
   AiLiveRuntimeCompositionDependencies &
@@ -42,32 +37,15 @@ export type AiProductSimulationCompositionDependencies =
       ContextDependencyKeys
     >;
 
-function withContextDiagnostics(
-  dependencies: AiProductSimulationCompositionDependencies,
-  diagnostics: ContextDiagnostics,
-) {
-  return {
-    ...dependencies,
-    ...diagnostics,
-    closeout: diagnostics.bestTrueCentralCloseoutProfileForMetrics,
-    extractFeatures: diagnostics.extractAiFeatures,
-    hasKnownUnaffordableLegalRun:
-      diagnostics.runnerHasKnownUnaffordableLegalRun,
-    remoteTrashAccessContext: diagnostics.runnerRemoteTrashAccessContext,
-    tagPunishAssessmentForAction:
-      diagnostics.corpTagPunishOntologyAssessmentForAction,
-    trashAccessContext: diagnostics.runnerRemoteTrashAccessContext,
-  };
-}
-
 export function createAiProductSimulationComposition(
   dependencies: AiProductSimulationCompositionDependencies,
 ) {
   const diagnostics = createAiContextDiagnosticsComposition(dependencies);
   const { tagPunishWindowDiagnosticsForSimulationAction } =
-    createCorpTagPunishWindowComposition(
-      withContextDiagnostics(dependencies, diagnostics),
-    );
+    createCorpTagPunishWindowComposition({
+      ...dependencies,
+      ...aiContextDiagnosticDependencies(diagnostics),
+    });
   const runtime = createAiLiveRuntimeComposition(dependencies);
   const qualityTagsForAction = createQualityTagsForAction({
     extractFeatures: diagnostics.extractAiFeatures,

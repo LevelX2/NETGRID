@@ -1,11 +1,16 @@
-import { visibleRunnerPathTraceContext } from "./run-analysis/trace-rules-profile-planning";
+import { assessVisibleRunnerServerPath } from "./run-analysis/visible-run-server-path";
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
 import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
 import { type AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { reconstructBeliefState, type BeliefState } from "./belief-state";
 import { runnerHintProvidesMultiaccess } from "./runner-canonical-hint-semantics";
-import { assessKnownRezzedIcePath } from "./visible-run-analysis";
+import {
+  eventVersion,
+  findLastHistoryIndex,
+  mergedPublicHistory,
+  runStartServerIdFromEvent,
+} from "./public-event-history";
 
 export type KnownCentralAccessPayoffKind =
   | "agenda"
@@ -1045,17 +1050,12 @@ function knownCentralPathCost(
       creditsAfterPath: input.playerView.own.credits,
     };
   }
-  const assessment = assessKnownRezzedIcePath(
-    server.ice,
-    input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
-    server.root,
-    input.playerView.opponent.credits,
-    visibleRunnerPathTraceContext(input),
-  );
+  const assessment = assessVisibleRunnerServerPath(input, server);
   return {
     visibleBreakCost: assessment.visibleBreakCost ?? 0,
-    creditsAfterPath: assessment.creditsAfterPath,
+    creditsAfterPath:
+      assessment.creditBudgetAfterPath?.traceEligibleCredits ??
+      Math.min(input.playerView.own.credits, assessment.creditsAfterPath),
   };
 }
 
@@ -1118,9 +1118,14 @@ function recentRunnerDeclinedKnownRdTopTrash(
   for (const event of history.slice(accessIndex + 1)) {
     const actionType = publicActionType(event);
     const actor = publicActor(event);
-    if (actor === "runner" && actionType === "decline_trash") {
-      declined = true;
-      continue;
+    if (actor === "runner" && !declined) {
+      if (actionType === "access_card" || runStartServerIdFromEvent(event)) return false;
+      if (actionType === "decline_trash") {
+        const declineServerId = eventServerId(event);
+        if (declineServerId !== undefined && declineServerId !== "rd") return false;
+        declined = true;
+        continue;
+      }
     }
     if (eventRefreshesRdTop(event)) return false;
     if (
@@ -1158,7 +1163,7 @@ function recentRunnerDeclinedKnownHqTrash(
     const event = history[index]!;
     if (publicActor(event) !== "runner") continue;
     const actionType = publicActionType(event);
-    if (actionType === "access_card") return false;
+    if (actionType === "access_card" || runStartServerIdFromEvent(event)) return false;
     if (actionType === "trash_accessed_card" || actionType === "steal_agenda")
       return false;
     if (actionType === "decline_trash") {
@@ -1185,30 +1190,6 @@ const runnerActionReopensDeclinedTrashPayoff = new Set([
   "activated_card_ability",
   "play_event",
 ]);
-
-function mergedPublicHistory(input: AiDecisionInput) {
-  const byId = new Map<string, AiDecisionInput["eventTail"][number]>();
-  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
-    const previous = byId.get(event.eventId);
-    if (!previous || eventVersion(previous) <= eventVersion(event))
-      byId.set(event.eventId, event);
-  }
-  return [...byId.values()].sort(
-    (left, right) =>
-      eventVersion(left) - eventVersion(right) ||
-      left.eventId.localeCompare(right.eventId),
-  );
-}
-
-function findLastHistoryIndex<T>(
-  values: readonly T[],
-  predicate: (value: T) => boolean,
-): number {
-  for (let index = values.length - 1; index >= 0; index -= 1) {
-    if (predicate(values[index]!)) return index;
-  }
-  return -1;
-}
 
 function eventRefreshesRdTop(
   event: AiDecisionInput["eventTail"][number],
@@ -1273,12 +1254,6 @@ function publicActor(
   event: AiDecisionInput["eventTail"][number],
 ): string | undefined {
   return stringValue(event.publicPayload.actor);
-}
-
-function eventVersion(event: AiDecisionInput["eventTail"][number]): number {
-  return typeof event.stateVersionAfter === "number"
-    ? event.stateVersionAfter
-    : 0;
 }
 
 function stringPayloadValue(

@@ -45,6 +45,16 @@ function emptyAnalysis(): DoctrineQualityCaseAnalysisReportInput {
 }
 
 describe("simulation report formatters", () => {
+  it("keeps delimiters and line breaks in examples inside their table cells", () => {
+    const analysis = emptyAnalysis();
+    const example = analysis.examples.scoreWindowMissed[0]!;
+    example.seed = "seed|rerun";
+    example.reasonCode = "reason\ncontinuation";
+    const report = formatDoctrineQualityCaseAnalysisReport(analysis);
+    expect(report).toContain(
+      "| seed\\|rerun | 7 | corp | end_turn | reason continuation | remote_1 | score_window_missed |",
+    );
+  });
   it("formats doctrine case analysis without runtime payload details", () => {
     const report = formatDoctrineQualityCaseAnalysisReport(
       emptyAnalysis(),

@@ -8,13 +8,22 @@ import type { GameState, LegalAction } from "@netgrid/shared";
 import { expect, it, vi } from "vitest";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
+import { runnerEncounterCreditBudgetForInput } from "../runtime/runner-encounter-credit-budget";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import { createRunnerPressureMetricContext } from "./runner-pressure-metrics";
 
 it("respects a fort's Trace payment restriction without treating bad publicity as liquid reserve", () => {
   const lockout = "onr_v1_373_twenty-four-hour-surveillance";
   const baseCorp = DEMO_DECKS.demo_corp_001;
-  const runnerDeck = DEMO_DECKS.demo_runner_001;
+  const cloak = "onr_v1_011_cloak";
+  const baseRunner = DEMO_DECKS.demo_runner_001;
+  const runnerDeck = {
+    ...baseRunner,
+    cards: [
+      ...baseRunner.cards.filter((card) => card.id !== cloak),
+      { id: cloak, quantity: 1 },
+    ],
+  };
   let state = createGameAfterSetup({
     matchId: "runner-pressure-budget",
     seed: "runner-pressure-budget",
@@ -34,17 +43,28 @@ it("respects a fort's Trace payment restriction without treating bad publicity a
     .withCorpRemoteRoot("hq", lockout, 0, { rezzed: true });
   state.corp.badPublicity = 2;
   state = applyCorpAction(state, "end_turn");
-  state.runner.credits = 0;
-  const input = buildAiDecisionInput(state, "runner", {
-    ownDeckSnapshot: {
-      deckSnapshotId: runnerDeck.id,
-      side: "runner",
-      cards: runnerDeck.cards.map(({ id, quantity }) => ({
-        cardId: id,
-        quantity,
-      })),
-    },
-  });
+  RealEngineFixtureBuilder.forState(state)
+    .withRunnerCredits(7)
+    .withRunnerCardInGrip(cloak);
+  const install = getLegalActions(state, "runner").find(
+    (action) =>
+      action.type === "install_card" &&
+      state.cardInstances[action.source]?.definitionId === cloak,
+  )!;
+  state = apply(state, install);
+  expect(state.runner.credits).toBe(0);
+  const runnerInput = (position: GameState) =>
+    buildAiDecisionInput(position, "runner", {
+      ownDeckSnapshot: {
+        deckSnapshotId: runnerDeck.id,
+        side: "runner",
+        cards: runnerDeck.cards.map(({ id, quantity }) => ({
+          cardId: id,
+          quantity,
+        })),
+      },
+    });
+  const input = runnerInput(state);
   const hq = input.playerView.servers.find((server) => server.id === "hq")!;
   expect(hq.statuses).toEqual(
     expect.arrayContaining([
@@ -88,6 +108,20 @@ it("respects a fort's Trace payment restriction without treating bad publicity a
   );
   expect(assessment.readyTargets).toEqual([]);
   expect(assessment.blockers).toContain("missing_post_run_reserve");
+
+  const encounterBudget = (serverId: string) => {
+    const run = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === serverId,
+    )!;
+    return runnerEncounterCreditBudgetForInput(runnerInput(apply(state, run)));
+  };
+  expect(encounterBudget("hq")).toMatchObject({
+    runOnlyCredits: 2,
+    stealthNonNoisyIcebreakerCredits: 0,
+    stealthCreditsBySourceId: {},
+  });
+  expect(encounterBudget("rd").stealthNonNoisyIcebreakerCredits).toBe(3);
 });
 
 function applyCorpAction(
@@ -97,9 +131,13 @@ function applyCorpAction(
   const action = getLegalActions(state, "corp").find(
     (candidate) => candidate.type === type,
   )!;
+  return apply(state, action);
+}
+
+function apply(state: GameState, action: LegalAction): GameState {
   const result = applyAction(state, {
     matchId: state.matchId,
-    side: "corp",
+    side: action.side,
     actionId: action.actionId,
     clientKnownStateVersion: state.stateVersion,
   });

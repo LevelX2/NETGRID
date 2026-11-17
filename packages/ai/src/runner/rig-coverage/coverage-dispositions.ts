@@ -322,6 +322,9 @@ export function runnerCoverageAlternativeCopyDisposition(params: {
   }[];
 }): string | undefined {
   const { input, candidate, candidates } = params;
+  if (candidate.semanticActionType !== "install.card") return undefined;
+  const definitionId = runnerCandidateSourceDefinitionId(input, candidate);
+  if (!definitionId || !candidate.sourceCardInstanceId) return undefined;
   const coverageGapsByAssignedPlanId = new Map(
     params.coverageGaps.map((gap) => [
       `runner.rig_and_coverage:${gap.gapId}`,
@@ -330,6 +333,7 @@ export function runnerCoverageAlternativeCopyDisposition(params: {
   );
   const alternativeToBoundCoverageCopy = params.developments.some(
     (development) =>
+      development.definitionId === definitionId &&
       development.assignedDomainPlanIds.length > 0 &&
       development.assignedDomainPlanIds.every((planId) => {
         const gap = coverageGapsByAssignedPlanId.get(planId);
@@ -342,6 +346,7 @@ export function runnerCoverageAlternativeCopyDisposition(params: {
             );
             return (
               bound?.semanticActionType === "install.card" &&
+              bound.sourceCardInstanceId !== undefined &&
               bound.sourceCardInstanceId !== candidate.sourceCardInstanceId &&
               runnerCandidateSourceDefinitionId(input, bound) ===
                 development.definitionId
@@ -351,8 +356,7 @@ export function runnerCoverageAlternativeCopyDisposition(params: {
       }),
   );
 
-  return candidate.semanticActionType === "install.card" &&
-    alternativeToBoundCoverageCopy
+  return alternativeToBoundCoverageCopy
     ? "runner_coverage_install_alternative_to_bound_same_definition_answer"
     : undefined;
 }

@@ -525,6 +525,38 @@ describe("known central access payoff HQ knownness", () => {
     );
   });
 
+  it("does not attribute a later HQ decline to the known R&D top card", () => {
+    const input = aiInput({
+      handCount: 2,
+      credits: 10,
+      publicEvents: [
+        publicEvent("rd-access", "access_card", 1, {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "rd",
+          cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+        }),
+        publicEvent("hq-access", "access_card", 2, {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "hq",
+          cardDefinitionId: "onr_v1_318_department-of-truth-enhancement",
+        }),
+        publicEvent("hq-decline", "decline_trash", 3, {
+          actor: "runner",
+          actionType: "decline_trash",
+          serverId: "hq",
+        }),
+      ],
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+    expect(evaluateKnownCentralAccessPayoff(input, "rd").payoff).toBe("trash_affordable");
+  });
+
   it("suppresses a repeated R&D run when trashing the known top would drain the reserve", () => {
     const rdAccess = publicEvent("evt_rd_bbs_access", "access_card", 1, {
       actor: "runner",

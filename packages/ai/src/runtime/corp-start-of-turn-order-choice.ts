@@ -1,6 +1,7 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
 import { corpStartOfTurnOptionalDrawProfile } from "./corp-canonical-card-facts";
+import { exactCurrentChoiceAction } from "./plan-bound-choice-contract";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -25,8 +26,7 @@ export function selectedCorpStartOfTurnOrderChoiceOptionId(
   choice: PendingChoice,
   selectableOptions: readonly PendingChoiceOption[],
 ): string | undefined {
-  const requirement = action.choiceRequirements?.[0];
-  const optionIds = choice.options.map((option) => option.id);
+  const optionIds = new Set(choice.options.map((option) => option.id));
   const exactRuleWindow =
     input.side === "corp" &&
     choice.side === "corp" &&
@@ -38,17 +38,9 @@ export function selectedCorpStartOfTurnOrderChoiceOptionId(
     choice.minSelections === 1 &&
     choice.maxSelections === 1 &&
     selectableOptions.length === choice.options.length &&
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+    exactCurrentChoiceAction(input, choice) === action &&
+    new Set(selectableOptions.map((option) => option.id)).size === optionIds.size &&
+    selectableOptions.every((option) => optionIds.has(option.id));
   if (!exactRuleWindow) return undefined;
 
   const bound = selectableOptions.map((option) =>
