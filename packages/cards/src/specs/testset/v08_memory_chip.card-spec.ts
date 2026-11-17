@@ -3,7 +3,7 @@ import { cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("v08_memory_chip"),
+    cardDefinitionId: cardDefinitionId(614),
     title: "Memory Chip",
     side: "runner",
     cardType: "hardware",

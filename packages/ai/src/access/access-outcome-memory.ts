@@ -128,7 +128,7 @@ export function deriveObservedRemoteNoProgressAccessMemory(
 function currentKnownRemoteRoots(
   input: AiDecisionInput,
   serverId: string,
-): Array<{ definitionId: string; sourceEventId?: string }> {
+): Array<{ definitionId: number; sourceEventId?: string }> {
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );
@@ -140,7 +140,7 @@ function currentKnownRemoteRoots(
       )
       .map((entry) => [entry.positionKey, entry]),
   );
-  const definitions: Array<{ definitionId: string; sourceEventId?: string }> =
+  const definitions: Array<{ definitionId: number; sourceEventId?: string }> =
     [];
   for (const [index, card] of server.root.entries()) {
     const remembered = rememberedRoots.get(`root:${index}`);

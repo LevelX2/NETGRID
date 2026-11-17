@@ -35,8 +35,8 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("orders two identical AI Boon run-start strength sources without changing the action", () => {
-    const firstId = "runner_onr_v1_002_ai-boon_1";
-    const secondId = "runner_onr_v1_002_ai-boon_2";
+    const firstId = "runner_214_1";
+    const secondId = "runner_214_2";
     const input = inputWithChoice(
       {
         choiceId: "runner_run_start_order_7",
@@ -54,7 +54,7 @@ describe("selectedChoicesForDecision", () => {
         side: "runner",
         rig: [firstId, secondId].map((instanceId) => ({
           instanceId,
-          definitionId: "onr_v1_002_ai-boon",
+          definitionId: 214,
           known: true,
           type: "program",
         })) as never,
@@ -74,8 +74,8 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("orders two identical Employee Empowerment sources without deciding the later draws", () => {
-    const firstId = "corp_onr_v1_199_employee-empowerment_1";
-    const secondId = "corp_onr_v1_199_employee-empowerment_2";
+    const firstId = "corp_411_1";
+    const secondId = "corp_411_2";
     const input = inputWithChoice(
       {
         choiceId: "corp_start_order_7",
@@ -93,7 +93,7 @@ describe("selectedChoicesForDecision", () => {
         side: "corp",
         scoreArea: [firstId, secondId].map((instanceId) => ({
           instanceId,
-          definitionId: "onr_v1_199_employee-empowerment",
+          definitionId: 411,
           known: true,
           type: "agenda",
         })) as never,
@@ -142,7 +142,7 @@ describe("selectedChoicesForDecision", () => {
         scoreArea: [
           {
             instanceId: sourceCardId,
-            definitionId: "onr_proteus_006_please-dont-choke-anyone",
+            definitionId: 64,
             known: true,
             type: "agenda",
           },
@@ -185,7 +185,7 @@ describe("selectedChoicesForDecision", () => {
         scoreArea: [
           {
             instanceId: sourceCardId,
-            definitionId: "onr_proteus_006_please-dont-choke-anyone",
+            definitionId: 64,
             known: true,
             type: "agenda",
           },
@@ -210,7 +210,7 @@ describe("selectedChoicesForDecision", () => {
           family: "runner_program_trash_before_install",
           originActionId: `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install.runner_installer_1.0`,
           sourceCardInstanceId,
-          sourceCardDefinitionId: "onr_v1_059_self-modifying-code",
+          sourceCardDefinitionId: 271,
           createdAtStateVersion: 7,
         },
         minSelections: 0,
@@ -363,7 +363,7 @@ describe("selectedChoicesForDecision", () => {
           },
           {
             instanceId: installedAgendaProgramId,
-            definitionId: "onr_classic_004_theorem-proof",
+            definitionId: 8,
             known: true,
             type: "agenda",
             controller: "runner",
@@ -399,7 +399,7 @@ describe("selectedChoicesForDecision", () => {
     const targetCardId = "rent_i_con_3";
     const sacrificeCardId = "invisibility_1";
     const sourceCardId = "sneak_3";
-    const sourceDefinitionId = "onr_v1_110_sneak-preview";
+    const sourceDefinitionId = 322;
     const input = inputWithChoice(
       {
         kind: "select_cards",
@@ -421,7 +421,7 @@ describe("selectedChoicesForDecision", () => {
         rig: [
           {
             instanceId: sacrificeCardId,
-            definitionId: "onr_v1_035_invisibility",
+            definitionId: 247,
             known: true,
             type: "program",
             memoryCost: 1,
@@ -434,7 +434,7 @@ describe("selectedChoicesForDecision", () => {
     input.playerView.own.heapOrArchives = [
       {
         instanceId: targetCardId,
-        definitionId: "onr_classic_031_rent-i-con",
+        definitionId: 35,
         known: true,
         type: "program",
         memoryCost: 1,
@@ -475,7 +475,7 @@ describe("selectedChoicesForDecision", () => {
                   sourceCardInstanceId: sourceCardId,
                   sourceDefinitionId,
                   targetCardInstanceId: targetCardId,
-                  targetDefinitionId: "onr_classic_031_rent-i-con",
+                  targetDefinitionId: 35,
                   installMemorySacrificeBinding: {
                     targetCardInstanceId: targetCardId,
                     targetMemoryCost: 1,
@@ -754,7 +754,7 @@ describe("selectedChoicesForDecision", () => {
     if (!accessedCardId) throw new Error("Missing R&D access fixture card.");
     state.cardInstances[accessedCardId] = {
       ...state.cardInstances[accessedCardId]!,
-      definitionId: "onr_v1_345_trap",
+      definitionId: 557,
     };
     state.corp.credits = 10;
     state = applyRealAction(
@@ -1061,7 +1061,7 @@ describe("selectedChoicesForDecision", () => {
   it("uses the first legal Runner damage-prevention source instead of passing", () => {
     const forceShield = {
       instanceId: "runner_force_shield_1",
-      definitionId: "onr_v1_028_force-shield",
+      definitionId: 240,
       known: true,
       type: "program",
     } as AiDecisionInput["playerView"]["own"]["gripOrHq"][number];
@@ -1560,7 +1560,7 @@ describe("selectedChoicesForDecision", () => {
         scoreArea: [
           {
             ...visibleCard("downsizing_source", "agenda"),
-            definitionId: "onr_v1_194_corporate-downsizing",
+            definitionId: 406,
           },
         ],
       },
@@ -1645,9 +1645,9 @@ describe("selectedChoicesForDecision", () => {
   it("completes a scored-agenda free-rez payload only for the exact ICE variant prebound by the resident score plan", () => {
     const sourceAgendaId = "priority-requisition";
     const targetCardId = "credit-blocks";
-    const targetDefinitionId = "onr_proteus_017_credit-blocks";
+    const targetDefinitionId = 75;
     const sourceProfile = corpScoredAgendaFreeRezProfile(
-      "onr_v1_212_priority-requisition",
+      424,
     )!;
     const input = inputWithChoice(
       {
@@ -1679,7 +1679,7 @@ describe("selectedChoicesForDecision", () => {
         scoreArea: [
           {
             ...visibleCard(sourceAgendaId, "agenda"),
-            definitionId: "onr_v1_212_priority-requisition",
+            definitionId: 424,
           },
         ],
         servers: [
@@ -1695,7 +1695,7 @@ describe("selectedChoicesForDecision", () => {
               },
               {
                 ...visibleCard("cheaper-ice", "ice"),
-                definitionId: "onr_v1_279_wall-of-static",
+                definitionId: 491,
                 rezzed: false,
                 rezCost: 5,
               },
@@ -1734,9 +1734,9 @@ describe("selectedChoicesForDecision", () => {
 
   it("completes a scored-agenda ICE-mark payload only for the exact Defense target prebound by the resident score plan", () => {
     const sourceAgendaId = "ice-transmutation";
-    const sourceDefinitionId = "onr_v1_204_ice-transmutation";
+    const sourceDefinitionId = 416;
     const targetCardId = "hq-data-wall";
-    const targetDefinitionId = "onr_v1_238_data-wall-2-0";
+    const targetDefinitionId = 450;
     const sourceProfile = corpScoredAgendaIceMarkProfile(sourceDefinitionId)!;
     const input = inputWithChoice(
       {
@@ -1785,7 +1785,7 @@ describe("selectedChoicesForDecision", () => {
             ice: [
               {
                 ...visibleCard("empty-remote-wall", "ice"),
-                definitionId: "onr_v1_279_wall-of-static",
+                definitionId: 491,
                 rezzed: true,
               },
             ],
@@ -1882,7 +1882,7 @@ describe("selectedChoicesForDecision", () => {
         scoreArea: [
           {
             ...visibleCard("employee", "agenda"),
-            definitionId: "onr_v1_199_employee-empowerment",
+            definitionId: 411,
           },
         ],
       },
@@ -2312,13 +2312,13 @@ describe("selectedChoicesForDecision", () => {
   it("routes advancement move choices through the Corp score chooser", () => {
     const agenda = {
       ...visibleCard("agenda_1", "agenda"),
-      definitionId: "simple_agenda",
+      definitionId: 588,
       advancementRequirement: 3,
       advancementCounters: 1,
     };
     const vapor = {
       ...visibleCard("vapor_1", "asset"),
-      definitionId: "onr_v1_347_vapor-ops",
+      definitionId: 559,
       advancementCounters: 2,
     };
     const input = inputWithChoice(
@@ -2835,7 +2835,7 @@ function scoredAgendaCleanupInput(): AiDecisionInput {
       scoreArea: [
         {
           ...visibleCard("downsizing_source", "agenda"),
-          definitionId: "onr_v1_194_corporate-downsizing",
+          definitionId: 406,
         },
       ],
     },
@@ -2864,7 +2864,7 @@ function satelliteMonitorsChoiceInput(): AiDecisionInput {
           root: [
             {
               instanceId: "satellite_monitors_1",
-              definitionId: "onr_classic_021_satellite-monitors",
+              definitionId: 25,
               known: true,
               type: "asset",
               rezzed: true,
@@ -2921,7 +2921,7 @@ function rememberResidentScoreChoiceContinuation(
     sourceCapabilityId: string;
     targetPurpose: "rez_best_defensive_ice";
     targetCardId: string;
-    targetDefinitionId: string;
+    targetDefinitionId: number;
     selectedVariantId: string;
     selectedOptionId: string;
   },
@@ -2929,7 +2929,7 @@ function rememberResidentScoreChoiceContinuation(
     sourceCapabilityId: string;
     targetPurpose: "strengthen_and_repeat_best_ice_subroutine";
     targetCardId: string;
-    targetDefinitionId: string;
+    targetDefinitionId: number;
   },
   hqAgendaShuffleChoiceBinding?: {
     sourceCapabilityId: string;
@@ -2976,7 +2976,7 @@ function rememberResidentScoreChoiceContinuation(
 
 function downsizingChoiceBinding(selectedCardInstanceIds: string[]) {
   const profile = corpScoredAgendaHqShuffleProfile(
-    "onr_v1_194_corporate-downsizing",
+    406,
   )!;
   return {
     sourceCapabilityId: profile.sourceCapabilityId,
@@ -3083,7 +3083,7 @@ function rememberRunnerInstalledCardLiquidationChoice(
   input: AiDecisionInput,
   source: {
     sourceResourceInstanceId: string;
-    sourceResourceDefinitionId: string;
+    sourceResourceDefinitionId: number;
     selectedOptionId: string;
     selectedCardInstanceId?: string;
     disposition:
@@ -3416,7 +3416,7 @@ function optionalRezInput(
   options: {
     optionValue?: string;
     optionCardId?: string;
-    optionDefinitionId?: string;
+    optionDefinitionId?: number;
   } = {},
 ): AiDecisionInput {
   const input = inputWithChoice(

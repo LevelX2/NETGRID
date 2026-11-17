@@ -22,7 +22,7 @@ export type RunnerInstallCreditSpendResult = {
   hostedCreditsSpent: number;
   recurringCreditsSpent: number;
   temporaryCreditsSpent: number;
-  sourceDefinitionIds: string[];
+  sourceDefinitionIds: number[];
   runnerCreditsAfter: number;
 };
 

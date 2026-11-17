@@ -54,7 +54,7 @@ describe("match FD6320 runner decision checkpoints", () => {
         const installedKrashIds = state.runner.rig.programs.filter(
           (instanceId) =>
             state.cardInstances[instanceId]?.definitionId ===
-            "onr_v1_039_krash",
+            251,
         );
         state.runner.rig.programs = state.runner.rig.programs.filter(
           (instanceId) => !installedKrashIds.includes(instanceId),

@@ -1834,7 +1834,7 @@ export function createStateRuntimeResolvers(
       throw new Error("Der Runner kann die Tag-Entfernung nicht bezahlen.");
     let remaining = amount;
     let recurringSpent = 0;
-    const recurringSourceDefinitionIds: string[] = [];
+    const recurringSourceDefinitionIds: number[] = [];
     for (const cardId of runnerTagRemovalRecurringCreditSourceIds(state)) {
       if (remaining <= 0) break;
       const spent = Math.min(hostedPaymentCredits(state, cardId), remaining);

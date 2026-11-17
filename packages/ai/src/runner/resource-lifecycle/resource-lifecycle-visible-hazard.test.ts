@@ -22,11 +22,11 @@ function fixture() {
       source: "resource-1",
       payload: {
         cardId: "resource-1",
-        sourceDefinitionId: "onr_classic_044_crash-space",
+        sourceDefinitionId: 48,
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
         cardImplementationAbilityKey: "trash_source_action",
         cardImplementationAbilityId:
-          "onr_classic_044_crash-space:trash_source_action",
+          "48:trash_source_action",
         cardImplementationTrashesSource: true,
       },
     },
@@ -43,13 +43,13 @@ function fixture() {
   Object.assign(input.playerView.own, { credits: 31, clicks: 2 });
   input.playerView.own.rig = [
     visibleCard("resource-1", "runner", "resource", {
-      definitionId: "onr_classic_044_crash-space",
+      definitionId: 48,
     }),
   ];
   input.playerView.servers = [
     server("rd", [
       visibleCard("trace-1", "corp", "ice", {
-        definitionId: "onr_v1_228_cinderella",
+        definitionId: 440,
         rezzed: true,
       }),
     ]),
@@ -59,7 +59,7 @@ function fixture() {
     observerSide: "runner",
     stateVersion: 1,
     visibleSourceDefinitionsByInstanceId: {
-      "resource-1": "onr_classic_044_crash-space",
+      "resource-1": 48,
     },
     cardSemanticProfilesByDefinitionId:
       buildActionCardSemanticProfilesByDefinitionId(),

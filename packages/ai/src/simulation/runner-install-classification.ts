@@ -185,7 +185,7 @@ export function isRunnerLowValueDuplicateInstallForSimulation(
   const definitionId = dependencies.sourceDefinitionIdForAction(input, action);
   if (!definitionId) return false;
   const roles = dependencies.rolesForCardId(definitionId);
-  if (definitionId === "onr_v1_165_junkyard-bbs") return true;
+  if (definitionId === 377) return true;
   if (roles.some((role) => role === "memory" || role === "memory_support"))
     return false;
   if (roles.some((role) => isRunnerPressureRole(role))) return false;

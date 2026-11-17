@@ -16,7 +16,7 @@ import {
   addRezzedCorpIceForTest,
 } from "../../test-fixtures/index-test-helpers";
 
-function setup(eventDefinitionId: string, target: "hq" | "rd") {
+function setup(eventDefinitionId: number, target: "hq" | "rd") {
   const state = toRunnerTurn(
     onrV1Game(`run-event-deflection-${eventDefinitionId}`),
   );
@@ -37,7 +37,7 @@ function setup(eventDefinitionId: string, target: "hq" | "rd") {
   };
   const agendaId = addCorpCardToHqForTest(
     state,
-    "onr_classic_003_unlisted-research-lab",
+    7,
     "remote_agenda",
   );
   state.corp.hq = state.corp.hq.filter((id) => id !== agendaId);
@@ -55,7 +55,7 @@ function setup(eventDefinitionId: string, target: "hq" | "rd") {
   };
   addRezzedCorpIceForTest(
     state,
-    "onr_classic_014_trapdoor",
+    18,
     target,
     "deflector",
   );
@@ -96,11 +96,11 @@ function assertReplay(initial: GameState, state: GameState) {
 
 describe("fixed-fort run-event benefits after deflection", () => {
   it.each([
-    ["onr_v1_084_edited-shipping-manifests", "hq", 1],
-    ["onr_v1_105_priority-wreck", "hq", 0],
-    ["onr_v1_106_private-ldl-access", "hq", 0],
-    ["onr_v1_081_custodial-position", "rd", 2],
-    ["onr_v1_118_weather-to-finance-pipe", "hq", 0],
+    [296, "hq", 1],
+    [317, "hq", 0],
+    [318, "hq", 0],
+    [293, "rd", 2],
+    [330, "hq", 0],
   ] as const)(
     "accesses the actual fort without the %s benefit",
     (definitionId, target, playCost) => {
@@ -110,7 +110,7 @@ describe("fixed-fort run-event benefits after deflection", () => {
       expect(state.run?.successfulRunEffectTargetServerId).toBe(target);
       const runnerView = JSON.stringify(getPlayerView(state, "runner"));
       expect(runnerView).not.toContain(fixture.agendaId);
-      expect(runnerView).not.toContain("onr_classic_003_unlisted-research-lab");
+      expect(runnerView).not.toContain(7);
       state = apply(state, "runner", (a) => a.type === "continue_run");
       expect(state.pendingChoice).toBeUndefined();
       expect(state.run).toMatchObject({
@@ -134,7 +134,7 @@ describe("fixed-fort run-event benefits after deflection", () => {
   );
 
   it("keeps a freely chosen run's successful replacement after deflection", () => {
-    const fixture = setup("onr_proteus_105_demolition-run", "hq");
+    const fixture = setup(163, "hq");
     const initial = structuredClone(fixture.state);
     let state = redirect(fixture.state, fixture.eventId, "hq");
     expect(state.run?.successfulRunEffectTargetServerId).toBeUndefined();

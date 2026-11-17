@@ -47,7 +47,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
         acceptableActions: [
           {
             type: "install_card",
-            sourceDefinitionId: "onr_v1_313_city-surveillance",
+            sourceDefinitionId: 525,
           },
         ],
         planExecution: {
@@ -109,7 +109,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
       current.expectation = {
         acceptableActions: [{
           type: "install_card",
-          sourceDefinitionId: "onr_v1_196_corporate-war",
+          sourceDefinitionId: 408,
           targetServerId: "remote_1",
         }],
         forbiddenActions: [{ type: "install_card", targetServerId: "hq" }],
@@ -169,10 +169,10 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
   });
 });
 
-const CHANCE_OBSERVATION = "onr_v1_284_chance-observation";
-const CLOSED_ACCOUNTS = "onr_v1_285_closed-accounts";
-const SCORCHED_EARTH = "onr_v1_302_scorched-earth";
-const URBAN_RENEWAL = "onr_v1_307_urban-renewal";
+const CHANCE_OBSERVATION = 496;
+const CLOSED_ACCOUNTS = 497;
+const SCORCHED_EARTH = 514;
+const URBAN_RENEWAL = 519;
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
   return structuredClone(value) as AiDecisionCheckpointV1;
@@ -190,7 +190,7 @@ function mutateFixture(
 
 function moveFirstCorpCardToHq(
   current: AiDecisionCheckpointV1,
-  definitionId: string,
+  definitionId: number,
 ): void {
   const state = current.engine.testOnlyGameState;
   const instanceId = Object.values(state.cardInstances).find(
@@ -222,7 +222,7 @@ function moveFirstCorpCardToHq(
 
 function moveFirstCorpCardToArchives(
   current: AiDecisionCheckpointV1,
-  definitionId: string,
+  definitionId: number,
 ): void {
   const state = current.engine.testOnlyGameState;
   const instanceId = state.corp.hq.find(

@@ -9,8 +9,8 @@ import { bindHistoricalRunEventCadence } from "./evaluation/decision-checkpoints
 import type { AiDecisionCheckpointV1 } from "./evaluation/decision-checkpoints/checkpoint-types";
 import { runAiDecisionCheckpoint } from "./evaluation/decision-checkpoints/checkpoint-runner";
 
-const BROKER = "onr_v1_154_broker";
-const JUNKYARD = "onr_v1_165_junkyard-bbs";
+const BROKER = 366;
+const JUNKYARD = 377;
 
 describe("match D153 card hint consumer contract", () => {
   it("keeps Broker's static hint aligned with its bank semantics", () => {
@@ -91,23 +91,23 @@ describe("match D153 card hint consumer contract", () => {
 
     expect(brokers).toEqual([
       expect.objectContaining({
-        sourceCardInstanceId: "runner_onr_v1_154_broker_1",
+        sourceCardInstanceId: "runner_366_1",
         buildActionIds: [
-          "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+          "runner.activated_card_ability.runner_366_1.runner_366_1.activated.onr_v1_154_broker:store_credits",
         ],
         cashOutActionIds: [],
       }),
       expect.objectContaining({
-        sourceCardInstanceId: "runner_onr_v1_154_broker_2",
+        sourceCardInstanceId: "runner_366_2",
         currentBankAmount: 12,
         currentBankAmounts: [12],
         portfolioStoredAmount: 12,
         estimatedPayout: 12,
         buildActionIds: [
-          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
+          "runner.activated_card_ability.runner_366_2.runner_366_2.activated.onr_v1_154_broker:store_credits",
         ],
         cashOutActionIds: [
-          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits",
+          "runner.activated_card_ability.runner_366_2.runner_366_2.activated.onr_v1_154_broker:withdraw_credits",
         ],
       }),
     ]);
@@ -124,7 +124,7 @@ describe("match D153 card hint consumer contract", () => {
       ),
     ).toBe(false);
     expect(result.decision?.actionId).toBe(
-      "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits",
+      "runner.activated_card_ability.runner_366_2.runner_366_2.activated.onr_v1_154_broker:withdraw_credits",
     );
     expect(result.decision?.fallbackUsed).toBe(false);
     expect(result.decision?.decisionDebug?.planKind).toBe("runner.credit_bank");

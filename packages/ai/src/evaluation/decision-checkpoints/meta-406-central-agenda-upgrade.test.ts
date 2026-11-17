@@ -20,7 +20,7 @@ it("SP-297 does not spend seven credits on a central agenda discount to clear HQ
     runtime,
   );
   const actionId =
-    "corp.install_card.corp_onr_v1_374_washington-d-c-city-grid_1.hq.corp_onr_v1_374_washington-d-c-city-grid_1";
+    "corp.install_card.corp_586_1.hq.corp_586_1";
   expect(input.legalActions.some((a) => a.actionId === actionId)).toBe(true);
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe("corp.gain_credit");

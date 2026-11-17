@@ -93,7 +93,7 @@ describe("MRGSG recurring draw-tax removal and reserve recovery", () => {
       state.corp.servers.find((server) => server.id === "remote_1")?.root ?? [],
     ).toEqual([]);
     expect(state.corp.archives).toContain(
-      "corp_onr_v1_313_city-surveillance_1",
+      "corp_525_1",
     );
     const recoveryInput = nextInput(state, checkpoint);
     const recoveryDecision = chooseAiAction(recoveryInput);

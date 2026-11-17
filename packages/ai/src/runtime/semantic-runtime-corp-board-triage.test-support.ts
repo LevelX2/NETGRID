@@ -184,7 +184,7 @@ export function iceCard(
   instanceId: string,
   overrides: Partial<VisibleCard> = {},
 ): VisibleCard {
-  const definitionId = overrides.definitionId ?? "simple_barrier_ice";
+  const definitionId = overrides.definitionId ?? 589;
   const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   return {
     instanceId,
@@ -279,7 +279,7 @@ export function earlyWormBreaker(): VisibleCard {
     type: "program",
     owner: "runner",
     title: "Early Worm",
-    definitionId: "onr_classic_027_early-worm",
+    definitionId: 31,
     subtypes: ["Icebreaker", "Worm"],
   } as VisibleCard;
 }

@@ -57,8 +57,8 @@ describe("PublicContext golden payload gate", () => {
       costs: [{ clicks: 1 }],
       payload: {
         serverId: "rd",
-        targetIceDefinitionId: "simple_agenda",
-        encounterTaxSource: "onr_v1_222_ball-and-chain",
+        targetIceDefinitionId: 588,
+        encounterTaxSource: 434,
       },
     });
 
@@ -86,10 +86,10 @@ describe("PublicContext golden payload gate", () => {
       runPhase: "approach_ice",
       serverId: "rd",
       serverLabel: "R&D",
-      targetIceDefinitionId: "simple_agenda",
+      targetIceDefinitionId: 588,
       targets: {
         serverLabel: "R&D",
-        targetIceDefinitionId: "simple_agenda",
+        targetIceDefinitionId: 588,
       },
       turnActionOrdinalEnd: 1,
       turnActionOrdinalStart: 1,
@@ -101,7 +101,7 @@ describe("PublicContext golden payload gate", () => {
 
   it("pins card source, target, access, breach, steal and trash context fields", () => {
     const state = goldenState("public-context-access");
-    addCorpRootCard(state, "corp_root_agenda", "simple_agenda", "remote_1");
+    addCorpRootCard(state, "corp_root_agenda", 588, "remote_1");
     const context = goldenContext(
       state,
       goldenAction({
@@ -111,18 +111,18 @@ describe("PublicContext golden payload gate", () => {
         label: "Access remote root",
         payload: {
           accessedCardId: "corp_root_agenda",
-          ambushDefinitionId: "simple_agenda",
+          ambushDefinitionId: 588,
           baseAccessCount: 1,
-          cardDefinitionId: "simple_agenda",
+          cardDefinitionId: 588,
           effectiveAccessCount: 2,
           installedAccessBonus: 1,
-          publicRevealDefinitionId: "simple_agenda",
+          publicRevealDefinitionId: 588,
           publicRevealKind: "breach",
           serverId: "remote_1",
-          sourceDefinitionId: "simple_economy_event",
+          sourceDefinitionId: 595,
           stealCost: 2,
-          targetCardDefinitionId: "simple_agenda",
-          targetIceDefinitionId: "simple_agenda",
+          targetCardDefinitionId: 588,
+          targetIceDefinitionId: 588,
           trashCostPaid: 3,
         },
       }),
@@ -132,25 +132,25 @@ describe("PublicContext golden payload gate", () => {
       accessedArea: "root",
       accessedCardPositionKey: "root:0",
       accessedIndex: 0,
-      ambushDefinitionId: "simple_agenda",
+      ambushDefinitionId: 588,
       baseAccessCount: 1,
-      cardDefinitionId: "simple_agenda",
+      cardDefinitionId: 588,
       effectiveAccessCount: 2,
       installedAccessBonus: 1,
-      publicRevealDefinitionId: "simple_agenda",
+      publicRevealDefinitionId: 588,
       publicRevealKind: "breach",
       revealKind: "breach",
       serverLabel: "Remote 1",
-      sourceDefinitionId: "simple_economy_event",
+      sourceDefinitionId: 595,
       stealCost: 2,
-      targetCardDefinitionId: "simple_agenda",
-      targetIceDefinitionId: "simple_agenda",
+      targetCardDefinitionId: 588,
+      targetIceDefinitionId: 588,
     });
   });
 
   it("exposes runner event runs as public chronicle context", () => {
     const state = goldenState("public-context-runner-event-run");
-    addCorpRootCard(state, "corp_root_remote_1", "simple_agenda", "remote_1");
+    addCorpRootCard(state, "corp_root_remote_1", 588, "remote_1");
     const context = goldenContext(
       state,
       goldenAction({
@@ -193,16 +193,16 @@ describe("PublicContext golden payload gate", () => {
           damageCannotBePrevented: true,
           runnerBid: 1,
           runnerLink: 2,
-          sourceDefinitionId: "simple_agenda",
+          sourceDefinitionId: 588,
           tagsAdded: 1,
           traceBaseLinkCostPaid: 1,
-          traceBaseLinkSourceDefinitionId: "simple_economy_event",
+          traceBaseLinkSourceDefinitionId: 595,
           traceLimit: 6,
           traceId: "trace_public_context_golden",
           traceStep: "result",
           traceSuccessEffect: "tag",
           traceSuccessful: true,
-          trashedCardDefinitionId: "simple_economy_event",
+          trashedCardDefinitionId: 595,
           trashedCardType: "program",
         },
       }),
@@ -219,10 +219,10 @@ describe("PublicContext golden payload gate", () => {
       damageCannotBePrevented: true,
       runnerBid: 1,
       runnerLink: 2,
-      sourceDefinitionId: "simple_agenda",
+      sourceDefinitionId: 588,
       tagsAdded: 1,
       traceBaseLinkCostPaid: 1,
-      traceBaseLinkSourceDefinitionId: "simple_economy_event",
+      traceBaseLinkSourceDefinitionId: 595,
       traceLimit: 6,
       traceBidsRevealed: true,
       traceId: "trace_public_context_golden",
@@ -230,7 +230,7 @@ describe("PublicContext golden payload gate", () => {
       traceStep: "result",
       traceSuccessEffect: "tag",
       traceSuccessful: true,
-      trashedCardDefinitionId: "simple_economy_event",
+      trashedCardDefinitionId: 595,
       trashedCardType: "program",
     });
   });
@@ -414,7 +414,7 @@ describe("PublicContext golden payload gate", () => {
           secretSpendCorp: 1,
           secretSpendRevealed: true,
           secretSpendRunner: 2,
-          sourceDefinitionId: "onr_v1_272_too-many-doors",
+          sourceDefinitionId: 484,
           secretSpendEndRun: true,
         },
       }),
@@ -426,7 +426,7 @@ describe("PublicContext golden payload gate", () => {
       secretSpendCorp: 1,
       secretSpendRevealed: true,
       secretSpendRunner: 2,
-      sourceDefinitionId: "onr_v1_272_too-many-doors",
+      sourceDefinitionId: 484,
       secretSpendEndRun: true,
     });
   });
@@ -452,10 +452,10 @@ describe("PublicContext golden payload gate", () => {
           recurringCreditsLoaded: 2,
           resourceAbility: "short_term_contract",
           runnerCreditsAfter: 9,
-          sourceDefinitionId: "simple_economy_event",
+          sourceDefinitionId: 595,
           sourceTrashed: true,
-          targetCardDefinitionId: "simple_agenda",
-          targetIceDefinitionId: "simple_agenda",
+          targetCardDefinitionId: 588,
+          targetIceDefinitionId: 588,
           v1917AssetAbility: "spinn_public_relations",
           v1919RunnerEventAbility: "future_agenda_point_forfeit",
           v1920AssetAbility: "newsgroup_taunting",
@@ -480,10 +480,10 @@ describe("PublicContext golden payload gate", () => {
       recurringCreditsLoaded: 2,
       resourceAbility: "short_term_contract",
       runnerCreditsAfter: 9,
-      sourceDefinitionId: "simple_economy_event",
+      sourceDefinitionId: 595,
       sourceTrashed: true,
-      targetCardDefinitionId: "simple_agenda",
-      targetIceDefinitionId: "simple_agenda",
+      targetCardDefinitionId: 588,
+      targetIceDefinitionId: 588,
       v1917AssetAbility: "spinn_public_relations",
       v1919RunnerEventAbility: "future_agenda_point_forfeit",
       v1920AssetAbility: "newsgroup_taunting",
@@ -506,7 +506,7 @@ describe("PublicContext golden payload gate", () => {
       type: "score_agenda",
       label: "Score Project Zurich",
       payload: {
-        cardId: "simple_agenda",
+        cardId: 588,
         projectZurichOveradvance: 4,
         overadvanceRecurringCredits: 2,
       },
@@ -569,8 +569,8 @@ describe("PublicContext golden payload gate", () => {
               choiceKind: "select_option",
               damageResolved: true,
               damageType: "net",
-              sourceDefinitionId: "simple_agenda",
-              targetCardDefinitionId: "simple_economy_event",
+              sourceDefinitionId: 588,
+              targetCardDefinitionId: 595,
               traceId: "trace_contract_golden",
             },
           }),
@@ -592,7 +592,7 @@ describe("PublicContext golden payload gate", () => {
             payload: {
               randomPurpose: "v1921.die.contract",
               serverLabel: "HQ",
-              sourceDefinitionId: "simple_economy_event",
+              sourceDefinitionId: 595,
               v1921DieRoll: 2,
               v1921RunnerProgramAbility: "ai_boon",
             },
@@ -617,8 +617,8 @@ describe("PublicContext golden payload gate", () => {
     const payload = {
       encounterTaxForFutureIce: 2,
       encounterTaxPaid: 2,
-      encounterTaxSource: "onr_v1_222_ball-and-chain",
-      targetIceDefinitionId: "simple_barrier_ice",
+      encounterTaxSource: 434,
+      targetIceDefinitionId: 589,
     };
 
     for (const type of ["continue_run", "rez_ice", "decline_rez"] as const) {
@@ -752,7 +752,7 @@ function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
 function addCorpRootCard(
   state: GameState,
   cardId: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   serverId: "remote_1",
 ): void {
   state.cardInstances[cardId] = {

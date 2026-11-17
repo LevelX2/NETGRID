@@ -776,7 +776,7 @@ function runnerRunWindowActionAssessment(
   if (
     action.type === "trigger_ability" &&
     candidate.sourceKind === "card" &&
-    typeof action.payload?.sourceDefinitionId === "string" &&
+    typeof action.payload?.sourceDefinitionId === "number" &&
     candidate.abilityBindingMethod === "unresolved"
   ) {
     throw new PlanResolutionFailure("missing_plan_module_coverage", {

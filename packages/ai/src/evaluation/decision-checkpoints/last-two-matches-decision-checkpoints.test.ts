@@ -109,10 +109,10 @@ describe("last two matches exact decision checkpoints", () => {
   });
 });
 
-const PREARRANGED_DROP = "onr_proteus_118_prearranged-drop";
+const PREARRANGED_DROP = 176;
 const TRACE_PAYOFFS = new Set([
-  "onr_v1_302_scorched-earth",
-  "onr_v1_307_urban-renewal",
+  514,
+  519,
 ]);
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {

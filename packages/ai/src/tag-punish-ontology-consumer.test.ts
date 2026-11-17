@@ -41,7 +41,7 @@ describe("tag punish ontology conflict detection", () => {
   it("does not classify Rex rez as a tag source", () => {
     const assessment = classifyTagPunishLegalActionFromOntology(
       rezAction(),
-      "onr_v1_264_rex",
+      476,
       { runnerTagged: false },
     );
 
@@ -52,7 +52,7 @@ describe("tag punish ontology conflict detection", () => {
   it("keeps Fetch rez classified as a real trace tag source", () => {
     const assessment = classifyTagPunishLegalActionFromOntology(
       rezAction(),
-      "onr_v1_243_fetch-4-0-1",
+      455,
       { runnerTagged: false },
     );
 
@@ -62,13 +62,13 @@ describe("tag punish ontology conflict detection", () => {
 
   it("does not classify a typed source-trash economy cashout as tag punishment", () => {
     expect(
-      getStructuredTagPunishProfileForCard("onr_v1_328_information-laundering"),
+      getStructuredTagPunishProfileForCard(540),
     ).toBeUndefined();
   });
 
   it("classifies installed access, follow-up, and random damage cards by typed mechanics", () => {
     expect(
-      getStructuredTagPunishProfileForCard("onr_v1_372_turbeau-delacroix"),
+      getStructuredTagPunishProfileForCard(584),
     ).toMatchObject({
       tagSource: true,
       traceTagSource: true,
@@ -76,13 +76,13 @@ describe("tag punish ontology conflict detection", () => {
       requiresTraceSuccess: true,
     });
     expect(
-      getStructuredTagPunishProfileForCard("onr_v1_333_omniscience-foundation"),
+      getStructuredTagPunishProfileForCard(545),
     ).toMatchObject({
       tagSource: true,
       payoff: false,
     });
     expect(
-      getStructuredTagPunishProfileForCard("onr_v1_339_schlaghund"),
+      getStructuredTagPunishProfileForCard(551),
     ).toMatchObject({
       tagSource: false,
       payoff: true,

@@ -58,7 +58,7 @@ export function corpResidentDelayedSuccessDefenseSignals(
     server.root.flatMap((card) =>
       card.known &&
       card.rezzed === true &&
-      card.definitionId === "onr_v1_358_dr-dreff"
+      card.definitionId === 570
         ? [
             {
               kind: "generic" as const,

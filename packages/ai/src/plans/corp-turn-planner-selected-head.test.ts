@@ -281,7 +281,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
       acceptableActions: [
         {
           actionId:
-            "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+            "corp.install_card.corp_71_1.rd.corp_71_1.4",
         },
       ],
       planExecution: {
@@ -296,15 +296,15 @@ describe("Corp TurnPlanner selected-head binding", () => {
 
     expect(result.ok, result.message).toBe(true);
     expect(result.decision?.actionId).toBe(
-      "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+      "corp.install_card.corp_71_1.rd.corp_71_1.4",
     );
     expect(planning).toMatchObject({
       mode: "cutover",
       shadowComparison: {
         liveActionId:
-          "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+          "corp.install_card.corp_71_1.rd.corp_71_1.4",
         shadowActionId:
-          "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+          "corp.install_card.corp_71_1.rd.corp_71_1.4",
         shadowRootPlanInstanceId:
           "plan:corp.defend_servers:server-defense-portfolio",
         agreement: true,
@@ -314,7 +314,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
         rematerialization: {
           status: "executable",
           actionId:
-            "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+            "corp.install_card.corp_71_1.rd.corp_71_1.4",
         },
       },
     });
@@ -326,7 +326,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
       turnPlanExecutionLease: {
         currentBinding: {
           actionId:
-            "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+            "corp.install_card.corp_71_1.rd.corp_71_1.4",
         },
       },
     });

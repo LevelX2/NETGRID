@@ -19,7 +19,7 @@ import {
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {
@@ -35,7 +35,7 @@ function instance(
   } as CardInstance;
 }
 
-function definition(id: string, title = id): CardDefinition {
+function definition(id: number, title = id): CardDefinition {
   return {
     id,
     title,

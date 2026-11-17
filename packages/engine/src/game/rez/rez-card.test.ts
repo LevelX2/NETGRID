@@ -185,7 +185,7 @@ describe("rez card execution", () => {
 
   it("preserves agenda-point rez costs when an effect waives printed credits", () => {
     const glacierId = "effect_glacier" as CardInstanceId;
-    const glacierDefinition = definition("onr_classic_011_glacier", "ice", {
+    const glacierDefinition = definition(15, "ice", {
       rezCost: 6,
     });
     const state = minimalState({
@@ -249,7 +249,7 @@ describe("rez card execution", () => {
 
   it("spends Glacier's public agenda-point self-rez cost", () => {
     const glacierId = "glacier" as CardInstanceId;
-    const glacierDefinition = definition("onr_classic_011_glacier", "ice", {
+    const glacierDefinition = definition(15, "ice", {
       rezCost: 0,
     });
     const state = minimalState({
@@ -327,7 +327,7 @@ describe("rez card execution", () => {
 });
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"],
   extras: Partial<CardDefinition> = {},
 ): CardDefinition {

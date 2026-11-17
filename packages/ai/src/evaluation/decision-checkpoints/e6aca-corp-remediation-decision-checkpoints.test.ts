@@ -80,14 +80,14 @@ describe("e6aca Corp remediation decision checkpoints", () => {
         planInstanceId: plan?.selectedPlan?.instanceId,
       });
       const bbsRoot =
-        "plan:corp.economy:economy-campaign%3Acorp_onr_v1_309_bbs-whispering-campaign_1%3Arez%3Aremote_1";
+        "plan:corp.economy:economy-campaign%3Acorp_521_1%3Arez%3Aremote_1";
       expect(plan?.turnPlanning?.heads).toContainEqual(
         expect.objectContaining({
           moduleId: "corp.economy",
           rootPlanInstanceId: bbsRoot,
           executorPlanInstanceId: bbsRoot,
           actionId:
-            "corp.rez_card.corp_onr_v1_309_bbs-whispering-campaign_1.remote_1.corp_onr_v1_309_bbs-whispering-campaign_1",
+            "corp.rez_card.corp_521_1.remote_1.corp_521_1",
           witnessValid: true,
         }),
       );
@@ -99,13 +99,13 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       fixture.expectation = {
         forbiddenActions: [
           {
-            sourceDefinitionId: "onr_v1_366_red-herrings",
+            sourceDefinitionId: 578,
             targetServerId: "hq",
           },
         ],
         acceptableActions: [
           {
-            sourceDefinitionId: "onr_v1_347_vapor-ops",
+            sourceDefinitionId: 559,
             targetServerId: "remote_1",
           },
         ],
@@ -121,7 +121,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       (server) => server.id === "rd",
     )!;
     expect(
-      rd.ice.find((ice) => ice.definitionId === "onr_v1_231_cortical-scrub")
+      rd.ice.find((ice) => ice.definitionId === 443)
         ?.effectiveRezCostQuote,
     ).toMatchObject({ complete: true, finalCredits: 7 });
     expect(result.input.playerView.own).toMatchObject({
@@ -158,7 +158,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
           acceptableActions: [
             {
               actionId:
-                "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+                "corp.install_card.corp_71_1.rd.corp_71_1.4",
             },
           ],
         };

@@ -21,7 +21,7 @@ describe("runner damage threat model v2 red evidence", () => {
             actionType: "core_damage",
             damageType: "core",
             damageAmount: 1,
-            sourceDefinitionId: "onr_v1_093_if-you-want-it-done-right",
+            sourceDefinitionId: 305,
           }),
         ],
       }),
@@ -57,7 +57,7 @@ describe("runner damage threat model v2 red evidence", () => {
                 amount: 2,
                 damageType: "net",
                 cardsTrashed: 2,
-                sourceDefinitionId: "onr_v1_348_virus-test-site",
+                sourceDefinitionId: 560,
               },
             ],
           }),
@@ -91,7 +91,7 @@ describe("runner damage threat model v2 red evidence", () => {
             damageType: "net",
             damageAmount: 0,
             damageResolved: true,
-            sourceDefinitionId: "onr_v1_340_setup",
+            sourceDefinitionId: 552,
           }),
         ],
       }),
@@ -110,7 +110,7 @@ describe("runner damage threat model v2 red evidence", () => {
     });
   });
 
-  it.each(["onr_v1_340_setup", "onr_proteus_004_fetal-ai"])(
+  it.each([552, 62])(
     "attributes canonical access damage to the publicly accessed Corp card %s",
     (cardDefinitionId) => {
       const assessment = runnerDamageThreatAssessment(
@@ -147,7 +147,7 @@ describe("runner damage threat model v2 red evidence", () => {
       events: [event("prevented-access", 31, 8, {
         actor: "runner",
         actionType: "access_card",
-        cardDefinitionId: "onr_v1_340_setup",
+        cardDefinitionId: 552,
         damageResolved: true,
         damageAmount: 0,
         damageType: "net",
@@ -160,10 +160,10 @@ describe("runner damage threat model v2 red evidence", () => {
   });
 
   it.each([
-    { actionType: "trash_accessed_card", cardDefinitionId: "onr_v1_340_setup", damageResolved: true },
-    { actionType: "access_card", cardDefinitionId: "onr_v1_340_setup", damageResolved: false },
+    { actionType: "trash_accessed_card", cardDefinitionId: 552, damageResolved: true },
+    { actionType: "access_card", cardDefinitionId: 552, damageResolved: false },
     { actionType: "access_card", cardDefinitionId: "unknown-damage-source", damageResolved: true },
-    { actionType: "access_card", cardDefinitionId: "onr_v1_093_if-you-want-it-done-right", damageResolved: true },
+    { actionType: "access_card", cardDefinitionId: 305, damageResolved: true },
   ])("does not infer a Corp damage binding from $actionType / $cardDefinitionId / $damageResolved", (payload) => {
     const assessment = runnerDamageThreatAssessment(input({
       handCount: 1,
@@ -210,12 +210,12 @@ describe("runner damage threat model v2 red evidence", () => {
           event("seen-chance-observation", 27, 7, {
             actor: "runner",
             actionType: "access_card",
-            cardDefinitionId: "onr_v1_284_chance-observation",
+            cardDefinitionId: 496,
           }),
           event("seen-urban-renewal", 29, 7, {
             actor: "runner",
             actionType: "access_card",
-            cardDefinitionId: "onr_v1_307_urban-renewal",
+            cardDefinitionId: 519,
           }),
         ],
       }),
@@ -242,7 +242,7 @@ describe("runner damage threat model v2 red evidence", () => {
             damageType: "net",
             damageAmount: 2,
             damageResolved: true,
-            sourceDefinitionId: "onr_v1_340_setup",
+            sourceDefinitionId: 552,
           }),
         ],
       }),
@@ -275,7 +275,7 @@ describe("runner damage threat model v2 red evidence", () => {
           damageType: "core",
           damageAmount: 3,
           damageResolved: true,
-          sourceDefinitionId: "onr_v1_258_neural-blade",
+          sourceDefinitionId: 470,
         }),
       ],
     });
@@ -317,7 +317,7 @@ describe("runner damage threat model v2 red evidence", () => {
           damageType: "net",
           damageAmount: 1,
           damageResolved: true,
-          sourceDefinitionId: "onr_v1_258_neural-blade",
+          sourceDefinitionId: 470,
         }),
       ],
     });
@@ -359,7 +359,7 @@ describe("runner damage threat model v2 red evidence", () => {
           damageType: "net",
           damageAmount: 1,
           damageResolved: true,
-          sourceDefinitionId: "onr_v1_258_neural-blade",
+          sourceDefinitionId: 470,
         }),
       ],
     });
@@ -492,7 +492,7 @@ function event(
 }
 
 function card(
-  definitionId: string,
+  definitionId: number,
   type: NonNullable<VisibleCard["type"]>,
   owner: "corp" | "runner",
 ): VisibleCard {

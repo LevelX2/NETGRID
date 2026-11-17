@@ -196,29 +196,29 @@ describe("V1.6.1 Mechanikpaket A", () => {
         /hosting|daemon|stealth|worm|search|arrange|shuffle|unique|counter_system|deterministischer_wuerfel/,
       );
     }
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_023_evil-twin"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[235]).toMatchObject({
       installCost: 6,
       memoryCost: 1,
       strength: 3,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_028_force-shield"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[240]).toMatchObject({
       installCost: 2,
       memoryCost: 1,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_125_dermatech-bodyplating"],
+      CARD_DEFINITIONS_BY_ID[337],
     ).toMatchObject({
       installCost: 0,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_229_code-corpse"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[441]).toMatchObject({
       rezCost: 10,
       strength: 5,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_231_cortical-scrub"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[443]).toMatchObject({
       rezCost: 7,
       strength: 3,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_254_liche"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[466]).toMatchObject({
       rezCost: 14,
       strength: 6,
     });
@@ -238,9 +238,9 @@ describe("V1.6.1 Mechanikpaket A", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_021_dwarf"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID[233]).toBeDefined();
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_297_overtime-incentives"],
+      CARD_DEFINITIONS_BY_ID[509],
     ).toBeDefined();
   });
 
@@ -254,14 +254,14 @@ describe("V1.6.1 Mechanikpaket A", () => {
       }),
     );
     meatState.runner.credits = 20;
-    moveRunnerCardToGrip(meatState, "onr_v1_125_dermatech-bodyplating");
+    moveRunnerCardToGrip(meatState, 337);
     meatState = apply(
       meatState,
       "runner",
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(meatState, action) ===
-          "onr_v1_125_dermatech-bodyplating",
+          337,
     );
     meatState = apply(
       meatState,
@@ -274,14 +274,14 @@ describe("V1.6.1 Mechanikpaket A", () => {
       (action) => action.type === "mandatory_draw",
     );
     meatState.runner.tags = 1;
-    moveCorpCardToHq(meatState, "onr_v1_302_scorched-earth");
+    moveCorpCardToHq(meatState, 514);
     const meatGripBefore = meatState.runner.grip.length;
     meatState = apply(
       meatState,
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(meatState, action) === "onr_v1_302_scorched-earth",
+        sourceDefinition(meatState, action) === 514,
     );
     const meatPreventionOption = meatState.pendingChoice?.options.find(
       (option) => option.id !== "pass",
@@ -301,15 +301,15 @@ describe("V1.6.1 Mechanikpaket A", () => {
 
   it("resolves new core-damage ICE through replayable, side-safe run paths", () => {
     const cases = [
-      { ice: "onr_v1_229_code-corpse", expectedCoreDamage: 2 },
-      { ice: "onr_v1_231_cortical-scrub", expectedCoreDamage: 1 },
-      { ice: "onr_v1_254_liche", expectedCoreDamage: 3 },
+      { ice: 441, expectedCoreDamage: 2 },
+      { ice: 443, expectedCoreDamage: 1 },
+      { ice: 466, expectedCoreDamage: 3 },
     ] as const;
 
     for (const testCase of cases) {
       let state = toRunnerTurn(v161CardReleaseGame(`v161-${testCase.ice}`));
       putCorpIceOnServer(state, "rd", testCase.ice);
-      putCorpCardOnTopOfRd(state, "simple_economy_operation");
+      putCorpCardOnTopOfRd(state, 596);
       state.corp.credits = 40;
       state.runner.credits = 10;
       const initial = structuredClone(state);

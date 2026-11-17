@@ -1762,7 +1762,7 @@ function selectedCorpDamageReplacementChoiceOptionId(
         (card) =>
           card.instanceId === sourceCardId &&
           card.known &&
-          card.definitionId === "onr_proteus_006_please-dont-choke-anyone" &&
+          card.definitionId === 64 &&
           card.type === "agenda",
       )
     : undefined;
@@ -2125,7 +2125,7 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
     searchState !== undefined &&
     searchState.selectedSearchStateVersion === portfolio.stateVersion &&
     binding !== undefined &&
-    typeof binding.targetDefinitionId === "string" &&
+    typeof binding.targetDefinitionId === "number" &&
     typeof targetCardInstanceId === "string" &&
     binding.targetCardInstanceId === targetCardInstanceId &&
     sacrifice?.targetCardInstanceId === targetCardInstanceId &&
@@ -2167,7 +2167,7 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
 function runnerHiddenSearchProgramInstallSourceBinding(source: string):
   | {
       sourceCardInstanceId: string;
-      sourceDefinitionId: string;
+      sourceDefinitionId: number;
       selectedAtStateVersion: number;
     }
   | undefined {
@@ -2603,7 +2603,7 @@ function selectedRunnerInstalledCardLiquidationOptionId(
       card.instanceId === sourceResourceInstanceId &&
       card.known &&
       card.type === "resource" &&
-      typeof card.definitionId === "string",
+      typeof card.definitionId === "number",
   );
   const requirement = action.choiceRequirements?.[0];
   const choiceOptionIds = choice.options.map((option) => option.id);
@@ -2791,7 +2791,7 @@ function runnerCoverageSearchChoiceBinding(
       requiredCoverage: RequiredCapabilityKind;
       serverId?: string;
       targetCardInstanceId?: string;
-      targetDefinitionId?: string;
+      targetDefinitionId?: number;
       optionalExactTargetOnly: boolean;
     }
   | undefined {
@@ -2838,7 +2838,7 @@ function runnerCoverageSearchChoiceBinding(
       (candidate) =>
         candidate.actionId === moduleState.selectedSearchActionId &&
         typeof candidate.sourceCardInstanceId === "string" &&
-        typeof candidate.sourceDefinitionId === "string" &&
+        typeof candidate.sourceDefinitionId === "number" &&
         choice.sourceCardInstanceId === candidate.sourceCardInstanceId &&
         choice.sourceCardDefinitionId === candidate.sourceDefinitionId,
     ) ?? [];
@@ -2891,7 +2891,7 @@ function runnerCoverageSearchChoiceBinding(
     ...(typeof binding.targetCardInstanceId === "string"
       ? { targetCardInstanceId: binding.targetCardInstanceId }
       : {}),
-    ...(typeof binding.targetDefinitionId === "string"
+    ...(typeof binding.targetDefinitionId === "number"
       ? { targetDefinitionId: binding.targetDefinitionId }
       : {}),
   };

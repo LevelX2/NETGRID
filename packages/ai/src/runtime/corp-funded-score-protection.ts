@@ -98,7 +98,7 @@ export type CorpFundedScoreProtectionIceInput = CorpScoreProtectionIceInput &
 
 export type CorpSelectedRezCost = Readonly<{
   iceInstanceId: string;
-  iceDefinitionId: string;
+  iceDefinitionId: number;
   credits: number;
   agendaPoints?: number;
   source: "engine_rez_cost_quote";
@@ -236,7 +236,7 @@ export function corpFundedScoreProtectionCertifiesBinding(params: {
 type CorpFundedIceInstallRouteBase = Readonly<{
   actionId: string;
   sourceCardInstanceId?: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   targetServerId?: string;
   before: CorpFundedScoreProtectionAssessment;
   effect: "unknown" | "no_progress" | "progress" | "satisfied";
@@ -250,7 +250,7 @@ export type KnownCorpFundedIceInstallRouteProjection =
       effect: "no_progress" | "progress" | "satisfied";
       certifiedZeroBidTraceStopId?: string;
       sourceCardInstanceId: string;
-      sourceDefinitionId: string;
+      sourceDefinitionId: number;
       targetServerId: string;
       after: KnownCorpFundedScoreProtectionAssessment;
       installCredits: number;
@@ -344,7 +344,7 @@ const MAX_EXACT_REZ_CANDIDATES = 12;
 type CompleteRezQuoteRead =
   | Readonly<{
       status: "known";
-      definitionId: string;
+      definitionId: number;
       options: readonly CertifiedFundedRezOption[];
     }>
   | Readonly<{

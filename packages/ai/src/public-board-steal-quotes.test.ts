@@ -21,7 +21,7 @@ it.each([
     const state = createGameAfterSetup({ seed: "public-board-quote-witness" });
     const instance = (
       id: string,
-      definitionId: string,
+      definitionId: number,
       faceup: boolean,
       isRezzed: boolean,
     ): CardInstance => ({
@@ -37,13 +37,13 @@ it.each([
     });
     state.cardInstances["public-tax"] = instance(
       "public-tax",
-      "onr_v1_366_red-herrings",
+      578,
       rezzed,
       rezzed,
     );
     state.cardInstances["agenda"] = instance(
       "agenda",
-      "onr_proteus_004_fetal-ai",
+      62,
       known,
       false,
     );

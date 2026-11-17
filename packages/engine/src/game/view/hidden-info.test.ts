@@ -50,7 +50,7 @@ describe("HiddenInfo special zone projection", () => {
     let state = toRunnerTurn(
       createMechanicFixtureGameAfterSetup({ seed: "v122-set-aside" }),
     );
-    const cardId = moveRunnerCardToGrip(state, "simple_economy_event");
+    const cardId = moveRunnerCardToGrip(state, 595);
     state.specialZoneHarness = {
       actor: "runner",
       cardInstanceId: cardId,
@@ -84,7 +84,7 @@ describe("HiddenInfo special zone projection", () => {
     expect(
       getPlayerView(state, "runner").specialZones?.setAside[0],
     ).toMatchObject({
-      definitionId: "simple_economy_event",
+      definitionId: 595,
       owner: "runner",
       controller: "runner",
     });
@@ -113,9 +113,9 @@ describe("HiddenInfo special zone projection", () => {
 describe("Proteus Hidden-Resource Foundation Harness", () => {
   const hiddenResourceDefinitionId = "test_hidden_runner_resource_harness";
   const hiddenResourceTitle = "Hidden Resource Harness";
-  const hiddenActivationDefinitionId = "onr_v1_161_fall-guy";
+  const hiddenActivationDefinitionId = 373;
   const hiddenActivationTitle = "Fall Guy";
-  const hiddenActivatedAbilityDefinitionId = "onr_v1_158_danshis-second-id";
+  const hiddenActivatedAbilityDefinitionId = 370;
   const hiddenActivatedAbilityTitle = "Danshi’s Second ID";
   const hiddenOriginalSubtypesByDefinitionId = new Map<string, string[]>();
 
@@ -176,10 +176,10 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
         id: `hidden_resource_harness_runner_${seed}`,
         name: "Hidden Resource Fixture Runner",
         side: "runner",
-        identity: "runner_identity_001",
+        identity: 587,
         cards: [
-          { id: "simple_economy_event", quantity: 2 },
-          { id: "simple_fracter", quantity: 1 },
+          { id: 595, quantity: 2 },
+          { id: 597, quantity: 1 },
           { id: hiddenResourceDefinitionId, quantity: 2 },
         ],
       },
@@ -381,9 +381,9 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
           id: "hidden_resource_activation_runner",
           name: "Hidden Resource Activation Runner",
           side: "runner",
-          identity: "runner_identity_001",
+          identity: 587,
           cards: [
-            { id: "simple_economy_event", quantity: 2 },
+            { id: 595, quantity: 2 },
             { id: hiddenActivationDefinitionId, quantity: 1 },
           ],
         },
@@ -391,7 +391,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
           ...DEMO_DECKS.demo_corp_008,
           id: "hidden_resource_activation_corp",
           cards: [
-            { id: "onr_v1_306_trojan-horse", quantity: 1 },
+            { id: 518, quantity: 1 },
             ...DEMO_DECKS.demo_corp_008.cards,
           ],
         },
@@ -429,7 +429,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
       stoleAgendaThisTurn: state.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
       stoleAgendaLastTurn: true,
     };
-    const trojanId = moveCorpCardToHq(state, "onr_v1_306_trojan-horse");
+    const trojanId = moveCorpCardToHq(state, 518);
     keepOnlyCorpHqCard(state, trojanId);
     state.corp.credits = 8;
     state = apply(
@@ -437,7 +437,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_306_trojan-horse",
+        sourceDefinition(state, action) === 518,
     );
 
     const openedPayload = state.eventLog.at(-1)?.publicPayload ?? {};
@@ -547,9 +547,9 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
           id: "hidden_resource_activated_runner",
           name: "Hidden Resource Activated Runner",
           side: "runner",
-          identity: "runner_identity_001",
+          identity: 587,
           cards: [
-            { id: "simple_economy_event", quantity: 2 },
+            { id: 595, quantity: 2 },
             { id: hiddenActivatedAbilityDefinitionId, quantity: 1 },
           ],
         },

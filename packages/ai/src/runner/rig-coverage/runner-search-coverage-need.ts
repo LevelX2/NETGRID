@@ -19,7 +19,7 @@ export type RunnerVisibleSearchCoverageNeed = {
 export type RunnerCoverageSearchSaturation = {
   readonly requiredCoverage: RequiredCapabilityKind;
   readonly serverId: string;
-  readonly handAnswerDefinitionId?: string;
+  readonly handAnswerDefinitionId?: number;
   readonly handAnswerTitle?: string;
 };
 

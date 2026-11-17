@@ -62,27 +62,27 @@ function fixture(
   s = apply(s, "corp", "corp.mandatory_draw");
   const f = RealEngineFixtureBuilder.forState(s)
     .withCorpHqSize(0)
-    .withCorpCardInHq("onr_proteus_004_fetal-ai")
-    .withCorpCardInHq("onr_proteus_005_marked-accounts")
+    .withCorpCardInHq(62)
+    .withCorpCardInHq(63)
     .withRunnerCredits(credits)
-    .withCorpRemoteRoot("hq", "onr_proteus_070_rasmin-bridger", 0, {
+    .withCorpRemoteRoot("hq", 128, 0, {
       rezzed: true,
       faceup: true,
     });
   if (lethalRemainingIce)
     f.withRunnerGripSize(0).withRezzedCorpIceOnServer(
       "hq",
-      "onr_proteus_033_mobile-barricade",
+      91,
     );
   if (withKnownSentry)
     f.withRunnerProgramInstalled(
-      "onr_proteus_080_black-widow",
-    ).withRezzedCorpIceOnServer("hq", "onr_proteus_040_sumo-2008");
-  f.withCorpIceOnServer("hq", "onr_proteus_017_credit-blocks");
+      138,
+    ).withRezzedCorpIceOnServer("hq", 98);
+  f.withCorpIceOnServer("hq", 75);
   if (withKnownSentry) {
     const breakerId = s.runner.rig.programs.find(
       (id) =>
-        s.cardInstances[id]?.definitionId === "onr_proteus_080_black-widow",
+        s.cardInstances[id]?.definitionId === 138,
     )!;
     s.cardInstances[breakerId]!.selectedCardId = s.corp.servers
       .find((server) => server.id === "hq")!

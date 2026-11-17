@@ -11,7 +11,7 @@ function signal(source: string): RunnerResourceLifecycleSignal {
   return {
     lifecycleId: `loan:${source}`,
     sourceCardInstanceId: source,
-    definitionId: "onr_v1_168_loan-from-chiba",
+    definitionId: 380,
     phase: "retain",
     actionIds: [],
     supportNeedId: `resource-lifecycle-support:${source}`,

@@ -47,7 +47,7 @@ function step(
 }
 function access(free: boolean, withDedicatedTrashCredits = false) {
   const runnerDeck = deck("standard_proteus_runner_breaker_lab_2026_05_25");
-  const poltergeist = "onr_v1_048_poltergeist";
+  const poltergeist = 260;
   if (
     withDedicatedTrashCredits &&
     !runnerDeck.cards.some((card) => card.id === poltergeist)
@@ -64,12 +64,12 @@ function access(free: boolean, withDedicatedTrashCredits = false) {
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
     .withCorpCardInHq(
-      free ? "onr_v1_244_filter" : "onr_v1_318_department-of-truth-enhancement",
+      free ? 456 : 530,
     );
   state = step(state, "end_turn");
   if (free) {
     RealEngineFixtureBuilder.forState(state).withRunnerProgramInstalled(
-      "onr_proteus_084_crumble",
+      142,
     );
     state.purgeableRunnerVirusCounters = { corp: { crumble: 2 } };
   }

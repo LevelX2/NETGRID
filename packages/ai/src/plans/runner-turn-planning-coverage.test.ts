@@ -157,7 +157,7 @@ describe("Runner turn planning coverage", () => {
           actionId,
           actionType: "install_card",
           semanticActionType: "install.card",
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          sourceDefinitionId: 380,
           risks: [],
           costProfile: {},
           strategicExchangeKinds: ["debt_financing"],

@@ -40,7 +40,7 @@ describe("match e653f50a Corp remediation decision checkpoints", () => {
       checkpoint.expectation.acceptableActions = [
         {
           actionId:
-            "corp.rez_card.corp_onr_v1_320_encoder-inc_1.remote_1.corp_onr_v1_320_encoder-inc_1",
+            "corp.rez_card.corp_532_1.remote_1.corp_532_1",
         },
       ];
       checkpoint.expectation.planExecution = {
@@ -72,7 +72,7 @@ describe("match e653f50a Corp remediation decision checkpoints", () => {
       expect(paid.ok).toBe(true);
       if (!paid.ok) throw Error(JSON.stringify(paid.error));
       expect(
-        paid.state.cardInstances["corp_onr_v1_320_encoder-inc_1"]!.rezzed,
+        paid.state.cardInstances["corp_532_1"]!.rezzed,
       ).toBe(true);
       expect(paid.state.corp.clicks).toBe(before.corp.clicks);
       expect(paid.state.corp.servers).toEqual(before.corp.servers);

@@ -114,7 +114,7 @@ describe("Paarung 529 native owner regressions", () => {
     )!;
     expect(action.payload?.delayedInstallAbility).toBe("remove_shell_counter");
     expect(action.payload?.targetCardId).toBe(
-      "runner_onr_classic_031_rent-i-con_2",
+      "runner_35_2",
     );
     expect(
       chosen.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
@@ -125,9 +125,9 @@ describe("Paarung 529 native owner regressions", () => {
     const state = take(before, "runner", chosen.actionId!);
     expect([state.runner.credits, state.runner.clicks]).toEqual([2, 1]);
     expect(state.runner.rig.programs).toContain(
-      "runner_onr_classic_031_rent-i-con_2",
+      "runner_35_2",
     );
-    expect(state.runner.grip).toContain("runner_onr_classic_031_rent-i-con_1");
+    expect(state.runner.grip).toContain("runner_35_1");
   });
   it("validates the entire finite original Shell alternative through access, Corp turn and the real later score click", () => {
     const { state: initial, steps } = original("shell-substitution");
@@ -188,7 +188,7 @@ describe("Paarung 529 native owner regressions", () => {
     state = take(state, "runner", support.actionId!, support.selectedChoices);
     expect(state.runner.credits).toBe(9);
     expect(state.runner.heap).toContain(
-      "runner_onr_proteus_152_swiss-bank-account_1",
+      "runner_210_1",
     );
     const continuedInput = buildAiDecisionInput(state, "runner", {
       difficulty: "hard",

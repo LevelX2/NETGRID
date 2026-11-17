@@ -14,7 +14,7 @@ import {
 import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decision-context";
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 
-const BROKER = "onr_v1_154_broker";
+const BROKER = 366;
 
 describe("runner credit-bank source-bound cadence", () => {
   beforeEach(() => resetResidentPlanPortfolioMemory());

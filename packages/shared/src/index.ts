@@ -170,7 +170,7 @@ export type CardType =
   | "asset"
   | "upgrade"
   | "ice";
-export type CardDefinitionId = string;
+export type CardDefinitionId = number;
 export type CardInstanceId = string;
 export type FixedPlayCostDefinition = {
   kind: "fixed";

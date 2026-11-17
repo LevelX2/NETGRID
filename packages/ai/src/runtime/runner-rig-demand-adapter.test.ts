@@ -18,9 +18,9 @@ import {
 
 describe("runner rig-demand coverage adapter", () => {
   it.each([
-    ["onr_v1_123_bodyweight-data-creche", 1, false],
-    ["onr_classic_047_little-black-box", 1, false],
-    ["onr_proteus_134_cortical-cybermodem", 4, true],
+    [335, 1, false],
+    [51, 1, false],
+    [192, 4, true],
   ] as const)(
     "uses net memory after replacing the installed deck with %s",
     (definitionId, capacity, admitted) => {
@@ -42,7 +42,7 @@ describe("runner rig-demand coverage adapter", () => {
       });
       input.playerView.own.rig = [
         visibleCard("installed-deck", {
-          definitionId: "onr_v1_123_bodyweight-data-creche",
+          definitionId: 335,
           type: "hardware",
           memoryLimitBonus: 1,
         }),
@@ -73,7 +73,7 @@ describe("runner rig-demand coverage adapter", () => {
   );
   it("binds an exact memory-support install to the existing coverage owner", () => {
     const memoryChip = visibleCard("memory-chip", {
-      definitionId: "onr_v1_146_zetatech-mem-chip",
+      definitionId: 358,
       title: "Zetatech Mem Chip",
       type: "hardware",
       memoryLimitBonus: 2,
@@ -166,7 +166,7 @@ describe("runner rig-demand coverage adapter", () => {
 
   it("does not turn doctrine or hand pressure into unbound memory demand", () => {
     const memoryChip = visibleCard("memory-chip", {
-      definitionId: "onr_v1_146_zetatech-mem-chip",
+      definitionId: 358,
       title: "Zetatech Mem Chip",
       type: "hardware",
       memoryLimitBonus: 2,
@@ -218,7 +218,7 @@ describe("runner rig-demand coverage adapter", () => {
 
   it("uses hand pressure only after comparing the best cleanup alternative", () => {
     const memoryChip = visibleCard("memory-chip", {
-      definitionId: "onr_v1_146_zetatech-mem-chip",
+      definitionId: 358,
       title: "Zetatech Mem Chip",
       type: "hardware",
       memoryLimitBonus: 2,
@@ -275,7 +275,7 @@ describe("runner rig-demand coverage adapter", () => {
 
   it("values a legal protected install when it is the only way to avoid losing bound rig material", () => {
     const memoryChip = visibleCard("memory-chip", {
-      definitionId: "onr_v1_146_zetatech-mem-chip",
+      definitionId: 358,
       title: "Zetatech Mem Chip",
       type: "hardware",
       memoryLimitBonus: 2,
@@ -356,7 +356,7 @@ describe("runner rig-demand coverage adapter", () => {
 
   it("values restricted run credits only for a compatible bound breaker line", () => {
     const corolla = visibleCard("corolla", {
-      definitionId: "onr_v1_124_corolla-speed-chip",
+      definitionId: 336,
       title: "Corolla Speed Chip",
       type: "hardware",
     });
@@ -458,7 +458,7 @@ describe("runner rig-demand coverage adapter", () => {
     "binds general recurring breaker credits to a real parent, including noisy=%s",
     (noisy) => {
       const source = visibleCard("general-pool", {
-        definitionId: "onr_classic_048_omnitech-spinal-tap-cybermodem",
+        definitionId: 52,
         type: "hardware",
       });
       const decoder = visibleCard("decoder", {
@@ -524,7 +524,7 @@ describe("runner rig-demand coverage adapter", () => {
 
   it("binds non-noisy recurring credits only to a compatible breaker line", () => {
     const vewy = visibleCard("vewy", {
-      definitionId: "onr_v1_071_vewy-vewy-quiet",
+      definitionId: 283,
       title: "Vewy Vewy Quiet",
       type: "program",
       memoryCost: 1,
@@ -582,7 +582,7 @@ describe("runner rig-demand coverage adapter", () => {
 
   it("includes visible additive run-credit programs in the next MU milestone", () => {
     const memoryChip = visibleCard("memory-chip", {
-      definitionId: "onr_v1_146_zetatech-mem-chip",
+      definitionId: 358,
       title: "Zetatech Mem Chip",
       type: "hardware",
       memoryLimitBonus: 2,
@@ -590,7 +590,7 @@ describe("runner rig-demand coverage adapter", () => {
     const supportPrograms = ["support-a", "support-b", "support-c"].map(
       (instanceId) =>
         visibleCard(instanceId, {
-          definitionId: "onr_v1_071_vewy-vewy-quiet",
+          definitionId: 283,
           title: "Vewy Vewy Quiet",
           type: "program",
           memoryCost: 1,
@@ -648,7 +648,7 @@ describe("runner rig-demand coverage adapter", () => {
 
   it("retains restricted run credits without preempting acquisition of the breaker parent", () => {
     const vewy = visibleCard("vewy", {
-      definitionId: "onr_v1_071_vewy-vewy-quiet",
+      definitionId: 283,
       title: "Vewy Vewy Quiet",
       type: "program",
       memoryCost: 1,
@@ -837,8 +837,8 @@ function coverageState(coverage: string, installed: boolean, inHand = false) {
   };
 }
 
-function roles(definitionId: string): readonly string[] {
-  if (definitionId === "onr_v1_146_zetatech-mem-chip") {
+function roles(definitionId: number): readonly string[] {
+  if (definitionId === 358) {
     return ["memory", "memory_support"];
   }
   if (definitionId === "test-decoder") return ["breaker_code_gate"];

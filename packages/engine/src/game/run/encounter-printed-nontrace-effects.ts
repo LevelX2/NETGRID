@@ -20,7 +20,7 @@ type ActiveRun = NonNullable<GameState["run"]>;
 type DeflectorTarget = NonNullable<SubroutineDefinition["deflectorTarget"]>;
 type SourceMetadata = {
   sourceCardId?: CardInstanceId;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   iceId?: CardInstanceId;
   subroutineId: string;
 };
@@ -28,7 +28,7 @@ type ClassicDeflectorChoiceContext = {
   runId: string;
   sourceIceId: CardInstanceId;
   subroutineIndex: number;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   subroutineId: string;
   target: DeflectorTarget;
   cost: number;
@@ -38,7 +38,7 @@ type TrashProgramChoiceContext = {
   runId: string;
   sourceIceId: CardInstanceId;
   subroutineIndex: number;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   subroutineId: string;
   subroutineType:
     | "initiate_trace"
@@ -112,7 +112,7 @@ export type EncounterPrintedNonTraceEffectResult = {
   handled: boolean;
   suspended?: boolean;
   sourceCardId?: CardInstanceId | undefined;
-  sourceDefinitionId?: string | undefined;
+  sourceDefinitionId?: number | undefined;
   iceId?: CardInstanceId | undefined;
   subroutineId?: string | undefined;
   runShouldEnd?: boolean;
@@ -629,7 +629,7 @@ function startClassicDeflectorChoice(
 export function applyClassicDeflectorRedirect(
   host: EncounterPrintedNonTraceHost,
   input: {
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     targetServerId: Exclude<ServerId, "new_remote">;
     legalAction?: LegalAction | undefined;
     paidCredits: number;

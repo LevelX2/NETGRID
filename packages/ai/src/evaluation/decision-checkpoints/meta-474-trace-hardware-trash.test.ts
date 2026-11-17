@@ -58,7 +58,7 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
     expect(
       input.playerView.servers
         .flatMap((s) => s.ice)
-        .find((c) => c.instanceId === "corp_onr_v1_228_cinderella_1")?.rezzed,
+        .find((c) => c.instanceId === "corp_440_1")?.rezzed,
     ).toBe(false);
     const decision = chooseAiAction(input);
     expect(decision).toMatchObject({
@@ -67,7 +67,7 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
       timeoutUsed: false,
       selectedChoices: {
         choiceId: input.playerView.pendingChoice!.choiceId,
-        selectedOptionIds: ["hardware_runner_onr_v1_129_hq-interface_1"],
+        selectedOptionIds: ["hardware_runner_341_1"],
       },
     });
     expect(input.legalActions[0]!.expiresAtStateVersion).toBe(298);
@@ -88,7 +88,7 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
   it("retains Defense ownership when only one hardware target remains", () => {
     const input = checkpoint();
     const choice = input.playerView.pendingChoice!;
-    const remainingId = "runner_onr_v1_139_r-and-d-interface_1";
+    const remainingId = "runner_351_1";
     // Keep the original native R&D Interface, its option and LegalAction binding.
     input.playerView.opponent.rig = input.playerView.opponent.rig!.filter(
       (card) => card.type !== "hardware" || card.instanceId === remainingId,
@@ -116,7 +116,7 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
       (card) => card.type === "hardware",
     );
     const target = hardware.find(
-      (card) => card.instanceId === "runner_onr_v1_139_r-and-d-interface_1",
+      (card) => card.instanceId === "runner_351_1",
     )!;
     target.counters = { power: 2 };
     const choice = input.playerView.pendingChoice!;
@@ -195,7 +195,7 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
     const action = input.legalActions[0]!;
     const source = input.playerView.servers
       .flatMap((server) => server.ice)
-      .find((card) => card.instanceId === "corp_onr_v1_228_cinderella_1")!;
+      .find((card) => card.instanceId === "corp_440_1")!;
     const quote = source.effectivePostRezRunQuote!;
     if (!quote.complete)
       throw new Error("Native checkpoint requires a complete quote");

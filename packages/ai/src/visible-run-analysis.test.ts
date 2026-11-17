@@ -156,18 +156,18 @@ describe("visible run analysis server ids", () => {
 describe("visible run analysis targeted breaker paths", () => {
   it("keeps definition-level coverage independent of random breaker strength", () => {
     expect(
-      canBreakerDefinitionBreakIce("simple_decoder", "simple_code_gate_ice"),
+      canBreakerDefinitionBreakIce(591, 590),
     ).toBe(true);
     expect(
-      canBreakerDefinitionBreakIce("simple_decoder", "simple_barrier_ice"),
+      canBreakerDefinitionBreakIce(591, 589),
     ).toBe(false);
     expect(
-      canBreakerDefinitionBreakIce("onr_v1_002_ai-boon", "onr_v1_249_hunter"),
+      canBreakerDefinitionBreakIce(214, 461),
     ).toBe(true);
     expect(
       canBreakerDefinitionBreakIce(
-        "onr_proteus_087_forwards-legacy",
-        "onr_v1_249_hunter",
+        145,
+        461,
       ),
     ).toBe(true);
   });
@@ -176,7 +176,7 @@ describe("visible run analysis targeted breaker paths", () => {
     const wall = classicWallIce("outer-wall");
     const sentry: VisibleCard = {
       instanceId: "inner-sentry",
-      definitionId: "onr_v1_249_hunter",
+      definitionId: 461,
       side: "corp",
       type: "ice",
       known: true,
@@ -185,14 +185,14 @@ describe("visible run analysis targeted breaker paths", () => {
       subtypes: ["sentry"],
       effectiveRunQuote: {
         iceInstanceId: "inner-sentry",
-        iceDefinitionId: "onr_v1_249_hunter",
+        iceDefinitionId: 461,
         effectiveStrength: 5,
         subroutines: [{ id: "inner-sentry:etr", type: "end_the_run" }],
       },
     };
     const bulldozer: VisibleCard = {
       instanceId: "bulldozer",
-      definitionId: "onr_proteus_082_bulldozer",
+      definitionId: 140,
       side: "runner",
       type: "program",
       known: true,
@@ -215,7 +215,7 @@ describe("visible run analysis targeted breaker paths", () => {
       ...classicWallIce("outer-partial-wall"),
       effectiveRunQuote: {
         iceInstanceId: "outer-partial-wall",
-        iceDefinitionId: "onr_v1_232_crystal-wall",
+        iceDefinitionId: 444,
         effectiveStrength: 3,
         subroutines: [
           { id: "outer-partial-wall:etr", type: "end_the_run" },
@@ -246,7 +246,7 @@ describe("visible run analysis targeted breaker paths", () => {
     const bulldozer = bulldozerBreaker("bulldozer-free");
     const aiBoon: VisibleCard = {
       instanceId: "ai-boon-free",
-      definitionId: "onr_v1_002_ai-boon",
+      definitionId: 214,
       side: "runner",
       type: "program",
       known: true,
@@ -255,7 +255,7 @@ describe("visible run analysis targeted breaker paths", () => {
       subtypes: ["icebreaker", "killer"],
     };
     const assessment = minimumCreditsToBreakVisibleSubroutines(
-      { definitionId: "onr_v1_249_hunter", subtypes: ["sentry"], strength: 5 },
+      { definitionId: 461, subtypes: ["sentry"], strength: 5 },
       [bulldozer, aiBoon],
       [
         { id: "sentry:one", type: "end_the_run" },
@@ -286,7 +286,7 @@ describe("visible run analysis targeted breaker paths", () => {
     const bulldozer = bulldozerBreaker("bulldozer-source");
     const aiBoon: VisibleCard = {
       instanceId: "ai-boon-paid",
-      definitionId: "onr_v1_002_ai-boon",
+      definitionId: 214,
       side: "runner",
       type: "program",
       known: true,
@@ -298,7 +298,7 @@ describe("visible run analysis targeted breaker paths", () => {
       ...sentryEndTheRunIce("middle-mixed-sentry"),
       effectiveRunQuote: {
         iceInstanceId: "middle-mixed-sentry",
-        iceDefinitionId: "onr_v1_249_hunter",
+        iceDefinitionId: 461,
         effectiveStrength: 5,
         subroutines: [
           { id: "middle-mixed-sentry:etr-1", type: "end_the_run" },
@@ -329,7 +329,7 @@ describe("visible run analysis targeted breaker paths", () => {
     const assessment = creditsToBreakVisibleSubroutinesWithBreaker(
       bulldozerBreaker("bulldozer-stealth"),
       {
-        definitionId: "onr_v1_232_crystal-wall",
+        definitionId: 444,
         subtypes: ["wall"],
         strength: 3,
       },
@@ -350,7 +350,7 @@ describe("visible run analysis targeted breaker paths", () => {
   it("expires Bulldozer's free break when the next encountered ICE is not a sentry", () => {
     const harmlessCodeGate: VisibleCard = {
       instanceId: "middle-code-gate",
-      definitionId: "onr_classic_014_trapdoor",
+      definitionId: 18,
       side: "corp",
       type: "ice",
       known: true,
@@ -359,7 +359,7 @@ describe("visible run analysis targeted breaker paths", () => {
       subtypes: ["code_gate"],
       effectiveRunQuote: {
         iceInstanceId: "middle-code-gate",
-        iceDefinitionId: "onr_classic_014_trapdoor",
+        iceDefinitionId: 18,
         effectiveStrength: 0,
         subroutines: [],
       },
@@ -387,7 +387,7 @@ describe("visible run analysis targeted breaker paths", () => {
       ...sentryEndTheRunIce("outer-snowball-sentry"),
       effectiveRunQuote: {
         iceInstanceId: "outer-snowball-sentry",
-        iceDefinitionId: "onr_v1_249_hunter",
+        iceDefinitionId: 461,
         effectiveStrength: 2,
         subroutines: [
           { id: "outer-snowball-sentry:etr-1", type: "end_the_run" },
@@ -400,7 +400,7 @@ describe("visible run analysis targeted breaker paths", () => {
       ...sentryEndTheRunIce("inner-snowball-sentry"),
       effectiveRunQuote: {
         iceInstanceId: "inner-snowball-sentry",
-        iceDefinitionId: "onr_v1_249_hunter",
+        iceDefinitionId: 461,
         effectiveStrength: 4,
         subroutines: [{ id: "inner-snowball-sentry:etr", type: "end_the_run" }],
       },
@@ -408,7 +408,7 @@ describe("visible run analysis targeted breaker paths", () => {
     };
     const snowball: VisibleCard = {
       instanceId: "snowball",
-      definitionId: "onr_v1_066_snowball",
+      definitionId: 278,
       side: "runner",
       type: "program",
       known: true,
@@ -450,7 +450,7 @@ describe("visible run analysis targeted breaker paths", () => {
     };
     const grubb: VisibleCard = {
       instanceId: "grubb",
-      definitionId: "onr_v1_030_grubb",
+      definitionId: 242,
       side: "runner",
       type: "program",
       known: true,
@@ -475,7 +475,7 @@ describe("visible run analysis targeted breaker paths", () => {
   it("chooses Fubar's subtype once for the entire known run", () => {
     const fubar: VisibleCard = {
       instanceId: "fubar",
-      definitionId: "onr_proteus_088_fubar",
+      definitionId: 146,
       side: "runner",
       type: "program",
       known: true,
@@ -524,7 +524,7 @@ describe("visible run analysis targeted breaker paths", () => {
     const assessment = creditsToBreakVisibleSubroutinesWithBreaker(
       {
         instanceId: "fubar-stealth",
-        definitionId: "onr_proteus_088_fubar",
+        definitionId: 146,
         side: "runner",
         type: "program",
         known: true,
@@ -533,7 +533,7 @@ describe("visible run analysis targeted breaker paths", () => {
         subtypes: ["icebreaker"],
       },
       {
-        definitionId: "onr_v1_232_crystal-wall",
+        definitionId: 444,
         subtypes: ["wall"],
         strength: 3,
       },
@@ -554,7 +554,7 @@ describe("visible run analysis targeted breaker paths", () => {
   it("uses Morphing Tool's installed subtype without changing it during a run", () => {
     const morphingTool: VisibleCard = {
       instanceId: "morphing-tool",
-      definitionId: "onr_proteus_092_morphing-tool",
+      definitionId: 150,
       side: "runner",
       type: "program",
       known: true,
@@ -585,7 +585,7 @@ describe("visible run analysis targeted breaker paths", () => {
   it("plans Morphing Tool's subtype change only as a funded pre-run action", () => {
     const morphingTool: VisibleCard = {
       instanceId: "morphing-tool-prep",
-      definitionId: "onr_proteus_092_morphing-tool",
+      definitionId: 150,
       side: "runner",
       type: "program",
       known: true,
@@ -613,7 +613,7 @@ describe("visible run analysis targeted breaker paths", () => {
         subtypeChanges: [
           {
             sourceCardInstanceId: "morphing-tool-prep",
-            sourceDefinitionId: "onr_proteus_092_morphing-tool",
+            sourceDefinitionId: 150,
             selectedSubtype: "sentry",
           },
         ],
@@ -636,7 +636,7 @@ describe("visible run analysis targeted breaker paths", () => {
     (generalCredits) => {
       const morphingTool: VisibleCard = {
         instanceId: "morphing-trace-preparation",
-        definitionId: "onr_proteus_092_morphing-tool",
+        definitionId: 150,
         type: "program",
         known: true,
         strength: 5,
@@ -671,7 +671,7 @@ describe("visible run analysis targeted breaker paths", () => {
   it("does not count Dropp's legal break as an access route", () => {
     const dropp: VisibleCard = {
       instanceId: "dropp",
-      definitionId: "onr_v1_019_dropp",
+      definitionId: 231,
       side: "runner",
       type: "program",
       known: true,
@@ -695,7 +695,7 @@ describe("visible run analysis targeted breaker paths", () => {
   it("does not treat Blink's random break attempt as guaranteed access", () => {
     const blink: VisibleCard = {
       instanceId: "blink",
-      definitionId: "onr_v1_007_blink",
+      definitionId: 219,
       side: "runner",
       type: "program",
       known: true,
@@ -719,7 +719,7 @@ describe("visible run analysis targeted breaker paths", () => {
   it("consumes Evil Twin's visible prevention pool across multiple damage effects", () => {
     const evilTwin: VisibleCard = {
       instanceId: "evil-twin",
-      definitionId: "onr_v1_023_evil-twin",
+      definitionId: 235,
       side: "runner",
       type: "program",
       known: true,
@@ -790,7 +790,7 @@ describe("visible run analysis targeted breaker paths", () => {
   it("marks a run-start random strength route as conditional instead of unavailable", () => {
     const forwardsLegacy: VisibleCard = {
       instanceId: "forwards-legacy",
-      definitionId: "onr_proteus_087_forwards-legacy",
+      definitionId: 145,
       side: "runner",
       type: "program",
       known: true,
@@ -815,7 +815,7 @@ describe("visible run analysis targeted breaker paths", () => {
   it("uses the visible random-breaker strength for quoted coverage", () => {
     const resolvedForwardsLegacy: VisibleCard = {
       instanceId: "resolved-forwards-legacy",
-      definitionId: "onr_proteus_087_forwards-legacy",
+      definitionId: 145,
       side: "runner",
       type: "program",
       known: true,
@@ -840,7 +840,7 @@ describe("visible run analysis targeted breaker paths", () => {
       canVisibleBreakerBreakQuotedSubroutines({
         breaker: resolvedForwardsLegacy,
         ice: {
-          definitionId: "simple_code_gate_ice",
+          definitionId: 590,
           subtypes: ["code_gate"],
         },
         subroutines: [{ id: "quoted-coverage-etr", type: "end_the_run" }],
@@ -862,7 +862,7 @@ describe("visible run analysis targeted breaker paths", () => {
   it("marks Bartmoss use as a post-pass trash risk", () => {
     const bartmoss: VisibleCard = {
       instanceId: "bartmoss",
-      definitionId: "onr_v1_005_bartmoss-memorial-icebreaker",
+      definitionId: 217,
       side: "runner",
       type: "program",
       known: true,
@@ -912,7 +912,7 @@ describe("visible run analysis targeted breaker paths", () => {
   it("does not quote the known Coyote-Mastermind path as free after installing Black Widow", () => {
     const coyote = (instanceId: string): VisibleCard => ({
       instanceId,
-      definitionId: "onr_proteus_016_coyote",
+      definitionId: 74,
       side: "corp",
       type: "ice",
       known: true,
@@ -921,7 +921,7 @@ describe("visible run analysis targeted breaker paths", () => {
       subtypes: ["sentry"],
       effectiveRunQuote: {
         iceInstanceId: instanceId,
-        iceDefinitionId: "onr_proteus_016_coyote",
+        iceDefinitionId: 74,
         effectiveStrength: 3,
         subroutines: [
           {
@@ -934,7 +934,7 @@ describe("visible run analysis targeted breaker paths", () => {
     });
     const mastermind: VisibleCard = {
       instanceId: "mastermind",
-      definitionId: "onr_proteus_030_mastermind",
+      definitionId: 88,
       side: "corp",
       type: "ice",
       known: true,
@@ -943,7 +943,7 @@ describe("visible run analysis targeted breaker paths", () => {
       subtypes: ["ap", "black_ice", "sentry", "zombie"],
       effectiveRunQuote: {
         iceInstanceId: "mastermind",
-        iceDefinitionId: "onr_proteus_030_mastermind",
+        iceDefinitionId: 88,
         effectiveStrength: 2,
         subroutines: [
           { id: "mastermind:damage", type: "do_damage", amount: 2 },
@@ -953,7 +953,7 @@ describe("visible run analysis targeted breaker paths", () => {
     };
     const blackWidow: VisibleCard = {
       instanceId: "black-widow",
-      definitionId: "onr_proteus_080_black-widow",
+      definitionId: 138,
       side: "runner",
       type: "program",
       known: true,
@@ -979,7 +979,7 @@ describe("visible run analysis targeted breaker paths", () => {
     const innerCodeGate = classicCodeGateIce("inner-code-gate");
     const outerCanis: VisibleCard = {
       instanceId: "outer-canis-major",
-      definitionId: "onr_v1_225_canis-major",
+      definitionId: 437,
       title: "Canis Major",
       side: "corp",
       type: "ice",
@@ -989,7 +989,7 @@ describe("visible run analysis targeted breaker paths", () => {
       subtypes: ["sentry", "watchdog"],
       effectiveRunQuote: {
         iceInstanceId: "outer-canis-major",
-        iceDefinitionId: "onr_v1_225_canis-major",
+        iceDefinitionId: 437,
         effectiveStrength: 4,
         subroutines: [
           {
@@ -1142,7 +1142,7 @@ describe("visible run analysis access-preserving effect choices", () => {
     const source = fatalAttractorIce("damage-source");
     const dwarf: VisibleCard = {
       ...krashBreaker("runner-dwarf"),
-      definitionId: "onr_v1_021_dwarf",
+      definitionId: 233,
       title: "Dwarf",
       strength: 1,
     };
@@ -1163,7 +1163,7 @@ describe("visible run analysis access-preserving effect choices", () => {
         {
           iceInstanceId: "damage-source",
           subroutineId: "damage-source:next-encounter-damage",
-          sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          sourceDefinitionId: 454,
           amount: 3,
         },
       ],
@@ -1307,7 +1307,7 @@ describe("visible run analysis Deflector paths", () => {
 
   it("reserves a break when the outer ICE funds a paid inner deflection", () => {
     const inner = trapdoorDeflectorIce("hq-vortex");
-    inner.definitionId = "onr_classic_015_vortex";
+    inner.definitionId = 19;
     inner.strength = 2;
     inner.effectiveRunQuote = {
       iceInstanceId: inner.instanceId,
@@ -1748,7 +1748,7 @@ describe("visible run analysis trace hazards", () => {
       postBidLinkOptions: [
         {
           sourceCardInstanceId: "wired-switchboard",
-          sourceDefinitionId: "onr_proteus_154_wired-switchboard",
+          sourceDefinitionId: 212,
           sourceTitle: "Wired Switchboard",
           linkDelta: 3,
           activationCost: 0,
@@ -1793,7 +1793,7 @@ describe("visible run analysis trace hazards", () => {
       traceSuccessCancelOptions: [
         {
           sourceCardInstanceId: "back-door-netwatch",
-          sourceDefinitionId: "onr_proteus_129_back-door-to-netwatch",
+          sourceDefinitionId: 187,
           sourceTitle: "Back Door to Netwatch",
           activationCost: 3,
           tapSource: false,
@@ -1821,7 +1821,7 @@ describe("visible run analysis trace hazards", () => {
       [
         {
           sourceCardInstanceId: "baedekers-net-map",
-          sourceDefinitionId: "onr_v1_003_baedekers-net-map",
+          sourceDefinitionId: 215,
           sourceTitle: "Baedeker’s Net Map",
           linkDelta: 1,
           activationCost: 1,
@@ -1883,7 +1883,7 @@ describe("visible run analysis trace hazards", () => {
         postBidLinkOptions: [
           {
             sourceCardInstanceId: "signpost",
-            sourceDefinitionId: "onr_v1_063_signpost",
+            sourceDefinitionId: 275,
             sourceTitle: "Signpost",
             linkDelta: 2,
             activationCost: 1,
@@ -1914,7 +1914,7 @@ describe("visible run analysis trace hazards", () => {
         [
           {
             sourceCardInstanceId: "runner-sensei",
-            sourceDefinitionId: "onr_proteus_148_runner-sensei",
+            sourceDefinitionId: 206,
             sourceTitle: "Runner Sensei",
             linkDelta: 1,
             activationCost: 2,
@@ -2387,7 +2387,7 @@ describe("shared runner run route quote", () => {
   it("resets Dupré's visible strength counters when the target fort changes", () => {
     const dupre: VisibleCard = {
       instanceId: "runner-dupre",
-      definitionId: "onr_v1_020_dupre",
+      definitionId: 232,
       title: "Dupré",
       side: "runner",
       type: "program",
@@ -2450,7 +2450,7 @@ function quotedSpecialIce(
 function classicWallIce(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_232_crystal-wall",
+    definitionId: 444,
     title: "Crystal Wall",
     type: "ice",
     subtypes: ["wall"],
@@ -2459,7 +2459,7 @@ function classicWallIce(instanceId: string): VisibleCard {
     strength: 3,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_232_crystal-wall",
+      iceDefinitionId: 444,
       effectiveStrength: 3,
       subroutines: [{ id: `${instanceId}:etr`, type: "end_the_run" }],
     },
@@ -2469,7 +2469,7 @@ function classicWallIce(instanceId: string): VisibleCard {
 function sentryEndTheRunIce(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_249_hunter",
+    definitionId: 461,
     side: "corp",
     type: "ice",
     known: true,
@@ -2478,7 +2478,7 @@ function sentryEndTheRunIce(instanceId: string): VisibleCard {
     subtypes: ["sentry"],
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_249_hunter",
+      iceDefinitionId: 461,
       effectiveStrength: 5,
       subroutines: [{ id: `${instanceId}:etr`, type: "end_the_run" }],
     },
@@ -2488,7 +2488,7 @@ function sentryEndTheRunIce(instanceId: string): VisibleCard {
 function bulldozerBreaker(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_proteus_082_bulldozer",
+    definitionId: 140,
     side: "runner",
     type: "program",
     known: true,
@@ -2500,7 +2500,7 @@ function bulldozerBreaker(instanceId: string): VisibleCard {
 function classicCodeGateIce(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "simple_code_gate_ice",
+    definitionId: 590,
     title: "Simple Code Gate ICE",
     type: "ice",
     subtypes: ["code_gate"],
@@ -2509,7 +2509,7 @@ function classicCodeGateIce(instanceId: string): VisibleCard {
     strength: 2,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "simple_code_gate_ice",
+      iceDefinitionId: 590,
       effectiveStrength: 2,
       subroutines: [
         { id: `${instanceId}:credit`, type: "corp_gain_credit", amount: 1 },
@@ -2522,7 +2522,7 @@ function classicCodeGateIce(instanceId: string): VisibleCard {
 function dataWallTwoPointZeroIce(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_238_data-wall-2-0",
+    definitionId: 450,
     title: "Data Wall 2.0",
     type: "ice",
     subtypes: ["wall"],
@@ -2531,7 +2531,7 @@ function dataWallTwoPointZeroIce(instanceId: string): VisibleCard {
     strength: 1,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_238_data-wall-2-0",
+      iceDefinitionId: 450,
       effectiveStrength: 1,
       subroutines: [{ id: `${instanceId}:etr`, type: "end_the_run" }],
     },
@@ -2541,7 +2541,7 @@ function dataWallTwoPointZeroIce(instanceId: string): VisibleCard {
 function neuralBladeIce(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_258_neural-blade",
+    definitionId: 470,
     title: "Neural Blade",
     type: "ice",
     subtypes: ["sentry", "ap", "sword"],
@@ -2550,7 +2550,7 @@ function neuralBladeIce(instanceId: string): VisibleCard {
     strength: 4,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_258_neural-blade",
+      iceDefinitionId: 470,
       effectiveStrength: 4,
       subroutines: [
         {
@@ -2572,7 +2572,7 @@ function neuralBladeIce(instanceId: string): VisibleCard {
 function fatalAttractorIce(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_242_fatal-attractor",
+    definitionId: 454,
     title: "Fatal Attractor",
     type: "ice",
     subtypes: ["ap", "black_ice", "sentry"],
@@ -2581,7 +2581,7 @@ function fatalAttractorIce(instanceId: string): VisibleCard {
     strength: 4,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_242_fatal-attractor",
+      iceDefinitionId: 454,
       effectiveStrength: 4,
       subroutines: [
         {
@@ -2599,7 +2599,7 @@ function fatalAttractorIce(instanceId: string): VisibleCard {
 function fireWallIce(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_245_fire-wall",
+    definitionId: 457,
     title: "Fire Wall",
     type: "ice",
     subtypes: ["wall"],
@@ -2608,7 +2608,7 @@ function fireWallIce(instanceId: string): VisibleCard {
     strength: 4,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_245_fire-wall",
+      iceDefinitionId: 457,
       effectiveStrength: 4,
       subroutines: [{ id: `${instanceId}:etr`, type: "end_the_run" }],
     },
@@ -2618,7 +2618,7 @@ function fireWallIce(instanceId: string): VisibleCard {
 function keeperIce(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_252_keeper",
+    definitionId: 464,
     title: "Keeper",
     type: "ice",
     subtypes: ["code_gate"],
@@ -2627,7 +2627,7 @@ function keeperIce(instanceId: string): VisibleCard {
     strength: 4,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_252_keeper",
+      iceDefinitionId: 464,
       effectiveStrength: 4,
       subroutines: [{ id: `${instanceId}:etr`, type: "end_the_run" }],
     },
@@ -2637,7 +2637,7 @@ function keeperIce(instanceId: string): VisibleCard {
 function caryatidAsCodeGateIce(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_proteus_013_caryatid",
+    definitionId: 71,
     title: "Caryatid",
     type: "ice",
     subtypes: ["code_gate"],
@@ -2646,7 +2646,7 @@ function caryatidAsCodeGateIce(instanceId: string): VisibleCard {
     strength: 5,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_proteus_013_caryatid",
+      iceDefinitionId: 71,
       effectiveStrength: 5,
       subroutines: [
         {
@@ -2661,7 +2661,7 @@ function caryatidAsCodeGateIce(instanceId: string): VisibleCard {
 function trapdoorDeflectorIce(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_classic_014_trapdoor",
+    definitionId: 18,
     title: "Trapdoor",
     type: "ice",
     subtypes: ["code_gate", "deflector"],
@@ -2670,7 +2670,7 @@ function trapdoorDeflectorIce(instanceId: string): VisibleCard {
     strength: 3,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_classic_014_trapdoor",
+      iceDefinitionId: 18,
       effectiveStrength: 3,
       subroutines: [
         {
@@ -2687,7 +2687,7 @@ function trapdoorDeflectorIce(instanceId: string): VisibleCard {
 function krashBreaker(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_039_krash",
+    definitionId: 251,
     title: "Krash",
     type: "program",
     subtypes: ["icebreaker"],
@@ -2699,7 +2699,7 @@ function krashBreaker(instanceId: string): VisibleCard {
 function earlyWormBreaker(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_classic_027_early-worm",
+    definitionId: 31,
     title: "Early Worm",
     type: "program",
     subtypes: ["icebreaker", "worm"],
@@ -2711,7 +2711,7 @@ function earlyWormBreaker(instanceId: string): VisibleCard {
 function pileDriverBreaker(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_047_pile-driver",
+    definitionId: 259,
     title: "Pile Driver",
     type: "program",
     subtypes: ["icebreaker", "fracter", "noisy"],
@@ -2723,7 +2723,7 @@ function pileDriverBreaker(instanceId: string): VisibleCard {
 function japaneseWaterTortureBreaker(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_037_japanese-water-torture",
+    definitionId: 249,
     title: "Japanese Water Torture",
     type: "program",
     subtypes: ["icebreaker", "fracter"],
@@ -2735,7 +2735,7 @@ function japaneseWaterTortureBreaker(instanceId: string): VisibleCard {
 function codecrackerBreaker(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_014_codecracker",
+    definitionId: 226,
     title: "Codecracker",
     type: "program",
     subtypes: ["icebreaker"],
@@ -2750,7 +2750,7 @@ function nonNoisyBreakerCreditPool(
 ): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_011_cloak",
+    definitionId: 223,
     title: "Cloak",
     type: "program",
     subtypes: ["stealth"],
@@ -2777,7 +2777,7 @@ function hostedOnlyBreakerCreditPool(
 ): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_proteus_139_eurocorpse-tm-spin-chip",
+    definitionId: 197,
     title: "Eurocorpse (TM) Spin Chip",
     type: "hardware",
     subtypes: ["chip"],
@@ -2802,7 +2802,7 @@ function hostedOnlyBreakerCreditPool(
 function hunterTraceTagIce(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_249_hunter",
+    definitionId: 461,
     title: "Hunter",
     type: "ice",
     subtypes: ["sentry", "bloodhound"],
@@ -2811,13 +2811,13 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
     strength: 5,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_249_hunter",
+      iceDefinitionId: 461,
       effectiveStrength: 5,
       subroutines: [
         {
           id: `${instanceId}_trace`,
           type: "initiate_trace",
-          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceDefinitionId: 461,
           sourceTitle: "Hunter",
           amount: 5,
           traceLimit: 5,
@@ -2832,7 +2832,7 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
 function fragmentationStormIce(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_246_fragmentation-storm",
+    definitionId: 458,
     title: "Fragmentation Storm",
     type: "ice",
     subtypes: ["sentry", "trace"],
@@ -2841,13 +2841,13 @@ function fragmentationStormIce(instanceId: string): VisibleCard {
     strength: 4,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_246_fragmentation-storm",
+      iceDefinitionId: 458,
       effectiveStrength: 4,
       subroutines: [
         {
           id: `${instanceId}_trace`,
           type: "initiate_trace",
-          sourceDefinitionId: "onr_v1_246_fragmentation-storm",
+          sourceDefinitionId: 458,
           sourceTitle: "Fragmentation Storm",
           amount: 4,
           traceLimit: 4,
@@ -2892,7 +2892,7 @@ function traceDamageIce(instanceId: string, amount: number): VisibleCard {
 function doubleTraceTagIce(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_249_hunter",
+    definitionId: 461,
     title: "Double Hunter Trace",
     type: "ice",
     subtypes: ["sentry", "bloodhound"],
@@ -2901,12 +2901,12 @@ function doubleTraceTagIce(instanceId: string): VisibleCard {
     strength: 5,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_249_hunter",
+      iceDefinitionId: 461,
       effectiveStrength: 5,
       subroutines: [1, 2].map((index) => ({
         id: `${instanceId}_trace_${index}`,
         type: "initiate_trace",
-        sourceDefinitionId: "onr_v1_249_hunter",
+        sourceDefinitionId: 461,
         sourceTitle: "Double Hunter Trace",
         amount: 5,
         traceLimit: 5,
@@ -2920,7 +2920,7 @@ function doubleTraceTagIce(instanceId: string): VisibleCard {
 function dataRavenTraceTagCounterIce(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_236_data-raven",
+    definitionId: 448,
     title: "Data Raven",
     type: "ice",
     subtypes: ["sentry"],
@@ -2929,13 +2929,13 @@ function dataRavenTraceTagCounterIce(instanceId: string): VisibleCard {
     strength: 5,
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_236_data-raven",
+      iceDefinitionId: 448,
       effectiveStrength: 5,
       subroutines: [
         {
           id: `${instanceId}_trace`,
           type: "initiate_trace",
-          sourceDefinitionId: "onr_v1_236_data-raven",
+          sourceDefinitionId: 448,
           sourceTitle: "Data Raven",
           amount: 5,
           traceLimit: 5,
@@ -2981,7 +2981,7 @@ function traceSupportQuote(
 function accessThroughAlpha(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_148_access-through-alpha",
+    definitionId: 360,
     title: "Access through Alpha",
     type: "resource",
     subtypes: ["link"],
@@ -2993,7 +2993,7 @@ function accessThroughAlpha(instanceId: string): VisibleCard {
 function bodyweightDataCreche(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_123_bodyweight-data-creche",
+    definitionId: 335,
     title: "Bodyweight Data Creche",
     type: "hardware",
     subtypes: ["deck"],
@@ -3004,7 +3004,7 @@ function bodyweightDataCreche(instanceId: string): VisibleCard {
 function submarineUplink(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_182_submarine-uplink",
+    definitionId: 394,
     title: "Submarine Uplink",
     type: "resource",
     subtypes: ["link"],
@@ -3016,7 +3016,7 @@ function submarineUplink(instanceId: string): VisibleCard {
 function replicator(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_056_replicator",
+    definitionId: 268,
     title: "Replicator",
     type: "program",
     subtypes: ["icebreaker"],
@@ -3028,7 +3028,7 @@ function replicator(instanceId: string): VisibleCard {
 describe("pre-run subtype preparation credit ledger", () => {
   const morphingTool: VisibleCard = {
     instanceId: "prepared-morphing",
-    definitionId: "onr_proteus_092_morphing-tool",
+    definitionId: 150,
     type: "program",
     known: true,
     strength: 5,

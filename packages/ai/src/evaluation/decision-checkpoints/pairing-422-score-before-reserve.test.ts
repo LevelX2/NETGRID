@@ -86,7 +86,7 @@ it.each([
   const score = input.legalActions.find((a) => a.type === "score_agenda")!;
   const project: CorpScoreProjectSignal = {
     projectId: "current-score",
-    agendaDefinitionId: "onr_v1_196_corporate-war",
+    agendaDefinitionId: 408,
     agendaInstanceId: score.source,
     agendaPoints: 3,
     phase: "score_agenda",
@@ -101,7 +101,7 @@ it.each([
   if (variant === "terminal_score") project.terminalScore = true;
   if (variant === "expired_score") score.expiresAtStateVersion--;
   if (variant === "ordinary_agenda")
-    project.agendaDefinitionId = "onr_v1_203_hostile-takeover";
+    project.agendaDefinitionId = 415;
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
     observerSide: "corp",

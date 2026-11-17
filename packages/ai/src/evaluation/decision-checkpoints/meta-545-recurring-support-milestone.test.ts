@@ -19,7 +19,7 @@ type HandParams = Parameters<typeof evaluateRunnerHandDevelopment>[0];
 type Decision = ReturnType<
   ReturnType<typeof createAiLiveRuntimeComposition>["chooseAiAction"]
 >;
-const supportId = "runner_onr_v1_071_vewy-vewy-quiet_2";
+const supportId = "runner_283_2";
 function fixture(name: string) {
   const f = JSON.parse(
     readFileSync(
@@ -102,7 +102,7 @@ describe("admitted recurring support milestone", () => {
     expectBoundRoute(first.input, setup);
     expect(setup.decisionDebug?.actionAlternatives).toContainEqual(
       expect.objectContaining({
-        actionId: "runner.install_card.runner_onr_v1_146_zetatech-mem-chip_1.runner_onr_v1_146_zetatech-mem-chip_1",
+        actionId: "runner.install_card.runner_358_1.runner_358_1",
         whyNot: expect.arrayContaining([
           expect.stringMatching(/candidate_plan:.*zetatech-mem-chip_1:ready/),
         ]),
@@ -131,7 +131,7 @@ describe("admitted recurring support milestone", () => {
       .filter((r) => r.params.rigDemandProjection)
       .at(-1)!
       .evaluations.find(
-        (e) => e.definitionId === "onr_v1_071_vewy-vewy-quiet",
+        (e) => e.definitionId === 283,
       )!;
     expect(observed.rigDemandBinding?.boundDemandIds).toEqual([]);
     expect(JSON.stringify(f.input)).toBe(before);

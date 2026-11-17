@@ -25,7 +25,7 @@ export type CorpOpeningRushQuote = Readonly<{
   schemaVersion: typeof CORP_OPENING_RUSH_SCHEMA_VERSION;
   opportunityKey: string;
   agendaInstanceId: string;
-  agendaDefinitionId: string;
+  agendaDefinitionId: number;
   targetServerId: string;
   observedAtTurnSerial: number;
   firstContestTurnSerial: number;
@@ -77,7 +77,7 @@ export type CorpOpeningRushDecision =
 type OpeningRushProject = Readonly<{
   projectId: string;
   agendaInstanceId?: string;
-  agendaDefinitionId?: string;
+  agendaDefinitionId?: number;
   serverId?: string;
   actionIds?: readonly string[];
   phase: string;

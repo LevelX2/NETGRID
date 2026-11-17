@@ -18,7 +18,7 @@ import type { AiSimulationSummary } from "./ai-simulation-summary";
 type VisibleCardDefinitionLookup = (
   input: AiDecisionInput,
   cardId: string,
-) => { definitionId?: string } | undefined;
+) => { definitionId?: number } | undefined;
 
 export type RunnerKnownNoAccessTarget = {
   serverId: string;
@@ -163,7 +163,7 @@ type RunnerKnownPathDiagnosticsDependencies =
       serverId: string,
     ) => boolean;
     rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
-    rolesForCardId: (definitionId: string | undefined) => string[];
+    rolesForCardId: (definitionId: number | undefined) => string[];
     runnerCoverageRepairDiagnostic: (
       input: AiDecisionInput,
       action: LegalAction,
@@ -594,7 +594,7 @@ export function runnerCoverageRepairDiagnostic(
       input: AiDecisionInput,
       action: LegalAction,
     ) => string | undefined;
-    rolesForCardId: (definitionId: string | undefined) => string[];
+    rolesForCardId: (definitionId: number | undefined) => string[];
   },
 ): RunnerCoverageRepairDiagnostic {
   const knownNoAccessTargets =
@@ -657,7 +657,7 @@ export function createRunnerCoverageRepairDiagnostic(dependencies: {
     input: AiDecisionInput,
   ) => RunnerKnownNoAccessTarget[];
   findVisibleCard: VisibleCardDefinitionLookup;
-  rolesForCardId: (definitionId: string | undefined) => string[];
+  rolesForCardId: (definitionId: number | undefined) => string[];
 }): (
   input: AiDecisionInput,
   action: LegalAction,

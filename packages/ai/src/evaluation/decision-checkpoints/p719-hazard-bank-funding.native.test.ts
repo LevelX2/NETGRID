@@ -22,7 +22,7 @@ it.each([true, false])(
     };
     if (!installed) {
       cp.input.playerView.own.rig = cp.input.playerView.own.rig!.filter(
-        (card) => card.definitionId !== "onr_v1_135_nasuko-cycle",
+        (card) => card.definitionId !== 347,
       );
     }
     const runActionId = "runner.start_run.remote_1";

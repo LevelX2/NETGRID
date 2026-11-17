@@ -43,7 +43,7 @@ it("does not declare the only stable breaker redundant to an incoming random-los
       choice,
       choice.options,
     ),
-  ).toEqual(["card_runner_onr_v1_059_self-modifying-code_2"]);
+  ).toEqual(["card_runner_271_2"]);
 });
 
 it("preserves the previously bound historical choice and its plan owner", () => {
@@ -68,7 +68,7 @@ it("preserves the previously bound historical choice and its plan owner", () => 
     actionId: "runner.resolve_choice",
     selectedChoices: {
       choiceId: "runner_program_trash_before_install_244",
-      selectedOptionIds: ["card_runner_onr_v1_039_krash_2"],
+      selectedOptionIds: ["card_runner_251_2"],
     },
     fallbackUsed: false,
     timeoutUsed: false,

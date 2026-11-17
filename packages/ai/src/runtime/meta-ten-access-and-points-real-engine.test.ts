@@ -75,7 +75,7 @@ function conditionalPointFixture() {
       id: "fixture_hot_tip_runner",
       cards: [
         ...DEMO_DECKS.demo_runner_001.cards,
-        { id: "onr_v1_090_hot-tip-for-wns", quantity: 1 },
+        { id: 302, quantity: 1 },
       ],
     },
     {
@@ -83,7 +83,7 @@ function conditionalPointFixture() {
       id: "fixture_hot_tip_corp",
       cards: [
         ...DEMO_DECKS.demo_corp_001.cards,
-        { id: "onr_v1_196_corporate-war", quantity: 1 },
+        { id: 408, quantity: 1 },
       ],
     },
   );
@@ -106,7 +106,7 @@ it("admits HQ access via empty Archives while rejecting the ordinary Archives ru
   );
   RealEngineFixtureBuilder.forState(state)
     .withRunnerCredits(26)
-    .withRunnerProgramInstalled("onr_v1_062_shredder-uplink-protocol");
+    .withRunnerProgramInstalled(274);
   const input = buildAiDecisionInput(state, "runner", {
     difficulty: "hard",
     ownDeckSnapshot: snapshot,
@@ -150,7 +150,7 @@ it.each(["rd", "remote_1"] as const)(
     );
     RealEngineFixtureBuilder.forState(state).withCorpIceOnServer(
       "remote_1",
-      "onr_v1_261_quandary",
+      473,
     );
     const input = buildAiDecisionInput(state, "runner", {
       difficulty: "hard",
@@ -236,7 +236,7 @@ it.each([false, true])(
     RealEngineFixtureBuilder.forState(state)
       .withRunnerCredits(10)
       .withRunnerGripSize(0)
-      .withRunnerCardInGrip("onr_v1_090_hot-tip-for-wns");
+      .withRunnerCardInGrip(302);
     if (terminal) {
       const agenda = Object.values(state.cardInstances).find((c) =>
         c.definitionId.includes("corporate-war"),
@@ -291,7 +291,7 @@ it.each(["none", "previous_turn"])(
     RealEngineFixtureBuilder.forState(state)
       .withRunnerCredits(10)
       .withRunnerGripSize(0)
-      .withRunnerCardInGrip("onr_v1_090_hot-tip-for-wns");
+      .withRunnerCardInGrip(302);
     state.agendaPointsToWin =
       getPlayerView(state, "runner").own.agendaPoints + 1;
     state.runnerTurnFlags = {
@@ -320,7 +320,7 @@ it.each(["missing", "stale", "source", "capability"])(
     RealEngineFixtureBuilder.forState(state)
       .withRunnerCredits(10)
       .withRunnerGripSize(0)
-      .withRunnerCardInGrip("onr_v1_090_hot-tip-for-wns");
+      .withRunnerCardInGrip(302);
     state.runnerTurnFlags = {
       ...state.runnerTurnFlags,
       stoleAgendaThisTurn: true,

@@ -74,7 +74,7 @@ type ClassicPlaytestSourceDeck = {
   originalsetCards: number;
   agendaPoints?: number;
   legalities: { appMatchstartLegal: boolean; aiSupported: boolean };
-  cards: Array<{ id: string; quantity: number }>;
+  cards: Array<{ id: number; quantity: number }>;
 };
 
 type ClassicEditableDeckEntry = {
@@ -90,12 +90,12 @@ type StandardDeckCatalogEntry = {
   status: "active";
   name: string;
   side: "runner" | "corp";
-  identityCardId: string;
+  identityCardId: number;
   cardPoolSnapshotId: string;
   cardPoolVersion?: string;
   formatProfileId: string;
   formatProfileVersion?: string;
-  cards: Array<{ cardId: string; quantity: number }>;
+  cards: Array<{ cardId: number; quantity: number }>;
   source: {
     kind: "curated_local_deck";
     sourceDeckId: string;
@@ -196,29 +196,29 @@ describe("deck validation and snapshots", () => {
       formatProfileId: "netgrid_private_local_proteus_playtest_v1",
     });
     expect(entry?.cards).toEqual([
-      { cardId: "onr_v1_214_project-babylon", quantity: 2 },
-      { cardId: "onr_proteus_008_project-zurich", quantity: 2 },
-      { cardId: "onr_proteus_007_project-venice", quantity: 1 },
-      { cardId: "onr_v1_199_employee-empowerment", quantity: 3 },
-      { cardId: "onr_v1_205_main-office-relocation", quantity: 1 },
-      { cardId: "onr_v1_291_falsified-transactions-expert", quantity: 1 },
-      { cardId: "onr_v1_305_team-restructuring", quantity: 3 },
-      { cardId: "onr_v1_347_vapor-ops", quantity: 3 },
-      { cardId: "onr_v1_348_virus-test-site", quantity: 3 },
-      { cardId: "onr_v1_346_vacant-soulkiller", quantity: 2 },
-      { cardId: "onr_v1_328_information-laundering", quantity: 1 },
-      { cardId: "onr_v1_312_chicago-branch", quantity: 1 },
-      { cardId: "onr_proteus_062_lesley-major", quantity: 1 },
-      { cardId: "onr_v1_290_efficiency-experts", quantity: 3 },
-      { cardId: "onr_v1_295_night-shift", quantity: 2 },
-      { cardId: "onr_v1_281_accounts-receivable", quantity: 3 },
-      { cardId: "onr_proteus_038_snowbank", quantity: 2 },
-      { cardId: "onr_proteus_032_misleading-access-menus", quantity: 2 },
-      { cardId: "onr_v1_261_quandary", quantity: 1 },
-      { cardId: "onr_proteus_017_credit-blocks", quantity: 3 },
-      { cardId: "onr_v1_245_fire-wall", quantity: 3 },
-      { cardId: "onr_v1_279_wall-of-static", quantity: 1 },
-      { cardId: "onr_v1_263_reinforced-wall", quantity: 1 },
+      { cardId: 426, quantity: 2 },
+      { cardId: 66, quantity: 2 },
+      { cardId: 65, quantity: 1 },
+      { cardId: 411, quantity: 3 },
+      { cardId: 417, quantity: 1 },
+      { cardId: 503, quantity: 1 },
+      { cardId: 517, quantity: 3 },
+      { cardId: 559, quantity: 3 },
+      { cardId: 560, quantity: 3 },
+      { cardId: 558, quantity: 2 },
+      { cardId: 540, quantity: 1 },
+      { cardId: 524, quantity: 1 },
+      { cardId: 120, quantity: 1 },
+      { cardId: 502, quantity: 3 },
+      { cardId: 507, quantity: 2 },
+      { cardId: 493, quantity: 3 },
+      { cardId: 96, quantity: 2 },
+      { cardId: 90, quantity: 2 },
+      { cardId: 473, quantity: 1 },
+      { cardId: 75, quantity: 3 },
+      { cardId: 457, quantity: 3 },
+      { cardId: 491, quantity: 1 },
+      { cardId: 475, quantity: 1 },
     ]);
     expect(entry?.cards.reduce((total, card) => total + card.quantity, 0)).toBe(
       45,
@@ -251,23 +251,23 @@ describe("deck validation and snapshots", () => {
       formatProfileId: "netgrid_private_local_proteus_playtest_v1",
     });
     expect(entry?.cards).toEqual([
-      { cardId: "onr_proteus_004_fetal-ai", quantity: 3 },
-      { cardId: "onr_v1_212_priority-requisition", quantity: 1 },
-      { cardId: "onr_v1_196_corporate-war", quantity: 3 },
-      { cardId: "onr_v1_347_vapor-ops", quantity: 3 },
-      { cardId: "onr_v1_297_overtime-incentives", quantity: 1 },
-      { cardId: "onr_v1_292_management-shake-up", quantity: 2 },
-      { cardId: "onr_v1_304_systematic-layoffs", quantity: 2 },
-      { cardId: "onr_v1_366_red-herrings", quantity: 3 },
-      { cardId: "onr_v1_290_efficiency-experts", quantity: 3 },
-      { cardId: "onr_v1_295_night-shift", quantity: 3 },
-      { cardId: "onr_v1_281_accounts-receivable", quantity: 3 },
-      { cardId: "onr_proteus_039_sphinx-2006", quantity: 3 },
-      { cardId: "onr_proteus_032_misleading-access-menus", quantity: 3 },
-      { cardId: "onr_proteus_038_snowbank", quantity: 3 },
-      { cardId: "onr_v1_261_quandary", quantity: 3 },
-      { cardId: "onr_proteus_017_credit-blocks", quantity: 3 },
-      { cardId: "onr_v1_245_fire-wall", quantity: 3 },
+      { cardId: 62, quantity: 3 },
+      { cardId: 424, quantity: 1 },
+      { cardId: 408, quantity: 3 },
+      { cardId: 559, quantity: 3 },
+      { cardId: 509, quantity: 1 },
+      { cardId: 504, quantity: 2 },
+      { cardId: 516, quantity: 2 },
+      { cardId: 578, quantity: 3 },
+      { cardId: 502, quantity: 3 },
+      { cardId: 507, quantity: 3 },
+      { cardId: 493, quantity: 3 },
+      { cardId: 97, quantity: 3 },
+      { cardId: 90, quantity: 3 },
+      { cardId: 96, quantity: 3 },
+      { cardId: 473, quantity: 3 },
+      { cardId: 75, quantity: 3 },
+      { cardId: 457, quantity: 3 },
     ]);
     expect(entry?.cards.reduce((total, card) => total + card.quantity, 0)).toBe(
       45,
@@ -298,36 +298,36 @@ describe("deck validation and snapshots", () => {
       cardPoolVersion: "private-local-onr-v1",
     });
     expect(entry?.cards).toEqual([
-      { cardId: "onr_v1_011_cloak", quantity: 1 },
-      { cardId: "onr_v1_014_codecracker", quantity: 1 },
-      { cardId: "onr_v1_016_cyfermaster", quantity: 1 },
-      { cardId: "onr_v1_021_dwarf", quantity: 1 },
-      { cardId: "onr_v1_030_grubb", quantity: 1 },
-      { cardId: "onr_v1_035_invisibility", quantity: 2 },
-      { cardId: "onr_v1_040_loony-goon", quantity: 1 },
-      { cardId: "onr_v1_054_raptor", quantity: 1 },
-      { cardId: "onr_v1_059_self-modifying-code", quantity: 2 },
-      { cardId: "onr_v1_063_signpost", quantity: 1 },
-      { cardId: "onr_v1_065_smarteye", quantity: 2 },
-      { cardId: "onr_v1_071_vewy-vewy-quiet", quantity: 2 },
-      { cardId: "onr_v1_079_bodyweight-synthetic-blood", quantity: 1 },
-      { cardId: "onr_v1_091_hunt-club-bbs", quantity: 1 },
+      { cardId: 223, quantity: 1 },
+      { cardId: 226, quantity: 1 },
+      { cardId: 228, quantity: 1 },
+      { cardId: 233, quantity: 1 },
+      { cardId: 242, quantity: 1 },
+      { cardId: 247, quantity: 2 },
+      { cardId: 252, quantity: 1 },
+      { cardId: 266, quantity: 1 },
+      { cardId: 271, quantity: 2 },
+      { cardId: 275, quantity: 1 },
+      { cardId: 277, quantity: 2 },
+      { cardId: 283, quantity: 2 },
+      { cardId: 291, quantity: 1 },
+      { cardId: 303, quantity: 1 },
       {
-        cardId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+        cardId: 304,
         quantity: 2,
       },
-      { cardId: "onr_v1_094_inside-job", quantity: 2 },
-      { cardId: "onr_v1_095_jack-n-joe", quantity: 3 },
-      { cardId: "onr_v1_097_livewires-contacts", quantity: 3 },
-      { cardId: "onr_v1_108_score", quantity: 3 },
-      { cardId: "onr_v1_112_stumble-through-wilderspace", quantity: 1 },
-      { cardId: "onr_v1_114_temple-microcode-outlet", quantity: 2 },
-      { cardId: "onr_v1_129_hq-interface", quantity: 2 },
-      { cardId: "onr_v1_139_r-and-d-interface", quantity: 2 },
-      { cardId: "onr_v1_144_tycho-mem-chip", quantity: 2 },
-      { cardId: "onr_v1_149_access-to-arasaka", quantity: 1 },
-      { cardId: "onr_v1_161_fall-guy", quantity: 2 },
-      { cardId: "onr_v1_178_short-term-contract", quantity: 2 },
+      { cardId: 306, quantity: 2 },
+      { cardId: 307, quantity: 3 },
+      { cardId: 309, quantity: 3 },
+      { cardId: 320, quantity: 3 },
+      { cardId: 324, quantity: 1 },
+      { cardId: 326, quantity: 2 },
+      { cardId: 341, quantity: 2 },
+      { cardId: 351, quantity: 2 },
+      { cardId: 356, quantity: 2 },
+      { cardId: 361, quantity: 1 },
+      { cardId: 373, quantity: 2 },
+      { cardId: 390, quantity: 2 },
     ]);
     expect(entry?.cards.reduce((total, card) => total + card.quantity, 0)).toBe(
       45,
@@ -360,7 +360,7 @@ describe("deck validation and snapshots", () => {
       templates.find((template) => template.side === "runner")!,
       "2026-05-03T12:00:00.000Z",
     );
-    deck.cards.push({ cardId: "catalog_preview_resource_001", quantity: 1 });
+    deck.cards.push({ cardId: 2, quantity: 1 });
     const validation = validateEditableDeck(deck, context);
     expect(validation.ok).toBe(false);
     expect(validation.errors.join(" ")).toContain("not playable");
@@ -422,14 +422,14 @@ describe("deck validation and snapshots", () => {
     expect(buildEngineDeck(runner).id).toBe("demo_runner_008_snapshot_v0_8");
     expect(
       buildEngineDeck(corp).cards.some(
-        (entry) => entry.id === "v08_project_agenda",
+        (entry) => entry.id === 617,
       ),
     ).toBe(true);
   });
 
   it("validates V1.2.3 O:NR human-playable snapshots through the runtime release gate", () => {
     const runtimeCardsById = createRuntimeCardsById();
-    if (!runtimeCardsById["onr_v1_021_dwarf"]) return;
+    if (!runtimeCardsById[233]) return;
     const contextV123 = { cardsById: runtimeCardsById, profile: profile08 };
     const runner = snapshots08.find(
       (candidate) =>
@@ -448,28 +448,28 @@ describe("deck validation and snapshots", () => {
       ok: true,
       errors: [],
     });
-    expect(computeDeckHash(runner)).toBe("fnv1a:349726b4");
-    expect(computeDeckHash(corp)).toBe("fnv1a:1c48dea7");
+    expect(computeDeckHash(runner)).toBe("fnv1a:6ce0beca");
+    expect(computeDeckHash(corp)).toBe("fnv1a:38f53ef0");
     expect(corp.validation.agendaPoints).toBe(7);
     expect(runner.cards.map((entry) => entry.cardId)).toEqual([
-      "onr_v1_021_dwarf",
-      "onr_v1_039_krash",
-      "onr_v1_066_snowball",
-      "onr_v1_074_worm",
-      "onr_v1_081_custodial-position",
-      "onr_v1_085_executive-wiretaps",
-      "onr_v1_101_mit-west-tier",
+      233,
+      251,
+      278,
+      286,
+      293,
+      297,
+      313,
     ]);
     for (const entry of [...runner.cards, ...corp.cards]) {
       const card = runtimeCardsById[entry.cardId];
-      if (entry.cardId.startsWith("onr_v1_"))
-        expect(card?.statuses.human_playable, entry.cardId).toBe(true);
+      if (card?.setId === "originalset-v1")
+        expect(card?.statuses.human_playable, String(entry.cardId)).toBe(true);
     }
   });
 
   it("validates V1.3.0 private local format snapshots with versioned format metadata", () => {
     const runtimeCardsById = createRuntimeCardsById();
-    if (!runtimeCardsById["onr_v1_021_dwarf"]) return;
+    if (!runtimeCardsById[233]) return;
     const contextV130 = { cardsById: runtimeCardsById, profile: profile130 };
     const runner = snapshots08.find(
       (candidate) =>
@@ -495,8 +495,8 @@ describe("deck validation and snapshots", () => {
       ok: true,
       errors: [],
     });
-    expect(computeDeckHash(runner)).toBe("fnv1a:55bfa3a5");
-    expect(computeDeckHash(corp)).toBe("fnv1a:187a16b4");
+    expect(computeDeckHash(runner)).toBe("fnv1a:58c6c28f");
+    expect(computeDeckHash(corp)).toBe("fnv1a:a704f37a");
     expect(runner.formatProfileId).toBe("netgrid_private_local_v1");
     expect(runner.formatProfileVersion).toBe("1.3.0");
     expect(runner.cardPoolVersion).toBe("private-local-onr-v1");
@@ -509,7 +509,7 @@ describe("deck validation and snapshots", () => {
 
   it("validates Proteus playtest snapshots through deck legality and AI support", () => {
     const runtimeCardsById = createRuntimeCardsById();
-    if (!runtimeCardsById["onr_proteus_001_ai-board-member"]) return;
+    if (!runtimeCardsById[59]) return;
     const contextProteus = {
       cardsById: runtimeCardsById,
       profile: profileProteus,
@@ -529,7 +529,7 @@ describe("deck validation and snapshots", () => {
     });
     expect(
       Object.values(runtimeCardsById)
-        .filter((card) => card.catalogCardId.startsWith("onr_proteus_"))
+        .filter((card) => card.setId === "proteus")
         .every(
           (card) =>
             card.statuses.human_playable === true &&
@@ -563,7 +563,7 @@ describe("deck validation and snapshots", () => {
         deckVersion: "test",
         name: "All Proteus Runner Probe",
         side: "runner",
-        identityCardId: "runner_identity_001",
+        identityCardId: 587,
         cardPoolSnapshotId: profileProteus.cardPoolSnapshotId,
         cardPoolVersion: profileProteus.cardPoolVersion!,
         formatProfileId: profileProteus.profileId,
@@ -571,7 +571,7 @@ describe("deck validation and snapshots", () => {
         cards: Object.values(runtimeCardsById)
           .filter(
             (card) =>
-              card.catalogCardId.startsWith("onr_proteus_") &&
+              card.setId === "proteus" &&
               card.side === "runner",
           )
           .slice(0, 45)
@@ -593,9 +593,9 @@ describe("deck validation and snapshots", () => {
 
   it("loads additive Classic format profiles for Classic AI play", () => {
     const classicRunnerIdentityRules =
-      profileClassic.identityRules?.runner.runner_identity_001;
+      profileClassic.identityRules?.runner[587];
     const classicProteusCorpIdentityRules =
-      profileClassicProteus.identityRules?.corp.corp_identity_001;
+      profileClassicProteus.identityRules?.corp[3];
 
     expect(profileClassic.cardPoolVersion).toBe(
       "private-local-onr-v1-plus-classic-playtest",
@@ -617,10 +617,10 @@ describe("deck validation and snapshots", () => {
       "onr_proteus",
     ]);
     expect(profileClassic.allowedIdentityCards.runner).toEqual([
-      "runner_identity_001",
+      587,
     ]);
     expect(profileClassicProteus.allowedIdentityCards.corp).toEqual([
-      "corp_identity_001",
+      3,
     ]);
     expect(profileClassic.minimumDeckCards).toEqual({ runner: 45, corp: 45 });
     expect(profileClassic.ai?.requireAiSupportedForAiDecks).toBe(true);
@@ -628,7 +628,7 @@ describe("deck validation and snapshots", () => {
 
   it("validates the versioned King of the Road Runner AI snapshot from the local deck shape", () => {
     const runtimeCardsById = createRuntimeCardsById();
-    if (!runtimeCardsById["onr_v1_006_black-dahlia"]) return;
+    if (!runtimeCardsById[218]) return;
     const contextV130 = { cardsById: runtimeCardsById, profile: profile130 };
     const snapshot = snapshots08.find(
       (candidate) =>
@@ -645,7 +645,7 @@ describe("deck validation and snapshots", () => {
       ok: true,
       errors: [],
     });
-    expect(computeDeckHash(snapshot)).toBe("fnv1a:7c029283");
+    expect(computeDeckHash(snapshot)).toBe("fnv1a:8325ac5b");
     expect(snapshot.cards).toHaveLength(14);
     expect(snapshot.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(
       19,
@@ -668,7 +668,7 @@ describe("deck validation and snapshots", () => {
       };
       const localCards = localDeck.deck.cards
         .slice()
-        .sort((left, right) => left.cardId.localeCompare(right.cardId));
+        .sort((left, right) => left.cardId - right.cardId);
       if (localCards.length === snapshot.cards.length) {
         expect(snapshot.cards).toEqual(localCards);
         expect(snapshot.name).toBe(localDeck.deck.name);
@@ -678,7 +678,7 @@ describe("deck validation and snapshots", () => {
 
   it("validates the O:NR origins AI snapshots and variant snapshots for both sides", () => {
     const runtimeCardsById = createRuntimeCardsById();
-    if (!runtimeCardsById["onr_v1_203_hostile-takeover"]) return;
+    if (!runtimeCardsById[415]) return;
     const contextV130 = { cardsById: runtimeCardsById, profile: profile130 };
     const runner = snapshots08.find(
       (candidate) =>
@@ -728,10 +728,10 @@ describe("deck validation and snapshots", () => {
       ok: true,
       errors: [],
     });
-    expect(computeDeckHash(runner)).toBe("fnv1a:25185df8");
-    expect(computeDeckHash(corp)).toBe("fnv1a:c75d3d9c");
-    expect(computeDeckHash(runnerVariant)).toBe("fnv1a:69fcf450");
-    expect(computeDeckHash(corpVariant)).toBe("fnv1a:36c22e6c");
+    expect(computeDeckHash(runner)).toBe("fnv1a:0037ec1a");
+    expect(computeDeckHash(corp)).toBe("fnv1a:5fb92fd3");
+    expect(computeDeckHash(runnerVariant)).toBe("fnv1a:27979ffc");
+    expect(computeDeckHash(corpVariant)).toBe("fnv1a:2777b868");
     expect(runner.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(
       20,
     );
@@ -795,18 +795,18 @@ describe("deck validation and snapshots", () => {
       ok: true,
       errors: [],
     });
-    expect(computeDeckHash(runner)).toBe("fnv1a:e1ecdc2c");
-    expect(computeDeckHash(corp)).toBe("fnv1a:712bfe19");
+    expect(computeDeckHash(runner)).toBe("fnv1a:a057d19d");
+    expect(computeDeckHash(corp)).toBe("fnv1a:bf186b7c");
     expect(runner.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(
       45,
     );
     expect(corp.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(45);
     expect(corp.validation.agendaPoints).toBeGreaterThanOrEqual(7);
     expect(
-      runner.cards.every((entry) => entry.cardId.startsWith("onr_classic_")),
+      runner.cards.every((entry) => runtimeCardsById[entry.cardId]?.setId === "classic"),
     ).toBe(true);
     expect(
-      corp.cards.every((entry) => entry.cardId.startsWith("onr_classic_")),
+      corp.cards.every((entry) => runtimeCardsById[entry.cardId]?.setId === "classic"),
     ).toBe(true);
     expect(
       runner.cards.every(
@@ -864,7 +864,7 @@ describe("deck validation and snapshots", () => {
       expect(sourceDeck.legalities.aiSupported).toBe(true);
       for (const entry of sourceDeck.cards) {
         expect(entry.quantity).toBeLessThanOrEqual(3);
-        expect(entry.id.startsWith("onr_classic_")).toBe(true);
+        expect(runtimeCardsById[entry.id]?.setId === "classic").toBe(true);
         expect(runtimeCardsById[entry.id]?.side).toBe(sourceDeck.side);
         expect(runtimeCardsById[entry.id]?.statuses.ai_supported).toBe(true);
       }
@@ -892,7 +892,7 @@ describe("deck validation and snapshots", () => {
       );
       expect(
         entry.deck.cards.every((card) =>
-          card.cardId.startsWith("onr_classic_"),
+          runtimeCardsById[card.cardId]?.setId === "classic",
         ),
       ).toBe(true);
     }
@@ -900,9 +900,9 @@ describe("deck validation and snapshots", () => {
 
   it("keeps V1.3.0 format legality restrictive and reports concrete safe error codes", () => {
     const runtimeCardsById = createRuntimeCardsById();
-    const baseBlockedCard = runtimeCardsById["onr_v1_020_dupre"];
+    const baseBlockedCard = runtimeCardsById[232];
     if (!baseBlockedCard) return;
-    const blockedCardId = "local_blocked_runner_card";
+    const blockedCardId = 920;
     const contextV130 = {
       cardsById: {
         ...runtimeCardsById,
@@ -948,12 +948,12 @@ describe("deck validation and snapshots", () => {
       deckVersion: "1.3.0-local",
       name: "Too Many Copies",
       side: "runner",
-      identityCardId: "runner_identity_001",
+      identityCardId: 587,
       cardPoolSnapshotId: "card-snapshot-0.8",
       cardPoolVersion: "private-local-onr-v1",
       formatProfileId: "netgrid_private_local_v1",
       formatProfileVersion: "1.3.0",
-      cards: [{ cardId: "onr_v1_021_dwarf", quantity: 4 }],
+      cards: [{ cardId: 233, quantity: 4 }],
       createdAt: "2026-05-08T12:00:00.000Z",
       updatedAt: "2026-05-08T12:00:00.000Z",
     };
@@ -966,7 +966,7 @@ describe("deck validation and snapshots", () => {
       identityRules: {
         ...profile130.identityRules!,
         runner: {
-          runner_identity_001: {
+          587: {
             faction: "neutral_demo",
             minimumDeckCards: 12,
             allowedFactions: ["neutral_demo", "onr1996_neutral"],
@@ -985,13 +985,13 @@ describe("deck validation and snapshots", () => {
         ...tooManyCopies,
         deckId: "local_v130_influence_limit",
         cards: [
-          { cardId: "onr_v1_021_dwarf", quantity: 2 },
-          { cardId: "onr_v1_039_krash", quantity: 2 },
-          { cardId: "onr_v1_066_snowball", quantity: 2 },
-          { cardId: "onr_v1_074_worm", quantity: 2 },
-          { cardId: "onr_v1_081_custodial-position", quantity: 1 },
-          { cardId: "onr_v1_085_executive-wiretaps", quantity: 1 },
-          { cardId: "onr_v1_101_mit-west-tier", quantity: 2 },
+          { cardId: 233, quantity: 2 },
+          { cardId: 251, quantity: 2 },
+          { cardId: 278, quantity: 2 },
+          { cardId: 286, quantity: 2 },
+          { cardId: 293, quantity: 1 },
+          { cardId: 297, quantity: 1 },
+          { cardId: 313, quantity: 2 },
         ],
       },
       { cardsById: runtimeCardsById, profile: influenceProfile },
@@ -1011,8 +1011,8 @@ describe("deck validation and snapshots", () => {
         deckVersion: "0.8.0-local",
         name: "Legacy",
         side: "runner",
-        identityCardId: "runner_identity_001",
-        cards: [{ cardId: "onr_v1_021_dwarf", quantity: 1 }],
+        identityCardId: 587,
+        cards: [{ cardId: 233, quantity: 1 }],
         createdAt: "2026-05-08T12:00:00.000Z",
         updatedAt: "2026-05-08T12:00:00.000Z",
       },
@@ -1026,7 +1026,7 @@ describe("deck validation and snapshots", () => {
 
   it("validates V1.1.2K O:NR decks through the runtime release gate when the local overlay is present", () => {
     const runtimeCardsById = createRuntimeCardsById();
-    if (!runtimeCardsById["onr_v1_015_codeslinger"]) return;
+    if (!runtimeCardsById[227]) return;
 
     const contextV105K = { cardsById: runtimeCardsById, profile: profile08 };
     const now = "2026-05-05T12:00:00.000Z";
@@ -1035,29 +1035,29 @@ describe("deck validation and snapshots", () => {
       deckVersion: "1.1.2k-local-onr",
       name: "O:NR V1.1.2K Runner Validation",
       side: "runner",
-      identityCardId: "runner_identity_001",
+      identityCardId: 587,
       cardPoolSnapshotId: "card-snapshot-0.8",
       formatProfileId: "local-demo-v0.8",
       cards: [
-        { cardId: "onr_v1_015_codeslinger", quantity: 2 },
-        { cardId: "onr_v1_052_raffles", quantity: 2 },
-        { cardId: "onr_v1_054_raptor", quantity: 2 },
-        { cardId: "onr_v1_070_tinweasel", quantity: 2 },
-        { cardId: "onr_v1_144_tycho-mem-chip", quantity: 1 },
-        { cardId: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
-        { cardId: "onr_v1_079_bodyweight-synthetic-blood", quantity: 1 },
-        { cardId: "onr_v1_095_jack-n-joe", quantity: 1 },
-        { cardId: "onr_v1_097_livewires-contacts", quantity: 1 },
-        { cardId: "onr_v1_108_score", quantity: 1 },
-        { cardId: "onr_v1_072_wild-card", quantity: 1 },
-        { cardId: "onr_v1_145_wutech-mem-chip", quantity: 1 },
-        { cardId: "onr_v1_006_black-dahlia", quantity: 1 },
-        { cardId: "onr_v1_014_codecracker", quantity: 1 },
-        { cardId: "onr_v1_016_cyfermaster", quantity: 1 },
-        { cardId: "onr_v1_040_loony-goon", quantity: 1 },
-        { cardId: "onr_v1_060_shaka", quantity: 1 },
-        { cardId: "onr_v1_073_wizards-book", quantity: 1 },
-        { cardId: "simple_economy_event", quantity: 2 },
+        { cardId: 227, quantity: 2 },
+        { cardId: 264, quantity: 2 },
+        { cardId: 266, quantity: 2 },
+        { cardId: 282, quantity: 2 },
+        { cardId: 356, quantity: 1 },
+        { cardId: 358, quantity: 1 },
+        { cardId: 291, quantity: 1 },
+        { cardId: 307, quantity: 1 },
+        { cardId: 309, quantity: 1 },
+        { cardId: 320, quantity: 1 },
+        { cardId: 284, quantity: 1 },
+        { cardId: 357, quantity: 1 },
+        { cardId: 218, quantity: 1 },
+        { cardId: 226, quantity: 1 },
+        { cardId: 228, quantity: 1 },
+        { cardId: 252, quantity: 1 },
+        { cardId: 272, quantity: 1 },
+        { cardId: 285, quantity: 1 },
+        { cardId: 595, quantity: 2 },
       ],
       createdAt: now,
       updatedAt: now,
@@ -1067,46 +1067,46 @@ describe("deck validation and snapshots", () => {
       deckVersion: "1.1.2k-local-onr",
       name: "O:NR V1.1.2K Corp Validation",
       side: "corp",
-      identityCardId: "corp_identity_001",
+      identityCardId: 3,
       cardPoolSnapshotId: "card-snapshot-0.8",
       formatProfileId: "local-demo-v0.8",
       cards: [
-        { cardId: "onr_v1_203_hostile-takeover", quantity: 3 },
-        { cardId: "simple_agenda", quantity: 3 },
-        { cardId: "onr_v1_230_cortical-scanner", quantity: 2 },
-        { cardId: "onr_v1_232_crystal-wall", quantity: 2 },
-        { cardId: "onr_v1_237_data-wall", quantity: 2 },
-        { cardId: "onr_v1_238_data-wall-2-0", quantity: 2 },
-        { cardId: "onr_v1_239_endless-corridor", quantity: 2 },
-        { cardId: "onr_v1_220_tycho-extension", quantity: 2 },
-        { cardId: "onr_v1_281_accounts-receivable", quantity: 1 },
-        { cardId: "onr_v1_282_annual-reviews", quantity: 1 },
-        { cardId: "onr_v1_285_closed-accounts", quantity: 1 },
-        { cardId: "onr_v1_287_datapool-by-zetatech", quantity: 1 },
-        { cardId: "onr_v1_288_day-shift", quantity: 1 },
-        { cardId: "onr_v1_290_efficiency-experts", quantity: 1 },
-        { cardId: "onr_v1_301_punitive-counterstrike", quantity: 1 },
-        { cardId: "onr_v1_302_scorched-earth", quantity: 1 },
-        { cardId: "onr_v1_307_urban-renewal", quantity: 1 },
-        { cardId: "onr_v1_244_filter", quantity: 1 },
-        { cardId: "onr_v1_245_fire-wall", quantity: 1 },
-        { cardId: "onr_v1_252_keeper", quantity: 1 },
-        { cardId: "onr_v1_256_mazer", quantity: 1 },
-        { cardId: "onr_v1_253_laser-wire", quantity: 1 },
-        { cardId: "onr_v1_257_nerve-labyrinth", quantity: 1 },
-        { cardId: "onr_v1_259_in-the-face", quantity: 1 },
-        { cardId: "onr_v1_261_quandary", quantity: 1 },
-        { cardId: "onr_v1_262_razor-wire", quantity: 1 },
-        { cardId: "onr_v1_263_reinforced-wall", quantity: 1 },
-        { cardId: "onr_v1_265_rock-is-strong", quantity: 1 },
-        { cardId: "onr_v1_266_scramble", quantity: 1 },
-        { cardId: "onr_v1_269_shotgun-wire", quantity: 1 },
-        { cardId: "onr_v1_270_sleeper", quantity: 1 },
-        { cardId: "onr_v1_278_wall-of-ice", quantity: 1 },
-        { cardId: "onr_v1_279_wall-of-static", quantity: 1 },
-        { cardId: "onr_v1_293_netwatch-credit-voucher", quantity: 1 },
-        { cardId: "onr_v1_295_night-shift", quantity: 1 },
-        { cardId: "simple_economy_operation", quantity: 2 },
+        { cardId: 415, quantity: 3 },
+        { cardId: 588, quantity: 3 },
+        { cardId: 442, quantity: 2 },
+        { cardId: 444, quantity: 2 },
+        { cardId: 449, quantity: 2 },
+        { cardId: 450, quantity: 2 },
+        { cardId: 451, quantity: 2 },
+        { cardId: 432, quantity: 2 },
+        { cardId: 493, quantity: 1 },
+        { cardId: 494, quantity: 1 },
+        { cardId: 497, quantity: 1 },
+        { cardId: 499, quantity: 1 },
+        { cardId: 500, quantity: 1 },
+        { cardId: 502, quantity: 1 },
+        { cardId: 513, quantity: 1 },
+        { cardId: 514, quantity: 1 },
+        { cardId: 519, quantity: 1 },
+        { cardId: 456, quantity: 1 },
+        { cardId: 457, quantity: 1 },
+        { cardId: 464, quantity: 1 },
+        { cardId: 468, quantity: 1 },
+        { cardId: 465, quantity: 1 },
+        { cardId: 469, quantity: 1 },
+        { cardId: 471, quantity: 1 },
+        { cardId: 473, quantity: 1 },
+        { cardId: 474, quantity: 1 },
+        { cardId: 475, quantity: 1 },
+        { cardId: 477, quantity: 1 },
+        { cardId: 478, quantity: 1 },
+        { cardId: 481, quantity: 1 },
+        { cardId: 482, quantity: 1 },
+        { cardId: 490, quantity: 1 },
+        { cardId: 491, quantity: 1 },
+        { cardId: 505, quantity: 1 },
+        { cardId: 507, quantity: 1 },
+        { cardId: 596, quantity: 2 },
       ],
       createdAt: now,
       updatedAt: now,
@@ -1122,20 +1122,20 @@ describe("deck validation and snapshots", () => {
       deckId: "local_onr_runner_v105k_blocked_old_card",
       cards: [
         ...runnerDeck.cards,
-        { cardId: "local_blocked_runner_card", quantity: 1 },
+        { cardId: 920, quantity: 1 },
       ],
     };
-    const baseBlockedCard = contextV105K.cardsById["onr_v1_020_dupre"];
+    const baseBlockedCard = contextV105K.cardsById[232];
     expect(baseBlockedCard).toBeDefined();
     if (!baseBlockedCard) throw new Error("Missing base blocked card");
     const blocked = validateEditableDeck(oldOnrDeck, {
       ...contextV105K,
       cardsById: {
         ...contextV105K.cardsById,
-        local_blocked_runner_card: {
+        920: {
           ...baseBlockedCard,
-          catalogCardId: "local_blocked_runner_card",
-          engineCardId: "local_blocked_runner_card",
+          catalogCardId: 920,
+          engineCardId: 920,
           statuses: {
             ...baseBlockedCard.statuses,
             human_playable: false,
@@ -1146,6 +1146,6 @@ describe("deck validation and snapshots", () => {
       },
     });
     expect(blocked.ok).toBe(false);
-    expect(blocked.errors.join(" ")).toContain("local_blocked_runner_card");
+    expect(blocked.errors.join(" ")).toContain(920);
   });
 });

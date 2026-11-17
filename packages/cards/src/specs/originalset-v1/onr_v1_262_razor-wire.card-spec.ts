@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_262_razor-wire"),
+    cardDefinitionId: cardDefinitionId(474),
     title: "Razor Wire",
     side: "corp",
     cardType: "ice",

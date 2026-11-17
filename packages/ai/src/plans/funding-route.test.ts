@@ -154,10 +154,10 @@ describe("funding routes", () => {
       candidates: [
         liquidCandidate("basic-credit", 1, { repeatable: true }),
         liquidCandidate("bbs-credit", 2, {
-          sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+          sourceDefinitionId: 521,
         }),
         liquidCandidate("corporate-coup-credit", 3, {
-          sourceDefinitionId: "onr_v1_193_corporate-coup",
+          sourceDefinitionId: 405,
         }),
       ],
       remainingClicks: 3,
@@ -232,7 +232,7 @@ describe("funding routes", () => {
           earliestOwnTurnOffset: 1,
           reliability: "contingent",
           requiredCurrentActionId: "broker-load",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
         },
       ],
     });
@@ -414,7 +414,7 @@ function liquidCandidate(
     maxCurrentTurnUses?: number;
     reliability?: "guaranteed" | "conditional" | "unknown";
     repeatable?: boolean;
-    sourceDefinitionId?: string;
+    sourceDefinitionId?: number;
   } = {},
 ): FundingActionCandidate {
   const creditCost = options.creditCost ?? 0;
@@ -447,7 +447,7 @@ function storedCreditCandidate(
   return {
     actionId,
     actionType: "activated_card_ability",
-    sourceDefinitionId: "onr_v1_154_broker",
+    sourceDefinitionId: 366,
     economyProjection: projection({
       kind: "stored_credit_build",
       timing: "setup",

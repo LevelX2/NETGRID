@@ -24,7 +24,7 @@ import {
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {
@@ -41,7 +41,7 @@ function instance(
 }
 
 function definition(
-  id: string,
+  id: number,
   options: Partial<CardDefinition> = {},
 ): CardDefinition {
   return {
@@ -57,9 +57,9 @@ function definition(
 function makeState(
   options: {
     iceRezzed?: boolean;
-    rootDefinitionId?: string;
+    rootDefinitionId?: number;
     rootRezzed?: boolean;
-    runnerProgramDefinitionId?: string;
+    runnerProgramDefinitionId?: number;
     timingPoint?: GameState["timingPoint"];
     activeSide?: GameState["activeSide"];
     positionKind?: "ice" | "server";
@@ -69,11 +69,11 @@ function makeState(
   const rootId = "root_1" as CardInstanceId;
   const programId = "program_1" as CardInstanceId;
   const cardInstances: Record<CardInstanceId, CardInstance> = {
-    [iceId]: instance(iceId, "simple_barrier_ice", {
+    [iceId]: instance(iceId, 589, {
       zone: { side: "corp", zone: "serverIce", serverId: "rd" },
       rezzed: options.iceRezzed ?? false,
     }),
-    [rootId]: instance(rootId, options.rootDefinitionId ?? "simple_upgrade", {
+    [rootId]: instance(rootId, options.rootDefinitionId ?? 606, {
       rezzed: options.rootRezzed ?? false,
     }),
   };
@@ -147,22 +147,22 @@ function makeState(
 
 function definitionsFor(state: GameState): Record<string, CardDefinition> {
   const definitions: Record<string, CardDefinition> = {
-    simple_barrier_ice: definition("simple_barrier_ice", {
+    simple_barrier_ice: definition(589, {
       title: "Simple Barrier ICE",
       type: "ice",
       rezCost: 3,
     }),
-    simple_upgrade: definition("simple_upgrade", {
+    simple_upgrade: definition(606, {
       title: "Simple Upgrade",
       type: "upgrade",
       rezCost: 1,
     }),
-    simple_economy_asset: definition("simple_economy_asset", {
+    simple_economy_asset: definition(594, {
       title: "Simple Economy Asset",
       type: "asset",
       rezCost: 0,
     }),
-    "onr_v1_067_speed-trap": definition("onr_v1_067_speed-trap", {
+    279: definition(279, {
       title: "Speed Trap",
       side: "runner",
       type: "program",
@@ -349,13 +349,13 @@ describe("run rez window", () => {
   it("certifies Jenny Jett's exact final-window rez and install funding without exposing HQ ICE identity", () => {
     const state = makeState({
       timingPoint: "run.approach_ice",
-      rootDefinitionId: "onr_v1_359_jenny-jett",
+      rootDefinitionId: 571,
     });
     state.run!.phase = "approach_ice";
     const hqIceId = "hq_ice_1" as CardInstanceId;
     state.corp.credits = 3;
     state.corp.hq.push(hqIceId);
-    state.cardInstances[hqIceId] = instance(hqIceId, "onr_v1_261_quandary", {
+    state.cardInstances[hqIceId] = instance(hqIceId, 473, {
       zone: { side: "corp", zone: "hq" },
       faceup: false,
     });
@@ -386,7 +386,7 @@ describe("run rez window", () => {
     });
     const serializedPayload = JSON.stringify(jennyRez?.payload);
     expect(serializedPayload).not.toContain(hqIceId);
-    expect(serializedPayload).not.toContain("onr_v1_261_quandary");
+    expect(serializedPayload).not.toContain(473);
     expect(hashState(state)).toBe(beforeHash);
     expect(() =>
       assertCorpRootRezCostQuoteValid(state, "root_1", jennyRez!),
@@ -396,13 +396,13 @@ describe("run rez window", () => {
   it("certifies Dr. Dreff's cheapest temporary HQ ICE encounter payment", () => {
     const state = makeState({
       timingPoint: "run.approach_ice",
-      rootDefinitionId: "onr_v1_358_dr-dreff",
+      rootDefinitionId: 570,
     });
     state.run!.phase = "approach_ice";
     const hqIceId = "hq_data_raven" as CardInstanceId;
     state.corp.credits = 3;
     state.corp.hq.push(hqIceId);
-    state.cardInstances[hqIceId] = instance(hqIceId, "onr_v1_236_data-raven", {
+    state.cardInstances[hqIceId] = instance(hqIceId, 448, {
       zone: { side: "corp", zone: "hq" },
       faceup: false,
     });
@@ -453,7 +453,7 @@ describe("run rez window", () => {
 
     const earlyJennyState = makeState({
       timingPoint: "run.approach_ice",
-      rootDefinitionId: "onr_v1_359_jenny-jett",
+      rootDefinitionId: 571,
     });
     earlyJennyState.run!.phase = "approach_ice";
     earlyJennyState.run!.position = {
@@ -477,12 +477,12 @@ describe("run rez window", () => {
   it("rejects stale Jenny support quotes when action, state, server ICE count or HQ ICE availability changes", () => {
     const state = makeState({
       timingPoint: "run.approach_ice",
-      rootDefinitionId: "onr_v1_359_jenny-jett",
+      rootDefinitionId: 571,
     });
     state.run!.phase = "approach_ice";
     const hqIceId = "hq_ice_1" as CardInstanceId;
     state.corp.hq.push(hqIceId);
-    state.cardInstances[hqIceId] = instance(hqIceId, "onr_v1_261_quandary", {
+    state.cardInstances[hqIceId] = instance(hqIceId, 473, {
       zone: { side: "corp", zone: "hq" },
     });
     const action = buildCorpApproachActions(hostFor(state).host).find(
@@ -513,7 +513,7 @@ describe("run rez window", () => {
     const outerIceId = "ice_2" as CardInstanceId;
     changedIceCount.cardInstances[outerIceId] = instance(
       outerIceId,
-      "simple_barrier_ice",
+      589,
       {
         zone: { side: "corp", zone: "serverIce", serverId: "rd" },
       },
@@ -567,14 +567,14 @@ describe("run rez window", () => {
     const rezzedRemoteRootId = "remote_root_rezzed" as CardInstanceId;
     state.cardInstances[remoteRootId] = instance(
       remoteRootId,
-      "simple_economy_asset",
+      594,
       {
         zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
       },
     );
     state.cardInstances[rezzedRemoteRootId] = instance(
       rezzedRemoteRootId,
-      "simple_economy_asset",
+      594,
       {
         zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
         rezzed: true,
@@ -637,8 +637,8 @@ describe("run rez window", () => {
 
   it("marks an exact root-rez credit outcome as Runner-interruptible when Speed Trap is active", () => {
     const state = makeState({
-      rootDefinitionId: "simple_economy_asset",
-      runnerProgramDefinitionId: "onr_v1_067_speed-trap",
+      rootDefinitionId: 594,
+      runnerProgramDefinitionId: 279,
       positionKind: "server",
     });
     const { host } = hostFor(state);
@@ -661,7 +661,7 @@ describe("run rez window", () => {
 
   it("resolves simple root rez effects without generic rez or payment execution", () => {
     const state = makeState({
-      rootDefinitionId: "simple_economy_asset",
+      rootDefinitionId: 594,
       rootRezzed: true,
     });
     state.corp.credits = 4;
@@ -681,7 +681,7 @@ describe("run rez window", () => {
       handled: true,
       rootEffectResolved: true,
       rezzedCardId: "root_1",
-      sourceDefinitionId: "simple_economy_asset",
+      sourceDefinitionId: 594,
     });
     expect(state.corp.credits).toBe(7);
     expect(calls.continued).toEqual([]);
@@ -731,7 +731,7 @@ describe("run rez window", () => {
     const secondRootId = "root_2" as CardInstanceId;
     state.cardInstances[secondRootId] = instance(
       secondRootId,
-      "simple_economy_asset",
+      594,
       {
         zone: { side: "corp", zone: "serverRoot", serverId: "rd" },
       },
@@ -755,7 +755,7 @@ describe("run rez window", () => {
 
   it("opens and resolves Speed Trap root-rez interrupt through the run rez window", () => {
     const state = makeState({
-      runnerProgramDefinitionId: "onr_v1_067_speed-trap",
+      runnerProgramDefinitionId: 279,
       rootRezzed: true,
       positionKind: "server",
     });
@@ -770,7 +770,7 @@ describe("run rez window", () => {
     expect(startResult).toMatchObject({
       handled: true,
       rezInterruptChoiceStarted: true,
-      sourceDefinitionId: "onr_v1_067_speed-trap",
+      sourceDefinitionId: 279,
       sourceCardId: "program_1",
     });
     expect(state.pendingChoice).toMatchObject({
@@ -783,9 +783,9 @@ describe("run rez window", () => {
     });
     expect(action.payload).toMatchObject({
       v1922RunnerProgramAbility: "rez_interrupt_jack_out_choice",
-      sourceDefinitionId: "onr_v1_067_speed-trap",
+      sourceDefinitionId: 279,
       rezInterruptSourceCardId: "program_1",
-      rezzedCardDefinitionId: "simple_upgrade",
+      rezzedCardDefinitionId: 606,
       rezInterruptChoiceOpened: true,
     });
 
@@ -808,7 +808,7 @@ describe("run rez window", () => {
       v1922RunnerProgramAbility: "rez_interrupt_jack_out",
       rezInterruptUsed: true,
       successfulRunWithoutAccess: true,
-      rezzedCardDefinitionId: "simple_upgrade",
+      rezzedCardDefinitionId: 606,
     });
   });
 });

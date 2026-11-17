@@ -58,18 +58,18 @@ describe("belief-state revealed opponent ownership", () => {
         actor: "runner",
         actionType: "resolve_choice",
         hiddenZoneAction: "p3_37_search_stack_to_grip",
-        cardDefinitionId: "onr_v1_047_pile-driver",
+        cardDefinitionId: 259,
         title: "Pile Driver",
         revealKind: "reveal",
         publicRevealKind: "reveal",
-        publicRevealDefinitionId: "onr_v1_047_pile-driver",
+        publicRevealDefinitionId: 259,
       },
     );
     const opponentAccess = publicEvent("evt_corp_access", "access_card", 2, {
       actor: "runner",
       actionType: "access_card",
       serverId: "rd",
-      cardDefinitionId: "onr_v1_206_marine-arcology",
+      cardDefinitionId: 418,
       title: "Marine Arcology",
     });
 
@@ -91,9 +91,9 @@ describe("belief-state revealed opponent ownership", () => {
 describe("belief-state R&D top freshness", () => {
   it("moves the entire observed multi-card Corp draw into HQ in one event", () => {
     const observed = rndPrivateLookEvent("evt_rd_look", 1, [
-      "simple_economy_operation",
-      "simple_economy_operation",
-      "simple_agenda",
+      596,
+      596,
+      588,
     ]);
     const draw = publicEvent("evt_draw_two", "mandatory_draw", 2, {
       actor: "corp",
@@ -102,16 +102,16 @@ describe("belief-state R&D top freshness", () => {
     });
     const belief = reconstructBeliefState(runnerInput([observed, draw], 2));
     expect(belief.rndTopFreshness).toMatchObject({
-      knownSequenceDefinitionIds: ["simple_agenda"],
+      knownSequenceDefinitionIds: [588],
     });
     expect(belief.runnerOpponentModel?.hqHandMemory).toMatchObject({
       allCardsKnown: true,
-      knownDefinitions: ["simple_economy_operation", "simple_economy_operation"],
+      knownDefinitions: [596, 596],
     });
   });
 
   it("drops exact R&D order when a draw opens an unresolved replacement", () => {
-    const observed = rndPrivateLookEvent("evt_rd_look", 1, ["simple_agenda"]);
+    const observed = rndPrivateLookEvent("evt_rd_look", 1, [588]);
     const draw = publicEvent("evt_draw_pending", "draw_card", 2, {
       actor: "corp",
       actionType: "draw_card",
@@ -123,11 +123,11 @@ describe("belief-state R&D top freshness", () => {
   });
 
   it("keeps R&D root accesses and removals separate from the deck sequence", () => {
-    const deckLook = rndPrivateLookEvent("evt_rd_look", 1, ["simple_agenda"]);
+    const deckLook = rndPrivateLookEvent("evt_rd_look", 1, [588]);
     const rootContext = {
       actor: "runner",
       serverId: "rd",
-      cardDefinitionId: "simple_upgrade",
+      cardDefinitionId: 606,
       installPlacement: "root",
       installedPositionKey: "installed-position-v1:upgrade",
       accessIndex: 0,
@@ -144,12 +144,12 @@ describe("belief-state R&D top freshness", () => {
     });
     const beforeTrash = reconstructBeliefState(runnerInput([deckLook, rootAccess]));
     expect(beforeTrash.knownPositionMemory).toContainEqual(
-      expect.objectContaining({ zone: "rd", positionKey: "root:0", definitionId: "simple_upgrade" }),
+      expect.objectContaining({ zone: "rd", positionKey: "root:0", definitionId: 606 }),
     );
     const afterTrash = reconstructBeliefState(runnerInput([deckLook, rootAccess, rootTrash]));
     expect(afterTrash.rndTopFreshness).toMatchObject({
-      knownSequenceDefinitionIds: ["simple_agenda"],
-      knownTopDefinitionId: "simple_agenda",
+      knownSequenceDefinitionIds: [588],
+      knownTopDefinitionId: 588,
     });
     expect(afterTrash.knownPositionMemory).not.toContainEqual(
       expect.objectContaining({ zone: "rd", positionKey: "root:0" }),
@@ -157,29 +157,29 @@ describe("belief-state R&D top freshness", () => {
   });
 
   it("retains the HQ hand copy when the Runner trashes a same-definition upgrade from the root", () => {
-    const hand = hqPrivateLookEvent("evt_hq_look", 1, ["simple_upgrade", "simple_agenda"]);
+    const hand = hqPrivateLookEvent("evt_hq_look", 1, [606, 588]);
     const rootTrash = publicEvent("evt_hq_root_trash", "trash_accessed_card", 2, {
       actor: "runner",
       actionType: "trash_accessed_card",
       serverId: "hq",
       installPlacement: "root",
       installedPositionKey: "installed-position-v1:upgrade",
-      cardDefinitionId: "simple_upgrade",
+      cardDefinitionId: 606,
     });
     const belief = reconstructBeliefState(runnerInput([hand, rootTrash], 2));
     expect(belief.runnerOpponentModel?.hqHandMemory).toMatchObject({
       allCardsKnown: true,
-      knownDefinitions: ["simple_upgrade", "simple_agenda"],
+      knownDefinitions: [606, 588],
     });
   });
 
   it("retains the ordered non-stolen remainder of a five-card R&D multiaccess after the Corp draw", () => {
     const accessedDefinitions = [
-      "simple_economy_operation",
-      "simple_agenda",
-      "onr_proteus_032_misleading-access-menus",
-      "simple_priority_agenda",
-      "onr_v1_295_night-shift",
+      596,
+      588,
+      90,
+      599,
+      507,
     ];
     const events: PublicGameEvent[] = [];
     let stateVersion = 0;
@@ -227,10 +227,10 @@ describe("belief-state R&D top freshness", () => {
 
     expect(belief.runnerOpponentModel?.rndTopFreshness).toMatchObject({
       freshness: "stale_known_same_top",
-      knownTopDefinitionId: "onr_proteus_032_misleading-access-menus",
+      knownTopDefinitionId: 90,
       knownSequenceDefinitionIds: [
-        "onr_proteus_032_misleading-access-menus",
-        "onr_v1_295_night-shift",
+        90,
+        507,
       ],
     });
     expect(
@@ -240,26 +240,26 @@ describe("belief-state R&D top freshness", () => {
     ).toEqual([
       expect.objectContaining({
         positionKey: "top",
-        definitionId: "onr_proteus_032_misleading-access-menus",
+        definitionId: 90,
       }),
       expect.objectContaining({
         positionKey: "top:1",
-        definitionId: "onr_v1_295_night-shift",
+        definitionId: 507,
       }),
     ]);
     expect(belief.runnerOpponentModel?.hqHandMemory.knownDefinitions).toContain(
-      "simple_economy_operation",
+      596,
     );
     expect(
       belief.runnerOpponentModel?.hqHandMemory.knownDefinitions,
-    ).not.toContain("onr_v1_295_night-shift");
+    ).not.toContain(507);
   });
 
   it("drops an unconfirmed known R&D suffix when a new access contradicts its prefix", () => {
     const look = rndPrivateLookEvent("evt_rd_look", 1, [
-      "simple_economy_operation",
-      "simple_agenda",
-      "simple_upgrade",
+      596,
+      588,
+      606,
     ]);
     const contradictoryAccess = publicEvent(
       "evt_contradictory_access",
@@ -269,7 +269,7 @@ describe("belief-state R&D top freshness", () => {
         actor: "runner",
         actionType: "access_card",
         serverId: "rd",
-        cardDefinitionId: "simple_barrier_ice",
+        cardDefinitionId: 589,
         accessIndex: 0,
         effectiveAccessCount: 1,
       },
@@ -281,7 +281,7 @@ describe("belief-state R&D top freshness", () => {
 
     expect(freshness).toMatchObject({
       freshness: "stale_known_same_top",
-      knownSequenceDefinitionIds: ["simple_barrier_ice"],
+      knownSequenceDefinitionIds: [589],
     });
     expect(freshness?.invalidationReasons).toContain(
       "rd_known_sequence_prefix_changed:evt_contradictory_access:0",
@@ -293,13 +293,13 @@ describe("belief-state R&D top freshness", () => {
       actor: "runner",
       actionType: "access_card",
       serverId: "rd",
-      cardDefinitionId: "simple_economy_asset",
+      cardDefinitionId: 594,
     });
     const trash = publicEvent("evt_unbound_trash", "trash_accessed_card", 2, {
       actor: "runner",
       actionType: "trash_accessed_card",
       serverId: "rd",
-      cardDefinitionId: "simple_economy_asset",
+      cardDefinitionId: 594,
     });
 
     const freshness = reconstructBeliefState(runnerInput([access, trash]))
@@ -307,7 +307,7 @@ describe("belief-state R&D top freshness", () => {
 
     expect(freshness).toMatchObject({
       freshness: "stale_known_same_top",
-      knownSequenceDefinitionIds: ["simple_economy_asset"],
+      knownSequenceDefinitionIds: [594],
     });
     expect(freshness?.invalidationReasons).toEqual(
       expect.arrayContaining([
@@ -319,11 +319,11 @@ describe("belief-state R&D top freshness", () => {
 
   it("advances a five-card private-look sequence over consecutive Corp draws", () => {
     const look = rndPrivateLookEvent("evt_rd_look", 1, [
-      "simple_economy_operation",
-      "simple_agenda",
-      "simple_economy_asset",
-      "simple_upgrade",
-      "simple_barrier_ice",
+      596,
+      588,
+      594,
+      606,
+      589,
     ]);
     const firstDraw = publicEvent("evt_draw_1", "mandatory_draw", 2, {
       actor: "corp",
@@ -340,28 +340,28 @@ describe("belief-state R&D top freshness", () => {
 
     expect(belief.runnerOpponentModel?.rndTopFreshness).toMatchObject({
       freshness: "stale_known_same_top",
-      knownTopDefinitionId: "simple_economy_asset",
+      knownTopDefinitionId: 594,
       knownSequenceDefinitionIds: [
-        "simple_economy_asset",
-        "simple_upgrade",
-        "simple_barrier_ice",
+        594,
+        606,
+        589,
       ],
     });
     expect(belief.runnerOpponentModel?.hqHandMemory?.knownDefinitions).toEqual([
-      "simple_economy_operation",
-      "simple_agenda",
+      596,
+      588,
     ]);
     expect(belief.runnerOpponentModel?.knownPositionMemory).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           zone: "rd",
           positionKey: "top",
-          definitionId: "simple_economy_asset",
+          definitionId: 594,
         }),
         expect.objectContaining({
           zone: "rd",
           positionKey: "top:1",
-          definitionId: "simple_upgrade",
+          definitionId: 606,
         }),
       ]),
     );
@@ -369,15 +369,15 @@ describe("belief-state R&D top freshness", () => {
 
   it("keeps the remaining private-look sequence after an accessed top card is removed", () => {
     const look = rndPrivateLookEvent("evt_rd_look", 1, [
-      "simple_economy_asset",
-      "simple_agenda",
-      "simple_upgrade",
+      594,
+      588,
+      606,
     ]);
     const access = publicEvent("evt_access", "access_card", 2, {
       actor: "runner",
       actionType: "access_card",
       serverId: "rd",
-      cardDefinitionId: "simple_economy_asset",
+      cardDefinitionId: 594,
       accessIndex: 0,
       effectiveAccessCount: 1,
     });
@@ -385,7 +385,7 @@ describe("belief-state R&D top freshness", () => {
       actor: "runner",
       actionType: "trash_accessed_card",
       serverId: "rd",
-      cardDefinitionId: "simple_economy_asset",
+      cardDefinitionId: 594,
       accessIndex: 0,
     });
 
@@ -393,30 +393,30 @@ describe("belief-state R&D top freshness", () => {
 
     expect(belief.runnerOpponentModel?.rndTopFreshness).toMatchObject({
       freshness: "stale_known_same_top",
-      knownTopDefinitionId: "simple_agenda",
-      knownSequenceDefinitionIds: ["simple_agenda", "simple_upgrade"],
+      knownTopDefinitionId: 588,
+      knownSequenceDefinitionIds: [588, 606],
       freshenedByRunnerAccess: true,
     });
     expect(belief.runnerOpponentModel?.knownPositionMemory).toContainEqual(
       expect.objectContaining({
         zone: "rd",
         positionKey: "top",
-        definitionId: "simple_agenda",
+        definitionId: 588,
       }),
     );
   });
 
   it("moves the next known R&D card into HQ after the accessed top card was stolen", () => {
     const look = rndPrivateLookEvent("evt_rd_look", 1, [
-      "simple_agenda",
-      "simple_economy_operation",
-      "simple_upgrade",
+      588,
+      596,
+      606,
     ]);
     const access = publicEvent("evt_access", "access_card", 2, {
       actor: "runner",
       actionType: "access_card",
       serverId: "rd",
-      cardDefinitionId: "simple_agenda",
+      cardDefinitionId: 588,
       accessIndex: 0,
       effectiveAccessCount: 1,
     });
@@ -424,7 +424,7 @@ describe("belief-state R&D top freshness", () => {
       actor: "runner",
       actionType: "steal_agenda",
       serverId: "rd",
-      cardDefinitionId: "simple_agenda",
+      cardDefinitionId: 588,
       accessIndex: 0,
     });
     const draw = publicEvent("evt_draw", "mandatory_draw", 4, {
@@ -437,23 +437,23 @@ describe("belief-state R&D top freshness", () => {
     );
 
     expect(belief.runnerOpponentModel?.hqHandMemory?.knownDefinitions).toEqual([
-      "simple_economy_operation",
+      596,
     ]);
     expect(
       belief.runnerOpponentModel?.hqHandMemory?.knownDefinitions,
-    ).not.toContain("simple_agenda");
+    ).not.toContain(588);
     expect(belief.runnerOpponentModel?.rndTopFreshness).toMatchObject({
       freshness: "stale_known_same_top",
-      knownTopDefinitionId: "simple_upgrade",
-      knownSequenceDefinitionIds: ["simple_upgrade"],
+      knownTopDefinitionId: 606,
+      knownSequenceDefinitionIds: [606],
     });
   });
 
   it("invalidates R&D order on an R&D shuffle while retaining cards already drawn into HQ", () => {
     const look = rndPrivateLookEvent("evt_rd_look", 1, [
-      "simple_economy_operation",
-      "simple_agenda",
-      "simple_upgrade",
+      596,
+      588,
+      606,
     ]);
     const draw = publicEvent("evt_draw", "mandatory_draw", 2, {
       actor: "corp",
@@ -486,14 +486,14 @@ describe("belief-state R&D top freshness", () => {
       ),
     ).toEqual([]);
     expect(belief.runnerOpponentModel?.hqHandMemory?.knownDefinitions).toEqual([
-      "simple_economy_operation",
+      596,
     ]);
   });
 
   it("invalidates R&D order on an R&D reorder but not on an HQ reorder", () => {
     const look = rndPrivateLookEvent("evt_rd_look", 1, [
-      "simple_economy_operation",
-      "simple_agenda",
+      596,
+      588,
     ]);
     const hqReorder = publicEvent("evt_hq_reorder", "resolve_choice", 2, {
       actor: "corp",
@@ -529,7 +529,7 @@ describe("belief-state R&D top freshness", () => {
     expect(
       beforeRdReorder.runnerOpponentModel?.rndTopFreshness
         .knownSequenceDefinitionIds,
-    ).toEqual(["simple_economy_operation", "simple_agenda"]);
+    ).toEqual([596, 588]);
     expect(afterRdReorder.runnerOpponentModel?.rndTopFreshness).toMatchObject({
       freshness: "invalidated",
       knownToRunner: false,
@@ -541,7 +541,7 @@ describe("belief-state R&D top freshness", () => {
       actor: "runner",
       actionType: "access_card",
       serverId: "rd",
-      cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+      cardDefinitionId: 555,
       title: "South African Mining Corp",
       accessIndex: 0,
       effectiveAccessCount: 1,
@@ -550,7 +550,7 @@ describe("belief-state R&D top freshness", () => {
       actor: "runner",
       actionType: "trash_accessed_card",
       serverId: "rd",
-      cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+      cardDefinitionId: 555,
       title: "South African Mining Corp",
       accessIndex: 0,
     });
@@ -578,7 +578,7 @@ describe("belief-state R&D top freshness", () => {
       actionType: "access_card",
       serverLabel: "R&D",
       targets: { serverLabel: "R&D" },
-      cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+      cardDefinitionId: 555,
       accessIndex: 0,
       effectiveAccessCount: 1,
     });
@@ -587,7 +587,7 @@ describe("belief-state R&D top freshness", () => {
       actionType: "steal_agenda",
       serverLabel: "R&D",
       targets: { serverLabel: "R&D" },
-      cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+      cardDefinitionId: 555,
       accessIndex: 0,
     });
 
@@ -613,14 +613,14 @@ describe("belief-state R&D top freshness", () => {
       actionType: "access_card",
       serverLabel: "R&D",
       targets: { serverLabel: "R&D" },
-      cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+      cardDefinitionId: 555,
     });
     const unrelatedEvent = publicEvent("evt_label_noise", "gain_credit", 2, {
       actor: "runner",
       actionType: "gain_credit",
       serverLabel: "R&D",
       targets: { serverLabel: "R&D" },
-      cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+      cardDefinitionId: 555,
     });
 
     const belief = reconstructBeliefState(
@@ -630,7 +630,7 @@ describe("belief-state R&D top freshness", () => {
 
     expect(freshness?.freshness).toBe("stale_known_same_top");
     expect(freshness?.knownTopDefinitionId).toBe(
-      "onr_v1_343_south-african-mining-corp",
+      555,
     );
     expect(freshness?.invalidationReasons).not.toContain(
       "rd_access_removed_top_card:evt_label_noise",
@@ -641,8 +641,8 @@ describe("belief-state R&D top freshness", () => {
 describe("belief-state HQ hand memory retention", () => {
   it("uses HQ size at hidden installation even when the hand later shrinks", () => {
     const look = hqPrivateLookEvent("evt_look", 1, [
-      "simple_agenda",
-      "simple_upgrade",
+      588,
+      606,
     ]);
     const draw = publicEvent("evt_draw", "draw_card", 2, {
       actor: "corp",
@@ -660,7 +660,7 @@ describe("belief-state HQ hand memory retention", () => {
     const operation = publicEvent("evt_play", "play_operation", 4, {
       actor: "corp",
       actionType: "play_operation",
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
       corpHqCountBefore: 2,
       corpHqCountAfter: 1,
     });
@@ -675,7 +675,7 @@ describe("belief-state HQ hand memory retention", () => {
       actor: "runner",
       actionType: "access_card",
       serverId: "hq",
-      cardDefinitionId: "onr_v1_238_data-wall-2-0",
+      cardDefinitionId: 450,
     });
     const firstInstall = publicEvent("evt_install_a", "install_card", 2, {
       actor: "corp",
@@ -689,7 +689,7 @@ describe("belief-state HQ hand memory retention", () => {
       actor: "runner",
       actionType: "access_card",
       serverId: "hq",
-      cardDefinitionId: "onr_v1_230_cortical-scanner",
+      cardDefinitionId: 442,
     });
     const secondInstall = publicEvent("evt_install_b", "install_card", 4, {
       actor: "corp",
@@ -705,7 +705,7 @@ describe("belief-state HQ hand memory retention", () => {
       serverId: "remote_1",
       installPlacement: "ice",
       installedPositionKey: "installed-position-v1:b",
-      rezzedCardDefinitionId: "onr_v1_230_cortical-scanner",
+      rezzedCardDefinitionId: 442,
     });
 
     const belief = reconstructBeliefState(
@@ -733,7 +733,7 @@ describe("belief-state HQ hand memory retention", () => {
       expect.objectContaining({
         zone: "remote_1",
         positionKey: "installed-position-v1:b",
-        definitionId: "onr_v1_230_cortical-scanner",
+        definitionId: 442,
       }),
     );
 
@@ -746,7 +746,7 @@ describe("belief-state HQ hand memory retention", () => {
         actionType: "trash_accessed_card",
         serverId: "remote_1",
         installedPositionKey: "installed-position-v1:b",
-        cardDefinitionId: "onr_v1_230_cortical-scanner",
+        cardDefinitionId: 442,
       },
     );
     const afterTrash = reconstructBeliefState(
@@ -771,8 +771,8 @@ describe("belief-state HQ hand memory retention", () => {
 
   it("retains count-safe ambiguity after an unknown Corp discard", () => {
     const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
-      "onr_v1_230_cortical-scanner",
-      "onr_v1_304_systematic-layoffs",
+      442,
+      516,
     ]);
     const hiddenDiscard = publicEvent(
       "evt_hidden_discard",
@@ -803,8 +803,8 @@ describe("belief-state HQ hand memory retention", () => {
             candidateCount: 2,
             departureCount: 1,
             candidateDefinitions: expect.arrayContaining([
-              { definitionId: "onr_v1_230_cortical-scanner", count: 1 },
-              { definitionId: "onr_v1_304_systematic-layoffs", count: 1 },
+              { definitionId: 442, count: 1 },
+              { definitionId: 516, count: 1 },
             ]),
           }),
         ],
@@ -820,7 +820,7 @@ describe("belief-state HQ hand memory retention", () => {
       actor: "runner",
       actionType: "access_card",
       serverId: "rd",
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
     });
     const knownDraw = publicEvent("evt_draw", "mandatory_draw", 2, {
       actor: "corp",
@@ -829,7 +829,7 @@ describe("belief-state HQ hand memory retention", () => {
     const playedOperation = publicEvent("evt_play", "play_operation", 3, {
       actor: "corp",
       actionType: "play_operation",
-      sourceDefinitionId: "simple_economy_operation",
+      sourceDefinitionId: 596,
     });
 
     const afterDraw = reconstructBeliefState(
@@ -841,7 +841,7 @@ describe("belief-state HQ hand memory retention", () => {
 
     expect(afterDraw).toMatchObject({
       handCount: 1,
-      knownDefinitions: ["simple_economy_operation"],
+      knownDefinitions: [596],
       knownCount: 1,
       allCardsKnown: true,
     });
@@ -868,8 +868,8 @@ describe("belief-state HQ hand memory retention", () => {
         actionType: "resolve_choice",
         hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
         agendaStoredInHq: true,
-        storedAgendaDefinitionId: "onr_v1_220_tycho-extension",
-        revealedAgendaDefinitionIds: "onr_v1_220_tycho-extension",
+        storedAgendaDefinitionId: 432,
+        revealedAgendaDefinitionIds: 432,
       },
     );
 
@@ -878,14 +878,14 @@ describe("belief-state HQ hand memory retention", () => {
 
     expect(memory).toMatchObject({
       handCount: 6,
-      knownDefinitions: ["onr_v1_220_tycho-extension"],
+      knownDefinitions: [432],
       knownCount: 1,
       allCardsKnown: false,
       ledger: {
         unknownRestCount: 5,
         safeDefinitions: [
           expect.objectContaining({
-            definitionId: "onr_v1_220_tycho-extension",
+            definitionId: 432,
             count: 1,
           }),
         ],
@@ -901,7 +901,7 @@ describe("belief-state HQ hand memory retention", () => {
       actor: "runner",
       actionType: "access_card",
       serverId: "rd",
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
     });
     const knownDraw = publicEvent("evt_draw", "mandatory_draw", 2, {
       actor: "corp",
@@ -922,7 +922,7 @@ describe("belief-state HQ hand memory retention", () => {
 
     expect(hqMemory).toMatchObject({
       handCount: 1,
-      knownDefinitions: ["simple_economy_operation"],
+      knownDefinitions: [596],
       knownCount: 1,
       allCardsKnown: true,
     });
@@ -938,7 +938,7 @@ describe("belief-state HQ hand memory retention", () => {
       ],
       safeDefinitions: [
         expect.objectContaining({
-          definitionId: "simple_economy_operation",
+          definitionId: 596,
           count: 1,
         }),
       ],
@@ -947,8 +947,8 @@ describe("belief-state HQ hand memory retention", () => {
 
   it("keeps known safe HQ ICE after an unknown draw and unrelated known operation play", () => {
     const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
-      "onr_v1_230_cortical-scanner",
-      "onr_v1_237_data-wall",
+      442,
+      449,
     ]);
     const unknownDraw = publicEvent("evt_draw", "mandatory_draw", 2, {
       actor: "corp",
@@ -958,7 +958,7 @@ describe("belief-state HQ hand memory retention", () => {
       actor: "corp",
       actionType: "play_operation",
       serverId: "hq",
-      cardDefinitionId: "onr_v1_281_accounts-receivable",
+      cardDefinitionId: 493,
     });
 
     const belief = reconstructBeliefState(
@@ -970,18 +970,18 @@ describe("belief-state HQ hand memory retention", () => {
       handCount: 2,
       knownCount: 2,
       allCardsKnown: true,
-      knownDefinitions: ["onr_v1_230_cortical-scanner", "onr_v1_237_data-wall"],
+      knownDefinitions: [442, 449],
     });
     expect(hqMemory?.ledger).toMatchObject({
       unknownRestCount: 0,
       candidateGroups: [],
       safeDefinitions: expect.arrayContaining([
         expect.objectContaining({
-          definitionId: "onr_v1_230_cortical-scanner",
+          definitionId: 442,
           count: 1,
         }),
         expect.objectContaining({
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           count: 1,
         }),
       ]),
@@ -990,8 +990,8 @@ describe("belief-state HQ hand memory retention", () => {
 
   it("keeps a hidden ICE install candidate group after a draw without collapsing to memory none", () => {
     const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
-      "onr_v1_230_cortical-scanner",
-      "onr_v1_237_data-wall",
+      442,
+      449,
     ]);
     const unknownDraw = publicEvent("evt_draw", "mandatory_draw", 2, {
       actor: "corp",
@@ -1024,8 +1024,8 @@ describe("belief-state HQ hand memory retention", () => {
           serverId: "remote_1",
           installPlacement: "ice",
           candidateDefinitions: expect.arrayContaining([
-            { definitionId: "onr_v1_230_cortical-scanner", count: 1 },
-            { definitionId: "onr_v1_237_data-wall", count: 1 },
+            { definitionId: 442, count: 1 },
+            { definitionId: 449, count: 1 },
           ]),
         }),
       ],
@@ -1034,8 +1034,8 @@ describe("belief-state HQ hand memory retention", () => {
 
   it("ignores malformed remote ids for hidden install candidate groups", () => {
     const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
-      "onr_v1_230_cortical-scanner",
-      "onr_v1_237_data-wall",
+      442,
+      449,
     ]);
     const unknownDraw = publicEvent("evt_draw", "mandatory_draw", 2, {
       actor: "corp",
@@ -1066,9 +1066,9 @@ describe("belief-state HQ hand memory retention", () => {
 
   it("does not count accessed HQ root upgrades as HQ hand cards", () => {
     const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
-      "simple_economy_operation",
-      "simple_economy_asset",
-      "simple_upgrade",
+      596,
+      594,
+      606,
     ]);
     const hiddenHqRootInstall = publicEvent(
       "evt_install_hq_root",
@@ -1091,7 +1091,7 @@ describe("belief-state HQ hand memory retention", () => {
         actionType: "access_card",
         serverId: "hq",
         serverLabel: "HQ",
-        cardDefinitionId: "simple_upgrade",
+        cardDefinitionId: 606,
         accessedCardPositionKey: "root:0",
         accessedArea: "root",
         accessedIndex: 0,
@@ -1110,32 +1110,32 @@ describe("belief-state HQ hand memory retention", () => {
     });
     expect(hqMemory?.knownDefinitions).toEqual(
       expect.arrayContaining([
-        "simple_economy_operation",
-        "simple_economy_asset",
+        596,
+        594,
       ]),
     );
-    expect(hqMemory?.knownDefinitions).not.toContain("simple_upgrade");
+    expect(hqMemory?.knownDefinitions).not.toContain(606);
     expect(hqMemory?.ledger).toMatchObject({
       unknownRestCount: 0,
       candidateGroups: [],
       safeDefinitions: expect.arrayContaining([
-        expect.objectContaining({ definitionId: "simple_economy_operation" }),
-        expect.objectContaining({ definitionId: "simple_economy_asset" }),
+        expect.objectContaining({ definitionId: 596 }),
+        expect.objectContaining({ definitionId: 594 }),
       ]),
     });
     expect(belief.runnerOpponentModel?.knownPositionMemory).toContainEqual(
       expect.objectContaining({
         zone: "hq",
         positionKey: "root:0",
-        definitionId: "simple_upgrade",
+        definitionId: 606,
       }),
     );
   });
 
   it("hard-invalidates HQ memory on hidden-zone reorder", () => {
     const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
-      "onr_v1_230_cortical-scanner",
-      "onr_v1_237_data-wall",
+      442,
+      449,
     ]);
     const reorder = publicEvent("evt_reorder", "resolve_choice", 2, {
       actor: "corp",
@@ -1169,8 +1169,8 @@ describe("belief-state HQ hand memory retention", () => {
 
   it("retains HQ memory when a shuffle-named ability moves no cards", () => {
     const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
-      "onr_v1_230_cortical-scanner",
-      "onr_v1_237_data-wall",
+      442,
+      449,
     ]);
     const noOp = publicEvent("evt_noop", "resolve_choice", 2, {
       actor: "corp",
@@ -1187,7 +1187,7 @@ describe("belief-state HQ hand memory retention", () => {
     const belief = reconstructBeliefState(runnerInput([hqLook, noOp], 2));
 
     expect(belief.runnerOpponentModel?.hqHandMemory).toMatchObject({
-      knownDefinitions: ["onr_v1_230_cortical-scanner", "onr_v1_237_data-wall"],
+      knownDefinitions: [442, 449],
       knownCount: 2,
       allCardsKnown: true,
     });
@@ -1198,8 +1198,8 @@ describe("belief-state HQ hand memory retention", () => {
 
   it("treats a current single-card HQ access as complete despite stale candidates", () => {
     const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
-      "simple_economy_asset",
-      "simple_upgrade",
+      594,
+      606,
     ]);
     const hiddenRootInstall = publicEvent(
       "evt_hidden_install",
@@ -1217,7 +1217,7 @@ describe("belief-state HQ hand memory retention", () => {
       actor: "runner",
       actionType: "access_card",
       serverLabel: "HQ",
-      cardDefinitionId: "onr_v1_297_overtime-incentives",
+      cardDefinitionId: 509,
       title: "Overtime Incentives",
     });
 
@@ -1228,7 +1228,7 @@ describe("belief-state HQ hand memory retention", () => {
 
     expect(hqMemory).toMatchObject({
       handCount: 1,
-      knownDefinitions: ["onr_v1_297_overtime-incentives"],
+      knownDefinitions: [509],
       knownCount: 1,
       allCardsKnown: true,
     });
@@ -1237,7 +1237,7 @@ describe("belief-state HQ hand memory retention", () => {
       candidateGroups: [],
       safeDefinitions: [
         expect.objectContaining({
-          definitionId: "onr_v1_297_overtime-incentives",
+          definitionId: 509,
           count: 1,
         }),
       ],
@@ -1246,9 +1246,9 @@ describe("belief-state HQ hand memory retention", () => {
 
   it("removes trashed accessed HQ cards when the event only exposes a server label", () => {
     const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
-      "onr_proteus_062_lesley-major",
-      "onr_v1_297_overtime-incentives",
-      "onr_v1_340_setup",
+      120,
+      509,
+      552,
     ]);
     const trashAccessedHqCard = publicEvent(
       "evt_hq_trash",
@@ -1258,7 +1258,7 @@ describe("belief-state HQ hand memory retention", () => {
         actor: "runner",
         actionType: "trash_accessed_card",
         serverLabel: "HQ",
-        cardDefinitionId: "onr_proteus_062_lesley-major",
+        cardDefinitionId: 120,
         title: "Lesley Major",
       },
     );
@@ -1275,12 +1275,12 @@ describe("belief-state HQ hand memory retention", () => {
     });
     expect(hqMemory?.knownDefinitions).toEqual(
       expect.arrayContaining([
-        "onr_v1_297_overtime-incentives",
-        "onr_v1_340_setup",
+        509,
+        552,
       ]),
     );
     expect(hqMemory?.knownDefinitions).not.toContain(
-      "onr_proteus_062_lesley-major",
+      120,
     );
     expect(hqMemory?.invalidationReasons).toContain(
       "known_hq_card_trash:evt_hq_trash",
@@ -1289,10 +1289,10 @@ describe("belief-state HQ hand memory retention", () => {
 
   it("invalidates complete HQ hand memory when a later HQ access contradicts it", () => {
     const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
-      "onr_proteus_062_lesley-major",
-      "onr_v1_297_overtime-incentives",
-      "onr_v1_340_setup",
-      "onr_v1_304_systematic-layoffs",
+      120,
+      509,
+      552,
+      516,
     ]);
     const contradictingHqAccess = publicEvent(
       "evt_hq_access_data_wall",
@@ -1302,7 +1302,7 @@ describe("belief-state HQ hand memory retention", () => {
         actor: "runner",
         actionType: "access_card",
         serverLabel: "HQ",
-        cardDefinitionId: "onr_v1_238_data-wall-2-0",
+        cardDefinitionId: 450,
         title: "Data Wall 2.0",
       },
     );
@@ -1314,7 +1314,7 @@ describe("belief-state HQ hand memory retention", () => {
 
     expect(hqMemory).toMatchObject({
       handCount: 4,
-      knownDefinitions: ["onr_v1_238_data-wall-2-0"],
+      knownDefinitions: [450],
       knownCount: 1,
       allCardsKnown: false,
     });
@@ -1323,7 +1323,7 @@ describe("belief-state HQ hand memory retention", () => {
       candidateGroups: [],
       safeDefinitions: [
         expect.objectContaining({
-          definitionId: "onr_v1_238_data-wall-2-0",
+          definitionId: 450,
           count: 1,
         }),
       ],
@@ -1344,7 +1344,7 @@ describe("belief-state known position memory", () => {
       actionType: "access_card",
       serverId: "remote_1",
       serverLabel: "Remote 1",
-      cardDefinitionId: "simple_upgrade",
+      cardDefinitionId: 606,
       accessedCardPositionKey: "root:0",
       accessedArea: "root",
       accessedIndex: 0,
@@ -1355,7 +1355,7 @@ describe("belief-state known position memory", () => {
         id: "remote_1",
         label: "Remote 1",
         ice: [],
-        root: [visibleCard("simple_upgrade", "corp", "upgrade")],
+        root: [visibleCard(606, "corp", "upgrade")],
       },
     ];
 
@@ -1371,7 +1371,7 @@ describe("belief-state known position memory", () => {
       actionType: "access_card",
       serverId: "remote_1",
       serverLabel: "Remote 1",
-      cardDefinitionId: "simple_upgrade",
+      cardDefinitionId: 606,
       accessedCardPositionKey: "root:0",
       accessedArea: "root",
       accessedIndex: 0,
@@ -1382,7 +1382,7 @@ describe("belief-state known position memory", () => {
     expect(belief.knownPositionMemory?.[0]).toMatchObject({
       zone: "remote_1",
       positionKey: "root:0",
-      definitionId: "simple_upgrade",
+      definitionId: 606,
     });
   });
 
@@ -1392,7 +1392,7 @@ describe("belief-state known position memory", () => {
       actionType: "access_card",
       serverId: "remote_1",
       serverLabel: "Remote 1",
-      cardDefinitionId: "onr_v1_194_corporate-downsizing",
+      cardDefinitionId: 406,
       accessedCardPositionKey: "root:0",
       accessedArea: "root",
       accessedIndex: 0,
@@ -1427,7 +1427,7 @@ describe("belief-state known position memory", () => {
       actionType: "access_card",
       serverId: "remote_2",
       serverLabel: "Remote 2",
-      cardDefinitionId: "onr_classic_023_shock-treatment",
+      cardDefinitionId: 27,
       accessedCardPositionKey: "root:0",
       accessedArea: "root",
       accessedIndex: 0,
@@ -1457,7 +1457,7 @@ describe("belief-state known position memory", () => {
       expect.objectContaining({
         zone: "remote_2",
         positionKey: "root:0",
-        definitionId: "onr_classic_023_shock-treatment",
+        definitionId: 27,
       }),
     );
   });
@@ -1468,8 +1468,8 @@ describe("Corp memory of Runner-known installed cards", () => {
     actor: "runner",
     actionType: "resolve_choice",
     publicRevealKind: "expose",
-    publicRevealDefinitionId: "onr_v1_345_trap",
-    exposedCardDefinitionId: "onr_v1_345_trap",
+    publicRevealDefinitionId: 557,
+    exposedCardDefinitionId: 557,
     exposedServerId: "remote_1",
     exposedArea: "root",
     exposedIndex: 0,
@@ -1528,7 +1528,7 @@ describe("Corp memory of Runner-known installed cards", () => {
           after: 0,
           cards: [
             {
-              definitionId: "onr_v1_345_trap",
+              definitionId: 557,
               serverId: "remote_1",
               area: "root",
               positionKey: "root:0",
@@ -1544,7 +1544,7 @@ describe("Corp memory of Runner-known installed cards", () => {
     expect(belief.corpOpponentModel?.runnerKnownCorpCardMemory).toEqual([
       expect.objectContaining({
         cardInstanceId: "trap-1",
-        definitionId: "onr_v1_345_trap",
+        definitionId: 557,
         serverId: "remote_1",
         area: "root",
         positionKey: "root:0",
@@ -1566,7 +1566,7 @@ describe("Corp memory of Runner-known installed cards", () => {
     ).toEqual([
       expect.objectContaining({
         cardInstanceId: "trap-1",
-        definitionId: "onr_v1_345_trap",
+        definitionId: 557,
         serverId: "remote_1",
         positionKey: "root:0",
         learnedBy: "persistent_exposure",
@@ -1635,7 +1635,7 @@ describe("Corp memory of Runner-known installed cards", () => {
     ).toEqual([
       expect.objectContaining({
         cardInstanceId: "trap-1",
-        definitionId: "onr_v1_345_trap",
+        definitionId: 557,
         positionKey: "root:0",
         learnedBy: "persistent_exposure",
         sourceEventId: "evt_persistent_exposure_ended",
@@ -1714,8 +1714,8 @@ describe("Corp memory of Runner-known installed cards", () => {
       actionType: "resolve_choice",
       exposePreventionDecision: "use",
       publicRevealKind: "expose",
-      publicRevealDefinitionId: "onr_v1_345_trap",
-      exposedCardDefinitionId: "onr_v1_345_trap",
+      publicRevealDefinitionId: 557,
+      exposedCardDefinitionId: 557,
       exposedServerId: "remote_1",
       exposedArea: "root",
       exposedIndex: 0,
@@ -1731,7 +1731,7 @@ describe("Corp memory of Runner-known installed cards", () => {
     const accessed = publicEvent("evt_access_trap", "access_card", 1, {
       actor: "runner",
       actionType: "access_card",
-      cardDefinitionId: "onr_v1_345_trap",
+      cardDefinitionId: 557,
       serverId: "remote_1",
       accessedArea: "root",
       accessedIndex: 0,
@@ -1845,14 +1845,14 @@ describe("Corp memory of Runner-known installed cards", () => {
       actor: "corp",
       actionType: "rez_ice",
       serverId: "remote_1",
-      cardDefinitionId: "simple_barrier_ice",
+      cardDefinitionId: 589,
     });
     const belief = reconstructBeliefState(
       corpInput([rez], "trap-1", {
         root: [],
         ice: [
           {
-            ...visibleCard("simple_barrier_ice", "corp", "ice"),
+            ...visibleCard(589, "corp", "ice"),
             instanceId: "ice-1",
             rezzed: false,
           },
@@ -1873,7 +1873,7 @@ describe("Corp memory of Runner-known installed cards", () => {
       actor: "corp",
       actionType: "rez_ice",
       serverId: "remote_1",
-      cardDefinitionId: "simple_barrier_ice",
+      cardDefinitionId: 589,
     });
     const conceal = publicEvent("evt_conceal", "resolve_choice", 2, {
       actor: "corp",
@@ -1892,7 +1892,7 @@ describe("Corp memory of Runner-known installed cards", () => {
         root: [],
         ice: [
           {
-            ...visibleCard("simple_barrier_ice", "corp", "ice"),
+            ...visibleCard(589, "corp", "ice"),
             instanceId: "ice-1",
             rezzed: false,
           },
@@ -2083,8 +2083,8 @@ describe("installed-source trash inside an activated ability", () => {
   it.each(["source", "other", "none"])(
     "reconciles only a publicly identified departing source: %s",
     (variant) => {
-      const source = "onr_v1_309_bbs-whispering-campaign";
-      const upgrade = "onr_v1_366_red-herrings";
+      const source = 521;
+      const upgrade = 578;
       const events = [source, upgrade].map((definitionId, index) =>
         publicEvent(`root_${index}`, "access_card", index, {
           actor: "runner",
@@ -2158,7 +2158,7 @@ function remoteUpgradeOnlyHistory(): PublicGameEvent[] {
       actor: "corp",
       actionType: "score_agenda",
       targets: { scoredFromServerId: "remote_1" },
-      cardDefinitionId: "onr_v1_193_corporate-coup",
+      cardDefinitionId: 405,
     }),
   ];
 }
@@ -2194,7 +2194,7 @@ function corpInput(
   serverCards?: { root: VisibleCard[]; ice: VisibleCard[] },
 ): AiDecisionInput {
   const trap = {
-    ...visibleCard("onr_v1_345_trap", "corp", "asset"),
+    ...visibleCard(557, "corp", "asset"),
     instanceId: rootInstanceId,
     rezzed: false,
     advancementCounters: 0,
@@ -2237,7 +2237,7 @@ function corpInput(
 function hqPrivateLookEvent(
   eventId: string,
   stateVersionBefore: number,
-  knownHqDefinitionIds: string[],
+  knownHqDefinitionIds: number[],
 ): PublicGameEvent {
   return publicEvent(eventId, "resolve_choice", stateVersionBefore, {
     actor: "runner",
@@ -2252,7 +2252,7 @@ function hqPrivateLookEvent(
 function rndPrivateLookEvent(
   eventId: string,
   stateVersionBefore: number,
-  knownRndDefinitionIds: string[],
+  knownRndDefinitionIds: number[],
 ): PublicGameEvent {
   return publicEvent(eventId, "resolve_choice", stateVersionBefore, {
     actor: "runner",
@@ -2291,7 +2291,7 @@ function publicEvent(
 }
 
 function visibleCard(
-  definitionId: string,
+  definitionId: number,
   owner: "runner" | "corp",
   type: NonNullable<VisibleCard["type"]>,
 ): VisibleCard {

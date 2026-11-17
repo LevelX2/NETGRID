@@ -125,7 +125,7 @@ it("does not undo a prepared R&D mode for a remote whose reserve is still unfund
   const { input, decision } = decide(preparationCheckpoint);
   expect(
     input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_proteus_092_morphing-tool",
+      (c) => c.definitionId === 150,
     )?.selectedSubtype,
   ).toBe("wall");
   expect(input.playerView.own.credits).toBe(3);

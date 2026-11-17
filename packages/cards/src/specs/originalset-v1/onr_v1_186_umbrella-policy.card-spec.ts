@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_186_umbrella-policy"),
+    cardDefinitionId: cardDefinitionId(398),
     title: "Umbrella Policy",
     side: "runner",
     cardType: "resource",

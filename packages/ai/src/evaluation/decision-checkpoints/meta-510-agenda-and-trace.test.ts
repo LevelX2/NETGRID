@@ -150,7 +150,7 @@ it.each([
       .input.playerView.servers.flatMap((s: { ice: any[] }) => s.ice)
       .find(
         (c: { instanceId: string }) =>
-          c.instanceId === "corp_onr_v1_228_cinderella_1",
+          c.instanceId === "corp_440_1",
       );
     const hypothetical = structuredClone(derezzed.effectivePostRezRunQuote);
     hypothetical.cardId = source.instanceId;
@@ -215,7 +215,7 @@ it("removes imaginary protection and selects the existing funded advance at g7d3
 it("preserves the separately owned deckout-flood action at g11d307", () => {
   const { decision } = assertOwnedDecision("g11d307", "corp.score_agenda");
   expect(decision.actionId).toBe(
-    "corp.install_card.corp_onr_v1_188_ai-chief-financial-officer_1.new_remote.corp_onr_v1_188_ai-chief-financial-officer_1",
+    "corp.install_card.corp_400_1.new_remote.corp_400_1",
   );
   expect(decision.evidence).toContain(
     "plan_assessment_evidence:corp_deckout_agenda_flood_score_install:new_remote",
@@ -241,7 +241,7 @@ it("preserves the separately owned deckout-flood action at g11d307", () => {
         firstActionId: load("g11d307-before").decision.actionId,
         evidenceCodes: expect.arrayContaining([
           "agenda_line_family:pure_rush",
-          "root_plan_instance:plan:corp.score_agenda:agenda%3Acorp_onr_v1_204_ice-transmutation_3%3Anew_remote",
+          "root_plan_instance:plan:corp.score_agenda:agenda%3Acorp_416_3%3Anew_remote",
         ]),
       }),
     ]),
@@ -300,7 +300,7 @@ it.each([
     expect(getPlayerView(state, "runner").own.agendaPoints).toBe(6);
     expect(getPlayerView(state, "corp").own.agendaPoints).toBe(0);
     expect(state.corp.hq).toContain(
-      "corp_onr_v1_191_black-ice-quality-assurance_2",
+      "corp_403_2",
     );
     expect(state.corp.servers.some((s) => s.id === "remote_2")).toBe(false);
     expect(state.winner).toBeNull();

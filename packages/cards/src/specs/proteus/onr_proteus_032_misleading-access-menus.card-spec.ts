@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_proteus_032_misleading-access-menus",
+      90,
     ),
     title: "Misleading Access Menus",
     side: "corp",

@@ -59,7 +59,7 @@ describe("pairing563 native owner regressions", () => {
       expect.objectContaining({
         zone: "remote_1",
         positionKey: "root:0",
-        definitionId: "onr_v1_353_chimera",
+        definitionId: 565,
         sourceEventId: "evt_231",
       }),
     );
@@ -327,7 +327,7 @@ describe("pairing563 native owner regressions", () => {
     )!;
     expect(action.type).toBe("activated_card_ability");
     expect(action.source).toBe(
-      "corp_onr_v1_318_department-of-truth-enhancement_1",
+      "corp_530_1",
     );
     const quote = JSON.parse(action.payload.hostedCreditBankCycleQuoteJson);
     expect(quote).toMatchObject({

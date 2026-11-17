@@ -53,7 +53,7 @@ describe("native deep672 terminal HQ relocation", () => {
     );
     const score = chooseAiAction(before.input);
     expect(score.actionId).toBe(
-      "corp.score_agenda.corp_onr_v1_194_corporate-downsizing_3.corp_onr_v1_194_corporate-downsizing_3",
+      "corp.score_agenda.corp_406_3.corp_406_3",
     );
     expect(
       score.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
@@ -63,7 +63,7 @@ describe("native deep672 terminal HQ relocation", () => {
     expect(choice.actionId).toBe("corp.resolve_choice");
     expect(choice.selectedChoices).toEqual({
       choiceId: after.input.playerView.pendingChoice!.choiceId,
-      selectedOptionIds: ["card_corp_onr_v1_196_corporate-war_3"],
+      selectedOptionIds: ["card_corp_408_3"],
     });
   });
 

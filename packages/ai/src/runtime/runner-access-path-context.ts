@@ -67,7 +67,7 @@ export type RunnerAccessPathContextDependencies = {
     serverId: string,
   ) => string;
   isRemoteServerTarget: (serverId: string | undefined) => boolean;
-  definitionType: (definitionId: string) => string | undefined;
+  definitionType: (definitionId: number) => string | undefined;
   remoteRootTrashCost: (
     card: VisibleServer["root"][number],
   ) => number | undefined;
@@ -145,7 +145,7 @@ export function createRunnerAccessPathContext(
       };
 
     const unknownRootCount = server.root.filter(
-      (card) => !card.known || typeof card.definitionId !== "string",
+      (card) => !card.known || typeof card.definitionId !== "number",
     ).length;
     if (unknownRootCount > 0) return { blocksBreak: false, evidence: [] };
 

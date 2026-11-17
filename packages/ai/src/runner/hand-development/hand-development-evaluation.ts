@@ -1148,7 +1148,7 @@ function recoveryOnlySearchHasNoVisibleTarget(
   if (!recoveryOnly) return false;
   const boundRecoveryTarget =
     typeof context.legalAction?.payload?.targetCardId === "string" ||
-    typeof context.legalAction?.payload?.targetCardDefinitionId === "string";
+    typeof context.legalAction?.payload?.targetCardDefinitionId === "number";
   if (context.card.type === "event" && !boundRecoveryTarget) return true;
   return input.playerView.own.heapOrArchives.length === 0;
 }

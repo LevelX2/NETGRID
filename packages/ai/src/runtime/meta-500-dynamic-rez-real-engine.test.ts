@@ -52,11 +52,11 @@ function nativeFixture(outsideGate: boolean, credits = 9) {
     .withCorpHqSize(0)
     .withCorpCredits(credits)
     .withRunnerCredits(6)
-    .withRunnerProgramInstalled("onr_v1_039_krash")
-    .withCorpRemoteRoot("remote_1", "onr_proteus_005_marked-accounts", 2)
-    .withCorpIceOnServer("remote_1", "onr_proteus_031_minotaur");
+    .withRunnerProgramInstalled(251)
+    .withCorpRemoteRoot("remote_1", 63, 2)
+    .withCorpIceOnServer("remote_1", 89);
   if (outsideGate)
-    b.withRezzedCorpIceOnServer("remote_1", "onr_proteus_034_riddler");
+    b.withRezzedCorpIceOnServer("remote_1", 92);
   state.runner.memoryUsed = 1;
   state = apply(
     state,

@@ -50,7 +50,7 @@ export function corpScoredAgendaFreeRezDefenseTarget(
         card.known === true &&
         card.type === "ice" &&
         card.rezzed === false &&
-        typeof card.definitionId === "string" &&
+        typeof card.definitionId === "number" &&
         card.definitionId.length > 0 &&
         card.effectiveRezCostQuote?.context === "installed" &&
         card.effectiveRezCostQuote.cardId === card.instanceId &&

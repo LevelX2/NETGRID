@@ -39,7 +39,7 @@ const SCENARIOS = [
   },
   {
     id: "tag",
-    sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+    sourceDefinitionId: 448 as CardDefinitionId,
     traceLimit: 5,
     runnerLink: 1,
     corpCredits: 8,
@@ -54,7 +54,7 @@ const SCENARIOS = [
   },
   {
     id: "terminal",
-    sourceDefinitionId: "onr_v1_248_homewrecker" as CardDefinitionId,
+    sourceDefinitionId: 460 as CardDefinitionId,
     traceLimit: 5,
     runnerLink: 0,
     corpCredits: 8,

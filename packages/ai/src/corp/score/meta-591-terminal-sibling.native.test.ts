@@ -38,7 +38,7 @@ it("admits a funded protected winning HQ agenda before preserving a nonwinning p
   const before = JSON.stringify(input),
     decision = chooseAiAction(input);
   expect(decision.actionId).toBe(
-    "corp.install_card.corp_onr_classic_004_theorem-proof_2.remote_1.corp_onr_classic_004_theorem-proof_2",
+    "corp.install_card.corp_8_2.remote_1.corp_8_2",
   );
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
@@ -51,14 +51,14 @@ it("admits a funded protected winning HQ agenda before preserving a nonwinning p
   expect(
     projects.find(
       (x) =>
-        x.agendaInstanceId === "corp_onr_classic_004_theorem-proof_2" &&
+        x.agendaInstanceId === "corp_8_2" &&
         x.serverId === "remote_1",
     ),
   ).toMatchObject({ terminalScore: true, feasible: true });
   expect(
     projects.find(
       (x) =>
-        x.agendaInstanceId === "corp_onr_classic_004_theorem-proof_2" &&
+        x.agendaInstanceId === "corp_8_2" &&
         x.serverId === "remote_2",
     )?.feasible,
   ).toBe(false);
@@ -73,7 +73,7 @@ it("retains the current prepared agenda when that agenda already wins", () => {
   );
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(
-    "corp.install_card.corp_onr_classic_002_superserum_1.remote_1.corp_onr_classic_002_superserum_1",
+    "corp.install_card.corp_6_1.remote_1.corp_6_1",
   );
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
 });
@@ -102,14 +102,14 @@ it.each([
   const winning = structuredClone(
     signals.find(
       (x) =>
-        x.agendaInstanceId === "corp_onr_classic_004_theorem-proof_2" &&
+        x.agendaInstanceId === "corp_8_2" &&
         x.serverId === "remote_1",
     ),
   );
   const previous = structuredClone(
     signals.find(
       (x) =>
-        x.agendaInstanceId === "corp_onr_classic_002_superserum_1" &&
+        x.agendaInstanceId === "corp_6_1" &&
         x.serverId === "remote_1",
     ),
   );

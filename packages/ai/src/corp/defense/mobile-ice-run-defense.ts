@@ -87,7 +87,7 @@ export function assessMobileIceRunDefense(
     card.rezzed === true &&
     card.type === "ice" &&
     typeof card.instanceId === "string" &&
-    typeof card.definitionId === "string" &&
+    typeof card.definitionId === "number" &&
     card.effectiveRunQuote?.iceInstanceId === card.instanceId &&
     card.effectiveRunQuote.iceDefinitionId === card.definitionId &&
     Array.isArray(card.effectiveRunQuote.subroutines);

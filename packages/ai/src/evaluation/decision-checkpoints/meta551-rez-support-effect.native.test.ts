@@ -77,7 +77,7 @@ describe("native action ICE rez-support current effect", () => {
       const { input, action, result, observedActionId } = decide(key);
       const target = input.playerView.servers
         .flatMap((s) => s.ice)
-        .find((i) => i.definitionId === "onr_proteus_031_minotaur")!;
+        .find((i) => i.definitionId === 89)!;
       expect(target.effectivePostRezRunQuote).toMatchObject({
         complete: true,
         effectiveRunQuote: { subroutines: [] },
@@ -136,12 +136,12 @@ describe("rez-support empty-effect proof boundary", () => {
       const { input } = capture(key);
       const targetId =
         key === "paid"
-          ? "onr_proteus_034_riddler"
+          ? 92
           : key === "activeDynamic"
-            ? "onr_proteus_031_minotaur"
+            ? 89
             : key === "income"
-              ? "onr_proteus_014_chihuahua"
-              : "onr_proteus_023_galatea";
+              ? 72
+              : 81;
       const server = input.playerView.servers.find((s) =>
         s.ice.some((i) => i.definitionId === targetId),
       )!;
@@ -161,7 +161,7 @@ describe("rez-support empty-effect proof boundary", () => {
   ])("does not infer emptiness from %s binding", (key) => {
     const { input } = capture("emptyInstallment"),
       server = input.playerView.servers.find((s) =>
-        s.ice.some((i) => i.definitionId === "onr_proteus_031_minotaur"),
+        s.ice.some((i) => i.definitionId === 89),
       )!,
       ice = server.ice[0]!;
     expect(

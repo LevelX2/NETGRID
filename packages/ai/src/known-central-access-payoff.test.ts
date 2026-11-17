@@ -60,8 +60,8 @@ describe("known central access payoff HQ knownness", () => {
             serverId: "remote_1",
             installPlacement: "ice",
             candidateDefinitions: [
-              { definitionId: "onr_v1_230_cortical-scanner", count: 1 },
-              { definitionId: "onr_v1_237_data-wall", count: 1 },
+              { definitionId: 442, count: 1 },
+              { definitionId: 449, count: 1 },
             ],
             candidateCount: 2,
             unknownCandidateCount: 0,
@@ -91,10 +91,10 @@ describe("known central access payoff HQ knownness", () => {
       beliefWithHqMemory({
         handCount: 5,
         knownDefinitions: [
-          "onr_v1_230_cortical-scanner",
-          "onr_v1_237_data-wall",
-          "onr_v1_281_accounts-receivable",
-          "simple_economy_operation",
+          442,
+          449,
+          493,
+          596,
         ],
         unknownRestCount: 1,
       }),
@@ -122,10 +122,10 @@ describe("known central access payoff HQ knownness", () => {
     const belief = beliefWithHqMemory({
       handCount: 5,
       knownDefinitions: [
-        "onr_v1_230_cortical-scanner",
-        "onr_v1_237_data-wall",
-        "onr_v1_281_accounts-receivable",
-        "simple_economy_operation",
+        442,
+        449,
+        493,
+        596,
       ],
       unknownRestCount: 1,
     });
@@ -160,7 +160,7 @@ describe("known central access payoff HQ knownness", () => {
           root: [
             {
               instanceId: "chicago-branch",
-              definitionId: "onr_v1_312_chicago-branch",
+              definitionId: 524,
               title: "Chicago Branch",
               owner: "corp",
               controller: "corp",
@@ -175,10 +175,10 @@ describe("known central access payoff HQ knownness", () => {
     const belief = beliefWithHqMemory({
       handCount: 5,
       knownDefinitions: [
-        "onr_v1_230_cortical-scanner",
-        "onr_v1_237_data-wall",
-        "onr_v1_281_accounts-receivable",
-        "simple_economy_operation",
+        442,
+        449,
+        493,
+        596,
       ],
       unknownRestCount: 1,
     });
@@ -200,7 +200,7 @@ describe("known central access payoff HQ knownness", () => {
       "hq",
       beliefWithHqMemory({
         handCount: 2,
-        knownDefinitions: ["simple_economy_operation"],
+        knownDefinitions: [596],
         unknownRestCount: 0,
         candidateGroups: [
           {
@@ -210,8 +210,8 @@ describe("known central access payoff HQ knownness", () => {
             serverId: "remote_1",
             installPlacement: "root",
             candidateDefinitions: [
-              { definitionId: "simple_agenda", count: 1 },
-              { definitionId: "simple_economy_asset", count: 1 },
+              { definitionId: 588, count: 1 },
+              { definitionId: 594, count: 1 },
             ],
             candidateCount: 2,
             unknownCandidateCount: 0,
@@ -238,7 +238,7 @@ describe("known central access payoff HQ knownness", () => {
       hiddenZoneAction: "p3_33_private_look",
       privateLookZone: "hq",
       privateLookCount: 2,
-      knownHqDefinitionIds: ["simple_economy_asset", "simple_upgrade"],
+      knownHqDefinitionIds: [594, 606],
     });
     const hiddenRootInstall = publicEvent(
       "evt_hidden_install",
@@ -255,7 +255,7 @@ describe("known central access payoff HQ knownness", () => {
       actor: "runner",
       actionType: "access_card",
       serverLabel: "HQ",
-      cardDefinitionId: "onr_v1_297_overtime-incentives",
+      cardDefinitionId: 509,
       title: "Overtime Incentives",
     });
     const input = aiInput({
@@ -297,9 +297,9 @@ describe("known central access payoff HQ knownness", () => {
       privateLookZone: "hq",
       privateLookCount: 3,
       knownHqDefinitionIds: [
-        "onr_proteus_062_lesley-major",
-        "onr_v1_297_overtime-incentives",
-        "onr_v1_340_setup",
+        120,
+        509,
+        552,
       ],
     });
     const trashLesley = publicEvent(
@@ -310,7 +310,7 @@ describe("known central access payoff HQ knownness", () => {
         actor: "runner",
         actionType: "trash_accessed_card",
         serverLabel: "HQ",
-        cardDefinitionId: "onr_proteus_062_lesley-major",
+        cardDefinitionId: 120,
         title: "Lesley Major",
       },
     );
@@ -322,7 +322,7 @@ describe("known central access payoff HQ knownness", () => {
         actor: "runner",
         actionType: "trash_accessed_card",
         serverLabel: "HQ",
-        cardDefinitionId: "onr_v1_340_setup",
+        cardDefinitionId: 552,
         title: "Setup!",
       },
     );
@@ -369,8 +369,8 @@ describe("known central access payoff HQ knownness", () => {
       beliefWithHqMemory({
         handCount: 2,
         knownDefinitions: [
-          "onr_v1_281_accounts-receivable",
-          "onr_v1_330_krumz",
+          493,
+          542,
         ],
         unknownRestCount: 0,
       }),
@@ -379,7 +379,7 @@ describe("known central access payoff HQ knownness", () => {
     expect(payoff).toMatchObject({
       payoff: "trash_affordable",
       accessFacts: {
-        knownTargetDefinitionIds: ["onr_v1_330_krumz"],
+        knownTargetDefinitionIds: [542],
         trashBudget: 2,
       },
       knownNoCurrentPayoff: false,
@@ -398,7 +398,7 @@ describe("known central access payoff HQ knownness", () => {
       actor: "runner",
       actionType: "access_card",
       serverLabel: "HQ",
-      cardDefinitionId: "onr_v1_330_krumz",
+      cardDefinitionId: 542,
       title: "Krumz",
     });
     const decline = publicEvent("evt_hq_krumz_decline", "decline_trash", 3, {
@@ -415,8 +415,8 @@ describe("known central access payoff HQ knownness", () => {
       beliefWithHqMemory({
         handCount: 2,
         knownDefinitions: [
-          "onr_v1_281_accounts-receivable",
-          "onr_v1_330_krumz",
+          493,
+          542,
         ],
         unknownRestCount: 0,
       }),
@@ -441,7 +441,7 @@ describe("known central access payoff HQ knownness", () => {
       actor: "runner",
       actionType: "access_card",
       serverLabel: "HQ",
-      cardDefinitionId: "onr_v1_330_krumz",
+      cardDefinitionId: 542,
       title: "Krumz",
     });
     const decline = publicEvent("evt_hq_krumz_decline", "decline_trash", 3, {
@@ -462,8 +462,8 @@ describe("known central access payoff HQ knownness", () => {
       beliefWithHqMemory({
         handCount: 2,
         knownDefinitions: [
-          "onr_v1_281_accounts-receivable",
-          "onr_v1_330_krumz",
+          493,
+          542,
         ],
         unknownRestCount: 0,
       }),
@@ -484,7 +484,7 @@ describe("known central access payoff HQ knownness", () => {
       actionType: "access_card",
       serverLabel: "R&D",
       targets: { serverLabel: "R&D" },
-      cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      cardDefinitionId: 521,
       title: "BBS Whispering Campaign",
     });
     const declineTrash = publicEvent("evt_rd_bbs_decline", "decline_trash", 2, {
@@ -534,13 +534,13 @@ describe("known central access payoff HQ knownness", () => {
           actor: "runner",
           actionType: "access_card",
           serverId: "rd",
-          cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+          cardDefinitionId: 521,
         }),
         publicEvent("hq-access", "access_card", 2, {
           actor: "runner",
           actionType: "access_card",
           serverId: "hq",
-          cardDefinitionId: "onr_v1_318_department-of-truth-enhancement",
+          cardDefinitionId: 530,
         }),
         publicEvent("hq-decline", "decline_trash", 3, {
           actor: "runner",
@@ -563,7 +563,7 @@ describe("known central access payoff HQ knownness", () => {
       actionType: "access_card",
       serverLabel: "R&D",
       targets: { serverLabel: "R&D" },
-      cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      cardDefinitionId: 521,
       title: "BBS Whispering Campaign",
     });
     const input = aiInput({
@@ -605,7 +605,7 @@ describe("known central access payoff HQ knownness", () => {
     const input = aiInput({
       handCount: 1,
       rig: [
-        visibleInstalledRunnerCard("onr_v1_139_r-and-d-interface", "hardware"),
+        visibleInstalledRunnerCard(351, "hardware"),
       ],
       servers: [
         { id: "hq", label: "HQ", ice: [], root: [] },
@@ -621,11 +621,11 @@ describe("known central access payoff HQ knownness", () => {
         lastKnownAccessEventId: "evt_rd_private_look",
         knownToRunner: true,
         freshness: "stale_known_same_top",
-        knownTopDefinitionId: "simple_economy_operation",
+        knownTopDefinitionId: 596,
         knownTopIsAgenda: false,
         knownSequenceDefinitionIds: [
-          "simple_economy_operation",
-          "simple_barrier_ice",
+          596,
+          589,
         ],
         freshenedByRunnerAccess: false,
         invalidationReasons: [],
@@ -656,11 +656,11 @@ describe("known central access payoff HQ knownness", () => {
 
   it("suppresses the match-like repeat run from reconstructed multiaccess memory", () => {
     const accessedDefinitions = [
-      "simple_economy_operation",
-      "simple_agenda",
-      "onr_proteus_032_misleading-access-menus",
-      "simple_priority_agenda",
-      "onr_v1_295_night-shift",
+      596,
+      588,
+      90,
+      599,
+      507,
     ];
     const publicEvents: PublicGameEvent[] = [];
     let stateVersion = 0;
@@ -708,7 +708,7 @@ describe("known central access payoff HQ knownness", () => {
       handCount: 1,
       publicEvents,
       rig: [
-        visibleInstalledRunnerCard("onr_v1_139_r-and-d-interface", "hardware"),
+        visibleInstalledRunnerCard(351, "hardware"),
       ],
       servers: [
         { id: "hq", label: "HQ", ice: [], root: [] },
@@ -737,14 +737,14 @@ describe("known central access payoff HQ knownness", () => {
   it.each([false, true])(
     "publishes the known R&D trash target and cost for multiaccess=%s",
     (multiaccess) => {
-      const target = "onr_v1_330_krumz";
+      const target = 542;
       const input = aiInput({
         handCount: 1,
         credits: 10,
         rig: multiaccess
           ? [
               visibleInstalledRunnerCard(
-                "onr_v1_139_r-and-d-interface",
+                351,
                 "hardware",
               ),
             ]
@@ -760,11 +760,11 @@ describe("known central access payoff HQ knownness", () => {
           knownToRunner: true,
           freshness: "stale_known_same_top",
           knownTopDefinitionId: multiaccess
-            ? "simple_economy_operation"
+            ? 596
             : target,
           knownTopIsAgenda: false,
           knownSequenceDefinitionIds: multiaccess
-            ? ["simple_economy_operation", target]
+            ? [596, target]
             : [target],
           freshenedByRunnerAccess: false,
           invalidationReasons: [],
@@ -784,7 +784,7 @@ describe("known central access payoff HQ knownness", () => {
     const input = aiInput({
       handCount: 1,
       rig: [
-        visibleInstalledRunnerCard("onr_v1_139_r-and-d-interface", "hardware"),
+        visibleInstalledRunnerCard(351, "hardware"),
       ],
       servers: [
         { id: "hq", label: "HQ", ice: [], root: [] },
@@ -800,11 +800,11 @@ describe("known central access payoff HQ knownness", () => {
         lastKnownAccessEventId: "evt_rd_private_look",
         knownToRunner: true,
         freshness: "stale_known_same_top",
-        knownTopDefinitionId: "simple_economy_operation",
+        knownTopDefinitionId: 596,
         knownTopIsAgenda: false,
         knownSequenceDefinitionIds: [
-          "simple_economy_operation",
-          "simple_agenda",
+          596,
+          588,
         ],
         freshenedByRunnerAccess: false,
         invalidationReasons: [],
@@ -833,7 +833,7 @@ describe("known central access payoff HQ knownness", () => {
       handCount: 1,
       rig: [
         visibleInstalledRunnerCard(
-          "onr_v1_024_expert-schedule-analyzer",
+          236,
           "program",
         ),
       ],
@@ -851,11 +851,11 @@ describe("known central access payoff HQ knownness", () => {
         lastKnownAccessEventId: "evt_rd_private_look",
         knownToRunner: true,
         freshness: "stale_known_same_top",
-        knownTopDefinitionId: "simple_economy_operation",
+        knownTopDefinitionId: 596,
         knownTopIsAgenda: false,
         knownSequenceDefinitionIds: [
-          "simple_economy_operation",
-          "simple_agenda",
+          596,
+          588,
         ],
         freshenedByRunnerAccess: false,
         invalidationReasons: [],
@@ -1083,7 +1083,7 @@ function runAction(actionId: string, serverId: string): LegalAction {
 }
 
 function visibleInstalledRunnerCard(
-  definitionId: string,
+  definitionId: number,
   type: NonNullable<VisibleCard["type"]>,
 ): VisibleCard {
   return {

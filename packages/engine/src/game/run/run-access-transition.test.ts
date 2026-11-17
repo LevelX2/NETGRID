@@ -19,7 +19,7 @@ import {
 import type { BreachStateHost } from "../access/breach-state";
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"],
   title = id,
 ): CardDefinition {
@@ -28,7 +28,7 @@ function definition(
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
   faceup = false,
   rezzed = false,

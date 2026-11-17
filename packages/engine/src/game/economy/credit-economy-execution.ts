@@ -49,7 +49,7 @@ export type CreditEconomyExecutionHost = {
       state: GameState,
       cardId: string | undefined,
     ) => string | undefined;
-    hasCardImplementationForDefinition: (definitionId: string) => boolean;
+    hasCardImplementationForDefinition: (definitionId: number) => boolean;
     hasCorpUtilityKind: (
       state: GameState,
       cardId: CardInstanceId,

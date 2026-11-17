@@ -70,7 +70,7 @@ import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 it("preserves the paid turn strength without charging inner Code Gates again", () => {
   const input = fixture(320);
   const breaker = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_classic_030_psychic-friend",
+    (c) => c.definitionId === 34,
   )!;
   const ice = input.playerView.run!.encounteredIce!;
   const rig = runnerRigAfterPumpAndEncounter(
@@ -93,7 +93,7 @@ it("preserves the paid turn strength without charging inner Code Gates again", (
 it("retains the boundary strength and adds only the new persistent pump", () => {
   const input = fixture(320);
   const breaker = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_classic_030_psychic-friend",
+    (c) => c.definitionId === 34,
   )!;
   breaker.strength = 5;
   breaker.strengthAfterEncounter = 2;
@@ -112,7 +112,7 @@ it("retains the boundary strength and adds only the new persistent pump", () => 
 it("does not retain either an old or a projected encounter-only pump", () => {
   const input = fixture(320);
   const breaker = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_classic_028_matador",
+    (c) => c.definitionId === 32,
   )!;
   breaker.strength = 5;
   breaker.strengthAfterEncounter = 0;

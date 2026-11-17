@@ -107,7 +107,7 @@ function play(seed?: string) {
     if (action.type === "break_subroutine") {
       expect(action.payload?.subroutineIndex).toBe(1);
       expect(action.payload?.targetIceDefinitionId).toBe(
-        "onr_proteus_021_dog-pile",
+        79,
       );
       expect(
         decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,

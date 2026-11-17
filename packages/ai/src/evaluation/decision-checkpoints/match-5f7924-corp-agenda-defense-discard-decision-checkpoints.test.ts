@@ -47,14 +47,14 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     expect(decision.actionId).toBe("corp.draw_card");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_005_marked-accounts_1%3Aremote_1",
+        "plan:corp.score_agenda:agenda%3Acorp_63_1%3Aremote_1",
       selectedPlan: { moduleId: "corp.defend_servers" },
     });
     expect(decision.decisionDebug?.planFirstDecision?.dispositions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           actionId:
-            "corp.install_card.corp_onr_proteus_005_marked-accounts_1.remote_1.corp_onr_proteus_005_marked-accounts_1",
+            "corp.install_card.corp_63_1.remote_1.corp_63_1",
           disposition: "explicitly_nonproductive",
           evidenceCode: "corp_last_click_score_install_deferred:remote_1",
         }),
@@ -115,11 +115,11 @@ function expectScoreProtectionDevelopmentContinuation(
   let { input, decision: second } = nextDecision(state, checkpoint);
   if (additionalActions > 0) {
     expect(second.actionId).toBe(
-      "corp.install_card.corp_onr_v1_251_jack-attack_3.remote_1.corp_onr_v1_251_jack-attack_3.1",
+      "corp.install_card.corp_463_3.remote_1.corp_463_3.1",
     );
     expect(second.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_005_marked-accounts_1%3Aremote_1",
+        "plan:corp.score_agenda:agenda%3Acorp_63_1%3Aremote_1",
       selectedPlan: { moduleId: "corp.defend_servers" },
     });
     state = applyDecision(state, second);
@@ -128,7 +128,7 @@ function expectScoreProtectionDevelopmentContinuation(
   expectLongScoreHorizonDeferral(input, second);
   const firstPlan = first.decision!.decisionDebug!.planFirstDecision!;
   expect(firstPlan.selectedPlan?.parentInstanceId).toBe(
-    "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_005_marked-accounts_1%3Anew_remote",
+    "plan:corp.score_agenda:agenda%3Acorp_63_1%3Anew_remote",
   );
   expect(
     first.selectedAction?.payload?.postInstallRezQuoteProjectedServerId,
@@ -141,7 +141,7 @@ function expectScoreProtectionDevelopmentContinuation(
   ).toEqual(
     expect.arrayContaining([
       first.selectedAction!.source,
-      "corp_onr_v1_251_jack-attack_3",
+      "corp_463_3",
     ]),
   );
   const initial = checkpointState(checkpoint);
@@ -160,7 +160,7 @@ function expectLongScoreHorizonDeferral(
 ): void {
   const remote = input.playerView.servers.find(({ id }) => id === "remote_1")!;
   const agenda = input.playerView.own.gripOrHq.find(
-    ({ instanceId }) => instanceId === "corp_onr_proteus_005_marked-accounts_1",
+    ({ instanceId }) => instanceId === "corp_63_1",
   )!;
   expect(input.playerView.own.clicks).toBe(1);
   expect(agenda.advancementRequirement).toBe(4);

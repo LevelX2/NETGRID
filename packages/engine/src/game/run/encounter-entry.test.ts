@@ -23,7 +23,7 @@ import {
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {
@@ -40,7 +40,7 @@ function instance(
 }
 
 function definition(
-  id: string,
+  id: number,
   options: Partial<CardDefinition> = {},
 ): CardDefinition {
   return {
@@ -54,10 +54,10 @@ function definition(
 
 function makeState(
   options: {
-    iceDefinitionId?: string;
+    iceDefinitionId?: number;
     iceRezzed?: boolean;
-    rootDefinitionId?: string;
-    runnerProgramDefinitionId?: string;
+    rootDefinitionId?: number;
+    runnerProgramDefinitionId?: number;
     phase?: NonNullable<GameState["run"]>["phase"];
     timingPoint?: GameState["timingPoint"];
     activeSide?: GameState["activeSide"];
@@ -67,7 +67,7 @@ function makeState(
   const iceId = "ice_1" as CardInstanceId;
   const rootId = "root_1" as CardInstanceId;
   const programId = "program_1" as CardInstanceId;
-  const rootDefinitionId = options.rootDefinitionId ?? "simple_upgrade";
+  const rootDefinitionId = options.rootDefinitionId ?? 606;
   const runnerProgramDefinitionId = options.runnerProgramDefinitionId;
   const cardInstances: Record<CardInstanceId, CardInstance> = {
     [iceId]: instance(iceId, options.iceDefinitionId ?? "simple_ice", {
@@ -147,20 +147,20 @@ function definitionsFor(state: GameState): Record<string, CardDefinition> {
   const definitions: Record<string, CardDefinition> = {
     simple_ice: definition("simple_ice"),
     simple_sentry: definition("simple_sentry", { subtypes: ["sentry"] }),
-    simple_upgrade: definition("simple_upgrade", {
+    simple_upgrade: definition(606, {
       title: "Simple Upgrade",
       type: "upgrade",
     }),
-    "onr_v1_260_pocket-virtual-reality": definition(
-      "onr_v1_260_pocket-virtual-reality",
+    472: definition(
+      472,
       { title: "Pocket Virtual Reality" },
     ),
-    onr_v1_065_smarteye: definition("onr_v1_065_smarteye", {
+    onr_v1_065_smarteye: definition(277, {
       title: "Smarteye",
       side: "runner",
       type: "program",
     }),
-    "onr_v1_067_speed-trap": definition("onr_v1_067_speed-trap", {
+    279: definition(279, {
       title: "Speed Trap",
       side: "runner",
       type: "program",
@@ -352,7 +352,7 @@ describe("encounter entry", () => {
         {
           sourceBreakerInstanceId: "bulldozer",
           sourceAbilityId:
-            "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
+            "140:break_wall_with_stealth_tradeoff_and_sentry_reward",
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -372,7 +372,7 @@ describe("encounter entry", () => {
         {
           sourceBreakerInstanceId: "bulldozer",
           sourceAbilityId:
-            "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
+            "140:break_wall_with_stealth_tradeoff_and_sentry_reward",
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -390,7 +390,7 @@ describe("encounter entry", () => {
         {
           sourceBreakerInstanceId: "bulldozer",
           sourceAbilityId:
-            "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
+            "140:break_wall_with_stealth_tradeoff_and_sentry_reward",
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -404,7 +404,7 @@ describe("encounter entry", () => {
 
   it("sets Pocket Virtual Reality encounter trace credits without running cleanup", () => {
     const state = makeState({
-      iceDefinitionId: "onr_v1_260_pocket-virtual-reality",
+      iceDefinitionId: 472,
     });
     const { host, calls } = hostFor(state);
     const legalAction = runnerAction(state);
@@ -414,18 +414,18 @@ describe("encounter entry", () => {
     expect(result).toMatchObject({
       handled: true,
       temporaryTraceCredits: 4,
-      sourceDefinitionId: "onr_v1_260_pocket-virtual-reality",
+      sourceDefinitionId: 472,
     });
     expect(state.run?.encounterTemporaryTraceCredits).toEqual({
       sourceIceId: "ice_1",
-      sourceDefinitionId: "onr_v1_260_pocket-virtual-reality",
+      sourceDefinitionId: 472,
       remaining: 4,
       usableFor: "this_ice_printed_trace_subroutines",
     });
     expect(legalAction.payload).toMatchObject({
       temporaryTraceCredits: 4,
       temporaryTraceCreditsSourceDefinitionId:
-        "onr_v1_260_pocket-virtual-reality",
+        472,
     });
     expect(calls.finish).toEqual([]);
   });
@@ -449,7 +449,7 @@ describe("encounter entry", () => {
   it("builds and resolves Smarteye approach-expose without leaking extra state", () => {
     const state = makeState({
       iceRezzed: false,
-      runnerProgramDefinitionId: "onr_v1_065_smarteye",
+      runnerProgramDefinitionId: 277,
     });
     const { host } = hostFor(state);
 

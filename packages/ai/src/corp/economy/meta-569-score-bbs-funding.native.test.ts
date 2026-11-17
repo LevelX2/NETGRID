@@ -47,7 +47,7 @@ function prefix(name: "bbs" | "accounts", actionTypes: string[]) {
   let current = structuredClone(saved.engineState);
   expect(Object.values(saved.validation).every(Boolean)).toBe(true);
   const expectedParent =
-    "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_1%3Aremote_" +
+    "plan:corp.score_agenda:agenda%3Acorp_405_1%3Aremote_" +
     (name === "bbs" ? "3" : "1");
   for (const [index, type] of actionTypes.entries()) {
     const input =

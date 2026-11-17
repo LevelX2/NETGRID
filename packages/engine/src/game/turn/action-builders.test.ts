@@ -79,7 +79,7 @@ describe("turn action builders", () => {
         serverId: "rd",
         runStartTaxCredits: 0,
         bonusRunNoClick: true,
-        bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+        bonusRunSource: 335,
       },
       "basic_action",
     );

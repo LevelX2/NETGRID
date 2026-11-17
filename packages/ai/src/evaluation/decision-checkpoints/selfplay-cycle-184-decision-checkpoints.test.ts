@@ -210,7 +210,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         actionType: "access_card",
         serverId: "remote_1",
         accessedCardPositionKey: "root:0",
-        cardDefinitionId: "onr_proteus_004_fetal-ai",
+        cardDefinitionId: 62,
         damageResolved: true,
         damageType: "net",
         damageAmount: 2,
@@ -225,7 +225,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         damageResolved: true,
         damageType: "meat",
         damageAmount: 2,
-        sourceDefinitionId: "onr_v1_301_punitive-counterstrike",
+        sourceDefinitionId: 513,
       },
     };
     input.eventTail = [...input.eventTail, observedAccess, confirmedDamage];
@@ -284,7 +284,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     server.ice = [
       {
         ...ice,
-        definitionId: "onr_v1_234_data-darts",
+        definitionId: 446,
         title: "Data Darts",
         rulesText:
           "[Subroutine] Do 3 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
@@ -293,7 +293,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         rezCost: 5,
         effectiveRunQuote: {
           iceInstanceId: ice.instanceId,
-          iceDefinitionId: "onr_v1_234_data-darts",
+          iceDefinitionId: 446,
           // The quoted +1 strength makes pump plus break cost three while
           // only two credits are available. This isolates accepting damage,
           // rather than relying on damage already paid away by MS-todon.
@@ -304,14 +304,14 @@ describe("selfplay cycle 184 decision checkpoints", () => {
               type: "do_damage",
               damageType: "net",
               amount: 3,
-              sourceDefinitionId: "onr_v1_234_data-darts",
+              sourceDefinitionId: 446,
               sourceTitle: "Data Darts",
               unbrokenRunEffect: { causesDamageOrProgramTrash: true },
             },
             {
               id: "printed_subroutines_prohibit_break_next_ice",
               type: "set_next_encounter_no_break_subroutines",
-              sourceDefinitionId: "onr_v1_234_data-darts",
+              sourceDefinitionId: 446,
               sourceTitle: "Data Darts",
             },
           ],

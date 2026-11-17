@@ -7,7 +7,7 @@ const jettisonRezzedIce = capabilityKey(
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_080_core-command-jettison-ice"),
+    cardDefinitionId: cardDefinitionId(292),
     title: "Core Command: Jettison Ice",
     side: "runner",
     cardType: "event",

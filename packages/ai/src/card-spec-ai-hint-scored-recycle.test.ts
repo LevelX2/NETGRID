@@ -12,7 +12,7 @@ function source(id: string) {
 
 describe("scored agenda recycling timing", () => {
   it("requires a later repeatable scored action for recycling and drawing", () => {
-    const entry = source("onr_v1_188_ai-chief-financial-officer");
+    const entry = source(400);
     expect(entry.planning.engine.scoredAgenda?.kind).toBe(
       "shuffle_hq_archives_into_rd_then_draw",
     );
@@ -34,13 +34,13 @@ describe("scored agenda recycling timing", () => {
   });
 
   it("derives the timing from the typed mechanic independently of the card title", () => {
-    const entry = source("onr_v1_188_ai-chief-financial-officer");
+    const entry = source(400);
     const renamed = { ...entry, definition: { ...entry.definition, title: "Scored recycle test" } };
     expect(deriveCardSpecAiHint(renamed).effects).toEqual(deriveCardSpecAiHint(entry).effects);
   });
 
   it("keeps an actual automatic score payout automatic", () => {
-    const hint = deriveCardSpecAiHint(source("onr_v1_203_hostile-takeover"));
+    const hint = deriveCardSpecAiHint(source(415));
     expect(hint.effects).toEqual(expect.arrayContaining([
       expect.objectContaining({ kind: "economy", timing: "when_scored", amount: 5 }),
     ]));

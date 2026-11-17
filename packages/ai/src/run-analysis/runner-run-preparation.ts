@@ -28,7 +28,7 @@ export function runnerHasExpiringAgendaAccessPayoff(
     if (
       payload.actor !== "runner" ||
       event.type !== "play_event" ||
-      typeof payload.cardDefinitionId !== "string"
+      typeof payload.cardDefinitionId !== "number"
     )
       continue;
     const abilities = cardSpecPlanningCardByDefinitionId(
@@ -155,7 +155,7 @@ export function runnerSameTurnAccessPreparationFitsTarget(
 export function runnerSameTurnAccessPreparationSourceDefinitionId(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
-): string | undefined {
+): number | undefined {
   if (candidate.actionType !== "play_event") return undefined;
   const createsSameTurnAccessPayoff = candidate.functionalEffects?.some(
     (effect) =>

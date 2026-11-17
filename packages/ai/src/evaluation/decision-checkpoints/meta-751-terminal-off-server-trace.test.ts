@@ -33,7 +33,7 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
-const cinderella = "corp_onr_v1_228_cinderella_1";
+const cinderella = "corp_440_1";
 const archivesInstall = `corp.install_card.${cinderella}.archives.${cinderella}.0`;
 
 function inputForDecision(): AiDecisionInputWithDeckCapabilities {
@@ -52,7 +52,7 @@ function archivesAssessment(input: AiDecisionInput) {
     observerSide: "corp",
     stateVersion: input.playerView.stateVersion,
     visibleSourceDefinitionsByInstanceId: {
-      [cinderella]: "onr_v1_228_cinderella",
+      [cinderella]: 440,
     },
   });
   return corpGlobalDefenseInstallRouteAssessment(
@@ -119,7 +119,7 @@ it("protects the terminal HQ access at the publicly reachable Archives entrance 
 it("leaves the Archives candidate unproductive without the visible redirect", () => {
   const input = inputForDecision();
   input.playerView.opponent.rig = input.playerView.opponent.rig!.filter(
-    (card) => card.definitionId !== "onr_v1_062_shredder-uplink-protocol",
+    (card) => card.definitionId !== 274,
   );
   expect(archivesAssessment(input)).toEqual({
     knowledge: "known",
@@ -183,18 +183,18 @@ it("rezzes the installed layer and stops a real Shredder run after three credit 
     ...DEMO_DECKS.demo_runner_001,
     cards: [
       ...DEMO_DECKS.demo_runner_001.cards,
-      { id: "onr_v1_062_shredder-uplink-protocol", quantity: 1 },
-      { id: "onr_v1_039_krash", quantity: 1 },
+      { id: 274, quantity: 1 },
+      { id: 251, quantity: 1 },
     ],
   };
   const corpDeck: DeckDefinition = {
     ...DEMO_DECKS.demo_corp_001,
     cards: [
       ...DEMO_DECKS.demo_corp_001.cards,
-      { id: "onr_v1_228_cinderella", quantity: 1 },
-      { id: "onr_v1_196_corporate-war", quantity: 1 },
-      { id: "onr_v1_220_tycho-extension", quantity: 1 },
-      { id: "onr_v1_191_black-ice-quality-assurance", quantity: 1 },
+      { id: 440, quantity: 1 },
+      { id: 408, quantity: 1 },
+      { id: 432, quantity: 1 },
+      { id: 403, quantity: 1 },
     ],
   };
   let state = createGameAfterSetup({
@@ -223,15 +223,15 @@ it("rezzes the installed layer and stops a real Shredder run after three credit 
   act((action) => action.type === "mandatory_draw");
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
-    .withCorpCardInHq("onr_v1_228_cinderella")
-    .withCorpCardInHq("onr_v1_196_corporate-war")
+    .withCorpCardInHq(440)
+    .withCorpCardInHq(408)
     .withCorpCredits(19)
     .withRunnerCredits(1)
-    .withRunnerProgramInstalled("onr_v1_062_shredder-uplink-protocol")
-    .withRunnerProgramInstalled("onr_v1_039_krash");
+    .withRunnerProgramInstalled(274)
+    .withRunnerProgramInstalled(251);
   state.corp.clicks = 1;
-  scoreRunnerAgendaForTest(state, "onr_v1_220_tycho-extension");
-  scoreRunnerAgendaForTest(state, "onr_v1_191_black-ice-quality-assurance");
+  scoreRunnerAgendaForTest(state, 432);
+  scoreRunnerAgendaForTest(state, 403);
   expect(getPlayerView(state, "runner").own.agendaPoints).toBe(6);
   act((a) => a.type === "install_card" && a.payload?.serverId === "archives");
   act((a) => a.type === "end_turn");

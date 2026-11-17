@@ -15,7 +15,7 @@ import {
 } from "./remote-protection-score";
 
 it("distinguishes active, payable and unfundable root protection in a native remote", () => {
-  const redHerrings = "onr_v1_366_red-herrings";
+  const redHerrings = 578;
   const corpDeck = {
     ...DEMO_DECKS.demo_corp_001,
     cards: [
@@ -69,7 +69,7 @@ it("distinguishes active, payable and unfundable root protection in a native rem
 
 describe("runnerContestRiskForSimulation", () => {
   it("counts only real runtime icebreakers for remote contest risk", () => {
-    expect(contestRiskWithRunnerRig([runnerCard("simple_decoder")])).toBe(
+    expect(contestRiskWithRunnerRig([runnerCard(591)])).toBe(
       "high",
     );
     expect(
@@ -96,7 +96,7 @@ function gameState(): GameState {
     },
     cardInstances: {
       "remote-ice-instance": {
-        definitionId: "simple_barrier_ice",
+        definitionId: 589,
         rezzed: false,
       },
     },
@@ -116,7 +116,7 @@ function aiInput(rig: VisibleCard[]): AiDecisionInput {
           ice: [
             {
               instanceId: "remote-ice-instance",
-              definitionId: "simple_barrier_ice",
+              definitionId: 589,
               known: true,
               rezzed: false,
             },
@@ -128,7 +128,7 @@ function aiInput(rig: VisibleCard[]): AiDecisionInput {
   } as unknown as AiDecisionInput;
 }
 
-function runnerCard(definitionId: string): VisibleCard {
+function runnerCard(definitionId: number): VisibleCard {
   return {
     instanceId: `${definitionId}-instance`,
     definitionId,

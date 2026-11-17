@@ -17,7 +17,7 @@ import { chooseCorpAction } from "../index";
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 
-const CLOSED_ACCOUNTS = "onr_v1_285_closed-accounts";
+const CLOSED_ACCOUNTS = 497;
 const CORP_DECK = withCards(
   DEMO_DECKS.demo_corp_001,
   "closed-accounts-quote-corp",
@@ -71,7 +71,7 @@ describe("Closed Accounts decision-local real-Engine punish quote", () => {
           kind: "other_punish",
           sourceCardDefinitionId: CLOSED_ACCOUNTS,
           sourceCapabilityId:
-            "onr_v1_285_closed-accounts:abilities_on_play_lose_credits",
+            "497:abilities_on_play_lose_credits",
           currentLegalAction: {
             actionId: currentAction.actionId,
             source: currentAction.source,

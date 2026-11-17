@@ -15,7 +15,7 @@ export type RunnerRunRouteEffect = {
     | "run_lock"
     | "future_modifier";
   timing: "before_access" | "at_access" | "after_access";
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   sourceTitle?: string;
   amount?: number;
   preventsAccess: boolean;

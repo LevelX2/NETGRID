@@ -36,18 +36,18 @@ export type RunnerBreakerCoverageUpgrade = Readonly<{
   requiredRole: RunnerCoverageGapSignal["requiredRole"];
   visibleAnswer?: VisibleCard;
   deckHasAlternative: true;
-  targetDefinitionId: string;
+  targetDefinitionId: number;
   searchActionId?: string;
   recoveryMode: "install_visible_upgrade" | "search_known_upgrade";
   memorySupportActionId?: string;
-  memorySupportDefinitionId?: string;
+  memorySupportDefinitionId?: number;
   economicQuote: RunnerBreakerUpgradeEconomicQuote;
   evidenceCodes: string[];
 }>;
 
 export type RunnerBreakerUpgradeMemorySupportRoute = Readonly<{
   actionId: string;
-  definitionId: string;
+  definitionId: number;
   additionalMu: number;
   creditCost: number;
   clickCost: number;
@@ -298,7 +298,7 @@ export function runnerBreakerUpgradeSearchRoute(
   candidates: readonly ActionSemanticCandidate[],
   deckCapabilities: DeckCapabilityProfile,
   requiredRole: RunnerCoverageGapSignal["requiredRole"],
-  targetDefinitionId: string,
+  targetDefinitionId: number,
 ):
   | {
       actionId: string;

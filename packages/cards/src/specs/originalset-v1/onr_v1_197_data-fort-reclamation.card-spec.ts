@@ -5,7 +5,7 @@ const buildNewRemote = capabilityKey("hq_to_new_remote_install_rez");
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_197_data-fort-reclamation"),
+    cardDefinitionId: cardDefinitionId(409),
     title: "Data Fort Reclamation",
     side: "corp",
     cardType: "agenda",

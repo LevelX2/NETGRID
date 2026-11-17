@@ -29,7 +29,7 @@ describe("runner deck engine doctrine", () => {
           provider.capabilities.includes("runner.coverage.breaker"),
         )
         .map((provider) => provider.cardId),
-    ).toEqual(["onr_classic_031_rent-i-con"]);
+    ).toEqual([35]);
     expect(
       doctrine?.dependencies.find(
         (entry) => entry.dependencyId === "runner.dependency.breaker_coverage",
@@ -74,10 +74,10 @@ describe("runner deck engine doctrine", () => {
       standardDeck("standard_runner_rent_i_con_shellspiel_2026_07_17"),
     );
     const shell = doctrine?.providers.find(
-      (provider) => provider.cardId === "onr_v1_176_the-shell-traders",
+      (provider) => provider.cardId === 388,
     );
     const junkyard = doctrine?.providers.find(
-      (provider) => provider.cardId === "onr_v1_165_junkyard-bbs",
+      (provider) => provider.cardId === 377,
     );
 
     expect(shell).toMatchObject({
@@ -94,11 +94,11 @@ describe("runner deck engine doctrine", () => {
     const base = standardDeck(
       "standard_runner_rent_i_con_shellspiel_2026_07_17",
     );
-    const withoutShell = removeCards(base, ["onr_v1_176_the-shell-traders"]);
+    const withoutShell = removeCards(base, [388]);
     const withoutRecovery = removeCards(base, [
-      "onr_v1_165_junkyard-bbs",
-      "onr_v1_089_gideons-pawnshop",
-      "onr_v1_087_forgotten-backup-chip",
+      377,
+      301,
+      299,
     ]);
 
     expect(
@@ -120,9 +120,9 @@ describe("runner deck engine doctrine", () => {
       deckSnapshotId: "conventional-stable-breakers",
       side: "runner",
       cards: [
-        { cardId: "onr_v1_014_codecracker", quantity: 2 },
-        { cardId: "onr_v1_021_dwarf", quantity: 2 },
-        { cardId: "onr_v1_039_krash", quantity: 2 },
+        { cardId: 226, quantity: 2 },
+        { cardId: 233, quantity: 2 },
+        { cardId: 251, quantity: 2 },
       ],
     });
 
@@ -139,8 +139,8 @@ describe("runner deck engine doctrine", () => {
       deckSnapshotId: "bypass-and-generic-economy",
       side: "runner",
       cards: [
-        { cardId: "onr_v1_111_social-engineering", quantity: 3 },
-        { cardId: "onr_v1_154_broker", quantity: 3 },
+        { cardId: 323, quantity: 3 },
+        { cardId: 366, quantity: 3 },
       ],
     });
 
@@ -247,7 +247,7 @@ describe("runner deck engine doctrine", () => {
           provider.capabilities.includes("runner.economy.recurring_breaker"),
         )
         .map((provider) => provider.cardId),
-    ).toEqual(["onr_v1_071_vewy-vewy-quiet", "onr_v1_124_corolla-speed-chip"]);
+    ).toEqual([283, 336]);
   });
 
   it("keeps sparse throughput support below high-strength development", () => {
@@ -255,8 +255,8 @@ describe("runner deck engine doctrine", () => {
       deckSnapshotId: "sparse-throughput",
       side: "runner",
       cards: [
-        { cardId: "onr_v1_021_dwarf", quantity: 2 },
-        { cardId: "onr_v1_114_temple-microcode-outlet", quantity: 1 },
+        { cardId: 233, quantity: 2 },
+        { cardId: 326, quantity: 1 },
       ],
     });
 
@@ -276,7 +276,7 @@ describe("runner deck engine doctrine", () => {
         buildRunnerDeckEngineDoctrine({
           deckSnapshotId: "invalid-runner-quantity",
           side: "runner",
-          cards: [{ cardId: "onr_v1_021_dwarf", quantity }],
+          cards: [{ cardId: 233, quantity }],
         }),
       ).toThrow(/quantity must be a non-negative safe integer/);
     },

@@ -11,9 +11,9 @@ import {
 
 const rootId = "plan:runner.pressure_central:central%3Ard";
 const windowId = "plan:runner.convert_run_window:run%3Arun_164";
-const newTarget = "corp_onr_v1_278_wall-of-ice_1";
-const oldTarget = "corp_onr_v1_268_shock-r_1";
-const sourceId = "runner_onr_v1_065_smarteye_1";
+const newTarget = "corp_490_1";
+const oldTarget = "corp_480_1";
+const sourceId = "runner_277_1";
 
 const checkpoints = {
   88: "cp-meta-736-r3-g24-d088.json",
@@ -82,7 +82,7 @@ describe("SP-469: a later approach window after a declined exposure", () => {
     expect(declined?.publicPayload.serverId).toBeUndefined();
     restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
     const selected = chooseAiAction(input);
-    const target = "corp_onr_v1_238_data-wall-2-0_2";
+    const target = "corp_450_2";
     const expose = input.legalActions.find(
       (action) => action.payload?.approachIceExposeDecision === "expose",
     );
@@ -147,7 +147,7 @@ describe("SP-469: a later approach window after a declined exposure", () => {
 describe("SP-469: nonterminal encounter and automatic movement", () => {
   const runParent = "plan:runner.convert_run_window:run%3Arun_166";
   const pressureRoot = "plan:runner.pressure_central:central%3Ahq";
-  const target = "corp_onr_v1_222_ball-and-chain_1";
+  const target = "corp_434_1";
   beforeEach(resetResidentPlanPortfolioMemory);
 
   it("lets Smarteye expose the next ICE under the same run parent", () => {
@@ -221,7 +221,7 @@ describe("SP-469: nonterminal encounter and automatic movement", () => {
 describe("SP-469: an initial expose child directly under the pressure root", () => {
   const pressureRoot = "plan:runner.pressure_central:central%3Ahq";
   const runParent = "plan:runner.convert_run_window:run%3Arun_83";
-  const target = "corp_onr_v1_237_data-wall_3";
+  const target = "corp_449_3";
   beforeEach(resetResidentPlanPortfolioMemory);
 
   it("moves the next exact ICE window under the resident same-run parent", () => {

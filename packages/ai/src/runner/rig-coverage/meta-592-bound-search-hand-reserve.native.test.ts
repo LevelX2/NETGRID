@@ -143,7 +143,7 @@ it("retains the actual Remote and confirmed damage hand floor when no draw remai
     ),
     state = structuredClone(cp.engineOrigin.state),
     card = cp.input.playerView.own.gripOrHq.find(
-      (c: any) => c.definitionId === "onr_proteus_133_chiba-bank-account",
+      (c: any) => c.definitionId === 191,
     ),
     action = getLegalActions(state, "runner").find(
       (a) => a.type === "install_card" && a.source === card.instanceId,

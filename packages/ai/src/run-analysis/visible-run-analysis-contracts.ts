@@ -8,7 +8,7 @@ import type {
 
 export type IceCardLike = {
   instanceId?: string;
-  definitionId?: string;
+  definitionId?: number;
   rezzed?: boolean;
   known: boolean;
   subtypes?: string[];
@@ -19,7 +19,7 @@ export type IceCardLike = {
 };
 
 export type RootCardLike = {
-  definitionId?: string;
+  definitionId?: number;
   rezzed?: boolean;
   known: boolean;
 };
@@ -82,7 +82,7 @@ export type HardUnbrokenRunEffectKind =
 export type BreakAssessment = {
   cost: number;
   breakerInstanceId: string;
-  breakerDefinitionId: string;
+  breakerDefinitionId: number;
   breakerSubtypes: string[];
   endingStrength: number;
   carriesStrengthAcrossIce: boolean;
@@ -216,7 +216,7 @@ export type VisibleIceRunHazard = {
   preventsAccess: boolean;
   canCauseFlatlineBeforeAccess: boolean;
   iceIndex: number;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   sourceTitle?: string;
   subroutineId: string;
   traceBaseStrength?: number;
@@ -232,7 +232,7 @@ export type VisibleIceRunHazard = {
   traceBidCost?: number;
   baseLinkValue?: number;
   baseLinkActivationCost?: number;
-  baseLinkSourceDefinitionId?: string;
+  baseLinkSourceDefinitionId?: number;
   baseLinkSourceTitle?: string;
   baseLinkSideEffect?: VisibleTraceSupportSideEffect;
   breakAvoidanceCost?: number;
@@ -264,7 +264,7 @@ export type VisibleIceRunHazardProjection = {
 export type DeferredNextEncounterDamage = {
   iceInstanceId: string;
   subroutineId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   amount: number;
 };
 
@@ -329,7 +329,7 @@ export type KnownRezzedIcePathAssessment = {
     clicks: number;
     subtypeChanges?: Array<{
       sourceCardInstanceId: string;
-      sourceDefinitionId: string;
+      sourceDefinitionId: number;
       selectedSubtype: string;
     }>;
   };

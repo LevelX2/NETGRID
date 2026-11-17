@@ -41,7 +41,7 @@ const SELF_DESTRUCT_SHAPE = implementation("self_destruct_shape", {
 });
 
 function implementation(
-  cardDefinitionId: string,
+  cardDefinitionId: number,
   accessEffect: NonNullable<
     CardImplementationDefinition["accessEffects"]
   >[number],

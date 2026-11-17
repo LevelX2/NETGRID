@@ -19,7 +19,7 @@ const cases: Array<{
   qualityConfidence?: "low" | "medium" | "high";
 }> = [
   {
-    id: "onr_v1_154_broker",
+    id: 366,
     roles: ["economy", "resource"],
     risks: ["resource_trash_if_tagged"],
     values: { economy: 3 },
@@ -33,7 +33,7 @@ const cases: Array<{
     strategyCovered: false,
   },
   {
-    id: "onr_v1_168_loan-from-chiba",
+    id: 380,
     roles: ["economy", "resource"],
     risks: [
       "opportunity_cost",
@@ -58,7 +58,7 @@ const cases: Array<{
     strategyCovered: false,
   },
   {
-    id: "onr_proteus_080_black-widow",
+    id: 138,
     roles: ["icebreaker", "program", "breaker_killer"],
     risks: [],
     values: {},
@@ -68,7 +68,7 @@ const cases: Array<{
     strategyCovered: false,
   },
   {
-    id: "onr_proteus_092_morphing-tool",
+    id: 150,
     roles: [
       "icebreaker",
       "program",
@@ -87,7 +87,7 @@ const cases: Array<{
     strategyCovered: false,
   },
   {
-    id: "onr_v1_110_sneak-preview",
+    id: 322,
     roles: ["hidden_zone_tool", "temporary_program_install"],
     risks: [
       "opportunity_cost",
@@ -110,7 +110,7 @@ const cases: Array<{
     strategyCovered: false,
   },
   {
-    id: "onr_v1_317_data-masons",
+    id: 529,
     roles: ["ice_modifier", "economy_asset", "remote_support"],
     values: { remoteRootValue: 2 },
     risks: [],
@@ -121,7 +121,7 @@ const cases: Array<{
     effectTargets: ["ice.corp_strength_support"],
   },
   {
-    id: "onr_proteus_020_digiconda",
+    id: 78,
     roles: ["ice", "damage_ice", "etr_ice", "sentry_ice"],
     risks: [],
     values: {},
@@ -136,7 +136,7 @@ const cases: Array<{
     qualityConfidence: "medium",
   },
   {
-    id: "onr_v1_348_virus-test-site",
+    id: 560,
     roles: ["ambush", "net_damage", "hidden_zone"],
     risks: [
       "hidden_info_barrier",
@@ -157,7 +157,7 @@ const cases: Array<{
     ],
   },
   {
-    id: "onr_v1_197_data-fort-reclamation",
+    id: 409,
     roles: ["corp", "agenda", "per_card_longtail"],
     risks: ["hidden_info_barrier"],
     values: {},
@@ -168,7 +168,7 @@ const cases: Array<{
     effectTargets: [],
   },
   {
-    id: "onr_v1_368_roving-submarine",
+    id: 580,
     roles: ["upgrade", "advance", "agenda"],
     risks: [],
     values: { remoteRootValue: 1 },
@@ -227,7 +227,7 @@ const signalCases: Record<
       "take_hosted_credits",
     ],
   },
-  "onr_v1_168_loan-from-chiba": {
+  380: {
     functionSignals: [
       "economy.counter",
       "economy.generic",
@@ -257,7 +257,7 @@ const signalCases: Record<
       "trash_source",
     ],
   },
-  "onr_proteus_080_black-widow": {
+  138: {
     functionSignals: [
       "breaker.sentry",
       "breaker.strength_bonus_vs_chosen_ice",
@@ -284,7 +284,7 @@ const signalCases: Record<
       "install_program",
     ],
   },
-  "onr_proteus_092_morphing-tool": {
+  150: {
     functionSignals: [
       "breaker.configurable_coverage",
       "breaker.reconfigurable_type",
@@ -309,7 +309,7 @@ const signalCases: Record<
       "selected_ice_subtype",
     ],
   },
-  "onr_v1_110_sneak-preview": {
+  322: {
     functionSignals: [
       "setup.end_of_turn_bounce",
       "setup.install_discount",
@@ -337,7 +337,7 @@ const signalCases: Record<
       "play_event",
     ],
   },
-  "onr_v1_317_data-masons": {
+  529: {
     functionSignals: [
       "economy.rez_discount",
       "ice.strength_modifier",
@@ -402,7 +402,7 @@ const signalCases: Record<
       "x_strength",
     ],
   },
-  "onr_v1_348_virus-test-site": {
+  560: {
     functionSignals: [
       "access.archives_safe_exception",
       "access.corp_net_damage_ambush",
@@ -446,7 +446,7 @@ const signalCases: Record<
       "trash_on_access",
     ],
   },
-  "onr_v1_197_data-fort-reclamation": {
+  409: {
     functionSignals: [
       "economy.corp_install_rez_budget",
       "install.corp_new_remote_fort_from_hq",
@@ -475,7 +475,7 @@ const signalCases: Record<
       "scoredAgenda",
     ],
   },
-  "onr_v1_368_roving-submarine": {
+  580: {
     functionSignals: [
       "condition.corp_installed_or_advanced_this_fort_last_turn",
       "run.corp_server_lock",
@@ -539,7 +539,7 @@ describe("CS06 effective AI hint compatibility", () => {
 
   it("keeps breaker details and strategy evidence exact", () => {
     expect(
-      requiredHint("onr_proteus_080_black-widow").breakerProfile,
+      requiredHint(138).breakerProfile,
     ).toMatchObject({
       coverage: ["sentry"],
       breakCost: 1,
@@ -548,14 +548,14 @@ describe("CS06 effective AI hint compatibility", () => {
       strengthBonusVsChosenIce: true,
     });
     expect(
-      requiredHint("onr_proteus_092_morphing-tool").breakerProfile,
+      requiredHint(150).breakerProfile,
     ).toMatchObject({
       coverageCandidates: ["code_gate", "sentry", "wall"],
       breakCost: 2,
       pumpCost: 1,
       reconfigurableType: true,
     });
-    const virus = requiredHint("onr_v1_348_virus-test-site");
+    const virus = requiredHint(560);
     expect(virus.strategySupportPairs).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -579,7 +579,7 @@ describe("CS06 effective AI hint compatibility", () => {
   });
 
   it("derives access-ambush damage semantics from the mechanical damage type", () => {
-    const vacantSoulkiller = requiredHint("onr_v1_346_vacant-soulkiller");
+    const vacantSoulkiller = requiredHint(558);
 
     expect(vacantSoulkiller.roles).toEqual(
       expect.arrayContaining(["ambush", "brain_damage"]),
@@ -611,7 +611,7 @@ describe("CS06 effective AI hint compatibility", () => {
       ),
     ).toEqual([
       {
-        cardId: "onr_v1_317_data-masons",
+        cardId: 529,
         strategyId: "corp.ice_tax_glacier",
         role: "tax_tool",
         roleDetail: "ice_tax_support",
@@ -623,7 +623,7 @@ describe("CS06 effective AI hint compatibility", () => {
         confidence: "high",
       },
       {
-        cardId: "onr_proteus_020_digiconda",
+        cardId: 78,
         strategyId: "corp.damage_kill",
         role: "support_tool",
         roleDetail: "net_damage_ice",
@@ -637,7 +637,7 @@ describe("CS06 effective AI hint compatibility", () => {
           "Two Net damage supports a damage line, but a single expensive ICE is not itself a damage-kill anchor.",
       },
       {
-        cardId: "onr_proteus_020_digiconda",
+        cardId: 78,
         strategyId: "corp.ice_tax_glacier",
         role: "tax_tool",
         roleDetail: "rez_paid_scaling_ice",
@@ -645,7 +645,7 @@ describe("CS06 effective AI hint compatibility", () => {
         confidence: "medium",
       },
       {
-        cardId: "onr_v1_348_virus-test-site",
+        cardId: 560,
         strategyId: "corp.ambush_bluff",
         role: "punish_payoff",
         roleDetail: "access_net_damage_payoff",
@@ -657,7 +657,7 @@ describe("CS06 effective AI hint compatibility", () => {
         confidence: "high",
       },
       {
-        cardId: "onr_v1_348_virus-test-site",
+        cardId: 560,
         strategyId: "corp.damage_kill",
         role: "punish_payoff",
         roleDetail: "access_net_damage_payoff",
@@ -669,7 +669,7 @@ describe("CS06 effective AI hint compatibility", () => {
         confidence: "medium",
       },
       {
-        cardId: "onr_v1_197_data-fort-reclamation",
+        cardId: 409,
         strategyId: "corp.remote_scoring",
         role: "engine_anchor",
         roleDetail: "remote_setup_engine",
@@ -679,7 +679,7 @@ describe("CS06 effective AI hint compatibility", () => {
           "Agenda Semantic Review v1 maps Data Fort Reclamation to corp.remote_scoring as engine_anchor/remote_setup_engine.",
       },
       {
-        cardId: "onr_v1_368_roving-submarine",
+        cardId: 580,
         strategyId: "corp.remote_scoring",
         role: "defensive_tool",
         roleDetail: "conditional_server_lock",
@@ -712,7 +712,7 @@ describe("CS06 effective AI hint compatibility", () => {
 
   it("keeps payoff use in planning while preserving mechanical damage facts", () => {
     const source = cs06PlanningCards().find(
-      (entry) => entry.definition.id === "onr_proteus_020_digiconda",
+      (entry) => entry.definition.id === 78,
     );
     if (!source) throw new Error("missing Digiconda planning fixture");
     const withoutTacticInterpretation = structuredClone(source) as unknown as {

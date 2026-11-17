@@ -84,7 +84,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
           acceptableActions: [
             {
               type: "install_card",
-              sourceDefinitionId: "onr_v1_221_asp",
+              sourceDefinitionId: 433,
               targetServerId: "rd",
             },
           ],
@@ -163,7 +163,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
         acceptableActions: [
           {
             type: "install_card",
-            sourceDefinitionId: "onr_v1_193_corporate-coup",
+            sourceDefinitionId: 405,
             targetServerId: "remote_1",
           },
         ],
@@ -187,12 +187,12 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
         acceptableActions: [
           {
             type: "play_operation",
-            sourceDefinitionId: "onr_v1_290_efficiency-experts",
+            sourceDefinitionId: 502,
           },
         ],
         planExecution: {
           acceptablePlanIds: [
-            "plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_290_efficiency-experts_3",
+            "plan:corp.economy:economy-immediate-operation%3Acorp_502_3",
           ],
           acceptablePlanKinds: ["corp.economy"],
           acceptableCapabilities: ["develop_or_convert_corp_economy"],
@@ -206,8 +206,8 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     const result = expectCheckpointToPass(checkpoint);
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
-        "plan_first_root:plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_290_efficiency-experts_3",
-        "plan_first_executor:plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_290_efficiency-experts_3",
+        "plan_first_root:plan:corp.economy:economy-immediate-operation%3Acorp_502_3",
+        "plan_first_executor:plan:corp.economy:economy-immediate-operation%3Acorp_502_3",
       ]),
     );
   });
@@ -231,7 +231,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
         forbiddenActions: [
           {
             type: "install_card",
-            sourceDefinitionId: "onr_v1_251_jack-attack",
+            sourceDefinitionId: 463,
             targetServerId: "remote_1",
           },
         ],

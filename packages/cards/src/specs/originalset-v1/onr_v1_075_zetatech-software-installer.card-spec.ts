@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_075_zetatech-software-installer",
+      287,
     ),
     title: "Zetatech Software Installer",
     side: "runner",

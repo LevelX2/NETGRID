@@ -45,7 +45,7 @@ describe("pairing 329 delegated Airport Locker coverage checkpoint", () => {
       fallbackUsed: false,
       selectedChoices: {
         choiceId: "p3_38_search_stack_install_239",
-        selectedOptionIds: ["card_runner_onr_classic_031_rent-i-con_2"],
+        selectedOptionIds: ["card_runner_35_2"],
       },
     });
     expect(portfolio).toMatchObject({
@@ -66,8 +66,8 @@ describe("pairing 329 delegated Airport Locker coverage checkpoint", () => {
           requesterPlanInstanceId: portfolio?.rootForegroundInstanceId,
           directSearchChoiceBindings: [
             expect.objectContaining({
-              targetCardInstanceId: "runner_onr_classic_031_rent-i-con_2",
-              targetDefinitionId: "onr_classic_031_rent-i-con",
+              targetCardInstanceId: "runner_35_2",
+              targetDefinitionId: 35,
             }),
           ],
         },

@@ -23,8 +23,8 @@ import { buildAiDecisionInput, chooseCorpAction } from "../../index";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { selectedCorpProgramTrashChoiceOptionIds } from "../../runtime/corp-program-trash-choice";
 
-const REX = "onr_v1_264_rex";
-const RAPTOR = "onr_v1_054_raptor";
+const REX = 476;
+const RAPTOR = 266;
 
 afterEach(resetResidentPlanPortfolioMemory);
 
@@ -136,8 +136,8 @@ it("recognizes universal replacement cost but prioritizes its unique Sentry cove
   const input = corpInput(choiceState({ krash: true }));
   const programs = input.playerView.opponent.rig!;
   const losses = programTrashCoverageLosses(input, programs);
-  const worm = programs.find((p) => p.definitionId === "onr_v1_074_worm")!;
-  const krash = programs.find((p) => p.definitionId === "onr_v1_039_krash")!;
+  const worm = programs.find((p) => p.definitionId === 286)!;
+  const krash = programs.find((p) => p.definitionId === 251)!;
   expect(losses.get(worm.instanceId)).toEqual({
     lostAffordableIce: 0,
     additionalCredits: 4,
@@ -255,15 +255,15 @@ function choiceState(
   } = {},
 ): GameState {
   const corp = [
-    "onr_proteus_029_marionette",
-    options.rexTraceProfile ? REX : "onr_v1_238_data-wall-2-0",
-    "onr_v1_247_haunting-inquisition",
+    87,
+    options.rexTraceProfile ? REX : 450,
+    459,
   ];
   const runner = [
-    "onr_v1_074_worm",
-    options.rexTraceProfile ? RAPTOR : "onr_v1_016_cyfermaster",
-    "onr_v1_021_dwarf",
-    "onr_v1_039_krash",
+    286,
+    options.rexTraceProfile ? RAPTOR : 228,
+    233,
+    251,
   ];
   let state = createGameAfterSetup({
     seed: "program-trash-coverage",

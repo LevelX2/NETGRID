@@ -70,14 +70,14 @@ export type EncounterPrintedEffectHost = {
     rabbitTraceLimitReductionForIceTrace: () => number;
     resolveDamageImminentEvent: (event: ImminentEvent) => DamageSummary;
     resolveTraceHardwareWreckerSuccess: (
-      sourceDefinitionId: string,
+      sourceDefinitionId: number,
       sourceCardInstanceId: CardInstanceId,
       traceId: string,
       damageAmount: number,
       legalAction: LegalAction,
     ) => { payload: Record<string, unknown>; suspended: boolean };
     resolveTraceTrashRunnerResourceSuccess: (
-      sourceDefinitionId: string,
+      sourceDefinitionId: number,
       sourceCardInstanceId: CardInstanceId,
       traceId: string,
       targetCardId: CardInstanceId,
@@ -274,7 +274,7 @@ export function resolvePrintedDamageSubroutine(
 
 function runnerApNetDamageReducerSourceDefinitionId(
   host: EncounterPrintedEffectHost,
-): string | undefined {
+): number | undefined {
   return host.state.runner.rig.hardware
     .map((cardId) => host.callbacks.definitionFor(cardId))
     .find(
@@ -861,9 +861,9 @@ export function applyPrintedTraceSuccessFollowups(
 function applyTraceAvoidRewards(
   host: EncounterPrintedEffectHost,
   trace: CurrentTrace,
-): { amount: number; sourceDefinitionIds: string[] } {
+): { amount: number; sourceDefinitionIds: number[] } {
   let amount = 0;
-  const sourceDefinitionIds: string[] = [];
+  const sourceDefinitionIds: number[] = [];
   for (const reward of trace.traceAvoidRewardUsages ?? []) {
     if (!Number.isInteger(reward.amount) || reward.amount <= 0) continue;
     amount += reward.amount;

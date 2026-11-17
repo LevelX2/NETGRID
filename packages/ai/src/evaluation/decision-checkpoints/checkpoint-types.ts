@@ -24,10 +24,10 @@ export const AI_DECISION_CHECKPOINT_SCHEMA_VERSION =
 export type AiDecisionCheckpointActionMatcher = {
   actionId?: string;
   type?: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   runnerAbility?: string;
   targetCardInstanceId?: string;
-  targetDefinitionId?: string;
+  targetDefinitionId?: number;
   targetServerId?: string;
   encounterWillEndRun?: boolean;
 };
@@ -67,8 +67,8 @@ export type AiDecisionCheckpointExpectationV1 = {
     mustNotSelectValues?: Array<string | number | boolean>;
   };
   discardChoice?: {
-    mustRetainDefinitionIds?: string[];
-    mustDiscardDefinitionIds?: string[];
+    mustRetainDefinitionIds?: number[];
+    mustDiscardDefinitionIds?: number[];
   };
   strategicIntent?: {
     acceptablePrimaryStrategyIds?: string[];

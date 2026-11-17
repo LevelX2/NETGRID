@@ -232,7 +232,7 @@ function fixture(): {
 
 function program(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   installCost = 1,
   memoryCost = 1,
 ): VisibleCard {

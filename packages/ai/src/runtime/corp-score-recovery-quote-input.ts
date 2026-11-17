@@ -24,7 +24,7 @@ export function sanitizeCorpScoreRecoveryQuote(
         !o ||
         typeof o.cardId !== "string" ||
         o.cardId.length === 0 ||
-        typeof o.definitionId !== "string" ||
+        typeof o.definitionId !== "number" ||
         o.definitionId.length === 0 ||
         o.cardId === q.sourceCardId ||
         ![o.playClicks, o.playCredits, o.advancementAmount].every(

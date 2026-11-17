@@ -7,7 +7,7 @@ const moveAdvancementCounters = capabilityKey(
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_347_vapor-ops"),
+    cardDefinitionId: cardDefinitionId(559),
     title: "Vapor Ops",
     side: "corp",
     cardType: "asset",

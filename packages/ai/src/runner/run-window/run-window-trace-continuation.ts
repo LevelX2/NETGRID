@@ -201,7 +201,7 @@ function planBoundRunnerTraceBaseLinkOption(
         (card) =>
           card.known &&
           card.instanceId === option.value &&
-          typeof card.definitionId === "string",
+          typeof card.definitionId === "number",
       );
       if (!sourceCard?.definitionId) return [];
       const support = quote.baseLinkOptions.find(

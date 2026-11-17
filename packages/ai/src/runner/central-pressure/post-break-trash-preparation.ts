@@ -9,7 +9,7 @@ import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 
 type Source = {
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   installed: boolean;
 };
 type Target = { targetIceInstanceId: string; trashCredits: number };
@@ -59,7 +59,7 @@ function currentQuote(
       (s: unknown): s is Source =>
         isRecord(s) &&
         typeof s.sourceCardInstanceId === "string" &&
-        typeof s.sourceDefinitionId === "string" &&
+        typeof s.sourceDefinitionId === "number" &&
         typeof s.installed === "boolean",
     ) ||
     !q.targets.every(
@@ -210,7 +210,7 @@ export function runnerPostBreakTrashPreparationSignals(
                 a.type === "install_card" &&
                 actionMatchesCurrentDecision(input, a) &&
                 a.source === card.instanceId &&
-                !a.actionId.includes("trash_before") &&
+                a.payload?.runnerProgramTrashBeforeInstall !== true &&
                 !a.choiceRequirements?.length &&
                 candidates.some((c) => c.actionId === a.actionId),
             );

@@ -198,24 +198,24 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
     ).toBe("playable_mvp");
   });
 
   it("routes V1.9.15 Runner events through LegalAction-only run and access paths", () => {
     const eventExpectations = [
       {
-        definitionId: "onr_v1_098_lucidrine-booster-drug",
+        definitionId: 310,
         serverId: "archives",
         accessCount: 1,
       },
       {
-        definitionId: "onr_v1_105_priority-wreck",
+        definitionId: 317,
         serverId: "hq",
         accessCount: 1,
       },
       {
-        definitionId: "onr_v1_112_stumble-through-wilderspace",
+        definitionId: 324,
         serverId: "rd",
         accessCount: 1,
       },
@@ -258,8 +258,8 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     );
     state.runner.credits = 8;
     state.corp.credits = 1;
-    moveRunnerCardToGrip(state, "onr_v1_105_priority-wreck");
-    const hqCardId = moveCorpCardToHq(state, "simple_economy_operation");
+    moveRunnerCardToGrip(state, 317);
+    const hqCardId = moveCorpCardToHq(state, 596);
     keepOnlyCorpHqCard(state, hqCardId);
     const initial = structuredClone(state);
 
@@ -268,7 +268,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_105_priority-wreck" &&
+        sourceDefinition(state, action) === 317 &&
         action.payload?.serverId === "hq",
     );
 
@@ -289,7 +289,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       accessReplacement: "runner_spend_corp_lose_credits",
       runnerPaidAmount: 2,
       corpLostCredits: 1,
-      sourceDefinitionId: "onr_v1_105_priority-wreck",
+      sourceDefinitionId: 317,
     });
 
     const replay = replayEvents(
@@ -307,9 +307,9 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     state.runner.credits = 0;
     const lucidrineId = moveRunnerCardToGrip(
       state,
-      "onr_v1_098_lucidrine-booster-drug",
+      310,
     );
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    putCorpCardOnTopOfRd(state, 596);
 
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -322,7 +322,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         action.payload?.serverId === "rd",
     );
     expect(state.run?.runnerRunTemporaryCredits).toMatchObject({
-      sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+      sourceDefinitionId: 310,
       remaining: 9,
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -355,10 +355,10 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     state.runner.credits = 20;
     state.runner.memoryLimit = 12;
     for (const definitionId of [
-      "onr_v1_020_dupre",
-      "onr_v1_043_mystery-box",
-      "onr_v1_062_shredder-uplink-protocol",
-      "onr_v1_065_smarteye",
+      232,
+      255,
+      274,
+      277,
     ] as const) {
       moveRunnerCardToGrip(state, definitionId);
       state.runner.clicks = 10;
@@ -372,13 +372,13 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
           (!title || action.label.includes(title)),
       );
     }
-    putCorpCardOnTopOfRd(state, "simple_agenda");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
-    putCorpCardOnTopOfRd(state, "simple_economy_asset");
+    putCorpCardOnTopOfRd(state, 588);
+    putCorpCardOnTopOfRd(state, 596);
+    putCorpCardOnTopOfRd(state, 594);
 
     const dupreId = state.runner.rig.programs.find(
       (cardId) =>
-        state.cardInstances[cardId]?.definitionId === "onr_v1_020_dupre",
+        state.cardInstances[cardId]?.definitionId === 232,
     );
     state = apply(
       state,
@@ -413,7 +413,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
           ...MECHANIC_SMOKE_DECKS.runAccess.corp,
           cards: [
             ...MECHANIC_SMOKE_DECKS.runAccess.corp.cards,
-            { id: "simple_code_gate_ice", quantity: 2 },
+            { id: 590, quantity: 2 },
           ],
         },
         agendaPointsToWin: 7,
@@ -421,9 +421,9 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     );
     state.runner.credits = 40;
     state.runner.memoryLimit = 8;
-    const dupreId = installRunnerProgramForTest(state, "onr_v1_020_dupre");
-    putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const dupreId = installRunnerProgramForTest(state, 232);
+    putCorpIceOnServer(state, "rd", 590);
+    putCorpCardOnTopOfRd(state, 596);
 
     state = apply(
       state,
@@ -436,7 +436,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "simple_code_gate_ice",
+        sourceDefinition(state, action) === 590,
     );
     for (let index = 0; index < 2; index += 1)
       state = apply(
@@ -461,7 +461,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     expect(state.cardInstances[dupreId]?.selectedServerId).toBe("rd");
 
     setCardCounterForTest(state, dupreId, "power", 3);
-    putCorpIceOnServer(state, "hq", "simple_code_gate_ice");
+    putCorpIceOnServer(state, "hq", 590);
     for (const cardId of state.corp.hq.slice()) {
       removeEverywhere(state, cardId);
       state.corp.archives.push(cardId);
@@ -470,7 +470,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         zone: { side: "corp", zone: "archives" },
       };
     }
-    moveCorpCardToHq(state, "simple_economy_operation");
+    moveCorpCardToHq(state, 596);
     state = apply(
       state,
       "runner",
@@ -482,7 +482,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "simple_code_gate_ice",
+        sourceDefinition(state, action) === 590,
     );
     for (let index = 0; index < 2; index += 1)
       state = apply(
@@ -521,12 +521,12 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     );
     state.runner.credits = 10;
     state.corp.credits = 100;
-    installRunnerProgramForTest(state, "onr_v1_065_smarteye");
-    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_227_cerberus");
+    installRunnerProgramForTest(state, 277);
+    const iceId = putCorpIceOnServer(state, "rd", 439);
     const hiddenOtherIceId = putCorpIceOnServer(
       state,
       "hq",
-      "onr_v1_255_mastiff",
+      467,
     );
     const initial = structuredClone(state);
 
@@ -566,7 +566,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       hiddenZoneBarrier: true,
       hiddenZoneAction: "approach_ice_expose",
       revealKind: "expose",
-      cardDefinitionId: "onr_v1_227_cerberus",
+      cardDefinitionId: 439,
     });
     expect(state.cardInstances[iceId]?.rezzed).toBe(false);
     expect(getLegalActions(state, "corp")).toEqual([]);
@@ -578,7 +578,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     expect(runnerView.run?.approachedIce).toMatchObject({
       instanceId: iceId,
       known: true,
-      definitionId: "onr_v1_227_cerberus",
+      definitionId: 439,
       effectiveRezCostQuote: {
         context: "installed",
         cardId: iceId,
@@ -590,7 +590,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       effectivePostRezRunQuote: {
         context: "installed_post_rez",
         cardId: iceId,
-        iceDefinitionId: "onr_v1_227_cerberus",
+        iceDefinitionId: 439,
         targetServerId: "rd",
         projectedServerId: "rd",
         expiresAtStateVersion: state.stateVersion,
@@ -608,9 +608,9 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     }
     const hiddenVariant = structuredClone(state);
     hiddenVariant.cardInstances[hiddenOtherIceId]!.definitionId =
-      "onr_v1_224_bolter-cluster";
+      436;
     for (const id of [...hiddenVariant.corp.hq, ...hiddenVariant.corp.rd]) {
-      hiddenVariant.cardInstances[id]!.definitionId = "onr_v1_261_quandary";
+      hiddenVariant.cardInstances[id]!.definitionId = 473;
     }
     expect(getPlayerView(hiddenVariant, "runner").run?.approachedIce).toEqual(
       runnerView.run?.approachedIce,
@@ -619,7 +619,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       runnerView.servers
         .find((server) => server.id === "rd")
         ?.ice.find((card) => card.instanceId === iceId),
-    ).toMatchObject({ known: true, definitionId: "onr_v1_227_cerberus" });
+    ).toMatchObject({ known: true, definitionId: 439 });
 
     const jackOutState = apply(
       structuredClone(state),
@@ -644,7 +644,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       getLegalActions(state, "corp").some(
         (action) =>
           action.type === "rez_ice" &&
-          sourceDefinition(state, action) === "onr_v1_227_cerberus",
+          sourceDefinition(state, action) === 439,
       ),
     ).toBe(true);
 
@@ -653,7 +653,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_227_cerberus",
+        sourceDefinition(state, action) === 439,
     );
     expect(state.timingPoint).toBe("run.encounter_ice");
     expect(state.activeSide).toBe("runner");
@@ -679,9 +679,9 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     );
     state.runner.credits = 10;
     state.corp.credits = 0;
-    installRunnerProgramForTest(state, "onr_v1_065_smarteye");
-    putCorpIceCopyOnServer(state, "rd", "onr_v1_227_cerberus");
-    putCorpIceOnServer(state, "rd", "onr_v1_255_mastiff");
+    installRunnerProgramForTest(state, 277);
+    putCorpIceCopyOnServer(state, "rd", 439);
+    putCorpIceOnServer(state, "rd", 467);
 
     state = apply(
       state,
@@ -724,12 +724,12 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
   it("opens root rez only after Runner declines jack out and then blocks movement", () => {
     let state = toRunnerTurn(v199CardReleaseGame("root-rez-window"));
     state.corp.credits = 10;
-    const aardvarkId = putCorpRootInRemote(state, "onr_v1_349_aardvark");
+    const aardvarkId = putCorpRootInRemote(state, 561);
     const bizarreEncryptionId = putCorpRootInRemote(
       state,
-      "onr_v1_351_bizarre-encryption-scheme",
+      563,
     );
-    putCorpIceOnServer(state, "remote_1", "onr_v1_279_wall-of-static");
+    putCorpIceOnServer(state, "remote_1", 491);
     const initial = structuredClone(state);
 
     state = apply(
@@ -840,10 +840,10 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       MECHANIC_SMOKE_GAMES.assetNodeEffects("post-jack-out-setup"),
     );
     state.corp.credits = 10;
-    const setupId = putCorpRootInRemote(state, "onr_v1_340_setup");
+    const setupId = putCorpRootInRemote(state, 552);
     const iceId = addRezzedCorpIceForTest(
       state,
-      "simple_barrier_ice",
+      589,
       "remote_1",
       "post_jack_out_setup",
     );
@@ -908,8 +908,8 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
 
   it("keeps V1.9.15 ICE overlaps side-safe through trace and damage windows", () => {
     for (const [definitionId, traceLimit] of [
-      ["onr_v1_227_cerberus", 5],
-      ["onr_v1_255_mastiff", 5],
+      [439, 5],
+      [467, 5],
     ] as const) {
       let state = toRunnerTurn(
         MECHANIC_SMOKE_GAMES.runAccess(`v1915-ice-${definitionId}`),
@@ -955,7 +955,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       MECHANIC_SMOKE_GAMES.runAccess("spotcheck-cerberus-damage"),
     );
     drawRunnerCardsForTest(state, 5);
-    putCorpIceOnServer(state, "rd", "onr_v1_227_cerberus");
+    putCorpIceOnServer(state, "rd", 439);
     state.corp.credits = 12;
     state.runner.credits = 0;
     const gripBefore = state.runner.grip.length;
@@ -971,13 +971,13 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_227_cerberus",
+        sourceDefinition(state, action) === 439,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
     expect(state.runner.grip.length).toBe(gripBefore - 3);
     expect(state.trace).toMatchObject({
-      sourceDefinitionId: "onr_v1_227_cerberus",
+      sourceDefinitionId: 439,
       successEffect: {
         type: "add_counter",
         counterType: "cerberus",
@@ -989,7 +989,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       damageType: "net",
       damageAmount: 3,
       traceStarted: true,
-      sourceDefinitionId: "onr_v1_227_cerberus",
+      sourceDefinitionId: 439,
     });
 
     state = applyChoice(state, "corp", "bid_1");
@@ -1037,7 +1037,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     expect(state.runner.grip.length).toBe(gripBefore - 4);
     expect(cardCounterAmount(state, state.runner.identity, "cerberus")).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      sourceDefinitionId: "onr_v1_227_cerberus",
+      sourceDefinitionId: 439,
       cerberusCounterCount: 2,
       damageResolved: true,
       damageType: "net",
@@ -1062,15 +1062,15 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
           id: "v1915_new_blood_reorder_corp",
           name: "V1.9.15 New Blood Reorder Corp",
           cards: [
-            { id: "onr_v1_294_new-blood", quantity: 1 },
-            { id: "simple_barrier_ice", quantity: 2 },
-            { id: "simple_code_gate_ice", quantity: 2 },
+            { id: 506, quantity: 1 },
+            { id: 589, quantity: 2 },
+            { id: 590, quantity: 2 },
             ...MECHANIC_SMOKE_DECKS.hiddenZone.corp.cards.filter(
               (card) =>
                 ![
-                  "onr_v1_294_new-blood",
-                  "simple_barrier_ice",
-                  "simple_code_gate_ice",
+                  506,
+                  589,
+                  590,
                 ].includes(card.id),
             ),
           ],
@@ -1078,9 +1078,9 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         agendaPointsToWin: 7,
       }),
     );
-    const operationId = moveCorpCardToHq(state, "onr_v1_294_new-blood");
-    const firstIceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
-    const secondIceId = putCorpIceOnServer(state, "hq", "simple_code_gate_ice");
+    const operationId = moveCorpCardToHq(state, 506);
+    const firstIceId = putCorpIceOnServer(state, "rd", 589);
+    const secondIceId = putCorpIceOnServer(state, "hq", 590);
     state.cardInstances[firstIceId] = {
       ...state.cardInstances[firstIceId]!,
       faceup: true,
@@ -1131,7 +1131,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       targets: expect.objectContaining({ hiddenOrderChoice: true }),
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
-      "simple_code_gate_ice",
+      590,
     );
   });
 });

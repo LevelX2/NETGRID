@@ -36,7 +36,7 @@ it("preserves the financing threshold while known central reserve protection sus
     decision = chooseAiAction(cp.input);
   expect(decision.actionId).toBe(account.actionId);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_281_accounts-receivable_1",
+    "plan:corp.economy:economy-immediate-operation%3Acorp_493_1",
   );
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(

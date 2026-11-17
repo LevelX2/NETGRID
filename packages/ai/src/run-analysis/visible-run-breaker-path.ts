@@ -99,7 +99,7 @@ export function blockedPathAssessment(
   visibleBreakCost: number,
   creditsAfterPath: number,
   unpayableIceIndex: number,
-  unpayableIceDefinitionId: string | undefined,
+  unpayableIceDefinitionId: number | undefined,
   unpayableIceSubtypes: string[] | undefined,
   creditsSpentBeforeUnpayableIce: number,
   firstKnownIceBreakable: boolean,
@@ -151,7 +151,7 @@ export function hardUnbrokenEffectBlockedPathAssessment(params: {
   visibleBreakCost: number;
   creditsAfterPath: number;
   iceIndex: number;
-  iceDefinitionId: string | undefined;
+  iceDefinitionId: number | undefined;
   iceSubtypes: string[] | undefined;
   creditsSpentBeforeUnpayableIce: number;
   firstKnownIceBreakable: boolean;
@@ -266,7 +266,7 @@ export function effectiveIceForQuote(
 }
 
 export function minimumCreditsToBreakVisibleSubroutines(
-  ice: { definitionId?: string; subtypes?: string[]; strength?: number },
+  ice: { definitionId?: number; subtypes?: string[]; strength?: number },
   rigCards: VisibleCard[],
   targetSubroutines: readonly VisibleEffectiveSubroutine[],
   breakerStrengths: Map<string, number>,
@@ -349,7 +349,7 @@ export function minimumCreditsToBreakVisibleSubroutines(
 
 export function creditsToBreakVisibleSubroutinesWithBreaker(
   breakerCard: VisibleCard,
-  ice: { definitionId?: string; subtypes?: string[]; strength?: number },
+  ice: { definitionId?: number; subtypes?: string[]; strength?: number },
   targetSubroutines: readonly VisibleEffectiveSubroutine[],
   currentBreakerStrength = breakerCard.strength ??
     cardDefinitionStrength(breakerCard.definitionId),
@@ -392,7 +392,7 @@ export function breakTagsForSubroutine(
 }
 
 export function minimumCreditsToBreakEndTheRunSubroutines(
-  ice: { definitionId?: string; subtypes?: string[]; strength?: number },
+  ice: { definitionId?: number; subtypes?: string[]; strength?: number },
   rigCards: VisibleCard[],
   endTheRunCount: number,
   breakerStrengths: Map<string, number>,
@@ -494,7 +494,7 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
 
 export function creditsToBreakEndTheRunSubroutinesWithBreaker(
   breakerCard: VisibleCard,
-  ice: { definitionId?: string; subtypes?: string[]; strength?: number },
+  ice: { definitionId?: number; subtypes?: string[]; strength?: number },
   endTheRunCount: number,
   currentBreakerStrength = breakerCard.strength ??
     cardDefinitionStrength(breakerCard.definitionId),
@@ -570,7 +570,7 @@ export function structuredBreakerAssessment(params: {
   breakerDefinition: CardDefinition | undefined;
   ice: {
     instanceId?: string;
-    definitionId?: string;
+    definitionId?: number;
     subtypes?: string[];
     strength?: number;
   };
@@ -834,7 +834,7 @@ export function structuredBreakerAssessment(params: {
 }
 
 function pendingFreeBreakAssessment(
-  ice: { definitionId?: string; subtypes?: string[] },
+  ice: { definitionId?: number; subtypes?: string[] },
   rigCards: VisibleCard[],
   pendingFreeBreaks: VisibleRunBreakerState["pendingFreeBreaks"],
   breakerStrengths: Map<string, number>,
@@ -891,7 +891,7 @@ function pendingFreeBreakAssessment(
   };
 }
 
-export function endTheRunSubroutineCount(iceDefinitionId: string): number {
+export function endTheRunSubroutineCount(iceDefinitionId: number): number {
   return (
     visibleRunCardDefinition(iceDefinitionId)?.subroutines?.filter(
       (subroutine) => subroutine.type === "end_the_run",
@@ -900,8 +900,8 @@ export function endTheRunSubroutineCount(iceDefinitionId: string): number {
 }
 
 export function canBreakerDefinitionBreakIce(
-  breakerDefinitionId: string,
-  iceDefinitionId: string,
+  breakerDefinitionId: number,
+  iceDefinitionId: number,
 ): boolean {
   if (breakerCardBlocksAccessReachability(breakerDefinitionId)) return false;
   const breakerDefinition = visibleRunCardDefinition(breakerDefinitionId);
@@ -929,7 +929,7 @@ export function canBreakerDefinitionBreakIce(
  */
 export function canVisibleBreakerBreakQuotedSubroutines(params: {
   breaker: VisibleCard;
-  ice: { instanceId?: string; definitionId?: string; subtypes?: string[] };
+  ice: { instanceId?: string; definitionId?: number; subtypes?: string[] };
   subroutines: readonly VisibleEffectiveSubroutine[];
 }): boolean {
   if (
@@ -962,19 +962,19 @@ export function canVisibleBreakerBreakQuotedSubroutines(params: {
   return (quote?.breakOptions.length ?? 0) > 0;
 }
 
-export function iceHasEndTheRun(iceDefinitionId: string): boolean {
+export function iceHasEndTheRun(iceDefinitionId: number): boolean {
   return endTheRunSubroutineCount(iceDefinitionId) > 0;
 }
 
 export function cardDefinitionStrength(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): number {
   if (!definitionId) return 0;
   return visibleRunCardDefinition(definitionId)?.strength ?? 0;
 }
 
 export function visibleRunCardDefinition(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CardDefinition | undefined {
   if (!definitionId) return undefined;
   return CARD_DEFINITIONS_BY_ID[definitionId];

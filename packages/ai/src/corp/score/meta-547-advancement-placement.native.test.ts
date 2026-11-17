@@ -53,7 +53,7 @@ describe("exact advancement placement from the chosen score parent", () => {
     const first = chooseAiAction(before.input);
     expect(first).toMatchObject({
       actionId:
-        "corp.advance_card.corp_onr_v1_214_project-babylon_1.corp_onr_v1_214_project-babylon_1",
+        "corp.advance_card.corp_426_1.corp_426_1",
       fallbackUsed: false,
     });
   });
@@ -67,7 +67,7 @@ describe("exact advancement placement from the chosen score parent", () => {
         id: snapshot.deckSnapshotId,
         name: "Current advancement binding",
         side: "corp",
-        identity: "corp_identity_001",
+        identity: 3,
         cards: snapshot.cards.map((card) => ({
           id: card.cardId,
           quantity: card.quantity,
@@ -81,9 +81,9 @@ describe("exact advancement placement from the chosen score parent", () => {
     RealEngineFixtureBuilder.forState(initial)
       .withCorpHqSize(0)
       .withCorpCredits(7)
-      .withCorpCardInHq("onr_v1_304_systematic-layoffs")
-      .withCorpRemoteRoot("remote_1", "onr_v1_214_project-babylon")
-      .withRezzedCorpIceOnServer("remote_1", "onr_v1_237_data-wall");
+      .withCorpCardInHq(516)
+      .withCorpRemoteRoot("remote_1", 426)
+      .withRezzedCorpIceOnServer("remote_1", 449);
     const agendaId = initial.corp.servers.find(
       (server) => server.id === "remote_1",
     )!.root[0]!;
@@ -97,7 +97,7 @@ describe("exact advancement placement from the chosen score parent", () => {
         input.legalActions.find((action) => action.actionId === first.actionId)!
           .source!
       ]!.definitionId,
-    ).toBe("onr_v1_304_systematic-layoffs");
+    ).toBe(516);
     const portfolio = residentPlanPortfolioSnapshot(input)!;
     const executor = portfolio.instances.find(
       (i) => i.instanceId === portfolio.executorInstanceId,

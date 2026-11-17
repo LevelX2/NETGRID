@@ -34,7 +34,7 @@ describe("DeckCapabilityProfile", () => {
     inputView.own.rig = [
       visibleCard(
         "codecracker-1",
-        "onr_v1_014_codecracker",
+        226,
         "runner",
         "program",
         {
@@ -45,7 +45,7 @@ describe("DeckCapabilityProfile", () => {
       ),
       visibleCard(
         "smc-1",
-        "onr_v1_059_self-modifying-code",
+        271,
         "runner",
         "program",
         {
@@ -53,7 +53,7 @@ describe("DeckCapabilityProfile", () => {
           memoryCost: 2,
         },
       ),
-      visibleCard("broker-1", "onr_v1_154_broker", "runner", "resource", {
+      visibleCard("broker-1", 366, "runner", "resource", {
         title: "Broker",
         counterDisplays: [
           {
@@ -98,16 +98,16 @@ describe("DeckCapabilityProfile", () => {
       playerView: inputView,
       legalActions,
       deckSnapshot: runnerSnapshot([
-        ["onr_v1_014_codecracker", 1],
-        ["onr_v1_021_dwarf", 2],
-        ["onr_v1_059_self-modifying-code", 1],
-        ["onr_v1_154_broker", 1],
+        [226, 1],
+        [233, 2],
+        [271, 1],
+        [366, 1],
       ]),
     });
 
     expect(
       profile.runner?.breakerInventory.map((entry) => entry.cardId),
-    ).toEqual(["onr_v1_014_codecracker", "onr_v1_021_dwarf"]);
+    ).toEqual([226, 233]);
     expect(profile.runner?.breakerCoverageMatrix.code_gate.installed).toBe(
       true,
     );
@@ -115,7 +115,7 @@ describe("DeckCapabilityProfile", () => {
     expect(profile.runner?.breakerCoverageMatrix.wall.searchableNow).toBe(true);
     expect(profile.runner?.searchAccess.canSearchProgramsNow).toBe(true);
     expect(profile.runner?.economyBankTools[0]).toMatchObject({
-      cardId: "onr_v1_154_broker",
+      cardId: 366,
       status: "installed",
       currentBankAmount: 3,
       buildActionLegal: true,
@@ -163,20 +163,20 @@ describe("DeckCapabilityProfile", () => {
       playerView: playerView("runner"),
       legalActions: [],
       deckSnapshot: runnerSnapshot([
-        ["onr_v1_098_lucidrine-booster-drug", 1],
-        ["onr_v1_154_broker", 1],
+        [310, 1],
+        [366, 1],
       ]),
     });
 
     expect(profile.runner?.economyBankTools.map((tool) => tool.cardId)).toEqual(
-      ["onr_v1_154_broker"],
+      [366],
     );
   });
 
   it("uses structured hosted-credit payloads and ignores label-only bank actions", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
-      visibleCard("broker-1", "onr_v1_154_broker", "runner", "resource", {
+      visibleCard("broker-1", 366, "runner", "resource", {
         title: "Broker",
         counterDisplays: [
           {
@@ -210,7 +210,7 @@ describe("DeckCapabilityProfile", () => {
           "Von Broker nehmen",
         ),
       ],
-      deckSnapshot: runnerSnapshot([["onr_v1_154_broker", 1]]),
+      deckSnapshot: runnerSnapshot([[366, 1]]),
     });
 
     expect(labelOnly.runner?.economyBankTools[0]).toMatchObject({
@@ -241,7 +241,7 @@ describe("DeckCapabilityProfile", () => {
           { cardImplementationTakesHostedCredits: true },
         ),
       ],
-      deckSnapshot: runnerSnapshot([["onr_v1_154_broker", 1]]),
+      deckSnapshot: runnerSnapshot([[366, 1]]),
     });
 
     expect(structured.runner?.economyBankTools[0]).toMatchObject({
@@ -255,7 +255,7 @@ describe("DeckCapabilityProfile", () => {
   it("keeps individual bank amounts and payout size distinct in a portfolio", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
-      visibleCard("broker-1", "onr_v1_154_broker", "runner", "resource", {
+      visibleCard("broker-1", 366, "runner", "resource", {
         title: "Broker",
         counterDisplays: [
           {
@@ -268,7 +268,7 @@ describe("DeckCapabilityProfile", () => {
           },
         ],
       }),
-      visibleCard("broker-2", "onr_v1_154_broker", "runner", "resource", {
+      visibleCard("broker-2", 366, "runner", "resource", {
         title: "Broker",
         counterDisplays: [
           {
@@ -332,7 +332,7 @@ describe("DeckCapabilityProfile", () => {
       side: "runner",
       playerView: inputView,
       legalActions,
-      deckSnapshot: runnerSnapshot([["onr_v1_154_broker", 2]]),
+      deckSnapshot: runnerSnapshot([[366, 2]]),
     });
 
     expect(profile.runner?.economyBankTools).toEqual([
@@ -394,7 +394,7 @@ describe("DeckCapabilityProfile", () => {
     inputView.own.rig = [
       visibleCard(
         "streetware-1",
-        "onr_proteus_150_streetware-distributor",
+        208,
         "runner",
         "resource",
         { title: "Streetware Distributor" },
@@ -430,7 +430,7 @@ describe("DeckCapabilityProfile", () => {
     inputView.own.rig = [
       visibleCard(
         "short-term-contract-1",
-        "onr_v1_178_short-term-contract",
+        390,
         "runner",
         "resource",
         {
@@ -468,12 +468,12 @@ describe("DeckCapabilityProfile", () => {
           },
         ),
       ],
-      deckSnapshot: runnerSnapshot([["onr_v1_178_short-term-contract", 3]]),
+      deckSnapshot: runnerSnapshot([[390, 3]]),
     });
 
     expect(profile.runner?.economyBankTools).toEqual([
       expect.objectContaining({
-        cardId: "onr_v1_178_short-term-contract",
+        cardId: 390,
         sourceCardInstanceId: "short-term-contract-1",
         status: "installed",
         currentBankAmount: 6,
@@ -521,7 +521,7 @@ describe("DeckCapabilityProfile", () => {
     inputView.own.rig = [
       visibleCard(
         "smc-1",
-        "onr_v1_059_self-modifying-code",
+        271,
         "runner",
         "program",
         {
@@ -543,12 +543,12 @@ describe("DeckCapabilityProfile", () => {
           "Self-Modifying Code: search your stack for a program",
         ),
       ],
-      deckSnapshot: runnerSnapshot([["onr_v1_059_self-modifying-code", 1]]),
+      deckSnapshot: runnerSnapshot([[271, 1]]),
     });
 
     expect(labelOnly.runner?.searchAccess.canSearchProgramsNow).toBe(false);
     expect(labelOnly.runner?.searchAccess.tools[0]).toMatchObject({
-      cardId: "onr_v1_059_self-modifying-code",
+      cardId: 271,
       legalNow: false,
     });
 
@@ -564,12 +564,12 @@ describe("DeckCapabilityProfile", () => {
           "Use ability",
         ),
       ],
-      deckSnapshot: runnerSnapshot([["onr_v1_059_self-modifying-code", 1]]),
+      deckSnapshot: runnerSnapshot([[271, 1]]),
     });
 
     expect(sourced.runner?.searchAccess.canSearchProgramsNow).toBe(true);
     expect(sourced.runner?.searchAccess.tools[0]).toMatchObject({
-      cardId: "onr_v1_059_self-modifying-code",
+      cardId: 271,
       legalNow: true,
     });
   });
@@ -660,7 +660,7 @@ describe("DeckCapabilityProfile", () => {
     inputView.own.gripOrHq = [
       visibleCard(
         "boostergang-1",
-        "onr_classic_034_boostergang-connections",
+        38,
         "runner",
         "event",
         {
@@ -684,15 +684,15 @@ describe("DeckCapabilityProfile", () => {
         ),
       ],
       deckSnapshot: runnerSnapshot([
-        ["onr_classic_027_early-worm", 2],
-        ["onr_classic_032_schematics-search-engine", 2],
-        ["onr_classic_034_boostergang-connections", 2],
+        [31, 2],
+        [36, 2],
+        [38, 2],
       ]),
     });
 
     expect(profile.runner?.searchAccess.tools).toEqual([
       expect.objectContaining({
-        cardId: "onr_classic_034_boostergang-connections",
+        cardId: 38,
         canSearchPrograms: true,
         canSearchBreakers: true,
         legalNow: true,
@@ -816,16 +816,16 @@ describe("DeckCapabilityProfile", () => {
     const profile = buildDeckCapabilityProfile({
       side: "runner",
       deckSnapshot: runnerSnapshot([
-        ["onr_classic_031_rent-i-con", 3],
-        ["onr_proteus_134_cortical-cybermodem", 1],
-        ["onr_v1_011_cloak", 1],
-        ["onr_v1_071_vewy-vewy-quiet", 2],
+        [35, 3],
+        [192, 1],
+        [223, 1],
+        [283, 2],
       ]),
     });
 
     expect(
       profile.runner?.breakerInventory.map((entry) => entry.cardId),
-    ).toEqual(["onr_classic_031_rent-i-con"]);
+    ).toEqual([35]);
     expect(profile.runner?.breakerInventory[0]).toMatchObject({
       coverage: ["subtype_limited", "universal"],
       quantityKnownInDeck: 3,
@@ -1080,7 +1080,7 @@ describe("DeckCapabilityProfile", () => {
     const deckSnapshot = {
       ...capturedSnapshot,
       cards: capturedSnapshot.cards.filter(
-        (card) => card.cardId !== "onr_v1_154_broker",
+        (card) => card.cardId !== 366,
       ),
     };
 
@@ -1092,7 +1092,7 @@ describe("DeckCapabilityProfile", () => {
 
     expect(
       profile.runner?.searchAccess.tools.map((tool) => tool.cardId),
-    ).toEqual(["onr_v1_114_temple-microcode-outlet"]);
+    ).toEqual([326]);
     expect(profile.runner?.attackPlanProfile).toMatchObject({
       remoteContestToolsKnown: 2,
       evidence: expect.arrayContaining(["remote_contest_tools:2"]),
@@ -1106,7 +1106,7 @@ describe("DeckCapabilityProfile", () => {
       legalActions: [
         legalAction("draw", "runner", "draw_card", "basic_action", "Draw"),
       ],
-      deckSnapshot: runnerSnapshot([["onr_v1_021_dwarf", 1]]),
+      deckSnapshot: runnerSnapshot([[233, 1]]),
     });
 
     expect(profile.runner?.breakerCoverageMatrix.wall.inDeckKnown).toBe(true);
@@ -1126,13 +1126,13 @@ describe("DeckCapabilityProfile", () => {
     inputView.own.heapOrArchives = [
       visibleCard(
         "codecracker-1",
-        "onr_v1_014_codecracker",
+        226,
         "runner",
         "program",
       ),
       visibleCard(
         "codecracker-2",
-        "onr_v1_014_codecracker",
+        226,
         "runner",
         "program",
       ),
@@ -1142,11 +1142,11 @@ describe("DeckCapabilityProfile", () => {
       side: "runner",
       playerView: inputView,
       legalActions: [],
-      deckSnapshot: runnerSnapshot([["onr_v1_014_codecracker", 2]]),
+      deckSnapshot: runnerSnapshot([[226, 2]]),
     });
 
     expect(profile.runner?.breakerInventory[0]).toMatchObject({
-      cardId: "onr_v1_014_codecracker",
+      cardId: 226,
       quantityKnownInDeck: 0,
       locations: ["discarded"],
     });
@@ -1164,7 +1164,7 @@ describe("DeckCapabilityProfile", () => {
     inputView.own.gripOrHq = [
       visibleCard(
         "codecracker-1",
-        "onr_v1_014_codecracker",
+        226,
         "runner",
         "program",
       ),
@@ -1172,7 +1172,7 @@ describe("DeckCapabilityProfile", () => {
     inputView.own.heapOrArchives = [
       visibleCard(
         "codecracker-2",
-        "onr_v1_014_codecracker",
+        226,
         "runner",
         "program",
       ),
@@ -1182,7 +1182,7 @@ describe("DeckCapabilityProfile", () => {
       side: "runner",
       playerView: inputView,
       legalActions: [],
-      deckSnapshot: runnerSnapshot([["onr_v1_014_codecracker", 3]]),
+      deckSnapshot: runnerSnapshot([[226, 3]]),
     });
 
     expect(profile.runner?.breakerInventory[0]).toMatchObject({
@@ -1201,7 +1201,7 @@ describe("DeckCapabilityProfile", () => {
     const inputView = playerView("runner");
     const breaker = visibleCard(
       "codecracker-1",
-      "onr_v1_014_codecracker",
+      226,
       "runner",
       "program",
     );
@@ -1217,7 +1217,7 @@ describe("DeckCapabilityProfile", () => {
       side: "runner",
       playerView: inputView,
       legalActions: [],
-      deckSnapshot: runnerSnapshot([["onr_v1_014_codecracker", 2]]),
+      deckSnapshot: runnerSnapshot([[226, 2]]),
     });
 
     expect(profile.runner?.breakerInventory[0]).toMatchObject({
@@ -1232,9 +1232,9 @@ describe("DeckCapabilityProfile", () => {
       playerView: playerView("runner"),
       legalActions: [],
       deckSnapshot: runnerSnapshot([
-        ["onr_v1_014_codecracker", 1],
-        ["onr_v1_021_dwarf", 1],
-        ["onr_v1_154_broker", 1],
+        [226, 1],
+        [233, 1],
+        [366, 1],
       ]),
     });
 
@@ -1309,14 +1309,14 @@ describe("DeckCapabilityProfile", () => {
       playerView: playerView("runner"),
       legalActions: [],
       deckSnapshot: runnerSnapshot([
-        ["onr_classic_032_schematics-search-engine", 2],
+        [36, 2],
       ]),
     });
 
     expect(profile.runner?.searchAccess.tools).not.toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          cardId: "onr_classic_032_schematics-search-engine",
+          cardId: 36,
         }),
       ]),
     );
@@ -1401,7 +1401,7 @@ function server(
 
 function visibleCard(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   side: Side,
   type: NonNullable<VisibleCard["type"]>,
   overrides: Omit<

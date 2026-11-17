@@ -126,7 +126,7 @@ describe("semanticRuntimeCorpCentralPressureAssessment", () => {
   it("distinguishes hardware multiaccess from virus pressure and requires a current multiaccess event for diversion", () => {
     const runnerRig = [
       runnerCard("interface", {
-        definitionId: "onr_v1_139_r-and-d-interface",
+        definitionId: 351,
         type: "hardware",
         title: "R&D Interface",
         rulesText: "Access 1 additional card when you access R&D.",
@@ -238,7 +238,7 @@ function rdVirusCard(instanceId: string): VisibleCard {
 
 function highlighterCard(instanceId: string): VisibleCard {
   return runnerCard(instanceId, {
-    definitionId: "onr_proteus_090_highlighter",
+    definitionId: 148,
     title: "Highlighter",
     rulesText:
       "After each successful run on R&D, give the Corp a Highlighter counter. Each Highlighter counter after the first allows you to access an additional card from R&D whenever you access cards from R&D.",

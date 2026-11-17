@@ -31,7 +31,7 @@ describe("match e8047b3e Runner remediation checkpoints", () => {
     const { input, decision } = replayDecision(shellDuplicateJson);
     const duplicatePreparation = input.legalActions.find((action) =>
       action.actionId.includes(
-        "runner_onr_v1_059_self-modifying-code_1.set_aside_from_grip",
+        "runner_271_1.set_aside_from_grip",
       ),
     );
     expect(duplicatePreparation).toBeDefined();

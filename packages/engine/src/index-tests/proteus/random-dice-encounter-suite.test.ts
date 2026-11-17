@@ -23,13 +23,13 @@ import {
   type Side,
 } from "@netgrid/shared";
 
-const ROADBLOCK = "onr_proteus_035_roadblock";
-const EXECUTIVE_BOOT_CAMP = "onr_proteus_058_executive-boot-camp";
-const LISA_BLIGHT = "onr_proteus_063_lisa-blight";
-const FORWARDS_LEGACY = "onr_proteus_087_forwards-legacy";
-const SIMPLE_TAG_ICE = "simple_tag_ice";
-const WALL = "onr_v1_279_wall-of-static";
-const SCORCHED_EARTH = "onr_v1_302_scorched-earth";
+const ROADBLOCK = 93;
+const EXECUTIVE_BOOT_CAMP = 116;
+const LISA_BLIGHT = 121;
+const FORWARDS_LEGACY = 145;
+const SIMPLE_TAG_ICE = 603;
+const WALL = 491;
+const SCORCHED_EARTH = 514;
 
 function baseState(seed: string): GameState {
   const state = toRunnerTurn(
@@ -58,7 +58,7 @@ function baseState(seed: string): GameState {
 
 function addCorpRoot(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   serverId: Exclude<ServerId, "new_remote">,
   rezzed = true,
@@ -95,7 +95,7 @@ function addCorpRoot(
 
 function addCorpIce(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   serverId: Exclude<ServerId, "new_remote">,
   rezzed = true,
@@ -132,7 +132,7 @@ function addCorpIce(
 
 function addCorpHq(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -154,7 +154,7 @@ function addCorpHq(
 
 function addRunnerProgram(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;

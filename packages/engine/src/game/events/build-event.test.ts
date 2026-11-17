@@ -294,7 +294,7 @@ describe("game event builder", () => {
       payload: {
         v1922RunnerEventAbility:
           "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
-        sourceDefinitionId: "onr_v1_080_core-command-jettison-ice",
+        sourceDefinitionId: 292,
       },
     } satisfies LegalAction;
 
@@ -371,7 +371,7 @@ describe("game event builder", () => {
     const assetId = previous.corp.hq[0]!;
     previous.cardInstances[assetId] = {
       ...previous.cardInstances[assetId]!,
-      definitionId: "onr_v1_309_bbs-whispering-campaign",
+      definitionId: 521,
     };
     const next = structuredClone(previous);
     next.cardInstances[assetId] = {
@@ -404,7 +404,7 @@ describe("game event builder", () => {
     expect(event.type).toBe("rez_card");
     expect(event.publicPayload).toMatchObject({
       actionType: "rez_card",
-      cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      cardDefinitionId: 521,
     });
     expect(event.visibilityClass).toBe("hidden_info_barrier");
     expect(event.privatePayload?.corp?.legalAction).toMatchObject({
@@ -480,11 +480,11 @@ describe("game event builder", () => {
       expiresAtStateVersion: previous.stateVersion,
       payload: {
         cardId: sourceCardInstanceId,
-        sourceDefinitionId: "runner_identity_001",
+        sourceDefinitionId: 587,
       },
     } satisfies LegalAction;
     const event = buildEventWithHost(
-      testBuildEventHost({ sourceDefinitionId: "runner_identity_001" }),
+      testBuildEventHost({ sourceDefinitionId: 587 }),
       previous.stateVersion,
       next.stateVersion,
       hashState(next),
@@ -496,7 +496,7 @@ describe("game event builder", () => {
 
     expect(toPublicEventForSide(event, "runner").publicPayload).toMatchObject({
       sourceCardInstanceId,
-      sourceDefinitionId: "runner_identity_001",
+      sourceDefinitionId: 587,
     });
     expect(toPublicEvent(event).publicPayload).not.toHaveProperty(
       "sourceCardInstanceId",
@@ -525,11 +525,11 @@ describe("game event builder", () => {
       expiresAtStateVersion: previous.stateVersion,
       payload: {
         cardId: "different-source-instance",
-        sourceDefinitionId: "runner_identity_001",
+        sourceDefinitionId: 587,
       },
     } satisfies LegalAction;
     const event = buildEventWithHost(
-      testBuildEventHost({ sourceDefinitionId: "runner_identity_001" }),
+      testBuildEventHost({ sourceDefinitionId: 587 }),
       previous.stateVersion,
       next.stateVersion,
       hashState(next),

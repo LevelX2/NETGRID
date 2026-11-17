@@ -46,7 +46,7 @@ describe("CardSpec generated AI hint artifact", () => {
   ] as const)(
     "validates stored capability semantics at %s",
     (changes, field) => {
-      const cardId = "onr_classic_001_data-fort-remapping";
+      const cardId = 5;
       const artifact = {
         ...generatedArtifact,
         cards: generatedArtifact.cards.map((record) =>

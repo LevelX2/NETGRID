@@ -48,7 +48,7 @@ it("owns the original public hardware-trash access choice at the Ambush executor
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.selectedChoices).toEqual({
     choiceId: input.playerView.pendingChoice!.choiceId,
-    selectedOptionIds: ["target_runner_onr_v1_129_hq-interface_2"],
+    selectedOptionIds: ["target_runner_341_2"],
   });
   expect(executor.moduleId).toBe("corp.ambush_and_bluff");
   expect(executor.moduleState).toMatchObject({
@@ -58,7 +58,7 @@ it("owns the original public hardware-trash access choice at the Ambush executor
         actionId: decision.actionId,
         targetCardType: "hardware",
         observedAtStateVersion: 166,
-        targetCardInstanceIds: ["runner_onr_v1_129_hq-interface_2"],
+        targetCardInstanceIds: ["runner_341_2"],
       },
     },
   });
@@ -74,7 +74,7 @@ it.each(["source", "server", "target", "cardinality"])(
     const input = fixture(),
       c = input.playerView.pendingChoice!;
     if (kind === "source")
-      c.sourceCardDefinitionId = "onr_v1_312_chicago-branch";
+      c.sourceCardDefinitionId = 524;
     if (kind === "server") input.playerView.run!.attackedServerId = "rd";
     if (kind === "target")
       c.options[0]!.value = input.playerView.opponent.rig!.find(

@@ -127,7 +127,7 @@ export function runnerCoveragePlanHandDisposition(
 }
 
 export function createRunnerCoverageModule(
-  rolesForDefinitionId: (definitionId: string) => readonly string[],
+  rolesForDefinitionId: (definitionId: number) => readonly string[],
 ): PlanModule {
   return {
     moduleId: "runner.rig_and_coverage",
@@ -334,7 +334,7 @@ export function createRunnerCoverageModule(
 function coveragePhase(
   context: PlanSchedulerContext,
   gap: RunnerCoverageGapSignal,
-  rolesForDefinitionId: (definitionId: string) => readonly string[],
+  rolesForDefinitionId: (definitionId: number) => readonly string[],
   preparations = coveragePreparationCandidates(context, gap),
   installs = coverageInstallCandidates(context, gap, rolesForDefinitionId),
 ): CoverageState["phase"] {
@@ -383,7 +383,7 @@ export function runnerCoverageAcquisitionActionIds(
 export function runnerCoverageCurrentPhase(params: {
   context: PlanSchedulerContext;
   gap: RunnerCoverageGapSignal;
-  rolesForDefinitionId: (definitionId: string) => readonly string[];
+  rolesForDefinitionId: (definitionId: number) => readonly string[];
 }): CoverageState["phase"] {
   return coveragePhase(params.context, params.gap, params.rolesForDefinitionId);
 }
@@ -391,7 +391,7 @@ export function runnerCoverageCurrentPhase(params: {
 function coverageInstallCandidates(
   context: PlanSchedulerContext,
   gap: RunnerCoverageGapSignal,
-  rolesForDefinitionId: (definitionId: string) => readonly string[],
+  rolesForDefinitionId: (definitionId: number) => readonly string[],
 ): PlanMaterialization["candidates"] {
   return context.actionCandidates.flatMap((candidate) => {
     if (candidate.semanticActionType !== "install.card") return [];
@@ -546,7 +546,7 @@ function runnerInstallSourceCardInstanceId(
 function runnerInstallSourceDefinitionId(
   context: PlanSchedulerContext,
   candidate: ActionSemanticCandidate,
-): string | undefined {
+): number | undefined {
   if (candidate.sourceDefinitionId) return candidate.sourceDefinitionId;
   const sourceCardInstanceId = runnerInstallSourceCardInstanceId(
     context,
@@ -560,7 +560,7 @@ function runnerInstallSourceDefinitionId(
 }
 
 export function runnerInstallDefinitionCoversCoverageGap(
-  definitionId: string,
+  definitionId: number,
   roles: readonly string[],
   requiredRole: RunnerCoverageGapSignal["requiredRole"],
   selectedSubtype?: unknown,

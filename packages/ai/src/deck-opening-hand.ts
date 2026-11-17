@@ -473,7 +473,7 @@ type OpeningSemanticContext = {
 
 function runnerOpeningCapabilityBreakerDefinitionIds(
   input: AiDecisionInput,
-): Set<string> {
+): Set<number> {
   const semanticInput = input as AiDecisionInputWithDeckCapabilities;
   return new Set(
     (semanticInput.ownDeckCapabilities?.runner?.breakerInventory ?? [])

@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_191_black-ice-quality-assurance",
+      403,
     ),
     title: "Black Ice Quality Assurance",
     side: "corp",

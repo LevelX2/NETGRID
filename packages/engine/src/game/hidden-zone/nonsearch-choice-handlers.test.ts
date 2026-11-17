@@ -28,7 +28,7 @@ const socialId = "social_engineering" as CardDefinitionId;
 const sourceId = "source" as CardInstanceId;
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"] = "resource",
   title = id,
 ): CardDefinition {
@@ -282,7 +282,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
       corpArchives: [sourceId, ice1, asset, ice2],
       definitions: {
         [sourceId]: definition(
-          "onr_classic_018_reclamation-project",
+          22,
           "operation",
           "Reclamation Project",
         ),
@@ -317,7 +317,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     expect(host.state.corp.hq).toEqual([ice1, ice2]);
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneAction: "v1922_corp_archives_to_hq",
-      sourceDefinitionId: "onr_classic_018_reclamation-project",
+      sourceDefinitionId: 22,
       movedCount: 2,
       archivesRevealCount: 2,
       archivesRevealDefinitionIds: "classic_ice_1,classic_ice_2",
@@ -330,7 +330,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
       corpArchives: [sourceId, ice],
       definitions: {
         [sourceId]: definition(
-          "onr_classic_018_reclamation-project",
+          22,
           "operation",
           "Reclamation Project",
         ),
@@ -357,7 +357,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     });
     expect(host.state.corp.archives).toEqual([sourceId, ice]);
     expect(host.legalAction.payload).toMatchObject({
-      sourceDefinitionId: "onr_classic_018_reclamation-project",
+      sourceDefinitionId: 22,
       movedCount: 0,
       archivesRevealCount: 0,
     });
@@ -366,7 +366,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
       corpArchives: [sourceId],
       definitions: {
         [sourceId]: definition(
-          "onr_classic_018_reclamation-project",
+          22,
           "operation",
           "Reclamation Project",
         ),
@@ -385,7 +385,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     startCorpArchivesToHqChoice(emptyHost, sourceId);
     expect(emptyHost.state.pendingChoice).toBeUndefined();
     expect(emptyHost.legalAction.payload).toMatchObject({
-      sourceDefinitionId: "onr_classic_018_reclamation-project",
+      sourceDefinitionId: 22,
       eligibleCount: 0,
       movedCount: 0,
       archivesRevealCount: 0,
@@ -398,7 +398,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
       corpHq: [hqCard],
       definitions: {
         [sourceId]: definition(
-          "onr_classic_017_corporate-shuffle",
+          21,
           "operation",
           "Corporate Shuffle",
         ),
@@ -424,7 +424,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "classic_corporate_shuffle_hq_to_rd",
-      sourceDefinitionId: "onr_classic_017_corporate-shuffle",
+      sourceDefinitionId: 21,
       movedCount: 1,
     });
     expect(host.legalAction.payload).not.toHaveProperty("movedCardId");

@@ -24,7 +24,7 @@ export type CentralCounterConversionQuote =
     }
   | {
       complete: true;
-      definitionId: string;
+      definitionId: number;
       missingServerId: string;
       counterType: string;
       nextCorpTurnActionsDenied: number;

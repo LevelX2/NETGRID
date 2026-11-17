@@ -107,7 +107,7 @@ describe("meta 403 surviving observations and persistent action denial", () => {
     ).toEqual([
       expect.objectContaining({
         positionKey: "root:0",
-        definitionId: "onr_v1_353_chimera",
+        definitionId: 565,
         sourceEventId: "evt_375",
       }),
     ]);
@@ -136,7 +136,7 @@ describe("meta 403 surviving observations and persistent action denial", () => {
     ).toEqual([
       expect.objectContaining({
         positionKey: "root:0",
-        definitionId: "onr_v1_353_chimera",
+        definitionId: 565,
       }),
     ]);
   });

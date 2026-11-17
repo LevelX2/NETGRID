@@ -152,7 +152,7 @@ export function spendRestrictedHostedCredits(
   options: RestrictedHostedCreditPaymentOptions = {},
 ): {
   spent: number;
-  sourceDefinitionIds: string[];
+  sourceDefinitionIds: number[];
 } {
   let remaining = Math.max(0, Math.floor(amount));
   let spent = 0;
@@ -606,7 +606,7 @@ export function payEncounterTaxForFutureIce(
   };
 }
 
-function requiredEncounterTaxSourceDefinitionId(run: ActiveRun): string {
+function requiredEncounterTaxSourceDefinitionId(run: ActiveRun): number {
   if (!run.encounterTaxSourceDefinitionId)
     throw new Error("Run-weite Encounter-Steuer hat keine Quellenbindung.");
   return run.encounterTaxSourceDefinitionId;

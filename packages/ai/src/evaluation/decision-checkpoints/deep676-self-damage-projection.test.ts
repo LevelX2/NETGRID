@@ -24,7 +24,7 @@ const fixture = JSON.parse(
   ),
 );
 const actionId =
-  "runner.play_event.runner_onr_classic_036_do-the-drine_1.runner_onr_classic_036_do-the-drine_1.4";
+  "runner.play_event.runner_40_1.runner_40_1.4";
 function scenario(amount = 4) {
   expect(Object.values(fixture.validation).every(Boolean)).toBe(true);
   expect(Object.values(fixture.actualAfter.validation).every(Boolean)).toBe(
@@ -43,7 +43,7 @@ function scenario(amount = 4) {
     observerSide: "runner",
     stateVersion: input.playerView.stateVersion,
     visibleSourceDefinitionsByInstanceId: {
-      [action.source!]: "onr_classic_036_do-the-drine",
+      [action.source!]: 40,
     },
   });
   return { input, action, candidate: candidate! };

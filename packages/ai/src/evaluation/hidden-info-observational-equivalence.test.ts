@@ -26,10 +26,10 @@ const RUNNER_DECK = withCards(
   DEMO_DECKS.demo_runner_001,
   "hidden-equivalence-runner",
   [
-    "onr_v1_154_broker",
-    "onr_v1_161_fall-guy",
-    "onr_classic_046_executive-file-clerk",
-    "onr_classic_050_sandbox-dig",
+    366,
+    373,
+    50,
+    54,
   ],
 );
 const CORP_DECK = withCards(
@@ -123,8 +123,8 @@ describe("hidden-info observational equivalence", () => {
 
   it("ignores different hidden Runner grip, facedown resource, and future stack from the Corp perspective", () => {
     const hiddenDefinitionIds = [
-      "onr_classic_046_executive-file-clerk",
-      "onr_classic_050_sandbox-dig",
+      50,
+      54,
     ];
     const left = corpMainState("hidden-equivalence-runner-private");
     const resourceDefinition = required(
@@ -181,7 +181,7 @@ describe("hidden-info observational equivalence", () => {
     const brokerId = required(
       hiddenOwnedCardIds(left, "runner").find(
         (cardId) =>
-          left.cardInstances[cardId]?.definitionId === "onr_v1_154_broker",
+          left.cardInstances[cardId]?.definitionId === 366,
       ),
       "hidden Broker instance",
     );
@@ -189,17 +189,17 @@ describe("hidden-info observational equivalence", () => {
       hiddenOwnedCardIds(left, "runner").find(
         (cardId) =>
           cardId !== brokerId &&
-          left.cardInstances[cardId]?.definitionId !== "onr_v1_154_broker",
+          left.cardInstances[cardId]?.definitionId !== 366,
       ),
       "other hidden Runner instance",
     );
     const right = structuredClone(left);
     swapDefinitions(right, brokerId, otherId);
     expect(left.cardInstances[brokerId]?.definitionId).toBe(
-      "onr_v1_154_broker",
+      366,
     );
     expect(right.cardInstances[otherId]?.definitionId).toBe(
-      "onr_v1_154_broker",
+      366,
     );
 
     expectEquivalentDecision(left, right, "corp");

@@ -45,7 +45,7 @@ it("withdraws prospective bank funding when the actual remote parent owns ICE pr
     (a) => a.actionId === result.actionId,
   )!;
   expect(action.type).toBe("play_event");
-  expect(action.source).toBe("runner_onr_v1_086_forged-activation-orders_3");
+  expect(action.source).toBe("runner_298_3");
   expect(result.fallbackUsed).toBe(false);
   expect(result.timeoutUsed).toBe(false);
   const pf = result.decisionDebug!.planFirstDecision!;
@@ -82,7 +82,7 @@ it("withdraws prospective bank funding when the actual remote parent owns ICE pr
   ).toBe(engineFacts);
   const bank = residentPlanPortfolioSnapshot(input)!.instances.find(
     (p) =>
-      p.instanceId === "plan:runner.credit_bank:runner_onr_v1_154_broker_1",
+      p.instanceId === "plan:runner.credit_bank:runner_366_1",
   )!;
   expect(bank.parentNeedId).toBeUndefined();
   expect(bank.moduleState).toMatchObject({

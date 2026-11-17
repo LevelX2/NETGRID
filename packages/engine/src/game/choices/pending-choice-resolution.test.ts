@@ -203,7 +203,7 @@ describe("pending choice resolution", () => {
     });
     state.cardInstances[sourceId] = {
       instanceId: sourceId,
-      definitionId: "onr_v1_339_schlaghund",
+      definitionId: 551,
       owner: "corp",
       controller: "corp",
       zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
@@ -215,7 +215,7 @@ describe("pending choice resolution", () => {
     state.pendingDamageFollowup = {
       kind: "trash_corp_source",
       sourceCardInstanceId: sourceId,
-      sourceDefinitionId: "onr_v1_339_schlaghund",
+      sourceDefinitionId: 551,
     };
     const trashSource = vi.fn();
     const resolveDamageChoice = vi.fn((current: GameState) => {
@@ -238,7 +238,7 @@ describe("pending choice resolution", () => {
     expect(trashSource).toHaveBeenCalledWith(state, sourceId, legalAction);
     expect(state.pendingDamageFollowup).toBeUndefined();
     expect(legalAction.payload).toMatchObject({
-      sourceDefinitionId: "onr_v1_339_schlaghund",
+      sourceDefinitionId: 551,
       selfTrashed: true,
     });
   });

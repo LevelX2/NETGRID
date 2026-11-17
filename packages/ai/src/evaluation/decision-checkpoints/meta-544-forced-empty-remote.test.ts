@@ -36,7 +36,7 @@ function projects(cp: ReturnType<typeof fixture>, previousStateVersion: number) 
   });
   const recent = new Set(recentlyCompromisedCorpRemoteIds(input, previousStateVersion));
   expect(recent.has("remote_1")).toBe(true);
-  return candidates.filter(c => c.sourceDefinitionId === "onr_v1_206_marine-arcology" && c.actionType === "install_card")
+  return candidates.filter(c => c.sourceDefinitionId === 418 && c.actionType === "install_card")
     .flatMap(c => scoreProjectForCandidate(input, c, corpScorelineFeasibilityForDecisionInput(input), undefined, false, false, undefined, recent));
 }
 function decide(cp: ReturnType<typeof fixture>) {
@@ -79,7 +79,7 @@ it("chooses that fort across the real opponent-turn boundary without resetting i
   const { action, plan } = decide(cp);
   expect(action.type).toBe("install_card");
   expect(action.payload?.serverId).toBe("remote_1");
-  expect(action.payload?.cardId).toBe("corp_onr_v1_206_marine-arcology_1");
+  expect(action.payload?.cardId).toBe("corp_418_1");
   expect(plan.selectedPlan?.moduleId).toBe("corp.score_agenda");
   expect(plan.rootPlanInstanceId).toBe(plan.selectedPlan?.instanceId);
 });
@@ -108,7 +108,7 @@ it("keeps the native immediate winning install available with zero liquid credit
   const { action, plan } = decide(cp);
   expect(action.type).toBe("install_card");
   expect(action.payload?.serverId).toBe("new_remote");
-  expect(action.payload?.cardId).toBe("corp_onr_proteus_008_project-zurich_1");
+  expect(action.payload?.cardId).toBe("corp_66_1");
   expect(plan.selectedPlan?.moduleId).toBe("corp.score_agenda");
   expect(plan.priority?.effectiveClass).toBe("P1");
 });

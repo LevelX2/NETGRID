@@ -5,7 +5,7 @@ import { quoteAgendaDefinitionSelfStealCreditCost } from "@netgrid/engine";
 export function runnerAgendaStealCreditRequirement(
   input: AiDecisionInput,
   serverId: string,
-  knownAgendaDefinitionIds?: readonly string[],
+  knownAgendaDefinitionIds?: readonly number[],
 ): number | undefined {
   const server = input.playerView.servers.find((s) => s.id === serverId);
   if (!server) return undefined;

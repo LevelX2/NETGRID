@@ -36,11 +36,11 @@ export function semanticRuntimeVisibleSourceCard(
   }
   const payload = action.payload ?? {};
   const definitionId =
-    typeof payload.cardDefinitionId === "string"
+    typeof payload.cardDefinitionId === "number"
       ? payload.cardDefinitionId
-      : typeof payload.sourceDefinitionId === "string"
+      : typeof payload.sourceDefinitionId === "number"
         ? payload.sourceDefinitionId
-        : typeof payload.sourceCardDefinitionId === "string"
+        : typeof payload.sourceCardDefinitionId === "number"
           ? payload.sourceCardDefinitionId
           : actionSource?.startsWith("onr_") ||
               actionSource?.startsWith("simple_")

@@ -46,7 +46,7 @@ it("keeps an actually unfunded known path blocked", () => {
 
 it("publishes funding rather than Draw when the exact funded free-break path removes all damage", () => {
   const current = input();
-  const worm = CARD_DEFINITIONS_BY_ID["onr_v1_074_worm"]!;
+  const worm = CARD_DEFINITIONS_BY_ID[286]!;
   current.playerView.own.rig = current.playerView.own.rig!.map((c) =>
     c.type === "program"
       ? {

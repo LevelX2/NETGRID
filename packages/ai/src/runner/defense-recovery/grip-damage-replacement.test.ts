@@ -72,7 +72,7 @@ it("binds the native reactive grip replacement to the existing defense owner", (
   expect(decision.selectedChoices).toEqual({
     choiceId: input.playerView.pendingChoice.choiceId,
     selectedOptionIds: [
-      "grip_meat_damage_replacement_runner_onr_proteus_112_identity-donor_1",
+      "grip_meat_damage_replacement_runner_170_1",
     ],
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
@@ -131,16 +131,16 @@ it.each([1, 7])(
     const builder = RealEngineFixtureBuilder.forState(state)
       .withCorpCredits(10)
       .withRunnerGripSize(0)
-      .withRunnerCardInGrip("onr_proteus_112_identity-donor")
+      .withRunnerCardInGrip(170)
       .withRunnerTags(1)
-      .withCorpCardInHq("onr_v1_302_scorched-earth");
+      .withCorpCardInHq(514);
     for (const id of [
-      "onr_proteus_097_taxman",
-      "onr_proteus_084_crumble",
-      "onr_proteus_089_garbage-in",
-      "onr_proteus_090_highlighter",
-      "onr_proteus_094_scaldan",
-      "onr_proteus_098_vienna-22",
+      155,
+      142,
+      147,
+      148,
+      152,
+      156,
     ].slice(0, handSize - 1))
       builder.withRunnerCardInGrip(id);
     expect(state.runner.grip).toHaveLength(handSize);

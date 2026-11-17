@@ -23,12 +23,12 @@ import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 
 afterEach(resetResidentPlanPortfolioMemory);
 
-const HUNT = "onr_v1_091_hunt-club-bbs";
-const GUIDE = "onr_v1_092_ice-and-datas-guide-to-the-net";
-const REPORT = "onr_proteus_111_ice-and-data-special-report";
-const BLOCKS = "onr_proteus_017_credit-blocks";
-const WALL = "onr_v1_245_fire-wall";
-const FETAL = "onr_proteus_004_fetal-ai";
+const HUNT = 303;
+const GUIDE = 304;
+const REPORT = 169;
+const BLOCKS = 75;
+const WALL = 457;
+const FETAL = 62;
 const runnerDeck: DeckDefinition = {
   ...DEMO_DECKS.demo_runner_001,
   id: "public-multi-expose-runner",
@@ -102,7 +102,7 @@ function playSource(state: GameState, source: string) {
   );
 }
 
-function selectCards(state: GameState, definitionIds: string[]) {
+function selectCards(state: GameState, definitionIds: number[]) {
   const selected = definitionIds.map((definitionId) => {
     const option = state.pendingChoice!.options.find(
       (entry) =>

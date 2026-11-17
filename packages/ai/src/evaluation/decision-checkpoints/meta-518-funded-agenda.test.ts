@@ -41,7 +41,7 @@ function withObservedHqAgenda(input: AiDecisionInputWithDeckCapabilities) {
       actor: "runner",
       actionType: "access_card",
       serverId: "hq",
-      cardDefinitionId: "onr_proteus_004_fetal-ai",
+      cardDefinitionId: 62,
       corpHqCountAfter: input.playerView.opponent.handCount,
     },
   }];
@@ -82,7 +82,7 @@ it("keeps the historical HQ card uncertain after a later hidden install", () => 
     (target) => target.actionId === "runner.start_run.hq",
   );
   expect(hq?.accessPayoff).toBe("unknown");
-  expect(hq?.accessFacts.knownTargetDefinitionIds).not.toContain("onr_proteus_004_fetal-ai");
+  expect(hq?.accessFacts.knownTargetDefinitionIds).not.toContain(62);
 });
 
 it("includes the known HQ agenda's self-cost before admitting access", () => {
@@ -92,7 +92,7 @@ it("includes the known HQ agenda's self-cost before admitting access", () => {
   )!;
   expect(hq.accessPayoff).toBe("agenda");
   expect(hq.accessFacts.knownTargetDefinitionIds).toContain(
-    "onr_proteus_004_fetal-ai",
+    62,
   );
   expect(hq.routeQuote!.fundingGap).toBe(2);
   expect(hq.accessPayoffContestable).toBe(false);
@@ -122,7 +122,7 @@ it("quotes the complete native five-ICE path at nineteen credits, including a fr
   );
   expect(short.canReachAccess).toBe(false);
   const snowbank = server.ice.filter(
-    (c) => c.definitionId === "onr_proteus_038_snowbank",
+    (c) => c.definitionId === 96,
   );
   expect(
     assessKnownRezzedIcePath(snowbank, input.playerView.own.rig!, 0)
@@ -138,7 +138,7 @@ it("combines current public server costs and canonical known agenda costs withou
   const input = inputFor(g9),
     server = input.playerView.servers.find((s) => s.id === "hq")!;
   server.runnerAgendaStealCostQuote!.minimumCreditCost = 5;
-  const known = ["onr_v1_196_corporate-war", "onr_proteus_004_fetal-ai"];
+  const known = [408, 62];
   expect(runnerAgendaStealCreditRequirement(input, "hq", known)).toBe(7);
   expect(runnerAgendaStealCreditRequirement(input, "hq")).toBe(5);
   expect(runnerAgendaStealCreditRequirement(input, "hq", [])).toBeUndefined();
@@ -146,7 +146,7 @@ it("combines current public server costs and canonical known agenda costs withou
     runnerAgendaStealCreditRequirement(input, "hq", ["missing"]),
   ).toBeUndefined();
   expect(
-    runnerAgendaStealCreditRequirement(input, "hq", ["onr_v1_039_krash"]),
+    runnerAgendaStealCreditRequirement(input, "hq", [251]),
   ).toBeUndefined();
   server.runnerAgendaStealCostQuote!.stateVersion--;
   expect(

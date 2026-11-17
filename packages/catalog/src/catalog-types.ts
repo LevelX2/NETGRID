@@ -1,4 +1,5 @@
 import type {
+  CardDefinitionId,
   CardDefinitionNumericFields,
   PlayCostDefinition,
   ResolvedStrengthDefinition,
@@ -59,9 +60,9 @@ export type CatalogManifestReference = {
 };
 
 export type CatalogCard = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   printingId: string;
-  engineCardId: string | null;
+  engineCardId: CardDefinitionId | null;
   title: string;
   side: CatalogSide;
   type: CatalogCardType;

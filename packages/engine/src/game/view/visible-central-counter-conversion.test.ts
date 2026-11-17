@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { PlayerView } from "@netgrid/shared";
 import { quoteLastCentralCounterConversion } from "./visible-central-counter-conversion";
-const definition = "onr_proteus_099_viral-pipeline";
+const definition = 157;
 function pools(hq = 1, rd = 1, archives = 0): PlayerView["servers"] {
   return (
     [
@@ -58,7 +58,7 @@ describe("public last-central-counter rule quote", () => {
   });
   it("does not invent an unsupported source or a counter on the wrong central", () => {
     expect(
-      quoteLastCentralCounterConversion("onr_v1_039_krash", pools(), "archives")
+      quoteLastCentralCounterConversion(251, pools(), "archives")
         .complete,
     ).toBe(false);
     expect(

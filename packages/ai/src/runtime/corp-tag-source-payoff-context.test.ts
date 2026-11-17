@@ -12,7 +12,7 @@ const source = {
 
 const payoffCard = {
   known: true,
-  definitionId: "onr_v1_302_scorched-earth",
+  definitionId: 514,
 };
 
 function knownPayoffInstances(instances: string[]) {

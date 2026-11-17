@@ -1,24 +1,25 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type {
   CatalogManifestReference,
   CatalogNumericFields,
 } from "./catalog-types";
 
 export type RuntimeGateEvidence = {
-  cardId: string;
-  engineCardId: string;
+  cardId: CardDefinitionId;
+  engineCardId: CardDefinitionId;
   runtimeStatus: "human_playable";
   deckLegal: boolean;
   formatLegal: boolean;
 };
 
 export type AiApprovalEvidence = {
-  cardId: string;
+  cardId: CardDefinitionId;
   approvalStatus: "ai_supported";
   scenarioGate: true;
 };
 
 export type ReleaseEvidence = {
-  cardId: string;
+  cardId: CardDefinitionId;
   auditReleaseId: string;
   implementationManifest: CatalogManifestReference;
   textOverrides: Partial<Record<string, string>>;
@@ -26,7 +27,7 @@ export type ReleaseEvidence = {
 };
 
 export type CardFactEvidence = {
-  cardId: string;
+  cardId: CardDefinitionId;
   runtimeGate?: RuntimeGateEvidence;
   aiApproval?: AiApprovalEvidence;
   releaseEvidence?: ReleaseEvidence;
@@ -34,7 +35,7 @@ export type CardFactEvidence = {
 
 export type CatalogGateBatch = {
   auditReleaseId: string;
-  cardIds: readonly string[];
+  cardIds: readonly CardDefinitionId[];
   implementationManifest: CatalogManifestReference;
   textOverrides: Partial<Record<string, string>>;
   numericOverrides: Partial<Record<string, Partial<CatalogNumericFields>>>;
@@ -44,19 +45,19 @@ export type CatalogGateBatch = {
 
 export type CatalogAiApprovalBatch = {
   approvalId: string;
-  cardIds: readonly string[];
+  cardIds: readonly CardDefinitionId[];
 };
 
 export type DuplicateGateCard = {
-  cardId: string;
+  cardId: CardDefinitionId;
   firstBatchId: string;
   duplicateBatchId: string;
 };
 
 function findDuplicateCards(
-  batches: readonly { batchId: string; cardIds: readonly string[] }[],
+  batches: readonly { batchId: string; cardIds: readonly CardDefinitionId[] }[],
 ): readonly DuplicateGateCard[] {
-  const firstBatchByCardId = new Map<string, string>();
+  const firstBatchByCardId = new Map<CardDefinitionId, string>();
   const duplicates: DuplicateGateCard[] = [];
   for (const batch of batches) {
     for (const cardId of batch.cardIds) {
@@ -99,13 +100,13 @@ export function findDuplicateAiApprovalCards(
 
 export function buildRuntimeCardIds(
   batches: readonly CatalogGateBatch[],
-): readonly string[] {
+): readonly CardDefinitionId[] {
   return Object.freeze(batches.flatMap((batch) => [...batch.cardIds]));
 }
 
 export function buildAiApprovedCardIds(
   batches: readonly CatalogAiApprovalBatch[],
-): readonly string[] {
+): readonly CardDefinitionId[] {
   return Object.freeze(batches.flatMap((batch) => [...batch.cardIds]));
 }
 
@@ -131,7 +132,7 @@ export function buildRuntimeGateByCardId(
 }
 
 export function buildAiApprovalByCardId(
-  approvedCardIds: Iterable<string>,
+  approvedCardIds: Iterable<CardDefinitionId>,
 ): Readonly<Record<string, AiApprovalEvidence>> {
   return Object.freeze(
     Object.fromEntries(
@@ -169,7 +170,7 @@ export function buildReleaseEvidenceByCardId(
 }
 
 export function buildCardFactsById(
-  cardIds: readonly string[],
+  cardIds: readonly CardDefinitionId[],
   runtimeGateByCardId: Readonly<Record<string, RuntimeGateEvidence>>,
   aiApprovalByCardId: Readonly<Record<string, AiApprovalEvidence>>,
   releaseEvidenceByCardId: Readonly<Record<string, ReleaseEvidence>>,

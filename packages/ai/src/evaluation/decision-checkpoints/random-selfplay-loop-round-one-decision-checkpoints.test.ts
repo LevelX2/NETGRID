@@ -34,7 +34,7 @@ describe("random standard selfplay loop round one", () => {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["develop_score_protection"],
         requiredAssessmentEvidence: [
-          "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_209_political-coup_2:remote_1:remote_1",
+          "score_plan_requires_effective_ice_draw:agenda:corp_421_2:remote_1:remote_1",
         ],
       };
     }

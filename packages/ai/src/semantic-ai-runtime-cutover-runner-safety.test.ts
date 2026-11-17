@@ -24,7 +24,7 @@ import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
 
 function quotedEndTheRunIce(params: {
   instanceId: string;
-  definitionId: string;
+  definitionId: number;
   title: string;
   strength: number;
   subtype: string;
@@ -52,7 +52,7 @@ function quotedEndTheRunIce(params: {
 function wallOfStatic(instanceId: string): VisibleCard {
   return quotedEndTheRunIce({
     instanceId,
-    definitionId: "onr_v1_279_wall-of-static",
+    definitionId: 491,
     title: "Wall of Static",
     strength: 2,
     subtype: "wall",
@@ -62,7 +62,7 @@ function wallOfStatic(instanceId: string): VisibleCard {
 function dataWall(instanceId: string): VisibleCard {
   return quotedEndTheRunIce({
     instanceId,
-    definitionId: "onr_v1_237_data-wall",
+    definitionId: 449,
     title: "Data Wall",
     strength: 0,
     subtype: "wall",
@@ -125,13 +125,13 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server(
         "remote_1",
         [wallOfStatic("onr_v1_279.wall-of-static.coverage")],
-        [visibleCard("simple_agenda", "corp", "agenda")],
+        [visibleCard(588, "corp", "agenda")],
       ),
     ];
     attachOwnDeckSnapshot(input, {
       deckSnapshotId: "runner-wall-coverage-safety",
       side: "runner",
-      cards: [{ cardId: "onr_v1_053_ramming-piston", quantity: 1 }],
+      cards: [{ cardId: 265, quantity: 1 }],
     });
 
     const decision = chooseRunnerAction(input);
@@ -177,7 +177,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     input.playerView.own.rig = [];
     input.playerView.own.gripOrHq = [
       visibleCard("expensive-fracter", "runner", "program", {
-        definitionId: "onr_v1_056_replicator",
+        definitionId: 268,
         title: "Replicator",
         installCost: 6,
         subtypes: ["Icebreaker"],
@@ -191,7 +191,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server(
         "remote_1",
         [wallOfStatic("onr_v1_279.wall-of-static.trace-safety")],
-        [visibleCard("simple_agenda", "corp", "agenda")],
+        [visibleCard(588, "corp", "agenda")],
       ),
     ];
 
@@ -223,7 +223,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
   it("does not spend the Runner's last credit on a pump that still cannot break the encountered ICE", () => {
     const dwarf: VisibleCard = {
       instanceId: "runner-dwarf",
-      definitionId: "onr_v1_021_dwarf",
+      definitionId: 233,
       title: "Dwarf",
       owner: "runner",
       controller: "runner",
@@ -234,7 +234,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     };
     const crystalWall = quotedEndTheRunIce({
       instanceId: "corp-crystal-wall",
-      definitionId: "onr_v1_232_crystal-wall",
+      definitionId: 444,
       title: "Crystal Wall",
       strength: 4,
       subtype: "wall",
@@ -260,7 +260,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
           encounterContinue: true,
           unbrokenSubroutineCount: 1,
           encounterWillEndRun: true,
-          sourceDefinitionId: "onr_v1_232_crystal-wall",
+          sourceDefinitionId: 444,
           encounterSubroutineIds: crystalWall
             .effectiveRunQuote!.subroutines.map((subroutine) => subroutine.id)
             .join(","),
@@ -299,14 +299,14 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
 
   it("uses Matador's bound +5 pump once to reach a strength-5 sentry", () => {
     const matador = visibleCard("runner-matador", "runner", "program", {
-      definitionId: "onr_classic_028_matador",
+      definitionId: 32,
       title: "Matador",
       subtypes: ["icebreaker", "killer"],
       strength: 0,
     });
     const hunter = quotedEndTheRunIce({
       instanceId: "corp-hunter",
-      definitionId: "onr_v1_249_hunter",
+      definitionId: 461,
       title: "Hunter",
       strength: 5,
       subtype: "sentry",
@@ -339,7 +339,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
           encounterContinue: true,
           unbrokenSubroutineCount: 1,
           encounterWillEndRun: true,
-          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceDefinitionId: 461,
           encounterSubroutineIds: hunter
             .effectiveRunQuote!.subroutines.map((s) => s.id)
             .join(","),
@@ -377,13 +377,13 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
 
   it("accepts Canis Major's cheaper known future-path tax instead of overspending to break it", () => {
     const loonyGoon = visibleCard("runner-loony-goon", "runner", "program", {
-      definitionId: "onr_v1_040_loony-goon",
+      definitionId: 252,
       title: "Loony Goon",
       subtypes: ["icebreaker", "killer"],
       strength: 0,
     });
     const codecracker = visibleCard("runner-codecracker", "runner", "program", {
-      definitionId: "onr_v1_014_codecracker",
+      definitionId: 226,
       title: "Codecracker",
       subtypes: ["icebreaker"],
       strength: 0,
@@ -391,7 +391,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const filter = (instanceId: string) =>
       withEffectiveRunQuote(
         visibleCard(instanceId, "corp", "ice", {
-          definitionId: "onr_v1_244_filter",
+          definitionId: 456,
           title: "Filter",
           subtypes: ["code_gate"],
           rezzed: true,
@@ -403,7 +403,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
             {
               id: `${instanceId}-end-the-run`,
               type: "end_the_run",
-              sourceDefinitionId: "onr_v1_244_filter",
+              sourceDefinitionId: 456,
               sourceTitle: "Filter",
             },
           ],
@@ -416,7 +416,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       "corp",
       "asset",
       {
-        definitionId: "onr_v1_312_chicago-branch",
+        definitionId: 524,
         title: "Chicago Branch",
         rezzed: true,
         trashCost: 1,
@@ -424,7 +424,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     );
     const canisMajor = withEffectiveRunQuote(
       visibleCard("outer-canis-major", "corp", "ice", {
-        definitionId: "onr_v1_225_canis-major",
+        definitionId: 437,
         title: "Canis Major",
         subtypes: ["sentry", "watchdog"],
         rezzed: true,
@@ -437,7 +437,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
             id: "outer-canis-major-future-strength",
             type: "set_run_future_strength_bonus",
             amount: 2,
-            sourceDefinitionId: "onr_v1_225_canis-major",
+            sourceDefinitionId: 437,
             sourceTitle: "Canis Major",
             unbrokenRunEffect: { increasesFutureIceStrength: 2 },
           },
@@ -473,7 +473,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
           encounterWillEndRun: false,
           unbrokenSubroutineCount: 1,
           encounterSubroutineIds: "outer-canis-major-future-strength",
-          sourceDefinitionId: "onr_v1_225_canis-major",
+          sourceDefinitionId: 437,
         },
       },
     );
@@ -520,7 +520,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
   it("uses visible non-noisy run credits when deciding whether pumps can reach a break", () => {
     const codecracker: VisibleCard = {
       instanceId: "runner-codecracker",
-      definitionId: "onr_v1_014_codecracker",
+      definitionId: 226,
       title: "Codecracker",
       owner: "runner",
       controller: "runner",
@@ -531,7 +531,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     };
     const quiet: VisibleCard = {
       instanceId: "runner-quiet",
-      definitionId: "onr_v1_071_vewy-vewy-quiet",
+      definitionId: 283,
       title: "Vewy Vewy Quiet",
       owner: "runner",
       controller: "runner",
@@ -562,7 +562,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     };
     const keeper: VisibleCard = {
       instanceId: "corp-keeper",
-      definitionId: "onr_v1_252_keeper",
+      definitionId: 464,
       title: "Keeper",
       owner: "corp",
       controller: "corp",
@@ -573,13 +573,13 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       strength: 4,
       effectiveRunQuote: {
         iceInstanceId: "corp-keeper",
-        iceDefinitionId: "onr_v1_252_keeper",
+        iceDefinitionId: 464,
         effectiveStrength: 4,
         subroutines: [
           {
             id: "keeper-etr",
             type: "end_the_run",
-            sourceDefinitionId: "onr_v1_252_keeper",
+            sourceDefinitionId: 464,
             sourceTitle: "Keeper",
           },
         ],
@@ -613,7 +613,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
           encounterContinue: true,
           unbrokenSubroutineCount: 1,
           encounterWillEndRun: true,
-          sourceDefinitionId: "onr_v1_252_keeper",
+          sourceDefinitionId: 464,
           encounterSubroutineIds: keeper
             .effectiveRunQuote!.subroutines.map((s) => s.id)
             .join(","),
@@ -663,7 +663,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
   it("does not spend the Runner's last credit on a break when the remaining ICE path is still unaffordable", () => {
     const dwarf: VisibleCard = {
       instanceId: "runner-dwarf",
-      definitionId: "onr_v1_021_dwarf",
+      definitionId: 233,
       title: "Dwarf",
       owner: "runner",
       controller: "runner",
@@ -674,14 +674,14 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     };
     const outerCrystalWall = quotedEndTheRunIce({
       instanceId: "corp-outer-crystal-wall",
-      definitionId: "onr_v1_232_crystal-wall",
+      definitionId: 444,
       title: "Crystal Wall",
       strength: 4,
       subtype: "wall",
     });
     const currentCrystalWall = quotedEndTheRunIce({
       instanceId: "corp-current-crystal-wall",
-      definitionId: "onr_v1_232_crystal-wall",
+      definitionId: 444,
       title: "Crystal Wall",
       strength: 4,
       subtype: "wall",
@@ -714,7 +714,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
           encounterContinue: true,
           unbrokenSubroutineCount: 1,
           encounterWillEndRun: true,
-          sourceDefinitionId: "onr_v1_232_crystal-wall",
+          sourceDefinitionId: 444,
         },
       },
     );
@@ -753,7 +753,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
 
   it("trashes an affordable Crybaby with canonical visible impact", () => {
     const crybaby = visibleCard("crybaby-root", "corp", "upgrade", {
-      definitionId: "onr_v1_354_crybaby",
+      definitionId: 566,
       title: "Crybaby",
       trashCost: 2,
       rezzed: false,
@@ -816,7 +816,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     ]);
     input.playerView.own.credits = 4;
     input.playerView.own.gripOrHq = [
-      visibleCard("onr_v1_108_score", "runner", "event"),
+      visibleCard(320, "runner", "event"),
       visibleCard("filler-1", "runner", "event"),
       visibleCard("filler-2", "runner", "event"),
       visibleCard("filler-3", "runner", "event"),
@@ -910,12 +910,12 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       publicEvent("seen-chance-observation", "access_card", 10, {
         actor: "runner",
         actionType: "access_card",
-        cardDefinitionId: "onr_v1_284_chance-observation",
+        cardDefinitionId: 496,
       }),
       publicEvent("seen-urban-renewal", "access_card", 12, {
         actor: "runner",
         actionType: "access_card",
-        cardDefinitionId: "onr_v1_307_urban-renewal",
+        cardDefinitionId: 519,
       }),
     ];
     for (const action of input.legalActions) {
@@ -991,7 +991,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         damageType: "net",
         damageAmount: 2,
         sourceTitle: "Setup!",
-        sourceDefinitionId: "onr_v1_340_setup",
+        sourceDefinitionId: 552,
       }),
     ];
     input.playerView.stateVersion = 39;
@@ -1045,7 +1045,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         [],
         [
           visibleCard("agenda", "corp", "agenda", {
-            definitionId: "simple_agenda",
+            definitionId: 588,
           }),
         ],
       ),
@@ -1102,7 +1102,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     input.playerView.own.stackOrRdCount = 0;
     input.playerView.own.rig = [
       visibleCard("runner-blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         subtypes: ["icebreaker", "random"],
         strength: 5,
       }),
@@ -1173,7 +1173,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     input.playerView.own.stackOrRdCount = 1;
     input.playerView.own.rig = [
       visibleCard("runner-blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         subtypes: ["icebreaker", "random"],
         strength: 5,
       }),
@@ -1223,13 +1223,13 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server(
         "remote_1",
         [wallOfStatic("onr_v1_279.wall-of-static.preview")],
-        [visibleCard("simple_agenda", "corp", "agenda")],
+        [visibleCard(588, "corp", "agenda")],
       ),
     ];
     attachOwnDeckSnapshot(input, {
       deckSnapshotId: "runner-wall-coverage-preview",
       side: "runner",
-      cards: [{ cardId: "onr_v1_053_ramming-piston", quantity: 1 }],
+      cards: [{ cardId: 265, quantity: 1 }],
     });
 
     const previewDecision = chooseRunnerAction(input, {

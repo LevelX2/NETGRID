@@ -45,7 +45,7 @@ it("quotes the self-steal price of the still valid reconcealed agenda memory", (
       expect.objectContaining({
         zone: "remote_3",
         positionKey: "root:0",
-        definitionId: "onr_proteus_004_fetal-ai",
+        definitionId: 62,
       }),
     ]),
   );

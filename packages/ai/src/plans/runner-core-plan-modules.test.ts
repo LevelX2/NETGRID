@@ -156,7 +156,7 @@ describe("Runner core plan modules", () => {
   it("preserves an active Shell Traders engine even though its install cost is zero", () => {
     const signal = runnerInstalledCardLiquidationChoiceSignal(
       installedCardLiquidationInput({
-        targetDefinitionId: "onr_v1_176_the-shell-traders",
+        targetDefinitionId: 388,
         targetType: "resource",
       }),
       [candidate("runner.resolve_choice", "resolve_choice", "choice.resolve")],
@@ -173,7 +173,7 @@ describe("Runner core plan modules", () => {
   it("declines liquidation of critical breaker coverage", () => {
     const signal = runnerInstalledCardLiquidationChoiceSignal(
       installedCardLiquidationInput({
-        targetDefinitionId: "simple_fracter",
+        targetDefinitionId: 597,
         targetType: "program",
       }),
       [candidate("runner.resolve_choice", "resolve_choice", "choice.resolve")],
@@ -192,7 +192,7 @@ describe("Runner core plan modules", () => {
       "prepare-dwarf",
       "trigger_ability",
       "card.persistent_development",
-      "onr_v1_176_the-shell-traders",
+      388,
     );
     prepare.sourceCardInstanceId = "shell-traders-1";
     prepare.targetContext = {
@@ -220,7 +220,7 @@ describe("Runner core plan modules", () => {
           pipelineId: "shell-traders-1:dwarf-1:prepare",
           phase: "prepare",
           sourceCardInstanceId: "shell-traders-1",
-          sourceDefinitionId: "onr_v1_176_the-shell-traders",
+          sourceDefinitionId: 388,
           targetCardInstanceId: "dwarf-1",
           targetDefinitionId: "onr_v1_107_dwarf",
           targetCardType: "program",
@@ -291,7 +291,7 @@ describe("Runner core plan modules", () => {
       "prepare-dwarf",
       "trigger_ability",
       "card.persistent_development",
-      "onr_v1_176_the-shell-traders",
+      388,
     );
     prepare.sourceCardInstanceId = "shell-traders-1";
     prepare.targetContext = {
@@ -319,7 +319,7 @@ describe("Runner core plan modules", () => {
           pipelineId: "shell-traders-1:dwarf-1:prepare",
           phase: "prepare",
           sourceCardInstanceId: "shell-traders-1",
-          sourceDefinitionId: "onr_v1_176_the-shell-traders",
+          sourceDefinitionId: 388,
           targetCardInstanceId: "dwarf-1",
           targetDefinitionId: "onr_v1_107_dwarf",
           targetCardType: "program",
@@ -361,7 +361,7 @@ describe("Runner core plan modules", () => {
       "prepare-dwarf",
       "trigger_ability",
       "card.persistent_development",
-      "onr_v1_176_the-shell-traders",
+      388,
     );
 
     expect(module.discover(context([prepare], {}))).toEqual([]);
@@ -392,7 +392,7 @@ describe("Runner core plan modules", () => {
       "broker-build",
       "activated_card_ability",
       "card_ability.activate",
-      "onr_v1_154_broker",
+      366,
     );
     build.planOwnerBinding = {
       capabilityKey: "store_credits",
@@ -403,7 +403,7 @@ describe("Runner core plan modules", () => {
       "broker-cash-out",
       "activated_card_ability",
       "card_ability.activate",
-      "onr_v1_154_broker",
+      366,
     );
     cashOut.planOwnerBinding = {
       capabilityKey: "withdraw_credits",
@@ -445,7 +445,7 @@ describe("Runner core plan modules", () => {
       "leave-loan",
       "end_turn",
       "turn_flow.end_turn",
-      "onr_v1_168_loan-from-chiba",
+      380,
     );
     leavePlay.sourceCardInstanceId = "loan-1";
     leavePlay.planOwnerBinding = {
@@ -455,9 +455,9 @@ describe("Runner core plan modules", () => {
     const runnerContext = context([leavePlay], {
       resourceLifecycle: [
         {
-          lifecycleId: "onr_v1_168_loan-from-chiba",
+          lifecycleId: 380,
           sourceCardInstanceId: "loan-1",
-          definitionId: "onr_v1_168_loan-from-chiba",
+          definitionId: 380,
           phase: "leave_play",
           actionIds: [leavePlay.actionId],
           priorityClass: "P5",
@@ -488,7 +488,7 @@ describe("Runner core plan modules", () => {
       "leave-loan-1",
       "end_turn",
       "turn_flow.end_turn",
-      "onr_v1_168_loan-from-chiba",
+      380,
     );
     firstLoanEnd.sourceCardInstanceId = "loan-1";
     firstLoanEnd.planOwnerBinding = {
@@ -499,7 +499,7 @@ describe("Runner core plan modules", () => {
       "leave-loan-2",
       "end_turn",
       "turn_flow.end_turn",
-      "onr_v1_168_loan-from-chiba",
+      380,
     );
     secondLoanEnd.sourceCardInstanceId = "loan-2";
     secondLoanEnd.planOwnerBinding = {
@@ -509,9 +509,9 @@ describe("Runner core plan modules", () => {
     const runnerContext = context([firstLoanEnd, secondLoanEnd], {
       resourceLifecycle: [
         {
-          lifecycleId: "onr_v1_168_loan-from-chiba:loan-1",
+          lifecycleId: "380:loan-1",
           sourceCardInstanceId: "loan-1",
-          definitionId: "onr_v1_168_loan-from-chiba",
+          definitionId: 380,
           phase: "leave_play",
           actionIds: [firstLoanEnd.actionId],
           priorityClass: "P5",
@@ -519,9 +519,9 @@ describe("Runner core plan modules", () => {
           evidenceCodes: ["runner_loan_from_chiba_leave_play"],
         },
         {
-          lifecycleId: "onr_v1_168_loan-from-chiba:loan-2",
+          lifecycleId: "380:loan-2",
           sourceCardInstanceId: "loan-2",
-          definitionId: "onr_v1_168_loan-from-chiba",
+          definitionId: 380,
           phase: "leave_play",
           actionIds: [secondLoanEnd.actionId],
           priorityClass: "P5",
@@ -561,9 +561,9 @@ describe("Runner core plan modules", () => {
     const runnerContext = context([credit], {
       resourceLifecycle: [
         {
-          lifecycleId: "onr_v1_168_loan-from-chiba:loan-1",
+          lifecycleId: "380:loan-1",
           sourceCardInstanceId: "loan-1",
-          definitionId: "onr_v1_168_loan-from-chiba",
+          definitionId: 380,
           phase: "retain",
           actionIds: [],
           rejectedActionIds: ["leave-loan-1"],
@@ -574,9 +574,9 @@ describe("Runner core plan modules", () => {
           evidenceCodes: ["runner_loan_waiting_for_funding"],
         },
         {
-          lifecycleId: "onr_v1_168_loan-from-chiba:loan-2",
+          lifecycleId: "380:loan-2",
           sourceCardInstanceId: "loan-2",
-          definitionId: "onr_v1_168_loan-from-chiba",
+          definitionId: 380,
           phase: "retain",
           actionIds: [],
           rejectedActionIds: ["leave-loan-2"],
@@ -699,7 +699,7 @@ describe("Runner core plan modules", () => {
       "score-theorem",
       "activated_card_ability",
       "agenda.score_installed",
-      "onr_classic_004_theorem-proof",
+      8,
     );
     const runnerContext = context([scoreAction], {
       installedAgendaScores: [
@@ -747,9 +747,9 @@ describe("Runner core plan modules", () => {
     const runnerContext = context([genericEndTurn], {
       resourceLifecycle: [
         {
-          lifecycleId: "onr_v1_168_loan-from-chiba",
+          lifecycleId: 380,
           sourceCardInstanceId: "loan-1",
-          definitionId: "onr_v1_168_loan-from-chiba",
+          definitionId: 380,
           phase: "leave_play",
           actionIds: [genericEndTurn.actionId],
           priorityClass: "P5",
@@ -782,7 +782,7 @@ describe("Runner core plan modules", () => {
           "score-terminal-theorem",
           "activated_card_ability",
           "agenda.score_installed",
-          "onr_classic_004_theorem-proof",
+          8,
         ),
       ],
       {
@@ -822,7 +822,7 @@ describe("Runner core plan modules", () => {
       "install-psychic",
       "install_card",
       "install.card",
-      "onr_classic_030_psychic-friend",
+      34,
     );
     const installResource = candidate(
       "install-resource",
@@ -1013,7 +1013,7 @@ describe("Runner core plan modules", () => {
             "install-second-psychic",
             "install_card",
             "install.card",
-            "onr_classic_030_psychic-friend",
+            34,
           ),
         ],
         { coverageGaps: [] },
@@ -1663,7 +1663,7 @@ describe("Runner core plan modules", () => {
       "install-memory-support",
       "install_card",
       "install.card",
-      "onr_v1_146_zetatech-mem-chip",
+      358,
     );
     const coverage = coreModule("runner.rig_and_coverage");
     const runnerContext = context([memoryInstall], {
@@ -1808,13 +1808,13 @@ describe("Runner core plan modules", () => {
       "install-smc-direct",
       "install_card",
       "install.card",
-      "onr_v1_059_self-modifying-code",
+      271,
     );
     const trashInstall = candidate(
       "install-smc-trash.runner_program_trash_before_install",
       "install_card",
       "install.card",
-      "onr_v1_059_self-modifying-code",
+      271,
     );
     const runnerContext = context([directInstall, trashInstall], {
       coverageGaps: [
@@ -2546,7 +2546,7 @@ describe("Runner core plan modules", () => {
 });
 
 function installedCardLiquidationInput(params: {
-  targetDefinitionId: string;
+  targetDefinitionId: number;
   targetType: "program" | "hardware" | "resource";
   duplicateTarget?: boolean;
   doctrineAdditivity?: "redundant_by_default";
@@ -2617,7 +2617,7 @@ function installedCardLiquidationInput(params: {
         rig: [
           {
             instanceId: sourceResourceInstanceId,
-            definitionId: "onr_v1_180_smiths-pawnshop",
+            definitionId: 392,
             known: true,
             type: "resource",
           },
@@ -2659,7 +2659,7 @@ function installedCardLiquidationInput(params: {
 
 function coreModule(
   moduleId: string,
-  rolesForDefinitionId?: (definitionId: string) => readonly string[],
+  rolesForDefinitionId?: (definitionId: number) => readonly string[],
 ) {
   return createRunnerCorePlanModules(
     rolesForDefinitionId ? { rolesForDefinitionId } : {},
@@ -2773,7 +2773,7 @@ function candidate(
   actionId: string,
   actionType = "gain_credit",
   semanticActionType = "economy.gain_credit",
-  sourceDefinitionId?: string,
+  sourceDefinitionId?: number,
 ): ActionSemanticCandidate {
   return {
     actionId,

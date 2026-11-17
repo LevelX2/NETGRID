@@ -99,7 +99,7 @@ export function breakerVariantDeckCapabilities(): DeckCapabilityProfile {
     runner: {
       breakerInventory: [
         {
-          cardId: "onr_v1_021_dwarf",
+          cardId: 233,
           title: "Dwarf",
           coverage: ["wall"],
           breakCost: 1,
@@ -112,7 +112,7 @@ export function breakerVariantDeckCapabilities(): DeckCapabilityProfile {
           evidence: ["test_deck_variant"],
         },
         {
-          cardId: "onr_v1_047_pile-driver",
+          cardId: 259,
           title: "Pile Driver",
           coverage: ["wall"],
           breakCost: 3,

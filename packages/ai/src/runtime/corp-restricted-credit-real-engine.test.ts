@@ -26,10 +26,10 @@ import { allocateCorpCentralDefenseFromAiFacts } from "../corp/defense/corp-cent
 import { corpRestrictedRezPreparationCandidates } from "./corp-restricted-credit-reserve";
 import { corpFundedCentralProtectionReserve } from "../corp/defense/corp-server-protection-reserve";
 
-const CONTRACT = "onr_proteus_059_government-contract";
-const WALL = "onr_v1_279_wall-of-static";
-const CAMPAIGN = "onr_v1_337_rockerboy-promotion";
-const OPERATION = "onr_v1_302_scorched-earth";
+const CONTRACT = 117;
+const WALL = 491;
+const CAMPAIGN = 549;
+const OPERATION = 514;
 const ORIGINAL_ENTRY = standardDeckCatalog.decks.find(
   (deck) =>
     deck.standardDeckId ===
@@ -321,7 +321,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
   it("does not replace defense draw with a bank preparation for visibly breakable ICE", () => {
     const state = preparedOriginalTerminalReserve(3, 2);
     RealEngineFixtureBuilder.forState(state)
-      .withRunnerProgramInstalled("onr_v1_036_jackhammer")
+      .withRunnerProgramInstalled(248)
       .withRunnerCredits(30);
     const input = decisionInput(state, ORIGINAL_DECK);
     const choice = chooseCorpAction(input);
@@ -431,7 +431,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
       (quote) => quote.consumer.actionType === "rez_ice",
     )!;
     expect(funding.consumer).toMatchObject({
-      sourceCardDefinitionId: "onr_proteus_033_mobile-barricade",
+      sourceCardDefinitionId: 91,
       creditCost: 6,
       generalCreditsRequired: 3,
       generalCreditsRemainingAfterConsumer: 0,
@@ -486,7 +486,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
   it("does not treat an affordable visible break route as an access block", () => {
     const state = preparedOriginalRun();
     RealEngineFixtureBuilder.forState(state)
-      .withRunnerProgramInstalled("onr_v1_036_jackhammer")
+      .withRunnerProgramInstalled(248)
       .withRunnerCredits(30);
     const input = decisionInput(state, ORIGINAL_DECK);
     expect(input.corpRestrictedCreditRouteQuotes).toHaveLength(1);
@@ -1063,7 +1063,7 @@ function preparedInstallWindow(): GameState {
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
     .withCorpRemoteRoot("remote_1", CONTRACT, 1, { faceup: true, rezzed: true })
-    .withCorpIceOnServer("hq", "simple_barrier_ice")
+    .withCorpIceOnServer("hq", 589)
     .withCorpCardInHq(WALL)
     .withCorpCredits(0)
     .withRunnerCredits(0);
@@ -1084,7 +1084,7 @@ function preparedEconomyWindow(): GameState {
       faceup: false,
       rezzed: false,
     })
-    .withCorpCardInHq("simple_agenda")
+    .withCorpCardInHq(588)
     .withCorpCredits(1);
   return state;
 }
@@ -1111,7 +1111,7 @@ function preparedOriginalCorp(): GameState {
       ...DEMO_DECKS.demo_runner_001,
       cards: [
         ...DEMO_DECKS.demo_runner_001.cards,
-        { id: "onr_v1_036_jackhammer", quantity: 1 },
+        { id: 248, quantity: 1 },
       ],
     },
   });
@@ -1124,7 +1124,7 @@ function preparedOriginalCorp(): GameState {
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
     .withCorpRemoteRoot("remote_1", CONTRACT, 2, { faceup: true, rezzed: true })
-    .withCorpIceOnServer("hq", "onr_proteus_033_mobile-barricade")
+    .withCorpIceOnServer("hq", 91)
     .withCorpCredits(3)
     .withRunnerCredits(0);
   return state;
@@ -1136,14 +1136,14 @@ function preparedOriginalTerminalReserve(
 ): GameState {
   const state = preparedOriginalCorp();
   RealEngineFixtureBuilder.forState(state)
-    .withCorpIceOnServer("rd", "onr_proteus_033_mobile-barricade")
-    .withCorpCardInHq("onr_v1_281_accounts-receivable")
+    .withCorpIceOnServer("rd", 91)
+    .withCorpCardInHq(493)
     .withCorpCredits(credits);
   state.cardInstances[contractId(state)]!.advancementCounters = 0;
   state.corp.clicks = clicks;
   const stolen = state.corp.rd.filter(
     (id) =>
-      state.cardInstances[id]!.definitionId === "onr_proteus_004_fetal-ai",
+      state.cardInstances[id]!.definitionId === 62,
   );
   expect(stolen).toHaveLength(2);
   state.corp.rd = state.corp.rd.filter((id) => !stolen.includes(id));

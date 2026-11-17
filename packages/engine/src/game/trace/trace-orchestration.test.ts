@@ -68,7 +68,7 @@ describe("trace orchestration", () => {
     const sourceId = "source_1" as CardInstanceId;
     const linkId = "access_1" as CardInstanceId;
     const linkDefinition = definition(
-      "onr_v1_150_access-to-kiribati",
+      362,
       "resource",
     );
     const state = minimalState({
@@ -197,7 +197,7 @@ describe("trace orchestration", () => {
     const baedekerId = "baedeker_1" as CardInstanceId;
     const sourceDefinition = definition("trace_source", "operation");
     const baedekerDefinition = definition(
-      "onr_v1_003_baedekers-net-map",
+      215,
       "resource",
     );
     const state = minimalState({
@@ -304,7 +304,7 @@ describe("trace orchestration", () => {
     const sourceId = "source_1" as CardInstanceId;
     const poolId = "krumz_pool" as CardInstanceId;
     const sourceDefinition = definition("trace_source", "operation");
-    const poolDefinition = definition("onr_v1_330_krumz", "asset");
+    const poolDefinition = definition(542, "asset");
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -416,7 +416,7 @@ describe("trace orchestration", () => {
     const crashSpaceId = "crash_space_1" as CardInstanceId;
     const sourceDefinition = definition("trace_source", "operation");
     const crashSpaceDefinition = definition(
-      "onr_classic_044_crash-space",
+      48,
       "resource",
     );
     const state = minimalState({
@@ -458,7 +458,7 @@ describe("trace orchestration", () => {
     expect(state.runner.tags).toBe(2);
     expect(action.payload).toMatchObject({
       traceSuccessful: true,
-      traceAutoSuccessSourceDefinitionId: "onr_classic_044_crash-space",
+      traceAutoSuccessSourceDefinitionId: 48,
       traceAutoSuccessAdditionalTagAmount: 1,
       tagsAdded: 2,
     });
@@ -474,7 +474,7 @@ describe("trace orchestration", () => {
         [chibaId]: {
           ...instance(
             chibaId,
-            "onr_proteus_133_chiba-bank-account" as CardDefinitionId,
+            191 as CardDefinitionId,
             "runner",
           ),
           faceup: false,
@@ -675,7 +675,7 @@ describe("trace orchestration", () => {
     const linkADefinition = definition("link_support_a_definition", "hardware");
     const linkBDefinition = definition("link_support_b_definition", "resource");
     const swissDefinition = definition(
-      "onr_proteus_152_swiss-bank-account",
+      210,
       "resource",
     );
     const state = minimalState({
@@ -748,7 +748,7 @@ describe("trace orchestration", () => {
     const sourceDefinition = definition("trace_source", "operation");
     const backDoorId = "back_door" as CardInstanceId;
     const backDoorDefinition = definition(
-      "onr_proteus_129_back-door-to-netwatch",
+      187,
       "resource",
     );
     const state = minimalState({
@@ -881,7 +881,7 @@ describe("trace orchestration", () => {
     const sourceDefinition = definition("trace_source", "operation");
     const accessId = "access_kiribati_1" as CardInstanceId;
     const accessDefinition = definition(
-      "onr_v1_150_access-to-kiribati",
+      362,
       "resource",
     );
     const state = minimalState({
@@ -988,7 +988,7 @@ describe("trace orchestration", () => {
 });
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"],
   extras: Partial<CardDefinition> = {},
 ): CardDefinition {

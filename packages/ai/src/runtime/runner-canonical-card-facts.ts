@@ -6,7 +6,7 @@ type RunnerPlanningCard = NonNullable<
 
 /** This temporary bit belongs to the install sequence, never general income. */
 export function runnerHasOnlyProgramInstallActionBundle(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   if (!definitionId) return false;
   const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
@@ -22,7 +22,7 @@ export function runnerHasOnlyProgramInstallActionBundle(
 }
 
 export function runnerEventStartsRunAfterProgramSearch(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   if (!definitionId) return false;
   const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
@@ -34,7 +34,7 @@ export function runnerEventStartsRunAfterProgramSearch(
 }
 
 export function runnerSoleFortIceTrashTagAmount(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): number | undefined {
   if (!definitionId) return undefined;
   const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
@@ -79,7 +79,7 @@ export type RunnerVoluntarySelfTrashLifecycleProfile = Readonly<{
 }>;
 
 export function runnerVoluntarySelfTrashLifecycleProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerVoluntarySelfTrashLifecycleProfile | undefined {
   if (!definitionId) return undefined;
   const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
@@ -148,7 +148,7 @@ export function runnerVoluntarySelfTrashLifecycleProfile(
 }
 
 export function runnerRestrictedRunCreditProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerRestrictedRunCreditProfile | undefined {
   if (!definitionId) return undefined;
   return runnerRestrictedRunCreditProfileFromPlanningCard(
@@ -254,7 +254,7 @@ export function runnerInstalledDebtFinancingLiability(
 }
 
 export function runnerDebtFinancingProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerDebtFinancingProfile | undefined {
   if (!definitionId) return undefined;
   return runnerDebtFinancingProfileFromPlanningCard(
@@ -325,7 +325,7 @@ export function runnerDebtFinancingProfileFromPlanningCard(
 }
 
 export function runnerNoRunRecurringEconomyProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerNoRunRecurringEconomyProfile | undefined {
   if (!definitionId) return undefined;
   return runnerNoRunRecurringEconomyProfileFromPlanningCard(
@@ -388,7 +388,7 @@ export function runnerNoRunRecurringEconomyProfileFromPlanningCard(
  * consequence.  This deliberately does not identify cards by title or ID.
  */
 export function runnerStartOfTurnCreditProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerStartOfTurnCreditProfile | undefined {
   if (!definitionId) return undefined;
   return runnerStartOfTurnCreditProfileFromPlanningCard(
@@ -456,7 +456,7 @@ export function runnerStartOfTurnCreditProfileFromPlanningCard(
  * The AI orders sources deterministically without simulating or consuming RNG.
  */
 export function runnerStartOfTurnRandomEffectProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerStartOfTurnRandomEffectProfile | undefined {
   if (!definitionId) return undefined;
   return runnerStartOfTurnRandomEffectProfileFromPlanningCard(
@@ -519,7 +519,7 @@ export function runnerStartOfTurnRandomEffectProfileFromPlanningCard(
  * place already-due automatic effects before the optional conversion.
  */
 export function runnerStartOfTurnOptionalInstalledCardConversionProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerStartOfTurnOptionalInstalledCardConversionProfile | undefined {
   if (!definitionId) return undefined;
   return runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlanningCard(
@@ -551,7 +551,7 @@ export function runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlann
  * not select the staged card or duplicate the delayed-install plan.
  */
 export function runnerStartOfTurnDelayedInstallCountdownProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerStartOfTurnDelayedInstallCountdownProfile | undefined {
   if (!definitionId) return undefined;
   return runnerStartOfTurnDelayedInstallCountdownProfileFromPlanningCard(
@@ -580,7 +580,7 @@ export function runnerStartOfTurnDelayedInstallCountdownProfileFromPlanningCard(
  * it among other equally profiled sources cannot make a strategic choice.
  */
 export function runnerRunStartTrashSourceProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerRunStartTrashSourceProfile | undefined {
   if (!definitionId) return undefined;
   return runnerRunStartTrashSourceProfileFromPlanningCard(
@@ -607,7 +607,7 @@ export function runnerRunStartTrashSourceProfileFromPlanningCard(
  * order-equivalent; the Engine still requires one exact source payload.
  */
 export function runnerRunStartRandomStrengthSourceProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerRunStartRandomStrengthSourceProfile | undefined {
   if (!definitionId) return undefined;
   return runnerRunStartRandomStrengthSourceProfileFromPlanningCard(

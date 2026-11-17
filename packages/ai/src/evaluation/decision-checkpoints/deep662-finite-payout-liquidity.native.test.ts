@@ -40,7 +40,7 @@ it("binds a stronger last finite bank payout to the current P6 liquidity need", 
     "plan:runner.economy:economy-liquidity-development%3Arunner%3A9",
   );
   expect(plan.leafExecutorInstanceId).toBe(
-    "plan:runner.credit_bank:runner_onr_v1_178_short-term-contract_2",
+    "plan:runner.credit_bank:runner_390_2",
   );
   expect(plan.route).toMatchObject({
     actionId: action.actionId,
@@ -55,7 +55,7 @@ it("keeps a real higher-priority run ahead of residual bank liquidation", () => 
   const input = native("deep662-d270-effective-access-priority");
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(
-    "runner.play_event.runner_onr_v1_094_inside-job_1.hq.runner_onr_v1_094_inside-job_1.onr_v1_094_inside-job:abilities_on_play_make_run",
+    "runner.play_event.runner_306_1.hq.runner_306_1.onr_v1_094_inside-job:abilities_on_play_make_run",
   );
   expect(decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId).toBe(
     "plan:runner.pressure_central:central%3Ahq",

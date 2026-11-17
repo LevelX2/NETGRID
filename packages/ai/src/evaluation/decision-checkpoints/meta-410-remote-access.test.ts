@@ -58,7 +58,7 @@ describe("meta 410 current remote identity and access purpose", () => {
         stateVersionAfter: 335,
         publicPayload: {
           ...asset.publicPayload,
-          cardDefinitionId: "onr_v1_366_red-herrings",
+          cardDefinitionId: 578,
           accessedCardPositionKey: "root:1",
           installedPositionKey: "test-upgrade-position",
         },
@@ -71,7 +71,7 @@ describe("meta 410 current remote identity and access purpose", () => {
         (x) => x.zone === "remote_1" && x.positionKey.startsWith("root:"),
       );
       expect(roots.map((x) => [x.positionKey, x.definitionId])).toEqual(
-        knownPrefix ? [["root:0", "onr_v1_366_red-herrings"]] : [],
+        knownPrefix ? [["root:0", 578]] : [],
       );
     },
   );

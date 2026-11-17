@@ -407,14 +407,14 @@ function runnerRecurringEconomyRunDecision(
 }
 
 function hasNoRunRecurringEconomyCommitment(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   return runnerNoRunRecurringEconomyProfile(definitionId) !== undefined;
 }
 
 function runnerRecurringEconomyInstalledInCurrentTurn(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): boolean {
   const turnSerial = input.playerView.turnSerial;
   if (turnSerial === undefined) return false;
@@ -434,7 +434,7 @@ function runnerRecurringEconomyInstalledInCurrentTurn(
 function recurringEconomyRealization(
   input: AiDecisionInput,
   cardInstanceId: string,
-  definitionId: string,
+  definitionId: number,
 ): { payoutCount: number; value: number } {
   const events = uniqueBy(
     [...input.playerView.publicEvents, ...input.eventTail],

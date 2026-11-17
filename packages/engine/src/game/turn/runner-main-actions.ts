@@ -73,13 +73,13 @@ export type RunnerMainActionGenerationHost = {
     runDurationPaymentHost: HostFn<unknown>;
     runStartTaxForServerUpgrades: HostFn<{
       amount: number;
-      sourceDefinitionIds: string[];
+      sourceDefinitionIds: number[];
       runStartLossAmount?: number;
-      runStartLossSourceDefinitionIds?: string[];
+      runStartLossSourceDefinitionIds?: number[];
     }>;
     runStartTaxForCorpRootAssets: HostFn<{
       amount: number;
-      sourceDefinitionIds: string[];
+      sourceDefinitionIds: number[];
     }>;
   };
   install: {

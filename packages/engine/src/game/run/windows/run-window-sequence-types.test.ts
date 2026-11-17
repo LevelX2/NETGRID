@@ -13,7 +13,7 @@ describe("run window sequence payload patches", () => {
     const payload = applyRunWindowPayloadPatch(legalAction, {
       sequenceKind: "ordered_fort_rebuild_sequence",
       hiddenZoneBarrier: true,
-      sourceDefinitionId: "onr_proteus_069_pavit-bharat",
+      sourceDefinitionId: 127,
       targetServerId: "remote_1",
       removedCardCount: 2,
       replacementCardCount: 2,
@@ -23,7 +23,7 @@ describe("run window sequence payload patches", () => {
       existing: true,
       sequenceKind: "ordered_fort_rebuild_sequence",
       hiddenZoneBarrier: true,
-      sourceDefinitionId: "onr_proteus_069_pavit-bharat",
+      sourceDefinitionId: 127,
       targetServerId: "remote_1",
       removedCardCount: 2,
       replacementCardCount: 2,

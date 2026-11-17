@@ -46,7 +46,7 @@ export type CorpHandActionDispositionInput = {
 
 export type CorpHandRouteCoverageRecord = {
   sourceInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   duplicateCount: number;
   legalActionIds: string[];
   exactCurrentProjections: string[];
@@ -324,7 +324,7 @@ function handPlanningDisposition(params: {
 
 export function corpHandDuplicateCount(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): number {
   if (input.side !== "corp") return 0;
   return input.playerView.own.gripOrHq.filter(

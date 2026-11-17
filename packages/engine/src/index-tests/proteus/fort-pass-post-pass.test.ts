@@ -184,10 +184,10 @@ import {
 } from "../../test-fixtures/index-test-helpers";
 
 describe("Proteus Public Fort Pass Windows", () => {
-  const LESLEY = "onr_proteus_062_lesley-major";
-  const RASMIN = "onr_proteus_070_rasmin-bridger";
-  const AGENDA = "onr_v1_203_hostile-takeover";
-  const ICE = "simple_barrier_ice";
+  const LESLEY = 120;
+  const RASMIN = 128;
+  const AGENDA = 415;
+  const ICE = 589;
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
@@ -399,13 +399,13 @@ describe("Proteus Public Fort Pass Windows", () => {
 });
 
 describe("Proteus Phase 1g Post-Pass Derez Utility", () => {
-  const DISINTEGRATOR = "onr_proteus_085_disintegrator";
-  const ICE = "simple_barrier_ice";
+  const DISINTEGRATOR = 143;
+  const ICE = 589;
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
   function proteusDisintegratorGame(seed: string): GameState {
-    const runnerOverrideIds = new Set([DISINTEGRATOR, "simple_fracter"]);
+    const runnerOverrideIds = new Set([DISINTEGRATOR, 597]);
     const corpOverrideIds = new Set([ICE]);
     return toRunnerTurn(
       createGameAfterSetup({
@@ -415,7 +415,7 @@ describe("Proteus Phase 1g Post-Pass Derez Utility", () => {
           id: `${seed}_runner`,
           cards: [
             { id: DISINTEGRATOR, quantity: 1 },
-            { id: "simple_fracter", quantity: 1 },
+            { id: 597, quantity: 1 },
             ...ONR_V1_6_2_RUNNER_DECK.cards.filter(
               (card) => !runnerOverrideIds.has(card.id),
             ),
@@ -440,7 +440,7 @@ describe("Proteus Phase 1g Post-Pass Derez Utility", () => {
     state: GameState;
     iceId: CardInstanceId;
   } {
-    installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, 597);
     installRunnerProgramForTest(state, DISINTEGRATOR);
     const iceId = putCorpIceOnServer(state, "rd", ICE);
     state = apply(
@@ -460,14 +460,14 @@ describe("Proteus Phase 1g Post-Pass Derez Utility", () => {
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(state, action) === "simple_fracter",
+        sourceDefinition(state, action) === 597,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "simple_fracter",
+        sourceDefinition(state, action) === 597,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     return { state, iceId };
@@ -560,7 +560,7 @@ describe("Proteus Phase 1g Post-Pass Derez Utility", () => {
     );
     state.runner.credits = 10;
     state.corp.credits = 10;
-    installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, 597);
     installRunnerProgramForTest(state, DISINTEGRATOR);
     putCorpIceOnServer(state, "rd", ICE);
     expect(

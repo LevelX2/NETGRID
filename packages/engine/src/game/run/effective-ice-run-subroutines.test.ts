@@ -11,11 +11,11 @@ import {
 } from "../../ability-engine/additional-subroutine-modifiers";
 import { effectiveIceRunSubroutines } from "./effective-ice-run-subroutines";
 
-const CRYSTAL_WALL = "onr_v1_232_crystal-wall" as CardDefinitionId;
-const ENCODER = "onr_v1_320_encoder-inc" as CardDefinitionId;
-const GALATEA = "onr_proteus_023_galatea" as CardDefinitionId;
-const GATEKEEPER = "onr_proteus_024_gatekeeper" as CardDefinitionId;
-const TUTOR = "onr_v1_274_tutor" as CardDefinitionId;
+const CRYSTAL_WALL = 444 as CardDefinitionId;
+const ENCODER = 532 as CardDefinitionId;
+const GALATEA = 81 as CardDefinitionId;
+const GATEKEEPER = 82 as CardDefinitionId;
+const TUTOR = 486 as CardDefinitionId;
 
 describe("effective ICE run subroutines", () => {
   it("stacks separately attributed run-duration subroutines without mark-copying external modifiers", () => {

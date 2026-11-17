@@ -91,7 +91,7 @@ it.each([
         drawForAnswerActionIds:
           game === 3
             ? [
-                "runner.play_event.runner_onr_v1_101_mit-west-tier_2.runner_onr_v1_101_mit-west-tier_2.onr_v1_101_mit-west-tier:abilities_on_play_shuffle_grip_trash_and_stack_then_draw",
+                "runner.play_event.runner_313_2.runner_313_2.onr_v1_101_mit-west-tier:abilities_on_play_shuffle_grip_trash_and_stack_then_draw",
                 decision.actionId,
               ]
             : [decision.actionId],

@@ -3,8 +3,8 @@ import { expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
-const risky = "onr_v1_005_bartmoss-memorial-icebreaker";
-const stable = "onr_v1_039_krash";
+const risky = 217;
+const stable = 251;
 
 it("projects typed post-encounter program loss into the breaker profile", () => {
   const hint = deriveCardSpecAiHint(cardSpecPlanningCardByDefinitionId(risky)!);

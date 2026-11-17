@@ -31,7 +31,7 @@ describe("pure opponent ICE-install tax at the native Development consumer", () 
       input.playerView.own.credits = credits;
       const evaluations = evaluateRunnerHandDevelopment({ input });
       const tax = evaluations.find(
-        (entry) => entry.definitionId === "onr_v1_173_restrictive-net-zoning",
+        (entry) => entry.definitionId === 385,
       )!;
       expect(tax.developmentRole).toBe("access_payoff");
       expect(tax.currentNeed).not.toBe("acute");
@@ -43,7 +43,7 @@ describe("pure opponent ICE-install tax at the native Development consumer", () 
         "economy_engine",
       );
       const income = evaluations.find(
-        (entry) => entry.definitionId === "onr_v1_097_livewires-contacts",
+        (entry) => entry.definitionId === 309,
       )!;
       expect(income.developmentRole).toBe("economy_engine");
       expect(income.liquidityTiming).toBe("immediate");

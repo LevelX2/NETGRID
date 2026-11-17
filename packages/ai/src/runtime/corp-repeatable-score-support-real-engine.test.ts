@@ -20,8 +20,8 @@ import {
 import { corpSameTurnScoreConversionPaths } from "../plans/tactical-plan-corp-score-conversion";
 import { buildAiDecisionInput } from "./ai-decision-input";
 
-const SUPPORT = "onr_v1_312_chicago-branch",
-  AGENDA = "onr_v1_205_main-office-relocation";
+const SUPPORT = 524,
+  AGENDA = 417;
 const corpDeck = {
   ...DEMO_DECKS.demo_corp_001,
   id: "repeatable-score-proof",

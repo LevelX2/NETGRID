@@ -40,7 +40,7 @@ it("funds a reachable conditional score threshold before a nonterminal free scor
     costs: [{ clicks: 1 }],
     payload: { gainCreditsAmount: 1 },
   });
-  expect(corpConditionalScoreCreditProfile("onr_v1_196_corporate-war")).toEqual(
+  expect(corpConditionalScoreCreditProfile(408)).toEqual(
     { threshold: 12, gainAmount: 12 },
   );
   resetResidentPlanPortfolioMemory();
@@ -137,7 +137,7 @@ it("keeps actual terminal R&D defense ahead of the native nonwinning score payof
   );
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(
-    "corp.install_card.corp_onr_v1_222_ball-and-chain_1.rd.corp_onr_v1_222_ball-and-chain_1.1",
+    "corp.install_card.corp_434_1.rd.corp_434_1.1",
   );
   expect(
     decision.decisionDebug?.planFirstDecision?.priority?.effectiveClass,

@@ -39,7 +39,7 @@ describe("Runner targeted-bypass plan admission", () => {
     expect(runnerGenericDevelopmentMayOwnAction(candidate)).toBe(false);
     expect(
       runnerDefinitionRequiresTargetedBypassPlan(
-        "onr_v1_111_social-engineering",
+        323,
       ),
     ).toBe(true);
   });
@@ -470,7 +470,7 @@ function socialEngineeringCandidate(
     actionType: "play_event",
     actorSide: "runner",
     semanticActionType: "play.runner_event",
-    sourceDefinitionId: "onr_v1_111_social-engineering",
+    sourceDefinitionId: 323,
     sourceCardInstanceId: "social-1",
     costProfile: { creditCost },
   } as ActionSemanticCandidate;
@@ -508,7 +508,7 @@ function planningInput(params: {
 function blockingWall(instanceId: string): VisibleCard {
   const ice: VisibleCard = {
     instanceId,
-    definitionId: "onr_v1_232_crystal-wall",
+    definitionId: 444,
     title: "Crystal Wall",
     type: "ice",
     subtypes: ["wall"],
@@ -522,7 +522,7 @@ function blockingWall(instanceId: string): VisibleCard {
       {
         id: `${instanceId}-end-the-run`,
         type: "end_the_run",
-        sourceDefinitionId: "onr_v1_232_crystal-wall",
+        sourceDefinitionId: 444,
         sourceTitle: "Crystal Wall",
       },
     ],
@@ -532,7 +532,7 @@ function blockingWall(instanceId: string): VisibleCard {
 function pileDriver(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_047_pile-driver",
+    definitionId: 259,
     title: "Pile Driver",
     type: "program",
     subtypes: ["icebreaker", "fracter", "noisy"],
@@ -548,7 +548,7 @@ function targetedContinuation(): RunnerTargetedBypassChoiceContinuation {
     sourceActionId: "runner.play.social-1",
     selectedActionId: "runner.play.social-1",
     sourceCardInstanceId: "social-1",
-    sourceDefinitionId: "onr_v1_111_social-engineering",
+    sourceDefinitionId: 323,
     plannedAtStateVersion: 10,
     selectedAtStateVersion: 10,
     ownerModuleId: "runner.pressure_central",
@@ -710,7 +710,7 @@ function paymentSupportEventTail(): AiDecisionInput["eventTail"] {
       publicPayload: {
         actor: "runner",
         actionType: "activated_card_ability",
-        sourceDefinitionId: "onr_proteus_133_chiba-bank-account",
+        sourceDefinitionId: 191,
       },
     },
     {
@@ -723,7 +723,7 @@ function paymentSupportEventTail(): AiDecisionInput["eventTail"] {
         actor: "runner",
         actionType: "play_event",
         sourceCardInstanceId: "social-1",
-        sourceDefinitionId: "onr_v1_111_social-engineering",
+        sourceDefinitionId: 323,
         abilityId: "secret_spend_guess_then_targeted_bypass_run",
       },
     },

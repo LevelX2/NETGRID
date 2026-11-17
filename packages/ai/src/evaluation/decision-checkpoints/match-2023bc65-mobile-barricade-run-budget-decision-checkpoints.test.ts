@@ -8,9 +8,9 @@ import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
-const KRASH_INSTANCE_ID = "runner_onr_v1_039_krash_1";
+const KRASH_INSTANCE_ID = "runner_251_1";
 const SPIN_CHIP_INSTANCE_ID =
-  "runner_onr_proteus_139_eurocorpse-tm-spin-chip_1";
+  "runner_197_1";
 
 describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
   it("uses the pool-funded HQ path while the remote contest remains underfunded", () => {

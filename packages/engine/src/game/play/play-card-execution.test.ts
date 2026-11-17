@@ -13,8 +13,8 @@ import {
 
 const EVENT_ID = "event_1" as CardInstanceId;
 const OPERATION_ID = "operation_1" as CardInstanceId;
-const RUNNER_EVENT_DEFINITION_ID = "onr_classic_038_gypsytm-schedule-analyzer";
-const CORP_OPERATION_DEFINITION_ID = "simple_economy_operation";
+const RUNNER_EVENT_DEFINITION_ID = 42;
+const CORP_OPERATION_DEFINITION_ID = 596;
 
 function state(): GameState {
   return {
@@ -64,7 +64,7 @@ function state(): GameState {
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {
@@ -293,7 +293,7 @@ describe("play-card-execution", () => {
     const targetState = state();
     targetState.corpTemporaryInstallRezCredits = {
       sourceCardInstanceId: "contract",
-      sourceDefinitionId: "onr_proteus_059_government-contract",
+      sourceDefinitionId: 117,
       remaining: 3,
       usableFor: "corp_install_or_rez",
       returnUnusedAtTurnEnd: true,
@@ -314,7 +314,7 @@ describe("play-card-execution", () => {
     const hiddenState = state();
     hiddenState.cardInstances[OPERATION_ID] = instance(
       OPERATION_ID,
-      "simple_economy_operation",
+      596,
       { owner: "corp", controller: "corp", zone: { side: "corp", zone: "hq" } },
     );
     const hiddenAction = legalAction("play_operation", OPERATION_ID, 2);
@@ -341,7 +341,7 @@ describe("play-card-execution", () => {
     const badPublicityState = state();
     badPublicityState.cardInstances[OPERATION_ID] = instance(
       OPERATION_ID,
-      "simple_economy_operation",
+      596,
       { owner: "corp", controller: "corp", zone: { side: "corp", zone: "hq" } },
     );
     const badPublicityAction = legalAction("play_operation", OPERATION_ID);

@@ -22,7 +22,7 @@ import type { DamageSummary } from "./encounter-resolution";
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
   options: Partial<CardInstance> = {},
 ): CardInstance {

@@ -142,6 +142,6 @@ export function createTurnStartTagContinuationResolver(
   };
 }
 
-function publicCardTitle(definitionId: string): string {
+function publicCardTitle(definitionId: number): string {
   return CARD_DEFINITIONS_BY_ID[definitionId]?.title ?? definitionId;
 }

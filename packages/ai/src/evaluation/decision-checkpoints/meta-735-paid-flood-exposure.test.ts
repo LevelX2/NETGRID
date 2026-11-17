@@ -14,9 +14,9 @@ const checkpoint = capture as unknown as {
   runtime: AiRuntimeCheckpointV1;
   validation: Record<string, boolean>;
 };
-const agendaId = "corp_onr_v1_196_corporate-war_2";
-const fetalId = "corp_onr_proteus_004_fetal-ai_1";
-const brokerId = "runner_onr_v1_154_broker_3";
+const agendaId = "corp_408_2";
+const fetalId = "corp_62_1";
+const brokerId = "runner_366_3";
 afterEach(resetResidentPlanPortfolioMemory);
 
 function fixture(sourceId = agendaId) {

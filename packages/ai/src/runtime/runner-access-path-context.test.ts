@@ -25,7 +25,7 @@ const context = createRunnerAccessPathContext({
   knownIcePathReason: () => "path",
   isRemoteServerTarget,
   definitionType: (id) =>
-    id === "onr_v1_366_red-herrings" ? "upgrade" : "asset",
+    id === 578 ? "upgrade" : "asset",
   remoteRootTrashCost: (card) => card.trashCost,
 });
 
@@ -73,7 +73,7 @@ describe("Runner encounter remote payoff", () => {
     input.playerView.traceRulesProfile = "modern_open";
     const ice = withEffectiveRunQuote(
       visibleCard("wall", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         rezzed: true,
       }),
       {
@@ -90,7 +90,7 @@ describe("Runner encounter remote payoff", () => {
         [ice],
         [
           visibleCard("campaign", "corp", "asset", {
-            definitionId: "onr_v1_326_holovid-campaign",
+            definitionId: 538,
             counters: { bit: 5 },
             rezzed: true,
             trashCost: 4,
@@ -156,7 +156,7 @@ describe("Runner encounter remote payoff", () => {
     const input = aiInput("runner", [first, second, cont]);
     const ice = withEffectiveRunQuote(
       visibleCard("wall", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         rezzed: true,
       }),
       {
@@ -195,13 +195,13 @@ describe("Runner encounter remote payoff", () => {
           [],
           [
             visibleCard("empty-campaign", "corp", "asset", {
-              definitionId: "onr_v1_326_holovid-campaign",
+              definitionId: 538,
               counters: { bit: 0 },
               rezzed: true,
               trashCost: 4,
             }),
             visibleCard("tax", "corp", "upgrade", {
-              definitionId: "onr_v1_366_red-herrings",
+              definitionId: 578,
               rezzed: true,
               trashCost: 5,
             }),

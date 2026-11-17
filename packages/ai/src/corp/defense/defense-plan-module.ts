@@ -2258,7 +2258,7 @@ function authoritativeDefensePlacementSource(
   }
   if (
     candidate.sourceDefinitionId !== undefined &&
-    typeof action.payload?.sourceDefinitionId === "string" &&
+    typeof action.payload?.sourceDefinitionId === "number" &&
     action.payload.sourceDefinitionId !== candidate.sourceDefinitionId
   ) {
     return undefined;

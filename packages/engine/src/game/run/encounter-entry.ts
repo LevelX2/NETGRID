@@ -57,7 +57,7 @@ export type EncounterEntryResult = {
   encounterStarted?: boolean;
   runShouldEnd?: boolean;
   iceId?: CardInstanceId;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   temporaryTraceCredits?: number;
   resolvedPayload?: NonNullable<LegalAction["payload"]> | undefined;
   stateChanged?: boolean;
@@ -758,7 +758,7 @@ function markApproachIceExposeUsedForSource(
 }
 
 function runEncounterInterventionsForDefinition(
-  definitionId: string,
+  definitionId: number,
 ): readonly CardRunEncounterInterventionImplementation[] {
   return (
     cardImplementationForDefinitionId(definitionId)

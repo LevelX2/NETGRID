@@ -182,6 +182,9 @@ importers:
       '@netgrid/catalog':
         specifier: workspace:*
         version: link:../catalog
+      '@netgrid/shared':
+        specifier: workspace:*
+        version: link:../shared
 
   packages/engine:
     dependencies:

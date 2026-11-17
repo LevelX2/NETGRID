@@ -9,7 +9,7 @@ import { runnerCandidateSourceDefinitionId } from "./runner-action-source-facts"
 
 export function runnerPartialProgramSearchProfile(
   input: AiDecisionInput,
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): AiHintEffectTargetProfile | undefined {
   if (!definitionId) return undefined;
   const profiles =

@@ -91,7 +91,7 @@ it("funds the current Sentry answer with one sufficient bank and preserves P4, p
   const a = f.input.legalActions.find((a) => a.actionId === d.actionId)!;
   expect(a).toMatchObject({
     type: "activated_card_ability",
-    source: "runner_onr_v1_154_broker_2",
+    source: "runner_366_2",
     payload: { cardImplementationAbilityKey: "withdraw_credits" },
   });
   expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
@@ -114,7 +114,7 @@ it("funds the current Sentry answer with one sufficient bank and preserves P4, p
       stateVersion: 413,
       gap: 5,
       targetCredits: 14,
-      targetDefinitionId: "onr_v1_002_ai-boon",
+      targetDefinitionId: 214,
       replacedBasicClicks: 5,
     },
   });
@@ -189,7 +189,7 @@ it("funds the full native install with one payout and lets the next normal decis
     )!;
   expect(a).toMatchObject({
     type: "install_card",
-    source: "runner_onr_v1_002_ai-boon_2",
+    source: "runner_214_2",
   });
   expect(next).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
   expect(next.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
@@ -207,7 +207,7 @@ it("funds the full native install with one payout and lets the next normal decis
   expect(own.credits).toBe(6);
   expect(own.clicks).toBe(2);
   expect(
-    own.rig!.find((c) => c.instanceId === "runner_onr_v1_154_broker_3")
+    own.rig!.find((c) => c.instanceId === "runner_366_3")
       ?.counters?.bit,
   ).toBe(3);
 });
@@ -370,7 +370,7 @@ it("does not cash out two small Brokers when their combined payout still misses 
   const f = base("cp-meta590-two-broker-coverage.json");
   expect(f.input.playerView.own).toMatchObject({ credits: 6, clicks: 3 });
   const need = f.development.find(
-    (entry) => entry.definitionId === "onr_proteus_092_morphing-tool",
+    (entry) => entry.definitionId === 150,
   )!.fundingNeed!;
   expect(need).toMatchObject({ installOrPlayCost: 10, targetCredits: 16 });
   expect(f.banks.map((bank) => bank.estimatedPayout)).toEqual([3, 3]);

@@ -17,7 +17,7 @@ describe("corp tactical goals", () => {
         ? {
             ...candidate,
             sourceKind: "card",
-            sourceDefinitionId: "onr_v1_237_data-wall",
+            sourceDefinitionId: 449,
             targetContext: {
               selectedTargets: [
                 {
@@ -65,7 +65,7 @@ describe("corp tactical goals", () => {
     frame.actionCandidates = frame.actionCandidates.map((candidate) => ({
       ...candidate,
       sourceKind: "card",
-      sourceDefinitionId: "onr_v1_347_vapor-ops",
+      sourceDefinitionId: 559,
     }));
 
     expect(buildCorpTacticalGoals(frame).map((goal) => goal.goalId)).toEqual([

@@ -89,7 +89,7 @@ it("admits the native G5/D170 Lucidrine remote contest through the live DTO", ()
   const { d, pf } = decide(input);
   expect(pf.selectedPlan?.moduleId).toBe("runner.contest_remote");
   expect(d.actionId).toBe(
-    "runner.play_event.runner_onr_v1_098_lucidrine-booster-drug_1.remote_1.runner_onr_v1_098_lucidrine-booster-drug_1.onr_v1_098_lucidrine-booster-drug:abilities_on_play_make_run",
+    "runner.play_event.runner_310_1.remote_1.runner_310_1.onr_v1_098_lucidrine-booster-drug:abilities_on_play_make_run",
   );
   const route = evaluateRunnerRunTargets({ input }).find(
     (t) => t.actionId === d.actionId,
@@ -156,7 +156,7 @@ it("retains mature development cashout as an executable ordinary-priority candid
     signal: {
       priorityClass: "P4",
       actionIds: [
-        "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+        "runner.activated_card_ability.runner_366_1.runner_366_1.activated.onr_v1_154_broker:withdraw_credits",
       ],
       evidenceCodes: expect.arrayContaining([
         "runner_credit_bank_cashout_for_mature_development_funding",
@@ -224,7 +224,7 @@ it("executes the actual G5 run through current Engine actions without restoring 
 it("allowlists the Engine's unresolved state without synthesizing numeric strength", () => {
   const cp = load("g5d170"),
     card = cp.input.playerView.own.rig.find(
-      (c: { definitionId: string }) => c.definitionId === "onr_v1_002_ai-boon",
+      (c: { definitionId: number }) => c.definitionId === 214,
     );
   card.randomRunStrengthState.secret = "discard-me";
   const input = buildAiDecisionInputDto(cp.input),
@@ -242,11 +242,11 @@ it("preserves the actual seeded Engine strength after the first native run actio
   state = apply(
     state,
     "runner",
-    "runner.play_event.runner_onr_v1_098_lucidrine-booster-drug_1.remote_1.runner_onr_v1_098_lucidrine-booster-drug_1.onr_v1_098_lucidrine-booster-drug:abilities_on_play_make_run",
+    "runner.play_event.runner_310_1.remote_1.runner_310_1.onr_v1_098_lucidrine-booster-drug:abilities_on_play_make_run",
   );
   const view = getPlayerView(state, "runner"),
     original = view.own.rig!.find(
-      (c) => c.definitionId === "onr_v1_002_ai-boon",
+      (c) => c.definitionId === 214,
     )!;
   expect(original.randomRunStrengthState?.status).toBe("resolved");
   const dto = buildAiDecisionInputDto({
@@ -262,7 +262,7 @@ it("preserves the actual seeded Engine strength after the first native run actio
 it("strips an unknown card's random-state data without exposing or validating it", () => {
   const cp = load("g5d170"),
     card = cp.input.playerView.own.rig.find(
-      (c: { definitionId: string }) => c.definitionId === "onr_v1_002_ai-boon",
+      (c: { definitionId: number }) => c.definitionId === 214,
     );
   card.known = false;
   card.randomRunStrengthState = { status: "secret", secret: "hidden" };
@@ -282,8 +282,8 @@ it.each([
   (status, actualStrength, currentStrengthAdjustment, strength) => {
     const cp = load("g5d170"),
       card = cp.input.playerView.own.rig.find(
-        (c: { definitionId: string }) =>
-          c.definitionId === "onr_v1_002_ai-boon",
+        (c: { definitionId: number }) =>
+          c.definitionId === 214,
       );
     card.randomRunStrengthState = {
       status,
@@ -302,13 +302,13 @@ it("continues native G32 Shock with the exact legal Boon pump instead of accepti
   const { d, pf } = decide(input);
   expect(pf.selectedPlan?.moduleId).toBe("runner.convert_run_window");
   expect(d.actionId).toBe(
-    "runner.pump_breaker.runner_onr_v1_002_ai-boon_2.runner_onr_v1_002_ai-boon_2.runner_onr_v1_002_ai-boon_2.corp_onr_v1_268_shock-r_1.onr_v1_002_ai-boon:icebreaker_abilities_increase_strength",
+    "runner.pump_breaker.runner_214_2.runner_214_2.runner_214_2.corp_480_1.onr_v1_002_ai-boon:icebreaker_abilities_increase_strength",
   );
 });
 it("quotes a hypothetical pumped resolved breaker without mutating its current public state", () => {
   const { input } = native("g32d305");
   const boon = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_v1_002_ai-boon",
+    (c) => c.definitionId === 214,
   )!;
   const before = structuredClone(boon);
   const ice = input.playerView.run!.encounteredIce!;
@@ -347,7 +347,7 @@ it("executes the native G32 pump, break and remaining run through the current En
         state = apply(state, "corp", corp[0]!.actionId);
       } else {
         const originalRezId =
-          "corp.rez_ice.corp_onr_v1_279_wall-of-static_2.corp_onr_v1_279_wall-of-static_2";
+          "corp.rez_ice.corp_491_2.corp_491_2";
         expect(corp).toHaveLength(2);
         expect(corp.filter((a) => a.type === "decline_rez")).toHaveLength(1);
         expect(corp.find((a) => a.actionId === originalRezId)?.type).toBe(
@@ -370,7 +370,7 @@ it("executes the native G32 pump, break and remaining run through the current En
 it("preserves signed public adjustments, including a negative visible strength", () => {
   const cp = load("g32d305"),
     card = cp.input.playerView.own.rig.find(
-      (c: { definitionId: string }) => c.definitionId === "onr_v1_002_ai-boon",
+      (c: { definitionId: number }) => c.definitionId === 214,
     );
   card.randomRunStrengthState = {
     status: "resolved",
@@ -387,7 +387,7 @@ it("preserves signed public adjustments, including a negative visible strength",
 it("pays the full pump deficit from an already resolved negative strength", () => {
   const { input } = native("g32d305");
   const boon = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_v1_002_ai-boon",
+    (c) => c.definitionId === 214,
   )!;
   boon.randomRunStrengthState = {
     status: "resolved",
@@ -417,7 +417,7 @@ it("preserves only the public opponent Rig random-strength fact in the Corp DTO"
     legalActions: getLegalActions(state, "corp"),
   });
   const source = view.opponent.rig!.find(
-    (c) => c.definitionId === "onr_v1_002_ai-boon",
+    (c) => c.definitionId === 214,
   )!;
   expect(
     dto.playerView.opponent.rig!.find(
@@ -429,7 +429,7 @@ it("preserves only the public opponent Rig random-strength fact in the Corp DTO"
 it("rejects an inconsistent original resolved fact before deriving the hypothetical pump", () => {
   const { input } = native("g32d305");
   const boon = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_v1_002_ai-boon",
+    (c) => c.definitionId === 214,
   )!;
   boon.randomRunStrengthState = {
     status: "resolved",

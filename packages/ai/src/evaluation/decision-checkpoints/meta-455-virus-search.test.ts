@@ -92,8 +92,8 @@ it.each(["unfunded", "hand_answer_payable", "no_memory", "full_hand"] as const)(
         {
           actionId: action.actionId,
           sourceCardInstanceId: action.source!,
-          sourceDefinitionId: "onr_v1_177_the-short-circuit",
-          targetDefinitionId: "onr_proteus_095_skeleton-passkeys",
+          sourceDefinitionId: 389,
+          targetDefinitionId: 153,
         },
       ],
     };

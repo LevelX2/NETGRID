@@ -119,7 +119,7 @@ describe("AI input DTO public event source binding", () => {
     action.source = "datacomb-ice";
     action.payload = {
       corpPostPassIceAbility: "return_passed_ice_to_hq",
-      sourceDefinitionId: "onr_proteus_018_datacomb",
+      sourceDefinitionId: 76,
       decision: "pay",
       paymentAmount: 1,
       serverId: "rd",
@@ -142,7 +142,7 @@ describe("AI input DTO public event source binding", () => {
 
     expect(input.legalActions[0]?.payload).toEqual({
       corpPostPassIceAbility: "return_passed_ice_to_hq",
-      sourceDefinitionId: "onr_proteus_018_datacomb",
+      sourceDefinitionId: 76,
       decision: "pay",
       paymentAmount: 1,
       serverId: "rd",
@@ -254,7 +254,7 @@ describe("AI input DTO public event source binding", () => {
         actor: "runner",
         actionType: "activated_card_ability",
         sourceCardInstanceId: "broker-1",
-        sourceDefinitionId: "onr_v1_154_broker",
+        sourceDefinitionId: 366,
         unapprovedSourceAlias: "must-not-cross-dto",
       },
     };
@@ -277,7 +277,7 @@ describe("AI input DTO public event source binding", () => {
     expect(input.eventTail).toBe(input.playerView.publicEvents);
     expect(input.eventTail[0]?.publicPayload).toMatchObject({
       sourceCardInstanceId: "broker-1",
-      sourceDefinitionId: "onr_v1_154_broker",
+      sourceDefinitionId: 366,
     });
     expect(input.eventTail[0]?.publicPayload).not.toHaveProperty(
       "unapprovedSourceAlias",
@@ -419,7 +419,7 @@ describe("AI input DTO public event source binding", () => {
         corpMandatoryOptionalAgendaCardCount: 0,
         corpMandatorySkivvissCardCount: 1,
         corpMandatoryAdditionalSourceCount: 1,
-        corpMandatoryAdditionalSourceDefinitionIds: "onr_v1_064_skivviss",
+        corpMandatoryAdditionalSourceDefinitionIds: 276,
         unapprovedDrawRateAlias: 2,
       },
     };
@@ -448,7 +448,7 @@ describe("AI input DTO public event source binding", () => {
       corpHqCountAfter: 5,
       corpRdDrawnToHqCount: 2,
       corpMandatorySkivvissCardCount: 1,
-      corpMandatoryAdditionalSourceDefinitionIds: "onr_v1_064_skivviss",
+      corpMandatoryAdditionalSourceDefinitionIds: 276,
     });
     expect(input.playerView.publicEvents[0]?.publicPayload).not.toHaveProperty(
       "unapprovedDrawRateAlias",

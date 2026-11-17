@@ -32,7 +32,7 @@ export type StructuredTagPunishPayoffKind =
 
 export type StructuredTagPunishLegalActionAssessment = {
   profile: StructuredTagPunishProfile;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   isTagSource: boolean;
   isPunishPayoff: boolean;
   isTraceTagSource: boolean;
@@ -72,7 +72,7 @@ export function classifyTagPunishPayoffFromOntology(
 
 export function classifyTagPunishLegalActionFromOntology(
   action: LegalAction,
-  sourceDefinitionId: string | undefined,
+  sourceDefinitionId: number | undefined,
   visibleState: {
     runnerTagged: boolean;
     legacyRoles?: string[];

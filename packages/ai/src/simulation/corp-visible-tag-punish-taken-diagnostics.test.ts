@@ -28,13 +28,13 @@ describe("visible Punish lethality metrics", () => {
     ] = [
       {
         action: econ,
-        cardId: "onr_v1_285_closed-accounts",
+        cardId: 497,
         kind: "closed_accounts_like",
         category: "economic",
       },
       {
         action: damage,
-        cardId: "onr_v1_302_scorched-earth",
+        cardId: 514,
         kind: "scorched_earth_like",
         category: "damage",
       },

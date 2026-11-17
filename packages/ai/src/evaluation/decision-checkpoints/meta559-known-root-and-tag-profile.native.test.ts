@@ -39,7 +39,7 @@ describe("pairing559: valid known root type reaches terminal threat facts (SP-66
       expect.objectContaining({
         zone: "remote_1",
         positionKey: "root:0",
-        definitionId: "onr_v1_345_trap",
+        definitionId: 557,
         sourceEventId: "evt_235",
       }),
     );
@@ -98,9 +98,9 @@ describe("pairing559: valid known root type reaches terminal threat facts (SP-66
     for (const events of [input.eventTail, input.playerView.publicEvents ?? []])
       for (const e of events)
         if (e.eventId === "evt_235") {
-          e.publicPayload.cardDefinitionId = "onr_proteus_004_fetal-ai";
+          e.publicPayload.cardDefinitionId = 62;
           e.publicPayload.title = "Fetal AI";
-          e.publicPayload.targets.cardDefinitionId = "onr_proteus_004_fetal-ai";
+          e.publicPayload.targets.cardDefinitionId = 62;
         }
     expect(runnerTargetHasTerminalContestThreat(input, "remote_1")).toBe(true);
   });
@@ -123,7 +123,7 @@ describe("pairing559: tag prevention survives the persistent functional profile 
     const f = original("tag-prevention-profile"),
       input = f.native.input;
     const card = input.playerView.own.gripOrHq.find(
-      (c: any) => c.definitionId === "onr_v1_135_nasuko-cycle",
+      (c: any) => c.definitionId === 347,
     );
     expect(
       persistentFunctionalProfileForCard(card, card.rulesText)
@@ -145,7 +145,7 @@ describe("pairing559: tag prevention survives the persistent functional profile 
     // Semantic coverage countercase; this modified board is not an original replay.
     const input = original("tag-prevention-profile").native.input;
     const fallGuy = input.playerView.own.heapOrArchives.find(
-      (c: any) => c.definitionId === "onr_v1_161_fall-guy",
+      (c: any) => c.definitionId === 373,
     );
     expect(fallGuy).toBeDefined();
     input.playerView.own.heapOrArchives =
@@ -157,7 +157,7 @@ describe("pairing559: tag prevention survives the persistent functional profile 
       input,
       strategicIntent: input.ownRunnerStrategicIntent,
       deckCapabilities: input.ownDeckCapabilities,
-    }).find((e) => e.definitionId === "onr_v1_135_nasuko-cycle")!;
+    }).find((e) => e.definitionId === 347)!;
     expect(
       evaluation.persistentInstallEvaluation!.newFunctionalCoverage,
     ).not.toContain("tag_prevention");
@@ -183,7 +183,7 @@ describe("pairing559: tag prevention survives the persistent functional profile 
       expect(r.fallbackUsed).toBe(false);
       expect(r.timeoutUsed).toBe(false);
       expect(a.type).toBe("install_card");
-      expect(a.source).toBe("runner_onr_v1_135_nasuko-cycle_1");
+      expect(a.source).toBe("runner_347_1");
       expect(r.decisionDebug!.planFirstDecision!.selectedPlan!.moduleId).toBe(
         "runner.defense_and_recovery",
       );
@@ -200,7 +200,7 @@ describe("pairing559: tag prevention survives the persistent functional profile 
       if (!applied.ok) throw Error(JSON.stringify(applied.error));
       expect(applied.state.runner.credits).toBe(10);
       expect(applied.state.runner.rig.hardware).toContain(
-        "runner_onr_v1_135_nasuko-cycle_1",
+        "runner_347_1",
       );
     },
   );

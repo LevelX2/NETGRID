@@ -31,7 +31,7 @@ import type { CardIceStrengthModifierImplementation } from "./definition-types";
  * sources without a visible target binding are deliberately unsupported.
  */
 export function projectVisibleIceAfterPassiveRunnerInstall(
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
   ice: VisibleCard,
 ): VisibleCard | undefined {
   const implementation = cardImplementationForDefinitionId(sourceDefinitionId);

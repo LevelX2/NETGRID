@@ -636,7 +636,7 @@ describe("Corp defensive draw context", () => {
   it("excludes set-aside and removed ICE from remote defense draw prospects", () => {
     const setup = targetedScoreDefenseDrawSetup();
     const filter = (id: string) =>
-      corpCard(id, "ice", { definitionId: "onr_v1_244_filter" });
+      corpCard(id, "ice", { definitionId: 456 });
     setup.input.playerView.specialZones = {
       setAside: [filter("set-aside-filter")],
       removedFromGame: [filter("removed-filter")],
@@ -707,7 +707,7 @@ function targetedScoreDefenseDrawSetup(handCount = 3): {
   input.ownDeckSnapshot = {
     deckSnapshotId: "targeted-score-defense-draw",
     side: "corp",
-    cards: [{ cardId: "onr_v1_244_filter", quantity: 2 }],
+    cards: [{ cardId: 456, quantity: 2 }],
   };
   const baseline: KnownCorpFundedScoreProtectionAssessment = {
     knowledge: "known",
@@ -824,8 +824,8 @@ function drawInput(
       deckSnapshotId: "generic-central-defense-draw",
       side: "corp",
       cards: [
-        { cardId: "onr_v1_263_reinforced-wall", quantity: 3 },
-        { cardId: "simple_economy_operation", quantity: 37 },
+        { cardId: 475, quantity: 3 },
+        { cardId: 596, quantity: 37 },
       ],
     },
   });
@@ -834,7 +834,7 @@ function drawInput(
 
 function centralIce(instanceId: string): VisibleCard {
   return corpCard(instanceId, "ice", {
-    definitionId: "onr_v1_263_reinforced-wall",
+    definitionId: 475,
     title: "Reinforced Wall",
     subtypes: ["Wall"],
   });
@@ -844,7 +844,7 @@ function terminalRdEffectGapInput(clicks: number): AiDecisionInput {
   const input = drawInput(5, 6, [
     {
       ...centralIce("rd-keeper"),
-      definitionId: "onr_v1_252_keeper",
+      definitionId: 464,
       title: "Keeper",
       subtypes: ["code_gate"],
       strength: 4,
@@ -857,7 +857,7 @@ function terminalRdEffectGapInput(clicks: number): AiDecisionInput {
     corpCard("runner-codecracker", "program", {
       owner: "runner",
       side: "runner",
-      definitionId: "onr_v1_014_codecracker",
+      definitionId: 226,
       title: "Codecracker",
       subtypes: ["icebreaker"],
       rulesText:

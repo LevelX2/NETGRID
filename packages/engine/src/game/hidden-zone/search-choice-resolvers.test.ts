@@ -164,7 +164,7 @@ describe("hidden-zone search choice resolvers", () => {
     ).toEqual({
       selectedCardId: programId,
       sourceZone: "heap",
-      sourceDefinitionId: "onr_v1_110_sneak-preview",
+      sourceDefinitionId: 322,
       isCardImplementationChoice: true,
       shuffleNeeded: true,
     });

@@ -21,7 +21,7 @@ type FundingCheckpoint = {
 
 function removeFallGuy(input: AiDecisionInputWithDeckCapabilities) {
   input.playerView.own.rig = input.playerView.own.rig!.filter(
-    (card) => card.definitionId !== "onr_v1_161_fall-guy",
+    (card) => card.definitionId !== 373,
   );
 }
 
@@ -73,7 +73,7 @@ it("revalidates the recovered loan when the terminal hazards still need funding"
       cp.input.playerView.own.gripOrHq.some(
         (card) =>
           card.instanceId === action.source &&
-          card.definitionId === "onr_v1_168_loan-from-chiba",
+          card.definitionId === 380,
       ),
   )!;
   expect(loan).toBeDefined();

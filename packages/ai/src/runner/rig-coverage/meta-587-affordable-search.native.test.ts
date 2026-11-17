@@ -58,7 +58,7 @@ it("uses the already bound affordable stack search before funding an unaffordabl
       gap: {
         directSearchChoiceBindings: Array<{
           actionId: string;
-          targetDefinitionId: string;
+          targetDefinitionId: number;
         }>;
       };
     }
@@ -66,7 +66,7 @@ it("uses the already bound affordable stack search before funding an unaffordabl
   expect(gap.directSearchChoiceBindings).toContainEqual(
     expect.objectContaining({
       actionId: search.actionId,
-      targetDefinitionId: "onr_v1_072_wild-card",
+      targetDefinitionId: 284,
     }),
   );
   expect(JSON.stringify(input)).toBe(snapshot);
@@ -107,7 +107,7 @@ it.each([
     (a: { actionId: string }) => a.actionId === decision.actionId,
   );
   const effects = AI_HINTS_BY_CARD.get(
-    "onr_v1_114_temple-microcode-outlet",
+    326,
   )!.actionCapabilitySemantics!.find(
     (s) => s.capabilityKey === action.payload.cardImplementationAbilityKey,
   )!.effects;

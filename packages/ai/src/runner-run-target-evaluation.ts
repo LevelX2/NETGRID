@@ -2126,7 +2126,7 @@ function isRunnerRdPrivateLook(event: PublicGameEvent): boolean {
     event.publicPayload.hiddenZoneAction === "p3_33_private_look" &&
     event.publicPayload.privateLookZone === "rd" &&
     (Array.isArray(event.publicPayload.knownRndDefinitionIds) ||
-      typeof event.publicPayload.knownRndTopDefinitionId === "string")
+      typeof event.publicPayload.knownRndTopDefinitionId === "number")
   );
 }
 

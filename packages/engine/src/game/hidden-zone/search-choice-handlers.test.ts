@@ -19,9 +19,9 @@ const hardwareId = "hardware_1" as CardInstanceId;
 const sourceCardId = "source_card" as CardInstanceId;
 const sourceDefinitionId = "source_definition" as CardDefinitionId;
 const sneakPreviewInstanceId = "sneak_preview_instance" as CardInstanceId;
-const sneakPreviewDefinitionId = "onr_v1_110_sneak-preview" as CardDefinitionId;
+const sneakPreviewDefinitionId = 322 as CardDefinitionId;
 const stackProgramFreeInstallSourceId =
-  "onr_v1_059_self-modifying-code" as CardDefinitionId;
+  271 as CardDefinitionId;
 const aujourdOuiId = "onr_v1_089_aujourd-oui" as CardDefinitionId;
 const shortCircuitId = "onr_v1_096_the-short-circuit" as CardDefinitionId;
 

@@ -26,7 +26,7 @@ function checkpoint() {
     native.input,
   ) as AiDecisionInputWithDeckCapabilities;
   const source = input.playerView.own.gripOrHq.find(
-    (c) => c.definitionId === "onr_v1_320_encoder-inc",
+    (c) => c.definitionId === 532,
   )!;
   const action = input.legalActions.find(
     (a) => a.source === source.instanceId && a.type === "install_card",

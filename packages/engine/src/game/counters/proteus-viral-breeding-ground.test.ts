@@ -41,7 +41,7 @@ function apply(
 
 function corpCard(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
   rezzed = false,
 ): CardInstance {
@@ -60,7 +60,7 @@ function corpCard(
 
 function runnerProgram(
   id: string,
-  definitionId: string,
+  definitionId: number,
   hostedOn?: CardInstanceId,
 ): CardInstance {
   return {
@@ -106,7 +106,7 @@ describe("Proteus Phase 8c Viral Breeding Ground", () => {
     const hiddenRootId = "proteus_8c_hidden_root" as CardInstanceId;
     const publicIceId = "proteus_8c_public_ice" as CardInstanceId;
     state.cardInstances[agendaId] = {
-      ...corpCard(agendaId, "onr_proteus_009_viral-breeding-ground", {
+      ...corpCard(agendaId, 67, {
         side: "corp",
         zone: "serverRoot",
         serverId,
@@ -115,13 +115,13 @@ describe("Proteus Phase 8c Viral Breeding Ground", () => {
     };
     state.cardInstances[hiddenRootId] = corpCard(
       hiddenRootId,
-      "onr_v1_346_vacant-soulkiller",
+      558,
       { side: "corp", zone: "serverRoot", serverId },
       false,
     );
     state.cardInstances[publicIceId] = corpCard(
       publicIceId,
-      "onr_v1_246_fragmentation-storm",
+      458,
       { side: "corp", zone: "serverIce", serverId },
       true,
     );
@@ -145,10 +145,10 @@ describe("Proteus Phase 8c Viral Breeding Ground", () => {
       scoredFromServerId: serverId,
     });
     expect(String(payload?.publicTrashedCardDefinitionIds ?? "")).toContain(
-      "onr_v1_246_fragmentation-storm",
+      458,
     );
     expect(String(payload?.publicTrashedCardDefinitionIds ?? "")).not.toContain(
-      "onr_v1_346_vacant-soulkiller",
+      558,
     );
     expect(
       replayEvents(initial, state.eventLog.slice(initial.eventLog.length))
@@ -169,7 +169,7 @@ describe("Proteus Phase 8c Viral Breeding Ground", () => {
     if (!server) throw new Error("Missing remote");
     const agendaId = "proteus_8c_vbg_access" as CardInstanceId;
     state.cardInstances[agendaId] = {
-      ...corpCard(agendaId, "onr_proteus_009_viral-breeding-ground", {
+      ...corpCard(agendaId, 67, {
         side: "corp",
         zone: "serverRoot",
         serverId,
@@ -181,11 +181,11 @@ describe("Proteus Phase 8c Viral Breeding Ground", () => {
     const hostedId = "proteus_8c_dwarf" as CardInstanceId;
     state.cardInstances[daemonId] = runnerProgram(
       daemonId,
-      "onr_v1_069_succubus",
+      281,
     );
     state.cardInstances[hostedId] = runnerProgram(
       hostedId,
-      "onr_v1_021_dwarf",
+      233,
       daemonId,
     );
     state.runner.rig.programs.push(daemonId, hostedId);

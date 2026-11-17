@@ -22,7 +22,7 @@ export type RunnerTargetedIceTrashCommitment = {
   kind: "targeted_ice_trash";
   sourceActionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   plannedAtStateVersion: number;
   ownerModuleId: "runner.pressure_central" | "runner.contest_remote";
   ownerDedupeKey: string;

@@ -26,9 +26,9 @@ import { corpEconomyDevelopmentCampaigns } from "./economy-signals";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 
-const CAMPAIGN = "onr_v1_337_rockerboy-promotion";
-const AGENDA = "onr_v1_196_corporate-war";
-const WALL = "onr_v1_237_data-wall";
+const CAMPAIGN = 549;
+const AGENDA = 408;
+const WALL = 449;
 const deck = {
   ...DEMO_DECKS.demo_corp_001,
   id: "finite-campaign-fort-reuse",
@@ -103,7 +103,7 @@ function fixture(pool?: number) {
     state.corp.rd.push(id);
   }
   state.corp.hq = [];
-  const ids = (definitionId: string) =>
+  const ids = (definitionId: number) =>
     Object.values(state.cardInstances)
       .filter((card) => card.definitionId === definitionId)
       .map((card) => card.instanceId);

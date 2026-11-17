@@ -12,7 +12,7 @@ describe("visibleBreakerRoles", () => {
         visibleProgram("custom-fracter", ["Icebreaker", "Fracter"]),
       ),
     ).toEqual(["fracter"]);
-    expect(visibleBreakerRoles(visibleProgram("simple_fracter", []))).toEqual(
+    expect(visibleBreakerRoles(visibleProgram(597, []))).toEqual(
       [],
     );
     expect(
@@ -87,7 +87,7 @@ describe("visibleBreakerCardCanAddressIce", () => {
   });
 });
 
-function visibleProgram(definitionId: string, subtypes: string[]): VisibleCard {
+function visibleProgram(definitionId: number, subtypes: string[]): VisibleCard {
   return {
     instanceId: `${definitionId}-instance`,
     definitionId,

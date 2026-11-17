@@ -90,7 +90,7 @@ describe("match e2f2 Corp decision-window remediation checkpoints", () => {
       forbiddenActions: [
         {
           type: "play_operation",
-          sourceDefinitionId: "onr_v1_282_annual-reviews",
+          sourceDefinitionId: 494,
         },
       ],
     };

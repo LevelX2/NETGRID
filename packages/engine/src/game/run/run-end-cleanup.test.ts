@@ -20,13 +20,13 @@ import {
 } from "./run-end-cleanup";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
 
-function definition(id: string, type: CardDefinition["type"]): CardDefinition {
+function definition(id: number, type: CardDefinition["type"]): CardDefinition {
   return { id: id as CardDefinitionId, title: id, type } as CardDefinition;
 }
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
   options: Partial<CardInstance> = {},
 ): CardInstance {
@@ -74,7 +74,7 @@ function makeHost(
 } {
   const definitions: Record<string, CardDefinition> = {
     ice_def: definition("ice_def", "ice"),
-    onr_v1_020_dupre: definition("onr_v1_020_dupre", "program"),
+    onr_v1_020_dupre: definition(232, "program"),
     tokyo_def: definition("tokyo_def", "upgrade"),
     lucidrine_def: definition("lucidrine_def", "operation"),
     ...(options.definitions ?? {}),
@@ -92,7 +92,7 @@ function makeHost(
     ),
     dupre: instance(
       "dupre",
-      "onr_v1_020_dupre",
+      232,
       { side: "runner", zone: "rig" },
       { counters: { power: 2 }, selectedServerId: "remote_0" },
     ),
@@ -364,7 +364,7 @@ describe("multi-server success sequence run-end cleanup", () => {
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1" as CardInstanceId,
           sourceDefinitionId:
-            "onr_proteus_116_pirate-broadcast" as CardDefinitionId,
+            174 as CardDefinitionId,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["archives"],
           successfulServerIds: ["hq"],
@@ -416,7 +416,7 @@ describe("multi-server success sequence run-end cleanup", () => {
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1" as CardInstanceId,
           sourceDefinitionId:
-            "onr_proteus_116_pirate-broadcast" as CardDefinitionId,
+            174 as CardDefinitionId,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: [],
           successfulServerIds: ["hq"],
@@ -457,7 +457,7 @@ describe("multi-server success sequence run-end cleanup", () => {
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1" as CardInstanceId,
           sourceDefinitionId:
-            "onr_proteus_116_pirate-broadcast" as CardDefinitionId,
+            174 as CardDefinitionId,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["archives"],
           successfulServerIds: ["hq"],
@@ -581,14 +581,14 @@ describe("run end cleanup", () => {
       instances: {
         highlighter: instance(
           "highlighter",
-          "onr_proteus_090_highlighter",
+          148,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
       },
       definitions: {
         onr_proteus_090_highlighter: definition(
-          "onr_proteus_090_highlighter",
+          148,
           "program",
         ),
       },
@@ -617,7 +617,7 @@ describe("run end cleanup", () => {
       counterType: "highlighter",
       counterDelta: 1,
       counterTotalAfter: 1,
-      sourceCardDefinitionId: "onr_proteus_090_highlighter",
+      sourceCardDefinitionId: 148,
     });
   });
 
@@ -633,13 +633,13 @@ describe("run end cleanup", () => {
       instances: {
         cascade: instance(
           "cascade",
-          "onr_v1_010_cascade",
+          222,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
       },
       definitions: {
-        onr_v1_010_cascade: definition("onr_v1_010_cascade", "program"),
+        onr_v1_010_cascade: definition(222, "program"),
       },
       virusImplementations: {
         cascade: {
@@ -669,7 +669,7 @@ describe("run end cleanup", () => {
       counterType: "cascade",
       counterDelta: 1,
       counterTotalAfter: 1,
-      sourceCardDefinitionId: "onr_v1_010_cascade",
+      sourceCardDefinitionId: 222,
     });
     expect(fixture.legalAction.resolvedEffects).toContainEqual(
       expect.objectContaining({
@@ -678,7 +678,7 @@ describe("run end cleanup", () => {
         counterType: "cascade",
         addedCounterAmount: 1,
         remainingCounters: 1,
-        sourceDefinitionId: "onr_v1_010_cascade",
+        sourceDefinitionId: 222,
       }),
     );
   });
@@ -695,14 +695,14 @@ describe("run end cleanup", () => {
       instances: {
         garbage: instance(
           "garbage",
-          "onr_proteus_089_garbage-in",
+          147,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
       },
       definitions: {
-        "onr_proteus_089_garbage-in": definition(
-          "onr_proteus_089_garbage-in",
+        147: definition(
+          147,
           "program",
         ),
       },
@@ -728,7 +728,7 @@ describe("run end cleanup", () => {
       proteusRunnerVirusCounter: true,
       serverId: "rd",
       counterType: "garbage",
-      sourceCardDefinitionId: "onr_proteus_089_garbage-in",
+      sourceCardDefinitionId: 147,
     });
   });
 
@@ -744,14 +744,14 @@ describe("run end cleanup", () => {
       instances: {
         scaldan: instance(
           "scaldan",
-          "onr_proteus_094_scaldan",
+          152,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
       },
       definitions: {
         onr_proteus_094_scaldan: definition(
-          "onr_proteus_094_scaldan",
+          152,
           "program",
         ),
       },
@@ -780,7 +780,7 @@ describe("run end cleanup", () => {
       counterType: "scaldan",
       counterDelta: 1,
       counterTotalAfter: 1,
-      sourceCardDefinitionId: "onr_proteus_094_scaldan",
+      sourceCardDefinitionId: 152,
     });
   });
 
@@ -796,31 +796,31 @@ describe("run end cleanup", () => {
       instances: {
         cascade: instance(
           "cascade",
-          "onr_v1_010_cascade",
+          222,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
         highlighter: instance(
           "highlighter",
-          "onr_proteus_090_highlighter",
+          148,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
         garbage: instance(
           "garbage",
-          "onr_proteus_089_garbage-in",
+          147,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
       },
       definitions: {
-        onr_v1_010_cascade: definition("onr_v1_010_cascade", "program"),
+        onr_v1_010_cascade: definition(222, "program"),
         onr_proteus_090_highlighter: definition(
-          "onr_proteus_090_highlighter",
+          148,
           "program",
         ),
-        "onr_proteus_089_garbage-in": definition(
-          "onr_proteus_089_garbage-in",
+        147: definition(
+          147,
           "program",
         ),
       },
@@ -894,14 +894,14 @@ describe("run end cleanup", () => {
       instances: {
         viral_pipeline: instance(
           "viral_pipeline",
-          "onr_proteus_099_viral-pipeline",
+          157,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
       },
       definitions: {
-        "onr_proteus_099_viral-pipeline": definition(
-          "onr_proteus_099_viral-pipeline",
+        157: definition(
+          157,
           "program",
         ),
       },
@@ -941,7 +941,7 @@ describe("run end cleanup", () => {
       counterType: "socket_archives",
       counterDelta: 1,
       counterTotalAfter: 1,
-      sourceCardDefinitionId: "onr_proteus_099_viral-pipeline",
+      sourceCardDefinitionId: 157,
     });
     expect(fixture.legalAction.resolvedEffects).toEqual(
       expect.arrayContaining([
@@ -950,7 +950,7 @@ describe("run end cleanup", () => {
           counterType: "socket_archives",
           addedCounterAmount: 1,
           reason: "runner_virus_successful_run",
-          sourceDefinitionId: "onr_proteus_099_viral-pipeline",
+          sourceDefinitionId: 157,
         }),
       ]),
     );
@@ -969,14 +969,14 @@ describe("run end cleanup", () => {
       instances: {
         viral_pipeline: instance(
           "viral_pipeline",
-          "onr_proteus_099_viral-pipeline",
+          157,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
       },
       definitions: {
-        "onr_proteus_099_viral-pipeline": definition(
-          "onr_proteus_099_viral-pipeline",
+        157: definition(
+          157,
           "program",
         ),
       },
@@ -1024,7 +1024,7 @@ describe("run end cleanup", () => {
           {
             counterType: "garbage",
             removeAtRunEnd: 2,
-            sourceDefinitionId: "onr_proteus_089_garbage-in",
+            sourceDefinitionId: 147,
           },
         ],
       } as unknown as NonNullable<GameState["run"]>,
@@ -1038,7 +1038,7 @@ describe("run end cleanup", () => {
       proteusRunnerVirusFreeTrashCounterType: "garbage",
       garbageCountersSpent: 2,
       garbageCountersAfter: 1,
-      garbageCounterRemovalSourceDefinitionId: "onr_proteus_089_garbage-in",
+      garbageCounterRemovalSourceDefinitionId: 147,
     });
   });
 
@@ -1128,7 +1128,7 @@ describe("run end cleanup", () => {
       instances: {
         dupre_2: instance(
           "dupre_2",
-          "onr_v1_020_dupre",
+          232,
           { side: "runner", zone: "rig" },
           { counters: { power: 0 } },
         ),

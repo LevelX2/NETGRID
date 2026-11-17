@@ -14,7 +14,7 @@ import {
 
 afterEach(resetResidentPlanPortfolioMemory);
 const sleeper =
-  "corp.install_card.corp_onr_v1_270_sleeper_1.remote_1.corp_onr_v1_270_sleeper_1.1";
+  "corp.install_card.corp_482_1.remote_1.corp_482_1.1";
 function checkpoint() {
   return JSON.parse(
     readFileSync(
@@ -54,7 +54,7 @@ it.each([6, 7])(
     cp.input.playerView.own.credits = credits;
     const triggerman = cp.input.playerView.servers
       .find((s) => s.id === "hq")!
-      .ice.find((c) => c.definitionId === "onr_v1_273_triggerman")!;
+      .ice.find((c) => c.definitionId === 485)!;
     expect(triggerman.rezzed).toBe(false);
     const quote = triggerman.effectiveRezCostQuote;
     if (quote?.complete !== true)
@@ -76,7 +76,7 @@ it.each([6, 7])(
     expect(corpFundedCentralProtectionReserve(cp.input, undefined, 1)).toBe(0);
     expect(decision.actionId).toBe(sleeper);
     expect(plan.rootPlanInstanceId).toBe(
-      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_208_on-call-solo-team_1%3Aremote_1",
+      "plan:corp.score_agenda:agenda%3Acorp_420_1%3Aremote_1",
     );
     expect(plan.selectedPlan?.moduleId).toBe("corp.defend_servers");
     const selected = cp.input.legalActions.find(
@@ -99,14 +99,14 @@ it.each([
     cp.input.playerView.own.credits = credits;
     cp.input.playerView.servers
       .find((s) => s.id === "hq")!
-      .ice.find((c) => c.definitionId === "onr_v1_273_triggerman")!.rezzed =
+      .ice.find((c) => c.definitionId === 485)!.rezzed =
       rezzed;
     const decision = decide(cp),
       plan = decision.decisionDebug!.planFirstDecision!;
     expect(decision.actionId).toBe(sleeper);
     expect(plan.selectedPlan?.moduleId).toBe("corp.defend_servers");
     expect(plan.rootPlanInstanceId).toBe(
-      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_217_strike-force-kali_1%3Aremote_1",
+      "plan:corp.score_agenda:agenda%3Acorp_429_1%3Aremote_1",
     );
     expect(decision.reasonCode).toBe("plan_first.corp.defend_servers");
   },

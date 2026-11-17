@@ -13,8 +13,8 @@ import {
 import { selectedCorpDiscardChoiceOptionIds } from "./corp-discard-choice-selection";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 
-const BEL = "onr_proteus_054_bel-digmo-antibody";
-const STEREO = "onr_proteus_075_stereogram-antibody";
+const BEL = 112;
+const STEREO = 133;
 function setup(installed = false, protectedRemote = false) {
   const card = visibleCard("antibody", "corp", "asset", {
     definitionId: BEL,

@@ -197,11 +197,11 @@ describe("plan-first Engine-restricted run contract", () => {
     ];
     input.playerView.own.rig = [
       visibleCard(
-        "runner_onr_v1_187_wilson-weeflerunner-apprentice_1",
+        "runner_399_1",
         "runner",
         "resource",
         {
-          definitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
+          definitionId: 399,
           title: "Wilson, Weeflerunner Apprentice",
         },
       ),
@@ -319,7 +319,7 @@ describe("plan-first Engine-restricted run contract", () => {
 });
 
 function wilsonRun(serverId: "hq" | "remote_1"): LegalAction {
-  const sourceId = "runner_onr_v1_187_wilson-weeflerunner-apprentice_1";
+  const sourceId = "runner_399_1";
   return legalAction(
     `runner.start_run.${sourceId}.${serverId}.${sourceId}.gain_run_only_action`,
     "runner",
@@ -333,7 +333,7 @@ function wilsonRun(serverId: "hq" | "remote_1"): LegalAction {
         abilityFamily: "run-access",
         abilityId: "gain_run_only_action",
         effectKind: "gain_credits",
-        sourceDefinitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
+        sourceDefinitionId: 399,
         gainActionsAmount: 1,
         actionCapacityTiming: "immediate",
         actionCapacityRestriction: "run_only",

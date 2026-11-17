@@ -26,7 +26,7 @@ export type PlanStepCapability = {
   requiredCardSignals?: string[];
   requiredFunctionalEffects?: FunctionalEffectRequirement[];
   /** Exact source identity only; never use this field as a capability proxy. */
-  requiredSourceDefinitionIds?: string[];
+  requiredSourceDefinitionIds?: number[];
   requiredSourceRoles?: string[];
 };
 

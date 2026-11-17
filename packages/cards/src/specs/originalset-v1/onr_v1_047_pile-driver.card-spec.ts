@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_047_pile-driver"),
+    cardDefinitionId: cardDefinitionId(259),
     title: "Pile Driver",
     side: "runner",
     cardType: "program",

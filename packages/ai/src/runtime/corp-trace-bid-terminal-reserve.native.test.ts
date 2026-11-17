@@ -21,7 +21,7 @@ function takeCorpCard(state: GameState, definitionId: CardDefinitionId) {
 }
 
 function setup() {
-  const fangDefinitionId = "onr_v1_240_fang";
+  const fangDefinitionId = 452;
   const { corp, runner } = ORIGINALSET_DEFAULT_DECKS;
   const state = createGame({
     seed: "terminal-fang-bid",
@@ -30,7 +30,7 @@ function setup() {
       ...runner,
       cards: [
         ...runner.cards,
-        { id: "onr_proteus_129_back-door-to-netwatch", quantity: 1 },
+        { id: 187, quantity: 1 },
       ],
     },
     corpDeck: {
@@ -38,7 +38,7 @@ function setup() {
       cards: [
         ...corp.cards,
         { id: fangDefinitionId, quantity: 1 },
-        { id: "onr_v1_190_bioweapons-engineering", quantity: 1 },
+        { id: 402, quantity: 1 },
       ],
     },
   });
@@ -48,10 +48,10 @@ function setup() {
   fang.zone = { side: "corp", zone: "serverIce", serverId: "hq" };
   fang.rezzed = true;
   fang.faceup = true;
-  const tycho = takeCorpCard(state, "onr_v1_220_tycho-extension");
+  const tycho = takeCorpCard(state, 432);
   tycho.zone = { side: "corp", zone: "hq" };
   state.corp.hq.push(tycho.instanceId);
-  const stolen = takeCorpCard(state, "onr_v1_190_bioweapons-engineering");
+  const stolen = takeCorpCard(state, 402);
   stolen.zone = { side: "runner", zone: "scoreArea" };
   stolen.controller = "runner";
   stolen.faceup = true;
@@ -173,7 +173,7 @@ describe("current terminal Corp trace reserve", () => {
       const id = [...state.runner.grip, ...state.runner.stack].find(
         (id) =>
           state.cardInstances[id]?.definitionId ===
-          "onr_proteus_129_back-door-to-netwatch",
+          187,
       )!;
       state.runner.grip = state.runner.grip.filter((cardId) => cardId !== id);
       state.runner.stack = state.runner.stack.filter((cardId) => cardId !== id);
@@ -184,7 +184,7 @@ describe("current terminal Corp trace reserve", () => {
       card.rezzed = true;
     }
     if (scenario === "another ICE") {
-      const inner = takeCorpCard(state, "onr_v1_279_wall-of-static");
+      const inner = takeCorpCard(state, 491);
       inner.zone = { side: "corp", zone: "serverIce", serverId: "hq" };
       inner.faceup = true;
       inner.rezzed = true;

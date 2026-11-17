@@ -55,7 +55,7 @@ describe("F450 and 10311 exact decision checkpoints", () => {
         acceptableActions: [
           {
             type: "activated_card_ability",
-            sourceDefinitionId: "onr_classic_004_theorem-proof",
+            sourceDefinitionId: 8,
           },
         ],
       };

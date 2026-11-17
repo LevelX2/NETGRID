@@ -40,7 +40,7 @@ function expectKnownDefenseSearch(checkpoint: AiDecisionCheckpointV1): void {
       acceptablePlanKinds: ["corp.defend_servers"],
       acceptableCapabilities: ["develop_score_protection"],
       requiredAssessmentEvidence: [
-        "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_192_corporate-boon_1:new_remote:new_remote",
+        "score_plan_requires_effective_ice_draw:agenda:corp_404_1:new_remote:new_remote",
       ],
     },
   };

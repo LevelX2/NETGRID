@@ -27,7 +27,7 @@ function fixture(name = "g31-d69") {
   const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
   const source = input.playerView.servers
     .flatMap((s) => s.root)
-    .find((c) => c.definitionId === "onr_v1_323_experimental-ai")!;
+    .find((c) => c.definitionId === 535)!;
   const rez = input.legalActions.find(
     (a) => a.type === "rez_card" && a.source === source.instanceId,
   )!;

@@ -10,9 +10,9 @@ import {
 } from "./runtime-checkpoint";
 
 const root =
-  "plan:corp.score_agenda:agenda%3Acorp_onr_v1_209_political-coup_1%3Aremote_1";
+  "plan:corp.score_agenda:agenda%3Acorp_421_1%3Aremote_1";
 const leaf =
-  "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_209_political-coup_1%3Aremote_1";
+  "plan:corp.economy:score-support%3Aagenda%3Acorp_421_1%3Aremote_1";
 function restore(checkpoint: unknown) {
   const { input, runtime } = structuredClone(checkpoint) as {
     input: AiDecisionInputWithDeckCapabilities;

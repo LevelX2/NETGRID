@@ -106,7 +106,7 @@ describe("meta 411 conditional next-encounter full break", () => {
     const ice = input.playerView.servers.find((s) => s.id === "remote_1")!.ice;
     const breaker = {
       instanceId: "branch-breaker",
-      definitionId: "onr_v1_005_bartmoss-memorial-icebreaker",
+      definitionId: 217,
       type: "program" as const,
       known: true,
       strength: 5,

@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_293_netwatch-credit-voucher"),
+    cardDefinitionId: cardDefinitionId(505),
     title: "Netwatch Credit Voucher",
     side: "corp",
     cardType: "operation",

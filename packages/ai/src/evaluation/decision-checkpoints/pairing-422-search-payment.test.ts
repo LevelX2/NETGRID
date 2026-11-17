@@ -49,7 +49,7 @@ it("restores the preempted coverage search before resolving its source and progr
   const target = chooseAiAction(nextInputs[2]!);
   expect(target.actionId).toBe(nextInputs[2]!.legalActions[0]!.actionId);
   expect(target.selectedChoices).toMatchObject({
-    selectedOptionIds: ["card_runner_onr_classic_031_rent-i-con_2"],
+    selectedOptionIds: ["card_runner_35_2"],
   });
   const executor = residentPlanPortfolioSnapshot(
     nextInputs[2]!,
@@ -59,15 +59,15 @@ it("restores the preempted coverage search before resolving its source and progr
     gap: {
       directSearchChoiceBindings: [
         expect.objectContaining({
-          targetCardInstanceId: "runner_onr_classic_031_rent-i-con_2",
+          targetCardInstanceId: "runner_35_2",
           installMemorySacrificeBinding: expect.objectContaining({
             requiredMemoryToFree: 2,
             selectedCards: [
               {
-                cardInstanceId: "runner_onr_v1_071_vewy-vewy-quiet_2",
+                cardInstanceId: "runner_283_2",
                 memoryCost: 1,
               },
-              { cardInstanceId: "runner_onr_v1_011_cloak_1", memoryCost: 1 },
+              { cardInstanceId: "runner_223_1", memoryCost: 1 },
             ],
           }),
         }),

@@ -333,7 +333,7 @@ describe("AI input DTO score-conversion contract", () => {
     view.own.gripOrHq = [
       {
         instanceId: "vapor",
-        definitionId: "onr_v1_347_vapor-ops",
+        definitionId: 559,
         title: "Vapor Ops",
         owner: "corp",
         controller: "corp",
@@ -407,7 +407,7 @@ describe("AI input DTO score-conversion contract", () => {
     view.own.gripOrHq = [
       {
         instanceId: "power-grid",
-        definitionId: "onr_v1_299_power-grid-overload",
+        definitionId: 511,
         title: "Power Grid Overload",
         owner: "corp",
         controller: "corp",
@@ -779,7 +779,7 @@ describe("AI input DTO score-conversion contract", () => {
               side: "runner",
               amount: 2,
               reason: "start_of_turn",
-              sourceDefinitionId: "onr_v1_184_top-runners-conference",
+              sourceDefinitionId: 396,
               sourceTitle: "Top Runners' Conference",
             },
             {
@@ -814,7 +814,7 @@ describe("AI input DTO score-conversion contract", () => {
         effectId: "conference-credit",
         kind: "gain_credits",
         visibility: "public",
-        sourceDefinitionId: "onr_v1_184_top-runners-conference",
+        sourceDefinitionId: 396,
       }),
     ]);
     expect(input.eventTail[0]?.publicPayload.resolvedEffects).toEqual(
@@ -1168,7 +1168,7 @@ describe("AI input DTO score-conversion contract", () => {
     view.own.rig = [
       {
         instanceId: "runner-morphing-tool",
-        definitionId: "onr_proteus_092_morphing-tool",
+        definitionId: 150,
         title: "Morphing Tool",
         owner: "runner",
         controller: "runner",
@@ -1419,7 +1419,7 @@ describe("AI input DTO score-conversion contract", () => {
     const view = playerView(action, "runner");
     const effectiveRunQuote = {
       iceInstanceId: "homing-missile",
-      iceDefinitionId: "onr_proteus_025_homing-missile",
+      iceDefinitionId: 83,
       effectiveStrength: 5,
       encounterTemporaryTraceCredits: 2,
       conditionalEncounterEffects: [
@@ -1450,7 +1450,7 @@ describe("AI input DTO score-conversion contract", () => {
         ice: [
           {
             instanceId: "homing-missile",
-            definitionId: "onr_proteus_025_homing-missile",
+            definitionId: 83,
             title: "Homing Missile",
             type: "ice",
             known: true,
@@ -1493,13 +1493,13 @@ describe("AI input DTO score-conversion contract", () => {
         ice: [
           {
             instanceId: "malformed-ice",
-            definitionId: "onr_proteus_025_homing-missile",
+            definitionId: 83,
             type: "ice",
             known: true,
             rezzed: true,
             effectiveRunQuote: {
               iceInstanceId: "malformed-ice",
-              iceDefinitionId: "onr_proteus_025_homing-missile",
+              iceDefinitionId: 83,
               effectiveStrength: 5,
               subroutines: [
                 {
@@ -1590,14 +1590,14 @@ describe("AI input DTO score-conversion contract", () => {
     const postRezQuote = {
       context: "installed_post_rez" as const,
       cardId: "corp-fixed-ice",
-      iceDefinitionId: "simple_barrier_ice",
+      iceDefinitionId: 589,
       targetServerId: "rd" as const,
       projectedServerId: "rd" as const,
       expiresAtStateVersion: view.stateVersion,
       complete: true as const,
       effectiveRunQuote: {
         iceInstanceId: "corp-fixed-ice",
-        iceDefinitionId: "simple_barrier_ice",
+        iceDefinitionId: 589,
         effectiveStrength: 3,
         subroutines: [{ id: "fixed-etr", type: "end_the_run" as const }],
       },
@@ -1609,7 +1609,7 @@ describe("AI input DTO score-conversion contract", () => {
         ice: [
           {
             instanceId: "corp-fixed-ice",
-            definitionId: "simple_barrier_ice",
+            definitionId: 589,
             type: "ice",
             owner: "corp",
             controller: "corp",
@@ -1643,7 +1643,7 @@ describe("AI input DTO score-conversion contract", () => {
     view.servers[0]!.ice[0]!.effectivePostRezRunQuote = {
       context: "installed_post_rez",
       cardId: "corp-fixed-ice",
-      iceDefinitionId: "simple_barrier_ice",
+      iceDefinitionId: 589,
       targetServerId: "rd",
       projectedServerId: "rd",
       expiresAtStateVersion: view.stateVersion,
@@ -1666,7 +1666,7 @@ describe("AI input DTO score-conversion contract", () => {
     ).toEqual({
       context: "installed_post_rez",
       cardId: "corp-fixed-ice",
-      iceDefinitionId: "simple_barrier_ice",
+      iceDefinitionId: 589,
       targetServerId: "rd",
       projectedServerId: "rd",
       expiresAtStateVersion: view.stateVersion,

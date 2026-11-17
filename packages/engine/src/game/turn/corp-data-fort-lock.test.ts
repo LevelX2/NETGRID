@@ -16,9 +16,9 @@ import {
   replayEvents,
 } from "../../index";
 
-const PRECISION_BRIBERY = "onr_proteus_146_precision-bribery";
-const WALL_OF_STATIC = "onr_v1_279_wall-of-static";
-const VACANT_SOULKILLER = "onr_v1_346_vacant-soulkiller";
+const PRECISION_BRIBERY = 204;
+const WALL_OF_STATIC = 491;
+const VACANT_SOULKILLER = 558;
 
 function ensurePrecisionBriberyDefinition(): void {
   if (CARD_DEFINITIONS_BY_ID[PRECISION_BRIBERY] === undefined)
@@ -27,7 +27,7 @@ function ensurePrecisionBriberyDefinition(): void {
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   owner: Side,
   zone: CardInstance["zone"],
   rezzed = true,
@@ -124,7 +124,7 @@ describe("Proteus Phase 9d data-fort creation lock", () => {
     state.corp.credits = cost + 2;
     state.corpTemporaryInstallRezCredits = {
       sourceCardInstanceId: "contract",
-      sourceDefinitionId: "onr_proteus_059_government-contract",
+      sourceDefinitionId: 117,
       remaining: 3,
       usableFor: "corp_install_or_rez",
       returnUnusedAtTurnEnd: true,

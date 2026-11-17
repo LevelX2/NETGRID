@@ -31,15 +31,15 @@ describe("selfplay cycle 185 decision checkpoints", () => {
 
     expect(decision).toMatchObject({
       actionId:
-        "corp.install_card.corp_onr_v1_194_corporate-downsizing_2.remote_2.corp_onr_v1_194_corporate-downsizing_2",
+        "corp.install_card.corp_406_2.remote_2.corp_406_2",
       reasonCode: "plan_first.corp.score_agenda",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_2%3Aremote_2",
+            "plan:corp.score_agenda:agenda%3Acorp_406_2%3Aremote_2",
           leafExecutorInstanceId:
-            "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_2%3Aremote_2",
+            "plan:corp.score_agenda:agenda%3Acorp_406_2%3Aremote_2",
           route: {
             actionType: "install_card",
             capabilityId: "install_score_agenda",

@@ -182,14 +182,14 @@ it("installs the exact cheaper breaker under the remote parent at db3d/163", () 
 it("revalidates the installed cheaper breaker and starts the remote only with the unknown-ICE reserve funded", () => {
   const snapshot = capture(163).input.ownDeckSnapshot!;
   const corpCards = [
-    "onr_v1_238_data-wall-2-0",
-    "onr_v1_268_shock-r",
-    "onr_proteus_015_colonel-failure",
-    "onr_v1_355_crystal-palace-station-grid",
-    "onr_v1_358_dr-dreff",
-    "onr_v1_199_employee-empowerment",
-    "onr_v1_205_main-office-relocation",
-    "onr_proteus_008_project-zurich",
+    450,
+    480,
+    73,
+    567,
+    570,
+    411,
+    417,
+    66,
   ];
   let state = createGameAfterSetup({
     seed: "remote-breaker-preparation",
@@ -218,13 +218,13 @@ it("revalidates the installed cheaper breaker and starts the remote only with th
       (a) => a.type === "resolve_choice",
       state.pendingChoice.options[0]!.id,
     );
-  installRunnerProgramForTest(state, "onr_v1_039_krash");
-  moveRunnerCardToGrip(state, "onr_v1_040_loony-goon");
-  const agenda = putCorpRootInRemote(state, "onr_v1_199_employee-empowerment");
+  installRunnerProgramForTest(state, 251);
+  moveRunnerCardToGrip(state, 252);
+  const agenda = putCorpRootInRemote(state, 411);
   state.cardInstances[agenda]!.advancementCounters = 1;
   for (const id of [
-    "onr_v1_355_crystal-palace-station-grid",
-    "onr_v1_358_dr-dreff",
+    567,
+    570,
   ]) {
     const card = state.cardInstances[putCorpRootInRemote(state, id)]!;
     card.rezzed = true;
@@ -239,8 +239,8 @@ it("revalidates the installed cheaper breaker and starts the remote only with th
   state.runner.credits = 14;
   state.runner.clicks = 2;
   state.corp.credits = 45;
-  scoreCorpAgendaForTest(state, "onr_v1_205_main-office-relocation");
-  scoreCorpAgendaForTest(state, "onr_proteus_008_project-zurich");
+  scoreCorpAgendaForTest(state, 417);
+  scoreCorpAgendaForTest(state, 66);
   const initial = structuredClone(state);
   const eventStart = state.eventLog.length;
   const inputForState = () =>

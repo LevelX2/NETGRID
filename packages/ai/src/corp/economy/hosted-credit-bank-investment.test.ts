@@ -10,7 +10,7 @@ import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { corpHostedBankInvestments } from "./hosted-credit-bank-investment";
 
-const DEPARTMENT = "onr_v1_318_department-of-truth-enhancement";
+const DEPARTMENT = 530;
 const LOAD = `${DEPARTMENT}:abilities_activated_corp_main_add_hosted_credits`;
 const CASH = `${DEPARTMENT}:abilities_activated_corp_main_take_hosted_credits`;
 afterEach(resetResidentPlanPortfolioMemory);
@@ -86,7 +86,7 @@ function fixture(
       source: "future-ice",
       payload: {
         cardId: "future-ice",
-        sourceDefinitionId: "onr_v1_254_liche",
+        sourceDefinitionId: 466,
         serverId: "new_remote",
         placement: "ice",
         postInstallRezQuoteCardId: "future-ice",
@@ -115,7 +115,7 @@ function fixture(
   input.playerView.own.stackOrRdCount = 20;
   input.playerView.own.gripOrHq = [
     visibleCard("future-ice", "corp", "ice", {
-      definitionId: "onr_v1_254_liche",
+      definitionId: 466,
       rezCost: 14,
     }),
   ];
@@ -135,13 +135,13 @@ function fixture(
         ? []
         : [
             visibleCard("wall", "corp", "ice", {
-              definitionId: "onr_v1_237_data-wall",
+              definitionId: 449,
               rezzed: true,
               strength: 2,
               subtypes: ["wall"],
               effectiveRunQuote: {
                 iceInstanceId: "wall",
-                iceDefinitionId: "onr_v1_237_data-wall",
+                iceDefinitionId: 449,
                 effectiveStrength: 2,
                 subroutines: [{ id: "wall:etr", type: "end_the_run" }],
               },

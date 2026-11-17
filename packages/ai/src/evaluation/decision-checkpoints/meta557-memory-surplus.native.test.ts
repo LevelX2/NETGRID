@@ -39,7 +39,7 @@ describe("pairing 557 memory sacrifice values only the current deficit", () => {
     const action = cp.input.legalActions.find(
       (a: any) =>
         a.actionId ===
-        "runner.install_card.runner_onr_v1_074_worm_2.runner_onr_v1_074_worm_2.runner_program_trash_before_install.runner_onr_v1_075_zetatech-software-installer_1.2.2",
+        "runner.install_card.runner_286_2.runner_286_2.runner_program_trash_before_install.runner_287_1.2.2",
     );
     expect(action).toBeDefined();
     const assessment = context.runnerProgramInstallTrashAssessmentForAction(
@@ -52,7 +52,7 @@ describe("pairing 557 memory sacrifice values only the current deficit", () => {
       memoryFreedBySelectedCandidates: 1,
     });
     expect(assessment?.selectedCandidates[0]?.card?.definitionId).toBe(
-      "onr_v1_075_zetatech-software-installer",
+      287,
     );
   });
 
@@ -100,7 +100,7 @@ describe("pairing 557 memory sacrifice values only the current deficit", () => {
     expect(result.selectedChoices).toEqual({
       choiceId: "runner_program_trash_before_install_172",
       selectedOptionIds: [
-        "card_runner_onr_v1_075_zetatech-software-installer_1",
+        "card_runner_287_1",
       ],
     });
     expect(pf.executionOrigin).toMatchObject({
@@ -125,7 +125,7 @@ describe("pairing 557 memory sacrifice values only the current deficit", () => {
     );
     expect(chooseAiAction(cp.input).selectedChoices).toEqual({
       choiceId: "runner_program_trash_before_install_172",
-      selectedOptionIds: ["card_runner_onr_v1_045_newsgroup-filter_1"],
+      selectedOptionIds: ["card_runner_257_1"],
     });
   });
 

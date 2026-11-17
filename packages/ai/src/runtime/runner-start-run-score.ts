@@ -6,7 +6,7 @@ import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type RunnerHqSuccessWindowSetup = {
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   minimumIceTrashCost: number;
   evidence: string[];
 };

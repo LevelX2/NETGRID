@@ -19,7 +19,7 @@ import { chooseCorpAction } from "../index";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "./ai-decision-input";
 
-const SQUAD = "onr_v1_342_solo-squad";
+const SQUAD = 554;
 const CAPABILITY = `${SQUAD}:abilities_activated_corp_main_damage`;
 const entry = catalog.decks.find(
   (d) => d.standardDeckId === "standard_corp_neon_guillotine",

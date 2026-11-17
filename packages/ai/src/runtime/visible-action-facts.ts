@@ -101,7 +101,7 @@ export function minimumVisiblePlayCost(
   return playCost.minimumX * playCost.creditsPerX;
 }
 
-export function visibleOwnDefinitionIds(input: AiDecisionInput): Set<string> {
+export function visibleOwnDefinitionIds(input: AiDecisionInput): Set<number> {
   return new Set(
     [
       ...input.playerView.own.gripOrHq,

@@ -152,7 +152,7 @@ describe("runner main action generation", () => {
           kind: "multi_server_success_sequence",
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1",
-          sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
+          sourceDefinitionId: 174,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["rd", "archives"],
           successfulServerIds: ["hq"],
@@ -174,7 +174,7 @@ describe("runner main action generation", () => {
         serverId: "rd",
         bonusRunNoClick: true,
         multiServerSuccessSequenceRun: true,
-        bonusRunSource: "onr_proteus_116_pirate-broadcast",
+        bonusRunSource: 174,
       },
     });
     expect(actions[0]?.payload?.optionalBonusRun).toBeUndefined();
@@ -209,7 +209,7 @@ describe("runner main action generation", () => {
           kind: "multi_server_success_sequence",
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1",
-          sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
+          sourceDefinitionId: 174,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["rd", "archives"],
           successfulServerIds: ["hq"],
@@ -345,7 +345,7 @@ describe("runner main action generation", () => {
     state.cardInstances[eventCardId] = {
       id: eventCardId,
       instanceId: eventCardId,
-      definitionId: "onr_classic_041_networking",
+      definitionId: 45,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "grip" },
@@ -357,7 +357,7 @@ describe("runner main action generation", () => {
     const host = testRunnerMainHost(state);
     host.cards.definitionFor = () =>
       ({
-        id: "onr_classic_041_networking",
+        id: 45,
         title: "Networking",
         side: "runner",
         type: "event",
@@ -403,7 +403,7 @@ describe("runner main action generation", () => {
           kind: "multi_server_success_sequence",
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1",
-          sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
+          sourceDefinitionId: 174,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["remote_99"],
           successfulServerIds: ["hq"],

@@ -15,7 +15,7 @@ function board(
     cardInstances: Object.fromEntries(
       Object.entries(counters).map(([id, advancementCounters]) => [
         id,
-        { definitionId: "onr_v1_193_corporate-coup", advancementCounters },
+        { definitionId: 405, advancementCounters },
       ]),
     ),
     corp: {

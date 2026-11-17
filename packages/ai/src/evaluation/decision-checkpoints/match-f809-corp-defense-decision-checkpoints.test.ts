@@ -57,7 +57,7 @@ describe("match f809 Corp defense decision checkpoints", () => {
     checkpoint.engine.stateHash = hashGameState(state);
     checkpoint.expectation = {
       discardChoice: {
-        mustDiscardDefinitionIds: ["onr_proteus_051_rent-to-own-contract"],
+        mustDiscardDefinitionIds: [109],
       },
     };
     expectCheckpointToPass(checkpoint);
@@ -74,7 +74,7 @@ describe("match f809 Corp defense decision checkpoints", () => {
     );
     checkpoint.expectation = {
       discardChoice: {
-        mustDiscardDefinitionIds: ["onr_proteus_051_rent-to-own-contract"],
+        mustDiscardDefinitionIds: [109],
       },
     };
     expectCheckpointToPass(checkpoint);
@@ -86,7 +86,7 @@ describe("match f809 Corp defense decision checkpoints", () => {
       acceptableActions: [
         {
           type: "play_operation",
-          sourceDefinitionId: "onr_proteus_049_emergency-rig",
+          sourceDefinitionId: 107,
         },
       ],
       planExecution: {
@@ -106,7 +106,7 @@ describe("match f809 Corp defense decision checkpoints", () => {
     const temporary = state.corp.hq.find(
       (id) =>
         state.cardInstances[id]?.definitionId ===
-        "onr_proteus_049_emergency-rig",
+        107,
     )!;
     expect(temporary).toBeDefined();
     state.corp.hq = state.corp.hq.filter((id) => id !== temporary);
@@ -121,7 +121,7 @@ describe("match f809 Corp defense decision checkpoints", () => {
       acceptableActions: [
         {
           type: "play_operation",
-          sourceDefinitionId: "onr_proteus_051_rent-to-own-contract",
+          sourceDefinitionId: 109,
         },
       ],
       planExecution: {
@@ -168,8 +168,8 @@ describe("match f809 Corp defense decision checkpoints", () => {
 });
 
 const ICE_REZ_SUPPORT_OPERATIONS = [
-  "onr_proteus_049_emergency-rig",
-  "onr_proteus_051_rent-to-own-contract",
+  107,
+  109,
 ] as const;
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
@@ -183,7 +183,7 @@ function derivedRezSupportFixture(credits: number): AiDecisionCheckpointV1 {
     (action) =>
       action.type === "install_card" &&
       action.payload?.serverId === "rd" &&
-      action.payload.cardId === "corp_onr_proteus_017_credit-blocks_2",
+      action.payload.cardId === "corp_75_2",
   );
   if (!installAction) throw new Error("Missing historical R&D install action");
   const result = applyAction(state, {

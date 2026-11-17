@@ -27,7 +27,7 @@ function load(game: number, decision: number, credits?: number) {
   };
   bindExplicitZeroPublicStealQuotes(
     input,
-    game === 33 ? ["onr_v1_363_olivia-salazar"] : ["onr_v1_352_chester-mix"],
+    game === 33 ? [575] : [564],
   );
   if (credits !== undefined) input.playerView.own.credits = credits;
   resetResidentPlanPortfolioMemory();

@@ -25,7 +25,7 @@ describe("match 802F search-role and remote-probe decision checkpoints", () => {
     };
     const result = runAiDecisionCheckpoint(cp);
     expect(result.ok, result.message).toBe(true);
-    const id = "onr_classic_032_schematics-search-engine";
+    const id = 36;
     expect(cp.deckSnapshot.cards.some((card) => card.cardId === id)).toBe(true);
     const profile = buildDeckCapabilityProfile({
       side: "runner",

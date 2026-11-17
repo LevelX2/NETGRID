@@ -56,7 +56,7 @@ export type {
   Side,
   CardDefinition,
 };
-export type CardDefinitionId = string;
+export type CardDefinitionId = number;
 export type CardInstanceId = string;
 export type {
   CorpServer,

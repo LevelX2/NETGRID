@@ -24,19 +24,19 @@ import {
   type ServerId,
 } from "@netgrid/shared";
 
-const EMERGENCY_RIG = "onr_proteus_049_emergency-rig";
-const RENT_TO_OWN = "onr_proteus_051_rent-to-own-contract";
-const ICE_AND_DATA = "onr_proteus_111_ice-and-data-special-report";
-const HERMAN = "onr_proteus_060_herman-revista";
-const MARCEL = "onr_proteus_064_marcel-desoleil";
-const OBFUSCATED = "onr_proteus_066_obfuscated-fortress";
-const PAVIT = "onr_proteus_069_pavit-bharat";
-const SIMON = "onr_proteus_073_simon-francisco";
-const WALL = "onr_v1_279_wall-of-static";
-const CHIHUAHUA = "onr_proteus_014_chihuahua";
-const SIMPLE_ASSET = "simple_economy_asset";
-const SIMPLE_AGENDA = "simple_agenda";
-const SIMPLE_UPGRADE = "simple_upgrade";
+const EMERGENCY_RIG = 107;
+const RENT_TO_OWN = 109;
+const ICE_AND_DATA = 169;
+const HERMAN = 118;
+const MARCEL = 122;
+const OBFUSCATED = 124;
+const PAVIT = 127;
+const SIMON = 131;
+const WALL = 491;
+const CHIHUAHUA = 72;
+const SIMPLE_ASSET = 594;
+const SIMPLE_AGENDA = 588;
+const SIMPLE_UPGRADE = 606;
 
 const PRO019_IDS = [
   EMERGENCY_RIG,
@@ -87,7 +87,7 @@ function removeEverywhere(state: GameState, cardId: CardInstanceId): void {
 
 function addCorpHq(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -109,7 +109,7 @@ function addCorpHq(
 
 function addRunnerGrip(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -131,7 +131,7 @@ function addRunnerGrip(
 
 function addCorpIce(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   serverId: Exclude<ServerId, "new_remote">,
   rezzed = false,
@@ -168,7 +168,7 @@ function addCorpIce(
 
 function addCorpRoot(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   serverId: Exclude<ServerId, "new_remote">,
   rezzed = true,
@@ -205,7 +205,7 @@ function addCorpRoot(
 
 function addCorpRd(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;

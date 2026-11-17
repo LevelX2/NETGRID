@@ -51,7 +51,7 @@ describe("visible Runner run-credit facts", () => {
 it("keeps two visible Cloak pools unavailable to Hunter's modern trace", () => {
   const hunter = {
     instanceId: "hunter",
-    definitionId: "onr_v1_249_hunter",
+    definitionId: 461,
     type: "ice",
     known: true,
     rezzed: true,
@@ -59,13 +59,13 @@ it("keeps two visible Cloak pools unavailable to Hunter's modern trace", () => {
     subtypes: ["sentry", "bloodhound"],
     effectiveRunQuote: {
       iceInstanceId: "hunter",
-      iceDefinitionId: "onr_v1_249_hunter",
+      iceDefinitionId: 461,
       effectiveStrength: 5,
       subroutines: [
         {
           id: "trace",
           type: "initiate_trace",
-          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceDefinitionId: 461,
           sourceTitle: "Hunter",
           amount: 5,
           traceLimit: 5,
@@ -77,7 +77,7 @@ it("keeps two visible Cloak pools unavailable to Hunter's modern trace", () => {
   } as VisibleCard;
   const rig = ["cloak-a", "cloak-b"].map<VisibleCard>((instanceId) => ({
     instanceId,
-    definitionId: "onr_v1_011_cloak",
+    definitionId: 223,
     type: "program",
     known: true,
     rezzed: true,

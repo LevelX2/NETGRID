@@ -1164,7 +1164,7 @@ function validateRestrictedActionGrants(
     const grantPath = `${path}.${key}`;
     if (typeof grant.sourceCardInstanceId !== "string")
       errors.push(`${grantPath}.sourceCardInstanceId must be a string.`);
-    if (typeof grant.sourceDefinitionId !== "string")
+    if (typeof grant.sourceDefinitionId !== "number")
       errors.push(`${grantPath}.sourceDefinitionId must be a string.`);
     if (typeof grant.actionType !== "string")
       errors.push(`${grantPath}.actionType must be a string.`);

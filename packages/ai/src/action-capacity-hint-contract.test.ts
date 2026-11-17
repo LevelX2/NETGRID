@@ -8,14 +8,14 @@ const hintsByCard = new Map(hints.map((hint) => [hint.cardId, hint]));
 
 describe("action-capacity hint contracts", () => {
   it.each([
-    ["onr_v1_117_valu-pak-software-bundle", "restricted_gain", 5],
-    ["onr_v1_187_wilson-weeflerunner-apprentice", "restricted_gain", 1],
-    ["onr_v1_192_corporate-boon", "finite_bank", 1],
-    ["onr_v1_289_edgerunner-inc-temps", "restricted_gain", 3],
-    ["onr_v1_297_overtime-incentives", "immediate_gain", 2],
-    ["onr_v1_334_pacifica-regional-ai", "finite_bank", 1],
-    ["onr_proteus_046_corporate-guard-r-temps", "future_recurring_gain", 1],
-    ["onr_v1_078_arasaka-owns-you", "action_debt", 4],
+    [329, "restricted_gain", 5],
+    [399, "restricted_gain", 1],
+    [404, "finite_bank", 1],
+    [501, "restricted_gain", 3],
+    [509, "immediate_gain", 2],
+    [546, "finite_bank", 1],
+    [104, "future_recurring_gain", 1],
+    [290, "action_debt", 4],
   ] as const)(
     "%s publishes a %s amount %d profile",
     (cardId, family, amount) => {

@@ -460,7 +460,7 @@ function installRunnerHardware(
   definition: CardDefinition,
 ): void {
   const { state } = host;
-  const trashedDeckDefinitionIds: string[] = [];
+  const trashedDeckDefinitionIds: number[] = [];
   if (host.cards.isRunnerHardwareDeckDefinition(definition)) {
     for (const oldDeckId of state.runner.rig.hardware.slice().sort()) {
       if (

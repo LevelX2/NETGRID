@@ -56,7 +56,7 @@ describe("match B008 older decision checkpoints", () => {
         (action) =>
           action.type === "play_event" &&
           action.source ===
-            "runner_onr_classic_038_gypsytm-schedule-analyzer_2",
+            "runner_42_2",
       ),
     ).toBe(true);
   });

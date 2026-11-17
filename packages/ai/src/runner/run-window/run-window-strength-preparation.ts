@@ -23,7 +23,7 @@ export function runnerRunStrengthCurrentPumpSavings(
 export function runnerRunStrengthPumpSavingsForAction(
   input: AiDecisionInput,
   action: LegalAction,
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
 ): number | undefined {
   const boost =
     cardSpecPlanningCardByDefinitionId(sourceDefinitionId)?.planning.engine

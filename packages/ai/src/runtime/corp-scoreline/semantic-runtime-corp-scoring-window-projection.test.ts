@@ -124,7 +124,7 @@ describe("scoringWindowHorizon", () => {
       agenda.instanceId,
     );
     const consultants = operationCard("project-consultants", {
-      definitionId: "onr_v1_300_project-consultants",
+      definitionId: 512,
       playCost: { kind: "fixed", credits: 12 },
     });
     const input = corpInput({
@@ -154,7 +154,7 @@ describe("scoringWindowHorizon", () => {
       agenda.instanceId,
     );
     const consultants = operationCard("project-consultants", {
-      definitionId: "onr_v1_300_project-consultants",
+      definitionId: 512,
     });
     const input = corpInput({
       ownClicks: 3,

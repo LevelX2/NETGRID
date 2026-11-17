@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_341_skalderviken-sa-beta-test-site",
+      553,
     ),
     title: "Skälderviken SA Beta Test Site",
     side: "corp",

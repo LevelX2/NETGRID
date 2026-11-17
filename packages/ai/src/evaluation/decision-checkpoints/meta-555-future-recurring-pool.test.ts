@@ -238,7 +238,7 @@ it("does not buy a public delayed breaker with restricted run credits", () => {
   const shell: VisibleCard = {
     ...restricted,
     instanceId: "test-shell-source",
-    definitionId: "onr_v1_176_the-shell-traders",
+    definitionId: 388,
     title: "The Shell Traders",
     type: "resource",
     subtypes: [],

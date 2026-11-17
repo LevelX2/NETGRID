@@ -46,7 +46,7 @@ describe("Trapdoor and Dumpster exact decision checkpoints", () => {
       forbiddenActions: [
         {
           type: "play_event",
-          sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+          sourceDefinitionId: 164,
           targetServerId: "archives",
         },
       ],

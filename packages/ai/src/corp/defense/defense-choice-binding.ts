@@ -78,7 +78,7 @@ export function selectedCorpClassicDeflectorOptionId(
     | {
         runId: string;
         sourceIceInstanceId: string;
-        sourceDefinitionId: string;
+        sourceDefinitionId: number;
         subroutineId: string;
       }
     | undefined;

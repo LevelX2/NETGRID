@@ -688,7 +688,7 @@ type VisibleRunnerTraceSupportOption = {
   activationCost: number;
   rewardCreditsOnAvoidTrace?: number;
   safeForAccess: boolean;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   sourceTitle?: string;
   sideEffect?: VisibleTraceSupportSideEffect;
   classicLinkModifier?: VisibleClassicLinkModifier;
@@ -696,7 +696,7 @@ type VisibleRunnerTraceSupportOption = {
 
 type VisibleRunnerTracePostBidLinkOption = {
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   sourceTitle: string;
   linkDelta: number;
   activationCost: number;
@@ -709,7 +709,7 @@ type VisibleRunnerTracePostBidLinkOption = {
 
 type VisibleRunnerTraceSuccessCancelOption = {
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   sourceTitle: string;
   activationCost: number;
   tapSource: boolean;

@@ -31,7 +31,7 @@ describe("meta 403 free score retains exact Engine cost evidence", () => {
       const score = input.legalActions.find((a) => a.type === "score_agenda")!;
       const project: CorpScoreProjectSignal = {
         projectId: "current-pool-score",
-        agendaDefinitionId: "onr_v1_209_political-coup",
+        agendaDefinitionId: 421,
         agendaInstanceId: score.source,
         agendaPoints: 2,
         actionIds: [score.actionId],

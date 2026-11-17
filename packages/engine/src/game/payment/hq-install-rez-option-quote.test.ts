@@ -19,7 +19,7 @@ describe("Data Fort Reclamation sequence rez payment projection", () => {
     });
     state.cardInstances[cardId] = {
       ...state.cardInstances[cardId]!,
-      definitionId: "onr_proteus_013_caryatid",
+      definitionId: 71,
       owner: "corp",
       controller: "corp",
       faceup: false,
@@ -43,7 +43,7 @@ describe("Data Fort Reclamation sequence rez payment projection", () => {
     hq.ice.push(cardId);
     state.cardInstances[cardId] = {
       ...state.cardInstances[cardId]!,
-      definitionId: "simple_barrier_ice",
+      definitionId: 589,
       owner: "corp",
       controller: "corp",
       faceup: false,

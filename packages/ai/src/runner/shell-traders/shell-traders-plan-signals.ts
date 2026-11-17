@@ -19,7 +19,7 @@ import { runnerInstalledProgramTrashLoss } from "../../runtime/runner-installed-
 
 import { shellCoverageSubstitution } from "./shell-traders-coverage-substitution";
 
-const SHELL_TRADERS_DEFINITION_ID = "onr_v1_176_the-shell-traders" as const;
+const SHELL_TRADERS_DEFINITION_ID = 388 as const;
 
 export type BuildRunnerShellTradersPipelineSignalsInput = Readonly<{
   input: AiDecisionInput;

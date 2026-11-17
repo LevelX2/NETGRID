@@ -189,7 +189,7 @@ it("preserves funding against nominal capacity but gives genuinely productive sa
   const action = input.legalActions.find(
     (a) =>
       a.type === "install_card" &&
-      a.source === "corp_onr_v1_222_ball-and-chain_2" &&
+      a.source === "corp_434_2" &&
       a.payload?.serverId === "rd",
   )!;
   expect(action).toBeDefined();
@@ -250,7 +250,7 @@ it("preserves funding against nominal capacity but gives genuinely productive sa
     defenseId: `install:rd:${action.actionId}`,
     phase: "install_ice",
     serverId: "rd",
-    sourceDefinitionIds: ["onr_v1_222_ball-and-chain"],
+    sourceDefinitionIds: [434],
     actionIds: [action.actionId],
     urgent: true,
     centralPressure: "terminal",

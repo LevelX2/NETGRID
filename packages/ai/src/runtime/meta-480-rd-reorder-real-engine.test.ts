@@ -41,7 +41,7 @@ function reorderWindow(definitions: string[]) {
   state.corp.clicks = 1;
   const builder = RealEngineFixtureBuilder.forState(state)
     .withCorpCredits(10)
-    .withCorpCardInHq("onr_v1_298_planning-consultants");
+    .withCorpCardInHq(510);
   const top = definitions.map((definition) => {
     builder.withCorpCardInHq(definition);
     const id = state.corp.hq.find(
@@ -77,18 +77,18 @@ function reorderWindow(definitions: string[]) {
 }
 
 const exposedTycho = [
-  "onr_v1_220_tycho-extension",
-  "onr_v1_288_day-shift",
-  "onr_v1_232_crystal-wall",
-  "onr_v1_277_virizz",
-  "onr_v1_226_canis-minor",
+  432,
+  500,
+  444,
+  489,
+  438,
 ];
 const exposedTwoAgendas = [
-  "onr_v1_214_project-babylon",
-  "onr_v1_220_tycho-extension",
-  "onr_v1_277_virizz",
-  "onr_v1_261_quandary",
-  "onr_v1_252_keeper",
+  426,
+  432,
+  489,
+  473,
+  464,
 ];
 
 it.each([[exposedTycho], [exposedTwoAgendas]])(

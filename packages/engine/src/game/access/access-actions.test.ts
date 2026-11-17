@@ -30,7 +30,7 @@ function demoDefinition(
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
 ): CardInstance {
   return {
@@ -207,7 +207,7 @@ describe("access action generation", () => {
           {
             entryId: "entry_0",
             status: "declined",
-            cardDefinitionId: "simple_upgrade",
+            cardDefinitionId: 606,
           },
         ],
         currentIndex: 1,

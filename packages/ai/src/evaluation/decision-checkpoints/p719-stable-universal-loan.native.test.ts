@@ -43,7 +43,7 @@ it.each(["insufficient_exit_reserve", "no_installed_coverage"] as const)(
       cp.input.playerView.own.gripOrHq.find(
         (card) => card.instanceId === action.source,
       )?.definitionId,
-    ).not.toBe("onr_v1_168_loan-from-chiba");
+    ).not.toBe(380);
     expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
   },
 );
@@ -64,7 +64,7 @@ it.each([
         cp.input.playerView.own.gripOrHq.some(
           (card) =>
             card.instanceId === action.source &&
-            card.definitionId === "onr_v1_168_loan-from-chiba",
+            card.definitionId === 380,
         ),
     )!;
     expect(loan).toBeDefined();

@@ -474,8 +474,8 @@ function discardChoiceExpectationMatches(
   decision: AiDecision,
   expectation:
     | {
-        mustRetainDefinitionIds?: string[];
-        mustDiscardDefinitionIds?: string[];
+        mustRetainDefinitionIds?: number[];
+        mustDiscardDefinitionIds?: number[];
       }
     | undefined,
 ): boolean {
@@ -577,7 +577,7 @@ function actionMatches(
     ].find((card) => card.instanceId === sourceId);
     const sourceDefinitionId =
       source?.definitionId ??
-      (typeof action.payload?.sourceDefinitionId === "string"
+      (typeof action.payload?.sourceDefinitionId === "number"
         ? action.payload.sourceDefinitionId
         : undefined);
     if (sourceDefinitionId !== matcher.sourceDefinitionId) return false;

@@ -213,7 +213,7 @@ export function createRunnerHandUseDiagnosticsForSimulationAction(
         : {}),
       ...(duplicateInstall &&
       dependencies.sourceDefinitionIdForSimulationAction(input, action) ===
-        "onr_v1_165_junkyard-bbs"
+        377
         ? { runnerJunkyardBbsDuplicateInstall: true }
         : {}),
       ...(economyActionTaken ? { runnerEconomyActionTaken: true } : {}),

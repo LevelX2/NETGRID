@@ -31,7 +31,7 @@ describe("trace rules profile planning", () => {
     const support = visibleRunnerTraceSupport(
       supportQuote({
         baseLink: 3,
-        sourceDefinitionId: "onr_v1_004_bakdoor",
+        sourceDefinitionId: 216,
       }),
       5,
       0,
@@ -52,7 +52,7 @@ describe("trace rules profile planning", () => {
       supportQuote({
         baseLink: 9,
         activationCost: 1,
-        sourceDefinitionId: "onr_v1_148_access-through-alpha",
+        sourceDefinitionId: 360,
       }),
       10,
       0,
@@ -121,12 +121,12 @@ describe("trace rules profile planning", () => {
     const quote = supportQuote(
       {
         baseLink: 3,
-        sourceDefinitionId: "onr_v1_004_bakdoor",
+        sourceDefinitionId: 216,
       },
       [
         {
           sourceCardInstanceId: "bakdoor_1",
-          sourceDefinitionId: "onr_v1_004_bakdoor",
+          sourceDefinitionId: 216,
           sourceTitle: "Bakdoor",
           linkDelta: 1,
           activationCost: 2,
@@ -169,7 +169,7 @@ function supportQuote(
   base: {
     baseLink: number;
     activationCost?: number;
-    sourceDefinitionId?: string;
+    sourceDefinitionId?: number;
   },
   postBidLinkOptions: VisibleRunnerTraceSupportQuote["postBidLinkOptions"] = [],
 ): VisibleRunnerTraceSupportQuote {

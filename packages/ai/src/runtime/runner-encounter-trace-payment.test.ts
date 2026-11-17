@@ -24,7 +24,7 @@ describe("encounter trace payment preserves the quoted access route", () => {
     delete input.legalActions.find((a) => a.type === "continue_run")!.payload!
       .encounterSubroutineIds;
     const breaker = input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_v1_039_krash",
+      (c) => c.definitionId === 251,
     )!;
     const assess = () =>
       cheaperSafeCurrentTracePayment(
@@ -61,7 +61,7 @@ describe("encounter trace payment preserves the quoted access route", () => {
     if (condition === "missing_trace_quote")
       delete input.playerView.own.runnerTraceSupportQuote;
     const breaker = input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_v1_039_krash",
+      (c) => c.definitionId === 251,
     )!;
     expect(
       cheaperSafeCurrentTracePayment(

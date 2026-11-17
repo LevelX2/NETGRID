@@ -24,7 +24,7 @@ function fixture(card: string, credits: number) {
   s = apply(s, getLegalActions(s, "corp").find((a) => a.type === "mandatory_draw")!);
   while (s.corp.clicks > 1) s = apply(s, getLegalActions(s, "corp").find((a) => a.type === "gain_credit")!);
   RealEngineFixtureBuilder.forState(s).withCorpHqSize(0).withCorpCredits(credits).withRunnerCredits(3)
-    .withCorpCardInHq("onr_proteus_005_marked-accounts").withCorpCardInHq(card);
+    .withCorpCardInHq(63).withCorpCardInHq(card);
   return s;
 }
 function input(s: GameState) {
@@ -33,8 +33,8 @@ function input(s: GameState) {
 afterEach(resetResidentPlanPortfolioMemory);
 
 it.each([
-  ["onr_proteus_017_credit-blocks", 6],
-  ["onr_proteus_040_sumo-2008", 8],
+  [75, 6],
+  [98, 8],
 ] as const)("binds the minimum base-subtype installation, Defense plan and actual rez of %s", (card, cost) => {
   let s = fixture(card, cost);
   const before = hashState(s), i = input(s), serialized = JSON.stringify(i);
@@ -64,7 +64,7 @@ it.each([
   expect(getPlayerView(s, "runner").opponent).not.toHaveProperty("gripOrHq");
 });
 
-it.each(["onr_proteus_025_homing-missile"])("does not invent an unbound variable projection for %s", (card) => {
+it.each([83])("does not invent an unbound variable projection for %s", (card) => {
   const s = fixture(card, 20), before = hashState(s), i = input(s);
   const installs = i.legalActions.filter((a) => a.type === "install_card" && a.source.includes(card));
   expect(installs.length).toBeGreaterThan(0);

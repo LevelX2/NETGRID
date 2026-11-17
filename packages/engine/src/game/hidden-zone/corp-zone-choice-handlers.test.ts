@@ -23,7 +23,7 @@ const downsizingDefinitionId = "corporate_downsizing" as CardDefinitionId;
 const aiCfoDefinitionId = "ai_cfo" as CardDefinitionId;
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"],
   title = id,
   agendaPoints?: number,

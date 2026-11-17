@@ -49,7 +49,7 @@ it.each(["unrezzed-replacement", "rezzed-replacement"])(
     expect(action.type).toBe(
       kind === "unrezzed-replacement" ? "rez_card" : "activated_card_ability",
     );
-    expect(action.source).toBe("corp_onr_v1_347_vapor-ops_1");
+    expect(action.source).toBe("corp_559_1");
     expect(
       action.costs.every(
         (c: any) => (c.clicks ?? 0) === 0 && (c.credits ?? 0) === 0,
@@ -78,7 +78,7 @@ it("keeps the actual funded counter transfer preparation", () => {
   );
   const result = chooseAiAction(input);
   expect(result.actionId).toBe(
-    "corp.rez_card.corp_onr_v1_347_vapor-ops_1.remote_1.corp_onr_v1_347_vapor-ops_1",
+    "corp.rez_card.corp_559_1.remote_1.corp_559_1",
   );
   expect(result.fallbackUsed).toBe(false);
   expect(result.timeoutUsed).toBe(false);
@@ -104,7 +104,7 @@ it.each([
   const install = input.legalActions.find(
     (a: any) =>
       a.type === "install_card" &&
-      a.source === "corp_onr_v1_220_tycho-extension_1" &&
+      a.source === "corp_432_1" &&
       a.payload?.serverId === "remote_1",
   );
   const bank = input.playerView.servers.find((s: any) => s.id === "remote_1")

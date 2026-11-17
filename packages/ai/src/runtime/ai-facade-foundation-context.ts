@@ -31,7 +31,7 @@ export function createAiFacadeFoundationContext(
   dependencies: AiFacadeFoundationContextDependencies,
 ) {
   const AI_HINTS = createAiHintsByCard();
-  const hintForDefinitionId = (definitionId: string) =>
+  const hintForDefinitionId = (definitionId: number) =>
     AI_HINTS.get(definitionId);
 
   const { rolesForAction, rolesForCardId } = createRoleContext({

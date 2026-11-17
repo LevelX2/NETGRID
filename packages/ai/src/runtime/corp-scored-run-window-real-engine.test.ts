@@ -16,9 +16,9 @@ import {
   selectAiDecisionSideForState,
 } from "./ai-decision-input";
 
-const REMAP = "onr_classic_001_data-fort-remapping";
-const THEOREM = "onr_classic_004_theorem-proof";
-const DEAD = "onr_classic_008_deadeye";
+const REMAP = 5;
+const THEOREM = 8;
+const DEAD = 12;
 const extra = [REMAP, THEOREM, DEAD];
 const corpDeck = {
   ...DEMO_DECKS.demo_corp_001,

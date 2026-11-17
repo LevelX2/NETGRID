@@ -17,7 +17,7 @@ describe("turn-planner shadow behavior-baseline regressions", () => {
       8,
     );
     const actionId =
-      "runner.install_card.runner_onr_v1_184_top-runners-conference_2.runner_onr_v1_184_top-runners-conference_2";
+      "runner.install_card.runner_396_2.runner_396_2";
     const diagnostic = captureDiagnostic(capture, actionId);
 
     expect(capture.side).toBe("runner");

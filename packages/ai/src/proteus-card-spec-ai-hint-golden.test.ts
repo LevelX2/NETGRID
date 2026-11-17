@@ -161,11 +161,11 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     expect(actionPairs).toHaveLength(22);
     expect(new Set(actionPairs.map(({ cardId }) => cardId)).size).toBe(12);
     for (const cardId of [
-      "onr_proteus_105_demolition-run",
-      "onr_proteus_107_drone-for-a-day",
-      "onr_proteus_113_live-news-feed",
-      "onr_proteus_121_remote-detonator",
-      "onr_proteus_129_back-door-to-netwatch",
+      163,
+      165,
+      171,
+      179,
+      187,
     ]) {
       expect(
         actionPairs.filter((entry) => entry.cardId === cardId),
@@ -182,11 +182,11 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     ).toBe(true);
     expect(
       reviewedGolden.cards.find(
-        ({ cardId }) => cardId === "onr_proteus_026_hunting-pack",
+        ({ cardId }) => cardId === 84,
       )?.hint,
     ).not.toHaveProperty("actionStrategySupportPairs");
     const expendable = reviewedGolden.cards.find(
-      ({ cardId }) => cardId === "onr_proteus_140_expendable-family-member",
+      ({ cardId }) => cardId === 198,
     )?.hint;
     expect(expendable?.actionCapacityProfiles).toBeUndefined();
     expect(expendable?.effects).not.toContainEqual(
@@ -196,13 +196,13 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     expect(expendable?.requiredMechanics).not.toContain("future_action_debt");
 
     const guardTemps = reviewedGolden.cards.find(
-      ({ cardId }) => cardId === "onr_proteus_046_corporate-guard-r-temps",
+      ({ cardId }) => cardId === 104,
     )?.hint;
     expect(guardTemps?.planRoles).toContain("action_tempo");
     expect(guardTemps?.planRoles).not.toContain("recover_economy");
 
     const fakedHit = reviewedGolden.cards.find(
-      ({ cardId }) => cardId === "onr_proteus_108_faked-hit",
+      ({ cardId }) => cardId === 166,
     )?.hint;
     expect(fakedHit?.strategicExchangeKinds).toContain("self_damage");
     expect(fakedHit?.actionTacticSignals).not.toContain("damage.payoff.runner");
@@ -213,22 +213,22 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
       reviewedGolden.cards.map((record) => [record.cardId, record.hint]),
     );
     expect(
-      hints.get("onr_proteus_085_disintegrator")?.targetProfiles,
+      hints.get(143)?.targetProfiles,
     ).toBeUndefined();
-    expect(hints.get("onr_proteus_004_fetal-ai")?.valueHints).toEqual({
+    expect(hints.get(62)?.valueHints).toEqual({
       damage: 2,
     });
-    expect(hints.get("onr_proteus_054_bel-digmo-antibody")?.valueHints).toEqual(
+    expect(hints.get(112)?.valueHints).toEqual(
       { damage: 1 },
     );
     expect(
-      hints.get("onr_proteus_075_stereogram-antibody")?.valueHints,
+      hints.get(133)?.valueHints,
     ).toEqual({ damage: 1 });
     expect(
-      hints.get("onr_proteus_150_streetware-distributor")?.valueHints,
+      hints.get(208)?.valueHints,
     ).toEqual({ economy: 3 });
     expect(
-      hints.get("onr_proteus_017_credit-blocks")?.requiredMechanics,
+      hints.get(75)?.requiredMechanics,
     ).toContain("alternate_subtype_wall");
   });
 
@@ -238,7 +238,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     );
     const hint = (cardId: string) => deriveCardSpecAiHint(entries.get(cardId)!);
 
-    expect(hint("onr_proteus_118_prearranged-drop")).toMatchObject({
+    expect(hint(176)).toMatchObject({
       effects: expect.arrayContaining([
         expect.objectContaining({
           kind: "economy",
@@ -249,7 +249,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
       ]),
       functionSignals: expect.arrayContaining(["access.next_agenda_credit"]),
     });
-    expect(hint("onr_proteus_119_promises-promises")).toMatchObject({
+    expect(hint(177)).toMatchObject({
       effects: expect.arrayContaining([
         expect.objectContaining({
           kind: "scored_agenda_action",
@@ -260,7 +260,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
       ]),
       functionSignals: expect.arrayContaining(["access.next_agenda_bonus"]),
     });
-    expect(hint("onr_proteus_051_rent-to-own-contract")).toMatchObject({
+    expect(hint(109)).toMatchObject({
       effects: expect.arrayContaining([
         expect.objectContaining({ kind: "rez", timing: "action" }),
         expect.objectContaining({ kind: "rez", timing: "corp_turn" }),
@@ -270,7 +270,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         "risk.term_counter_payment_liability",
       ]),
     });
-    expect(hint("onr_proteus_049_emergency-rig")).toMatchObject({
+    expect(hint(107)).toMatchObject({
       functionSignals: expect.arrayContaining([
         "ice.corp_temporary_rez",
         "risk.temporary_rez_liability",
@@ -280,7 +280,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         "risk.temporary_rez_liability",
       ]),
     });
-    expect(hint("onr_proteus_106_disgruntled-ice-technician")).toMatchObject({
+    expect(hint(164)).toMatchObject({
       effects: expect.arrayContaining([
         expect.objectContaining({ kind: "rez", target: "derez" }),
         expect.objectContaining({
@@ -293,7 +293,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         "run.ends_run_after_effect",
       ]),
     });
-    expect(hint("onr_proteus_032_misleading-access-menus")).toMatchObject({
+    expect(hint(90)).toMatchObject({
       effects: expect.arrayContaining([
         expect.objectContaining({
           kind: "etr",
@@ -314,32 +314,32 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
 
     const mutations: Array<[string, (entry: any) => void]> = [
       [
-        "onr_proteus_118_prearranged-drop",
+        176,
         (entry) => (entry.planning.engine.abilities[0].effects[0].amount = 0),
       ],
       [
-        "onr_proteus_119_promises-promises",
+        177,
         (entry) =>
           (entry.planning.engine.abilities[0].effects[0].visibility =
             "hidden_info_barrier"),
       ],
       [
-        "onr_proteus_051_rent-to-own-contract",
+        109,
         (entry) =>
           (entry.planning.engine.abilities[0].effects[0].lifecycle =
             "remove_one_counter_start_corp_turn_trash_on_last"),
       ],
       [
-        "onr_proteus_106_disgruntled-ice-technician",
+        164,
         (entry) =>
           (entry.planning.engine.runnerUtilityLongtail.target = "other_ice"),
       ],
       [
-        "onr_proteus_032_misleading-access-menus",
+        90,
         (entry) => (entry.planning.engine.printedSubroutines[0].amount = 0),
       ],
       [
-        "onr_proteus_032_misleading-access-menus",
+        90,
         (entry) =>
           (entry.planning.engine.lifecycle.on_rez[0].recipient = "runner"),
       ],
@@ -356,7 +356,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
   it("rejects unknown families and missing current scenario evidence", () => {
     const entry = cardSpecPlanningCards().find(
       (candidate) =>
-        candidate.definition.id === "onr_proteus_001_ai-board-member",
+        candidate.definition.id === 59,
     )!;
     expect(() =>
       deriveCardSpecAiHint({
@@ -382,7 +382,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
   it("rejects invented strategy bindings and forged capability evidence", () => {
     const entry = cardSpecPlanningCards().find(
       (candidate) =>
-        candidate.definition.id === "onr_proteus_003_corporate-headhunters",
+        candidate.definition.id === 61,
     )!;
 
     for (const mutation of [
@@ -409,13 +409,13 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         .filter((entry) => reviewedIds.has(entry.definition.id))
         .map((entry) => [entry.definition.id, deriveCardSpecAiHint(entry)]),
     );
-    expect(hints.get("onr_proteus_055_cybertech-think-tank")).toMatchObject({
+    expect(hints.get(113)).toMatchObject({
       conditions: [{ kind: "requires_advancement_counter" }],
       effects: [{ kind: "global_modifier", scope: "damage", timing: "action" }],
       functionSignals: ["advance.corp_counter_bank"],
     });
     expect(
-      hints.get("onr_proteus_056_department-of-misinformation"),
+      hints.get(114),
     ).toMatchObject({
       effects: [
         {
@@ -426,7 +426,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
       ],
       functionSignals: ["expose.corp_prevention"],
     });
-    expect(hints.get("onr_proteus_066_obfuscated-fortress")).toMatchObject({
+    expect(hints.get(124)).toMatchObject({
       conditions: [{ kind: "requires_during_run" }],
       effects: [
         {
@@ -438,7 +438,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
       ],
       remoteRole: { kind: "run_tax", serverScope: "fort" },
     });
-    expect(hints.get("onr_proteus_112_identity-donor")).toMatchObject({
+    expect(hints.get(170)).toMatchObject({
       conditions: [
         { kind: "requires_meat_damage" },
         { kind: "requires_prevention_window" },
@@ -449,7 +449,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         "defense.meat_damage_prevention",
       ],
     });
-    expect(hints.get("onr_proteus_115_personal-touch-the")).toMatchObject({
+    expect(hints.get(173)).toMatchObject({
       conditions: [{ kind: "requires_installed_program" }],
       effects: [
         {
@@ -461,7 +461,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         { kind: "breaker", target: "strength_boost" },
       ],
     });
-    expect(hints.get("onr_proteus_117_poisoned-water-supply")).toMatchObject({
+    expect(hints.get(175)).toMatchObject({
       effects: [
         {
           kind: "resource_trash",
@@ -481,7 +481,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         "corp.bad_publicity_pressure",
       ],
     });
-    expect(hints.get("onr_proteus_141_get-ready-to-rumble")).toMatchObject({
+    expect(hints.get(199)).toMatchObject({
       effects: expect.arrayContaining([
         expect.objectContaining({
           kind: "persistent_counter_effect",
@@ -494,7 +494,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         "random_discard_pressure",
       ]),
     });
-    expect(hints.get("onr_proteus_153_time-to-collect")).toMatchObject({
+    expect(hints.get(211)).toMatchObject({
       conditions: [{ kind: "requires_prevention_window" }],
       effects: expect.arrayContaining([
         expect.objectContaining({
@@ -544,16 +544,16 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         : []),
     ];
 
-    expect(hints.get("onr_proteus_012_bug-zapper")?.effects).toEqual(
+    expect(hints.get(70)?.effects).toEqual(
       expectedRelative("net_damage", 2, false),
     );
-    expect(hints.get("onr_proteus_021_dog-pile")?.effects).toEqual(
+    expect(hints.get(79)?.effects).toEqual(
       expectedRelative("net_damage", 1, true),
     );
-    expect(hints.get("onr_proteus_030_mastermind")?.effects).toEqual(
+    expect(hints.get(88)?.effects).toEqual(
       expectedRelative("brain_damage", 1, true),
     );
-    expect(hints.get("onr_proteus_025_homing-missile")?.effects).toEqual([
+    expect(hints.get(83)?.effects).toEqual([
       {
         kind: "trace",
         scope: "trace",
@@ -605,10 +605,10 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
       },
     ]);
     for (const cardId of [
-      "onr_proteus_012_bug-zapper",
-      "onr_proteus_021_dog-pile",
-      "onr_proteus_030_mastermind",
-      "onr_proteus_025_homing-missile",
+      70,
+      79,
+      88,
+      83,
     ])
       expect(hints.get(cardId)?.effects).not.toContainEqual(
         expect.objectContaining({ amount: 0 }),
@@ -618,23 +618,23 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
   it("rejects malformed dynamic subroutine bindings instead of compiling placeholders", () => {
     const mutations: Array<[string, (entry: any) => void]> = [
       [
-        "onr_proteus_012_bug-zapper",
+        70,
         (entry) =>
           (entry.planning.engine.relativeIce.dynamicDamageSubroutine.amountPerCount = 0),
       ],
       [
-        "onr_proteus_021_dog-pile",
+        79,
         (entry) =>
           (entry.planning.engine.relativeIce.strengthBonusPerCount = 0),
       ],
       [
-        "onr_proteus_030_mastermind",
+        88,
         (entry) =>
           (entry.planning.engine.relativeIce.dynamicDamageSubroutine.subroutineCapabilityKey =
             "unbound_dynamic_damage"),
       ],
       [
-        "onr_proteus_025_homing-missile",
+        83,
         (entry) => (entry.planning.engine.printedSubroutines[0].onSuccess = []),
       ],
     ];
@@ -654,14 +654,14 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
   it("derives current-run additional access only from the exact typed access-start ability", () => {
     const expected = [
       [
-        "onr_proteus_142_hq-mole",
+        200,
         "hq",
         "access.hq_hidden_multiaccess",
         "access.hq_multiaccess",
         "multiaccess",
       ],
       [
-        "onr_proteus_147_r-and-d-mole",
+        205,
         "rnd",
         "access.rnd_hidden_multiaccess",
         "access.rnd_multiaccess",
@@ -687,7 +687,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
       expect(hint.actionCapabilitySemantics).toContainEqual(
         expect.objectContaining({
           capabilityKey:
-            cardId === "onr_proteus_142_hq-mole"
+            cardId === 200
               ? "hq_access_start_add_two_accesses"
               : "rd_access_start_add_two_accesses",
           costProfile: { credits: 4 },
@@ -698,7 +698,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     const malformed = structuredClone(
       cardSpecPlanningCards().find(
         (candidate) =>
-          candidate.definition.id === "onr_proteus_147_r-and-d-mole",
+          candidate.definition.id === 205,
       )!,
     );
     Object.assign(malformed.planning.engine.abilities![0]!, {
@@ -712,36 +712,36 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
   it("fails closed when a longtail mechanical witness is mutated", () => {
     const mutations: Array<[string, (entry: any) => void]> = [
       [
-        "onr_proteus_055_cybertech-think-tank",
+        113,
         (entry) => (entry.planning.engine.corpUtility.amount = 2),
       ],
       [
-        "onr_proteus_056_department-of-misinformation",
+        114,
         (entry) => (entry.planning.engine.corpUtility.timing = "start_of_run"),
       ],
       [
-        "onr_proteus_066_obfuscated-fortress",
+        124,
         (entry) => (entry.planning.engine.corpUtility.target = "hq"),
       ],
       [
-        "onr_proteus_112_identity-donor",
+        170,
         (entry) =>
           (entry.planning.engine.flatlineReplacementSources[0].badPublicity = 1),
       ],
       [
-        "onr_proteus_115_personal-touch-the",
+        173,
         (entry) => (entry.planning.engine.runnerEventTargetedEffect.amount = 2),
       ],
       [
-        "onr_proteus_117_poisoned-water-supply",
+        175,
         (entry) => (entry.planning.engine.runnerEventLongtail.count = 1),
       ],
       [
-        "onr_proteus_141_get-ready-to-rumble",
+        199,
         (entry) => (entry.planning.engine.runnerUtilityLongtail.amount = 1),
       ],
       [
-        "onr_proteus_153_time-to-collect",
+        211,
         (entry) =>
           (entry.planning.engine.trashPreventionSources[0].priority = 29),
       ],
@@ -753,7 +753,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         )!,
       );
       mutate(entry);
-      if (cardId === "onr_proteus_153_time-to-collect") {
+      if (cardId === 211) {
         const canonical = reviewedGolden.cards.find(
           (record) => record.cardId === cardId,
         )!.hint;
@@ -769,30 +769,30 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
   it("binds card evidence profiles and trace-tag anchors to exact typed witnesses", () => {
     const profileMutations: Array<[string, (entry: any) => void]> = [
       [
-        "onr_proteus_030_mastermind",
+        88,
         (entry) =>
           (entry.planning.engine.printedSubroutines[0].damageType = "net"),
       ],
       [
-        "onr_proteus_012_bug-zapper",
+        70,
         (entry) =>
           (entry.planning.engine.printedSubroutines[0].damageType = "brain"),
       ],
       [
-        "onr_proteus_025_homing-missile",
+        83,
         (entry) => (entry.planning.engine.printedSubroutines = []),
       ],
       [
-        "onr_proteus_053_underworld-mole",
+        111,
         (entry) => delete entry.planning.engine.abilities[0].condition,
       ],
       [
-        "onr_proteus_052_schlaghund-pointers",
+        110,
         (entry) =>
           (entry.planning.engine.abilities[0].effects[0].additionalPlayCostPerTraceLimitPointAboveZero = 2),
       ],
       [
-        "onr_proteus_027_iceberg",
+        85,
         (entry) => (entry.planning.engine.abilities[0].costs[0].amount = 1),
       ],
     ];
@@ -811,7 +811,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     const forgedProfile = structuredClone(
       cardSpecPlanningCards().find(
         (candidate) =>
-          candidate.definition.id === "onr_proteus_066_obfuscated-fortress",
+          candidate.definition.id === 124,
       )!,
     );
     const cardPair = forgedProfile.planning.planningAnnotations?.card?.find(
@@ -826,7 +826,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     const tagAnchor = structuredClone(
       cardSpecPlanningCards().find(
         (candidate) =>
-          candidate.definition.id === "onr_proteus_052_schlaghund-pointers",
+          candidate.definition.id === 110,
       )!,
     );
     Object.assign(tagAnchor.planning.planningAnnotations!, {

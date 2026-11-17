@@ -39,12 +39,12 @@ describe("immutable breaker deck-pair admission", () => {
   it.each([
     [
       "g22-d378",
-      "onr_v1_016_cyfermaster",
+      228,
       "runner_matchpoint_remote_reserve_blocks_overlapping_breaker_install",
     ],
     [
       "g39-d61",
-      "onr_v1_074_worm",
+      286,
       "runner_install_has_no_bound_development_or_specialized_plan",
     ],
   ])(
@@ -108,7 +108,7 @@ describe("immutable breaker deck-pair admission", () => {
       breaker.quantityKnownInDeck = 0;
     }
     expect(
-      variant(input, "onr_v1_016_cyfermaster").persistentInstallEvaluation,
+      variant(input, 228).persistentInstallEvaluation,
     ).toMatchObject({
       capabilityDelta: "cost_upgrade",
       duplicateRole: "useful_backup",
@@ -128,12 +128,12 @@ describe("immutable breaker deck-pair admission", () => {
         input.ownDeckSnapshot!.cards = input.ownDeckSnapshot!.cards.filter(
           (card) =>
             countercase === "candidate_absent"
-              ? card.cardId !== "onr_v1_016_cyfermaster"
-              : !["onr_v1_039_krash", "onr_v1_066_snowball"].includes(
+              ? card.cardId !== 228
+              : ![251, 278].includes(
                   card.cardId,
                 ),
         );
-      const evaluation = variant(input, "onr_v1_016_cyfermaster");
+      const evaluation = variant(input, 228);
       expect(evaluation.persistentInstallEvaluation).toMatchObject({
         capabilityDelta: "backup_only",
         duplicateRole: "redundant_duplicate",

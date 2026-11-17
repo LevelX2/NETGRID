@@ -184,7 +184,7 @@ import {
   addInstalledRunnerProgramForTest,
 } from "../../test-fixtures/index-test-helpers";
 
-const BROKER_DEFINITION_ID = "onr_v1_154_broker";
+const BROKER_DEFINITION_ID = 366;
 
 function isBrokerCapabilityAction(
   action: LegalAction,
@@ -227,7 +227,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     let mit = toRunnerTurn(v123CardReleaseGame("spotcheck-mit-west-tier"));
     mit.runner.credits = 20;
     emptyRunnerGripForTest(mit);
-    const mitId = moveRunnerCardToGrip(mit, "onr_v1_101_mit-west-tier");
+    const mitId = moveRunnerCardToGrip(mit, 313);
     const mitAction = mustAction(
       mit,
       "runner",
@@ -254,7 +254,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     expect(mit.specialZones?.removedFromGame).toContain(mitId);
     expect(mit.runner.grip).toHaveLength(5);
     expect(mit.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_101_mit-west-tier",
+      cardDefinitionId: 313,
       hiddenZoneAction: "p3_47_shuffle_grip_heap_stack_then_draw",
       drawnCount: 5,
     });
@@ -270,7 +270,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
 
     let score = toRunnerTurn(onrV1Game("spotcheck-score-event"));
     score.runner.credits = 20;
-    const scoreId = moveRunnerCardToGrip(score, "onr_v1_108_score");
+    const scoreId = moveRunnerCardToGrip(score, 320);
     const scoreLegal = mustAction(
       score,
       "runner",
@@ -296,7 +296,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     );
     expect(score.runner.credits).toBe(scoreCreditsBefore + 4);
     expect(score.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_108_score",
+      cardDefinitionId: 320,
       gainedCredits: 9,
       runnerCreditsAfter: score.runner.credits,
       resolvedEffects: [
@@ -305,7 +305,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
           side: "runner",
           amount: 9,
           reason: "card_resolver",
-          sourceDefinitionId: "onr_v1_108_score",
+          sourceDefinitionId: 320,
         }),
       ],
     });
@@ -318,7 +318,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     );
     total.runner.credits = 20;
     total.runner.tags = 3;
-    moveRunnerCardToGrip(total, "onr_v1_116_total-genetic-retrofit");
+    moveRunnerCardToGrip(total, 328);
     const totalInitial = structuredClone(total);
     const totalReplayStart = total.eventLog.length;
     total = apply(
@@ -326,11 +326,11 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(total, action) === "onr_v1_116_total-genetic-retrofit",
+        sourceDefinition(total, action) === 328,
     );
     expect(total.runner.tags).toBe(0);
     expect(total.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_116_total-genetic-retrofit",
+      cardDefinitionId: 328,
       removedTags: 3,
       runnerTagsAfter: 0,
     });
@@ -348,7 +348,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
           ...MECHANIC_SMOKE_DECKS.traceTags.runner,
           id: "spotcheck_total_genetic_retrofit_untagged_runner",
           cards: MECHANIC_SMOKE_DECKS.traceTags.runner.cards.map((entry) =>
-            entry.id === "onr_v1_116_total-genetic-retrofit"
+            entry.id === 328
               ? { ...entry, quantity: 2 }
               : entry,
           ),
@@ -361,12 +361,12 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     untaggedTotal.runner.tags = 0;
     const firstRetrofitId = moveRunnerCardToGrip(
       untaggedTotal,
-      "onr_v1_116_total-genetic-retrofit",
+      328,
     );
     const secondRetrofitId = Object.entries(untaggedTotal.cardInstances).find(
       ([cardId, card]) =>
         cardId !== firstRetrofitId &&
-        card.definitionId === "onr_v1_116_total-genetic-retrofit",
+        card.definitionId === 328,
     )?.[0];
     if (!secondRetrofitId)
       throw new Error("Missing second Total Genetic Retrofit copy.");
@@ -383,7 +383,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(untaggedTotal, action) ===
-          "onr_v1_116_total-genetic-retrofit",
+          328,
     );
     expect(untaggedTotal.runner.tags).toBe(0);
     expect(untaggedTotal.runnerTagAvoidanceCredits).toBe(1);
@@ -393,7 +393,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(untaggedTotal, action) ===
-          "onr_v1_116_total-genetic-retrofit",
+          328,
     );
     expect(untaggedTotal.runner.tags).toBe(0);
     expect(untaggedTotal.runnerTagAvoidanceCredits).toBe(2);
@@ -409,9 +409,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
           id: "spotcheck_social_engineering_corp",
           name: "Spotcheck Social Engineering Corp",
           cards: [
-            { id: "simple_barrier_ice", quantity: 1 },
+            { id: 589, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.runAccess.corp.cards.filter(
-              (card) => card.id !== "simple_barrier_ice",
+              (card) => card.id !== 589,
             ),
           ],
         },
@@ -419,14 +419,14 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
       }),
     );
     social.runner.credits = 20;
-    moveRunnerCardToGrip(social, "onr_v1_111_social-engineering");
-    const socialIceId = putCorpIceOnServer(social, "hq", "simple_barrier_ice");
+    moveRunnerCardToGrip(social, 323);
+    const socialIceId = putCorpIceOnServer(social, "hq", 589);
     const socialAction = mustAction(
       social,
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(social, action) === "onr_v1_111_social-engineering",
+        sourceDefinition(social, action) === 323,
     );
     const socialWrongSide = applyAction(social, {
       matchId: social.matchId,
@@ -451,7 +451,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     social = applyChoice(social, "runner", `ice_${socialIceId}`);
     expect(social.run?.attackedServerId).toBe("hq");
     expect(social.eventLog.at(-1)?.publicPayload).toMatchObject({
-      sourceDefinitionId: "onr_v1_111_social-engineering",
+      sourceDefinitionId: 323,
       secretSpendGuessRun: true,
       hiddenZoneBarrier: true,
       targets: expect.objectContaining({
@@ -467,11 +467,11 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     temple.runner.credits = 20;
     const templeId = moveRunnerCardToGrip(
       temple,
-      "onr_v1_114_temple-microcode-outlet",
+      326,
     );
     const selectedProgram = putRunnerCardOnTopOfStack(
       temple,
-      "onr_v1_036_jackhammer",
+      248,
     );
     const templeLegal = mustAction(
       temple,
@@ -495,7 +495,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     expect(temple.runner.grip).toContain(selectedProgram);
     expect(temple.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "p3_37_search_stack_to_grip",
-      publicRevealDefinitionId: "onr_v1_036_jackhammer",
+      publicRevealDefinitionId: 248,
     });
     expect(JSON.stringify(temple.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
@@ -512,7 +512,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     reprisal.corp.maxHandSize = 100;
     const reprisalId = moveRunnerCardToGrip(
       reprisal,
-      "onr_v1_115_terrorist-reprisal",
+      327,
     );
     expect(
       getLegalActions(reprisal, "runner").some(
@@ -532,13 +532,13 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     );
     reprisal.corp.credits = 60;
     reprisal.corp.clicks = 20;
-    moveCorpCardToHq(reprisal, "onr_v1_193_corporate-coup");
+    moveCorpCardToHq(reprisal, 405);
     reprisal = apply(
       reprisal,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(reprisal, action) === "onr_v1_193_corporate-coup",
+        sourceDefinition(reprisal, action) === 405,
     );
     for (let index = 0; index < 5; index += 1) {
       reprisal = apply(
@@ -546,7 +546,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
         "corp",
         (action) =>
           action.type === "advance_card" &&
-          sourceDefinition(reprisal, action) === "onr_v1_193_corporate-coup",
+          sourceDefinition(reprisal, action) === 405,
       );
     }
     reprisal = apply(
@@ -554,15 +554,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(reprisal, action) === "onr_v1_193_corporate-coup",
+        sourceDefinition(reprisal, action) === 405,
     );
     reprisal = apply(reprisal, "corp", (action) => action.type === "end_turn");
     const hqIds = [
-      moveCorpCardToHq(reprisal, "simple_economy_operation"),
-      moveCorpCardToHq(reprisal, "simple_barrier_ice"),
-      moveCorpCardToHq(reprisal, "onr_v1_275_vacuum-link"),
-      moveCorpCardToHq(reprisal, "onr_v1_223_banpei"),
-      moveCorpCardToHq(reprisal, "onr_v1_279_wall-of-static"),
+      moveCorpCardToHq(reprisal, 596),
+      moveCorpCardToHq(reprisal, 589),
+      moveCorpCardToHq(reprisal, 487),
+      moveCorpCardToHq(reprisal, 435),
+      moveCorpCardToHq(reprisal, 491),
     ];
     keepOnlyCorpHqCards(reprisal, hqIds);
     const reprisalInitial = structuredClone(reprisal);
@@ -575,7 +575,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     );
     expect(reprisal.corp.hq).toHaveLength(0);
     expect(reprisal.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_115_terrorist-reprisal",
+      cardDefinitionId: 327,
       hiddenZoneAction: "hq_random_discard",
       discardedCardsCount: 5,
     });
@@ -597,8 +597,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     hardware.runner.credits = 30;
     hardware.runner.clicks = 10;
     for (const definitionId of [
-      "onr_v1_120_armadillo-armored-road-home",
-      "onr_v1_126_drifter-mobile-environment",
+      332,
+      338,
     ] as const) {
       moveRunnerCardToGrip(hardware, definitionId);
       hardware = apply(
@@ -625,14 +625,14 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
       }),
     );
     dermatech.runner.credits = 20;
-    moveRunnerCardToGrip(dermatech, "onr_v1_125_dermatech-bodyplating");
+    moveRunnerCardToGrip(dermatech, 337);
     dermatech = apply(
       dermatech,
       "runner",
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(dermatech, action) ===
-          "onr_v1_125_dermatech-bodyplating",
+          337,
     );
     dermatech = apply(
       dermatech,
@@ -645,7 +645,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
       (action) => action.type === "mandatory_draw",
     );
     dermatech.runner.tags = 1;
-    moveCorpCardToHq(dermatech, "onr_v1_301_punitive-counterstrike");
+    moveCorpCardToHq(dermatech, 513);
     const initial = structuredClone(dermatech);
     const replayStart = dermatech.eventLog.length;
     dermatech = apply(
@@ -654,7 +654,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
       (action) =>
         action.type === "play_operation" &&
         sourceDefinition(dermatech, action) ===
-          "onr_v1_301_punitive-counterstrike",
+          513,
     );
     const optionId = dermatech.pendingChoice?.options.find(
       (option) => option.id !== "pass",
@@ -664,7 +664,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     dermatech = applyChoice(dermatech, "runner", optionId);
     expect(dermatech.eventLog.at(-1)?.publicPayload).toMatchObject({
       eventModificationDecision: "apply",
-      sourceDefinitionId: "onr_v1_125_dermatech-bodyplating",
+      sourceDefinitionId: 337,
       preventedAmount: 1,
     });
     expect(
@@ -684,7 +684,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
           id: "spotcheck_open_ended_mileage_runner",
           name: "Spotcheck Open-Ended Mileage Runner",
           cards: [
-            { id: "onr_v1_102_open-ended-mileage-program", quantity: 1 },
+            { id: 314, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -696,7 +696,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     state.runner.tags = 1;
     const eventId = moveRunnerCardToGrip(
       state,
-      "onr_v1_102_open-ended-mileage-program",
+      314,
     );
     const legal = mustAction(
       state,
@@ -745,31 +745,31 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
   it("keeps run-start events source-bound, side-safe and replayable", () => {
     for (const [definitionId, game, serverId, expectedPayload] of [
       [
-        "onr_v1_076_all-nighter",
+        288,
         v192CardReleaseGame("spotcheck-all-nighter"),
         "rd",
         { bonusRunOnFinish: true },
       ],
       [
-        "onr_v1_081_custodial-position",
+        293,
         v123CardReleaseGame("spotcheck-custodial-position"),
         "rd",
         { baseAccessCount: 3, effectiveAccessCount: 3 },
       ],
       [
-        "onr_v1_085_executive-wiretaps",
+        297,
         v123CardReleaseGame("spotcheck-executive-wiretaps"),
         "hq",
         { baseAccessCount: 3, effectiveAccessCount: 3 },
       ],
       [
-        "onr_v1_094_inside-job",
+        306,
         v181CardReleaseGame("spotcheck-inside-job"),
         "rd",
         { bypassFirstIce: true },
       ],
       [
-        "onr_v1_098_lucidrine-booster-drug",
+        310,
         MECHANIC_SMOKE_GAMES.runAccess("spotcheck-lucidrine"),
         "archives",
         {},
@@ -779,7 +779,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
       state.runner.credits = 30;
       const eventId = moveRunnerCardToGrip(state, definitionId);
       if (serverId === "rd" || serverId === "archives")
-        putCorpCardOnTopOfRd(state, "simple_economy_operation");
+        putCorpCardOnTopOfRd(state, 596);
       const legal = mustAction(
         state,
         "runner",
@@ -813,7 +813,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
         "runner",
         (action) => action.actionId === legal.actionId,
       );
-      if (definitionId === "onr_v1_098_lucidrine-booster-drug")
+      if (definitionId === 310)
         expect(state.run, definitionId).toBeUndefined();
       else expect(state.run?.attackedServerId, definitionId).toBe(serverId);
       if (state.run) {
@@ -844,8 +844,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
 
   it("keeps same-turn agenda-theft events gated and public-safe", () => {
     for (const [definitionId, stolenAgendaId] of [
-      ["onr_v1_083_desperate-competitor", "onr_v1_203_hostile-takeover"],
-      ["onr_v1_090_hot-tip-for-wns", "onr_v1_214_project-babylon"],
+      [295, 415],
+      [302, 426],
     ] as const) {
       let state = toRunnerTurn(
         v180CardReleaseGame(`spotcheck-${definitionId}`),
@@ -857,7 +857,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
           (action) =>
             action.type === "play_event" && action.payload?.cardId === eventId,
         ),
-      ).toBe(definitionId === "onr_v1_090_hot-tip-for-wns");
+      ).toBe(definitionId === 302);
       putCorpCardOnTopOfRd(state, stolenAgendaId);
       state = apply(
         state,
@@ -906,9 +906,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
     gideon.runner.credits = 20;
     const gideonId = moveRunnerCardToGrip(
       gideon,
-      "onr_v1_089_gideons-pawnshop",
+      301,
     );
-    const programId = moveRunnerCardToGrip(gideon, "simple_decoder");
+    const programId = moveRunnerCardToGrip(gideon, 591);
     removeEverywhere(gideon, programId);
     gideon.runner.heap.push(programId);
     gideon.cardInstances[programId] = {
@@ -937,11 +937,11 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
       actionType: "play_event",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_37_search_trash_to_grip",
-      sourceDefinitionId: "onr_v1_089_gideons-pawnshop",
+      sourceDefinitionId: 301,
     });
     expect(JSON.stringify(gideonSearchStartedPayload)).not.toContain(programId);
     expect(JSON.stringify(gideonSearchStartedPayload)).not.toContain(
-      "simple_decoder",
+      591,
     );
     const optionId =
       gideon.pendingChoice?.options.find((option) => option.value === programId)
@@ -954,10 +954,10 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
       actionType: "resolve_choice",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_37_search_trash_to_grip",
-      sourceDefinitionId: "onr_v1_089_gideons-pawnshop",
-      cardDefinitionId: "simple_decoder",
+      sourceDefinitionId: 301,
+      cardDefinitionId: 591,
       publicRevealKind: "reveal",
-      publicRevealDefinitionId: "simple_decoder",
+      publicRevealDefinitionId: 591,
       searchedZone: "runner_heap",
       selectedCount: 1,
       movedCardCount: 1,
@@ -974,7 +974,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
 
     let jack = toRunnerTurn(onrV1Game("spotcheck-jack-n-joe"));
     jack.runner.credits = 20;
-    const jackId = moveRunnerCardToGrip(jack, "onr_v1_095_jack-n-joe");
+    const jackId = moveRunnerCardToGrip(jack, 307);
     const jackInitial = structuredClone(jack);
     const jackReplayStart = jack.eventLog.length;
     const gripBefore = jack.runner.grip.length;
@@ -986,7 +986,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
     );
     expect(jack.runner.grip.length).toBe(gripBefore + 2);
     expect(jack.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_095_jack-n-joe",
+      cardDefinitionId: 307,
       drawnCount: 3,
       resolvedEffects: [
         expect.objectContaining({
@@ -994,7 +994,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
           side: "runner",
           amount: 3,
           reason: "card_resolver",
-          sourceDefinitionId: "onr_v1_095_jack-n-joe",
+          sourceDefinitionId: 307,
         }),
       ],
     });
@@ -1004,8 +1004,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
 
     let kilroy = toRunnerTurn(v192CardReleaseGame("spotcheck-kilroy"));
     kilroy.runner.credits = 20;
-    moveRunnerCardToGrip(kilroy, "onr_v1_096_kilroy-was-here");
-    putCorpCardOnTopOfRd(kilroy, "simple_economy_operation");
+    moveRunnerCardToGrip(kilroy, 308);
+    putCorpCardOnTopOfRd(kilroy, 596);
     const kilroyInitial = structuredClone(kilroy);
     const kilroyReplayStart = kilroy.eventLog.length;
     kilroy = apply(
@@ -1013,7 +1013,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(kilroy, action) === "onr_v1_096_kilroy-was-here",
+        sourceDefinition(kilroy, action) === 308,
     );
     kilroy = apply(kilroy, "runner", (action) => action.type === "access_card");
     const creditsBeforeTrash = kilroy.runner.credits;
@@ -1024,7 +1024,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
     );
     expect(kilroy.runner.credits).toBe(creditsBeforeTrash);
     expect(kilroy.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
     });
     expect(
       replayEvents(kilroyInitial, kilroy.eventLog.slice(kilroyReplayStart)).ok,
@@ -1041,31 +1041,31 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
       id: "spotcheck_runner_hardware_link_resources",
       name: "Spotcheck Runner Hardware Link Resources",
       side: "runner",
-      identity: "runner_identity_001",
+      identity: 587,
       cards: [
-        { id: "onr_v1_128_green-knight-surge-buffers", quantity: 1 },
-        { id: "onr_v1_133_militech-mram-chip", quantity: 1 },
-        { id: "onr_v1_141_raven-microcyb-owl", quantity: 1 },
-        { id: "onr_v1_143_techtronica-utility-suit", quantity: 1 },
-        { id: "onr_v1_144_tycho-mem-chip", quantity: 1 },
-        { id: "onr_v1_145_wutech-mem-chip", quantity: 1 },
-        { id: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
-        { id: "onr_v1_152_back-door-to-hilliard", quantity: 1 },
-        { id: "onr_v1_153_back-door-to-orbital-air", quantity: 1 },
-        { id: "onr_v1_154_broker", quantity: 1 },
-        { id: "simple_decoder", quantity: 2 },
-        { id: "simple_economy_event", quantity: 8 },
+        { id: 340, quantity: 1 },
+        { id: 345, quantity: 1 },
+        { id: 353, quantity: 1 },
+        { id: 355, quantity: 1 },
+        { id: 356, quantity: 1 },
+        { id: 357, quantity: 1 },
+        { id: 358, quantity: 1 },
+        { id: 364, quantity: 1 },
+        { id: 365, quantity: 1 },
+        { id: 366, quantity: 1 },
+        { id: 591, quantity: 2 },
+        { id: 595, quantity: 8 },
       ],
     };
     const corpDeck: DeckDefinition = {
       id: "spotcheck_runner_hardware_link_resources_corp",
       name: "Spotcheck Runner Hardware Link Resources Corp",
       side: "corp",
-      identity: "corp_identity_001",
+      identity: 3,
       cards: [
-        { id: "simple_agenda", quantity: 6 },
-        { id: "simple_barrier_ice", quantity: 2 },
-        { id: "simple_economy_operation", quantity: 8 },
+        { id: 588, quantity: 6 },
+        { id: 589, quantity: 2 },
+        { id: 596, quantity: 8 },
       ],
     };
     let state = toRunnerTurn(
@@ -1112,8 +1112,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
 
   it("keeps Green Knight and Techtronica prevention source-safe", () => {
     for (const [definitionId, damageSetup] of [
-      ["onr_v1_128_green-knight-surge-buffers", "net"],
-      ["onr_v1_143_techtronica-utility-suit", "meat"],
+      [340, "net"],
+      [355, "meat"],
     ] as const) {
       let state = toRunnerTurn(
         MECHANIC_SMOKE_GAMES.damagePrevention(
@@ -1134,9 +1134,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
       );
       if (damageSetup === "meat") {
         state.runner.tags = 1;
-        moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
+        moveCorpCardToHq(state, 513);
       } else {
-        putCorpIceOnServer(state, "rd", "onr_v1_258_neural-blade");
+        putCorpIceOnServer(state, "rd", 470);
       }
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
@@ -1153,7 +1153,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
           (action) =>
             action.type === "play_operation" &&
             sourceDefinition(state, action) ===
-              "onr_v1_301_punitive-counterstrike",
+              513,
         );
       } else {
         state = apply(
@@ -1167,7 +1167,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
           "corp",
           (action) =>
             action.type === "rez_ice" &&
-            sourceDefinition(state, action) === "onr_v1_258_neural-blade",
+            sourceDefinition(state, action) === 470,
         );
         state = apply(
           state,
@@ -1203,17 +1203,17 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
     state.runner.clicks = 10;
     state.runner.maxHandSize = 100;
     state.corp.maxHandSize = 100;
-    moveRunnerCardToGrip(state, "onr_v1_154_broker");
+    moveRunnerCardToGrip(state, 366);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_154_broker",
+        sourceDefinition(state, action) === 366,
     );
     const brokerId = state.runner.rig.resources.find(
       (cardId) =>
-        state.cardInstances[cardId]?.definitionId === "onr_v1_154_broker",
+        state.cardInstances[cardId]?.definitionId === 366,
     );
     expect(brokerId).toBeDefined();
     if (!brokerId) throw new Error("Missing Broker");
@@ -1278,7 +1278,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
     );
     expect(state.runner.credits).toBe(creditsBefore + 3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_154_broker",
+      cardDefinitionId: 366,
       actionType: "activated_card_ability",
       gainedCredits: 3,
       remainingCounters: 0,
@@ -1294,26 +1294,26 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
 
   const programDefinitions = [
-    "onr_v1_001_afreet",
-    "onr_v1_003_baedekers-net-map",
-    "onr_v1_004_bakdoor",
-    "onr_v1_006_black-dahlia",
-    "onr_v1_010_cascade",
-    "onr_v1_012_clown",
-    "onr_v1_015_codeslinger",
-    "onr_v1_016_cyfermaster",
-    "onr_v1_018_dogcatcher",
-    "onr_v1_019_dropp",
+    213,
+    215,
+    216,
+    218,
+    222,
+    224,
+    227,
+    228,
+    230,
+    231,
   ] as const;
 
   const runnerProgramDeck: DeckDefinition = {
     id: "spotcheck_runner_program_core",
     name: "Spotcheck Runner Program Core",
     side: "runner",
-    identity: "runner_identity_001",
+    identity: 587,
     cards: [
       ...programDefinitions.map((id) => ({ id, quantity: 1 })),
-      { id: "simple_economy_event", quantity: 12 },
+      { id: 595, quantity: 12 },
     ],
   };
 
@@ -1321,16 +1321,16 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
     id: "spotcheck_runner_program_core_corp",
     name: "Spotcheck Runner Program Core Corp",
     side: "corp",
-    identity: "corp_identity_001",
+    identity: 3,
     cards: [
-      { id: "simple_agenda", quantity: 6 },
-      { id: "simple_barrier_ice", quantity: 2 },
-      { id: "simple_code_gate_ice", quantity: 2 },
-      { id: "simple_sentry_ice", quantity: 2 },
-      { id: "onr_v1_243_fetch-4-0-1", quantity: 1 },
-      { id: "onr_v1_239_endless-corridor", quantity: 1 },
-      { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
-      { id: "simple_economy_operation", quantity: 8 },
+      { id: 588, quantity: 6 },
+      { id: 589, quantity: 2 },
+      { id: 590, quantity: 2 },
+      { id: 601, quantity: 2 },
+      { id: 455, quantity: 1 },
+      { id: 451, quantity: 1 },
+      { id: 567, quantity: 1 },
+      { id: 596, quantity: 8 },
     ],
   };
 
@@ -1360,7 +1360,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
           id: "spotcheck_runner_program_hand_install_dedupe",
           cards: [
             ...runnerProgramDeck.cards,
-            { id: "onr_v1_064_skivviss", quantity: 1 },
+            { id: 276, quantity: 1 },
           ],
         },
         corpDeck: corpProgramDeck,
@@ -1371,8 +1371,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
     state.runner.clicks = 30;
     state.runner.memoryLimit = 30;
     const definitions = [
-      "onr_v1_064_skivviss",
-      "onr_v1_016_cyfermaster",
+      276,
+      228,
     ] as const;
 
     for (const definitionId of definitions) {
@@ -1443,7 +1443,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
       expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
         privatePayloadMarkers,
       );
-      if (definitionId === "onr_v1_010_cascade") {
+      if (definitionId === 222) {
         const cascadeId = state.runner.rig.programs.find(
           (id) => state.cardInstances[id]?.definitionId === definitionId,
         );
@@ -1462,21 +1462,21 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
 
   it("keeps Afreet hosting and Clown encounter modification source-safe and replayable", () => {
     let state = programCoreGame("spotcheck-runner-program-core-hosting-clown");
-    moveRunnerCardToGrip(state, "onr_v1_001_afreet");
+    moveRunnerCardToGrip(state, 213);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_001_afreet",
+        sourceDefinition(state, action) === 213,
     );
     const afreetId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_001_afreet",
+      (id) => state.cardInstances[id]?.definitionId === 213,
     );
     expect(afreetId).toBeDefined();
     if (!afreetId) throw new Error("Missing Afreet");
 
-    const bakdoorId = moveRunnerCardToGrip(state, "onr_v1_004_bakdoor");
+    const bakdoorId = moveRunnerCardToGrip(state, 216);
     const hostedInstall = mustAction(
       state,
       "runner",
@@ -1505,7 +1505,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
     expect(state.cardInstances[bakdoorId]?.hostedOn).toBe(afreetId);
     expect(state.runner.memoryUsed).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_004_bakdoor",
+      cardDefinitionId: 216,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
@@ -1517,15 +1517,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
     expect(hostReplay.ok).toBe(true);
     expect(hashState(hostReplay.state)).toBe(hashState(state));
 
-    moveRunnerCardToGrip(state, "onr_v1_012_clown");
+    moveRunnerCardToGrip(state, 224);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_012_clown",
+        sourceDefinition(state, action) === 224,
     );
-    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    putCorpIceOnServer(state, "rd", 589);
     const runInitial = structuredClone(state);
     const runReplayStart = state.eventLog.length;
     state = apply(
@@ -1539,7 +1539,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "simple_barrier_ice",
+        sourceDefinition(state, action) === 589,
     );
     expect(getPlayerView(state, "runner").run?.encounteredIce?.strength).toBe(
       2,
@@ -1554,11 +1554,11 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
 
   it("keeps core runner breakers installed-source-bound in run windows", () => {
     const specs = [
-      ["onr_v1_006_black-dahlia", "simple_sentry_ice"],
-      ["onr_v1_015_codeslinger", "simple_sentry_ice"],
-      ["onr_v1_016_cyfermaster", "simple_code_gate_ice"],
-      ["onr_v1_018_dogcatcher", "onr_v1_243_fetch-4-0-1"],
-      ["onr_v1_019_dropp", "simple_code_gate_ice"],
+      [218, 601],
+      [227, 601],
+      [228, 590],
+      [230, 455],
+      [231, 590],
     ] as const;
 
     for (const [breakerDefinitionId, iceDefinitionId] of specs) {
@@ -1600,7 +1600,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
           (action) =>
             action.type === "break_subroutine" &&
             String(action.payload?.breakerId) === breakerId &&
-            (breakerDefinitionId === "onr_v1_019_dropp"
+            (breakerDefinitionId === 231
               ? action.payload?.breakAllMatchingSubroutines === true
               : action.payload?.subroutineIndex === 0),
         );
@@ -1653,7 +1653,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
         "runner",
         (action) => action.actionId === breakAction.actionId,
       );
-      if (breakerDefinitionId === "onr_v1_019_dropp") {
+      if (breakerDefinitionId === 231) {
         expect(state.run).toBeUndefined();
         expect(state.timingPoint).toBe("runner_action.main");
       } else {
@@ -1678,10 +1678,10 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
     let state = programCoreGame("spotcheck-runner-program-core-dropp-errata");
     state.runner.credits = 20;
     state.corp.credits = 20;
-    const droppId = installRunnerProgramForTest(state, "onr_v1_019_dropp");
+    const droppId = installRunnerProgramForTest(state, 231);
     const crystalId = putCorpRootInRemote(
       state,
-      "onr_v1_355_crystal-palace-station-grid",
+      567,
     );
     state.cardInstances[crystalId] = {
       ...state.cardInstances[crystalId]!,
@@ -1691,7 +1691,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
     const iceId = putCorpIceOnServer(
       state,
       "remote_1",
-      "onr_v1_239_endless-corridor",
+      451,
     );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -1745,7 +1745,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
       multiBreakSubroutines: true,
       breakAllMatchingSubroutines: true,
       breakerEndsRunAfterBreak: true,
-      targetIceDefinitionId: "onr_v1_239_endless-corridor",
+      targetIceDefinitionId: 451,
       targetIceTitle: "Endless Corridor",
       breakSubroutineBaseCost: 0,
       breakSubroutineAdditionalCost: 2,
@@ -1791,8 +1791,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
     expect(state.timingPoint).toBe("runner_action.main");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
-      cardDefinitionId: "onr_v1_019_dropp",
-      targetIceDefinitionId: "onr_v1_239_endless-corridor",
+      cardDefinitionId: 231,
+      targetIceDefinitionId: 451,
       subroutineIndexes: "0,1",
       breakSubroutineCount: 2,
       breakAllMatchingSubroutines: true,
@@ -1819,16 +1819,16 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
   const programDefinitions = [
-    "onr_v1_021_dwarf",
-    "onr_v1_024_expert-schedule-analyzer",
-    "onr_v1_028_force-shield",
-    "onr_v1_033_imp",
-    "onr_v1_036_jackhammer",
-    "onr_v1_038_joan-of-arc",
-    "onr_v1_039_krash",
-    "onr_v1_040_loony-goon",
-    "onr_v1_042_mouse",
-    "onr_v1_050_r-and-d-protocol-files",
+    233,
+    236,
+    240,
+    245,
+    248,
+    250,
+    251,
+    252,
+    254,
+    262,
   ] as const;
 
   function preventionToolState(seed: string): GameState {
@@ -1840,26 +1840,26 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
           id: `spotcheck_runner_prevention_tools_${seed}`,
           name: "Spotcheck Runner Prevention Tools",
           side: "runner",
-          identity: "runner_identity_001",
+          identity: 587,
           cards: [
             ...programDefinitions.map((id) => ({ id, quantity: 1 })),
-            { id: "simple_economy_event", quantity: 12 },
+            { id: 595, quantity: 12 },
           ],
         },
         corpDeck: {
           id: `spotcheck_runner_prevention_tools_corp_${seed}`,
           name: "Spotcheck Runner Prevention Tools Corp",
           side: "corp",
-          identity: "corp_identity_001",
+          identity: 3,
           cards: [
-            { id: "simple_agenda", quantity: 6 },
-            { id: "simple_barrier_ice", quantity: 2 },
-            { id: "simple_code_gate_ice", quantity: 2 },
-            { id: "simple_sentry_ice", quantity: 2 },
-            { id: "onr_v1_232_crystal-wall", quantity: 2 },
-            { id: "simple_upgrade", quantity: 2 },
-            { id: "simple_economy_asset", quantity: 2 },
-            { id: "simple_economy_operation", quantity: 8 },
+            { id: 588, quantity: 6 },
+            { id: 589, quantity: 2 },
+            { id: 590, quantity: 2 },
+            { id: 601, quantity: 2 },
+            { id: 444, quantity: 2 },
+            { id: 606, quantity: 2 },
+            { id: 594, quantity: 2 },
+            { id: 596, quantity: 8 },
           ],
         },
         agendaPointsToWin: 7,
@@ -1929,7 +1929,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
       expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
         privatePayloadMarkers,
       );
-      if (definitionId === "onr_v1_050_r-and-d-protocol-files") {
+      if (definitionId === 262) {
         const protocolId = state.runner.rig.programs.find(
           (id) => state.cardInstances[id]?.definitionId === definitionId,
         );
@@ -1947,22 +1947,22 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
 
   it("keeps Imp hosting source-safe", () => {
     let hostState = preventionToolState("imp-hosting");
-    moveRunnerCardToGrip(hostState, "onr_v1_033_imp");
+    moveRunnerCardToGrip(hostState, 245);
     hostState = apply(
       hostState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(hostState, action) === "onr_v1_033_imp",
+        sourceDefinition(hostState, action) === 245,
     );
     const impId = hostState.runner.rig.programs.find(
-      (id) => hostState.cardInstances[id]?.definitionId === "onr_v1_033_imp",
+      (id) => hostState.cardInstances[id]?.definitionId === 245,
     );
     expect(impId).toBeDefined();
     if (!impId) throw new Error("Missing Imp");
     const jackhammerId = moveRunnerCardToGrip(
       hostState,
-      "onr_v1_036_jackhammer",
+      248,
     );
     const hostedInstall = mustAction(
       hostState,
@@ -2002,10 +2002,10 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
 
   it("keeps prevention-tool breakers and Mouse/Expert tools revalidated", () => {
     const specs = [
-      ["onr_v1_021_dwarf", "onr_v1_232_crystal-wall"],
-      ["onr_v1_036_jackhammer", "onr_v1_232_crystal-wall"],
-      ["onr_v1_039_krash", "simple_code_gate_ice"],
-      ["onr_v1_040_loony-goon", "simple_sentry_ice"],
+      [233, 444],
+      [248, 444],
+      [251, 590],
+      [252, 601],
     ] as const;
     for (const [breakerDefinitionId, iceDefinitionId] of specs) {
       let state = preventionToolState(breakerDefinitionId);
@@ -2096,8 +2096,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
 
     let toolState = preventionToolState("mouse-expert");
     for (const definitionId of [
-      "onr_v1_024_expert-schedule-analyzer",
-      "onr_v1_042_mouse",
+      236,
+      254,
     ] as const) {
       moveRunnerCardToGrip(toolState, definitionId);
       toolState = apply(
@@ -2108,13 +2108,13 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
           sourceDefinition(toolState, action) === definitionId,
       );
     }
-    const mouseTargetId = putCorpRootInRemote(toolState, "simple_upgrade");
+    const mouseTargetId = putCorpRootInRemote(toolState, 606);
     const expose = mustAction(
       toolState,
       "runner",
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinition(toolState, action) === "onr_v1_042_mouse",
+        sourceDefinition(toolState, action) === 254,
     );
     expect(expose.label).toBe("Mouse: installierte Korp-Karte exposen");
     expect(expose.payload).not.toHaveProperty("targetDefinitionId");
@@ -2124,7 +2124,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
     expect(JSON.stringify(expose.payload)).not.toMatch(/simple_upgrade/);
     const removedMouse = structuredClone(toolState);
     const mouseId = toolState.runner.rig.programs.find(
-      (id) => toolState.cardInstances[id]?.definitionId === "onr_v1_042_mouse",
+      (id) => toolState.cardInstances[id]?.definitionId === 254,
     );
     expect(mouseId).toBeDefined();
     if (!mouseId) throw new Error("Missing Mouse");
@@ -2169,7 +2169,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
     expect(toolState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "expose_installed_card_choice",
-      sourceDefinitionId: "onr_v1_042_mouse",
+      sourceDefinitionId: 254,
     });
     expect(
       JSON.stringify(toolState.eventLog.at(-1)?.publicPayload),
@@ -2183,8 +2183,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
     expect(toolState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "expose_installed_card_review",
-      sourceDefinitionId: "onr_v1_042_mouse",
-      cardDefinitionId: "simple_upgrade",
+      sourceDefinitionId: 254,
+      cardDefinitionId: 606,
     });
     expect(
       JSON.stringify(toolState.eventLog.at(-1)?.publicPayload),
@@ -2192,13 +2192,13 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
     expect(
       getPlayerView(toolState, "runner")
         .servers.flatMap((server) => server.root)
-        .some((card) => card.known && card.definitionId === "simple_upgrade"),
+        .some((card) => card.known && card.definitionId === 606),
     ).toBe(true);
     toolState = applyChoice(toolState, "runner", "done");
     expect(toolState.pendingChoice).toBeUndefined();
     expect(toolState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "expose_installed_card_finish",
-      sourceDefinitionId: "onr_v1_042_mouse",
+      sourceDefinitionId: 254,
     });
     const exposeReplay = replayEvents(
       exposeInitial,
@@ -2207,9 +2207,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
     expect(exposeReplay.ok).toBe(true);
     expect(hashState(exposeReplay.state)).toBe(hashState(toolState));
 
-    putCorpCardOnTopOfRd(toolState, "simple_agenda");
-    putCorpCardOnTopOfRd(toolState, "simple_economy_operation");
-    putCorpCardOnTopOfRd(toolState, "simple_economy_asset");
+    putCorpCardOnTopOfRd(toolState, 588);
+    putCorpCardOnTopOfRd(toolState, 596);
+    putCorpCardOnTopOfRd(toolState, 594);
     const accessInitial = structuredClone(toolState);
     const accessReplayStart = toolState.eventLog.length;
     toolState = apply(
@@ -2243,16 +2243,16 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
   const resourceDefinitions = [
-    "onr_v1_157_crash-everett-inventive-fixer",
-    "onr_v1_158_danshis-second-id",
-    "onr_v1_159_databroker",
-    "onr_v1_162_field-reporter-for-ice-and-data",
-    "onr_v1_163_floating-runner-bbs",
-    "onr_v1_165_junkyard-bbs",
-    "onr_v1_166_karl-de-veres-corporate-stooge",
-    "onr_v1_167_leland-corporate-bodyguard",
-    "onr_v1_168_loan-from-chiba",
-    "onr_v1_176_the-shell-traders",
+    369,
+    370,
+    371,
+    374,
+    375,
+    377,
+    378,
+    379,
+    380,
+    388,
   ] as const;
 
   function resourceContactState(
@@ -2271,40 +2271,40 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
           id: `spotcheck_runner_resource_contacts_${seed}`,
           name: "Spotcheck Runner Resource Contacts",
           side: "runner",
-          identity: "runner_identity_001",
+          identity: 587,
           cards: [
             ...resourceDefinitions.map((id) => ({
               id,
               quantity:
-                id === "onr_v1_176_the-shell-traders"
+                id === 388
                   ? (options?.shellTraderQuantity ?? 1)
                   : 1,
             })),
             ...(options?.includeCloak
-              ? [{ id: "onr_v1_011_cloak", quantity: 1 }]
+              ? [{ id: 223, quantity: 1 }]
               : []),
             ...(options?.includeAfreet
               ? [
-                  { id: "onr_v1_001_afreet", quantity: 1 },
-                  { id: "onr_v1_023_evil-twin", quantity: 1 },
+                  { id: 213, quantity: 1 },
+                  { id: 235, quantity: 1 },
                 ]
               : []),
-            { id: "onr_classic_031_rent-i-con", quantity: 1 },
-            { id: "simple_fracter", quantity: 2 },
-            { id: "simple_setup_hardware", quantity: 1 },
-            { id: "simple_agenda", quantity: 2 },
-            { id: "simple_economy_event", quantity: 12 },
+            { id: 35, quantity: 1 },
+            { id: 597, quantity: 2 },
+            { id: 602, quantity: 1 },
+            { id: 588, quantity: 2 },
+            { id: 595, quantity: 12 },
           ],
         },
         corpDeck: {
           id: `spotcheck_runner_resource_contacts_corp_${seed}`,
           name: "Spotcheck Runner Resource Contacts Corp",
           side: "corp",
-          identity: "corp_identity_001",
+          identity: 3,
           cards: [
-            { id: "simple_agenda", quantity: 6 },
-            { id: "simple_barrier_ice", quantity: 2 },
-            { id: "simple_economy_operation", quantity: 8 },
+            { id: 588, quantity: 6 },
+            { id: 589, quantity: 2 },
+            { id: 596, quantity: 8 },
           ],
         },
         agendaPointsToWin: 7,
@@ -2374,7 +2374,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
         privatePayloadMarkers,
       );
-      if (definitionId === "onr_v1_168_loan-from-chiba") {
+      if (definitionId === 380) {
         const resourceId = state.runner.rig.resources.find(
           (id) => state.cardInstances[id]?.definitionId === definitionId,
         );
@@ -2394,7 +2394,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
           ],
         });
       }
-      if (definitionId === "onr_v1_176_the-shell-traders") {
+      if (definitionId === 388) {
         const resourceId = state.runner.rig.resources.find(
           (id) => state.cardInstances[id]?.definitionId === definitionId,
         );
@@ -2413,18 +2413,18 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
   it("keeps Danshi and Databroker active resource actions source-bound", () => {
     let danshi = resourceContactState("danshi");
     danshi.runner.tags = 3;
-    moveRunnerCardToGrip(danshi, "onr_v1_158_danshis-second-id");
+    moveRunnerCardToGrip(danshi, 370);
     danshi = apply(
       danshi,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(danshi, action) === "onr_v1_158_danshis-second-id",
+        sourceDefinition(danshi, action) === 370,
     );
     const danshiId = danshi.runner.rig.resources.find(
       (id) =>
         danshi.cardInstances[id]?.definitionId ===
-        "onr_v1_158_danshis-second-id",
+        370,
     );
     expect(danshiId).toBeDefined();
     if (!danshiId) throw new Error("Missing Danshi's Second ID");
@@ -2434,7 +2434,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       (action) =>
         action.type === "activated_card_ability" &&
         String(action.payload?.cardId) === danshiId &&
-        sourceDefinition(danshi, action) === "onr_v1_158_danshis-second-id",
+        sourceDefinition(danshi, action) === 370,
     );
     const removedDanshi = structuredClone(danshi);
     removeEverywhere(removedDanshi, danshiId);
@@ -2457,7 +2457,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(danshi.runner.tags).toBe(0);
     expect(danshi.runner.heap).toContain(danshiId);
     expect(danshi.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_158_danshis-second-id",
+      cardDefinitionId: 370,
       removedTags: 3,
       runnerTagsAfter: 0,
     });
@@ -2469,21 +2469,21 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(hashState(danshiReplay.state)).toBe(hashState(danshi));
 
     let databroker = resourceContactState("databroker");
-    moveRunnerCardToGrip(databroker, "onr_v1_159_databroker");
+    moveRunnerCardToGrip(databroker, 371);
     databroker = apply(
       databroker,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(databroker, action) === "onr_v1_159_databroker",
+        sourceDefinition(databroker, action) === 371,
     );
     const brokerId = databroker.runner.rig.resources.find(
       (id) =>
-        databroker.cardInstances[id]?.definitionId === "onr_v1_159_databroker",
+        databroker.cardInstances[id]?.definitionId === 371,
     );
     expect(brokerId).toBeDefined();
     if (!brokerId) throw new Error("Missing Databroker");
-    const agendaId = scoreRunnerAgendaForTest(databroker, "simple_agenda");
+    const agendaId = scoreRunnerAgendaForTest(databroker, 588);
     const databrokerAction = mustAction(
       databroker,
       "runner",
@@ -2527,7 +2527,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(databroker.cardInstances[agendaId]?.agendaPointsSpent).toBe(1);
     expect(databroker.runner.heap).toContain(brokerId);
     expect(databroker.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_159_databroker",
+      cardDefinitionId: 371,
       abilityId: "databroker",
       agendaPointCostPaid: 1,
       spentAgendaCardId: agendaId,
@@ -2543,22 +2543,22 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
 
   it("offers Junkyard BBS for the top heap card and revalidates source, cost and target drift", () => {
     let state = resourceContactState("junkyard-bbs");
-    moveRunnerCardToGrip(state, "onr_v1_165_junkyard-bbs");
+    moveRunnerCardToGrip(state, 377);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_165_junkyard-bbs",
+        sourceDefinition(state, action) === 377,
     );
     const junkyardId = state.runner.rig.resources.find(
       (id) =>
-        state.cardInstances[id]?.definitionId === "onr_v1_165_junkyard-bbs",
+        state.cardInstances[id]?.definitionId === 377,
     );
     expect(junkyardId).toBeDefined();
     if (!junkyardId) throw new Error("Missing Junkyard BBS");
 
-    const bottomHeapId = findCard(state, "simple_economy_event");
+    const bottomHeapId = findCard(state, 595);
     removeEverywhere(state, bottomHeapId);
     state.runner.heap.push(bottomHeapId);
     state.cardInstances[bottomHeapId] = {
@@ -2569,7 +2569,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     };
     const topHeapId = findCard(
       state,
-      "onr_v1_157_crash-everett-inventive-fixer",
+      369,
     );
     removeEverywhere(state, topHeapId);
     state.runner.heap.push(topHeapId);
@@ -2585,7 +2585,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       "runner",
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinition(state, action) === "onr_v1_165_junkyard-bbs" &&
+        sourceDefinition(state, action) === 377 &&
         action.payload?.cardId === junkyardId &&
         action.payload?.cardImplementationTopTrashTargetId === topHeapId,
     );
@@ -2663,9 +2663,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(state.runner.grip[0]).toBe(topHeapId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
-      sourceDefinitionId: "onr_v1_165_junkyard-bbs",
-      cardDefinitionId: "onr_v1_165_junkyard-bbs",
-      returnedCardDefinitionId: "onr_v1_157_crash-everett-inventive-fixer",
+      sourceDefinitionId: 377,
+      cardDefinitionId: 377,
+      returnedCardDefinitionId: 369,
       returnedCount: 1,
       sourceZone: "heap",
       destinationZone: "grip",
@@ -2682,13 +2682,13 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
 
   it("keeps Floating Runner BBS recurring contact credits turn-safe", () => {
     let state = resourceContactState("turn-credits");
-    moveRunnerCardToGrip(state, "onr_v1_163_floating-runner-bbs");
+    moveRunnerCardToGrip(state, 375);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_163_floating-runner-bbs",
+        sourceDefinition(state, action) === 375,
     );
     const initialCredits = state.runner.credits;
     const initial = structuredClone(state);
@@ -2704,13 +2704,13 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
 
   it("offers The Shell Traders prepare action only for legal grip program and hardware targets", () => {
     let state = resourceContactState("shell-prepare-targets");
-    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    moveRunnerCardToGrip(state, 388);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+        sourceDefinition(state, action) === 388,
     );
     emptyRunnerGripForTest(state);
     expect(
@@ -2721,8 +2721,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       ),
     ).toBe(false);
 
-    const programId = moveRunnerCardToGrip(state, "simple_fracter");
-    const hardwareId = moveRunnerCardToGrip(state, "simple_setup_hardware");
+    const programId = moveRunnerCardToGrip(state, 597);
+    const hardwareId = moveRunnerCardToGrip(state, 602);
     const prepareActions = getLegalActions(state, "runner").filter(
       (action) =>
         action.type === "trigger_ability" &&
@@ -2737,19 +2737,19 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
 
   it("offers The Shell Traders prepare actions for programs while current MU is full", () => {
     let state = resourceContactState("shell-prepare-under-memory-pressure");
-    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    moveRunnerCardToGrip(state, 388);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+        sourceDefinition(state, action) === 388,
     );
-    installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, 597);
     state.runner.memoryLimit = state.runner.memoryUsed;
     const targetProgramId = moveRunnerCardToGrip(
       state,
-      "onr_classic_031_rent-i-con",
+      35,
     );
 
     const prepareActions = getLegalActions(state, "runner").filter(
@@ -2777,17 +2777,17 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
         `shell-afreet-${reason}-${fullMemory}-${destination}`,
         { includeAfreet: true },
       );
-      moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+      moveRunnerCardToGrip(state, 388);
       state = apply(
         state,
         "runner",
         (action) =>
           action.type === "install_card" &&
-          sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+          sourceDefinition(state, action) === 388,
       );
-      const hostId = installRunnerProgramForTest(state, "onr_v1_001_afreet");
-      const installedId = installRunnerProgramForTest(state, "simple_fracter");
-      const targetId = moveRunnerCardToGrip(state, "onr_v1_023_evil-twin");
+      const hostId = installRunnerProgramForTest(state, 213);
+      const installedId = installRunnerProgramForTest(state, 597);
+      const targetId = moveRunnerCardToGrip(state, 235);
       state = apply(
         state,
         "runner",
@@ -2845,7 +2845,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       const filledHostState = structuredClone(state);
       const fillerId = installRunnerProgramForTest(
         filledHostState,
-        "onr_classic_031_rent-i-con",
+        35,
       );
       filledHostState.cardInstances[fillerId]!.hostedOn = hostId;
       filledHostState.cardInstances[installedId]!.hostedOn = hostId;
@@ -2927,10 +2927,10 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
   );
 
   it.each([
-    ["paid", "onr_v1_023_evil-twin", true],
-    ["start_turn", "onr_v1_023_evil-twin", false],
-    ["paid", "onr_v1_011_cloak", false],
-    ["start_turn", "onr_v1_011_cloak", true],
+    ["paid", 235, true],
+    ["start_turn", 235, false],
+    ["paid", 223, false],
+    ["start_turn", 223, true],
   ] as const)(
     "replaces a program in full Afreet through Shell Traders via %s with %s and full rig %s",
     (reason, targetDefinitionId, fullRig) => {
@@ -2938,12 +2938,12 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
         includeAfreet: true,
         includeCloak: true,
       });
-      installRunnerResourceForTest(state, "onr_v1_176_the-shell-traders");
-      const hostId = installRunnerProgramForTest(state, "onr_v1_001_afreet");
-      const hostedId = installRunnerProgramForTest(state, "simple_fracter");
+      installRunnerResourceForTest(state, 388);
+      const hostId = installRunnerProgramForTest(state, 213);
+      const hostedId = installRunnerProgramForTest(state, 597);
       const otherHostedId = installRunnerProgramForTest(
         state,
-        "onr_classic_031_rent-i-con",
+        35,
       );
       for (const id of [hostedId, otherHostedId]) {
         state.cardInstances[id]!.hostedOn = hostId;
@@ -3007,7 +3007,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
         creditsBefore - (reason === "paid" ? 1 : 0),
       );
       expect(cardCounterAmount(state, targetId, "shell")).toBe(0);
-      if (targetDefinitionId === "onr_v1_011_cloak")
+      if (targetDefinitionId === 223)
         expect(cardCounterAmount(state, targetId, "bit")).toBe(3);
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok).toBe(true);
@@ -3020,22 +3020,22 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       includeAfreet: true,
       includeCloak: true,
     });
-    installRunnerResourceForTest(state, "onr_v1_176_the-shell-traders");
-    const hostId = installRunnerProgramForTest(state, "onr_v1_001_afreet");
+    installRunnerResourceForTest(state, 388);
+    const hostId = installRunnerProgramForTest(state, 213);
     const outsideId = installRunnerProgramForTest(
       state,
-      "onr_v1_023_evil-twin",
+      235,
     );
     const hostedIds = [
-      installRunnerProgramForTest(state, "simple_fracter"),
-      installRunnerProgramCopyForTest(state, "simple_fracter"),
-      installRunnerProgramForTest(state, "onr_v1_011_cloak"),
+      installRunnerProgramForTest(state, 597),
+      installRunnerProgramCopyForTest(state, 597),
+      installRunnerProgramForTest(state, 223),
     ];
     for (const id of hostedIds) {
       state.cardInstances[id]!.hostedOn = hostId;
       state.runner.memoryUsed -= 1;
     }
-    const targetId = moveRunnerCardToGrip(state, "onr_classic_031_rent-i-con");
+    const targetId = moveRunnerCardToGrip(state, 35);
     state = apply(
       state,
       "runner",
@@ -3123,20 +3123,20 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
 
   it("requires program trash before the last Shell counter installs under MU pressure", () => {
     let state = resourceContactState("shell-final-counter-memory-choice");
-    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    moveRunnerCardToGrip(state, 388);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+        sourceDefinition(state, action) === 388,
     );
     const installedProgramId = installRunnerProgramForTest(
       state,
-      "simple_fracter",
+      597,
     );
     state.runner.memoryLimit = state.runner.memoryUsed + 1;
-    const targetProgramId = moveRunnerCardCopyToGrip(state, "simple_fracter");
+    const targetProgramId = moveRunnerCardCopyToGrip(state, 597);
     state = apply(
       state,
       "runner",
@@ -3224,9 +3224,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       actionType: "resolve_choice",
       abilityFamily: "hosting-counters",
       abilityId: "resolve_delayed_install_memory",
-      sourceDefinitionId: "onr_v1_176_the-shell-traders",
+      sourceDefinitionId: 388,
       targets: expect.objectContaining({
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
       }),
       amounts: expect.objectContaining({
         removedCounterAmount: 1,
@@ -3241,20 +3241,20 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
 
   it("resumes the Runner start-of-turn flow after Shell Traders frees MU", () => {
     let state = resourceContactState("shell-start-turn-memory-choice");
-    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    moveRunnerCardToGrip(state, 388);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+        sourceDefinition(state, action) === 388,
     );
     const installedProgramId = installRunnerProgramForTest(
       state,
-      "simple_fracter",
+      597,
     );
     state.runner.memoryLimit = state.runner.memoryUsed + 1;
-    const targetProgramId = moveRunnerCardCopyToGrip(state, "simple_fracter");
+    const targetProgramId = moveRunnerCardCopyToGrip(state, 597);
     state = apply(
       state,
       "runner",
@@ -3298,8 +3298,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
           counterType: "shell",
           removedCounterAmount: 1,
           remainingCounters: 0,
-          sourceDefinitionId: "onr_v1_176_the-shell-traders",
-          cardDefinitionId: "simple_fracter",
+          sourceDefinitionId: 388,
+          cardDefinitionId: 597,
           reason: "start_of_turn",
         }),
       ]),
@@ -3311,22 +3311,22 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
 
   it("sets aside Shell Traders targets public, revalidates drift, and keeps hidden grip data out of public payloads", () => {
     let state = resourceContactState("shell-set-aside");
-    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    moveRunnerCardToGrip(state, 388);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+        sourceDefinition(state, action) === 388,
     );
     const shellId = state.runner.rig.resources.find(
       (id) =>
         state.cardInstances[id]?.definitionId ===
-        "onr_v1_176_the-shell-traders",
+        388,
     );
     expect(shellId).toBeDefined();
     if (!shellId) throw new Error("Missing The Shell Traders");
-    const programId = moveRunnerCardToGrip(state, "simple_fracter");
+    const programId = moveRunnerCardToGrip(state, 597);
     const corpViewBefore = JSON.stringify(getPlayerView(state, "corp"));
     expect(corpViewBefore).not.toContain("Simple Fracter");
     expect(corpViewBefore).not.toContain(programId);
@@ -3401,13 +3401,13 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       abilityFamily: "hosting-counters",
       abilityId: "set_aside_from_grip",
       effectKind: "counter_change",
-      sourceDefinitionId: "onr_v1_176_the-shell-traders",
+      sourceDefinitionId: 388,
       amounts: expect.objectContaining({
         addedCounterAmount: 2,
         remainingCounters: 2,
       }),
       targets: expect.objectContaining({
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
       }),
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -3426,7 +3426,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     for (let index = 0; index < 2; index += 1) {
       const shellId = moveRunnerCardCopyToGrip(
         state,
-        "onr_v1_176_the-shell-traders",
+        388,
       );
       state = apply(
         state,
@@ -3435,7 +3435,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
           action.type === "install_card" && action.payload?.cardId === shellId,
       );
     }
-    const cloakId = moveRunnerCardToGrip(state, "onr_v1_011_cloak");
+    const cloakId = moveRunnerCardToGrip(state, 223);
     state = apply(
       state,
       "runner",
@@ -3471,7 +3471,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
           counterType: "bit",
           addedCounterAmount: 3,
           remainingCounters: 3,
-          sourceDefinitionId: "onr_v1_011_cloak",
+          sourceDefinitionId: 223,
         }),
       ]),
     );
@@ -3484,15 +3484,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     let state = resourceContactState("shell-cloak-paid-lifecycle", {
       includeCloak: true,
     });
-    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    moveRunnerCardToGrip(state, 388);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+        sourceDefinition(state, action) === 388,
     );
-    const cloakId = moveRunnerCardToGrip(state, "onr_v1_011_cloak");
+    const cloakId = moveRunnerCardToGrip(state, 223);
     state = apply(
       state,
       "runner",
@@ -3522,15 +3522,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       includeCloak: true,
     });
     state.runner.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    moveRunnerCardToGrip(state, 388);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+        sourceDefinition(state, action) === 388,
     );
-    const cloakId = moveRunnerCardToGrip(state, "onr_v1_011_cloak");
+    const cloakId = moveRunnerCardToGrip(state, 223);
     state = apply(
       state,
       "runner",
@@ -3574,20 +3574,20 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     let state = resourceContactState("shell-cloak-memory-lifecycle", {
       includeCloak: true,
     });
-    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    moveRunnerCardToGrip(state, 388);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+        sourceDefinition(state, action) === 388,
     );
     const installedProgramId = installRunnerProgramForTest(
       state,
-      "simple_fracter",
+      597,
     );
     state.runner.memoryLimit = state.runner.memoryUsed;
-    const cloakId = moveRunnerCardToGrip(state, "onr_v1_011_cloak");
+    const cloakId = moveRunnerCardToGrip(state, 223);
     state = apply(
       state,
       "runner",
@@ -3629,15 +3629,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
 
   it("removes Shell counters through paid and start-of-turn paths and installs the prepared card", () => {
     let state = resourceContactState("shell-counter-removal");
-    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    moveRunnerCardToGrip(state, 388);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+        sourceDefinition(state, action) === 388,
     );
-    const programId = moveRunnerCardToGrip(state, "simple_fracter");
+    const programId = moveRunnerCardToGrip(state, 597);
     state = apply(
       state,
       "runner",
@@ -3682,8 +3682,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
           counterType: "shell",
           removedCounterAmount: 1,
           remainingCounters: 0,
-          sourceDefinitionId: "onr_v1_176_the-shell-traders",
-          cardDefinitionId: "simple_fracter",
+          sourceDefinitionId: 388,
+          cardDefinitionId: 597,
           reason: "start_of_turn",
         }),
       ]),
@@ -3695,15 +3695,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
 
   it("requires a Runner choice before removing a start-of-turn Shell counter from multiple prepared cards", () => {
     let state = resourceContactState("shell-counter-start-turn-choice");
-    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    moveRunnerCardToGrip(state, 388);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+        sourceDefinition(state, action) === 388,
     );
-    const programId = moveRunnerCardToGrip(state, "simple_fracter");
+    const programId = moveRunnerCardToGrip(state, 597);
     state = apply(
       state,
       "runner",
@@ -3712,7 +3712,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
         action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
         action.payload?.targetCardId === programId,
     );
-    const hardwareId = moveRunnerCardToGrip(state, "simple_setup_hardware");
+    const hardwareId = moveRunnerCardToGrip(state, 602);
     state = apply(
       state,
       "runner",
@@ -3770,7 +3770,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       abilityId: "start_turn_remove_shell_counter",
       effectKind: "counter_change",
       targets: expect.objectContaining({
-        targetCardDefinitionId: "simple_setup_hardware",
+        targetCardDefinitionId: 602,
       }),
       amounts: expect.objectContaining({
         removedCounterAmount: 1,
@@ -3780,7 +3780,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
         expect.objectContaining({
           kind: "counter_change",
           reason: "start_of_turn",
-          cardDefinitionId: "simple_setup_hardware",
+          cardDefinitionId: 602,
           removedCounterAmount: 1,
           remainingCounters: 1,
         }),
@@ -3793,11 +3793,11 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
 
   it("applies P3.9 agenda_difficulty modifiers from scored Corp agendas to score actions and revalidation", () => {
     const p39CardIds = new Set([
-      "onr_v1_189_artificial-security-directors",
-      "onr_v1_191_black-ice-quality-assurance",
-      "onr_v1_201_executive-extraction",
-      "onr_v1_202_genetics-visionary-acquisition",
-      "onr_v1_203_hostile-takeover",
+      401,
+      403,
+      413,
+      414,
+      415,
     ]);
     const makeState = (seed: string) => {
       const state = apply(
@@ -3809,11 +3809,11 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
             id: `${seed}_corp`,
             name: `${seed} Corp`,
             cards: [
-              { id: "onr_v1_189_artificial-security-directors", quantity: 2 },
-              { id: "onr_v1_191_black-ice-quality-assurance", quantity: 2 },
-              { id: "onr_v1_201_executive-extraction", quantity: 2 },
-              { id: "onr_v1_202_genetics-visionary-acquisition", quantity: 2 },
-              { id: "onr_v1_203_hostile-takeover", quantity: 1 },
+              { id: 401, quantity: 2 },
+              { id: 403, quantity: 2 },
+              { id: 413, quantity: 2 },
+              { id: 414, quantity: 2 },
+              { id: 415, quantity: 1 },
               ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
                 (entry) => !p39CardIds.has(entry.id),
               ),
@@ -3845,13 +3845,13 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
 
     for (const [sourceDefinitionId, targetDefinitionId] of [
       [
-        "onr_v1_189_artificial-security-directors",
-        "onr_v1_201_executive-extraction",
+        401,
+        413,
       ],
-      ["onr_v1_201_executive-extraction", "onr_v1_203_hostile-takeover"],
+      [413, 415],
       [
-        "onr_v1_202_genetics-visionary-acquisition",
-        "onr_v1_191_black-ice-quality-assurance",
+        414,
+        403,
       ],
     ] as const) {
       const state = makeState(`p39-${sourceDefinitionId}`);
@@ -3877,15 +3877,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     const stackingState = makeState("p39-stacking-and-stale");
     const firstSource = scoreCorpAgendaForTest(
       stackingState,
-      "onr_v1_189_artificial-security-directors",
+      401,
     );
     const secondSource = scoreCorpAgendaForTest(
       stackingState,
-      "onr_v1_189_artificial-security-directors",
+      401,
     );
     const blackOpsTarget = putCorpRootInRemote(
       stackingState,
-      "onr_v1_201_executive-extraction",
+      413,
     );
     stackingState.cardInstances[blackOpsTarget] = {
       ...stackingState.cardInstances[blackOpsTarget]!,
@@ -3900,7 +3900,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          sourceDefinitionId: "onr_v1_189_artificial-security-directors",
+          sourceDefinitionId: 401,
           kind: "agenda_difficulty",
           side: "corp",
           amount: -1,

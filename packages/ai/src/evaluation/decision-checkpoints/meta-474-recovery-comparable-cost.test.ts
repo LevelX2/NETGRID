@@ -41,7 +41,7 @@ it("rejects false recovery savings caused by comparing differently funded trace 
     server = i.playerView.servers.find((s) => s.id === "rd")!,
     rig = i.playerView.own.rig!,
     copy = i.playerView.own.gripOrHq.find(
-      (c) => c.definitionId === "onr_v1_039_krash",
+      (c) => c.definitionId === 251,
     )!,
     target = evaluateRunnerRunTargets({
       input: i,

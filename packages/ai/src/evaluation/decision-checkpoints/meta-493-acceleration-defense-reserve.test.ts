@@ -64,7 +64,7 @@ it("rejects the two-acceleration score route before it consumes a funded termina
       (p) =>
         p.moduleState as {
           signal: {
-            agendaDefinitionId?: string;
+            agendaDefinitionId?: number;
             sameTurnConversionProof?: string;
             feasible: boolean;
             routeAssessment?: string;
@@ -74,7 +74,7 @@ it("rejects the two-acceleration score route before it consumes a funded termina
   expect(
     scores.some(
       (p) =>
-        p.signal.agendaDefinitionId === "onr_v1_201_executive-extraction" &&
+        p.signal.agendaDefinitionId === 413 &&
         p.signal.sameTurnConversionProof === "engine_quoted_path" &&
         !p.signal.feasible &&
         p.signal.routeAssessment ===
@@ -109,7 +109,7 @@ it("does not reserve the already paid ICE again", () => {
   const cp = checkpoint();
   cp.input.playerView.servers
     .find((s) => s.id === "rd")!
-    .ice.find((c) => c.definitionId === "onr_v1_259_in-the-face")!.rezzed =
+    .ice.find((c) => c.definitionId === 471)!.rezzed =
     true;
   expect(decide(cp).actionId).toContain("overtime-incentives");
 });
@@ -121,7 +121,7 @@ it("fails closed when the funded claim loses its complete current score horizon"
       (p) =>
         p.moduleId === "corp.score_agenda" &&
         (p.moduleState as { signal: CorpScoreProjectSignal }).signal
-          .agendaDefinitionId === "onr_v1_201_executive-extraction",
+          .agendaDefinitionId === 413,
     )!.moduleState as { signal: CorpScoreProjectSignal }
   ).signal;
   const withoutHorizon = { ...signal, feasible: true };

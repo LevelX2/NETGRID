@@ -45,8 +45,8 @@ describe("selectedBidChoiceOptionId", () => {
           ownClicks: 1,
           runnerCredits: 6,
           hq: [
-            card("closed", "onr_v1_285_closed-accounts", 1),
-            card("scorched", "onr_v1_302_scorched-earth", 3),
+            card("closed", 497, 1),
+            card("scorched", 514, 3),
           ],
         }),
         bidChoice("trace:corp", range(0, 11)),
@@ -76,7 +76,7 @@ describe("selectedBidChoiceOptionId", () => {
           ownCredits: 8,
           ownClicks: 0,
           runnerCredits: 0,
-          encounteredIceDefinitionId: "onr_v1_264_rex",
+          encounteredIceDefinitionId: 476,
         }),
         bidChoice("trace:run_1.rex.0.trace", range(0, 5)),
         { traceLimit: 5, runnerLink: 0 },
@@ -91,7 +91,7 @@ describe("selectedBidChoiceOptionId", () => {
           ownCredits: 8,
           ownClicks: 0,
           runnerCredits: 11,
-          encounteredIceDefinitionId: "onr_v1_264_rex",
+          encounteredIceDefinitionId: 476,
         }),
         bidChoice("trace:run_1.rex.0.trace", range(0, 8)),
         { traceLimit: 5, runnerLink: 0 },
@@ -106,7 +106,7 @@ describe("selectedBidChoiceOptionId", () => {
           ownCredits: 8,
           ownClicks: 0,
           runnerCredits: 5,
-          encounteredIceDefinitionId: "onr_v1_284_chance-observation",
+          encounteredIceDefinitionId: 496,
         }),
         bidChoice("trace:chance-observation", range(0, 5)),
         { traceLimit: 5, runnerLink: 0 },
@@ -121,7 +121,7 @@ describe("selectedBidChoiceOptionId", () => {
           ownCredits: 7,
           ownClicks: 1,
           runnerCredits: 11,
-          hq: [card("closed", "onr_v1_285_closed-accounts", 1)],
+          hq: [card("closed", 497, 1)],
         }),
         bidChoice("trace:corp", range(0, 11)),
         { traceLimit: 5, runnerLink: 0 },
@@ -136,7 +136,7 @@ describe("selectedBidChoiceOptionId", () => {
           ownCredits: 8,
           ownClicks: 1,
           runnerCredits: 0,
-          hq: [card("closed", "onr_v1_285_closed-accounts", 1)],
+          hq: [card("closed", 497, 1)],
         }),
         bidChoice("trace:corp", range(0, 5)),
         { traceLimit: 5, runnerLink: 0 },
@@ -151,7 +151,7 @@ describe("selectedBidChoiceOptionId", () => {
           ownCredits: 18,
           ownClicks: 0,
           runnerCredits: 11,
-          hq: [card("closed", "onr_v1_285_closed-accounts", 1)],
+          hq: [card("closed", 497, 1)],
         }),
         bidChoice("trace:corp", range(0, 11)),
         { traceLimit: 5, runnerLink: 0 },
@@ -192,7 +192,7 @@ describe("selectedBidChoiceOptionId", () => {
   it.each([0, 1, 2])(
     "keeps the Engine run continuing after a hidden Corp bid of %i",
     (corpBid) => {
-      const definitionId = "onr_v1_272_too-many-doors";
+      const definitionId = 484;
       const corp = ORIGINALSET_DEFAULT_DECKS.corp;
       let state = createGameAfterSetup({
         seed: "secret-compare-runtime-choice",
@@ -276,7 +276,7 @@ describe("selectedBidChoiceOptionId", () => {
         input("runner", "normal", {
           ownCredits: 6,
           runnerCredits: 0,
-          encounteredIceDefinitionId: "onr_v1_246_fragmentation-storm",
+          encounteredIceDefinitionId: 458,
         }),
         bidChoice("trace:seed7.fragmentation-storm", range(0, 6)),
         {
@@ -284,7 +284,7 @@ describe("selectedBidChoiceOptionId", () => {
           traceLimit: 4,
           runnerLink: 0,
           traceRulesProfile: "modern_open",
-          sourceDefinitionId: "onr_v1_246_fragmentation-storm",
+          sourceDefinitionId: 458,
         },
       ),
     ).toBe("bid_4");
@@ -299,7 +299,7 @@ function input(
     ownClicks?: number;
     runnerCredits?: number;
     hq?: Array<Record<string, unknown>>;
-    encounteredIceDefinitionId?: string;
+    encounteredIceDefinitionId?: number;
   } = {},
 ): AiDecisionInput {
   return {
@@ -353,7 +353,7 @@ function input(
   } as unknown as AiDecisionInput;
 }
 
-function card(instanceId: string, definitionId: string, cost: number) {
+function card(instanceId: string, definitionId: number, cost: number) {
   return {
     instanceId,
     definitionId,

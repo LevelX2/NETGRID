@@ -33,7 +33,7 @@ type ReconstructedDecisionCapture = {
 };
 
 const INSTALL_MISLEADING_ACCESS_MENUS_ON_HQ =
-  "corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.0";
+  "corp.install_card.corp_90_1.hq.corp_90_1.0";
 
 describe("match f291a822 HQ defense allocation", () => {
   it("protects the exposed HQ with a current quoted encounter before an unsupported score-remote staging route", () => {
@@ -91,7 +91,7 @@ describe("match f291a822 HQ defense allocation", () => {
     expect(decision.actionId).toBe("corp.draw_card");
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_008_project-zurich_1%3Aremote_1",
+      "plan:corp.score_agenda:agenda%3Acorp_66_1%3Aremote_1",
     );
     expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
       expect.objectContaining({

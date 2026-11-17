@@ -91,7 +91,7 @@ describe("missingBreakerCoverageKind", () => {
         playerViewWithIce(
           visibleCard({
             instanceId: "wall-of-static",
-            definitionId: "onr_v1_279_wall-of-static",
+            definitionId: 491,
             type: "ice",
             title: "Wall of Static",
           }),

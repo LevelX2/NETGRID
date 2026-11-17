@@ -129,7 +129,7 @@ describe("runner discard choice plan", () => {
 
   it("protects reviewed flatline prevention only under confirmed danger", () => {
     const arasaka = {
-      definitionId: "onr_v1_078_arasaka-owns-you",
+      definitionId: 290,
     };
 
     expect(runnerEmergencyDiscardKeepApplies("confirmed", arasaka)).toBe(true);
@@ -138,7 +138,7 @@ describe("runner discard choice plan", () => {
     expect(runnerEmergencyDiscardKeepApplies("none", arasaka)).toBe(false);
     expect(
       runnerEmergencyDiscardKeepApplies("confirmed", {
-        definitionId: "onr_v1_139_r-and-d-interface",
+        definitionId: 351,
       }),
     ).toBe(false);
   });

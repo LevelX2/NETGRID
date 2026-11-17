@@ -15,8 +15,8 @@ import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfol
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { buildAiDecisionInputDto } from "../input-dto";
 
-const RASMIN = "onr_proteus_070_rasmin-bridger";
-const HOMING = "onr_proteus_025_homing-missile";
+const RASMIN = 128;
+const HOMING = 83;
 const decks = Object.fromEntries(
   (["corp", "runner"] as const).map((side) => {
     const id =
@@ -41,7 +41,7 @@ const fixedTraceCorpDeck = {
   ...decks.corp!,
   id: `${decks.corp!.id}-fixed-trace`,
   cards: decks.corp!.cards.map((c) =>
-    c.id === HOMING ? { ...c, id: "onr_v1_228_cinderella" } : c,
+    c.id === HOMING ? { ...c, id: 440 } : c,
   ),
 };
 function act(
@@ -91,13 +91,13 @@ function fixture(
     .withRunnerCredits(runnerCredits);
   if (kind === "pass_tax")
     f.withCorpRemoteRoot("hq", RASMIN)
-      .withCorpIceOnServer("hq", "onr_proteus_012_bug-zapper")
-      .withCorpIceOnServer("hq", "onr_proteus_017_credit-blocks")
-      .withCorpIceOnServer("hq", "onr_proteus_021_dog-pile");
+      .withCorpIceOnServer("hq", 70)
+      .withCorpIceOnServer("hq", 75)
+      .withCorpIceOnServer("hq", 79);
   else
     f.withCorpIceOnServer(
       "hq",
-      kind === "fixed_trace" ? "onr_v1_228_cinderella" : HOMING,
+      kind === "fixed_trace" ? 440 : HOMING,
     );
   s.corp.clicks = 0;
   s = act(s, "corp", "corp.end_turn");
@@ -312,7 +312,7 @@ it("prices trace ties correctly and rezzes positive repeatable trace pressure ag
 it("includes an affordable visible breaker and does not certify a blind trace", () => {
   const s = fixture("trace", 20);
   RealEngineFixtureBuilder.forState(s).withRunnerProgramInstalled(
-    "onr_proteus_079_big-frackin-gun",
+    137,
   );
   const quote = getPlayerView(s, "corp").servers.find((x) => x.id === "hq")!
     .ice[0]!.currentTraceIceRezQuotes;

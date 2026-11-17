@@ -86,7 +86,7 @@ describe("match d0f6 partial-break mitigation", () => {
       const input = loadCapture(index!).input;
       const ice = currentEncounteredIceCard(input)!;
       const breaker = input.playerView.own.rig!.find(
-        (c) => c.definitionId === "onr_v1_040_loony-goon",
+        (c) => c.definitionId === 252,
       )!;
       const result = currentEncounterMitigationForBreaker(
         input,
@@ -109,7 +109,7 @@ describe("match d0f6 partial-break mitigation", () => {
     const input = loadCapture(77).input;
     const ice = currentEncounteredIceCard(input)!;
     const breaker = input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_v1_040_loony-goon",
+      (c) => c.definitionId === 252,
     )!;
     const continueAction = input.legalActions.find(
       (a) => a.payload?.encounterContinue === true,
@@ -144,7 +144,7 @@ describe("match d0f6 partial-break mitigation", () => {
     const input = loadCapture(156).input;
     const ice = currentEncounteredIceCard(input)!;
     const breaker = input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_v1_040_loony-goon",
+      (c) => c.definitionId === 252,
     )!;
     input.playerView.own.rig = [breaker];
     expect(
@@ -165,16 +165,16 @@ describe("match d0f6 partial-break mitigation", () => {
     ).toBe(0);
   });
   it.each([
-    "onr_v1_007_blink",
-    "onr_v1_005_bartmoss-memorial-icebreaker",
-    "onr_proteus_088_fubar",
+    219,
+    217,
+    146,
   ])(
     "does not label the unresolved self-cost of %s as guaranteed mitigation",
     (definitionId) => {
       const input = loadCapture(156).input;
       const ice = currentEncounteredIceCard(input)!;
       const breaker = input.playerView.own.rig!.find(
-        (c) => c.definitionId === "onr_v1_040_loony-goon",
+        (c) => c.definitionId === 252,
       )!;
       breaker.definitionId = definitionId;
       breaker.subtypes = ["icebreaker"];
@@ -193,7 +193,7 @@ describe("match d0f6 partial-break mitigation", () => {
     const input = loadCapture(156).input;
     const ice = currentEncounteredIceCard(input)!;
     const breaker = input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_v1_040_loony-goon",
+      (c) => c.definitionId === 252,
     )!;
     ice.effectiveRunQuote!.breakSubroutineAdditionalCostPerSubroutine = 2;
     input.playerView.own.credits = 0;
@@ -220,7 +220,7 @@ describe("match d0f6 partial-break mitigation", () => {
     const input = loadCapture(77).input;
     const ice = currentEncounteredIceCard(input)!;
     const breaker = input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_v1_040_loony-goon",
+      (c) => c.definitionId === 252,
     )!;
     const action = input.legalActions.find(
       (a) => a.payload?.encounterContinue === true,
@@ -244,8 +244,8 @@ describe("match d0f6 partial-break mitigation", () => {
     expect(assess).toThrow("missing_action_semantics");
   });
   it.each([
-    ["onr_v1_280_zombie", 6, 4, 2],
-    ["onr_proteus_015_colonel-failure", 8, 6, 2],
+    [492, 6, 4, 2],
+    [73, 8, 6, 2],
   ] as const)(
     "proves the complete mitigation sequence with Engine actions for %s",
     (iceDefinitionId, credits, pumps, breaks) => {
@@ -286,8 +286,8 @@ describe("match d0f6 partial-break mitigation", () => {
     },
   );
   it.each([
-    ["onr_v1_280_zombie", 6, 4, 2],
-    ["onr_proteus_015_colonel-failure", 8, 6, 2],
+    [492, 6, 4, 2],
+    [73, 8, 6, 2],
   ] as const)(
     "executes the entire AI-owned mitigation for %s",
     (iceDefinitionId, credits, expectedPumps, expectedBreaks) => {
@@ -387,13 +387,13 @@ function applyMatching(
 }
 
 function mechanismEncounter(
-  iceDefinitionId: string,
+  iceDefinitionId: number,
   credits: number,
 ): GameState {
   const programs = [
-    "onr_v1_040_loony-goon",
-    "onr_v1_039_krash",
-    "onr_v1_016_cyfermaster",
+    252,
+    251,
+    228,
   ];
   const snapshot = JSON.parse(
     readFileSync(

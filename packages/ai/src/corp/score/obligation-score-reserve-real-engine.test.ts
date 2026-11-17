@@ -33,17 +33,17 @@ function fixture(credits: number, clicks: number, terminal = false): GameState {
     agendaPointsToWin: 7, runnerDeck, corpDeck });
   state = step(state, (a) => a.type === "mandatory_draw");
   RealEngineFixtureBuilder.forState(state)
-    .withCorpRemoteRoot("remote_1", "onr_v1_220_tycho-extension", 4)
-    .withCorpRemoteRoot("remote_2", "onr_v1_308_acme-savings-and-loan")
+    .withCorpRemoteRoot("remote_1", 432, 4)
+    .withCorpRemoteRoot("remote_2", 520)
     .withCorpHqSize(0)
-    .withCorpCardInHq(terminal ? "onr_v1_193_corporate-coup" : "onr_v1_215_security-net-optimization");
+    .withCorpCardInHq(terminal ? 405 : 427);
   state = step(state, (a) => a.type === "score_agenda");
   const loan = getLegalActions(state, "corp").find((a) => a.type === "rez_card" && a.source.includes("acme-savings-and-loan"));
   expect(loan).toBeDefined();
   state = apply(state, loan!);
   expect(getPlayerView(state, "corp").own.agendaPoints).toBe(3);
   if (terminal) {
-    RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot("remote_3", "onr_v1_215_security-net-optimization", 5);
+    RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot("remote_3", 427, 5);
     state = step(state, (a) => a.type === "score_agenda" && a.payload?.selectedServerId === "archives");
     expect(getPlayerView(state, "corp").own.agendaPoints).toBe(6);
   }
@@ -55,11 +55,11 @@ function fixture(credits: number, clicks: number, terminal = false): GameState {
   state = step(state, (a) => a.type === "end_turn");
   state = step(state, (a) => a.type === "mandatory_draw");
   RealEngineFixtureBuilder.forState(state).withCorpHqSize(0)
-    .withCorpCardInHq(terminal ? "onr_v1_374_washington-d-c-city-grid" : "onr_v1_193_corporate-coup")
-    .withCorpIceOnServer("rd", "onr_v1_245_fire-wall")
+    .withCorpCardInHq(terminal ? 586 : 405)
+    .withCorpIceOnServer("rd", 457)
     .withCorpCredits(credits).withRunnerCredits(5)
-    .withRunnerProgramInstalled("onr_proteus_079_big-frackin-gun")
-    .withRunnerProgramInstalled("onr_proteus_095_skeleton-passkeys");
+    .withRunnerProgramInstalled(137)
+    .withRunnerProgramInstalled(153);
   state.corp.clicks = clicks;
   state.runner.memoryUsed = 2;
   return state;

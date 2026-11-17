@@ -1058,7 +1058,7 @@ export function scoreProjectForCandidate(
 }
 
 export function corpAgendaRecyclesHqAgendasIntoRd(
-  agendaDefinitionId: string,
+  agendaDefinitionId: number,
 ): boolean {
   return (
     AI_HINTS_BY_CARD.get(agendaDefinitionId)?.strategySupportPairs?.some(
@@ -1787,7 +1787,7 @@ export function corpScoreHorizonCertificationIsCurrent(
 }
 
 export function corpScoreProjectId(
-  agendaInstanceOrDefinitionId: string,
+  agendaInstanceOrDefinitionId: number,
   serverId: string | undefined,
 ): string {
   return `agenda:${agendaInstanceOrDefinitionId}:${serverId ?? "unbound"}`;

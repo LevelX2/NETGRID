@@ -64,9 +64,9 @@ const EXPECTED_FAMILIES = [
   "virusCounter",
 ] as const satisfies readonly ProspectiveCapabilityFamily[];
 
-function spec(id: string, title: string, side: "runner" | "corp" = "runner") {
+function spec(id: CardDefinitionId, title: string, side: "runner" | "corp" = "runner") {
   const value = minimalCardSpec();
-  value.identity.cardDefinitionId = id as CardDefinitionId;
+  value.identity.cardDefinitionId = id;
   value.identity.title = title;
   value.identity.side = side;
   value.identity.cardType = side === "runner" ? "program" : "asset";
@@ -141,7 +141,7 @@ describe("compileProspectiveCapabilities", () => {
   });
 
   it("compiles Broker abilities, shared source limit, and its static initial condition", () => {
-    const broker = spec("stress_broker", "Broker");
+    const broker = spec(930, "Broker");
     broker.engine.abilities = [
       {
         ...keyed("store_credits"),
@@ -197,7 +197,7 @@ describe("compileProspectiveCapabilities", () => {
     const withdraw = byKey(broker, "withdraw_credits");
     expect(store.identity).toMatchObject({
       kind: "keyed",
-      canonicalCapabilityId: "stress_broker:store_credits",
+      canonicalCapabilityId: "930:store_credits",
     });
     expect(descriptorValue(store, ".costs")).toEqual([
       { kind: "action", amount: 1 },
@@ -225,7 +225,7 @@ describe("compileProspectiveCapabilities", () => {
   });
 
   it("keeps Loan from Chiba transition outcome and three liabilities separate", () => {
-    const loan = spec("stress_loan", "Loan from Chiba");
+    const loan = spec(931, "Loan from Chiba");
     loan.engine.lifecycle = {
       on_install: [
         {
@@ -316,12 +316,12 @@ describe("compileProspectiveCapabilities", () => {
     );
     expectUnique(liabilities.map((entry) => entry.sourcePath));
     expect(byKey(loan, "trash_at_end_of_turn").identity).toMatchObject({
-      canonicalCapabilityId: "stress_loan:trash_at_end_of_turn",
+      canonicalCapabilityId: "931:trash_at_end_of_turn",
     });
   });
 
   it("keeps Black Widow's install binding abstract and its bonus scoped", () => {
-    const widow = spec("stress_black_widow", "Black Widow");
+    const widow = spec(932, "Black Widow");
     widow.engine.installTargetBinding = {
       ...keyed("bind_ice"),
       kind: "choose_installed_ice_on_install",
@@ -384,7 +384,7 @@ describe("compileProspectiveCapabilities", () => {
   });
 
   it("compiles Morphing Tool's unselected install choice and later subtype change", () => {
-    const morphing = spec("stress_morphing_tool", "Morphing Tool");
+    const morphing = spec(933, "Morphing Tool");
     morphing.engine.installTargetBinding = {
       ...keyed("choose_initial_subtype"),
       kind: "choose_icebreaker_subtype_on_install",
@@ -433,7 +433,7 @@ describe("compileProspectiveCapabilities", () => {
   });
 
   it("keeps Sneak Preview at the hidden-zone choice boundary", () => {
-    const sneak = spec("stress_sneak_preview", "Sneak Preview");
+    const sneak = spec(934, "Sneak Preview");
     sneak.identity.cardType = "event";
     sneak.engine.characteristics.playCost = { kind: "fixed", credits: 0 };
     sneak.engine.characteristics.numeric = {
@@ -491,7 +491,7 @@ describe("compileProspectiveCapabilities", () => {
   });
 
   it("covers Data Masons, Digiconda, Virus Test Site, Data Fort Reclamation, and Roving Submarine families", () => {
-    const dataMasons = spec("stress_data_masons", "Data Masons", "corp");
+    const dataMasons = spec(935, "Data Masons", "corp");
     dataMasons.engine.modifiers = [
       {
         kind: "rez_cost",
@@ -530,7 +530,7 @@ describe("compileProspectiveCapabilities", () => {
     expect(descriptorValue(strengthIncrease!, ".operation")).toBe("increase");
     expect(descriptorValue(strengthIncrease!, ".amount")).toBe(1);
 
-    const digiconda = spec("stress_digiconda", "Digiconda", "corp");
+    const digiconda = spec(936, "Digiconda", "corp");
     digiconda.identity.cardType = "ice";
     digiconda.engine.characteristics.numeric.rezCost = 6;
     digiconda.engine.characteristics.numeric.trashCost = null;
@@ -567,7 +567,7 @@ describe("compileProspectiveCapabilities", () => {
       ),
     ).toBe(1);
 
-    const virus = spec("stress_virus_test_site", "Virus Test Site", "corp");
+    const virus = spec(937, "Virus Test Site", "corp");
     virus.engine.advanceable = { while: "installed_before_and_after_rez" };
     virus.engine.accessEffects = [
       {
@@ -665,7 +665,7 @@ describe("compileProspectiveCapabilities", () => {
     ).toEqual(originalIds);
 
     const reclamation = spec(
-      "stress_data_fort_reclamation",
+      938,
       "Data Fort Reclamation",
       "corp",
     );
@@ -707,7 +707,7 @@ describe("compileProspectiveCapabilities", () => {
     ]);
     expect(canonicalSerialize(score)).not.toMatch(/serverInstance|hqCardId/);
 
-    const roving = spec("stress_roving_submarine", "Roving Submarine", "corp");
+    const roving = spec(939, "Roving Submarine", "corp");
     roving.engine.installCapabilities = [
       {
         kind: "install_only_inside_subsidiary_data_fort",
@@ -772,7 +772,7 @@ describe("compileProspectiveCapabilities", () => {
   });
 
   it("is deterministic, JSON roundtrippable, deeply frozen, cache-stable, and side-independent", () => {
-    const first = spec("stress_determinism", "Determinism");
+    const first = spec(940, "Determinism");
     first.engine.modifiers = [
       {
         kind: "ice_strength",
@@ -818,7 +818,7 @@ describe("compileProspectiveCapabilities", () => {
   });
 
   it("derives changed mechanics and keys instead of using card-specific tables", () => {
-    const first = spec("stress_generic_first", "Generic A");
+    const first = spec(941, "Generic A");
     first.engine.modifiers = [
       {
         kind: "ice_strength",
@@ -830,7 +830,7 @@ describe("compileProspectiveCapabilities", () => {
         appliesTo: { side: "corp", cardType: "ice" },
       },
     ];
-    const second = spec("stress_generic_second", "Generic B");
+    const second = spec(942, "Generic B");
     second.engine.modifiers = [
       {
         kind: "ice_strength",
@@ -854,7 +854,7 @@ describe("compileProspectiveCapabilities", () => {
   });
 
   it("keeps dynamic transition effects conservative and compiles exact cleanup obligations", () => {
-    const dynamic = spec("stress_dynamic_install", "Dynamic Install");
+    const dynamic = spec(943, "Dynamic Install");
     dynamic.engine.lifecycle = {
       on_install: [
         {
@@ -870,7 +870,7 @@ describe("compileProspectiveCapabilities", () => {
       expect.objectContaining({ resolution: "requires_engine_quote" }),
     ]);
 
-    const cleanup = spec("stress_cleanup", "Cleanup", "corp");
+    const cleanup = spec(944, "Cleanup", "corp");
     cleanup.engine.leavePlayCleanup = [
       {
         kind: "trash_agenda_or_node_if_fort_over_capacity",
@@ -887,7 +887,7 @@ describe("compileProspectiveCapabilities", () => {
     ]);
 
     const rezOnInstall = spec(
-      "stress_rez_on_install",
+      945,
       "Rez on install",
       "corp",
     );
@@ -909,7 +909,7 @@ describe("compileProspectiveCapabilities", () => {
   });
 
   it("clones planning annotations and invalidates only relevant cache fingerprints", () => {
-    const annotated = spec("stress_annotations", "Annotations");
+    const annotated = spec(946, "Annotations");
     annotated.engine.abilities = [
       {
         ...keyed("gain"),
@@ -983,7 +983,7 @@ describe("compileProspectiveCapabilities", () => {
   });
 
   it("fails before derivation for unknown runtime engine fields", () => {
-    const malformed = spec("stress_malformed", "Malformed");
+    const malformed = spec(947, "Malformed");
     (malformed.engine as unknown as Record<string, unknown>).unknownMechanic = {
       amount: 1,
     };

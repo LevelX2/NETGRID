@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import {
   assertCardRegistryPlanningContext,
   assertCardRegistryRulesContext,
@@ -72,7 +73,7 @@ export type CardSpecPlanningCompatibilityCard = DeepReadonly<{
 }>;
 export type Cs06PlanningCompatibilityCard = CardSpecPlanningCompatibilityCard;
 
-const expectedCs06Ids = new Set<string>(CS06_CARD_DEFINITION_IDS);
+const expectedCs06Ids = new Set<CardDefinitionId>(CS06_CARD_DEFINITION_IDS);
 const cachedCardSpecPlanningCards = deepFreezeSerializable(
   planningCardViews(CARD_REGISTRY).map((planning) => {
     const spec = cardSpecForDefinitionId(
@@ -102,7 +103,7 @@ const cachedCardSpecPlanningCards = deepFreezeSerializable(
 const cachedCardSpecPlanningCardsById = new Map(
   cachedCardSpecPlanningCards.map((entry) => [entry.definition.id, entry]),
 );
-export const cardSpecPlanningCardByDefinitionId = (definitionId: string) =>
+export const cardSpecPlanningCardByDefinitionId = (definitionId: CardDefinitionId) =>
   cachedCardSpecPlanningCardsById.get(definitionId);
 export const cardSpecPlanningCards = () => cachedCardSpecPlanningCards;
 
@@ -118,7 +119,7 @@ const cachedCs06PlanningCardsById = new Map(
 );
 
 /** Bound, serializable planning read model; no CardSpec or registry handle. */
-export const cs06PlanningCardByDefinitionId = (definitionId: string) =>
+export const cs06PlanningCardByDefinitionId = (definitionId: CardDefinitionId) =>
   cachedCs06PlanningCardsById.get(definitionId);
 export const cs06PlanningCards = () => cachedCs06PlanningCards;
 export { CS06_CARD_DEFINITION_IDS } from "../cs06-slice";

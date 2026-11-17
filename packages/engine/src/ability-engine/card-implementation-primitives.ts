@@ -42,7 +42,7 @@ export type CardImplementationEffectKind =
 
 type PrimitivePayload = NonNullable<LegalAction["payload"]>;
 
-const CARD_SPEC_DEFINITION_IDS = new Set<string>(
+const CARD_SPEC_DEFINITION_IDS = new Set<CardDefinitionId>(
   cardSpecRuntimeDefinitionIds(),
 );
 

@@ -9,8 +9,8 @@ import { runnerActionDispositions } from "../../runtime/plan-first-live-runtime"
 
 describe("exact Runner coverage-copy ownership", () => {
   it.each([
-    ["onr_v1_014_codecracker", "breaker_code_gate"],
-    ["onr_proteus_083_corrosion", "breaker_wall"],
+    [226, "breaker_code_gate"],
+    [141, "breaker_wall"],
   ] as const)(
     "defers an unselected %s copy without changing the selected route",
     (definitionId, requiredRole) => {
@@ -185,8 +185,8 @@ describe("exact Runner coverage-copy ownership", () => {
         false,
       );
       domain.remoteContests.pop();
-      candidates[0]!.sourceDefinitionId = "onr_v1_039_krash";
-      input.playerView.own.gripOrHq[0]!.definitionId = "onr_v1_039_krash";
+      candidates[0]!.sourceDefinitionId = 251;
+      input.playerView.own.gripOrHq[0]!.definitionId = 251;
       // A different answer is not proven interchangeable. Do not conceal that
       // ownership defect with a blanket unowned-action disposition.
       expect(inspect()).toEqual([]);

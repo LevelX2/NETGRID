@@ -16,7 +16,7 @@ export type CorpHostedCreditBankProfile = Readonly<{
 
 /** Only a direct, unconditional liquid payout; no pool, threshold or choice. */
 export function corpUnconditionalScoreCreditGain(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): number | undefined {
   const card = planningCard(definitionId);
   const effect = card?.planning.engine.scoredAgenda;
@@ -47,7 +47,7 @@ export function corpUnconditionalScoreCreditGain(
 }
 
 export function corpConditionalScoreCreditProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpConditionalScoreCreditProfile | undefined {
   const planning = planningCard(definitionId);
   const scoredAgenda = planning?.planning.engine.scoredAgenda;
@@ -83,7 +83,7 @@ export function corpImmediateEconomyGainFromHint(
 }
 
 export function corpHostedCreditBankProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpHostedCreditBankProfile | undefined {
   const planning = planningCard(definitionId);
   if (planning?.planning.side !== "corp") return undefined;
@@ -164,7 +164,7 @@ export function corpHostedCreditBankProfile(
 
 /** A plain rez-created pool with a single-click, otherwise free current-turn payout. */
 export function corpRezHostedCreditPayoutProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
   installing = false,
 ):
   | { poolCredits: number; payoutCredits: number; trashesWhenEmpty: boolean }
@@ -230,7 +230,7 @@ export function corpRezHostedCreditPayoutProfile(
 
 /** A plain score-created pool with a single-click, otherwise free payout. */
 export function corpScoreHostedCreditPayoutProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): { poolCredits: number; payoutCredits: number } | undefined {
   const planning = planningCard(definitionId);
   const engine = planning?.planning.engine;
@@ -276,7 +276,7 @@ export function corpScoreHostedCreditPayoutProfile(
     : undefined;
 }
 
-function planningCard(definitionId: string | undefined) {
+function planningCard(definitionId: number | undefined) {
   return definitionId
     ? cardSpecPlanningCardByDefinitionId(definitionId)
     : undefined;

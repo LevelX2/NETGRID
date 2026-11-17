@@ -23,7 +23,7 @@ export type ProgressAwareAlternativeSnapshot = {
   semanticActionType: string;
   selected?: boolean;
   sourceKind?: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   scoreKeys: string[];
   hardGates: string[];
   targetContextStatus: string;

@@ -447,13 +447,13 @@ function runnerHandSetAsideStatus(
     payload.abilityId === "set_aside_from_grip" &&
     payload.abilityFamily === "hosting-counters" &&
     payload.effectKind === "counter_change" &&
-    typeof payload.sourceDefinitionId === "string" &&
+    typeof payload.sourceDefinitionId === "number" &&
     (candidate.sourceDefinitionId === undefined ||
       candidate.sourceDefinitionId === payload.sourceDefinitionId) &&
     typeof target === "string" &&
     target.length > 0 &&
     target !== source &&
-    typeof payload.targetCardDefinitionId === "string" &&
+    typeof payload.targetCardDefinitionId === "number" &&
     payload.targetCardDefinitionId.length > 0 &&
     action.targetRequirements.some(
       (requirement) =>
@@ -573,7 +573,7 @@ export function corpZoneTransitionProjectionStatus(
     typeof sourceCardInstanceId === "string" &&
     sourceCardInstanceId === action.source &&
     sourceCardInstanceId === candidate.sourceCardInstanceId &&
-    typeof sourceDefinitionId === "string" &&
+    typeof sourceDefinitionId === "number" &&
     (candidate.sourceDefinitionId === undefined ||
       sourceDefinitionId === candidate.sourceDefinitionId) &&
     stateVersion === action.expiresAtStateVersion &&

@@ -40,7 +40,7 @@ function capture() {
 }
 
 function preventionInput(
-  definitionId: string,
+  definitionId: number,
   damageType: "net" | "meat" | "core",
 ) {
   const meatOnly = definitionId.endsWith("_armored-fridge");
@@ -55,19 +55,19 @@ function preventionInput(
     hand: [
       card,
       visibleCard("expensive-sentry", {
-        definitionId: "onr_v1_066_snowball",
+        definitionId: 278,
         type: "program",
         installCost: 10,
         memoryCost: 1,
       }),
       visibleCard("expensive-economy", {
-        definitionId: "onr_v1_011_cloak",
+        definitionId: 223,
         type: "program",
         installCost: 7,
         memoryCost: 1,
       }),
       visibleCard("expensive-wall", {
-        definitionId: "onr_v1_021_dwarf",
+        definitionId: 233,
         type: "program",
         installCost: 6,
         memoryCost: 1,
@@ -79,10 +79,10 @@ function preventionInput(
   });
   const source =
     damageType === "meat"
-      ? "onr_v1_307_urban-renewal"
+      ? 519
       : damageType === "core"
-        ? "onr_proteus_011_brain-wash"
-        : "onr_proteus_021_dog-pile";
+        ? 69
+        : 79;
   const event: PublicGameEvent = {
     eventId: "actual-damage-kind",
     type: "damage_resolved",
@@ -120,7 +120,7 @@ describe("type-bound prevention development", () => {
     );
     const evaluation = evaluateRunnerHandDevelopment({
       input: fixture.input,
-    }).find((e) => e.definitionId === "onr_v1_121_armored-fridge");
+    }).find((e) => e.definitionId === 333);
     expect(evaluation).toMatchObject({
       developmentRole: "defense_support",
       currentNeed: "none",
@@ -130,7 +130,7 @@ describe("type-bound prevention development", () => {
     const chosen = fixture.input.legalActions.find(
       (a) => a.actionId === result.actionId,
     );
-    expect(chosen?.source).toBe("runner_onr_v1_108_score_1");
+    expect(chosen?.source).toBe("runner_320_1");
     expect(
       result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.defense_and_recovery");
@@ -151,13 +151,13 @@ describe("type-bound prevention development", () => {
   it.each(["net", "core"] as const)(
     "keeps the general %s hand buffer while rejecting Fridge",
     (type) => {
-      const input = preventionInput("onr_v1_121_armored-fridge", type);
+      const input = preventionInput(333, type);
       expect(runnerDamageThreatAssessment(input).flatlineRisk.level).toBe(
         "confirmed",
       );
       expect(
         evaluateRunnerHandDevelopment({ input }).find(
-          (e) => e.definitionId === "onr_v1_121_armored-fridge",
+          (e) => e.definitionId === 333,
         ),
       ).toMatchObject({ currentNeed: "none" });
     },
@@ -179,7 +179,7 @@ describe("type-bound prevention development", () => {
         actor: "corp",
         targetSide: "runner",
         damageType: "meat",
-        sourceDefinitionId: "onr_v1_307_urban-renewal",
+        sourceDefinitionId: 519,
         damageAmount: 1,
         damageResolved: true,
       },
@@ -188,7 +188,7 @@ describe("type-bound prevention development", () => {
     input.playerView.publicEvents.push(meat);
     expect(
       evaluateRunnerHandDevelopment({ input }).find(
-        (e) => e.definitionId === "onr_v1_121_armored-fridge",
+        (e) => e.definitionId === 333,
       ),
     ).toMatchObject({
       developmentRole: "defense_support",
@@ -210,25 +210,25 @@ describe("type-bound prevention development", () => {
   it.each(["net", "core"] as const)(
     "retains Force Shield's canonical %s scope",
     (type) => {
-      const input = preventionInput("onr_v1_028_force-shield", type);
+      const input = preventionInput(240, type);
       expect(
         evaluateRunnerHandDevelopment({ input }).find(
-          (e) => e.definitionId === "onr_v1_028_force-shield",
+          (e) => e.definitionId === 240,
         ),
       ).toMatchObject({ currentNeed: "acute", deferReason: "none" });
     },
   );
 
   it("rejects Force Shield for pure Meat and consumes every generated scope", () => {
-    const input = preventionInput("onr_v1_028_force-shield", "meat");
+    const input = preventionInput(240, "meat");
     expect(
       evaluateRunnerHandDevelopment({ input }).find(
-        (e) => e.definitionId === "onr_v1_028_force-shield",
+        (e) => e.definitionId === 240,
       )?.currentNeed,
     ).toBe("none");
     expect(
       runnerEffectsDamagePreventionTypes(
-        AI_HINTS_BY_CARD.get("onr_v1_028_force-shield")?.effects,
+        AI_HINTS_BY_CARD.get(240)?.effects,
       ),
     ).toEqual(["core", "net"]);
     for (const hint of AI_HINTS_BY_CARD.values())

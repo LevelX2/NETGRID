@@ -75,7 +75,7 @@ describe("Proteus Fetal AI install plan coverage", () => {
     expect(summary.runtimeFailures).toEqual([]);
     expect(summary.replayOk).toBe(true);
     const admittedAmbushEvidence =
-      "plan_scheduler:assess:validated:plan:corp.ambush_and_bluff:ambush%3Acorp_onr_proteus_004_fetal-ai_1%3Asetup%3Anew_remote";
+      "plan_scheduler:assess:validated:plan:corp.ambush_and_bluff:ambush%3Acorp_62_1%3Asetup%3Anew_remote";
     expect(
       summary.actionSequence.some((entry) =>
         entry.evidence.includes(admittedAmbushEvidence),

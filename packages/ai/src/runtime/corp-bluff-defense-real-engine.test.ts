@@ -16,10 +16,10 @@ import { buildAiDecisionInput } from "./ai-decision-input";
 import { corpRdRecyclingSignals } from "../corp/ambush/corp-access-zone-preparation";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 
-const BEL = "onr_proteus_054_bel-digmo-antibody";
-const DOG = "onr_proteus_021_dog-pile";
-const RIDDLER = "onr_proteus_034_riddler";
-const FUBAR = "onr_proteus_088_fubar";
+const BEL = 112;
+const DOG = 79;
+const RIDDLER = 92;
+const FUBAR = 146;
 const decks = Object.fromEntries(
   (["corp", "runner"] as const).map((side) => {
     const id =
@@ -58,7 +58,7 @@ function fixture(ice = DOG, credits = 6) {
     .withCorpRemoteRoot("remote_1", BEL)
     .withCorpIceOnServer("remote_1", ice)
     .withRunnerCredits(6)
-    .withRunnerProgramInstalled("onr_proteus_093_redecorator");
+    .withRunnerProgramInstalled(151);
   state.turnSerial = 12;
   return state;
 }
@@ -307,8 +307,8 @@ it("installs the empty-R&D rescue before score funding, then recycles after the 
   let state = fixture();
   RealEngineFixtureBuilder.forState(state)
     .withCorpCardInHq(BEL)
-    .withCorpCardInHq("onr_proteus_002_charity-takeover")
-    .withCorpCardInHq("onr_proteus_005_marked-accounts")
+    .withCorpCardInHq(60)
+    .withCorpCardInHq(63)
     .withCorpCredits(2);
   for (const id of state.corp.rd) {
     state.corp.archives.push(id);

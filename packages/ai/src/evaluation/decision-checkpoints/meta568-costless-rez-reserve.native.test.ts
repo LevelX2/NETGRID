@@ -93,7 +93,7 @@ it("executes that same native rez at the existing Defense owner", () => {
     input.legalActions.find((a) => a.actionId === result.actionId),
   ).toMatchObject({
     type: "rez_ice",
-    source: "corp_onr_proteus_014_chihuahua_1",
+    source: "corp_72_1",
     costs: [{ credits: 0 }],
   });
   expect(result.decisionDebug?.planFirstDecision).toMatchObject({
@@ -112,7 +112,7 @@ it.each(["missing", "wrong_bank", "stale"] as const)(
     const { input } = fixture();
     const card = input.playerView.servers
       .find((s) => s.id === "rd")!
-      .ice.find((c) => c.definitionId === "onr_proteus_014_chihuahua")!;
+      .ice.find((c) => c.definitionId === 72)!;
     const post = card.effectivePostRezRunQuote;
     if (post?.complete !== true)
       throw new Error("Missing native complete quote");

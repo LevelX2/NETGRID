@@ -52,13 +52,13 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+              "runner.activated_card_ability.runner_366_1.runner_366_1.activated.onr_v1_154_broker:store_credits",
           },
         ],
         forbiddenActions: [
           {
             actionId:
-              "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.0",
+              "runner.activated_card_ability.runner_366_1.runner_366_1.activated.0",
           },
         ],
         planExecution: {
@@ -79,13 +79,13 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
         "plan_priority_class:P4",
-        "plan_scheduler:assess:validated:plan:runner.credit_bank:runner_onr_v1_154_broker_1",
+        "plan_scheduler:assess:validated:plan:runner.credit_bank:runner_366_1",
       ]),
     );
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.selectedPlan,
     ).toMatchObject({
-      instanceId: "plan:runner.credit_bank:runner_onr_v1_154_broker_1",
+      instanceId: "plan:runner.credit_bank:runner_366_1",
       moduleId: "runner.credit_bank",
     });
   });
@@ -97,7 +97,7 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
       result.input.legalActions.some(
         (action) =>
           action.actionId ===
-          "runner.install_card.runner_onr_proteus_131_bargain-with-viacox_1.runner_onr_proteus_131_bargain-with-viacox_1",
+          "runner.install_card.runner_189_1.runner_189_1",
       ),
     ).toBe(true);
   });
@@ -116,7 +116,7 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "runner.install_card.runner_onr_v1_151_aujourdoui_1.runner_onr_v1_151_aujourdoui_1",
+              "runner.install_card.runner_363_1.runner_363_1",
           },
         ],
         planExecution: {

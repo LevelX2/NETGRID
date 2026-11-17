@@ -23,7 +23,7 @@ describe("current and future encounter share their break budget", () => {
     // The old capture predates this Engine field. The separate Engine view
     // regression proves this quote for Krash's four encounter-only pumps.
     cp.input.playerView.own.rig.find(
-      (c: { definitionId: string }) => c.definitionId === "onr_v1_039_krash",
+      (c: { definitionId: number }) => c.definitionId === 251,
     ).strengthAfterEncounter = 0;
     const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
     input.playerView.own.credits = credits;

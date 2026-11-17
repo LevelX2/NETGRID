@@ -172,7 +172,7 @@ describe("corp score defense continuity", () => {
         {
           instanceId: "shock-r",
           known: true,
-          definitionId: "onr_v1_268_shock-r",
+          definitionId: 480,
           type: "ice",
           rezzed: false,
           effectiveRezCostQuote: {
@@ -190,14 +190,14 @@ describe("corp score defense continuity", () => {
           effectivePostRezRunQuote: {
             context: "installed_post_rez",
             cardId: "shock-r",
-            iceDefinitionId: "onr_v1_268_shock-r",
+            iceDefinitionId: 480,
             targetServerId: "remote_1",
             projectedServerId: "remote_1",
             expiresAtStateVersion: 42,
             complete: true,
             effectiveRunQuote: {
               iceInstanceId: "shock-r",
-              iceDefinitionId: "onr_v1_268_shock-r",
+              iceDefinitionId: 480,
               effectiveStrength: 3,
               subroutines: [
                 {

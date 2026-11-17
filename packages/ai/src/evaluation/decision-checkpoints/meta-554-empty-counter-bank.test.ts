@@ -51,7 +51,7 @@ function project(cp: ReturnType<typeof fixture>, serverId = "remote_1") {
       buildActionCardSemanticProfilesByDefinitionId(),
   }).find(
     (c) =>
-      c.sourceCardInstanceId === "corp_onr_proteus_008_project-zurich_1" &&
+      c.sourceCardInstanceId === "corp_66_1" &&
       c.actionType === "install_card" &&
       input.legalActions.find((a) => a.actionId === c.actionId)?.payload
         ?.serverId === serverId,

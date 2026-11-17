@@ -11,7 +11,7 @@ type PendingChoiceOption = PendingChoice["options"][number];
 type BoundCorpStartOption = Readonly<{
   optionId: string;
   sourceCardInstanceId: string;
-  definitionId: string;
+  definitionId: number;
   drawCount: number;
 }>;
 
@@ -76,7 +76,7 @@ function boundCorpStartOption(
     (card) =>
       card.instanceId === option.value &&
       card.known !== false &&
-      typeof card.definitionId === "string",
+      typeof card.definitionId === "number",
   );
   const profile = corpStartOfTurnOptionalDrawProfile(source?.definitionId);
   return source?.definitionId && profile

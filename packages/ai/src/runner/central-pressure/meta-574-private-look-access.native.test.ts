@@ -64,12 +64,12 @@ it("selects real hand and credit development instead of the falsely boosted info
     decision = chooseAiAction(input);
   expect(decision).toMatchObject({
     actionId:
-      "runner.play_event.runner_onr_classic_042_panzer-run_2.runner_onr_classic_042_panzer-run_2.onr_classic_042_panzer-run:on_play_gain_credits_and_draw",
+      "runner.play_event.runner_46_2.runner_46_2.onr_classic_042_panzer-run:on_play_gain_credits_and_draw",
     fallbackUsed: false,
     timeoutUsed: false,
   });
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.develop_board_and_hand:card%3Arunner_onr_classic_042_panzer-run_2",
+    "plan:runner.develop_board_and_hand:card%3Arunner_46_2",
   );
   expect(input.legalActions.some((a) => a.actionId === decision.actionId)).toBe(
     true,

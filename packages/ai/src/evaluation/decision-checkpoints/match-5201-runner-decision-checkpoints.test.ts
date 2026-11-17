@@ -80,7 +80,7 @@ describe("match 5201 runner decision checkpoints", () => {
     if (!applied.ok) throw new Error("Native checkpoint draw was rejected");
     expect(applied.state.runner.grip).toHaveLength(4);
     expect(applied.state.runner.grip).toContain(
-      "runner_onr_classic_027_early-worm_2",
+      "runner_31_2",
     );
     expect(applied.state.runner.coreDamage).toBe(state.runner.coreDamage);
     expect(applied.state.runner.rig).toEqual(state.runner.rig);

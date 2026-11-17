@@ -19,7 +19,7 @@ import {
 } from "./encounter-printed-nontrace-effects";
 
 function definition(
-  id: string,
+  id: number,
   title: string,
   type: CardDefinition["type"],
   options: Partial<CardDefinition> = {},
@@ -34,7 +34,7 @@ function definition(
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
   options: Partial<CardInstance> = {},
 ): CardInstance {
@@ -136,13 +136,13 @@ function makeHost(
 ): EncounterPrintedNonTraceHost {
   const definitions: Record<string, CardDefinition> = {
     test_ice: definition("test_ice", "Test ICE", "ice"),
-    "onr_v1_250_ice-pick-willie": definition(
-      "onr_v1_250_ice-pick-willie",
+    462: definition(
+      462,
       "Ice Pick Willie",
       "ice",
     ),
-    "onr_v1_272_too-many-doors": definition(
-      "onr_v1_272_too-many-doors",
+    484: definition(
+      484,
       "Secret Spend Compare",
       "ice",
     ),
@@ -325,7 +325,7 @@ describe("encounter printed non-trace effects boundary", () => {
     const legalAction = { payload: {} } as LegalAction;
 
     const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition("onr_classic_013_puzzle", "Puzzle", "ice"),
+      definition: definition(17, "Puzzle", "ice"),
       subroutine: {
         id: "puzzle_etr_trash",
         type: "end_the_run_and_trash_source_at_end_of_turn",
@@ -337,7 +337,7 @@ describe("encounter printed non-trace effects boundary", () => {
     expect(result).toMatchObject({
       handled: true,
       runShouldEnd: true,
-      sourceDefinitionId: "onr_classic_013_puzzle",
+      sourceDefinitionId: 17,
       iceId: "ice_1",
       stateChanged: true,
     });
@@ -347,12 +347,12 @@ describe("encounter printed non-trace effects boundary", () => {
     expect(legalAction.payload).toMatchObject({
       delayedCorpInstalledCardTrashAtTurnEnd: true,
       delayedCorpInstalledCardTrashAtTurnEndId: "ice_1",
-      sourceDefinitionId: "onr_classic_013_puzzle",
+      sourceDefinitionId: 17,
     });
     expect(legalAction.resolvedEffects).toEqual([
       expect.objectContaining({
         kind: "resolve_subroutine",
-        sourceDefinitionId: "onr_classic_013_puzzle",
+        sourceDefinitionId: 17,
         subroutineType: "end_the_run_and_trash_source_at_end_of_turn",
         endedRun: true,
       }),
@@ -693,12 +693,12 @@ describe("encounter printed non-trace effects boundary", () => {
     const state = makeState();
     state.cardInstances.ice_1 = {
       ...state.cardInstances.ice_1!,
-      definitionId: "onr_v1_272_too-many-doors",
+      definitionId: 484,
     };
     const legalAction = { payload: {} } as LegalAction;
     const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
       definition: definition(
-        "onr_v1_272_too-many-doors",
+        484,
         "Secret Spend Compare",
         "ice",
       ),
@@ -739,7 +739,7 @@ describe("encounter printed non-trace effects boundary", () => {
     const legalAction = { payload: {} } as LegalAction;
 
     const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition("onr_classic_009_dumpster", "Dumpster", "ice"),
+      definition: definition(13, "Dumpster", "ice"),
       subroutine: {
         id: "dumpster_deflect",
         type: "deflect_run",
@@ -780,7 +780,7 @@ describe("encounter printed non-trace effects boundary", () => {
     const legalAction = { payload: {} } as LegalAction;
 
     const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition("onr_classic_009_dumpster", "Dumpster", "ice"),
+      definition: definition(13, "Dumpster", "ice"),
       subroutine: {
         id: "dumpster_deflect",
         type: "deflect_run",
@@ -807,9 +807,9 @@ describe("encounter printed non-trace effects boundary", () => {
 
   it("opens and resolves a paid Deflector target choice", () => {
     const state = makeState();
-    state.cardInstances.ice_1!.definitionId = "onr_classic_010_entrapment";
+    state.cardInstances.ice_1!.definitionId = 14;
     const entrapmentDefinition = definition(
-      "onr_classic_010_entrapment",
+      14,
       "Entrapment",
       "ice",
     );
@@ -884,7 +884,7 @@ describe("encounter printed non-trace effects boundary", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;
     const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition("onr_classic_014_trapdoor", "Trapdoor", "ice"),
+      definition: definition(18, "Trapdoor", "ice"),
       subroutine: {
         id: "trapdoor_deflect",
         type: "deflect_run",

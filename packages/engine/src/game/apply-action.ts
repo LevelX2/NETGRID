@@ -166,7 +166,8 @@ function choiceContinuation(
       choice.sourceCardInstanceId === continuation.sourceCardInstanceId &&
       choice.sourceCardDefinitionId === continuation.sourceCardDefinitionId &&
       continuation.sourceCardInstanceId.length > 0 &&
-      continuation.sourceCardDefinitionId.length > 0 &&
+      Number.isSafeInteger(continuation.sourceCardDefinitionId) &&
+      continuation.sourceCardDefinitionId > 0 &&
       continuation.drawnCardInstanceIds.length > 0 &&
       new Set(continuation.drawnCardInstanceIds).size ===
         continuation.drawnCardInstanceIds.length &&
@@ -195,7 +196,8 @@ function choiceContinuation(
       continuation.originActionId === legalAction.actionId &&
       continuation.createdAtStateVersion === choice.stateVersion &&
       continuation.sourceCardInstanceId.length > 0 &&
-      continuation.sourceCardDefinitionId.length > 0 &&
+      Number.isSafeInteger(continuation.sourceCardDefinitionId) &&
+      continuation.sourceCardDefinitionId > 0 &&
       continuation.sourceCapabilityKey.length > 0 &&
       Number.isSafeInteger(continuation.temporaryCredits) &&
       continuation.temporaryCredits > 0 &&
@@ -221,7 +223,8 @@ function choiceContinuation(
       choice.minSelections === 0 &&
       choice.maxSelections === choice.options.length &&
       continuation.sourceCardInstanceId.length > 0 &&
-      continuation.sourceCardDefinitionId.length > 0
+      Number.isSafeInteger(continuation.sourceCardDefinitionId) &&
+      continuation.sourceCardDefinitionId > 0
     )
       return continuation;
     if (
@@ -260,7 +263,8 @@ function choiceContinuation(
     continuation?.family === "corp_fort_capacity_cleanup" &&
     continuation.originActionId === legalAction.actionId &&
     continuation.createdAtStateVersion === choice.stateVersion &&
-    continuation.sourceCardDefinitionId.length > 0 &&
+    Number.isSafeInteger(continuation.sourceCardDefinitionId) &&
+    continuation.sourceCardDefinitionId > 0 &&
     choice.sourceCardDefinitionId === continuation.sourceCardDefinitionId &&
     continuation.candidateCardInstanceIds.length > 1 &&
     new Set(continuation.candidateCardInstanceIds).size ===

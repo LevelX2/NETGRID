@@ -22,9 +22,9 @@ import { boundCorpPunishTraceChoices } from "../corp/punish/punish-trace-binding
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 
-const MANHUNT = "onr_proteus_050_manhunt";
-const MARKED = "onr_proteus_005_marked-accounts";
-const BROKER = "onr_v1_154_broker";
+const MANHUNT = 108;
+const MARKED = 63;
+const BROKER = 366;
 const corpDeck: DeckDefinition = {
   ...DEMO_DECKS.demo_corp_001,
   id: "hidden-node-followup",

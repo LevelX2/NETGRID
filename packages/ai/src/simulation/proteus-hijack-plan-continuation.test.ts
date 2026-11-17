@@ -14,13 +14,13 @@ import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfol
 import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 
-const HIJACK = "onr_proteus_110_hijack";
-const INSTALL_TARGET = "onr_proteus_151_sunburst-cranial-interface";
-const MEMORY_INSTALL_TARGET = "onr_proteus_085_disintegrator";
+const HIJACK = 168;
+const INSTALL_TARGET = 209;
+const MEMORY_INSTALL_TARGET = 143;
 const INSTALLED_PROGRAMS = [
-  "onr_proteus_090_highlighter",
-  "onr_v1_014_codecracker",
-  "onr_v1_021_dwarf",
+  148,
+  226,
+  233,
 ] as const;
 
 describe("Proteus Hijack plan continuation", () => {
@@ -248,7 +248,7 @@ function hijackState(
   runnerDeck: DeckDefinition,
   corpDeck: DeckDefinition,
   installTargetDefinitionId = INSTALL_TARGET,
-  installedProgramDefinitionIds: readonly string[] = [],
+  installedProgramDefinitionIds: readonly number[] = [],
 ): GameState {
   const state = createGameAfterSetup({
     matchId: "proteus-hijack-plan-continuation",
@@ -310,7 +310,7 @@ function hijackState(
   return state;
 }
 
-function runnerCard(state: GameState, definitionId: string) {
+function runnerCard(state: GameState, definitionId: number) {
   const card = Object.values(state.cardInstances).find(
     (candidate) =>
       candidate.owner === "runner" && candidate.definitionId === definitionId,

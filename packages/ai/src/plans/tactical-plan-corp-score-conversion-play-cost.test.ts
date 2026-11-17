@@ -44,7 +44,7 @@ function inputWithProjectedConsultants(
     agendaPoints: 2,
   });
   const consultants = card("consultants", "operation", {
-    definitionId: "onr_v1_300_project-consultants",
+    definitionId: 512,
     ...(playCost ? { playCost } : {}),
   });
   const install: LegalAction = {

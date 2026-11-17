@@ -391,7 +391,7 @@ export function discardKeepScore(
 
 function runnerSaturatedFiniteBurstEconomyPenalty(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): number {
   if (input.side !== "runner") return 0;
   const burstAmount = Math.max(
@@ -417,7 +417,7 @@ function runnerSaturatedFiniteBurstEconomyPenalty(
 
 function runnerImmediateLiquidityKeepBonus(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
   cost: number,
 ): number {
   if (
@@ -435,7 +435,7 @@ function runnerImmediateLiquidityKeepBonus(
 
 function runnerMatchpointCloseoutKeepBonus(params: {
   input: AiDecisionInput;
-  definitionId: string;
+  definitionId: number;
   duplicateCount: number;
   installedSameDefinition: boolean;
 }): number {
@@ -461,7 +461,7 @@ function runnerMatchpointCloseoutKeepBonus(params: {
     : 0;
 }
 
-function runnerCreditPayoutAmount(definitionId: string): number {
+function runnerCreditPayoutAmount(definitionId: number): number {
   return Math.max(
     0,
     ...(AI_HINTS_BY_CARD.get(definitionId)?.effects ?? [])
@@ -490,7 +490,7 @@ function runnerDiscardStrategyIds(input: AiDecisionInput): ReadonlySet<string> {
 
 function runnerCardProvidesVisiblePathUtility(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): boolean {
   if (!runnerHasVisibleIcedPath(input)) return false;
   const effects = AI_HINTS_BY_CARD.get(definitionId)?.effects ?? [];
@@ -505,7 +505,7 @@ function runnerCardProvidesVisiblePathUtility(
 
 function runnerCardProvidesConditionalHqSuccessIceTrash(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   const requiresSuccessfulHqRun = (hint?.conditions ?? []).some(
@@ -558,7 +558,7 @@ function runnerHasDeckBreakerCoverageUnavailableOutsideStack(
 
 function corpConditionalPayoffKeepAdjustment(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
   duplicateCount: number,
 ): { value: number; evidence: string[] } {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
@@ -675,7 +675,7 @@ function corpHasReachableTagSource(input: AiDecisionInput): boolean {
 
 function corpHasReachableCardMatching(
   input: AiDecisionInput,
-  matches: (definitionId: string) => boolean,
+  matches: (definitionId: number) => boolean,
 ): boolean {
   const semanticInput = input as AiDecisionInputWithDeckCapabilities;
   const snapshot = semanticInput.ownDeckSnapshot;
@@ -725,7 +725,7 @@ function corpHasReachableCardWithAnySignal(
 }
 
 function cardHasAnySemanticSignal(
-  definitionId: string,
+  definitionId: number,
   signals: readonly string[],
 ): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
@@ -746,7 +746,7 @@ function cardSemanticSignals(
 /** A retention value, not a certificate of future clicks or a score route. */
 function corpAffordableMatchpointAccelerationSupport(
   input: AiDecisionInput,
-  operationDefinitionId: string,
+  operationDefinitionId: number,
   operationCost: number,
 ): boolean {
   if (!Number.isSafeInteger(operationCost) || operationCost < 0) return false;
@@ -789,7 +789,7 @@ function corpAffordableMatchpointAccelerationSupport(
 
 function corpAdvancementBurstHasVisibleSupport(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
   dependencies: DiscardKeepScoreDependencies,
 ): boolean {
   const profile = corpScoreConversionProfile(definitionId);
@@ -824,7 +824,7 @@ function corpAdvancementBurstHasVisibleSupport(
 
 function corpAgendaOverflowKeepAdjustment(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
   type: string | undefined,
   duplicateCount: number,
   handPressure: CorpHandPressureAssessment | undefined,

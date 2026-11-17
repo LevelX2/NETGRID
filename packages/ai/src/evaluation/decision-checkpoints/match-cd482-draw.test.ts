@@ -68,7 +68,7 @@ it("D29 does not create an unbound second draw plan after the coverage draw with
       .map((event) => event.type),
   ).toEqual(["end_turn", "play_event", "gain_credit", "gain_credit"]);
   const conditionalPointEvent = input.legalActions.find(
-    (action) => action.source === "runner_onr_v1_090_hot-tip-for-wns_1",
+    (action) => action.source === "runner_302_1",
   )!;
   expect(conditionalPointEvent.payload).toMatchObject({
     runnerConditionalAgendaPointQuoteSchema:

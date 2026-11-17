@@ -51,7 +51,7 @@ export type TargetRefInput =
     }
   | {
       kind: "abilitySource";
-      sourceDefinitionId: string;
+      sourceDefinitionId: number;
       abilityId: string;
       evidence?: readonly string[];
     }

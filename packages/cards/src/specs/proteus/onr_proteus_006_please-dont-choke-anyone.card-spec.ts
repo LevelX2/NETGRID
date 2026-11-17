@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_proteus_006_please-dont-choke-anyone",
+      64,
     ),
     title: "Please Don't Choke Anyone",
     side: "corp",

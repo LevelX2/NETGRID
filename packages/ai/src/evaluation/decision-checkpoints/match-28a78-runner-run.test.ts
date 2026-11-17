@@ -32,7 +32,7 @@ function capture(index: number): Capture {
   ) as Capture;
   if (index === 85 || index === 90) {
     bindExplicitZeroPublicStealQuotes(captured.input, [
-      "onr_v1_309_bbs-whispering-campaign",
+      521,
     ]);
   }
   return captured;
@@ -95,10 +95,10 @@ describe("match 28a78 run costs and admission", () => {
         expect(plan?.selectedPlan).toMatchObject({
           moduleId: "runner.develop_board_and_hand",
           instanceId:
-            "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_101_mit-west-tier_1",
+            "plan:runner.develop_board_and_hand:card%3Arunner_313_1",
         });
         expect(plan?.executionOrigin?.rootPlanInstanceId).toBe(
-          "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_101_mit-west-tier_1",
+          "plan:runner.develop_board_and_hand:card%3Arunner_313_1",
         );
       } else {
         expect(plan?.selectedPlan?.moduleId).toBe(

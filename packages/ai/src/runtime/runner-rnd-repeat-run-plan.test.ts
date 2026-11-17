@@ -20,7 +20,7 @@ describe("R&D repeat-run planning", () => {
         rdLabelOnlyAccessEvent(
           "evt_rd_access",
           1,
-          "onr_v1_281_accounts-receivable",
+          493,
           "Accounts Receivable",
         ),
       ],
@@ -116,7 +116,7 @@ function runnerInput(params: {
 function rdLabelOnlyAccessEvent(
   eventId: string,
   stateVersionBefore: number,
-  cardDefinitionId: string,
+  cardDefinitionId: number,
   title: string,
 ): PublicGameEvent {
   return {

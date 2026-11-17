@@ -239,7 +239,7 @@ export function bindSelectedRunnerDelayedProgramSearchChoice(
         ...(typeof binding?.targetCardInstanceId === "string"
           ? { preferredCardInstanceId: binding.targetCardInstanceId }
           : {}),
-        ...(typeof binding?.targetDefinitionId === "string"
+        ...(typeof binding?.targetDefinitionId === "number"
           ? { preferredCardDefinitionId: binding.targetDefinitionId }
           : {}),
       },
@@ -257,7 +257,7 @@ export function bindSelectedRunnerDelayedProgramSearchChoice(
       selectedOption?.card?.known !== false &&
       selectedOption?.card?.type === "program" &&
       typeof selectedOption.card.instanceId === "string" &&
-      typeof selectedOption.card.definitionId === "string";
+      typeof selectedOption.card.definitionId === "number";
     if (!exactCoverageBinding || !binding || !selectedOption?.card) {
       throw new PlanResolutionFailure("commitment_invalidated", {
         side: input.side,
@@ -355,7 +355,7 @@ export function bindSelectedRunnerDelayedProgramSearchChoice(
     selectedCard?.known !== false &&
     selectedCard?.type === "program" &&
     typeof selectedCard.instanceId === "string" &&
-    typeof selectedCard.definitionId === "string" &&
+    typeof selectedCard.definitionId === "number" &&
     assessment !== undefined &&
     (!assessment.memoryRequired ||
       (Number.isInteger(selectedCard.memoryCost) &&
@@ -1047,7 +1047,7 @@ export function runnerDevelopmentSearchChoiceBinding(
   | {
       planInstanceId: string;
       targetCardInstanceId?: string;
-      targetDefinitionId: string;
+      targetDefinitionId: number;
       optionalExactTargetOnly: boolean;
       sourceOptionId?: string;
     }
@@ -1096,7 +1096,7 @@ export function runnerDevelopmentSearchChoiceBinding(
   const commitment = recoveryCommitment ?? programCommitment;
   const partialProfile =
     programCommitment &&
-    typeof programCommitment.sourceDefinitionId === "string"
+    typeof programCommitment.sourceDefinitionId === "number"
       ? runnerPartialProgramSearchProfile(
           input,
           programCommitment.sourceDefinitionId,
@@ -1123,7 +1123,7 @@ export function runnerDevelopmentSearchChoiceBinding(
               recoveryCommitment.targetCardInstanceId &&
             option.card?.definitionId === recoveryCommitment.targetDefinitionId,
         )
-      : typeof commitment?.targetDefinitionId === "string"
+      : typeof commitment?.targetDefinitionId === "number"
         ? choice.options.filter(
             (option) =>
               option.selectable !== false &&
@@ -1137,8 +1137,8 @@ export function runnerDevelopmentSearchChoiceBinding(
     signal.targetKind === "capability" &&
     Array.isArray(signal.actionIds) &&
     typeof commitment?.sourceCardInstanceId === "string" &&
-    typeof commitment.sourceDefinitionId === "string" &&
-    typeof commitment.targetDefinitionId === "string" &&
+    typeof commitment.sourceDefinitionId === "number" &&
+    typeof commitment.targetDefinitionId === "number" &&
     typeof commitment.selectedActionId === "string" &&
     signal.actionIds.includes(commitment.selectedActionId) &&
     commitment.plannedAtStateVersion === commitment.selectedAtStateVersion &&

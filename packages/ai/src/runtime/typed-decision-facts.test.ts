@@ -34,7 +34,7 @@ function remoteRun() {
       [],
       [
         visibleCard("known-root", "corp", "upgrade", {
-          definitionId: "onr_v1_358_dr-dreff",
+          definitionId: 570,
           title: "Dr. Dreff",
           rezzed: true,
           trashCost: 3,
@@ -54,7 +54,7 @@ describe("typed Runner access facts", () => {
       actionId: "run-remote",
       accessPayoff: "trash_affordable",
       accessFacts: {
-        knownTargetDefinitionIds: ["onr_v1_358_dr-dreff"],
+        knownTargetDefinitionIds: [570],
         trashBudget: 3,
       },
     });

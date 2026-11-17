@@ -392,7 +392,7 @@ describe("corp action disposition contributors", () => {
     current.playerView.own.gripOrHq = [
       {
         instanceId: "trace-support",
-        definitionId: "onr_v1_309_bbs-whispering-campaign",
+        definitionId: 521,
         type: "asset",
         known: true,
         owner: "corp",
@@ -405,7 +405,7 @@ describe("corp action disposition contributors", () => {
       semanticActionType: "install.card",
       sourceKind: "card",
       sourceCardInstanceId: "trace-support",
-      sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      sourceDefinitionId: 521,
       strategySupport: [],
     } as unknown as ActionSemanticCandidate;
     const facts = {
@@ -450,7 +450,7 @@ describe("corp action disposition contributors", () => {
       actionType: "install_card",
       semanticActionType: "install.card",
       sourceKind: "card",
-      sourceDefinitionId: "onr_v1_363_olivia-salazar",
+      sourceDefinitionId: 575,
     } as unknown as ActionSemanticCandidate;
     const facts = {
       ...contributorFacts(),

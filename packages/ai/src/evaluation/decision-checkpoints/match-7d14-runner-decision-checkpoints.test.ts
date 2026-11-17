@@ -52,7 +52,7 @@ describe("match 7D14 runner decision checkpoints", () => {
       matchpointDiscardJson,
       (checkpoint) => {
         const state = checkpoint.engine.testOnlyGameState;
-        const handInstanceId = "runner_onr_v1_129_hq-interface_1";
+        const handInstanceId = "runner_341_1";
         const installedInstanceId =
           "runner_onr_v1_129_hq-interface_companion_installed";
         const handCard = state.cardInstances[handInstanceId];
@@ -67,7 +67,7 @@ describe("match 7D14 runner decision checkpoints", () => {
         checkpoint.source.findingId = "7D14-C02-DISCARD-INSTALLED-EQUIVALENT";
         checkpoint.expectation = {
           discardChoice: {
-            mustDiscardDefinitionIds: ["onr_v1_129_hq-interface"],
+            mustDiscardDefinitionIds: [341],
           },
         };
       },

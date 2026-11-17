@@ -138,7 +138,7 @@ export function planningRunnerNeedsStrictlyMore(
 }
 
 export function planningClassicLinkModifierForBaseLinkOption(option: {
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   activationCost: number;
 }): VisibleClassicLinkModifier | undefined {
   if (!option.sourceDefinitionId) return undefined;
@@ -159,7 +159,7 @@ export function planningClassicLinkModifierForBaseLinkOption(option: {
 }
 
 export function planningDefinitionIsBaseLinkCard(
-  sourceDefinitionId: string | undefined,
+  sourceDefinitionId: number | undefined,
 ): boolean {
   if (!sourceDefinitionId) return false;
   return (

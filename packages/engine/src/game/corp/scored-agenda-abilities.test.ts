@@ -15,7 +15,7 @@ import {
 } from "./scored-agenda-abilities";
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"] = "agenda",
   title = id,
 ): CardDefinition {
@@ -60,7 +60,7 @@ function makeHost(input: HostInput = {}) {
   const definitions: Record<string, CardDefinition> = {
     ai_cfo: definition("ai_cfo", "agenda", "HQ/Archives-Shuffle-Draw"),
     retreat: definition("retreat", "agenda", "Corporate Retreat"),
-    boon: definition("onr_v1_192_corporate-boon", "agenda", "Corporate Boon"),
+    boon: definition(404, "agenda", "Corporate Boon"),
     ...input.definitions,
   };
   const scoreArea =
@@ -315,7 +315,7 @@ describe("scored agenda activated abilities", () => {
       scoreArea: ["netwatch" as CardInstanceId],
       definitions: {
         netwatch: definition(
-          "onr_v1_207_netwatch-operations-office",
+          419,
           "agenda",
           "Netwatch Operations Office",
         ),
@@ -330,7 +330,7 @@ describe("scored agenda activated abilities", () => {
       scoreArea: ["netwatch" as CardInstanceId],
       definitions: {
         netwatch: definition(
-          "onr_v1_207_netwatch-operations-office",
+          419,
           "agenda",
           "Netwatch Operations Office",
         ),

@@ -94,7 +94,7 @@ describe("native R&D access/removal binding through the AI input DTO", () => {
       reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness,
     ).toMatchObject({
       freshness: "stale_known_same_top",
-      knownTopDefinitionId: "onr_proteus_004_fetal-ai",
+      knownTopDefinitionId: 62,
     });
     expect(evaluateKnownCentralAccessPayoff(input, "rd").payoff).toBe("agenda");
   });

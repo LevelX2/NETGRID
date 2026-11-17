@@ -180,7 +180,7 @@ function selfStealCostApplies(
 
 /** Canonical self-cost for an already identified agenda; no hidden instance data. */
 export function quoteAgendaDefinitionSelfStealCreditCost(
-  definitionId: string,
+  definitionId: number,
   serverId: string,
 ): number | undefined {
   const definition = CARD_DEFINITIONS_BY_ID[definitionId];

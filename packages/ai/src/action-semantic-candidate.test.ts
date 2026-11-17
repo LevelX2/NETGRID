@@ -403,7 +403,7 @@ describe("buildActionSemanticCandidates", () => {
       observerSide: "runner",
       stateVersion: 8,
       visibleSourceDefinitionsByInstanceId: {
-        "armageddon-instance": "onr_proteus_078_armageddon",
+        "armageddon-instance": 136,
       },
     });
 
@@ -739,9 +739,9 @@ describe("buildActionSemanticCandidates", () => {
           visibility: "private_to_actor",
           payload: {
             sourceCardId: "runner-resource-1",
-            sourceDefinitionId: "onr_proteus_136_credit-subversion",
+            sourceDefinitionId: 194,
             cardImplementationAbilityId:
-              "onr_proteus_136_credit-subversion:successful_run_before_access:0",
+              "194:successful_run_before_access:0",
             cardImplementationAbilityKey: "successful_run_before_access:0",
             cardImplementationPrimitiveKind:
               "successful_run_before_access_effect",
@@ -757,10 +757,10 @@ describe("buildActionSemanticCandidates", () => {
     expect(candidate.sourceCardId).toBe("runner-resource-1");
     expect(candidate.sourceCardInstanceId).toBe("runner-resource-1");
     expect(candidate.sourceDefinitionId).toBe(
-      "onr_proteus_136_credit-subversion",
+      194,
     );
     expect(candidate.abilityId).toBe(
-      "onr_proteus_136_credit-subversion:successful_run_before_access:0",
+      "194:successful_run_before_access:0",
     );
     expect(candidate.abilityKey).toBe("successful_run_before_access:0");
     expect(candidate.primitiveKind).toBe("successful_run_before_access_effect");
@@ -805,7 +805,7 @@ describe("buildActionSemanticCandidates", () => {
           source: "short-circuit",
           payload: {
             cardId: "short-circuit",
-            sourceDefinitionId: "onr_v1_177_the-short-circuit",
+            sourceDefinitionId: 389,
             cardImplementationEffectKind: "search_stack_to_grip",
             cardImplementationSearchFilter: "program",
           },
@@ -831,7 +831,7 @@ describe("buildActionSemanticCandidates", () => {
           source: "game_rule",
           payload: {
             sourceCardId: "runner-resource-1",
-            sourceDefinitionId: "onr_proteus_136_credit-subversion",
+            sourceDefinitionId: 194,
             cardImplementationAbilityKey: "successful_run_before_access:0",
             cardImplementationPrimitiveKind:
               "successful_run_before_access_effect",
@@ -840,13 +840,13 @@ describe("buildActionSemanticCandidates", () => {
         }),
       ],
       cardSemanticProfilesByDefinitionId: {
-        "onr_proteus_136_credit-subversion": {
-          cardId: "onr_proteus_136_credit-subversion",
+        194: {
+          cardId: 194,
           tacticSignals: ["card.context.credit_subversion"],
           abilitySemantics: [
             {
               abilityId:
-                "onr_proteus_136_credit-subversion:successful_run_before_access:0",
+                "194:successful_run_before_access:0",
               tacticSignals: ["economy.corp_credit_denial"],
             },
           ],
@@ -857,10 +857,10 @@ describe("buildActionSemanticCandidates", () => {
 
     expect(candidate.sourceKind).toBe("card");
     expect(candidate.sourceDefinitionId).toBe(
-      "onr_proteus_136_credit-subversion",
+      194,
     );
     expect(candidate.abilityId).toBe(
-      "onr_proteus_136_credit-subversion:successful_run_before_access:0",
+      "194:successful_run_before_access:0",
     );
     expect(candidate.abilityKey).toBe("successful_run_before_access:0");
     expect(candidate.abilityBindingMethod).toBe("engine_payload");
@@ -1340,7 +1340,7 @@ describe("buildActionSemanticCandidates", () => {
             targetId: "rd-interface-1",
             targetKind: "hardware",
             targetSide: "runner",
-            targetDefinitionId: "onr_v1_139_r-and-d-interface",
+            targetDefinitionId: 351,
             targetTitle: "R&D Interface",
             targetSubtypes: ["interface"],
             targetConstraints: ["not_cybernetics"],
@@ -1352,7 +1352,7 @@ describe("buildActionSemanticCandidates", () => {
             targetId: "decoder-1",
             targetKind: "program",
             targetSide: "runner",
-            targetDefinitionId: "simple_decoder",
+            targetDefinitionId: 591,
             targetTitle: "Simple Decoder",
             targetSubtypes: ["icebreaker", "decoder"],
             evidence: ["P5 side-safe visible program target"],
@@ -1372,7 +1372,7 @@ describe("buildActionSemanticCandidates", () => {
       expect.objectContaining({
         targetId: "rd-interface-1",
         targetKind: "hardware",
-        targetDefinitionId: "onr_v1_139_r-and-d-interface",
+        targetDefinitionId: 351,
         targetTitle: "R&D Interface",
         targetSubtypes: ["interface"],
         targetConstraints: ["not_cybernetics"],
@@ -1399,7 +1399,7 @@ describe("buildActionSemanticCandidates", () => {
       expect.objectContaining({
         targetId: "decoder-1",
         targetKind: "program",
-        targetDefinitionId: "simple_decoder",
+        targetDefinitionId: 591,
       }),
     ]);
   });
@@ -1947,14 +1947,14 @@ describe("buildActionSemanticCandidates", () => {
           abilityRef: {
             sourceCardInstanceId: "dropp-instance",
             sourceAbilityId:
-              "onr_v1_019_dropp:icebreaker_abilities_break_subroutine",
+              "231:icebreaker_abilities_break_subroutine",
           },
           payload: {
             cardId: "dropp-instance",
-            sourceDefinitionId: "onr_v1_019_dropp",
+            sourceDefinitionId: 231,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityId:
-              "onr_v1_019_dropp:icebreaker_abilities_break_subroutine",
+              "231:icebreaker_abilities_break_subroutine",
             cardImplementationAbilityKey:
               "icebreaker_abilities_break_subroutine",
             iceId: "ice-1",
@@ -1977,13 +1977,13 @@ describe("buildActionSemanticCandidates", () => {
       },
       cardSemanticProfilesByDefinitionId: {
         onr_v1_019_dropp: {
-          cardId: "onr_v1_019_dropp",
+          cardId: 231,
           tacticSignals: [],
           strategySupport: [],
           abilitySemantics: [
             {
               abilityId:
-                "onr_v1_019_dropp:icebreaker_abilities_break_subroutine",
+                "231:icebreaker_abilities_break_subroutine",
               tacticSignals: [
                 "breaker.break_any_subroutine",
                 "encounter.emergency_subroutine_prevention",
@@ -2075,12 +2075,12 @@ describe("buildActionSemanticCandidates", () => {
         }),
       ],
       visibleSourceDefinitionsByInstanceId: {
-        "danshi-instance": "onr_v1_158_danshis-second-id",
+        "danshi-instance": 370,
       },
     });
 
     if (!candidate) throw new Error("Expected Danish tag cleanup candidate");
-    expect(candidate.sourceDefinitionId).toBe("onr_v1_158_danshis-second-id");
+    expect(candidate.sourceDefinitionId).toBe(370);
     expect(candidate.semanticActionType).toBe("tag.remove");
     expect(candidate.tagEffectProfile).toMatchObject({
       kind: "remove_tags",
@@ -2113,7 +2113,7 @@ describe("buildActionSemanticCandidates", () => {
         }),
       ],
       visibleSourceDefinitionsByInstanceId: {
-        "nomad-instance": "onr_v1_170_nomad-allies",
+        "nomad-instance": 382,
       },
     });
 
@@ -2139,7 +2139,7 @@ describe("buildActionSemanticCandidates", () => {
         }),
       ],
       visibleSourceDefinitionsByInstanceId: {
-        "fall-guy-instance": "onr_v1_161_fall-guy",
+        "fall-guy-instance": 373,
       },
     });
 
@@ -2186,7 +2186,7 @@ describe("buildActionSemanticCandidates", () => {
         }),
       ],
       visibleSourceDefinitionsByInstanceId: {
-        "black-widow-instance": "onr_proteus_080_black-widow",
+        "black-widow-instance": 138,
       },
     });
 

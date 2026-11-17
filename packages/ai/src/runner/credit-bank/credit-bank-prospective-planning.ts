@@ -15,7 +15,7 @@ export type ProspectivePlanningStatus =
   | "unknown";
 
 export type RunnerCreditBankProspectivePlan = {
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   sourceCardInstanceId: string;
   owner: "runner.credit_bank";
   install: {
@@ -74,7 +74,7 @@ export type RunnerCreditBankProspectivePlan = {
  * Engine rematerializes the exact current LegalAction after installation.
  */
 export function runnerCreditBankProspectivePlan(params: {
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   sourceCardInstanceId: string;
   currentCredits: number;
   currentActions: number;

@@ -12,8 +12,8 @@ import { chooseCorpAction } from "../index";
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 
-const TROJAN = "onr_v1_306_trojan-horse";
-const MOLE = "onr_proteus_142_hq-mole";
+const TROJAN = 518;
+const MOLE = 200;
 const corpDeck: DeckDefinition = {
   ...DEMO_DECKS.demo_corp_001,
   id: "uncertain-direct-tag-corp",

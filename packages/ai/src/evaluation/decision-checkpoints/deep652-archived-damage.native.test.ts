@@ -41,8 +41,8 @@ it("separates the original D375 discarded damage evidence from current active th
     input.playerView.servers
       .find((s: { id: string }) => s.id === "archives")
       .root.some(
-        (c: { definitionId: string }) =>
-          c.definitionId === "onr_v1_228_cinderella",
+        (c: { definitionId: number }) =>
+          c.definitionId === 440,
       ),
   ).toBe(true);
   expect(runnerDamageThreatAssessment(input)).toMatchObject({

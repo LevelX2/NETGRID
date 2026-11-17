@@ -94,7 +94,7 @@ it("resolves the original mandatory placement without inventing a credit head", 
 it("uses the exact printed X payment to fund the unaffordable central ICE", () => {
   const { input, state } = corpFreeRezBoardCompanion(
       load(28, 164),
-      "onr_proteus_049_emergency-rig",
+      107,
     ),
     result = chooseAiAction(input);
   const action = input.legalActions.find(
@@ -102,11 +102,11 @@ it("uses the exact printed X payment to fund the unaffordable central ICE", () =
   )!;
   expect(action).toMatchObject({
     type: "play_operation",
-    source: "corp_onr_proteus_049_emergency-rig_1",
+    source: "corp_107_1",
     costs: [{ clicks: 1, credits: 3 }],
     payload: {
       xValue: 3,
-      targetCardId: "corp_onr_proteus_015_colonel-failure_2",
+      targetCardId: "corp_73_2",
     },
   });
   expect(result.fallbackUsed).toBe(false);
@@ -129,7 +129,7 @@ it("uses the exact printed X payment to fund the unaffordable central ICE", () =
   if (!applied.ok) throw new Error(applied.error.message);
   expect(applied.state.corp.credits).toBe(state.corp.credits - 3);
   expect(
-    applied.state.cardInstances["corp_onr_proteus_015_colonel-failure_2"],
+    applied.state.cardInstances["corp_73_2"],
   ).toMatchObject({
     rezzed: true,
     counters: { kludge: 3 },

@@ -389,7 +389,7 @@ describe("ChoiceView projection", () => {
         corpDeckId: "demo_corp_001",
       }),
     );
-    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const iceId = putCorpIceOnServer(state, "rd", 589);
     state.cardInstances[iceId] = {
       ...state.cardInstances[iceId]!,
       faceup: true,
@@ -436,7 +436,7 @@ describe("ChoiceView projection", () => {
     expect(runnerRdIce).toMatchObject({
       known: true,
       title: "Simple Barrier ICE",
-      definitionId: "simple_barrier_ice",
+      definitionId: 589,
       rezzed: true,
     });
     expect(JSON.stringify(runnerView)).toContain("Simple Barrier ICE");
@@ -450,8 +450,8 @@ describe("ChoiceView projection", () => {
         corpDeckId: "demo_corp_001",
       }),
     );
-    const rootId = putCorpRootInRemote(state, "simple_economy_asset");
-    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const rootId = putCorpRootInRemote(state, 594);
+    const iceId = putCorpIceOnServer(state, "rd", 589);
     state.pendingChoice = {
       choiceId: "p3_36_schematics_expose_installed_cards_review_1",
       side: "runner",
@@ -472,7 +472,7 @@ describe("ChoiceView projection", () => {
         .filter((card) => card.known)
         .map((card) => card.definitionId)
         .sort(),
-    ).toEqual(["simple_barrier_ice", "simple_economy_asset"]);
+    ).toEqual([589, 594]);
 
     delete state.pendingChoice;
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toMatch(

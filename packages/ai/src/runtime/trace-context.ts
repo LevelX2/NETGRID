@@ -6,7 +6,7 @@ import type {
 } from "@netgrid/shared";
 
 export type LatestTraceContext = {
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   traceLimit?: number;
   traceValue?: number;
   runnerLink?: number;
@@ -109,7 +109,7 @@ function latestTraceContextFromEventTail(
       typeof postBidTraceLinkBonus === "number"
     ) {
       return {
-        ...(typeof sourceDefinitionId === "string" &&
+        ...(typeof sourceDefinitionId === "number" &&
         sourceDefinitionId.length > 0
           ? { sourceDefinitionId }
           : {}),

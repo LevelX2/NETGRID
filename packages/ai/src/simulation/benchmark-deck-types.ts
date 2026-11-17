@@ -106,7 +106,7 @@ export type DeckSnapshotRecord = {
   sourceDeckId: string;
   name: string;
   side: Side;
-  identityCardId: string;
+  identityCardId: number;
   cards: Array<{ cardId: string; quantity: number }>;
   publicMetadata?: DeckPublicMetadata;
 };
@@ -118,7 +118,7 @@ export type FrozenLocalBenchmarkDeckSnapshot = {
   deckVersion: string;
   name: string;
   side: Side;
-  identityCardId: string;
+  identityCardId: number;
   cardPoolSnapshotId: string;
   cardPoolVersion?: string;
   formatProfileId: string;

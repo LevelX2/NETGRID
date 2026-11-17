@@ -184,16 +184,16 @@ import {
 } from "../../test-fixtures/index-test-helpers";
 
 describe("Proteus Visible Baseline", () => {
-  const TOUGHONIUM = "onr_proteus_041_toughoniumtm-wall";
-  const NETWORKED_CENTER = "onr_proteus_065_networked-center";
-  const RESEARCH_BUNKER = "onr_proteus_072_research-bunker";
-  const WEAPONS_DEPOT = "onr_proteus_077_weapons-depot";
-  const STREETWARE_DISTRIBUTOR = "onr_proteus_150_streetware-distributor";
-  const FLOATING_RUNNER_BBS = "onr_v1_163_floating-runner-bbs";
-  const CORTICAL_CYBERMODEM = "onr_proteus_134_cortical-cybermodem";
-  const DECK_THE = "onr_proteus_138_deck-the";
+  const TOUGHONIUM = 99;
+  const NETWORKED_CENTER = 123;
+  const RESEARCH_BUNKER = 130;
+  const WEAPONS_DEPOT = 135;
+  const STREETWARE_DISTRIBUTOR = 208;
+  const FLOATING_RUNNER_BBS = 375;
+  const CORTICAL_CYBERMODEM = 192;
+  const DECK_THE = 196;
   const SUNBURST_CRANIAL_INTERFACE =
-    "onr_proteus_151_sunburst-cranial-interface";
+    209;
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
@@ -337,17 +337,17 @@ describe("Proteus Visible Baseline", () => {
     const regionCases = [
       {
         regionId: NETWORKED_CENTER,
-        agendaId: "onr_v1_202_genetics-visionary-acquisition",
+        agendaId: 414,
         subtype: "gray_ops",
       },
       {
         regionId: RESEARCH_BUNKER,
-        agendaId: "onr_v1_189_artificial-security-directors",
+        agendaId: 401,
         subtype: "research",
       },
       {
         regionId: WEAPONS_DEPOT,
-        agendaId: "onr_v1_198_detroit-police-contract",
+        agendaId: 410,
         subtype: "black_ops",
       },
     ] as const;
@@ -543,7 +543,7 @@ describe("Proteus Visible Baseline", () => {
         .flatMap((event) => event.publicPayload.resolvedEffects ?? [])
         .some(
           (effect) =>
-            (effect as { sourceDefinitionId?: string }).sourceDefinitionId ===
+            (effect as { sourceDefinitionId?: number }).sourceDefinitionId ===
             STREETWARE_DISTRIBUTOR,
         ),
     ).toBe(true);
@@ -602,7 +602,7 @@ describe("Proteus Visible Baseline", () => {
       .flatMap((event) => event.publicPayload.resolvedEffects ?? [])
       .filter(
         (effect) =>
-          (effect as { sourceDefinitionId?: string }).sourceDefinitionId ===
+          (effect as { sourceDefinitionId?: number }).sourceDefinitionId ===
           STREETWARE_DISTRIBUTOR,
       );
     expect(streetwareEffects).toHaveLength(2);
@@ -679,7 +679,7 @@ describe("Proteus Visible Baseline", () => {
           name: "Proteus Phase 7a Deck Runner",
           cards: [
             { id: DECK_THE, quantity: 1 },
-            { id: "onr_v1_137_parraline-5750", quantity: 1 },
+            { id: 349, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.programSubtypeHosting.runner.cards,
           ],
         },
@@ -689,7 +689,7 @@ describe("Proteus Visible Baseline", () => {
     );
     state.runner.credits = 30;
     state.corp.credits = 8;
-    const oldDeckId = moveRunnerCardToGrip(state, "onr_v1_137_parraline-5750");
+    const oldDeckId = moveRunnerCardToGrip(state, 349);
     const deckId = moveRunnerCardToGrip(state, DECK_THE);
     const memoryBefore =
       getPlayerView(state, "runner").own.memoryLimit ??
@@ -774,7 +774,7 @@ describe("Proteus Visible Baseline", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
 
-    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+    putCorpIceOnServer(state, "rd", 458);
     state = apply(
       state,
       "runner",
@@ -786,7 +786,7 @@ describe("Proteus Visible Baseline", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm",
+        sourceDefinition(state, action) === 458,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", "bid_0");
@@ -843,9 +843,9 @@ describe("Proteus Visible Baseline", () => {
             name: "Proteus Phase 7b Deck Runner",
             cards: [
               { id: definitionId, quantity: 1 },
-              { id: "simple_decoder", quantity: 1 },
+              { id: 591, quantity: 1 },
               ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
-                (card) => card.id !== "simple_decoder",
+                (card) => card.id !== 591,
               ),
             ],
           },
@@ -854,7 +854,7 @@ describe("Proteus Visible Baseline", () => {
             id: `proteus_phase_7b_${definitionId}_corp`,
             name: "Proteus Phase 7b Deck Corp",
             cards: [
-              { id: "simple_code_gate_ice", quantity: 1 },
+              { id: 590, quantity: 1 },
               ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
             ],
           },
@@ -864,8 +864,8 @@ describe("Proteus Visible Baseline", () => {
       state.runner.credits = 30;
       state.runner.memoryLimit = 4;
       const deckId = moveRunnerCardToGrip(state, definitionId);
-      moveRunnerCardToGrip(state, "simple_decoder");
-      const iceId = putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
+      moveRunnerCardToGrip(state, 591);
+      const iceId = putCorpIceOnServer(state, "rd", 590);
       const memoryBefore =
         getPlayerView(state, "runner").own.memoryLimit ??
         state.runner.memoryLimit;
@@ -940,7 +940,7 @@ describe("Proteus Visible Baseline", () => {
       expect(installReplay.ok).toBe(true);
       expect(hashState(installReplay.state)).toBe(hashState(state));
 
-      installRunnerProgramForTest(state, "simple_decoder");
+      installRunnerProgramForTest(state, 591);
       state.runner.credits = 0;
       state = apply(
         state,
@@ -958,7 +958,7 @@ describe("Proteus Visible Baseline", () => {
         "runner",
         (action) =>
           action.type === "pump_breaker" &&
-          sourceDefinition(state, action) === "simple_decoder",
+          sourceDefinition(state, action) === 591,
       );
       expect(state.runner.credits).toBe(0);
       expect(cardCounterAmount(state, deckId, "bit")).toBe(expectedAfterPump);
@@ -973,9 +973,9 @@ describe("Proteus Visible Baseline", () => {
           name: "Proteus Phase 7b Sunburst Noisy Runner",
           cards: [
             { id: SUNBURST_CRANIAL_INTERFACE, quantity: 1 },
-            { id: "onr_v1_036_jackhammer", quantity: 1 },
+            { id: 248, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
-              (card) => card.id !== "onr_v1_036_jackhammer",
+              (card) => card.id !== 248,
             ),
           ],
         },
@@ -984,9 +984,9 @@ describe("Proteus Visible Baseline", () => {
           id: "proteus_phase_7b_sunburst_noisy_corp",
           name: "Proteus Phase 7b Sunburst Noisy Corp",
           cards: [
-            { id: "onr_v1_232_crystal-wall", quantity: 1 },
+            { id: 444, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
-              (card) => card.id !== "onr_v1_232_crystal-wall",
+              (card) => card.id !== 444,
             ),
           ],
         },
@@ -996,11 +996,11 @@ describe("Proteus Visible Baseline", () => {
     noisyState.runner.credits = 30;
     noisyState.runner.memoryLimit = 4;
     moveRunnerCardToGrip(noisyState, SUNBURST_CRANIAL_INTERFACE);
-    moveRunnerCardToGrip(noisyState, "onr_v1_036_jackhammer");
+    moveRunnerCardToGrip(noisyState, 248);
     const wallId = putCorpIceOnServer(
       noisyState,
       "rd",
-      "onr_v1_232_crystal-wall",
+      444,
     );
     noisyState = apply(
       noisyState,
@@ -1014,7 +1014,7 @@ describe("Proteus Visible Baseline", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(noisyState, action) === "onr_v1_036_jackhammer",
+        sourceDefinition(noisyState, action) === 248,
     );
     noisyState.runner.credits = 0;
     noisyState = apply(
@@ -1032,7 +1032,7 @@ describe("Proteus Visible Baseline", () => {
       getLegalActions(noisyState, "runner").some(
         (action) =>
           action.type === "pump_breaker" &&
-          sourceDefinition(noisyState, action) === "onr_v1_036_jackhammer",
+          sourceDefinition(noisyState, action) === 248,
       ),
     ).toBe(false);
   });

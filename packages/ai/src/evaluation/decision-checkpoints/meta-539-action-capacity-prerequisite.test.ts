@@ -59,7 +59,7 @@ it("publishes every agenda bound to the same actual action-capacity action", () 
   const first = candidates.find(
     (c) =>
       c.actionId ===
-      "corp.play_operation.corp_onr_v1_297_overtime-incentives_1.corp_onr_v1_297_overtime-incentives_1",
+      "corp.play_operation.corp_509_1.corp_509_1",
   )!;
   const expected = [
     ...new Set(
@@ -69,7 +69,7 @@ it("publishes every agenda bound to the same actual action-capacity action", () 
     ),
   ].sort();
   expect(expected.length).toBeGreaterThan(1);
-  expect(expected).toContain("corp_onr_proteus_008_project-zurich_1");
+  expect(expected).toContain("corp_66_1");
   const projects = sameTurnScoreConversionProjectsForCandidate(
     input,
     first,

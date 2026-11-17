@@ -21,14 +21,14 @@ import {
 } from "../semantic-ai-runtime-cutover.test-support";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 
-const HOSTILE_TAKEOVER = "onr_v1_203_hostile-takeover";
-const CORPORATE_DOWNSIZING = "onr_v1_194_corporate-downsizing";
-const ANNUAL_REVIEWS = "onr_v1_282_annual-reviews";
-const OVERTIME_INCENTIVES = "onr_v1_297_overtime-incentives";
-const DATA_WALL = "onr_v1_237_data-wall";
-const PRECISION_BRIBERY = "onr_proteus_146_precision-bribery";
-const CORPORATE_GUARD_R_TEMPS = "onr_proteus_046_corporate-guard-r-temps";
-const VIRAL_BREEDING_GROUND = "onr_proteus_009_viral-breeding-ground";
+const HOSTILE_TAKEOVER = 415;
+const CORPORATE_DOWNSIZING = 406;
+const ANNUAL_REVIEWS = 494;
+const OVERTIME_INCENTIVES = 509;
+const DATA_WALL = 449;
+const PRECISION_BRIBERY = 204;
+const CORPORATE_GUARD_R_TEMPS = 104;
+const VIRAL_BREEDING_GROUND = 67;
 
 describe("plan-first Corp card variant contracts", () => {
   beforeEach(() => {
@@ -442,7 +442,7 @@ describe("plan-first Corp card variant contracts", () => {
 });
 
 function scoreConversionFixture(params: {
-  agendaDefinitionId: string;
+  agendaDefinitionId: number;
   agendaTitle: string;
   agendaPoints: number;
   includeOvertime: boolean;
@@ -520,12 +520,12 @@ function annualReviewsFixture(params: {
   });
   const fillerOne = corpCard(
     "filler-operation-1",
-    "onr_v1_283_audit-of-call-records",
+    495,
     "operation",
   );
   const fillerTwo = corpCard(
     "filler-operation-2",
-    "onr_v1_298_planning-consultants",
+    510,
     "operation",
   );
   const annualReviews = playAnnualReviews(annual);
@@ -573,11 +573,11 @@ function annualReviewsFixture(params: {
       { cardId: HOSTILE_TAKEOVER, quantity: 3 },
       { cardId: ANNUAL_REVIEWS, quantity: 3 },
       {
-        cardId: "onr_v1_283_audit-of-call-records",
+        cardId: 495,
         quantity: 3,
       },
       {
-        cardId: "onr_v1_298_planning-consultants",
+        cardId: 510,
         quantity: 3,
       },
     ],
@@ -587,7 +587,7 @@ function annualReviewsFixture(params: {
 
 function corpCard(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   type: NonNullable<VisibleCard["type"]>,
   overrides: Omit<
     Partial<VisibleCard>,

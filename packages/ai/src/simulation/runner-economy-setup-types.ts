@@ -2,10 +2,10 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { rolesMatch } from "../role-match";
 import { runnerDebtFinancingProfile } from "../runtime/runner-canonical-card-facts";
 
-const SHORT_TERM_CONTRACT_CARD_ID = "onr_v1_178_short-term-contract";
+const SHORT_TERM_CONTRACT_CARD_ID = 390;
 const MRAM_HAND_SIZE_CARD_IDS = new Set([
-  "onr_v1_133_militech-mram-chip",
-  "onr_v1_134_mram-chip",
+  345,
+  346,
 ]);
 
 type RunnerEconomySetupDefinition = {

@@ -5,13 +5,13 @@ describe("remote root value projection", () => {
   it("projects finite economy pools from explicit finite economy semantics", () => {
     expect(
       projectRemoteRootValue({
-        definitionId: "onr_v1_326_holovid-campaign",
+        definitionId: 538,
         roles: ["campaign", "economy"],
         effects: [{ kind: "economy", scope: "corp", finite: true }],
         visibleCard: {
           instanceId: "holovid",
           known: true,
-          definitionId: "onr_v1_326_holovid-campaign",
+          definitionId: 538,
           title: "Holovid Campaign",
           type: "asset",
           counters: { bit: 5 },

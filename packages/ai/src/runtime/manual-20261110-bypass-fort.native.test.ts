@@ -18,13 +18,13 @@ import { buildAiDecisionInput } from "./ai-decision-input";
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 
-const QUANDARY = "onr_v1_261_quandary";
-const WALL = "onr_v1_237_data-wall";
-const INSIDE = "onr_v1_094_inside-job";
-const KRASH = "onr_v1_039_krash";
+const QUANDARY = 473;
+const WALL = 449;
+const INSIDE = 306;
+const KRASH = 251;
 
 it("keeps Classic trace semantics when quoting the live inner path", () => {
-  const f = fixture(false, true, true, 15, "onr_v1_249_hunter");
+  const f = fixture(false, true, true, 15, 461);
   const view = getPlayerView(f.state, "runner");
   const input = {
     ...f.input,
@@ -102,7 +102,7 @@ function fixture(
         ...DEMO_DECKS.demo_corp_001.cards,
         { id: QUANDARY, quantity: 1 },
         { id: WALL, quantity: 1 },
-        { id: "onr_v1_249_hunter", quantity: 1 },
+        { id: 461, quantity: 1 },
       ],
     },
   });

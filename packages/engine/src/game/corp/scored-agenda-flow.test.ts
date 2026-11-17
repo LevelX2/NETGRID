@@ -19,7 +19,7 @@ import {
 import type { ScoredAgendaFlowHost } from "./scored-agenda/scored-agenda-flow-host";
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"],
   title = id,
   subtypes: string[] = [],

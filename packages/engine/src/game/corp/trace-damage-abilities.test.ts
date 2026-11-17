@@ -16,7 +16,7 @@ import {
 import type { CardImplementationDefinition } from "../../card-implementations/types";
 
 function definition(
-  id: string,
+  id: number,
   title = id,
   type: CardDefinition["type"] = "agenda",
 ): CardDefinition {
@@ -25,7 +25,7 @@ function definition(
 
 function instance(
   cardId: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"] = { side: "corp", zone: "scoreArea" },
 ): CardInstance {
   return {
@@ -108,23 +108,23 @@ type HostInput = {
 function makeHost(input: HostInput = {}) {
   const definitions: Record<string, CardDefinition> = {
     netwatch: definition(
-      "onr_v1_207_netwatch-operations-office",
+      419,
       "Netwatch Operations Office",
     ),
     private: definition(
-      "onr_v1_213_private-cybernet-police",
+      425,
       "Private Cybernet Police",
     ),
-    on_call: definition("onr_v1_208_on-call-solo-team", "On-Call Solo Team"),
-    kali: definition("onr_v1_217_strike-force-kali", "Strike Force Kali"),
-    blood_cat: definition("onr_v1_310_blood-cat", "Blood Cat", "asset"),
-    solo_squad: definition("onr_v1_342_solo-squad", "Solo Squad", "asset"),
+    on_call: definition(420, "On-Call Solo Team"),
+    kali: definition(429, "Strike Force Kali"),
+    blood_cat: definition(522, "Blood Cat", "asset"),
+    solo_squad: definition(554, "Solo Squad", "asset"),
     i_got_a_rock: definition(
-      "onr_v1_327_i-got-a-rock",
+      539,
       "I Got a Rock",
       "asset",
     ),
-    schlaghund: definition("onr_v1_339_schlaghund", "Schlaghund", "asset"),
+    schlaghund: definition(551, "Schlaghund", "asset"),
     ...input.definitions,
   };
   const scoreArea =
@@ -280,12 +280,12 @@ describe("corp trace/damage activated abilities", () => {
     expect(calls.pushed).toEqual(["netwatch", "private"]);
     expect(netwatch).toMatchObject({
       handled: true,
-      sourceDefinitionId: "onr_v1_207_netwatch-operations-office",
+      sourceDefinitionId: 419,
       traceBase: 2,
     });
     expect(privateCybernet).toMatchObject({
       handled: true,
-      sourceDefinitionId: "onr_v1_213_private-cybernet-police",
+      sourceDefinitionId: 425,
       traceBase: 5,
     });
     expect(netwatch.actions[0]?.actionId).toBe(
@@ -333,7 +333,7 @@ describe("corp trace/damage activated abilities", () => {
       handled: true,
       stateChanged: true,
       sourceCardId: "netwatch",
-      sourceDefinitionId: "onr_v1_207_netwatch-operations-office",
+      sourceDefinitionId: 419,
       traceStarted: true,
       traceBase: 2,
     });
@@ -353,7 +353,7 @@ describe("corp trace/damage activated abilities", () => {
       handled: true,
       stateChanged: true,
       sourceCardId: "kali",
-      sourceDefinitionId: "onr_v1_217_strike-force-kali",
+      sourceDefinitionId: 429,
       damageType: "meat",
       damageAmount: 2,
       requiresRunnerTagged: true,
@@ -375,12 +375,12 @@ describe("corp trace/damage activated abilities", () => {
 
     expect(bloodCat).toMatchObject({
       handled: true,
-      sourceDefinitionId: "onr_v1_310_blood-cat",
+      sourceDefinitionId: 522,
       traceBase: 5,
     });
     expect(soloSquad).toMatchObject({
       handled: true,
-      sourceDefinitionId: "onr_v1_342_solo-squad",
+      sourceDefinitionId: 554,
       damageType: "meat",
       damageAmount: 1,
     });

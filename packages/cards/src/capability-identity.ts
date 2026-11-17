@@ -58,18 +58,14 @@ export function capabilityKey(value: string): CapabilityKey {
   return value as CapabilityKey;
 }
 
-export function cardDefinitionId(value: string): CardDefinitionId {
-  if (
-    value.length === 0 ||
-    value.length > 192 ||
-    !CARD_DEFINITION_ID_PATTERN.test(value)
-  )
+export function cardDefinitionId(value: number): CardDefinitionId {
+  if (!Number.isSafeInteger(value) || value <= 0)
     throw new CapabilityIdentityError(
       "invalid_card_definition_id",
       "cardDefinitionId",
-      "must use the existing lower-case ASCII definition-id syntax",
+      "must be a positive safe integer",
     );
-  return value as CardDefinitionId;
+  return value;
 }
 
 export function abilityKey(value: string): AbilityKey {
@@ -98,7 +94,7 @@ export function parseCanonicalCapabilityId(value: string): {
       "canonicalCapabilityId",
       "must use <cardDefinitionId>:<capabilityKey>",
     );
-  const definitionId = cardDefinitionId(value.slice(0, separator));
+  const definitionId = cardDefinitionId(Number(value.slice(0, separator)));
   const key = capabilityKey(value.slice(separator + 1));
   const canonicalId = canonicalCapabilityId(definitionId, key);
   if (canonicalId !== value)
@@ -166,7 +162,6 @@ export function assertAbilityKeyAlias(
 }
 
 const CAPABILITY_KEY_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
-const CARD_DEFINITION_ID_PATTERN = /^[a-z0-9]+(?:[._-][a-z0-9]+)*$/;
 
 function assertKeyText(value: string, path: string): void {
   if (

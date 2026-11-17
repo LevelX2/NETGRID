@@ -58,7 +58,7 @@ export type RunnerRigDemandBinding = Readonly<{
 
 export type RunnerRigDemandProviderInput = Readonly<{
   providerId: string;
-  definitionId?: string;
+  definitionId?: number;
   cardInstanceId?: string;
   memoryMode: RunnerRigMemoryMode;
   memoryUnits: number;
@@ -92,7 +92,7 @@ export type RunnerRigRoleDemandInput = Readonly<{
 
 export type RunnerRigDemandProvider = Readonly<{
   providerId: string;
-  definitionId?: string;
+  definitionId?: number;
   cardInstanceId?: string;
   memoryMode: RunnerRigMemoryMode;
   memoryUnits: number;
@@ -162,7 +162,7 @@ export type RunnerRigCardInstallReadiness =
 
 export type RunnerRigCardRetentionFact = Readonly<{
   cardInstanceId: string;
-  definitionId?: string;
+  definitionId?: number;
   boundDemandIds: readonly string[];
   retentionValue: RunnerRigCardRetentionValue;
   installReadiness: RunnerRigCardInstallReadiness;
@@ -448,7 +448,7 @@ function zoneHasProvider(
 
 function deckContains(
   input: AiDecisionInputWithDeckCapabilities,
-  definitionId: string,
+  definitionId: number,
 ): boolean {
   return (
     input.ownDeckSnapshot?.cards.some(

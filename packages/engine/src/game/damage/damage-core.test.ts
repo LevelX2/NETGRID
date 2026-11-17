@@ -346,13 +346,13 @@ describe("damage core", () => {
       cardInstances: {
         [firstId]: instance(
           firstId,
-          "onr_v1_190_bioweapons-engineering",
+          402,
           "corp",
           "identity",
         ),
         [secondId]: instance(
           secondId,
-          "onr_v1_190_bioweapons-engineering",
+          402,
           "corp",
           "identity",
         ),
@@ -362,7 +362,7 @@ describe("damage core", () => {
     state.corp.scoreArea = [firstId, secondId];
     const host = testHost();
     host.cards.scoredAgendaKindForDefinition = (definition) =>
-      definition.id === "onr_v1_190_bioweapons-engineering"
+      definition.id === 402
         ? "meat_damage_bonus"
         : undefined;
     configureDamageCoreHost(host);
@@ -389,7 +389,7 @@ describe("damage core", () => {
       cardInstances: {
         [umbrellaId]: instance(
           umbrellaId,
-          "onr_v1_186_umbrella-policy",
+          398,
           "runner",
           "identity",
         ),
@@ -493,7 +493,7 @@ describe("damage core", () => {
       runId: "weefle_run",
       attackedServerId: "rd",
       damagePreventionPool: {
-        sourceDefinitionId: "onr_proteus_127_weefle-initiation",
+        sourceDefinitionId: 185,
         remaining: 7,
       },
     } as NonNullable<GameState["run"]>;
@@ -608,13 +608,13 @@ describe("damage core", () => {
     const state = minimalState({
       cardInstances: {
         [fallGuyId]: {
-          ...instance(fallGuyId, "onr_v1_161_fall-guy", "runner", "grip"),
+          ...instance(fallGuyId, 373, "runner", "grip"),
           faceup: true,
           rezzed: true,
           zone: { side: "runner", zone: "rig" },
         } as CardInstance,
         [nomadId]: {
-          ...instance(nomadId, "onr_v1_170_nomad-allies", "runner", "grip"),
+          ...instance(nomadId, 382, "runner", "grip"),
           faceup: true,
           rezzed: true,
           zone: { side: "runner", zone: "rig" },
@@ -685,7 +685,7 @@ describe("damage core", () => {
     const state = minimalState({
       cardInstances: {
         [fallGuyId]: {
-          ...instance(fallGuyId, "onr_v1_161_fall-guy", "runner", "grip"),
+          ...instance(fallGuyId, 373, "runner", "grip"),
           faceup: true,
           rezzed: true,
           zone: { side: "runner", zone: "rig" },
@@ -730,7 +730,7 @@ describe("damage core", () => {
         [camaroId]: {
           ...instance(
             camaroId,
-            "onr_classic_051_vintage-camaro",
+            55,
             "runner",
             "grip",
           ),
@@ -765,7 +765,7 @@ describe("damage core", () => {
     expect(state.runnerTurnFlags?.forgoNextActionsPending).toBe(1);
     expect(choiceAction.payload).toMatchObject({
       eventModificationOutcome: "avoided",
-      sourceDefinitionId: "onr_classic_051_vintage-camaro",
+      sourceDefinitionId: 55,
       paidCredits: 1,
       runnerForgoNextActions: 1,
       tagsAdded: 0,
@@ -884,7 +884,7 @@ function minimalState(input: {
   } as unknown as GameState;
 }
 
-function definition(id: string, type: CardDefinition["type"]): CardDefinition {
+function definition(id: number, type: CardDefinition["type"]): CardDefinition {
   return {
     id: id as CardDefinitionId,
     title: id,
@@ -900,7 +900,7 @@ function definition(id: string, type: CardDefinition["type"]): CardDefinition {
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   owner: "corp" | "runner",
   runnerZone: "grip" | "heap" | "identity",
 ): CardInstance {

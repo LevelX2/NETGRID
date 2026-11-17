@@ -53,8 +53,8 @@ describe("pairing 557 current preparation and post-install income", () => {
       // The Tokyo-Chiba root access is separate from the subsequent deck
       // sequence. The Corp drew Snowbank, leaving known Off-Site Backups.
       expect(reconstructBeliefState(cp.input).rndTopFreshness).toMatchObject({
-        knownTopDefinitionId: "onr_v1_296_off-site-backups",
-        knownSequenceDefinitionIds: ["onr_v1_296_off-site-backups"],
+        knownTopDefinitionId: 508,
+        knownSequenceDefinitionIds: [508],
       });
       expect(pf?.selectedPlan).toMatchObject({
         moduleId: "runner.pressure_central",
@@ -115,7 +115,7 @@ describe("pairing 557 current preparation and post-install income", () => {
       const development = pf?.portfolio.find(
         (p) =>
           p.moduleId === "runner.develop_board_and_hand" &&
-          p.target?.id === "onr_v1_045_newsgroup-filter",
+          p.target?.id === 257,
       );
       expect(development).toMatchObject({
         viability: "ready",
@@ -123,7 +123,7 @@ describe("pairing 557 current preparation and post-install income", () => {
         openNeedIds: [],
       });
       const card = cp.input.playerView.own.gripOrHq.find(
-        (c: any) => c.definitionId === "onr_v1_045_newsgroup-filter",
+        (c: any) => c.definitionId === 257,
       );
       const action = cp.input.legalActions.find(
         (a: any) =>
@@ -159,7 +159,7 @@ describe("pairing 557 current preparation and post-install income", () => {
     const setup = () => {
       const cp = fixture("cp-meta557-install-income-order");
       const card = cp.input.playerView.own.gripOrHq.find(
-        (c: any) => c.definitionId === "onr_v1_045_newsgroup-filter",
+        (c: any) => c.definitionId === 257,
       );
       const action = cp.input.legalActions.find(
         (a: any) =>
@@ -197,7 +197,7 @@ describe("pairing 557 current preparation and post-install income", () => {
           instanceId: "countermodel_installed_income",
         });
       if (kind === "finite_bank")
-        card.definitionId = "onr_v1_178_short-term-contract";
+        card.definitionId = 390;
       expect(
         persistentIncomeInstallRecovery(input, card, action, 5, 1),
       ).toBeUndefined();

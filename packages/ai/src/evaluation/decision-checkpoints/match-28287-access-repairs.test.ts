@@ -90,7 +90,7 @@ it.each([
       complete: true,
     };
     const candidate = candidates(input).find(
-      (c) => c.sourceDefinitionId === "onr_v1_111_social-engineering",
+      (c) => c.sourceDefinitionId === 323,
     )!;
     const result = runnerTargetedBypassPlanCommitment({
       input,

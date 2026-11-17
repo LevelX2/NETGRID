@@ -30,7 +30,7 @@ export type FundingRouteStep = {
   netLiquidCreditGain: number;
   creditRestriction: CreditRestriction;
   reliability: FundingRouteReliability;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   evidence: string[];
 };
 
@@ -70,7 +70,7 @@ export type FutureFundingProjection = {
   earliestOwnTurnOffset: 1 | 2 | 3;
   reliability: FundingRouteReliability;
   requiredCurrentActionId?: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   evidence?: readonly string[];
 };
 
@@ -95,7 +95,7 @@ export type SearchFundingRoutesParams = {
 export type PaymentWindowFundingSetup = {
   actionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   capabilityId: string;
   installClickCost: number;
   installCreditCost: number;

@@ -257,7 +257,7 @@ function accessProgramBounceChoiceSignal(
   };
 }
 
-function definitionSupportsProgramBounceAmbush(definitionId: string): boolean {
+function definitionSupportsProgramBounceAmbush(definitionId: number): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   return (
     (hint?.strategyAnchors?.includes("corp.ambush_bluff") === true ||
@@ -1132,7 +1132,7 @@ function corpIntentSupportsAmbush(intent: CorpStrategicIntentProfile): boolean {
   );
 }
 
-function definitionSupportsAmbushPlan(definitionId: string): boolean {
+function definitionSupportsAmbushPlan(definitionId: number): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   const strategyBound =
     hint?.strategyAnchors?.includes("corp.ambush_bluff") === true ||
@@ -1157,7 +1157,7 @@ function definitionSupportsAmbushPlan(definitionId: string): boolean {
 
 function ambushVisibleConditionsSatisfied(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   if (!hint) return false;
@@ -1205,7 +1205,7 @@ function agendaAmbushInstallHasDecisivePayoff(
 
 function ambushAdvancementTarget(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): number {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   const requiresCounters = hint?.conditions?.some(
@@ -1247,7 +1247,7 @@ function ambushAdvancementSupportRoute(params: {
       phase: "install" | "rez" | "trigger";
       candidate: ActionSemanticCandidate;
       supportSourceInstanceId: string;
-      supportSourceDefinitionId: string;
+      supportSourceDefinitionId: number;
       creditCost: number;
     }
   | undefined {

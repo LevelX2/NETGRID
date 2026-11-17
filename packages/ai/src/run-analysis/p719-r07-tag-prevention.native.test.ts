@@ -99,15 +99,15 @@ it.each([14, 26] as const)(
 function tagFacts() {
   const { input } = fixture(14);
   const nasuko = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_v1_135_nasuko-cycle",
+    (c) => c.definitionId === 347,
   )!;
   const { input: other } = fixture(26);
   const fallGuy = other.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_v1_161_fall-guy",
+    (c) => c.definitionId === 373,
   )!;
   const hunter = input.playerView.servers
     .flatMap((s) => s.ice)
-    .find((c) => c.definitionId === "onr_v1_249_hunter" && c.rezzed)!;
+    .find((c) => c.definitionId === 461 && c.rezzed)!;
   return { nasuko, fallGuy, hunter };
 }
 
@@ -169,9 +169,9 @@ it.each([
   );
   if (variant === "unknown_source") source.known = false;
   if (variant === "coupled_source")
-    source.definitionId = "onr_v1_167_leland-corporate-bodyguard";
+    source.definitionId = 379;
   if (variant === "future_action")
-    source.definitionId = "onr_classic_051_vintage-camaro";
+    source.definitionId = 55;
   const ice = structuredClone(hunter);
   if (variant === "counter")
     ice.effectiveRunQuote!.subroutines[0]!.traceSuccessEffect = {

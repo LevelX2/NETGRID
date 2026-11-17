@@ -20,7 +20,7 @@ export function sp082KnownProtectionFundingCompanion(): AiDecisionCheckpointV1 {
   state.runner.rig.programs = [];
   const fort = state.corp.servers.find((server) => server.id === "remote_1")!;
   const ice = state.cardInstances[fort.ice[0]!]!;
-  if (ice.definitionId !== "onr_proteus_033_mobile-barricade")
+  if (ice.definitionId !== 91)
     throw Error("Expected the native Mobile Barricade");
   ice.rezzed = true;
   ice.faceup = true;

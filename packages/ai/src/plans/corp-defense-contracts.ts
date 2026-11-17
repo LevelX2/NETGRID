@@ -29,7 +29,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     | "recover_exposed_agenda"
     | "pass_encounter"
     | "decline_rez";
-  sourceDefinitionIds: string[];
+  sourceDefinitionIds: number[];
   parentKind?: "remote";
   parentProjectId?: string;
   parentNeedId?: string;
@@ -93,7 +93,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
         traceId: string;
         runId: string;
         sourceIceInstanceId: string;
-        sourceDefinitionId: string;
+        sourceDefinitionId: number;
         subroutineIndex: number;
         selectedOptionId: string;
         targetCardInstanceId: string;
@@ -128,7 +128,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
         sourceStateVersion: number;
         runId: string;
         sourceIceInstanceId: string;
-        sourceDefinitionId: string;
+        sourceDefinitionId: number;
         subroutineIndex: number;
         subroutineId: string;
         targetProfile: "archives" | "any_data_fort" | "subsidiary_data_fort";
@@ -153,7 +153,7 @@ export type CorpScoreProtectionInstallSignal = CorpDefenseSignalBase & {
   delegatedPriorityClass: CorpScorePriorityClass;
   actionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   effect: "progress" | "satisfied";
   runnerAccessSuccessProbability: ExactProbability;
   totalInstallAndRezCredits: number;
@@ -185,7 +185,7 @@ export type CorpScoreProtectionStagingInstallSignal = CorpDefenseSignalBase & {
   delegatedPriorityClass: CorpScorePriorityClass;
   actionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   developmentRisk?: "unmodeled_access_path";
 };
 

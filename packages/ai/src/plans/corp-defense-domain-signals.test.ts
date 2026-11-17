@@ -95,7 +95,7 @@ describe("corp defense domain signals", () => {
       postInstallRezQuoteProjectedServerId: "remote_2",
       postInstallEffectiveRunQuoteJson: JSON.stringify({
         iceInstanceId: "candidate-ice",
-        iceDefinitionId: "onr_v1_237_data-wall",
+        iceDefinitionId: 449,
         effectiveStrength: 0,
         subroutines: [{ id: "sub-1", type: "end_the_run" }],
       }),
@@ -155,7 +155,7 @@ describe("corp defense domain signals", () => {
       kind: "generic",
       serverId: "remote_1",
       phase: "install_defense_support",
-      sourceDefinitionIds: ["onr_v1_237_data-wall"],
+      sourceDefinitionIds: [449],
     });
     expect(signal?.evidenceCode).toContain(
       "corp_layered_remote_ice_staging:score:score-project-1",
@@ -168,7 +168,7 @@ describe("corp defense domain signals", () => {
     input.playerView.servers[0]!.ice = [
       {
         instanceId: "hq-data-wall",
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         owner: "corp",
         side: "corp",
         known: true,
@@ -341,7 +341,7 @@ function qualitativeCentralRouteFixture(): {
   const stateVersion = 29;
   const source = {
     instanceId: "neural-blade",
-    definitionId: "onr_v1_258_neural-blade",
+    definitionId: 470,
     owner: "corp",
     side: "corp",
     known: true,
@@ -351,7 +351,7 @@ function qualitativeCentralRouteFixture(): {
     subtypes: ["sentry"],
     effectiveRunQuote: {
       iceInstanceId: "neural-blade",
-      iceDefinitionId: "onr_v1_258_neural-blade",
+      iceDefinitionId: 470,
       effectiveStrength: 4,
       subroutines: [
         {
@@ -475,7 +475,7 @@ function layeredRemoteFixture(
   const stateVersion = 17;
   const source = {
     instanceId: "candidate-ice",
-    definitionId: "onr_v1_237_data-wall",
+    definitionId: 449,
     owner: "corp",
     side: "corp",
     known: true,

@@ -1007,7 +1007,7 @@ function bindVisibleDrawTaxPreparation(
   defense.handBufferActionIds = [];
   defense.evidenceCodes.unshift("runner_visible_draw_tax_preparation");
 }
-function runnerDefinitionProvidesTraceDefense(definitionId: string): boolean {
+function runnerDefinitionProvidesTraceDefense(definitionId: number): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   return (
     hint?.functionSignals?.includes("defense.trace_defense") === true ||

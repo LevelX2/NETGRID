@@ -15,7 +15,7 @@ import {
  */
 export function assessPassiveStrengthDevelopment(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
   memoryCost: number,
   installCredits: number,
   installClicks: number,

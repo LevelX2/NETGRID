@@ -21,7 +21,7 @@ function restore(f:ReturnType<typeof fixture>,input:AiDecisionInputWithDeckCapab
   restoreResidentPlanPortfolioMemorySnapshot(input,f.checkpoint.runtime.residentPlanPortfolio);
 }
 function source(input:AiDecisionInputWithDeckCapabilities){
-  return buildActionSemanticCandidates({legalActions:input.legalActions,observerSide:input.side,stateVersion:input.playerView.stateVersion,visibleSourceDefinitionsByInstanceId:visibleSourceDefinitionsByInstanceId(input.playerView),cardSemanticProfilesByDefinitionId:buildActionCardSemanticProfilesByDefinitionId()}).find(c=>c.sourceDefinitionId==="onr_v1_296_off-site-backups"&&c.actionType==="play_operation")!;
+  return buildActionSemanticCandidates({legalActions:input.legalActions,observerSide:input.side,stateVersion:input.playerView.stateVersion,visibleSourceDefinitionsByInstanceId:visibleSourceDefinitionsByInstanceId(input.playerView),cardSemanticProfilesByDefinitionId:buildActionCardSemanticProfilesByDefinitionId()}).find(c=>c.sourceDefinitionId===508&&c.actionType==="play_operation")!;
 }
 it("normal native Defense binds and executes the exact Archives agenda recovery and its unchanged choice",()=>{
   const f=fixture(),input=f.checkpoint.input as AiDecisionInputWithDeckCapabilities;
@@ -44,7 +44,7 @@ it("normal native Defense binds and executes the exact Archives agenda recovery 
   expect(isExactDefenseRecoveryChoiceOwner(executor,p.selectedActionOrigin,input.playerView.stateVersion-1)).toBe(false);
   const origin=p.selectedActionOrigin!;
   if(origin.immediateChoicePolicy!=="select_bound_corp_archives_cards_to_hq")throw Error("exact recovery origin required");
-  const wrong={...origin,selectedArchiveCardInstanceIds:["corp_onr_v1_295_night-shift_1"]};
+  const wrong={...origin,selectedArchiveCardInstanceIds:["corp_507_1"]};
   expect(isExactDefenseRecoveryChoiceOwner(executor,wrong,input.playerView.stateVersion)).toBe(false);
   if(!d.actionId)throw Error("normal source action required");
   const op=applyAction(f.state,{matchId:f.state.matchId,side:"corp",actionId:d.actionId,clientKnownStateVersion:f.state.stateVersion});
@@ -53,7 +53,7 @@ it("normal native Defense binds and executes the exact Archives agenda recovery 
   next.planningStateIdentity=buildPlanningStateIdentity(next);
   const choice=chooseAiAction(next);
   expect(choice.actionId).toBe("corp.resolve_choice");
-  expect(choice.selectedChoices).toEqual({choiceId:"v1922_corp_archives_to_hq_342",selectedOptionIds:["card_corp_onr_v1_203_hostile-takeover_2"]});
+  expect(choice.selectedChoices).toEqual({choiceId:"v1922_corp_archives_to_hq_342",selectedOptionIds:["card_corp_415_2"]});
   expect(choice.fallbackUsed||choice.timeoutUsed).toBe(false);
   if(!choice.selectedChoices)throw Error("bound choices required");
   const resolved=applyAction(op.state,{matchId:op.state.matchId,side:"corp",actionId:choice.actionId!,clientKnownStateVersion:op.state.stateVersion,selectedChoices:choice.selectedChoices});
@@ -80,7 +80,7 @@ it.each(["covered_archives","run_prohibited","multiple_agendas","nonterminal","h
 });
 it("does not spend the last click of an Engine-legal current winning score on recovery",()=>{
   const f=fixture(),state=f.state as GameState;
-  const id=state.corp.rd.find(id=>state.cardInstances[id]!.definitionId==="onr_v1_196_corporate-war")!;
+  const id=state.corp.rd.find(id=>state.cardInstances[id]!.definitionId===408)!;
   expect(id).toBeDefined();
   state.corp.rd=state.corp.rd.filter(c=>c!==id);
   state.corp.servers.find(s=>s.id==="remote_2")!.root.push(id);

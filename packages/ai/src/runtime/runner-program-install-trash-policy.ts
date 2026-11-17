@@ -327,7 +327,7 @@ export function runnerProgramInstallTrashAssessmentFromCards(params: {
 
 export type ProgramSacrificeCandidateDependencies = {
   visibleMemoryCost: (card: VisibleCard | undefined) => number;
-  rolesForCardId: (definitionId: string | undefined) => readonly string[];
+  rolesForCardId: (definitionId: number | undefined) => readonly string[];
   visibleBreakerRoles: (card: VisibleCard) => readonly string[];
   isRunnerPressureRole: (role: string) => boolean;
   isRunnerEconomyRole: (role: string) => boolean;

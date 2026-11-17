@@ -11,7 +11,7 @@ export type RunnerPreparedRunOpportunity = Readonly<{
 
 export type RunnerRecurringEconomySignal = {
   commitmentId: string;
-  definitionId: string;
+  definitionId: number;
   commitmentActive: boolean;
   phase: "install" | "hold";
   actionIds: string[];

@@ -31,7 +31,7 @@ describe("access outcome memory", () => {
           actor: "runner",
           actionType: "access_card",
           serverId: "remote_1",
-          cardDefinitionId: "onr_v1_317_data-masons",
+          cardDefinitionId: 529,
           accessedCardPositionKey: "root:0",
           accessedArea: "root",
         }),
@@ -39,7 +39,7 @@ describe("access outcome memory", () => {
       servers: [
         server("remote_1", [
           visibleCard("remote-root", {
-            definitionId: "onr_v1_317_data-masons",
+            definitionId: 529,
             title: "Data Masons",
             type: "asset",
             trashCost: 1,
@@ -106,13 +106,13 @@ describe("access outcome memory", () => {
           actor: "runner",
           actionType: "access_card",
           targets: { serverLabel: "Remote 1" },
-          cardDefinitionId: "onr_v1_317_data-masons",
+          cardDefinitionId: 529,
         }),
       ],
       servers: [
         server("remote_1", [
           visibleCard("remote-root", {
-            definitionId: "onr_v1_317_data-masons",
+            definitionId: 529,
             type: "asset",
             trashCost: 1,
           }),
@@ -140,7 +140,7 @@ describe("access outcome memory", () => {
           actor: "runner",
           actionType: "access_card",
           serverId: "remote_1",
-          cardDefinitionId: "onr_v1_317_data-masons",
+          cardDefinitionId: 529,
         }),
         publicEvent("evt-run-failed", 10, "start_run", {
           actor: "runner",
@@ -156,7 +156,7 @@ describe("access outcome memory", () => {
       servers: [
         server("remote_1", [
           visibleCard("remote-root", {
-            definitionId: "onr_v1_317_data-masons",
+            definitionId: 529,
             type: "asset",
             trashCost: 1,
           }),
@@ -188,7 +188,7 @@ describe("access outcome memory", () => {
           actor: "runner",
           actionType: "access_card",
           serverId: "remote_1",
-          cardDefinitionId: "onr_v1_317_data-masons",
+          cardDefinitionId: 529,
         }),
         publicEvent("evt-decline", 10, "decline_trash", {
           actor: "runner",
@@ -199,7 +199,7 @@ describe("access outcome memory", () => {
       servers: [
         server("remote_1", [
           visibleCard("remote-root", {
-            definitionId: "onr_v1_317_data-masons",
+            definitionId: 529,
             type: "asset",
             trashCost: 1,
           }),
@@ -233,7 +233,7 @@ describe("access outcome memory", () => {
           actor: "runner",
           actionType: "access_card",
           serverId: "remote_1",
-          cardDefinitionId: "onr_v1_317_data-masons",
+          cardDefinitionId: 529,
         }),
         publicEvent("evt-install", 10, "install_card", {
           actor: "corp",
@@ -244,7 +244,7 @@ describe("access outcome memory", () => {
       servers: [
         server("remote_1", [
           visibleCard("remote-root", {
-            definitionId: "onr_v1_317_data-masons",
+            definitionId: 529,
             type: "asset",
             trashCost: 1,
           }),

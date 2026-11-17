@@ -5,8 +5,8 @@ import { selectedRunnerStartOfTurnOrderChoiceOptionId } from "./runner-start-of-
 
 describe("Runner start-of-turn order choice", () => {
   it("resolves a due credit gain before an optional installed-card conversion without changing the bound action", () => {
-    const smithsPawnshopId = "runner_onr_v1_180_smiths-pawnshop_1";
-    const topRunnersConferenceId = "runner_onr_v1_184_top-runners-conference_1";
+    const smithsPawnshopId = "runner_392_1";
+    const topRunnersConferenceId = "runner_396_1";
     const options = [
       {
         id: `source_${smithsPawnshopId}`,
@@ -34,13 +34,13 @@ describe("Runner start-of-turn order choice", () => {
           rig: [
             {
               instanceId: smithsPawnshopId,
-              definitionId: "onr_v1_180_smiths-pawnshop",
+              definitionId: 392,
               known: true,
               type: "resource",
             },
             {
               instanceId: topRunnersConferenceId,
-              definitionId: "onr_v1_184_top-runners-conference",
+              definitionId: 396,
               known: true,
               type: "resource",
             },
@@ -98,8 +98,8 @@ describe("Runner start-of-turn order choice", () => {
   });
 
   it("orders two equivalent delayed-install countdown sources without choosing their later target", () => {
-    const firstShellId = "runner_onr_v1_176_the-shell-traders_1";
-    const secondShellId = "runner_onr_v1_176_the-shell-traders_2";
+    const firstShellId = "runner_388_1";
+    const secondShellId = "runner_388_2";
     const options = [secondShellId, firstShellId].map((instanceId) => ({
       id: `source_${instanceId}`,
       label: "The Shell Traders",
@@ -119,7 +119,7 @@ describe("Runner start-of-turn order choice", () => {
           gripOrHq: [],
           rig: [firstShellId, secondShellId].map((instanceId) => ({
             instanceId,
-            definitionId: "onr_v1_176_the-shell-traders",
+            definitionId: 388,
             known: true,
             type: "resource",
           })),

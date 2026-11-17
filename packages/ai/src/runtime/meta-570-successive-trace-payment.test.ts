@@ -108,7 +108,7 @@ it("retains the contest owner through rez, two mandatory traces and the selected
   expect(getPlayerView(state, "runner").own.tags).toBe(0);
   expect(
     getPlayerView(state, "runner").own.rig?.some(
-      (c) => c.definitionId === "onr_proteus_133_chiba-bank-account",
+      (c) => c.definitionId === 191,
     ),
   ).toBe(false);
   expect(actions).toContain("access_card");

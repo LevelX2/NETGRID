@@ -16,6 +16,7 @@ describe("CardSpec compatibility implementation projection", () => {
   it("projects one margin-based tag effect and rejects an unrepresented combined effect", () => {
     const margin = {
       kind: "add_tags_by_trace_margin_over_runner_link" as const,
+      recipient: "runner" as const,
       visibility: "public" as const,
     };
     expect(projectTraceSuccessEffect([margin])).toEqual({
@@ -29,7 +30,7 @@ describe("CardSpec compatibility implementation projection", () => {
     ).toThrow("card_spec_unsupported_trace_success_effect");
   });
   it("preserves the explicit copy-order-neutral lifecycle contract", () => {
-    const definitionId = "onr_proteus_150_streetware-distributor";
+    const definitionId = 208;
     const engine = engineCardViewForDefinitionId(CARD_REGISTRY, definitionId);
     const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
     expect(engine).toBeDefined();
@@ -77,14 +78,14 @@ describe("CardSpec compatibility implementation projection", () => {
 
   it("binds Proteus relative ICE damage through canonical capability identities", () => {
     for (const definitionId of [
-      "onr_proteus_012_bug-zapper",
-      "onr_proteus_021_dog-pile",
-      "onr_proteus_030_mastermind",
+      70,
+      79,
+      88,
     ]) {
       const engine = engineCardViewForDefinitionId(CARD_REGISTRY, definitionId);
       const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
-      expect(engine, definitionId).toBeDefined();
-      expect(spec, definitionId).toBeDefined();
+      expect(engine, String(definitionId)).toBeDefined();
+      expect(spec, String(definitionId)).toBeDefined();
       const relativeIce = engine!.engine.relativeIce!;
       const binding = relativeIce.dynamicDamageSubroutine!;
       const printed = engine!.engine.printedSubroutines!.find(
@@ -92,7 +93,7 @@ describe("CardSpec compatibility implementation projection", () => {
           String(subroutine.capabilityKey) ===
           String(binding.subroutineCapabilityKey),
       );
-      expect(printed, definitionId).toMatchObject({
+      expect(printed, String(definitionId)).toMatchObject({
         kind: "damage",
         amount: {
           kind: "derived",
@@ -106,7 +107,7 @@ describe("CardSpec compatibility implementation projection", () => {
           (subroutine) =>
             subroutine.id === String(binding.subroutineCapabilityKey),
         ),
-        definitionId,
+        String(definitionId),
       ).toMatchObject({
         id: binding.subroutineCapabilityKey,
         type: "do_damage",
@@ -119,7 +120,7 @@ describe("CardSpec compatibility implementation projection", () => {
   });
 
   it("fails closed for missing, forged, mismatched, and duplicate dynamic-damage bindings", () => {
-    const definitionId = "onr_proteus_012_bug-zapper";
+    const definitionId = 70;
     const engine = engineCardViewForDefinitionId(CARD_REGISTRY, definitionId)!;
     const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId)!;
     const relativeIce = engine.engine.relativeIce!;
@@ -177,7 +178,7 @@ describe("CardSpec compatibility implementation projection", () => {
   });
 
   it("fails closed when a mechanical family is missing from the projector contract", () => {
-    const definitionId = "onr_proteus_112_identity-donor";
+    const definitionId = 170;
     const engine = engineCardViewForDefinitionId(CARD_REGISTRY, definitionId);
     const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
     expect(engine).toBeDefined();
@@ -198,7 +199,7 @@ describe("CardSpec compatibility implementation projection", () => {
   });
 
   it("projects the closed Originalset runtime families and keeps region baseline authoring-only", () => {
-    const definitionId = "onr_proteus_112_identity-donor";
+    const definitionId = 170;
     const engine = engineCardViewForDefinitionId(CARD_REGISTRY, definitionId);
     const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
     expect(engine).toBeDefined();
@@ -256,7 +257,7 @@ describe("CardSpec compatibility implementation projection", () => {
   });
 
   it("passes complete flatline replacement resolutions through frozen", () => {
-    const definitionId = "onr_proteus_112_identity-donor";
+    const definitionId = 170;
     const engine = engineCardViewForDefinitionId(CARD_REGISTRY, definitionId);
     const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
     expect(engine).toBeDefined();
@@ -348,7 +349,9 @@ describe("CardSpec compatibility implementation projection", () => {
     ];
     const originalsetIce = engineCardViews(CARD_REGISTRY).filter(
       (engine) =>
-        engine.cardDefinitionId.startsWith("onr_v1_") &&
+        cardSpecForDefinitionId(CARD_REGISTRY, engine.cardDefinitionId)?.printings.some(
+          (printing) => printing.setId === "originalset-v1",
+        ) &&
         engine.engine.printedSubroutines !== undefined,
     );
     const subroutines = originalsetIce.flatMap(
@@ -363,7 +366,7 @@ describe("CardSpec compatibility implementation projection", () => {
         CARD_REGISTRY,
         engine.cardDefinitionId,
       );
-      expect(spec, engine.cardDefinitionId).toBeDefined();
+      expect(spec, String(engine.cardDefinitionId)).toBeDefined();
       const projected = projectCardSpecDefinition(engine, spec!);
       expect(projected.subroutines).toHaveLength(
         engine.engine.printedSubroutines?.length ?? 0,
@@ -377,7 +380,7 @@ describe("CardSpec compatibility implementation projection", () => {
   });
 
   it("fails closed for invalid generic run-duration printed subroutine payloads", () => {
-    const definitionId = "onr_v1_222_ball-and-chain";
+    const definitionId = 434;
     const engine = engineCardViewForDefinitionId(CARD_REGISTRY, definitionId);
     const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
     expect(engine).toBeDefined();
@@ -403,19 +406,19 @@ describe("CardSpec compatibility implementation projection", () => {
   it("projects optional run-strength cancellation exactly when the CardSpec supplies it", () => {
     const unconditional = engineCardViewForDefinitionId(
       CARD_REGISTRY,
-      "onr_v1_225_canis-major",
+      437,
     );
     const conditional = engineCardViewForDefinitionId(
       CARD_REGISTRY,
-      "onr_proteus_016_coyote",
+      74,
     );
     const unconditionalSpec = cardSpecForDefinitionId(
       CARD_REGISTRY,
-      "onr_v1_225_canis-major",
+      437,
     );
     const conditionalSpec = cardSpecForDefinitionId(
       CARD_REGISTRY,
-      "onr_proteus_016_coyote",
+      74,
     );
     expect(unconditional).toBeDefined();
     expect(conditional).toBeDefined();
@@ -461,7 +464,7 @@ describe("CardSpec compatibility implementation projection", () => {
   });
 
   it("fails closed on malformed trace damage instead of guessing a legacy effect", () => {
-    const definitionId = "onr_proteus_014_chihuahua";
+    const definitionId = 72;
     const engine = engineCardViewForDefinitionId(CARD_REGISTRY, definitionId);
     const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
     expect(engine).toBeDefined();
@@ -494,7 +497,7 @@ describe("CardSpec compatibility implementation projection", () => {
   });
 
   it("projects a typed trace run lock and rejects incomplete combined effects", () => {
-    const definitionId = "onr_proteus_025_homing-missile";
+    const definitionId = 83;
     const engine = engineCardViewForDefinitionId(CARD_REGISTRY, definitionId);
     const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
     expect(engine).toBeDefined();

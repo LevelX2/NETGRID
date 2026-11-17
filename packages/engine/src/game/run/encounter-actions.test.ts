@@ -22,7 +22,7 @@ import {
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {
@@ -53,7 +53,7 @@ function iceDefinition(options: Partial<CardDefinition> = {}): CardDefinition {
 
 function makeState(
   options: {
-    breakerDefinitionId?: string;
+    breakerDefinitionId?: number;
     ice?: CardDefinition;
     runnerCredits?: number;
     encounteredIceId?: CardInstanceId | undefined;
@@ -106,7 +106,7 @@ function makeState(
     cardInstances: {
       [breakerId]: instance(
         breakerId,
-        options.breakerDefinitionId ?? "simple_killer",
+        options.breakerDefinitionId ?? 598,
       ),
       [iceId]: instance(iceId, "test_sentry_ice", {
         owner: "corp",
@@ -232,7 +232,7 @@ describe("runner encounter action generation", () => {
           { id: "lock", type: "set_next_encounter_no_break_subroutines" },
         ],
       });
-      const state = makeState({ breakerDefinitionId: "onr_v1_039_krash", ice });
+      const state = makeState({ breakerDefinitionId: 251, ice });
       state.run!.fatalDamageActiveForEncounter = active;
       state.run!.fatalDamageAmountForEncounter = 3;
       state.run!.brokenSubroutineIndexes = broken;
@@ -246,7 +246,7 @@ describe("runner encounter action generation", () => {
     },
   );
   it.each(
-    ["onr_v1_039_krash", "onr_v1_007_blink"].flatMap((breakerDefinitionId) =>
+    [251, 219].flatMap((breakerDefinitionId) =>
       [0, 1, undefined].map((amount) => ({ breakerDefinitionId, amount })),
     ),
   )(
@@ -292,9 +292,9 @@ describe("runner encounter action generation", () => {
   );
 
   it.each([
-    "onr_classic_033_superglue",
-    "onr_proteus_106_disgruntled-ice-technician",
-    "onr_v1_046_pattels-virus",
+    37,
+    164,
+    258,
   ])("retains full-break value from %s", (definitionId) => {
     const ice = iceDefinition({
       strength: 0,
@@ -302,7 +302,7 @@ describe("runner encounter action generation", () => {
         { id: "damage", type: "do_damage", damageType: "net", amount: 0 },
       ],
     });
-    const state = makeState({ breakerDefinitionId: "onr_v1_039_krash", ice });
+    const state = makeState({ breakerDefinitionId: 251, ice });
     state.runner.rig.programs.push("support" as CardInstanceId);
     state.cardInstances.support = instance("support", definitionId);
     const definitions = definitionsFor(state, ice);
@@ -318,8 +318,8 @@ describe("runner encounter action generation", () => {
   it.each([0, 1])(
     "uses the current derived damage with %i outer ICE",
     (outerCount) => {
-      const ice = proteusTestCardDefinition("onr_proteus_021_dog-pile");
-      const state = makeState({ breakerDefinitionId: "onr_v1_039_krash", ice });
+      const ice = proteusTestCardDefinition(79);
+      const state = makeState({ breakerDefinitionId: 251, ice });
       state.cardInstances.ice_1!.definitionId = ice.id;
       if (outerCount) {
         state.cardInstances.outer = instance("outer", ice.id, {
@@ -409,7 +409,7 @@ describe("runner encounter action generation", () => {
       pumpStrengthAmount: 1,
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationAbilityKey: "simple_killer_pump",
-      cardImplementationAbilityId: "simple_killer:simple_killer_pump",
+      cardImplementationAbilityId: "598:simple_killer_pump",
     });
     expect(pump.payload).not.toHaveProperty("cardImplementationAbilityIndex");
     expect(pump.payload).not.toHaveProperty(
@@ -417,7 +417,7 @@ describe("runner encounter action generation", () => {
     );
     expect(pump.abilityRef).toEqual({
       sourceCardInstanceId: "breaker_1",
-      sourceAbilityId: "simple_killer:simple_killer_pump",
+      sourceAbilityId: "598:simple_killer_pump",
     });
     const breaker = result.legalActions[1]!;
     expect(breaker.actionId).toBe(
@@ -435,11 +435,11 @@ describe("runner encounter action generation", () => {
       breakSubroutineBaseCost: 1,
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationAbilityKey: "simple_killer_break_sentry",
-      cardImplementationAbilityId: "simple_killer:simple_killer_break_sentry",
+      cardImplementationAbilityId: "598:simple_killer_break_sentry",
     });
     expect(breaker.abilityRef).toEqual({
       sourceCardInstanceId: "breaker_1",
-      sourceAbilityId: "simple_killer:simple_killer_break_sentry",
+      sourceAbilityId: "598:simple_killer_break_sentry",
     });
     expect(result.legalActions[2]!.payload).toMatchObject({
       encounterContinue: true,
@@ -479,7 +479,7 @@ describe("runner encounter action generation", () => {
   });
 
   it("does not offer break or pump actions for an ineligible breaker", () => {
-    const state = makeState({ breakerDefinitionId: "simple_decoder" });
+    const state = makeState({ breakerDefinitionId: 591 });
     const ice = iceDefinition();
 
     const result = buildRunnerEncounterActions(
@@ -494,7 +494,7 @@ describe("runner encounter action generation", () => {
   it("builds Proteus PRO004 simple icebreaker pump and break LegalActions from real Proteus definitions", () => {
     const cases = [
       {
-        definitionId: "onr_proteus_079_big-frackin-gun",
+        definitionId: 137,
         title: "Big Frackin' Gun",
         iceSubtype: "sentry",
         offSubtype: "wall",
@@ -505,7 +505,7 @@ describe("runner encounter action generation", () => {
         pumpAmount: 1,
       },
       {
-        definitionId: "onr_proteus_081_boring-bit",
+        definitionId: 139,
         title: "Boring Bit",
         iceSubtype: "wall",
         offSubtype: "sentry",
@@ -515,7 +515,7 @@ describe("runner encounter action generation", () => {
         pumpAmount: 1,
       },
       {
-        definitionId: "onr_proteus_083_corrosion",
+        definitionId: 141,
         title: "Corrosion",
         iceSubtype: "wall",
         offSubtype: "sentry",
@@ -525,7 +525,7 @@ describe("runner encounter action generation", () => {
         pumpAmount: 1,
       },
       {
-        definitionId: "onr_proteus_093_redecorator",
+        definitionId: 151,
         title: "Redecorator",
         iceSubtype: "sentry",
         offSubtype: "wall",
@@ -536,7 +536,7 @@ describe("runner encounter action generation", () => {
         pumpAmount: 1,
       },
       {
-        definitionId: "onr_proteus_095_skeleton-passkeys",
+        definitionId: 153,
         title: "Skeleton Passkeys",
         iceSubtype: "code_gate",
         offSubtype: "wall",
@@ -546,7 +546,7 @@ describe("runner encounter action generation", () => {
         pumpAmount: 4,
       },
       {
-        definitionId: "onr_proteus_100_wrecking-ball",
+        definitionId: 158,
         title: "Wrecking Ball",
         iceSubtype: "wall",
         offSubtype: "sentry",
@@ -660,11 +660,11 @@ describe("runner encounter action generation", () => {
 
   it("emits one canonical multi-break action per equivalent subroutine effect multiset", () => {
     const state = makeState({
-      breakerDefinitionId: "onr_proteus_079_big-frackin-gun",
+      breakerDefinitionId: 137,
       runnerCredits: 20,
     });
     const breakerDefinition = proteusTestCardDefinition(
-      "onr_proteus_079_big-frackin-gun",
+      137,
     );
     const matchingIce = iceDefinition({
       subroutines: Array.from({ length: 16 }, (_unused, index) => ({
@@ -690,11 +690,11 @@ describe("runner encounter action generation", () => {
 
   it("preserves multi-break choices with different subroutine effects", () => {
     const state = makeState({
-      breakerDefinitionId: "onr_proteus_079_big-frackin-gun",
+      breakerDefinitionId: 137,
       runnerCredits: 20,
     });
     const breakerDefinition = proteusTestCardDefinition(
-      "onr_proteus_079_big-frackin-gun",
+      137,
     );
     const matchingIce = iceDefinition({
       subroutines: [
@@ -722,7 +722,7 @@ describe("runner encounter action generation", () => {
 
   it("offers paid and unpaid continue actions for pay-or-end-run subroutines", () => {
     const state = makeState({
-      breakerDefinitionId: "simple_decoder",
+      breakerDefinitionId: 591,
       ice: iceDefinition({
         subroutines: [
           {

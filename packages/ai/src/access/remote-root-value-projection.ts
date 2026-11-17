@@ -14,7 +14,7 @@ export type RemoteRootValueKind =
   | "unknown";
 
 export type RemoteRootValueProjectionInput = {
-  definitionId: string;
+  definitionId: number;
   visibleCard?: VisibleCard;
   roles?: readonly string[];
   effects?: readonly {

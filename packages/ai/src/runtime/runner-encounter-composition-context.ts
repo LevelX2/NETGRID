@@ -20,7 +20,7 @@ export type RunnerEncounterCompositionContextDependencies = Omit<
   | "encounterRemotePayoffAfterBreakAssessment"
   | "runnerCreditReserveTarget"
 > & {
-  rolesForCardId: (definitionId: string | undefined) => string[];
+  rolesForCardId: (definitionId: number | undefined) => string[];
   breakSubroutineIndexesForAction: (action: LegalAction) => Set<number>;
   currentEncounteredIceCard: (
     input: AiDecisionInput,
@@ -31,7 +31,7 @@ export type RunnerEncounterCompositionContextDependencies = Omit<
     serverId: string,
   ) => string;
   isRemoteServerTarget: (serverId: string | undefined) => boolean;
-  definitionType: (definitionId: string) => string | undefined;
+  definitionType: (definitionId: number) => string | undefined;
   remoteRootTrashCost: Parameters<
     typeof createRunnerAccessPathContext
   >[0]["remoteRootTrashCost"];

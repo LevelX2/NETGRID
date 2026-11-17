@@ -97,7 +97,7 @@ describe("real preparation admission in meta 461", () => {
         actor: "runner",
         actionType: "access_card",
         serverId: "hq",
-        cardDefinitionId: "onr_v1_196_corporate-war",
+        cardDefinitionId: 408,
         corpHqCountAfter: 1,
       },
     }];
@@ -168,7 +168,7 @@ describe("real preparation admission in meta 461", () => {
     const replacingEvent = evaluateRunnerRunTargets({ input: funded }).find(
       (r) =>
         r.runActionProjection.sourceCardId ===
-        "onr_classic_038_gypsytm-schedule-analyzer",
+        42,
     )!;
     expect(replacingEvent).toBeDefined();
     expect(
@@ -204,7 +204,7 @@ describe("real preparation admission in meta 461", () => {
     const rejected = input.legalActions.find((a) =>
       game === 19
         ? a.type === "install_card" &&
-          a.source === "runner_onr_v1_123_bodyweight-data-creche_1"
+          a.source === "runner_335_1"
         : a.type === "play_event" && a.source?.includes("promises-promises"),
     );
     expect(rejected).toBeDefined();

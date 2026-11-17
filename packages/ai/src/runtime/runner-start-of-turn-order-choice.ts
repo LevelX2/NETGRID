@@ -81,7 +81,7 @@ function boundStartOfTurnOption(
     (card) =>
       card.instanceId === option.value &&
       card.known !== false &&
-      typeof card.definitionId === "string",
+      typeof card.definitionId === "number",
   );
   if (!source?.definitionId) return undefined;
 

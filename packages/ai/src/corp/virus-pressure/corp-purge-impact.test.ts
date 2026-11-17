@@ -270,7 +270,7 @@ it.each([
       state.runner.rig.programs.push(source);
       state.cardInstances[source] = {
         instanceId: source,
-        definitionId: "onr_proteus_099_viral-pipeline",
+        definitionId: 157,
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "rig" },
@@ -334,7 +334,7 @@ it.each([
 function inputWithVirusCounters(amount: number): AiDecisionInput {
   const bugZapper: VisibleCard = {
     instanceId: "bug-zapper",
-    definitionId: "onr_proteus_012_bug-zapper",
+    definitionId: 70,
     title: "Bug Zapper",
     type: "ice",
     known: true,
@@ -428,7 +428,7 @@ function inputWithRunnerVirusCounters(
     counterType === "highlighter"
       ? ({
           instanceId: "highlighter",
-          definitionId: "onr_proteus_090_highlighter",
+          definitionId: 148,
           title: "Highlighter",
           type: "program",
           known: true,
@@ -438,7 +438,7 @@ function inputWithRunnerVirusCounters(
       : counterType === "garbage"
         ? ({
             instanceId: "garbage-in",
-            definitionId: "onr_proteus_089_garbage-in",
+            definitionId: 147,
             title: "Garbage In",
             type: "program",
             known: true,

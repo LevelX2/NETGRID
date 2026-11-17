@@ -7,7 +7,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate-types
 
 /** Canonical same-fort discount facts, never an installation recommendation. */
 export function corpSameFortAgendaDiscountProfiles(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): readonly Readonly<{ requiredSubtype?: string; reduction: number }>[] {
   const card = planningCard(definitionId);
   return (card?.planning.engine.modifiers ?? []).flatMap((modifier) =>
@@ -33,7 +33,7 @@ export function corpSameFortAgendaDiscountProfiles(
 /** A public, unconditional reusable run has separate physical entry and access.
  * This certifies a possible path, never predicts the Runner's next action. */
 export function corpPublicFixedOffServerRunProfiles(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): readonly Readonly<{
   entryServerId: "hq" | "rd" | "archives";
   accessServerId: "hq" | "rd";
@@ -121,7 +121,7 @@ export type CorpOnPlayCapabilityProfile = Readonly<{
 
 /** Fixed printed cost for a visible operation, independent of its play conditions. */
 export function corpFixedOperationPlayCredits(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): number | undefined {
   const card = planningCard(definitionId)?.planning;
   if (card?.side !== "corp" || card.cardType !== "operation") return undefined;
@@ -130,7 +130,7 @@ export function corpFixedOperationPlayCredits(
 }
 
 export function corpPunishFixedCapabilityCost(
-  definitionId: string,
+  definitionId: number,
   capabilityId: string,
 ): { clicks: number; credits: number } | undefined {
   const card = planningCard(definitionId)?.planning;
@@ -219,7 +219,7 @@ export type CorpStartOfTurnOptionalDrawProfile = Readonly<{
 }>;
 
 export function corpStartOfTurnOptionalDrawProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpStartOfTurnOptionalDrawProfile | undefined {
   const planning = planningCard(definitionId);
   const scoredAgenda = planning?.planning.engine.scoredAgenda;
@@ -235,7 +235,7 @@ export function corpStartOfTurnOptionalDrawProfile(
 }
 
 export function corpScoredAgendaHqShuffleProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpScoredAgendaHqShuffleProfile | undefined {
   const planning = planningCard(definitionId);
   const scoredAgenda = planning?.planning.engine.scoredAgenda;
@@ -271,7 +271,7 @@ export function corpScoredAgendaHqShuffleProfile(
 }
 
 export function corpScoredAgendaIceMarkProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpScoredAgendaIceMarkProfile | undefined {
   const planning = planningCard(definitionId);
   const scoredAgenda = planning?.planning.engine.scoredAgenda;
@@ -314,7 +314,7 @@ export function corpScoredAgendaIceMarkProfile(
 }
 
 export function corpScoredAgendaFreeRezProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpScoredAgendaFreeRezProfile | undefined {
   const planning = planningCard(definitionId);
   const scoredAgenda = planning?.planning.engine.scoredAgenda;
@@ -344,7 +344,7 @@ export function corpScoredAgendaFreeRezProfile(
  * income. Past on-score payouts are inert in the scored area.
  */
 export function corpDefinitionIsMainPhasePassive(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
   scoreEffect: "none" | "past" | "unreachable" = "none",
 ): boolean {
   const card = planningCard(definitionId);
@@ -379,7 +379,7 @@ export function corpDefinitionIsMainPhasePassive(
  * The caller must exclude other installed agendas and advancement triggers.
  */
 export function corpOperationCannotFundWithLastClick(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   const card = planningCard(definitionId);
   if (card?.planning.side !== "corp" || card.planning.cardType !== "operation")
@@ -409,7 +409,7 @@ export function corpOperationCannotFundWithLastClick(
 }
 
 export function corpDefinitionHasTraceSource(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   const planning = planningCard(definitionId);
   if (planning?.planning.side !== "corp") return false;
@@ -422,7 +422,7 @@ export function corpDefinitionHasTraceSource(
 }
 
 export function corpDefinitionHasTagSource(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   const planning = planningCard(definitionId);
   return (
@@ -433,13 +433,13 @@ export function corpDefinitionHasTagSource(
 }
 
 export function corpDefinitionHasTraceTagSource(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   return corpTraceTagSourceProfile(definitionId) !== undefined;
 }
 
 export function corpTraceTagSourceProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpTraceTagSourceProfile | undefined {
   const planning = planningCard(definitionId);
   if (
@@ -472,7 +472,7 @@ export function corpTraceTagSourceProfile(
 }
 
 export function corpScoredTraceTagSourceProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpTraceTagSourceProfile | undefined {
   const planning = planningCard(definitionId);
   if (
@@ -505,7 +505,7 @@ export function corpScoredTraceTagSourceProfile(
 }
 
 export function corpDirectTagOperationProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpOnPlayCapabilityProfile | undefined {
   const planning = planningCard(definitionId);
   if (
@@ -552,7 +552,7 @@ export function corpDirectTagOperationProfile(
 }
 
 export function corpTaggedCreditDenialOperationProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpOnPlayCapabilityProfile | undefined {
   const planning = planningCard(definitionId);
   if (
@@ -583,7 +583,7 @@ export function corpTaggedCreditDenialOperationProfile(
 }
 
 export function corpInstalledHardwareTrashOperationProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpOnPlayCapabilityProfile | undefined {
   const planning = planningCard(definitionId);
   const utility = planning?.planning.engine.corpUtility;
@@ -606,7 +606,7 @@ export function corpInstalledHardwareTrashOperationProfile(
 }
 
 export function corpArchivesToHqOperationProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpArchivesToHqOperationProfile | undefined {
   const planning = planningCard(definitionId);
   const utility = planning?.planning.engine.corpUtility;
@@ -638,13 +638,13 @@ export function corpArchivesToHqOperationProfile(
 }
 
 export function corpTaggedMeatDamageOperationProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpTaggedMeatDamageProfile | undefined {
   return taggedMeatDamageProfile(definitionId, "operation");
 }
 
 export function corpScoredTaggedMeatDamageProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpTaggedMeatDamageProfile | undefined {
   const card = planningCard(definitionId);
   const scored = card?.planning.engine.scoredAgenda;
@@ -668,7 +668,7 @@ export function corpScoredTaggedMeatDamageProfile(
 }
 
 export function corpInstalledTaggedMeatDamageProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpTaggedMeatDamageProfile | undefined {
   const card = planningCard(definitionId)?.planning;
   if (
@@ -692,7 +692,7 @@ export function corpInstalledTaggedMeatDamageProfile(
 }
 
 function taggedMeatDamageProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
   cardType: "operation" | "agenda" | "asset" | "upgrade",
 ): CorpTaggedMeatDamageProfile | undefined {
   const planning = planningCard(definitionId);
@@ -743,7 +743,7 @@ function taggedMeatDamageProfile(
 }
 
 export function corpTaggedDamagePayoffProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpTaggedDamagePayoffProfile | undefined {
   const planning = planningCard(definitionId);
   const payoff = planning?.planning.engine.uniqueDirectLongtail;
@@ -768,7 +768,7 @@ export function corpTaggedDamagePayoffProfile(
 /** Guaranteed placement on one target from a plain unconditional operation.
  * Distinct-target distribution contributes at most one counter to that agenda. */
 export function corpGuaranteedOnPlayAdvancementCountersPerTarget(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): number {
   const card = planningCard(definitionId);
   if (card?.planning.side !== "corp" || card.planning.cardType !== "operation")
@@ -796,7 +796,7 @@ export function corpGuaranteedOnPlayAdvancementCountersPerTarget(
 }
 
 export function corpScoreConversionProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpScoreConversionProfile | undefined {
   const planning = planningCard(definitionId);
   if (planning?.planning.side !== "corp") return undefined;
@@ -844,7 +844,7 @@ export function corpCandidateProvidesScoreConversion(
   return corpScoreConversionProfile(candidate.sourceDefinitionId) !== undefined;
 }
 
-function planningCard(definitionId: string | undefined) {
+function planningCard(definitionId: number | undefined) {
   return definitionId
     ? cardSpecPlanningCardByDefinitionId(definitionId)
     : undefined;

@@ -67,7 +67,7 @@ describe("match 5F7924 passivity remediation checkpoints", () => {
       (server) => server.id === "archives",
     );
     const approachedKeeper = archives?.ice.find(
-      (card) => card.definitionId === "onr_v1_252_keeper",
+      (card) => card.definitionId === 464,
     );
 
     expect(

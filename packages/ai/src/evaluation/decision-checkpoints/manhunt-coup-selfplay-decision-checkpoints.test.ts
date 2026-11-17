@@ -71,7 +71,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
     ).toBe(
-      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_196_corporate-war_2%3Aremote_1",
+      "plan:corp.score_agenda:agenda%3Acorp_408_2%3Aremote_1",
     );
   });
 
@@ -99,7 +99,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
   });
 });
 
-const CORPORATE_WAR = "onr_v1_196_corporate-war";
+const CORPORATE_WAR = 408;
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
   return bindHistoricalRunEventCadence(
@@ -121,7 +121,7 @@ function mutateFixture(
 
 function moveCorpCardToArchives(
   checkpoint: AiDecisionCheckpointV1,
-  definitionId: string,
+  definitionId: number,
 ): void {
   const state = checkpoint.engine.testOnlyGameState;
   const instanceId = [...state.corp.hq, ...state.corp.rd].find(

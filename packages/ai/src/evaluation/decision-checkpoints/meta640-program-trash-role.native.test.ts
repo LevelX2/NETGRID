@@ -13,8 +13,8 @@ afterEach(resetResidentPlanPortfolioMemory);
 
 it("uses the compiled breaker role when native affordable-coverage losses tie", () => {
   expect(Object.values(checkpoint.validation).every(Boolean)).toBe(true);
-  expect(AI_HINTS_BY_CARD.get("onr_v1_039_krash")?.roles).toContain("icebreaker");
-  expect(AI_HINTS_BY_CARD.get("onr_v1_046_pattels-virus")?.roles).toContain(
+  expect(AI_HINTS_BY_CARD.get(251)?.roles).toContain("icebreaker");
+  expect(AI_HINTS_BY_CARD.get(258)?.roles).toContain(
     "icebreaker_support",
   );
   const decisions = [0, 1].map(() => {
@@ -34,7 +34,7 @@ it("uses the compiled breaker role when native affordable-coverage losses tie", 
       actionId: "corp.resolve_choice",
       selectedChoices: {
         choiceId: "trash_installed_program_104",
-        selectedOptionIds: ["card_runner_onr_v1_039_krash_2"],
+        selectedOptionIds: ["card_runner_251_2"],
       },
       fallbackUsed: false,
       timeoutUsed: false,

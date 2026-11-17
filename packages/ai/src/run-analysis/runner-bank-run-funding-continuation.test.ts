@@ -17,7 +17,7 @@ function facts(
   ) as unknown as AiDecisionInputWithDeckCapabilities;
   if (options?.withoutTagPrevention) {
     input.playerView.own.rig = input.playerView.own.rig!.filter(
-      (card) => card.definitionId !== "onr_v1_135_nasuko-cycle",
+      (card) => card.definitionId !== 347,
     );
   }
   const candidates = buildActionSemanticCandidates({
@@ -69,7 +69,7 @@ it.each(["one_credit_short", "one_click_short", "no_loan"] as const)(
     if (variant === "one_click_short") input.playerView.own.clicks = 3;
     if (variant === "no_loan")
       input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.filter(
-        (card) => card.definitionId !== "onr_v1_168_loan-from-chiba",
+        (card) => card.definitionId !== 380,
       );
     expect(
       runnerBankRunFundingContinuation(
@@ -143,7 +143,7 @@ it.each([
   if (variant === "no_run_click") input.playerView.own.clicks = 2;
   if (variant === "unheld_loan")
     input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.filter(
-      (card) => card.definitionId !== "onr_v1_168_loan-from-chiba",
+      (card) => card.definitionId !== 380,
     );
   if (variant === "wrong_run") target.actionId = "runner.start_run.hq";
   if (variant === "central_consumer") target.accessTargetKind = "hq";

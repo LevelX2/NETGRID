@@ -25,17 +25,17 @@ function fixture(credits = 3, runnerCredits = 22) {
     runnerDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.runner,
       cards: [
-        { id: "onr_v1_039_krash", quantity: 3 },
-        { id: "onr_v1_108_score", quantity: 8 },
+        { id: 251, quantity: 3 },
+        { id: 320, quantity: 8 },
       ],
     },
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
-        { id: "onr_classic_011_glacier", quantity: 3 },
-        { id: "onr_classic_008_deadeye", quantity: 3 },
-        { id: "onr_classic_004_theorem-proof", quantity: 6 },
-        { id: "onr_classic_001_data-fort-remapping", quantity: 3 },
+        { id: 15, quantity: 3 },
+        { id: 12, quantity: 3 },
+        { id: 8, quantity: 6 },
+        { id: 5, quantity: 3 },
       ],
     },
   });
@@ -46,10 +46,10 @@ function fixture(credits = 3, runnerCredits = 22) {
   state.runner.clicks = 3;
   state.corp.credits = credits;
   const scoredTheorem = Object.values(state.cardInstances).filter(
-    (c) => c.definitionId === "onr_classic_004_theorem-proof",
+    (c) => c.definitionId === 8,
   )[1]!;
   const scoredRemaps = Object.values(state.cardInstances).filter(
-    (c) => c.definitionId === "onr_classic_001_data-fort-remapping",
+    (c) => c.definitionId === 5,
   );
   for (const [card, side] of [
     [scoredTheorem, "runner"],
@@ -63,16 +63,16 @@ function fixture(credits = 3, runnerCredits = 22) {
     state[side].scoreArea.push(card.instanceId);
   }
   const glacs = Object.values(state.cardInstances).filter(
-    (c) => c.definitionId === "onr_classic_011_glacier",
+    (c) => c.definitionId === 15,
   );
   const dead = Object.values(state.cardInstances).find(
-    (c) => c.definitionId === "onr_classic_008_deadeye",
+    (c) => c.definitionId === 12,
   )!;
   const agenda = Object.values(state.cardInstances).find(
-    (c) => c.definitionId === "onr_classic_004_theorem-proof",
+    (c) => c.definitionId === 8,
   )!;
   const krash = Object.values(state.cardInstances).find(
-    (c) => c.definitionId === "onr_v1_039_krash",
+    (c) => c.definitionId === 251,
   )!;
   for (const c of [glacs[0]!, glacs[1]!, dead, agenda, krash])
     removeEverywhere(state, c.instanceId);
@@ -128,10 +128,10 @@ function inputFor(state: GameState) {
       deckSnapshotId: "sp431-current-terminal-corp",
       side: "corp",
       cards: [
-        { cardId: "onr_classic_011_glacier", quantity: 3 },
-        { cardId: "onr_classic_008_deadeye", quantity: 3 },
-        { cardId: "onr_classic_004_theorem-proof", quantity: 6 },
-        { cardId: "onr_classic_001_data-fort-remapping", quantity: 3 },
+        { cardId: 15, quantity: 3 },
+        { cardId: 12, quantity: 3 },
+        { cardId: 8, quantity: 6 },
+        { cardId: 5, quantity: 3 },
       ],
     },
   });
@@ -174,14 +174,14 @@ function terminalHqFixture(corpCredits = 3, runnerCredits = 4) {
   const runnerRemap = state.runner.scoreArea.find(
     (id) =>
       state.cardInstances[id]!.definitionId ===
-      "onr_classic_001_data-fort-remapping",
+      5,
   )!;
   removeEverywhere(state, runnerRemap);
   state.cardInstances[runnerRemap]!.zone = { side: "corp", zone: "archives" };
   state.corp.archives.push(runnerRemap);
   const extraScore = Object.values(state.cardInstances).find(
     (c) =>
-      c.definitionId === "onr_classic_004_theorem-proof" &&
+      c.definitionId === 8 &&
       c.zone.zone !== "scoreArea" &&
       c.instanceId !== agenda.instanceId,
   )!;
@@ -333,7 +333,7 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
     const { state } = fixture(),
       spare = Object.values(state.cardInstances).find(
         (c) =>
-          c.definitionId === "onr_classic_004_theorem-proof" &&
+          c.definitionId === 8 &&
           c.zone.zone !== "serverRoot",
       )!;
     removeEverywhere(state, spare.instanceId);
@@ -370,7 +370,7 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
       scored = state.runner.scoreArea.find(
         (id) =>
           state.cardInstances[id]?.definitionId ===
-          "onr_classic_001_data-fort-remapping",
+          5,
       )!;
     removeEverywhere(state, scored);
     state.cardInstances[scored]!.zone = { side: "corp", zone: "archives" };

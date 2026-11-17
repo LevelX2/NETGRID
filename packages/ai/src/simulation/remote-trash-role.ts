@@ -23,7 +23,7 @@ export type RemoteTrashRole =
 
 const REMOTE_TRASH_ROLE_AI_HINTS = createAiHintsByCard();
 const BBS_WHISPERING_CAMPAIGN_DEFINITION_ID =
-  "onr_v1_309_bbs-whispering-campaign";
+  521;
 
 export function remoteTrashRoleForVisibleCard(
   card: VisibleCard,

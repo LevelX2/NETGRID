@@ -42,7 +42,7 @@ it("finishes the audited multi-turn campaign before the second Runner window", (
     cp.runtime,
   );
   const root =
-    "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_1%3Aremote_1";
+    "plan:corp.score_agenda:agenda%3Acorp_405_1%3Aremote_1";
   const selected: string[] = [];
   const corp = () => {
     const input = buildAiDecisionInput(state, "corp", {

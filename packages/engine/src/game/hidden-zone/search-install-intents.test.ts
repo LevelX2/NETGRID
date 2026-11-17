@@ -16,9 +16,9 @@ import {
   resolveTemporaryProgramSearchInstallIntent,
 } from "./search-install-intents";
 
-const sourceDefinitionId = "onr_v1_059_self-modifying-code" as CardDefinitionId;
+const sourceDefinitionId = 271 as CardDefinitionId;
 const selectedCardId = "stack_program" as CardInstanceId;
-const selectedDefinitionId = "simple_decoder" as CardDefinitionId;
+const selectedDefinitionId = 591 as CardDefinitionId;
 const sneakPreviewDefinitionId = "onr_v1_089_sneak-preview" as CardDefinitionId;
 const mysterySourceCardId = "revealed_stack_program_install" as CardInstanceId;
 

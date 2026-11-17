@@ -19,8 +19,8 @@ import {
 } from "../semantic-ai-runtime-cutover.test-support";
 import { corpCounterBankScoreProjects } from "../corp/score/corp-counter-bank-score-plan";
 
-const VAPOR_OPS = "onr_v1_347_vapor-ops";
-const DATA_WALL = "onr_v1_238_data-wall-2-0";
+const VAPOR_OPS = 559;
+const DATA_WALL = 450;
 
 describe("corpCounterBankScoreProjects", () => {
   it.each([
@@ -323,7 +323,7 @@ describe("corpCounterBankScoreProjects", () => {
       input.playerView.own.gripOrHq = [agenda("agenda")];
       const existing = onePointExisting
         ? visibleCard("existing", "corp", "agenda", {
-            definitionId: "onr_v1_203_hostile-takeover",
+            definitionId: 415,
             advancementRequirement: 3,
             agendaPoints: 1,
           })
@@ -543,7 +543,7 @@ describe("corpCounterBankScoreProjects", () => {
     const input = withDeck(aiInput("corp", [installAsset]));
     input.playerView.own.gripOrHq = [
       visibleCard("asset", "corp", "asset", {
-        definitionId: "onr_v1_309_bbs-whispering-campaign",
+        definitionId: 521,
         title: "BBS Whispering Campaign",
       }),
     ];
@@ -565,7 +565,7 @@ function withDeck(input: AiDecisionInput): AiDecisionInput {
   attachOwnDeckSnapshot(input, {
     deckSnapshotId: "vapor-ops-score-bank-test",
     side: "corp",
-    cards: [{ cardId: "simple_agenda", quantity: 3 }],
+    cards: [{ cardId: 588, quantity: 3 }],
   });
   return input;
 }
@@ -591,7 +591,7 @@ function candidate(
       action.source === "vapor"
         ? VAPOR_OPS
         : action.source === "agenda"
-          ? "simple_agenda"
+          ? 588
           : undefined,
   } as ActionSemanticCandidate;
 }
@@ -633,7 +633,7 @@ function vapor(
 
 function agenda(instanceId: string): VisibleCard {
   return visibleCard(instanceId, "corp", "agenda", {
-    definitionId: "simple_agenda",
+    definitionId: 588,
     title: "Simple Agenda",
     advancementRequirement: 3,
     agendaPoints: 2,

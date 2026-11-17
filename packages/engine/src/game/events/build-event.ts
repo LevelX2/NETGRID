@@ -461,7 +461,7 @@ function revealForPublicEvent(
     legalAction.payload?.hiddenRunnerResourceInstall === true
   )
     return {};
-  if (typeof legalAction.payload?.publicRevealDefinitionId === "string") {
+  if (typeof legalAction.payload?.publicRevealDefinitionId === "number") {
     const definition =
       CARD_DEFINITIONS_BY_ID[legalAction.payload.publicRevealDefinitionId];
     if (definition)

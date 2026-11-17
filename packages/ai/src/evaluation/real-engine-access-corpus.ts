@@ -278,7 +278,7 @@ function scenario(params: {
           {
             positionKey: "root:1",
             instanceId: "secondary-asset",
-            definitionId: "onr_v1_322_euromarket-consortium",
+            definitionId: 534,
             targetKind: "asset" as const,
             commitment: {
               serverId,
@@ -290,7 +290,7 @@ function scenario(params: {
             projection: projectAccessDecision({
               source: "access_window",
               serverId,
-              knownRootDefinitionId: "onr_v1_322_euromarket-consortium",
+              knownRootDefinitionId: 534,
               target: "asset",
               intendedAccessAction: "trash",
             }),
@@ -370,9 +370,9 @@ function definitionIdFor(
 ): string {
   switch (targetKind) {
     case "agenda":
-      return "simple_agenda";
+      return 588;
     case "asset":
-      return "onr_v1_322_euromarket-consortium";
+      return 534;
     case "upgrade":
       return "low-value-upgrade";
     case "unknown":

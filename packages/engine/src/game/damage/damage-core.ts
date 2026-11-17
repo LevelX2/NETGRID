@@ -165,7 +165,7 @@ export function openRunnerInstalledTrashPreventionWindow(
     typeof legalAction.payload?.cardId === "string"
       ? (legalAction.payload.cardId as CardInstanceId)
       : undefined,
-    typeof legalAction.payload?.sourceDefinitionId === "string"
+    typeof legalAction.payload?.sourceDefinitionId === "number"
       ? (legalAction.payload.sourceDefinitionId as CardDefinitionId)
       : undefined,
   );

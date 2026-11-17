@@ -45,7 +45,7 @@ it.each([2, 10])(
     const decision = chooseAiAction(capture.input);
     expect(JSON.stringify(capture.input)).toBe(before);
     const source = capture.input.playerView.own.gripOrHq.find(
-      (card) => card.definitionId === "onr_v1_123_bodyweight-data-creche",
+      (card) => card.definitionId === 335,
     )!;
     const install = capture.input.legalActions.find(
       (action) => action.type === "install_card" && action.source === source.instanceId,

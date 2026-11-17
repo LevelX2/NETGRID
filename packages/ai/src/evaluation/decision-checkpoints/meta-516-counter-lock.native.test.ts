@@ -54,7 +54,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 it("corrects the native Raven fact while preserving the bound defense owner and legal Engine installation", () => {
   const { state, input } = native("g2d21");
   const raven = input.playerView.own.gripOrHq.find(
-    (c) => c.definitionId === "onr_v1_236_data-raven",
+    (c) => c.definitionId === 448,
   )!;
   expect(buildCorpIceCardFacts(raven)).toMatchObject({
     damage: false,

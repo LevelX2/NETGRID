@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { CatalogCard, CatalogStatusKey } from "@netgrid/catalog";
 import {
   createDeckValidationIssue,
@@ -35,12 +36,12 @@ export {
 export type DeckSide = "runner" | "corp";
 
 export type DeckCardEntry = {
-  cardId: string;
+  cardId: CardDefinitionId;
   quantity: number;
 };
 
 export type DeckTableLayoutEntry = {
-  cardId: string;
+  cardId: CardDefinitionId;
   quantity: number;
   order: number;
 };
@@ -75,7 +76,7 @@ export type EditableDeck = {
   deckVersion: string;
   name: string;
   side: DeckSide;
-  identityCardId: string;
+  identityCardId: CardDefinitionId;
   cardPoolSnapshotId: string;
   cardPoolVersion?: string;
   formatProfileId: string;
@@ -93,7 +94,7 @@ export type DeckTemplate = {
   sourceDeckId: string;
   name: string;
   side: DeckSide;
-  identityCardId: string;
+  identityCardId: CardDefinitionId;
   editableCopyAllowed: boolean;
   versionedTemplate: boolean;
   cards: DeckCardEntry[];
@@ -112,7 +113,7 @@ export type DeckFormatProfile = {
   copyLimit?: {
     defaultLimit: number;
     exceptions?: Array<{
-      cardId?: string;
+      cardId?: CardDefinitionId;
       title?: string;
       canonicalGroup?: string;
       limit: number;
@@ -135,7 +136,7 @@ export type DeckFormatProfile = {
     };
   };
   requireIdentity: boolean;
-  allowedIdentityCards: Record<DeckSide, string[]>;
+  allowedIdentityCards: Record<DeckSide, CardDefinitionId[]>;
   identityRules?: Record<
     DeckSide,
     Record<
@@ -184,7 +185,7 @@ export type DeckValidationResult = {
 
 export type DeckPublicMetadata = {
   side: DeckSide;
-  identityCardId: string;
+  identityCardId: CardDefinitionId;
   deckName: string;
   cardPoolSnapshotId: string;
   cardPoolVersion?: string;
@@ -199,7 +200,7 @@ export type DeckSnapshot = {
   deckVersion: string;
   name: string;
   side: DeckSide;
-  identityCardId: string;
+  identityCardId: CardDefinitionId;
   cardPoolSnapshotId: string;
   cardPoolVersion?: string;
   formatProfileId: string;
@@ -225,8 +226,8 @@ export type EngineDeckDefinition = {
   id: string;
   name: string;
   side: DeckSide;
-  identity: string;
-  cards: Array<{ id: string; quantity: number }>;
+  identity: CardDefinitionId;
+  cards: Array<{ id: CardDefinitionId; quantity: number }>;
 };
 
 export const FORBIDDEN_DECK_PAYLOAD_KEYS = [
@@ -407,8 +408,20 @@ export function importDeck(
     return { ok: false, errors: ["Deck JSON enthält kein Deck."] };
   if (deck.side !== "runner" && deck.side !== "corp")
     return { ok: false, errors: ["Deck Side ist ungültig."] };
-  if (!deck.name || !deck.identityCardId || !Array.isArray(deck.cards))
+  if (
+    !deck.name ||
+    typeof deck.identityCardId !== "number" ||
+    !Number.isSafeInteger(deck.identityCardId) ||
+    deck.identityCardId < 1 ||
+    !Array.isArray(deck.cards)
+  )
     return { ok: false, errors: ["Deck Pflichtfelder fehlen."] };
+  if (
+    deck.cards.some(
+      (entry) => !entry || !Number.isSafeInteger(entry.cardId) || entry.cardId < 1,
+    )
+  )
+    return { ok: false, errors: ["Deck enthält eine ungültige Karten-ID."] };
   return {
     ok: true,
     deck: {
@@ -819,9 +832,9 @@ function influenceCostForCard(
 }
 
 function normalizeCards(cards: DeckCardEntry[]): DeckCardEntry[] {
-  const byId = new Map<string, number>();
+  const byId = new Map<CardDefinitionId, number>();
   for (const entry of cards) {
-    if (typeof entry.cardId !== "string" || !Number.isFinite(entry.quantity))
+    if (!Number.isSafeInteger(entry.cardId) || entry.cardId <= 0 || !Number.isFinite(entry.quantity))
       continue;
     byId.set(
       entry.cardId,
@@ -831,7 +844,7 @@ function normalizeCards(cards: DeckCardEntry[]): DeckCardEntry[] {
   return [...byId.entries()]
     .filter(([, quantity]) => quantity > 0)
     .map(([cardId, quantity]) => ({ cardId, quantity }))
-    .sort((left, right) => left.cardId.localeCompare(right.cardId));
+    .sort((left, right) => left.cardId - right.cardId);
 }
 
 function sanitizeId(value: string): string {

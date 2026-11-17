@@ -24,7 +24,7 @@ export type PunishComponentAdapter = {
 };
 
 export function structuredPunishComponentAdapter(
-  definitionId: string,
+  definitionId: number,
 ): PunishComponentAdapter | undefined {
   return (
     structuredTraceTagAdapter(definitionId) ??
@@ -41,7 +41,7 @@ export function structuredPunishComponentAdapter(
  * certifying the exact current action and the complete response window.
  */
 function structuredTraceTagAdapter(
-  definitionId: string,
+  definitionId: number,
 ): PunishComponentAdapter | undefined {
   const profile =
     corpTraceTagSourceProfile(definitionId) ??
@@ -62,7 +62,7 @@ function structuredTraceTagAdapter(
  * The Engine subsequently proves the exact corpUtility capability.
  */
 function structuredHardwareTrashAdapter(
-  definitionId: string,
+  definitionId: number,
 ): PunishComponentAdapter | undefined {
   const profile = corpInstalledHardwareTrashOperationProfile(definitionId);
   const hint = AI_HINTS_BY_CARD.get(definitionId);
@@ -104,7 +104,7 @@ function structuredHardwareTrashAdapter(
 }
 
 function structuredDirectTagAdapter(
-  definitionId: string,
+  definitionId: number,
 ): PunishComponentAdapter | undefined {
   const profile = corpDirectTagOperationProfile(definitionId);
   return profile
@@ -118,7 +118,7 @@ function structuredDirectTagAdapter(
 }
 
 function structuredTaggedCreditDenialAdapter(
-  definitionId: string,
+  definitionId: number,
 ): PunishComponentAdapter | undefined {
   const profile = corpTaggedCreditDenialOperationProfile(definitionId);
   return profile
@@ -132,7 +132,7 @@ function structuredTaggedCreditDenialAdapter(
 }
 
 function structuredTaggedDamageAdapter(
-  definitionId: string,
+  definitionId: number,
 ): PunishComponentAdapter | undefined {
   const profile =
     corpTaggedMeatDamageOperationProfile(definitionId) ??

@@ -2,7 +2,7 @@ import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { RUNTIME_CARDS } from "../ai-hints";
 
 export function isLowValueKnownAccessCard(
-  definitionId: string,
+  definitionId: number,
   runnerCredits: number,
 ): boolean {
   const runtimeDefinition = RUNTIME_CARDS[definitionId];

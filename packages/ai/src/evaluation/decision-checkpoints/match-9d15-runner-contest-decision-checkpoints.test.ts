@@ -43,13 +43,13 @@ describe("match 9D15 runner contest decision checkpoints", () => {
         forbiddenActions: [
           {
             actionId:
-              "runner.play_event.runner_onr_v1_094_inside-job_2.remote_1.runner_onr_v1_094_inside-job_2.onr_v1_094_inside-job:abilities_on_play_make_run",
+              "runner.play_event.runner_306_2.remote_1.runner_306_2.onr_v1_094_inside-job:abilities_on_play_make_run",
           },
         ],
         runTargets: [
           {
             actionId:
-              "runner.play_event.runner_onr_v1_094_inside-job_2.remote_1.runner_onr_v1_094_inside-job_2.onr_v1_094_inside-job:abilities_on_play_make_run",
+              "runner.play_event.runner_306_2.remote_1.runner_306_2.onr_v1_094_inside-job:abilities_on_play_make_run",
             targetServerId: "remote_1",
             pathPassability: "blocked_missing_coverage",
             recommendation: "find_breaker_first",
@@ -95,7 +95,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
         const matchpointAgendaId = state.corp.scoreArea.find(
           (cardId) =>
             state.cardInstances[cardId]?.definitionId ===
-            "onr_v1_205_main-office-relocation",
+            417,
         );
         if (!matchpointAgendaId) throw new Error("Expected matchpoint agenda");
         state.corp.scoreArea = state.corp.scoreArea.filter(

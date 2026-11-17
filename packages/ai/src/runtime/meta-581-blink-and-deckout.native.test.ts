@@ -93,7 +93,7 @@ function take(
 }
 function risk(input: AiDecisionInputWithDeckCapabilities, action: LegalAction) {
   return createRunnerRandomBreakOrDamageEncounterContext({
-    sourceDefinitionIdForAction: () => "onr_v1_007_blink",
+    sourceDefinitionIdForAction: () => 219,
     randomBreakOrDamageRiskProfileForDefinitionId,
     breakSubroutineIndexesForAction,
     encounteredSubroutines: (i) =>
@@ -240,7 +240,7 @@ it("does not use an encounter survival fact to waive pre-run risk", () => {
     context: "run_path",
     certainLossRescue: true,
     riskProfile:
-      randomBreakOrDamageRiskProfileForDefinitionId("onr_v1_007_blink")!,
+      randomBreakOrDamageRiskProfileForDefinitionId(219)!,
   });
   expect(r.certainLossRescue).toBeUndefined();
   expect(randomBreakOrDamageRiskShouldAvoidRun(r)).toBe(true);
@@ -253,7 +253,7 @@ it("binds the native Downsizing rescue at scoring and consumes exactly that cont
   expect(input.playerView.own.clicks).toBe(0);
   const score = chooseAiAction(input);
   expect(score.actionId).toBe(
-    "corp.score_agenda.corp_onr_v1_194_corporate-downsizing_2.corp_onr_v1_194_corporate-downsizing_2",
+    "corp.score_agenda.corp_406_2.corp_406_2",
   );
   expect(score.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "corp.score_agenda",
@@ -266,7 +266,7 @@ it("binds the native Downsizing rescue at scoring and consumes exactly that cont
   expect(choice.actionId).toBe("corp.resolve_choice");
   expect(choice.selectedChoices).toEqual({
     choiceId: "scored_agenda_hq_agenda_shuffle_credits_314",
-    selectedOptionIds: ["card_corp_onr_v1_196_corporate-war_2"],
+    selectedOptionIds: ["card_corp_408_2"],
   });
   expect(choice.fallbackUsed || choice.timeoutUsed).toBe(false);
   const replenished = take(scored, choice.actionId, choice.selectedChoices);
@@ -287,7 +287,7 @@ it("retains the ordinary empty selection when a real R&D card prevents the next-
   restore(f, input);
   const score = chooseAiAction(input);
   expect(score.actionId).toBe(
-    "corp.score_agenda.corp_onr_v1_194_corporate-downsizing_2.corp_onr_v1_194_corporate-downsizing_2",
+    "corp.score_agenda.corp_406_2.corp_406_2",
   );
   const portfolio = residentPlanPortfolioSnapshot(input)!;
   const binding = portfolio.instances.find(

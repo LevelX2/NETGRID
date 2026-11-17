@@ -31,7 +31,7 @@ export function createCorpTagCreationDiagnosticsContext(
   function classifySource(
     diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
     action: LegalAction,
-    sourceDefinitionId: string,
+    sourceDefinitionId: number,
   ): void {
     const sourceType =
       RUNTIME_CARDS[sourceDefinitionId]?.type ??
@@ -86,7 +86,7 @@ export function createCorpTagCreationDiagnosticsContext(
       diagnostics.corpTagCreatedByAccessOrSteal = true;
     }
     const sourceDefinitionId =
-      typeof result.sourceDefinitionId === "string"
+      typeof result.sourceDefinitionId === "number"
         ? result.sourceDefinitionId
         : dependencies.sourceDefinitionIdForAction(input, action);
     classifySource(diagnostics, action, sourceDefinitionId);

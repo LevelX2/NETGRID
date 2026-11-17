@@ -401,7 +401,7 @@ describe("Runner targeted ICE disruption plan", () => {
       subroutines: [{
         id: "trace",
         type: "initiate_trace",
-        sourceDefinitionId: "onr_v1_232_crystal-wall",
+        sourceDefinitionId: 444,
         sourceTitle: "Trace wall",
         traceLimit: 2,
         traceSuccessEffect: { type: "add_tag", amount: 1 },
@@ -430,14 +430,14 @@ describe("Runner targeted ICE disruption plan", () => {
       abilityRef: {
         sourceCardInstanceId: "worm-1",
         sourceAbilityId:
-          "onr_v1_109_security-code-worm-chip:abilities_on_play_trash_unrezzed_ice",
+          "321:abilities_on_play_trash_unrezzed_ice",
       },
       payload: {
         cardId: "worm-1",
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
         cardImplementationAbilityKey: "abilities_on_play_trash_unrezzed_ice",
         cardImplementationAbilityId:
-          "onr_v1_109_security-code-worm-chip:abilities_on_play_trash_unrezzed_ice",
+          "321:abilities_on_play_trash_unrezzed_ice",
       },
     } satisfies LegalAction;
     const [candidate] = buildActionSemanticCandidates({
@@ -687,7 +687,7 @@ function canonicalForgedCandidate(): ActionSemanticCandidate {
     abilityRef: {
       sourceCardInstanceId: "forged-1",
       sourceAbilityId:
-        "onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+        "298:abilities_on_play_corp_choice_rez_or_trash_ice",
     },
     payload: {
       cardId: "forged-1",
@@ -695,7 +695,7 @@ function canonicalForgedCandidate(): ActionSemanticCandidate {
       cardImplementationAbilityKey:
         "abilities_on_play_corp_choice_rez_or_trash_ice",
       cardImplementationAbilityId:
-        "onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+        "298:abilities_on_play_corp_choice_rez_or_trash_ice",
     },
   } satisfies LegalAction;
   const [candidate] = buildActionSemanticCandidates({
@@ -757,7 +757,7 @@ function blockingIce(
     instanceId,
     definitionId:
       subtype === "wall"
-        ? "onr_v1_232_crystal-wall"
+        ? 444
         : "test-targeted-trash-sentry",
     title: subtype === "wall" ? "Crystal Wall" : "Blocking Sentry",
     type: "ice",
@@ -783,7 +783,7 @@ function blockingIce(
 function fracter(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_047_pile-driver",
+    definitionId: 259,
     title: "Pile Driver",
     type: "program",
     subtypes: ["icebreaker", "fracter", "noisy"],

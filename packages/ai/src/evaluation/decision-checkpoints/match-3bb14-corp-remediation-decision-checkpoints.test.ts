@@ -33,7 +33,7 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
       checkpoint.expectation.acceptableActions = [
         {
           actionId:
-            "corp.install_card.corp_onr_v1_268_shock-r_1.rd.corp_onr_v1_268_shock-r_1.1",
+            "corp.install_card.corp_480_1.rd.corp_480_1.1",
         },
       ];
       checkpoint.expectation.planExecution = {
@@ -62,9 +62,9 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
         expect.objectContaining({
           moduleId: "corp.score_agenda",
           instanceId:
-            "plan:corp.score_agenda:agenda%3Acorp_onr_v1_217_strike-force-kali_1%3Aremote_1",
+            "plan:corp.score_agenda:agenda%3Acorp_429_1%3Aremote_1",
           openNeedIds: expect.arrayContaining([
-            "score-protection:agenda:corp_onr_v1_217_strike-force-kali_1:remote_1",
+            "score-protection:agenda:corp_429_1:remote_1",
           ]),
           evidenceCodes: expect.arrayContaining([
             "corp_near_matchpoint_remote_maturity_required:remote_1",
@@ -103,7 +103,7 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
         acceptablePlanKinds: ["corp.economy"],
         acceptableCapabilities: ["develop_or_convert_corp_economy"],
         requiredAssessmentEvidence: [
-          "corp_terminal_central_rez_reserve_required:hq:corp_onr_v1_259_in-the-face_1:gap_2",
+          "corp_terminal_central_rez_reserve_required:hq:corp_471_1:gap_2",
         ],
       },
     };
@@ -163,7 +163,7 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
     const input = structuredClone(result.input);
     input.playerView.opponent.rig = (
       input.playerView.opponent.rig ?? []
-    ).filter((card) => card.definitionId !== "onr_v1_176_the-shell-traders");
+    ).filter((card) => card.definitionId !== 388);
     const remote = input.playerView.servers.find(
       (server) => server.id === "remote_1",
     );
@@ -192,7 +192,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
       acceptablePlanKinds: ["corp.economy"],
       acceptableCapabilities: ["develop_or_convert_corp_economy"],
       requiredAssessmentEvidence: [
-        "corp_terminal_central_rez_reserve_required:hq:corp_onr_v1_259_in-the-face_1:gap_2",
+        "corp_terminal_central_rez_reserve_required:hq:corp_471_1:gap_2",
       ],
     };
   return checkpoint;

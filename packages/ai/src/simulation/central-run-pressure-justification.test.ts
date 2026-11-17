@@ -20,20 +20,20 @@ describe("runnerCentralRunPressureJustificationReasons", () => {
     decision.playerView.opponent.credits = 4;
     decision.playerView.servers[0]!.ice = [
       {
-        ...card("onr_v1_249_hunter"),
+        ...card(461),
         type: "ice",
         subtypes: ["sentry", "bloodhound"],
         rezzed: true,
         strength: 5,
         effectiveRunQuote: {
-          iceInstanceId: "onr_v1_249_hunter",
-          iceDefinitionId: "onr_v1_249_hunter",
+          iceInstanceId: 461,
+          iceDefinitionId: 461,
           effectiveStrength: 5,
           subroutines: [
             {
               id: "hunter_trace",
               type: "initiate_trace",
-              sourceDefinitionId: "onr_v1_249_hunter",
+              sourceDefinitionId: 461,
               sourceTitle: "Hunter",
               amount: 5,
               traceLimit: 5,
@@ -92,7 +92,7 @@ function input(): AiDecisionInput {
   } as unknown as AiDecisionInput;
 }
 
-function card(definitionId: string): VisibleCard {
+function card(definitionId: number): VisibleCard {
   return {
     instanceId: definitionId,
     definitionId,

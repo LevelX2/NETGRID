@@ -24,7 +24,7 @@ describe("access window choice", () => {
     const projection = projectAccessWindowChoice({
       actionType: "trash_accessed_card",
       serverId: "remote_1",
-      knownRootDefinitionId: "onr_v1_322_euromarket-consortium",
+      knownRootDefinitionId: 534,
       targetType: "asset_node",
       trashCost: 4,
       generalTrashCost: 2,
@@ -51,7 +51,7 @@ describe("access window choice", () => {
       projectAccessWindowChoice({
         actionType: "steal_agenda",
         serverId: "remote_1",
-        knownRootDefinitionId: "simple_agenda",
+        knownRootDefinitionId: 588,
         targetType: "unknown",
         trashCost: 4,
         stealCost: 5,

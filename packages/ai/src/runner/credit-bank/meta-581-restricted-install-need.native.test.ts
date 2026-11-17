@@ -188,7 +188,7 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
   expect(before.view.own.agendaPoints).toBe(2);
   const stored = (view: typeof after.view) =>
     view.own
-      .rig!.filter((c) => c.definitionId === "onr_v1_154_broker")
+      .rig!.filter((c) => c.definitionId === 366)
       .reduce((n, c) => n + (c.counters?.bit ?? 0), 0);
   expect(stored(after.view)).toBe(6);
   expect(stored(before.view)).toBe(0);
@@ -211,7 +211,7 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
   });
   expect(after.steps.some((step) =>
     step.actionId.startsWith("runner.break_subroutine.") &&
-    step.actionId.includes("onr_v1_007_blink"),
+    step.actionId.includes(219),
   )).toBe(true);
   expect(
     after.steps.filter((s) => s.side === "corp").map((s) => s.actionId),
@@ -232,7 +232,7 @@ it("reports no acute economy need for a pure unavailable program-install bundle"
     strategicIntent: input.ownRunnerStrategicIntent!,
   });
   const bundle = evaluations.find(
-    (e) => e.definitionId === "onr_v1_117_valu-pak-software-bundle",
+    (e) => e.definitionId === 329,
   );
   expect(bundle).toMatchObject({
     availability: "timing_blocked",

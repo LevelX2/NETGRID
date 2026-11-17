@@ -38,11 +38,11 @@ it.each([
     expect(decision.fallbackUsed).toBe(false);
     expect(a.type).toBe("install_card");
     expect(a.payload).toMatchObject({
-      cardId: "corp_onr_v1_203_hostile-takeover_1",
+      cardId: "corp_415_1",
       serverId: "remote_1",
     });
     const parent =
-      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_203_hostile-takeover_1%3Aremote_1";
+      "plan:corp.score_agenda:agenda%3Acorp_415_1%3Aremote_1";
     expect(
       decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
     ).toBe(parent);
@@ -137,9 +137,9 @@ it.each([
   if (kind === "blocked") project.feasible = false;
   if (kind === "pending_funding") project.fundingGap = 1;
   if (kind === "conditional_payout")
-    project.agendaDefinitionId = "onr_v1_196_corporate-war";
+    project.agendaDefinitionId = 408;
   if (kind === "ability_income")
-    project.agendaDefinitionId = "onr_v1_206_marine-arcology";
+    project.agendaDefinitionId = 418;
   if (kind === "runner_window") input.playerView.activeSide = "runner";
   expect(corpScoreRestoresRezReserveBeforeRunnerTurn(input, [project], 4)).toBe(
     false,
@@ -168,9 +168,9 @@ it("retains the complete cost certificate after installing the score target", ()
   const d = chooseAiAction(input),
     a = input.legalActions.find((a) => a.actionId === d.actionId)!;
   expect(a.type).toBe("advance_card");
-  expect(a.source).toBe("corp_onr_v1_203_hostile-takeover_1");
+  expect(a.source).toBe("corp_415_1");
   const parent =
-    "plan:corp.score_agenda:agenda%3Acorp_onr_v1_203_hostile-takeover_1%3Aremote_1";
+    "plan:corp.score_agenda:agenda%3Acorp_415_1%3Aremote_1";
   expect(d.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe(
     parent,
   );
@@ -197,7 +197,7 @@ import { corpInstalledScoreResourceCost } from "../../corp/score/score-reserve-r
 import { corpConditionalScoreCreditProfile } from "../../runtime/corp-canonical-credit-facts";
 it("uses real conditional-card semantics in the payout contrast", () => {
   expect(
-    corpConditionalScoreCreditProfile("onr_v1_196_corporate-war"),
+    corpConditionalScoreCreditProfile(408),
   ).toMatchObject({ threshold: 12 });
 });
 it.each([
@@ -214,7 +214,7 @@ it.each([
   ) as unknown as AiDecisionInputWithDeckCapabilities;
   const agenda = input.playerView.servers
     .find((s) => s.id === "remote_1")!
-    .root.find((c) => c.instanceId === "corp_onr_v1_203_hostile-takeover_1")!;
+    .root.find((c) => c.instanceId === "corp_415_1")!;
   const q = agenda.scoreContinuationQuote!;
   if (!q.complete)
     throw new Error("Expected a complete installed score fixture quote");

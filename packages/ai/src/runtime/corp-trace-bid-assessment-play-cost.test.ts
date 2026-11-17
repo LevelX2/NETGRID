@@ -72,7 +72,7 @@ describe("Corp trace-bid play-cost projection", () => {
 function payoffCard(playCost?: VisibleCard["playCost"]): VisibleCard {
   return {
     instanceId: "power-grid",
-    definitionId: "onr_v1_299_power-grid-overload",
+    definitionId: 511,
     title: "Power Grid Overload",
     owner: "corp",
     controller: "corp",

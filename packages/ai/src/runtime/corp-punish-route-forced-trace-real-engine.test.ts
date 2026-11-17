@@ -24,10 +24,10 @@ import { buildAiDecisionInput } from "./ai-decision-input";
 import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 
-const CHANCE = "onr_v1_284_chance-observation";
-const AUDIT = "onr_v1_283_audit-of-call-records";
-const PUNITIVE = "onr_v1_301_punitive-counterstrike";
-const URBAN = "onr_v1_307_urban-renewal";
+const CHANCE = 496;
+const AUDIT = 495;
+const PUNITIVE = 513;
+const URBAN = 519;
 const CORP_DECK = withCards(DEMO_DECKS.demo_corp_001, "forced-trace-punish", [
   CHANCE,
   AUDIT,
@@ -226,7 +226,7 @@ it.each(["modern_open", "classic_blind", "classic_blind_corp_ties"] as const)(
     state.runner.rig.resources.push(crash);
     state.cardInstances[crash] = {
       instanceId: crash,
-      definitionId: "onr_classic_044_crash-space",
+      definitionId: 48,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -403,7 +403,7 @@ function applySelected(
 function playOperation(
   actions: readonly LegalAction[],
   input: ReturnType<typeof decisionInput>,
-  definitionId: string,
+  definitionId: number,
 ): LegalAction {
   const instanceId = input.playerView.own.gripOrHq.find(
     (card) => card.definitionId === definitionId,

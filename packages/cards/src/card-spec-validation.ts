@@ -270,8 +270,8 @@ export function assertCardSpecContract(spec: CardSpec): void {
     IDENTITY_KEYS,
     "$cardSpec.identity",
   );
-  if (typeof identity.cardDefinitionId !== "string")
-    invalid("$cardSpec.identity.cardDefinitionId", "must be a string");
+  if (typeof identity.cardDefinitionId !== "number")
+    invalid("$cardSpec.identity.cardDefinitionId", "must be a number");
   cardDefinitionId(identity.cardDefinitionId);
   assertNonEmptyString(identity.title, "$cardSpec.identity.title");
   enumValue(identity.side, ["corp", "runner"], "$cardSpec.identity.side");

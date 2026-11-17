@@ -8,7 +8,7 @@ import { chooseAiAction } from "../index";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 
-const AI_BOARD_MEMBER = "onr_proteus_001_ai-board-member";
+const AI_BOARD_MEMBER = 59;
 
 describe("Proteus AI Board Member offer plan", () => {
   it("accepts guaranteed Basic Credit capacity through corp.economy", () => {
@@ -82,7 +82,7 @@ function offerInput(restriction: "gain_credit" | "draw_card") {
   };
 }
 
-function corpCard(state: GameState, definitionId: string) {
+function corpCard(state: GameState, definitionId: number) {
   const card = Object.values(state.cardInstances).find(
     (candidate) =>
       candidate.owner === "corp" && candidate.definitionId === definitionId,

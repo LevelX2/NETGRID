@@ -16,8 +16,8 @@ import { removeEverywhere } from "../../engine/src/test-fixtures/mechanic-smoke-
 
 describe("AI input DTO Corp rez projection contract", () => {
   it.each([
-    ["onr_v1_352_chester-mix", "hq", 1],
-    ["onr_v1_324_fortress-architects", "rd", 1],
+    [564, "hq", 1],
+    [536, "rd", 1],
   ] as const)(
     "passes %s's Engine savings from %s through the Corp DTO",
     (sourceDefinitionId, sourceServerId, depth) => {
@@ -27,8 +27,8 @@ describe("AI input DTO Corp rez projection contract", () => {
           ...ORIGINALSET_DEFAULT_DECKS.corp,
           cards: [
             { id: sourceDefinitionId, quantity: 1 },
-            { id: "onr_v1_237_data-wall", quantity: 2 },
-            { id: "onr_v1_188_ai-chief-financial-officer", quantity: 3 },
+            { id: 449, quantity: 2 },
+            { id: 400, quantity: 3 },
           ],
         },
       });
@@ -41,7 +41,7 @@ describe("AI input DTO Corp rez projection contract", () => {
         (c) => c.definitionId === sourceDefinitionId,
       )!;
       const walls = Object.values(state.cardInstances).filter(
-        (c) => c.definitionId === "onr_v1_237_data-wall",
+        (c) => c.definitionId === 449,
       );
       const hq = state.corp.servers.find((s) => s.id === "hq")!;
       for (const c of [source, ...walls]) removeEverywhere(state, c.instanceId);
@@ -864,7 +864,7 @@ function optionalRezChoiceView(
   view.own.scoreArea = [
     {
       instanceId: "data-fort",
-      definitionId: "onr_v1_197_data-fort-reclamation",
+      definitionId: 409,
       title: "Data Fort Reclamation",
       known: true,
       type: "agenda",

@@ -93,7 +93,7 @@ import { isImmediateSafetyThreatSubroutine } from "./encounter-subroutine";
 
 function quotedFixtureIce(params: {
   instanceId: string;
-  definitionId: string;
+  definitionId: number;
   title: string;
   strength: number;
   subtypes: string[];
@@ -143,7 +143,7 @@ function costIneffectiveCoverageCreditAction() {
 
 function costEffectiveWallBreakerInHand() {
   return visibleCard("ramming-piston", "runner", "program", {
-    definitionId: "onr_v1_053_ramming-piston",
+    definitionId: 265,
     title: "Ramming Piston",
     installCost: 4,
     strength: 5,
@@ -157,7 +157,7 @@ function costIneffectiveWallInput(actions: ReturnType<typeof legalAction>[]) {
   input.playerView.own.clicks = 3;
   input.playerView.own.rig = [
     visibleCard("installed-krash", "runner", "program", {
-      definitionId: "onr_v1_039_krash",
+      definitionId: 251,
       title: "Krash",
       installCost: 0,
       strength: 0,
@@ -168,7 +168,7 @@ function costIneffectiveWallInput(actions: ReturnType<typeof legalAction>[]) {
     server("hq", [
       quotedFixtureIce({
         instanceId: "costly-hq-wall",
-        definitionId: "onr_v1_279_wall-of-static",
+        definitionId: 491,
         title: "Wall of Static",
         strength: 4,
         subtypes: ["wall"],
@@ -215,7 +215,7 @@ function costIneffectiveCoverageCapabilities(
   alternative: "in_hand" | "in_deck" | "none",
 ): DeckCapabilityProfile {
   const krash: BreakerCapability = {
-    cardId: "onr_v1_039_krash",
+    cardId: 251,
     title: "Krash",
     coverage: ["universal", "wall", "code_gate", "sentry"],
     installCost: 0,
@@ -230,7 +230,7 @@ function costIneffectiveCoverageCapabilities(
     evidence: ["test_installed_expensive_coverage"],
   };
   const rammingPiston: BreakerCapability = {
-    cardId: "onr_v1_053_ramming-piston",
+    cardId: 265,
     title: "Ramming Piston",
     coverage: ["wall"],
     installCost: 4,
@@ -268,7 +268,7 @@ function costIneffectiveCoverageCapabilities(
         searchableNow: false,
         drawOnly: alternative === "in_deck",
         missing: false,
-        bestKnownCards: ["onr_v1_039_krash"],
+        bestKnownCards: [251],
         blockers: [],
       },
     ]),
@@ -324,7 +324,7 @@ function midgameUpgradeEconomyPosture() {
 
 function alternativeWallBreakerForUpgradeSelection(): BreakerCapability {
   return {
-    cardId: "onr_v1_047_pile-driver",
+    cardId: 259,
     title: "Pile Driver",
     coverage: ["wall"],
     installCost: 7,
@@ -490,7 +490,7 @@ describe("authoritative plan-first live runtime", () => {
     const input = aiInput("runner", [prepareMemory, draw, deferredInstall]);
     input.playerView.own.gripOrHq = [
       visibleCard("memory", "runner", "hardware", {
-        definitionId: "onr_v1_145_wutech-mem-chip",
+        definitionId: 357,
       }),
     ];
     const candidates = buildActionSemanticCandidates({
@@ -498,8 +498,8 @@ describe("authoritative plan-first live runtime", () => {
       observerSide: "runner",
       stateVersion: input.playerView.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
-        memory: "onr_v1_145_wutech-mem-chip",
-        snowball: "onr_v1_066_snowball",
+        memory: 357,
+        snowball: 278,
       },
     });
 
@@ -515,7 +515,7 @@ describe("authoritative plan-first live runtime", () => {
         developments: [
           {
             developmentId: "card:snowball",
-            definitionId: "onr_v1_066_snowball",
+            definitionId: 278,
             phase: "execute",
             assignedDomainPlanIds: [
               "runner.rig_and_coverage:coverage:breaker_sentry",
@@ -610,7 +610,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "baedeker",
         payload: {
           cardId: "baedeker",
-          sourceDefinitionId: "onr_v1_003_baedekers-net-map",
+          sourceDefinitionId: 215,
           runnerProgramTrashBeforeInstall: true,
         },
       },
@@ -618,7 +618,7 @@ describe("authoritative plan-first live runtime", () => {
     const input = aiInput("runner", [action]);
     input.playerView.own.gripOrHq = [
       visibleCard("baedeker", "runner", "program", {
-        definitionId: "onr_v1_003_baedekers-net-map",
+        definitionId: 215,
         title: "Baedeker's Net Map",
         memoryCost: 1,
       }),
@@ -628,7 +628,7 @@ describe("authoritative plan-first live runtime", () => {
       observerSide: "runner",
       stateVersion: input.playerView.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
-        baedeker: "onr_v1_003_baedekers-net-map",
+        baedeker: 215,
       },
     });
     const dispositions = runnerActionDispositions(
@@ -687,15 +687,15 @@ describe("authoritative plan-first live runtime", () => {
         source: "junkyard-bbs",
         payload: {
           cardId: "junkyard-bbs",
-          sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+          sourceDefinitionId: 377,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "abilities_activated_runner_main_move_top_trash_to_grip",
           cardImplementationAbilityId:
-            "onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip",
+            "377:abilities_activated_runner_main_move_top_trash_to_grip",
           cardImplementationEffectKind: "move_top_trash_to_grip",
           targetCardId: "jackhammer",
-          targetCardDefinitionId: "onr_v1_036_jackhammer",
+          targetCardDefinitionId: 248,
           cardImplementationTopTrashTargetId: "jackhammer",
         },
       },
@@ -703,12 +703,12 @@ describe("authoritative plan-first live runtime", () => {
     const input = aiInput("runner", [action]);
     input.playerView.own.rig = [
       visibleCard("junkyard-bbs", "runner", "resource", {
-        definitionId: "onr_v1_165_junkyard-bbs",
+        definitionId: 377,
       }),
     ];
     input.playerView.own.heapOrArchives = [
       visibleCard("jackhammer", "runner", "program", {
-        definitionId: "onr_v1_036_jackhammer",
+        definitionId: 248,
         subtypes: ["icebreaker"],
       }),
     ];
@@ -717,7 +717,7 @@ describe("authoritative plan-first live runtime", () => {
       observerSide: "runner",
       stateVersion: input.playerView.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
-        "junkyard-bbs": "onr_v1_165_junkyard-bbs",
+        "junkyard-bbs": 377,
       },
       cardSemanticProfilesByDefinitionId:
         buildActionCardSemanticProfilesByDefinitionId(),
@@ -797,7 +797,7 @@ describe("authoritative plan-first live runtime", () => {
       observerSide: "runner",
       stateVersion: input.playerView.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
-        "runner-identity": "runner_identity_001",
+        "runner-identity": 587,
       },
     });
     const dispositions = runnerActionDispositions(
@@ -896,7 +896,7 @@ describe("authoritative plan-first live runtime", () => {
       "runner",
       "event",
       {
-        definitionId: "onr_v1_076_all-nighter",
+        definitionId: 288,
         title: "All-Nighter",
       },
     );
@@ -978,7 +978,7 @@ describe("authoritative plan-first live runtime", () => {
       "runner",
       "event",
       {
-        definitionId: "onr_v1_084_edited-shipping-manifests",
+        definitionId: 296,
         title: "Edited Shipping Manifests",
       },
     );
@@ -992,7 +992,7 @@ describe("authoritative plan-first live runtime", () => {
         source: shippingCard.instanceId,
         payload: {
           cardId: shippingCard.instanceId,
-          sourceDefinitionId: "onr_v1_084_edited-shipping-manifests",
+          sourceDefinitionId: 296,
           serverId: "hq",
           runnerEventRun: true,
           cardImplementationAbilityKey: "abilities_on_play_make_run",
@@ -1078,7 +1078,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 20;
     input.playerView.own.gripOrHq = [
       visibleCard("jettison", "runner", "event", {
-        definitionId: "onr_v1_080_core-command-jettison-ice",
+        definitionId: 292,
         title: "Core Command: Jettison Ice",
       }),
     ];
@@ -1184,7 +1184,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 20;
     input.playerView.own.gripOrHq = [
       visibleCard("jettison", "runner", "event", {
-        definitionId: "onr_v1_080_core-command-jettison-ice",
+        definitionId: 292,
         title: "Core Command: Jettison Ice",
       }),
     ];
@@ -1422,12 +1422,12 @@ describe("authoritative plan-first live runtime", () => {
         source: "desperate-card",
         payload: {
           cardId: "desperate-card",
-          sourceDefinitionId: "onr_v1_083_desperate-competitor",
+          sourceDefinitionId: 295,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "abilities_on_play_gain_runner_event_agenda_point",
           cardImplementationAbilityId:
-            "onr_v1_083_desperate-competitor:abilities_on_play_gain_runner_event_agenda_point",
+            "295:abilities_on_play_gain_runner_event_agenda_point",
         },
       },
     );
@@ -1443,7 +1443,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.agendaPointsToWin = 7;
     input.playerView.own.gripOrHq = [
       visibleCard("desperate-card", "runner", "event", {
-        definitionId: "onr_v1_083_desperate-competitor",
+        definitionId: 295,
       }),
     ];
 
@@ -1484,12 +1484,12 @@ describe("authoritative plan-first live runtime", () => {
         source: "desperate-card",
         payload: {
           cardId: "desperate-card",
-          sourceDefinitionId: "onr_v1_083_desperate-competitor",
+          sourceDefinitionId: 295,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "abilities_on_play_gain_runner_event_agenda_point",
           cardImplementationAbilityId:
-            "onr_v1_083_desperate-competitor:abilities_on_play_gain_runner_event_agenda_point",
+            "295:abilities_on_play_gain_runner_event_agenda_point",
         },
       },
     );
@@ -1505,7 +1505,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.agendaPointsToWin = 7;
     input.playerView.own.gripOrHq = [
       visibleCard("desperate-card", "runner", "event", {
-        definitionId: "onr_v1_083_desperate-competitor",
+        definitionId: 295,
       }),
     ];
 
@@ -1540,7 +1540,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "desperate-card",
         payload: {
           cardId: "desperate-card",
-          sourceDefinitionId: "onr_v1_083_desperate-competitor",
+          sourceDefinitionId: 295,
         },
       },
     );
@@ -1569,7 +1569,7 @@ describe("authoritative plan-first live runtime", () => {
         developments: [
           {
             developmentId: "hand:desperate-card",
-            definitionId: "onr_v1_083_desperate-competitor",
+            definitionId: 295,
             actionIds: [desperate.actionId],
             assignedDomainPlanIds: [],
             duplicateAlreadyInstalled: false,
@@ -1613,7 +1613,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "social-card",
         payload: {
           cardId: "social-card",
-          sourceDefinitionId: "onr_v1_111_social-engineering",
+          sourceDefinitionId: 323,
         },
       },
     );
@@ -1628,7 +1628,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("social-card", "runner", "event", {
-        definitionId: "onr_v1_111_social-engineering",
+        definitionId: 323,
       }),
     ];
 
@@ -1636,7 +1636,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "social-card",
-          definitionId: "onr_v1_111_social-engineering",
+          definitionId: 323,
           legalActionId: "play-social",
           priority: 1_000,
           developmentRole: "run_event",
@@ -1672,7 +1672,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "access-card",
         payload: {
           cardId: "access-card",
-          sourceDefinitionId: "onr_v1_149_access-to-arasaka",
+          sourceDefinitionId: 361,
         },
       },
     );
@@ -1687,25 +1687,25 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 8;
     input.playerView.own.gripOrHq = [
       visibleCard("access-card", "runner", "resource", {
-        definitionId: "onr_v1_149_access-to-arasaka",
+        definitionId: 361,
         title: "Access to Arasaka",
         installCost: 2,
       }),
     ];
     const hunter = visibleCard("hunter", "corp", "ice", {
-      definitionId: "onr_v1_249_hunter",
+      definitionId: 461,
       title: "Hunter",
       rezzed: true,
     });
     hunter.effectiveRunQuote = {
       iceInstanceId: hunter.instanceId,
-      iceDefinitionId: "onr_v1_249_hunter",
+      iceDefinitionId: 461,
       effectiveStrength: 5,
       subroutines: [
         {
           id: "hunter-trace",
           type: "initiate_trace",
-          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceDefinitionId: 461,
           sourceTitle: "Hunter",
           traceLimit: 5,
           traceSuccessEffect: { type: "add_tag", amount: 1 },
@@ -1718,7 +1718,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "access-card",
-          definitionId: "onr_v1_149_access-to-arasaka",
+          definitionId: 361,
           legalActionId: install.actionId,
           priority: 600,
           developmentRole: "defense_support",
@@ -1763,7 +1763,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "mileage-card",
         payload: {
           cardId: "mileage-card",
-          sourceDefinitionId: "onr_v1_102_open-ended-mileage-program",
+          sourceDefinitionId: 314,
           cardImplementationEffectKind: "remove_tags",
           cardImplementationTagMode: "amount",
           cardImplementationTagAmount: 1,
@@ -1774,7 +1774,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.tags = 1;
     input.playerView.own.gripOrHq = [
       visibleCard("mileage-card", "runner", "event", {
-        definitionId: "onr_v1_102_open-ended-mileage-program",
+        definitionId: 314,
         title: "Open-Ended Mileage Program",
       }),
     ];
@@ -1783,7 +1783,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "mileage-card",
-          definitionId: "onr_v1_102_open-ended-mileage-program",
+          definitionId: 314,
           legalActionId: mileage.actionId,
           priority: 1_000,
           developmentRole: "defense_support",
@@ -1823,7 +1823,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "signpost-card",
         payload: {
           cardId: "signpost-card",
-          sourceDefinitionId: "onr_v1_063_signpost",
+          sourceDefinitionId: 275,
         },
       },
     );
@@ -1838,7 +1838,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 8;
     input.playerView.own.gripOrHq = [
       visibleCard("signpost-card", "runner", "program", {
-        definitionId: "onr_v1_063_signpost",
+        definitionId: 275,
         title: "Signpost",
         installCost: 2,
         memoryCost: 1,
@@ -1849,7 +1849,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "signpost-card",
-          definitionId: "onr_v1_063_signpost",
+          definitionId: 275,
           legalActionId: install.actionId,
           priority: 100,
           developmentRole: "defense_support",
@@ -1887,7 +1887,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "ms-todon-card",
         payload: {
           cardId: "ms-todon-card",
-          sourceDefinitionId: "onr_classic_029_ms-todon",
+          sourceDefinitionId: 33,
         },
       },
     );
@@ -1904,7 +1904,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.agendaPoints = 6;
     input.playerView.own.rig = [
       visibleCard("installed-matador", "runner", "program", {
-        definitionId: "onr_classic_028_matador",
+        definitionId: 32,
         title: "Matador",
         strength: 0,
         subtypes: ["icebreaker", "killer"],
@@ -1912,7 +1912,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.own.gripOrHq = [
       visibleCard("ms-todon-card", "runner", "program", {
-        definitionId: "onr_classic_029_ms-todon",
+        definitionId: 33,
         title: "MS-todon",
         installCost: 4,
         strength: 2,
@@ -1924,7 +1924,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "ms-todon-card",
-          definitionId: "onr_classic_029_ms-todon",
+          definitionId: 33,
           legalActionId: install.actionId,
           priority: 1_000,
           developmentRole: "breaker_or_rig_piece",
@@ -1973,7 +1973,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "social-card",
         payload: {
           cardId: "social-card",
-          sourceDefinitionId: "onr_v1_111_social-engineering",
+          sourceDefinitionId: 323,
         },
       },
     );
@@ -1988,7 +1988,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("social-card", "runner", "event", {
-        definitionId: "onr_v1_111_social-engineering",
+        definitionId: 323,
       }),
     ];
 
@@ -2011,7 +2011,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "social-card",
-          definitionId: "onr_v1_111_social-engineering",
+          definitionId: 323,
           legalActionId: "play-social",
           priority: 1_000,
           developmentRole: "access_payoff",
@@ -2049,7 +2049,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "rd-interface-card",
         payload: {
           cardId: "rd-interface-card",
-          sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+          sourceDefinitionId: 351,
         },
       },
     );
@@ -2079,7 +2079,7 @@ describe("authoritative plan-first live runtime", () => {
           source: "rd-interface-card",
           payload: {
             cardId: "rd-interface-card",
-            sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+            sourceDefinitionId: 351,
             runnerInstallPaymentSourceIds: "software-installer",
             runnerInstallPaymentSourceAmounts: "1",
             runnerInstallPaymentHostedCredits: 1,
@@ -2096,7 +2096,7 @@ describe("authoritative plan-first live runtime", () => {
           source: "rd-interface-card",
           payload: {
             cardId: "rd-interface-card",
-            sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+            sourceDefinitionId: 351,
             runnerInstallPaymentSourceIds: "software-installer",
             runnerInstallPaymentSourceAmounts: "2",
             runnerInstallPaymentHostedCredits: 2,
@@ -2113,7 +2113,7 @@ describe("authoritative plan-first live runtime", () => {
           source: "rd-interface-card",
           payload: {
             cardId: "rd-interface-card",
-            sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+            sourceDefinitionId: 351,
             runnerProgramTrashBeforeInstall: true,
             runnerInstallPaymentSourceIds: "software-installer",
             runnerInstallPaymentSourceAmounts: "1",
@@ -2131,7 +2131,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("rd-interface-card", "runner", "hardware", {
-        definitionId: "onr_v1_139_r-and-d-interface",
+        definitionId: 351,
       }),
     ];
     const blockedRd = {
@@ -2162,7 +2162,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "rd-interface-card",
-          definitionId: "onr_v1_139_r-and-d-interface",
+          definitionId: 351,
           legalActionId: "install-rd-interface",
           priority: 900,
           cardType: "hardware",
@@ -2226,7 +2226,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("rd-mole-card", "runner", "resource", {
-        definitionId: "onr_proteus_147_r-and-d-mole",
+        definitionId: 205,
       }),
     ];
     const blockedRd = {
@@ -2284,7 +2284,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "payoff-card",
         payload: {
           cardId: "payoff-card",
-          sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+          sourceDefinitionId: 351,
         },
       },
     );
@@ -2307,7 +2307,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("payoff-card", "runner", "hardware", {
-        definitionId: "onr_v1_139_r-and-d-interface",
+        definitionId: 351,
       }),
     ];
     const target = {
@@ -2322,7 +2322,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "payoff-card",
-          definitionId: "onr_v1_139_r-and-d-interface",
+          definitionId: 351,
           legalActionId: install.actionId,
           priority: 900,
           cardType: "hardware",
@@ -2383,7 +2383,7 @@ describe("authoritative plan-first live runtime", () => {
           source: `payoff-card-${index}`,
           payload: {
             cardId: `payoff-card-${index}`,
-            sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+            sourceDefinitionId: 351,
           },
         },
       ),
@@ -2400,7 +2400,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 12;
     input.playerView.own.gripOrHq = installs.map((_, index) =>
       visibleCard(`payoff-card-${index + 1}`, "runner", "hardware", {
-        definitionId: "onr_v1_139_r-and-d-interface",
+        definitionId: 351,
       }),
     );
     const target = {
@@ -2414,7 +2414,7 @@ describe("authoritative plan-first live runtime", () => {
         installs.map((action, index) =>
           handEvaluation({
             cardInstanceId: `payoff-card-${index + 1}`,
-            definitionId: "onr_v1_139_r-and-d-interface",
+            definitionId: 351,
             legalActionId: action.actionId,
             priority: 900,
             cardType: "hardware",
@@ -2469,7 +2469,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("payoff-card", "runner", "hardware", {
-        definitionId: "onr_v1_139_r-and-d-interface",
+        definitionId: 351,
       }),
     ];
     const target = {
@@ -2482,7 +2482,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "payoff-card",
-          definitionId: "onr_v1_139_r-and-d-interface",
+          definitionId: 351,
           legalActionId: "install-payoff-not-yet-legal",
           priority: 900,
           availability: "missing_credits",
@@ -2550,31 +2550,31 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("blackmail-card", "runner", "event", {
-        definitionId: "onr_proteus_102_blackmail",
+        definitionId: 160,
       }),
       visibleCard("protected-buffer-1", "runner", "event", {
         definitionId: "onr_v1_029_special-order",
       }),
       visibleCard("protected-buffer-2", "runner", "event", {
-        definitionId: "onr_v1_111_social-engineering",
+        definitionId: 323,
       }),
       visibleCard("protected-buffer-3", "runner", "event", {
-        definitionId: "onr_v1_095_jack-n-joe",
+        definitionId: 307,
       }),
       visibleCard("protected-buffer-4", "runner", "event", {
-        definitionId: "onr_v1_110_sneak-preview",
+        definitionId: 322,
       }),
     ];
     input.playerView.servers = [
       server("hq", [
         visibleCard("hq-data-wall", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           rezzed: true,
           strength: 2,
           subtypes: ["wall"],
           effectiveRunQuote: {
             iceInstanceId: "hq-data-wall",
-            iceDefinitionId: "onr_v1_237_data-wall",
+            iceDefinitionId: 449,
             effectiveStrength: 2,
             subroutines: [{ id: "data-wall-etr", type: "end_the_run" }],
           },
@@ -2596,7 +2596,7 @@ describe("authoritative plan-first live runtime", () => {
         runner: {
           breakerInventory: [
             {
-              cardId: "onr_v1_053_ramming-piston",
+              cardId: 265,
               title: "Ramming Piston",
               coverage: ["wall"],
               installCost: 4,
@@ -2618,7 +2618,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "blackmail-card",
-          definitionId: "onr_proteus_102_blackmail",
+          definitionId: 160,
           legalActionId: "play-blackmail-not-yet-legal",
           priority: 1_000,
           availability: "missing_credits",
@@ -2716,7 +2716,7 @@ describe("authoritative plan-first live runtime", () => {
       server("remote_1", [
         quotedFixtureIce({
           instanceId: "empty-remote-wall",
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           title: "Data Wall",
           strength: 2,
           subtypes: ["wall"],
@@ -2738,7 +2738,7 @@ describe("authoritative plan-first live runtime", () => {
         runner: {
           breakerInventory: [
             {
-              cardId: "onr_v1_030_grubb",
+              cardId: 242,
               title: "Grubb",
               coverage: ["wall"],
               installCost: 0,
@@ -2788,7 +2788,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "payoff-card",
         payload: {
           cardId: "payoff-card",
-          sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+          sourceDefinitionId: 351,
         },
       },
     );
@@ -2811,7 +2811,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("payoff-card", "runner", "hardware", {
-        definitionId: "onr_v1_139_r-and-d-interface",
+        definitionId: 351,
       }),
     ];
 
@@ -2819,7 +2819,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "payoff-card",
-          definitionId: "onr_v1_139_r-and-d-interface",
+          definitionId: 351,
           legalActionId: install.actionId,
           priority: 900,
           cardType: "hardware",
@@ -2871,7 +2871,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 6;
     input.playerView.own.rig = [
       visibleCard("installed-payoff", "runner", "hardware", {
-        definitionId: "onr_v1_139_r-and-d-interface",
+        definitionId: 351,
       }),
     ];
 
@@ -2912,7 +2912,7 @@ describe("authoritative plan-first live runtime", () => {
       legalNow: false,
       evaluation: handEvaluation({
         cardInstanceId: "social-card",
-        definitionId: "onr_v1_111_social-engineering",
+        definitionId: 323,
         legalActionId: "play-social",
         priority: 1_000,
         availability: "missing_credits",
@@ -2927,7 +2927,7 @@ describe("authoritative plan-first live runtime", () => {
       legalNow: true,
       evaluation: handEvaluation({
         cardInstanceId: "social-card",
-        definitionId: "onr_v1_111_social-engineering",
+        definitionId: 323,
         legalActionId: "play-social",
         priority: 1_000,
         deferReason: "preserve_credit_floor",
@@ -2956,7 +2956,7 @@ describe("authoritative plan-first live runtime", () => {
           source: "social-card",
           payload: {
             cardId: "social-card",
-            sourceDefinitionId: "onr_v1_111_social-engineering",
+            sourceDefinitionId: 323,
           },
         },
       );
@@ -2964,7 +2964,7 @@ describe("authoritative plan-first live runtime", () => {
       input.playerView.own.credits = legalNow ? 5 : 0;
       input.playerView.own.gripOrHq = [
         visibleCard("social-card", "runner", "event", {
-          definitionId: "onr_v1_111_social-engineering",
+          definitionId: 323,
         }),
       ];
 
@@ -3131,11 +3131,11 @@ describe("authoritative plan-first live runtime", () => {
   });
 
   it.each([
-    ["onr_proteus_018_datacomb", false],
-    ["onr_proteus_018_datacomb", true],
-    ["onr_proteus_029_marionette", false],
-    ["onr_proteus_029_marionette", true],
-    ["onr_proteus_043_twisty-passages", true],
+    [76, false],
+    [76, true],
+    [87, false],
+    [87, true],
+    [101, true],
   ] as const)(
     "binds %s post-pass retention with temporary=%s to corp.defend_servers",
     (definitionId, temporary) => {
@@ -3273,7 +3273,7 @@ describe("authoritative plan-first live runtime", () => {
           payload: {
             corpPostPassIceAbility: "return_passed_ice_to_hq",
             postPassIceTrashedUnlessReturned: temporary,
-            sourceDefinitionId: "onr_proteus_037_scaffolding",
+            sourceDefinitionId: 95,
             decision: "decline",
             serverId: "hq",
           },
@@ -3290,7 +3290,7 @@ describe("authoritative plan-first live runtime", () => {
           payload: {
             corpPostPassIceAbility: "return_passed_ice_to_hq",
             postPassIceTrashedUnlessReturned: temporary,
-            sourceDefinitionId: "onr_proteus_037_scaffolding",
+            sourceDefinitionId: 95,
             decision: "return_to_hq",
             gainCredits: 1,
             serverId: "hq",
@@ -3352,7 +3352,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "ms-todon-card",
         payload: {
           cardId: "ms-todon-card",
-          sourceDefinitionId: "onr_classic_029_ms-todon",
+          sourceDefinitionId: 33,
         },
       },
     );
@@ -3369,7 +3369,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.agendaPoints = 6;
     input.playerView.own.rig = [
       visibleCard("installed-ms-todon", "runner", "program", {
-        definitionId: "onr_classic_029_ms-todon",
+        definitionId: 33,
         title: "MS-todon",
         strength: 2,
         subtypes: ["icebreaker", "killer", "noisy"],
@@ -3377,7 +3377,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.own.gripOrHq = [
       visibleCard("ms-todon-card", "runner", "program", {
-        definitionId: "onr_classic_029_ms-todon",
+        definitionId: 33,
         title: "MS-todon",
         installCost: 4,
         strength: 2,
@@ -3389,7 +3389,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "ms-todon-card",
-          definitionId: "onr_classic_029_ms-todon",
+          definitionId: 33,
           legalActionId: install.actionId,
           priority: 0,
           deferReason: "duplicate",
@@ -3424,7 +3424,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "krash-card",
         payload: {
           cardId: "krash-card",
-          sourceDefinitionId: "onr_v1_039_krash",
+          sourceDefinitionId: 251,
         },
       },
     );
@@ -3438,7 +3438,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "krash-card",
         payload: {
           cardId: "krash-card",
-          sourceDefinitionId: "onr_v1_039_krash",
+          sourceDefinitionId: 251,
           runnerProgramTrashBeforeInstall: true,
         },
       },
@@ -3469,7 +3469,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("worm-card", "runner", "program", {
-        definitionId: "onr_v1_074_worm",
+        definitionId: 286,
         title: "Worm",
         rulesText: "[0]: Break wall subroutine.\n[3]: +1 strength.",
         installCost: 4,
@@ -3478,7 +3478,7 @@ describe("authoritative plan-first live runtime", () => {
         subtypes: ["icebreaker", "worm"],
       }),
       visibleCard("krash-card", "runner", "program", {
-        definitionId: "onr_v1_039_krash",
+        definitionId: 251,
         title: "Krash",
         rulesText: "2 credits: Break ice subroutine.\n2 credits: +1 strength.",
         installCost: 0,
@@ -3489,7 +3489,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.own.rig = [
       visibleCard("installed-codecracker", "runner", "program", {
-        definitionId: "onr_v1_014_codecracker",
+        definitionId: 226,
         title: "Codecracker",
         installCost: 2,
         memoryCost: 1,
@@ -3502,7 +3502,7 @@ describe("authoritative plan-first live runtime", () => {
       server("rd", [
         quotedFixtureIce({
           instanceId: "rd-data-wall",
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           title: "Data Wall",
           strength: 0,
           subtypes: ["wall"],
@@ -3516,7 +3516,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "krash-card",
-          definitionId: "onr_v1_039_krash",
+          definitionId: 251,
           legalActionId: installKrash.actionId,
           priority: 1_000,
           developmentRole: "breaker_or_rig_piece",
@@ -3569,7 +3569,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "boring-bit",
         payload: {
           cardId: "boring-bit",
-          sourceDefinitionId: "onr_proteus_081_boring-bit",
+          sourceDefinitionId: 139,
         },
       },
     );
@@ -3583,7 +3583,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "garbage-in",
         payload: {
           cardId: "garbage-in",
-          sourceDefinitionId: "onr_proteus_089_garbage-in",
+          sourceDefinitionId: 147,
         },
       },
     );
@@ -3594,14 +3594,14 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 20;
     input.playerView.own.gripOrHq = [
       visibleCard("boring-bit", "runner", "program", {
-        definitionId: "onr_proteus_081_boring-bit",
+        definitionId: 139,
         title: "Boring Bit",
         installCost: 6,
         memoryCost: 1,
         subtypes: ["icebreaker", "worm"],
       }),
       visibleCard("garbage-in", "runner", "program", {
-        definitionId: "onr_proteus_089_garbage-in",
+        definitionId: 147,
         title: "Garbage In",
         installCost: 3,
         memoryCost: 1,
@@ -3614,8 +3614,8 @@ describe("authoritative plan-first live runtime", () => {
       observerSide: "runner",
       stateVersion: input.playerView.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
-        "boring-bit": "onr_proteus_081_boring-bit",
-        "garbage-in": "onr_proteus_089_garbage-in",
+        "boring-bit": 139,
+        "garbage-in": 147,
       },
     });
     const dispositions = runnerActionDispositions(
@@ -3758,7 +3758,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "corruption",
         payload: {
           cardId: "corruption",
-          sourceDefinitionId: "onr_classic_035_corruption",
+          sourceDefinitionId: 39,
           runnerAgendaPointTransferQuoteSchemaVersion:
             "runner-agenda-point-transfer-quote-v1",
           runnerAgendaPointTransferQuoteComplete: true,
@@ -3793,7 +3793,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.stackOrRdCount = 20;
     input.playerView.own.gripOrHq = [
       visibleCard("corruption", "runner", "event", {
-        definitionId: "onr_classic_035_corruption",
+        definitionId: 39,
         title: "Corruption",
       }),
     ];
@@ -3804,7 +3804,7 @@ describe("authoritative plan-first live runtime", () => {
       cardSemanticProfilesByDefinitionId:
         buildActionCardSemanticProfilesByDefinitionId(),
       visibleSourceDefinitionsByInstanceId: {
-        corruption: "onr_classic_035_corruption",
+        corruption: 39,
       },
     });
 
@@ -3869,7 +3869,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "bulldozer",
         payload: {
           cardId: "bulldozer",
-          sourceDefinitionId: "onr_proteus_082_bulldozer",
+          sourceDefinitionId: 140,
         },
       },
     );
@@ -3883,7 +3883,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "bulldozer",
         payload: {
           cardId: "bulldozer",
-          sourceDefinitionId: "onr_proteus_082_bulldozer",
+          sourceDefinitionId: 140,
           runnerProgramTrashBeforeInstall: true,
         },
       },
@@ -3891,7 +3891,7 @@ describe("authoritative plan-first live runtime", () => {
     const input = aiInput("runner", [direct, trashBeforeInstall]);
     input.playerView.own.gripOrHq = [
       visibleCard("bulldozer", "runner", "program", {
-        definitionId: "onr_proteus_082_bulldozer",
+        definitionId: 140,
         title: "Bulldozer",
         installCost: 7,
         memoryCost: 1,
@@ -3903,7 +3903,7 @@ describe("authoritative plan-first live runtime", () => {
       observerSide: "runner",
       stateVersion: input.playerView.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
-        bulldozer: "onr_proteus_082_bulldozer",
+        bulldozer: 140,
       },
     });
     const dispositions = runnerActionDispositions(
@@ -3918,7 +3918,7 @@ describe("authoritative plan-first live runtime", () => {
         developments: [
           {
             developmentId: "runner.develop_board_and_hand:bulldozer",
-            definitionId: "onr_proteus_082_bulldozer",
+            definitionId: 140,
             phase: "execute",
             assignedDomainPlanIds: [],
             duplicateAlreadyInstalled: false,
@@ -4030,7 +4030,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "meat-upgrade",
         payload: {
           cardId: "meat-upgrade",
-          sourceDefinitionId: "onr_classic_040_meat-upgrade",
+          sourceDefinitionId: 44,
         },
       },
     );
@@ -4039,7 +4039,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("meat-upgrade", "runner", "event", {
-        definitionId: "onr_classic_040_meat-upgrade",
+        definitionId: 44,
         title: "Meat Upgrade",
       }),
     ];
@@ -4048,12 +4048,12 @@ describe("authoritative plan-first live runtime", () => {
       observerSide: "runner",
       stateVersion: input.playerView.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
-        "meat-upgrade": "onr_classic_040_meat-upgrade",
+        "meat-upgrade": 44,
       },
     });
     const evaluation = handEvaluation({
       cardInstanceId: "meat-upgrade",
-      definitionId: "onr_classic_040_meat-upgrade",
+      definitionId: 44,
       legalActionId: meatUpgrade.actionId,
       priority: 1_000,
       deferReason: "preserve_credit_floor",
@@ -4229,7 +4229,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "running-interference",
         payload: {
           cardId: "running-interference",
-          sourceDefinitionId: "onr_classic_043_running-interference",
+          sourceDefinitionId: 47,
           serverId: "hq",
         },
       },
@@ -4238,7 +4238,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("running-interference", "runner", "event", {
-        definitionId: "onr_classic_043_running-interference",
+        definitionId: 47,
         title: "Running Interference",
       }),
     ];
@@ -4247,7 +4247,7 @@ describe("authoritative plan-first live runtime", () => {
       observerSide: "runner",
       stateVersion: input.playerView.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
-        "running-interference": "onr_classic_043_running-interference",
+        "running-interference": 47,
       },
     });
     const dispositions = runnerActionDispositions(
@@ -4288,7 +4288,7 @@ describe("authoritative plan-first live runtime", () => {
       [
         handEvaluation({
           cardInstanceId: "running-interference",
-          definitionId: "onr_classic_043_running-interference",
+          definitionId: 47,
           legalActionId: playRunningInterference.actionId,
           priority: 10,
           developmentRole: "run_event",
@@ -4369,7 +4369,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "krash-card",
         payload: {
           cardId: "krash-card",
-          sourceDefinitionId: "onr_v1_039_krash",
+          sourceDefinitionId: 251,
           runnerProgramTrashBeforeInstall: true,
         },
       },
@@ -4407,7 +4407,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 20;
     input.playerView.own.gripOrHq = [
       visibleCard("krash-card", "runner", "program", {
-        definitionId: "onr_v1_039_krash",
+        definitionId: 251,
         title: "Krash",
         installCost: 0,
         memoryCost: 1,
@@ -4419,7 +4419,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "krash-card",
-          definitionId: "onr_v1_039_krash",
+          definitionId: 251,
           legalActionId: install.actionId,
           priority: 1_000,
           developmentRole: "breaker_or_rig_piece",
@@ -4487,7 +4487,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "smc",
         payload: {
           cardId: "smc",
-          sourceDefinitionId: "onr_v1_059_self-modifying-code",
+          sourceDefinitionId: 271,
           runnerProgramTrashBeforeInstall: true,
         },
       },
@@ -4506,7 +4506,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.memoryUsed = 4;
     input.playerView.own.memoryLimit = 4;
     const sacrifice = visibleCard("redundant-program", "runner", "program", {
-      definitionId: "onr_v1_039_krash",
+      definitionId: 251,
       title: "Krash",
       memoryCost: 1,
       subtypes: ["icebreaker"],
@@ -4514,7 +4514,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.rig = [sacrifice];
     input.playerView.own.gripOrHq = [
       visibleCard("smc", "runner", "program", {
-        definitionId: "onr_v1_059_self-modifying-code",
+        definitionId: 271,
         title: "Self-Modifying Code",
         installCost: 0,
         memoryCost: 1,
@@ -4525,7 +4525,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "smc",
-          definitionId: "onr_v1_059_self-modifying-code",
+          definitionId: 271,
           legalActionId: install.actionId,
           priority: 1_000,
           developmentRole: "breaker_or_rig_piece",
@@ -4649,12 +4649,12 @@ describe("authoritative plan-first live runtime", () => {
       source:
         "runner_program_trash_before_install:smc:2:payment=ids=installer;amounts=0",
       sourceCardInstanceId: "smc",
-      sourceCardDefinitionId: "onr_v1_059_self-modifying-code",
+      sourceCardDefinitionId: 271,
       continuation: {
         family: "runner_program_trash_before_install",
         originActionId: install.actionId,
         sourceCardInstanceId: "smc",
-        sourceCardDefinitionId: "onr_v1_059_self-modifying-code",
+        sourceCardDefinitionId: 271,
         createdAtStateVersion: 2,
       },
       prompt: "Programme vor Installation trashen",
@@ -4687,26 +4687,26 @@ describe("authoritative plan-first live runtime", () => {
   it("classifies a matchpoint-reserved optional Cyfermaster trash-install only through its variant owner", () => {
     resetResidentPlanPortfolioMemory();
     const direct = legalAction(
-      "runner.install_card.runner_onr_v1_016_cyfermaster_2.runner_onr_v1_016_cyfermaster_2",
+      "runner.install_card.runner_228_2.runner_228_2",
       "runner",
       "install_card",
       "Install Cyfermaster",
       { credits: 4, clicks: 1 },
       {
-        source: "runner_onr_v1_016_cyfermaster_2",
-        payload: { cardId: "runner_onr_v1_016_cyfermaster_2" },
+        source: "runner_228_2",
+        payload: { cardId: "runner_228_2" },
       },
     );
     const withTrash = legalAction(
-      "runner.install_card.runner_onr_v1_016_cyfermaster_2.runner_onr_v1_016_cyfermaster_2.runner_program_trash_before_install",
+      "runner.install_card.runner_228_2.runner_228_2.runner_program_trash_before_install",
       "runner",
       "install_card",
       "Trash a program and install Cyfermaster",
       { credits: 4, clicks: 1 },
       {
-        source: "runner_onr_v1_016_cyfermaster_2",
+        source: "runner_228_2",
         payload: {
-          cardId: "runner_onr_v1_016_cyfermaster_2",
+          cardId: "runner_228_2",
           runnerProgramTrashBeforeInstall: true,
         },
       },
@@ -4724,15 +4724,15 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 2;
     input.playerView.opponent.agendaPoints = 6;
     input.playerView.own.rig = [
-      visibleCard("runner_onr_v1_039_krash_1", "runner", "program", {
-        definitionId: "onr_v1_039_krash",
+      visibleCard("runner_251_1", "runner", "program", {
+        definitionId: 251,
         title: "Krash",
         subtypes: ["icebreaker"],
       }),
     ];
     input.playerView.own.gripOrHq = [
-      visibleCard("runner_onr_v1_016_cyfermaster_2", "runner", "program", {
-        definitionId: "onr_v1_016_cyfermaster",
+      visibleCard("runner_228_2", "runner", "program", {
+        definitionId: 228,
         title: "Cyfermaster",
         installCost: 4,
         subtypes: ["icebreaker"],
@@ -4742,8 +4742,8 @@ describe("authoritative plan-first live runtime", () => {
     const decision = liveContext({
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
-          cardInstanceId: "runner_onr_v1_016_cyfermaster_2",
-          definitionId: "onr_v1_016_cyfermaster",
+          cardInstanceId: "runner_228_2",
+          definitionId: 228,
           legalActionId: direct.actionId,
           priority: 0,
           deferReason: "preserve_credit_floor",
@@ -4778,7 +4778,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "social-card",
         payload: {
           cardId: "social-card",
-          sourceDefinitionId: "onr_v1_111_social-engineering",
+          sourceDefinitionId: 323,
         },
       },
     );
@@ -4795,14 +4795,14 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.rig = [];
     input.playerView.own.gripOrHq = [
       visibleCard("social-card", "runner", "event", {
-        definitionId: "onr_v1_111_social-engineering",
+        definitionId: 323,
       }),
     ];
     input.playerView.servers = [
       server("hq", [
         quotedFixtureIce({
           instanceId: "hq-wall",
-          definitionId: "onr_v1_232_crystal-wall",
+          definitionId: 444,
           title: "Crystal Wall",
           strength: 3,
           subtypes: ["wall"],
@@ -4823,7 +4823,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "social-card",
-          definitionId: "onr_v1_111_social-engineering",
+          definitionId: 323,
           legalActionId: "play-social",
           priority: 1_000,
           developmentRole: "run_event",
@@ -4899,13 +4899,13 @@ describe("authoritative plan-first live runtime", () => {
       server("hq"),
       server("rd", [
         visibleCard("rd-keeper", "corp", "ice", {
-          definitionId: "onr_v1_252_keeper",
+          definitionId: 464,
           rezzed: true,
           subtypes: ["code_gate"],
           strength: 4,
           effectiveRunQuote: {
             iceInstanceId: "rd-keeper",
-            iceDefinitionId: "onr_v1_252_keeper",
+            iceDefinitionId: 464,
             effectiveStrength: 4,
             subroutines: [{ id: "keeper-etr", type: "end_the_run" }],
           },
@@ -4964,7 +4964,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 4;
     input.playerView.own.rig = [
       visibleCard("blink-installed", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         strength: 5,
         subtypes: ["icebreaker", "random"],
       }),
@@ -4984,7 +4984,7 @@ describe("authoritative plan-first live runtime", () => {
       server("rd", [
         quotedFixtureIce({
           instanceId: "rd-visible-code-gate",
-          definitionId: "onr_v1_239_endless-corridor",
+          definitionId: 451,
           title: "Endless Corridor",
           strength: 4,
           subtypes: ["code_gate"],
@@ -5028,7 +5028,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 4;
     input.playerView.own.rig = [
       visibleCard("blink-installed", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
       }),
     ];
     input.playerView.own.gripOrHq = [
@@ -5046,7 +5046,7 @@ describe("authoritative plan-first live runtime", () => {
       server("rd", [
         quotedFixtureIce({
           instanceId: "rd-visible-code-gate",
-          definitionId: "onr_v1_239_endless-corridor",
+          definitionId: 451,
           title: "Endless Corridor",
           strength: 4,
           subtypes: ["code_gate"],
@@ -5100,7 +5100,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 4;
     input.playerView.own.rig = [
       visibleCard("blink-installed", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
       }),
     ];
     input.playerView.own.gripOrHq = Array.from({ length: 5 }, (_, index) =>
@@ -5108,14 +5108,14 @@ describe("authoritative plan-first live runtime", () => {
     );
     const innerIce = quotedFixtureIce({
       instanceId: "inner-code-gate",
-      definitionId: "onr_v1_239_endless-corridor",
+      definitionId: 451,
       title: "Endless Corridor",
       strength: 4,
       subtypes: ["code_gate"],
     });
     const outerIce = quotedFixtureIce({
       instanceId: "outer-code-gate",
-      definitionId: "onr_v1_270_sleeper",
+      definitionId: 482,
       title: "Sleeper",
       strength: 4,
       subtypes: ["code_gate"],
@@ -5165,7 +5165,7 @@ describe("authoritative plan-first live runtime", () => {
     blinkBreak.timingPoint = "run.encounter_ice";
     blinkBreak.abilityRef = {
       sourceCardInstanceId: "blink-installed",
-      sourceAbilityId: "onr_v1_007_blink:icebreaker_abilities_break_subroutine",
+      sourceAbilityId: "219:icebreaker_abilities_break_subroutine",
     };
     blinkBreak.payload = {
       ...blinkBreak.payload,
@@ -5174,7 +5174,7 @@ describe("authoritative plan-first live runtime", () => {
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationAbilityKey: "icebreaker_abilities_break_subroutine",
       cardImplementationAbilityId:
-        "onr_v1_007_blink:icebreaker_abilities_break_subroutine",
+        "219:icebreaker_abilities_break_subroutine",
     };
     const resolveIce = legalAction(
       "resolve-advanced-remote-etr",
@@ -5196,12 +5196,12 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.gripOrHq = [];
     input.playerView.own.rig = [
       visibleCard("blink-installed", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
       }),
     ];
     const encounteredIce = quotedFixtureIce({
       instanceId: "advanced-remote-ice",
-      definitionId: "onr_v1_270_sleeper",
+      definitionId: 482,
       title: "Sleeper",
       strength: 4,
       subtypes: ["code_gate"],
@@ -5285,14 +5285,14 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("corp", [action]);
     const lowValueCard = visibleCard("drawn-operation", "corp", "operation", {
-      definitionId: "onr_v1_284_chance-observation",
+      definitionId: 496,
     });
     const retainedAgenda = visibleCard("drawn-agenda", "corp", "agenda", {
-      definitionId: "simple_agenda",
+      definitionId: 588,
     });
     const additionalCards = Array.from({ length: 4 }, (_, index) =>
       visibleCard(`drawn-additional-${index + 1}`, "corp", "asset", {
-        definitionId: "simple_economy_asset",
+        definitionId: 594,
       }),
     );
     const options = [
@@ -5465,14 +5465,14 @@ describe("authoritative plan-first live runtime", () => {
     const agendas = ["agenda-one", "agenda-two", "agenda-three"].map(
       (instanceId) =>
         visibleCard(instanceId, "corp", "agenda", {
-          definitionId: "simple_agenda",
+          definitionId: 588,
         }),
     );
     const operation = visibleCard("operation", "corp", "operation", {
-      definitionId: "onr_v1_284_chance-observation",
+      definitionId: 496,
     });
     const ice = visibleCard("ice", "corp", "ice", {
-      definitionId: "onr_v1_261_quandary",
+      definitionId: 473,
     });
     const hand = [...agendas, operation, ice];
     const options = hand.map((card) => ({
@@ -5652,19 +5652,19 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.rig = [
       visibleCard("cyfermaster", "runner", "program", {
-        definitionId: "onr_v1_016_cyfermaster",
+        definitionId: 228,
         strength: 5,
         subtypes: ["icebreaker"],
       }),
     ];
     const entrapment = visibleCard("entrapment", "corp", "ice", {
-      definitionId: "onr_classic_010_entrapment",
+      definitionId: 14,
       rezzed: true,
       strength: 4,
       subtypes: ["code_gate", "deflector"],
       effectiveRunQuote: {
         iceInstanceId: "entrapment",
-        iceDefinitionId: "onr_classic_010_entrapment",
+        iceDefinitionId: 14,
         effectiveStrength: 4,
         subroutines: [
           {
@@ -5755,7 +5755,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.own.rig = [
       visibleCard("rent-i-con", "runner", "program", {
-        definitionId: "onr_classic_031_rent-i-con",
+        definitionId: 35,
         title: "Rent-I-Con",
         strength: 2,
         subtypes: ["icebreaker"],
@@ -5764,14 +5764,14 @@ describe("authoritative plan-first live runtime", () => {
       }),
     ];
     const brainDrain = visibleCard("brain-drain", "corp", "ice", {
-      definitionId: "onr_classic_007_brain-drain",
+      definitionId: 11,
       title: "Brain Drain",
       rezzed: true,
       strength: 3,
       subtypes: ["sentry", "black_ice", "ap"],
       effectiveRunQuote: {
         iceInstanceId: "brain-drain",
-        iceDefinitionId: "onr_classic_007_brain-drain",
+        iceDefinitionId: 11,
         effectiveStrength: 3,
         subroutines: [
           {
@@ -5779,7 +5779,7 @@ describe("authoritative plan-first live runtime", () => {
             type: "random_damage",
             amount: 3,
             damageType: "core",
-            sourceDefinitionId: "onr_classic_007_brain-drain",
+            sourceDefinitionId: 11,
           },
         ],
       },
@@ -5846,7 +5846,7 @@ describe("authoritative plan-first live runtime", () => {
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "icebreaker_abilities_break_subroutine",
           cardImplementationAbilityId:
-            "onr_v1_047_pile-driver:icebreaker_abilities_break_subroutine",
+            "259:icebreaker_abilities_break_subroutine",
         },
       },
     );
@@ -5891,39 +5891,39 @@ describe("authoritative plan-first live runtime", () => {
     });
     input.playerView.own.rig = [
       visibleCard("pile-driver", "runner", "program", {
-        definitionId: "onr_v1_047_pile-driver",
+        definitionId: 259,
         title: "Pile Driver",
         strength: 7,
         subtypes: ["icebreaker", "noisy"],
       }),
       visibleCard("cloak", "runner", "program", {
-        definitionId: "onr_v1_011_cloak",
+        definitionId: 223,
         title: "Cloak",
         subtypes: ["stealth"],
         counterDisplays: [restrictedPool("cloak")],
       }),
       visibleCard("owl", "runner", "hardware", {
-        definitionId: "onr_v1_141_raven-microcyb-owl",
+        definitionId: 353,
         title: "Raven Microcyb Owl",
         subtypes: ["deck", "stealth"],
         counterDisplays: [restrictedPool("owl")],
       }),
     ];
     const fireWall = visibleCard("fire-wall", "corp", "ice", {
-      definitionId: "onr_v1_245_fire-wall",
+      definitionId: 457,
       title: "Fire Wall",
       rezzed: true,
       strength: 4,
       subtypes: ["wall"],
       effectiveRunQuote: {
         iceInstanceId: "fire-wall",
-        iceDefinitionId: "onr_v1_245_fire-wall",
+        iceDefinitionId: 457,
         effectiveStrength: 4,
         subroutines: [
           {
             id: "printed_subroutines_end_the_run",
             type: "end_the_run",
-            sourceDefinitionId: "onr_v1_245_fire-wall",
+            sourceDefinitionId: 457,
           },
         ],
       },
@@ -6153,7 +6153,7 @@ describe("authoritative plan-first live runtime", () => {
             cardImplementationAbilityKey:
               "icebreaker_abilities_break_subroutine",
             cardImplementationAbilityId:
-              "onr_v1_007_blink:icebreaker_abilities_break_subroutine",
+              "219:icebreaker_abilities_break_subroutine",
           },
         },
       );
@@ -6168,7 +6168,7 @@ describe("authoritative plan-first live runtime", () => {
           payload: {
             encounterContinue: true,
             encounterWillEndRun: false,
-            sourceDefinitionId: "onr_v1_275_vacuum-link",
+            sourceDefinitionId: 487,
             unbrokenSubroutineCount: 1,
             encounterSubroutineIds:
               "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
@@ -6185,7 +6185,7 @@ describe("authoritative plan-first live runtime", () => {
       input.playerView.own.credits = 3;
       input.playerView.own.rig = [
         visibleCard("blink", "runner", "program", {
-          definitionId: "onr_v1_007_blink",
+          definitionId: 219,
           title: "Blink",
           strength: 5,
           subtypes: ["icebreaker", "random"],
@@ -6193,7 +6193,7 @@ describe("authoritative plan-first live runtime", () => {
       ];
       const vacuumLink = withEffectiveRunQuote(
         visibleCard("vacuum-link", "corp", "ice", {
-          definitionId: "onr_v1_275_vacuum-link",
+          definitionId: 487,
           title: "Vacuum Link",
           rezzed: true,
           strength: 5,
@@ -6205,7 +6205,7 @@ describe("authoritative plan-first live runtime", () => {
             {
               id: "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
               type: "rewind_run_to_rezzed_ice_by_die",
-              sourceDefinitionId: "onr_v1_275_vacuum-link",
+              sourceDefinitionId: 487,
               sourceTitle: "Vacuum Link",
             },
           ],
@@ -6221,7 +6221,7 @@ describe("authoritative plan-first live runtime", () => {
       };
       const innerWall = withEffectiveRunQuote(
         visibleCard("inner-wall", "corp", "ice", {
-          definitionId: "onr_v1_279_wall-of-static",
+          definitionId: 491,
           title: "Wall of Static",
           rezzed: true,
           strength: 2,
@@ -6233,7 +6233,7 @@ describe("authoritative plan-first live runtime", () => {
             {
               id: "printed_subroutines_end_the_run",
               type: "end_the_run",
-              sourceDefinitionId: "onr_v1_279_wall-of-static",
+              sourceDefinitionId: 491,
               sourceTitle: "Wall of Static",
             },
           ],
@@ -6407,7 +6407,7 @@ describe("authoritative plan-first live runtime", () => {
         side: "runner",
         source: "card_implementation.vacuum_link_rewind",
         sourceCardInstanceId: "vacuum-link",
-        sourceCardDefinitionId: "onr_v1_275_vacuum-link",
+        sourceCardDefinitionId: 487,
         prompt: "Run fortsetzen oder ausstöpseln?",
         kind: "select_option",
         options: [
@@ -6437,7 +6437,7 @@ describe("authoritative plan-first live runtime", () => {
             {
               effectId: "vacuum-link-rewind",
               kind: "resolve_subroutine",
-              sourceDefinitionId: "onr_v1_275_vacuum-link",
+              sourceDefinitionId: 487,
               visibility: "public",
             },
           ],
@@ -6491,7 +6491,7 @@ describe("authoritative plan-first live runtime", () => {
                       {
                         effectId: "vacuum-link-rewind",
                         kind: "resolve_subroutine",
-                        sourceDefinitionId: "onr_v1_275_vacuum-link",
+                        sourceDefinitionId: 487,
                         visibility: "public",
                       },
                     ],
@@ -6568,7 +6568,7 @@ describe("authoritative plan-first live runtime", () => {
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "spend_remap_counter_end_run",
           cardImplementationAbilityId:
-            "onr_classic_001_data-fort-remapping:spend_remap_counter_end_run",
+            "5:spend_remap_counter_end_run",
           cardImplementationAbilityTiming: "corp_during_run",
           cardImplementationEffectKind: "end_run",
           cardImplementationSourceCounterType: "remap",
@@ -6605,14 +6605,14 @@ describe("authoritative plan-first live runtime", () => {
       server("archives"),
       server("remote_1", [
         visibleCard("remote-wall", "corp", "ice", {
-          definitionId: "onr_classic_011_glacier",
+          definitionId: 15,
           rezzed: false,
         }),
       ]),
     ];
     input.playerView.own.scoreArea = [
       visibleCard("scored-remap", "corp", "agenda", {
-        definitionId: "onr_classic_001_data-fort-remapping",
+        definitionId: 5,
         counters: { remap: 1 },
       }),
     ];
@@ -6622,13 +6622,13 @@ describe("authoritative plan-first live runtime", () => {
         observerSide: "corp",
         stateVersion: input.playerView.stateVersion,
         visibleSourceDefinitionsByInstanceId: {
-          "scored-remap": "onr_classic_001_data-fort-remapping",
+          "scored-remap": 5,
         },
       }).find((candidate) => candidate.actionId === endRun.actionId),
     ).toMatchObject({
       semanticActionType: "run.end_by_corp",
       sourceCardInstanceId: "scored-remap",
-      sourceDefinitionId: "onr_classic_001_data-fort-remapping",
+      sourceDefinitionId: 5,
       primaryProjectionStatus: "projected",
     });
 
@@ -6667,12 +6667,12 @@ describe("authoritative plan-first live runtime", () => {
         visibility: "private_to_actor",
         payload: {
           sourceCardId: "credit-subversion-installed",
-          sourceDefinitionId: "onr_proteus_136_credit-subversion",
+          sourceDefinitionId: 194,
           cardId: "credit-subversion-installed",
           serverId: "hq",
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+            "194:hq_success_reveal_trash_source_corp_lose_three",
           cardImplementationAbilityKey:
             "hq_success_reveal_trash_source_corp_lose_three",
           cardImplementationPrimitiveKind:
@@ -6747,11 +6747,11 @@ describe("authoritative plan-first live runtime", () => {
         source: "credit-subversion-installed",
         payload: {
           sourceCardId: "credit-subversion-installed",
-          sourceDefinitionId: "onr_proteus_136_credit-subversion",
+          sourceDefinitionId: 194,
           serverId: "hq",
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+            "194:hq_success_reveal_trash_source_corp_lose_three",
           cardImplementationAbilityKey:
             "hq_success_reveal_trash_source_corp_lose_three",
           cardImplementationPrimitiveKind:
@@ -6918,7 +6918,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("mantis-card", "runner", "event", {
-        definitionId: "onr_v1_099_mantis-fixer-at-large",
+        definitionId: 311,
         title: "Mantis, Fixer-at-Large",
         rulesText:
           "Search your stack for a card, and bring it into your hand. Reshuffle your stack afterwards.",
@@ -6944,7 +6944,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "short-circuit",
         payload: {
           cardId: "short-circuit",
-          sourceDefinitionId: "onr_v1_177_the-short-circuit",
+          sourceDefinitionId: 389,
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: "program",
         },
@@ -6971,15 +6971,15 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.rig = [
       visibleCard("short-circuit", "runner", "resource", {
-        definitionId: "onr_v1_177_the-short-circuit",
+        definitionId: 389,
       }),
       visibleCard("blink-installed", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
       }),
     ];
     input.playerView.own.gripOrHq = [
       visibleCard("newsgroup-in-grip", "runner", "program", {
-        definitionId: "onr_v1_045_newsgroup-filter",
+        definitionId: 257,
       }),
     ];
     Object.assign(input, {
@@ -6987,8 +6987,8 @@ describe("authoritative plan-first live runtime", () => {
         deckSnapshotId: "program-tutor-no-unrepresented-target",
         side: "runner",
         cards: [
-          { cardId: "onr_v1_007_blink", quantity: 3 },
-          { cardId: "onr_v1_045_newsgroup-filter", quantity: 1 },
+          { cardId: 219, quantity: 3 },
+          { cardId: 257, quantity: 1 },
         ],
       },
     });
@@ -7012,7 +7012,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "short-circuit",
         payload: {
           cardId: "short-circuit",
-          sourceDefinitionId: "onr_v1_177_the-short-circuit",
+          sourceDefinitionId: 389,
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: "program",
         },
@@ -7031,10 +7031,10 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.rig = [
       visibleCard("short-circuit", "runner", "resource", {
-        definitionId: "onr_v1_177_the-short-circuit",
+        definitionId: 389,
       }),
       visibleCard("blink-installed", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
       }),
     ];
     Object.assign(input, {
@@ -7042,8 +7042,8 @@ describe("authoritative plan-first live runtime", () => {
         deckSnapshotId: "program-tutor-unrepresented-target",
         side: "runner",
         cards: [
-          { cardId: "onr_v1_007_blink", quantity: 3 },
-          { cardId: "onr_v1_047_pile-driver", quantity: 1 },
+          { cardId: 219, quantity: 3 },
+          { cardId: 259, quantity: 1 },
         ],
       },
     });
@@ -7096,7 +7096,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.rig = fullNonNoisyBreakerRig();
     input.playerView.own.gripOrHq = [
       visibleCard("smc", "runner", "program", {
-        definitionId: "onr_v1_059_self-modifying-code",
+        definitionId: 271,
       }),
     ];
     Object.assign(input, {
@@ -7105,10 +7105,10 @@ describe("authoritative plan-first live runtime", () => {
         side: "runner",
         cards: [
           {
-            cardId: "onr_v1_059_self-modifying-code",
+            cardId: 271,
             quantity: 1,
           },
-          { cardId: "onr_v1_071_vewy-vewy-quiet", quantity: 2 },
+          { cardId: 283, quantity: 2 },
         ],
       },
     });
@@ -7167,7 +7167,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("smc", "runner", "program", {
-        definitionId: "onr_v1_059_self-modifying-code",
+        definitionId: 271,
       }),
     ];
     Object.assign(input, {
@@ -7175,8 +7175,8 @@ describe("authoritative plan-first live runtime", () => {
         deckSnapshotId: "program-search-source-normalized-variant",
         side: "runner",
         cards: [
-          { cardId: "onr_v1_059_self-modifying-code", quantity: 1 },
-          { cardId: "onr_v1_047_pile-driver", quantity: 1 },
+          { cardId: 271, quantity: 1 },
+          { cardId: 259, quantity: 1 },
         ],
       },
     });
@@ -7201,7 +7201,7 @@ describe("authoritative plan-first live runtime", () => {
         runner: {
           breakerInventory: [
             {
-              cardId: "onr_v1_047_pile-driver",
+              cardId: 259,
               title: "Pile Driver",
               coverage: ["wall"],
               risks: [],
@@ -7221,14 +7221,14 @@ describe("authoritative plan-first live runtime", () => {
               searchableNow: true,
               drawOnly: false,
               missing: false,
-              bestKnownCards: ["onr_v1_047_pile-driver"],
+              bestKnownCards: [259],
               blockers: ["needs_search_action"],
             },
           },
           searchAccess: {
             tools: [
               {
-                cardId: "onr_v1_059_self-modifying-code",
+                cardId: 271,
                 title: "Self-Modifying Code",
                 status: "in_hand",
                 canSearchPrograms: true,
@@ -7278,7 +7278,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("smc", "runner", "program", {
-        definitionId: "onr_v1_059_self-modifying-code",
+        definitionId: 271,
       }),
     ];
     Object.assign(input, {
@@ -7287,10 +7287,10 @@ describe("authoritative plan-first live runtime", () => {
         side: "runner",
         cards: [
           {
-            cardId: "onr_v1_059_self-modifying-code",
+            cardId: 271,
             quantity: 1,
           },
-          { cardId: "onr_v1_047_pile-driver", quantity: 1 },
+          { cardId: 259, quantity: 1 },
         ],
       },
     });
@@ -7304,7 +7304,7 @@ describe("authoritative plan-first live runtime", () => {
         evaluateRunnerHandDevelopment: () => [
           handEvaluation({
             cardInstanceId: "smc",
-            definitionId: "onr_v1_059_self-modifying-code",
+            definitionId: 271,
             legalActionId: install.actionId,
             priority: 500,
             deferReason: "preserve_credit_floor",
@@ -7351,7 +7351,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.gripOrHq = [
       visibleCard("broker-card", "runner", "resource", {
-        definitionId: "onr_v1_154_broker",
+        definitionId: 366,
         title: "Broker",
       }),
     ];
@@ -7363,7 +7363,7 @@ describe("authoritative plan-first live runtime", () => {
             searchAccess: { tools: [] },
             economyBankTools: [
               {
-                cardId: "onr_v1_154_broker",
+                cardId: 366,
                 sourceCardInstanceId: "broker-card",
                 title: "Broker",
                 ownerSide: "runner",
@@ -7388,7 +7388,7 @@ describe("authoritative plan-first live runtime", () => {
         evaluateRunnerHandDevelopment: () => [
           handEvaluation({
             cardInstanceId: "broker-card",
-            definitionId: "onr_v1_154_broker",
+            definitionId: 366,
             legalActionId: "install-broker",
             priority: 80,
           }),
@@ -7435,7 +7435,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("contract-card", "runner", "resource", {
-        definitionId: "onr_v1_178_short-term-contract",
+        definitionId: 390,
         title: "Short-Term Contract",
       }),
     ];
@@ -7447,7 +7447,7 @@ describe("authoritative plan-first live runtime", () => {
             searchAccess: { tools: [] },
             economyBankTools: [
               {
-                cardId: "onr_v1_178_short-term-contract",
+                cardId: 390,
                 sourceCardInstanceId: "contract-card",
                 title: "Short-Term Contract",
                 ownerSide: "runner",
@@ -7473,7 +7473,7 @@ describe("authoritative plan-first live runtime", () => {
         evaluateRunnerHandDevelopment: () => [
           handEvaluation({
             cardInstanceId: "contract-card",
-            definitionId: "onr_v1_178_short-term-contract",
+            definitionId: 390,
             legalActionId: install.actionId,
             priority: 80,
           }),
@@ -7541,7 +7541,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.gripOrHq = [
       visibleCard("bank-card", "runner", "resource", {
-        definitionId: "onr_v1_154_broker",
+        definitionId: 366,
         title: "Broker",
       }),
     ];
@@ -7553,7 +7553,7 @@ describe("authoritative plan-first live runtime", () => {
             searchAccess: { tools: [] },
             economyBankTools: [
               {
-                cardId: "onr_v1_154_broker",
+                cardId: 366,
                 title: "Broker",
                 ownerSide: "runner",
                 status: "in_hand",
@@ -7577,7 +7577,7 @@ describe("authoritative plan-first live runtime", () => {
         evaluateRunnerHandDevelopment: () => [
           handEvaluation({
             cardInstanceId: "bank-card",
-            definitionId: "onr_v1_154_broker",
+            definitionId: 366,
             legalActionId: direct.actionId,
             priority: 80,
           }),
@@ -7602,10 +7602,10 @@ describe("authoritative plan-first live runtime", () => {
         source: "broker-card",
         payload: {
           cardId: "broker-card",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "store_credits",
-          cardImplementationAbilityId: "onr_v1_154_broker:store_credits",
+          cardImplementationAbilityId: "366:store_credits",
           cardImplementationAddsHostedCredits: true,
           hostedCreditAddAmount: 3,
         },
@@ -7621,10 +7621,10 @@ describe("authoritative plan-first live runtime", () => {
         source: "broker-card",
         payload: {
           cardId: "broker-card",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "withdraw_credits",
-          cardImplementationAbilityId: "onr_v1_154_broker:withdraw_credits",
+          cardImplementationAbilityId: "366:withdraw_credits",
           cardImplementationTakesHostedCredits: true,
           hostedCreditTakeAmount: 3,
           gainCreditsAmount: 3,
@@ -7644,7 +7644,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 4;
     input.playerView.own.rig = [
       visibleCard("broker-card", "runner", "resource", {
-        definitionId: "onr_v1_154_broker",
+        definitionId: 366,
         title: "Broker",
       }),
     ];
@@ -7675,7 +7675,7 @@ describe("authoritative plan-first live runtime", () => {
             searchAccess: { tools: [] },
             economyBankTools: [
               {
-                cardId: "onr_v1_154_broker",
+                cardId: 366,
                 title: "Broker",
                 ownerSide: "runner",
                 status: "installed",
@@ -7712,12 +7712,12 @@ describe("authoritative plan-first live runtime", () => {
         source: "short-term-contract",
         payload: {
           cardId: "short-term-contract",
-          sourceDefinitionId: "onr_v1_178_short-term-contract",
+          sourceDefinitionId: 390,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "abilities_activated_runner_main_take_hosted_credits",
           cardImplementationAbilityId:
-            "onr_v1_178_short-term-contract:abilities_activated_runner_main_take_hosted_credits",
+            "390:abilities_activated_runner_main_take_hosted_credits",
           cardImplementationTakesHostedCredits: true,
           cardImplementationHostedCreditCashOutMaxUses: 6,
           hostedCreditTakeAmount: 2,
@@ -7738,7 +7738,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.rig = [
       visibleCard("short-term-contract", "runner", "resource", {
-        definitionId: "onr_v1_178_short-term-contract",
+        definitionId: 390,
         title: "Short-Term Contract",
         counters: { bit: 12 },
         counterDisplays: [
@@ -7804,10 +7804,10 @@ describe("authoritative plan-first live runtime", () => {
         source: "broker-2",
         payload: {
           cardId: "broker-2",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "store_credits",
-          cardImplementationAbilityId: "onr_v1_154_broker:store_credits",
+          cardImplementationAbilityId: "366:store_credits",
           cardImplementationAddsHostedCredits: true,
           hostedCreditAddAmount: 3,
         },
@@ -7828,12 +7828,12 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.rig = [
       visibleCard("broker-1", "runner", "resource", {
-        definitionId: "onr_v1_154_broker",
+        definitionId: 366,
         title: "Broker",
         counters: { bit: 3 },
       }),
       visibleCard("broker-2", "runner", "resource", {
-        definitionId: "onr_v1_154_broker",
+        definitionId: 366,
         title: "Broker",
       }),
     ];
@@ -7849,7 +7849,7 @@ describe("authoritative plan-first live runtime", () => {
           actor: "runner",
           actionType: "activated_card_ability",
           sourceCardInstanceId: "broker-1",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
           resolvedEffects: [
             {
               effectId: "broker-1-load-effect",
@@ -7906,10 +7906,10 @@ describe("authoritative plan-first live runtime", () => {
         source: "broker-card",
         payload: {
           cardId: "broker-card",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "store_credits",
-          cardImplementationAbilityId: "onr_v1_154_broker:store_credits",
+          cardImplementationAbilityId: "366:store_credits",
           cardImplementationAddsHostedCredits: true,
           hostedCreditAddAmount: 3,
         },
@@ -7925,10 +7925,10 @@ describe("authoritative plan-first live runtime", () => {
         source: "broker-card",
         payload: {
           cardId: "broker-card",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "withdraw_credits",
-          cardImplementationAbilityId: "onr_v1_154_broker:withdraw_credits",
+          cardImplementationAbilityId: "366:withdraw_credits",
           cardImplementationTakesHostedCredits: true,
           hostedCreditTakeAmount: 3,
           gainCreditsAmount: 3,
@@ -7945,7 +7945,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "target-program",
         payload: {
           cardId: "target-program",
-          sourceDefinitionId: "onr_v1_007_blink",
+          sourceDefinitionId: 219,
         },
       },
     );
@@ -7954,7 +7954,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("target-program", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         title: "Blink",
       }),
       visibleCard("buffer-1", "runner", "event"),
@@ -7964,7 +7964,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.own.rig = [
       visibleCard("broker-card", "runner", "resource", {
-        definitionId: "onr_v1_154_broker",
+        definitionId: 366,
         title: "Broker",
       }),
     ];
@@ -7975,7 +7975,7 @@ describe("authoritative plan-first live runtime", () => {
           searchAccess: { tools: [] },
           economyBankTools: [
             {
-              cardId: "onr_v1_154_broker",
+              cardId: 366,
               title: "Broker",
               ownerSide: "runner",
               status: "installed",
@@ -7994,7 +7994,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "target-program",
-          definitionId: "onr_v1_007_blink",
+          definitionId: 219,
           legalActionId: "install-target-program",
           priority: 800,
           deferReason: "missing_credits",
@@ -8007,7 +8007,7 @@ describe("authoritative plan-first live runtime", () => {
         }),
         handEvaluation({
           cardInstanceId: "target-program",
-          definitionId: "onr_v1_007_blink",
+          definitionId: 219,
           legalActionId: installTarget.actionId,
           priority: 0,
           deferReason: "stronger_override",
@@ -8070,10 +8070,10 @@ describe("authoritative plan-first live runtime", () => {
         source: "broker-card",
         payload: {
           cardId: "broker-card",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "withdraw_credits",
-          cardImplementationAbilityId: "onr_v1_154_broker:withdraw_credits",
+          cardImplementationAbilityId: "366:withdraw_credits",
           cardImplementationTakesHostedCredits: true,
           hostedCreditTakeAmount: 3,
           hostedCreditTakeMode: "all",
@@ -8102,7 +8102,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.gripOrHq = [
       visibleCard("social-engineering", "runner", "event", {
-        definitionId: "onr_v1_111_social-engineering",
+        definitionId: 323,
         title: "Social Engineering",
       }),
       visibleCard("buffer-1", "runner", "event"),
@@ -8112,7 +8112,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.own.rig = [
       visibleCard("broker-card", "runner", "resource", {
-        definitionId: "onr_v1_154_broker",
+        definitionId: 366,
         title: "Broker",
       }),
     ];
@@ -8123,7 +8123,7 @@ describe("authoritative plan-first live runtime", () => {
           searchAccess: { tools: [] },
           economyBankTools: [
             {
-              cardId: "onr_v1_154_broker",
+              cardId: 366,
               title: "Broker",
               ownerSide: "runner",
               status: "installed",
@@ -8142,7 +8142,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "social-engineering",
-          definitionId: "onr_v1_111_social-engineering",
+          definitionId: 323,
           legalActionId: "play-social-engineering",
           priority: 800,
           deferReason: "missing_credits",
@@ -8184,10 +8184,10 @@ describe("authoritative plan-first live runtime", () => {
         source: "broker-card",
         payload: {
           cardId: "broker-card",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "store_credits",
-          cardImplementationAbilityId: "onr_v1_154_broker:store_credits",
+          cardImplementationAbilityId: "366:store_credits",
           cardImplementationAddsHostedCredits: true,
           hostedCreditAddAmount: 3,
         },
@@ -8203,10 +8203,10 @@ describe("authoritative plan-first live runtime", () => {
         source: "broker-card",
         payload: {
           cardId: "broker-card",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "withdraw_credits",
-          cardImplementationAbilityId: "onr_v1_154_broker:withdraw_credits",
+          cardImplementationAbilityId: "366:withdraw_credits",
           cardImplementationTakesHostedCredits: true,
           hostedCreditTakeAmount: 3,
           hostedCreditTakeMode: "all",
@@ -8226,7 +8226,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("target-program", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         title: "Blink",
       }),
       visibleCard("buffer-1", "runner", "event"),
@@ -8236,7 +8236,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.own.rig = [
       visibleCard("broker-card", "runner", "resource", {
-        definitionId: "onr_v1_154_broker",
+        definitionId: 366,
         title: "Broker",
       }),
     ];
@@ -8258,14 +8258,14 @@ describe("authoritative plan-first live runtime", () => {
               searchableNow: false,
               drawOnly: false,
               missing: false,
-              bestKnownCards: ["onr_v1_007_blink"],
+              bestKnownCards: [219],
               blockers: ["needs_install"],
             },
           },
           searchAccess: { tools: [] },
           economyBankTools: [
             {
-              cardId: "onr_v1_154_broker",
+              cardId: 366,
               title: "Broker",
               ownerSide: "runner",
               status: "installed",
@@ -8284,7 +8284,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "target-program",
-          definitionId: "onr_v1_007_blink",
+          definitionId: 219,
           legalActionId: "install-target-program",
           priority: 780,
           deferReason: "missing_credits",
@@ -8336,7 +8336,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 2;
     input.playerView.own.gripOrHq = [
       visibleCard("snowball", "runner", "program", {
-        definitionId: "onr_v1_066_snowball",
+        definitionId: 278,
         title: "Snowball",
         subtypes: ["icebreaker", "killer"],
         installCost: 10,
@@ -8369,7 +8369,7 @@ describe("authoritative plan-first live runtime", () => {
               searchableNow: false,
               drawOnly: false,
               missing: false,
-              bestKnownCards: ["onr_v1_066_snowball"],
+              bestKnownCards: [278],
               blockers: ["needs_install"],
             },
           },
@@ -8429,7 +8429,7 @@ describe("authoritative plan-first live runtime", () => {
     const input = aiInput("runner", [direct, replace, credit]);
     input.playerView.own.gripOrHq = [
       visibleCard(blinkId, "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         title: "Blink",
       }),
     ];
@@ -8439,7 +8439,7 @@ describe("authoritative plan-first live runtime", () => {
         evaluateRunnerHandDevelopment: () => [
           handEvaluation({
             cardInstanceId: blinkId,
-            definitionId: "onr_v1_007_blink",
+            definitionId: 219,
             legalActionId: direct.actionId,
             priority: 0,
             deferReason: "stronger_override",
@@ -8495,7 +8495,7 @@ describe("authoritative plan-first live runtime", () => {
     resetResidentPlanPortfolioMemory();
     const choiceId = "corp_start_rez_1";
     const holovid = visibleCard("holovid", "corp", "asset", {
-      definitionId: "onr_v1_326_holovid-campaign",
+      definitionId: 538,
       title: "Holovid Campaign",
       rezzed: false,
       rezCost: 4,
@@ -8729,10 +8729,10 @@ describe("authoritative plan-first live runtime", () => {
         hostId = "daemon-host";
       input.playerView.own.rig = [
         visibleCard(sourceId, "runner", "resource", {
-          definitionId: "onr_v1_176_the-shell-traders",
+          definitionId: 388,
         }),
         visibleCard(hostId, "runner", "program", {
-          definitionId: "onr_v1_001_afreet",
+          definitionId: 213,
         }),
       ];
       input.playerView.specialZones = {
@@ -8740,7 +8740,7 @@ describe("authoritative plan-first live runtime", () => {
         removedFromGameCount: 0,
         setAside: [
           visibleCard(targetId, "runner", "program", {
-            definitionId: "onr_v1_059_self-modifying-code",
+            definitionId: 271,
           }),
         ],
         removedFromGame: [],
@@ -8751,7 +8751,7 @@ describe("authoritative plan-first live runtime", () => {
         kind: "select_option",
         source: `runner.delayed_install_destination:${sourceId}:${targetId}:start_turn:${version}`,
         sourceCardInstanceId: sourceId,
-        sourceCardDefinitionId: "onr_v1_176_the-shell-traders",
+        sourceCardDefinitionId: 388,
         prompt: "Installationsziel",
         stateVersion: version,
         visibility: "public",
@@ -8890,8 +8890,8 @@ describe("authoritative plan-first live runtime", () => {
           observerSide: "corp",
           stateVersion: input.playerView.stateVersion,
           visibleSourceDefinitionsByInstanceId: {
-            "pacifica-a": "onr_v1_334_pacifica-regional-ai",
-            "pacifica-b": "onr_v1_334_pacifica-regional-ai",
+            "pacifica-a": 546,
+            "pacifica-b": 546,
           },
         });
       const development = [
@@ -9158,7 +9158,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "tycho",
         payload: {
           cardId: "tycho",
-          sourceDefinitionId: "onr_v1_220_tycho-extension",
+          sourceDefinitionId: 432,
           serverId: "remote_1",
           placement: "root",
         },
@@ -9177,7 +9177,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.gripOrHq = [
       pacificaCard("pacifica"),
       visibleCard("tycho", "corp", "agenda", {
-        definitionId: "onr_v1_220_tycho-extension",
+        definitionId: 432,
         title: "Tycho Extension",
         advancementRequirement: 4,
         agendaPoints: 4,
@@ -9190,7 +9190,7 @@ describe("authoritative plan-first live runtime", () => {
       server("archives"),
       server("remote_1", [
         visibleCard("remote-data-wall", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           title: "Data Wall",
           rezCost: 1,
           strength: 0,
@@ -9281,7 +9281,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "tycho",
         payload: {
           cardId: "tycho",
-          sourceDefinitionId: "onr_v1_220_tycho-extension",
+          sourceDefinitionId: 432,
           serverId: "remote_1",
           placement: "root",
         },
@@ -9298,11 +9298,11 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.agendaPoints = 2;
     input.playerView.own.gripOrHq = [
       visibleCard("bbs-card", "corp", "asset", {
-        definitionId: "onr_v1_309_bbs-whispering-campaign",
+        definitionId: 521,
         title: "BBS Whispering Campaign",
       }),
       visibleCard("tycho", "corp", "agenda", {
-        definitionId: "onr_v1_220_tycho-extension",
+        definitionId: 432,
         title: "Tycho Extension",
         advancementRequirement: 4,
         agendaPoints: 4,
@@ -9317,7 +9317,7 @@ describe("authoritative plan-first live runtime", () => {
         {
           ...quotedFixtureIce({
             instanceId: "remote-data-wall",
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             strength: 0,
             subtypes: ["wall"],
@@ -9395,7 +9395,7 @@ describe("authoritative plan-first live runtime", () => {
         visibility: "private_to_actor",
         payload: {
           cardId: "overtime",
-          sourceDefinitionId: "onr_v1_297_overtime-incentives",
+          sourceDefinitionId: 509,
           gainActionsAmount: 2,
           actionCapacityTiming: "immediate",
           actionCapacityRestriction: "unrestricted",
@@ -9452,7 +9452,7 @@ describe("authoritative plan-first live runtime", () => {
       ownDeckSnapshot: {
         deckSnapshotId: "hq-overflow-reactivation-deck",
         side: "corp",
-        cards: [{ cardId: "onr_v1_220_tycho-extension", quantity: 3 }],
+        cards: [{ cardId: 432, quantity: 3 }],
       },
     });
     supportDraw.legalActions = [
@@ -9485,7 +9485,7 @@ describe("authoritative plan-first live runtime", () => {
     afterSupportDraw.playerView.own.clicks = 1;
     afterSupportDraw.playerView.own.gripOrHq.push(
       visibleCard("overtime", "corp", "operation", {
-        definitionId: "onr_v1_297_overtime-incentives",
+        definitionId: 509,
         title: "Overtime Incentives",
         cost: 4,
       }),
@@ -9506,7 +9506,7 @@ describe("authoritative plan-first live runtime", () => {
       ),
     ).toMatchObject({
       sourceCardInstanceId: "overtime",
-      sourceDefinitionId: "onr_v1_297_overtime-incentives",
+      sourceDefinitionId: 509,
       economyProjection: {
         cardsConsumed: 1,
         netHandDelta: -1,
@@ -9598,7 +9598,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "team-restructuring",
         payload: {
           cardId: "team-restructuring",
-          sourceDefinitionId: "onr_v1_305_team-restructuring",
+          sourceDefinitionId: 517,
           scoreConversionCapability: "place_advancement",
           scoreConversionTiming: "immediate",
           advancementCounterAmount: 1,
@@ -9630,7 +9630,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "data-wall",
         payload: {
           cardId: "data-wall",
-          sourceDefinitionId: "onr_v1_237_data-wall",
+          sourceDefinitionId: 449,
           serverId: "remote_1",
           placement: "ice",
           iceInstallBaseCost: 0,
@@ -9662,18 +9662,18 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.gripOrHq = [
       pacificaCard("pacifica"),
       visibleCard("team-restructuring", "corp", "operation", {
-        definitionId: "onr_v1_305_team-restructuring",
+        definitionId: 517,
         title: "Team Restructuring",
       }),
       visibleCard("data-wall", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         title: "Data Wall",
         rezCost: 1,
         strength: 0,
         subtypes: ["wall"],
       }),
       visibleCard("agenda", "corp", "agenda", {
-        definitionId: "onr_v1_201_executive-extraction",
+        definitionId: 413,
         title: "Executive Extraction",
         advancementRequirement: 3,
         agendaPoints: 2,
@@ -9688,7 +9688,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.opponent.rig = [
       visibleCard("runner-blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         strength: 5,
         subtypes: ["icebreaker", "random"],
       }),
@@ -9742,7 +9742,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "data-wall",
         payload: {
           cardId: "data-wall",
-          sourceDefinitionId: "onr_v1_237_data-wall",
+          sourceDefinitionId: 449,
           serverId: "archives",
           placement: "ice",
         },
@@ -9758,7 +9758,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "data-wall",
         payload: {
           cardId: "data-wall",
-          sourceDefinitionId: "onr_v1_237_data-wall",
+          sourceDefinitionId: 449,
           serverId: "remote_1",
           placement: "ice",
           iceInstallBaseCost: 0,
@@ -9782,7 +9782,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 10;
     input.playerView.own.gripOrHq = [
       visibleCard("data-wall", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         title: "Data Wall",
         rezCost: 1,
         strength: 0,
@@ -9798,7 +9798,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.opponent.rig = [
       visibleCard("runner-blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         strength: 5,
         subtypes: ["icebreaker", "random"],
       }),
@@ -9829,7 +9829,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "data-wall",
         payload: {
           cardId: "data-wall",
-          sourceDefinitionId: "onr_v1_237_data-wall",
+          sourceDefinitionId: 449,
           serverId: "hq",
           placement: "ice",
           iceInstallBaseCost: 0,
@@ -9871,13 +9871,13 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.stackOrRdCount = 20;
     input.playerView.own.gripOrHq = [
       visibleCard("agenda", "corp", "agenda", {
-        definitionId: "onr_v1_201_executive-extraction",
+        definitionId: 413,
         title: "Executive Extraction",
         advancementRequirement: 3,
         agendaPoints: 2,
       }),
       visibleCard("data-wall", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         title: "Data Wall",
         rezCost: 1,
         strength: 0,
@@ -9891,7 +9891,7 @@ describe("authoritative plan-first live runtime", () => {
       server("hq"),
       server("rd", [
         visibleCard("rd-data-wall", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           title: "Data Wall",
           rezCost: 1,
           strength: 0,
@@ -9921,9 +9921,9 @@ describe("authoritative plan-first live runtime", () => {
       deckSnapshotId: "agenda-capacity-defense-conversion",
       side: "corp",
       cards: [
-        { cardId: "onr_v1_201_executive-extraction", quantity: 1 },
-        { cardId: "onr_v1_237_data-wall", quantity: 3 },
-        { cardId: "onr_v1_284_chance-observation", quantity: 23 },
+        { cardId: 413, quantity: 1 },
+        { cardId: 449, quantity: 3 },
+        { cardId: 496, quantity: 23 },
       ],
     });
     for (const action of input.legalActions) {
@@ -9965,7 +9965,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "data-wall",
         payload: {
           cardId: "data-wall",
-          sourceDefinitionId: "onr_v1_237_data-wall",
+          sourceDefinitionId: 449,
           serverId: "hq",
           placement: "ice",
           iceInstallBaseCost: 1,
@@ -10007,13 +10007,13 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.stackOrRdCount = 20;
     input.playerView.own.gripOrHq = [
       visibleCard("agenda", "corp", "agenda", {
-        definitionId: "onr_v1_201_executive-extraction",
+        definitionId: 413,
         title: "Executive Extraction",
         advancementRequirement: 3,
         agendaPoints: 2,
       }),
       visibleCard("data-wall", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         title: "Data Wall",
         rezCost: 1,
         strength: 0,
@@ -10024,7 +10024,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.servers = [
       server("hq", [
         visibleCard("hq-data-wall", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           title: "Data Wall",
           rezCost: 1,
           strength: 0,
@@ -10034,7 +10034,7 @@ describe("authoritative plan-first live runtime", () => {
       ]),
       server("rd", [
         visibleCard("rd-data-wall", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           title: "Data Wall",
           rezCost: 1,
           strength: 0,
@@ -10064,9 +10064,9 @@ describe("authoritative plan-first live runtime", () => {
       deckSnapshotId: "agenda-capacity-defense-conversion",
       side: "corp",
       cards: [
-        { cardId: "onr_v1_201_executive-extraction", quantity: 1 },
-        { cardId: "onr_v1_237_data-wall", quantity: 3 },
-        { cardId: "onr_v1_284_chance-observation", quantity: 23 },
+        { cardId: 413, quantity: 1 },
+        { cardId: 449, quantity: 3 },
+        { cardId: 496, quantity: 23 },
       ],
     });
     for (const action of input.legalActions) {
@@ -10115,7 +10115,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 10;
     input.playerView.own.gripOrHq = [
       visibleCard("rio-card", "corp", "upgrade", {
-        definitionId: "onr_v1_367_rio-de-janeiro-city-grid",
+        definitionId: 579,
         title: "Rio de Janeiro City Grid",
       }),
     ];
@@ -10147,7 +10147,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("vapor-card", "corp", "asset", {
-            definitionId: "onr_v1_347_vapor-ops",
+            definitionId: 559,
             title: "Vapor Ops",
             rezzed: false,
           }),
@@ -10204,7 +10204,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("vapor-card", "corp", "asset", {
-            definitionId: "onr_v1_347_vapor-ops",
+            definitionId: 559,
             title: "Vapor Ops",
             rezzed: false,
           }),
@@ -10240,7 +10240,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 10;
     input.playerView.own.gripOrHq = [
       visibleCard("bbs-card", "corp", "asset", {
-        definitionId: "onr_v1_309_bbs-whispering-campaign",
+        definitionId: 521,
         title: "BBS Whispering Campaign",
       }),
     ];
@@ -10285,7 +10285,7 @@ describe("authoritative plan-first live runtime", () => {
     }
     input.playerView.own.gripOrHq = [
       visibleCard("vapor-card", "corp", "asset", {
-        definitionId: "onr_v1_347_vapor-ops",
+        definitionId: 559,
         title: "Vapor Ops",
       }),
     ];
@@ -10323,7 +10323,7 @@ describe("authoritative plan-first live runtime", () => {
       { credits: 0, clicks: 1 },
       { payload: { gainCreditsAmount: 1 } },
     );
-    const dataWall = CARD_DEFINITIONS_BY_ID["onr_v1_238_data-wall-2-0"];
+    const dataWall = CARD_DEFINITIONS_BY_ID[450];
     if (!dataWall || dataWall.type !== "ice") {
       throw new Error("Missing Data Wall test definition.");
     }
@@ -10336,7 +10336,7 @@ describe("authoritative plan-first live runtime", () => {
     }
     input.playerView.own.gripOrHq = [
       visibleCard("vapor-card", "corp", "asset", {
-        definitionId: "onr_v1_347_vapor-ops",
+        definitionId: 559,
         title: "Vapor Ops",
         counterBankPreparationQuote: {
           schemaVersion: CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
@@ -10383,7 +10383,7 @@ describe("authoritative plan-first live runtime", () => {
     attachOwnDeckSnapshot(input, {
       deckSnapshotId: "vapor-ops-score-bank-runtime-test",
       side: "corp",
-      cards: [{ cardId: "simple_agenda", quantity: 3 }],
+      cards: [{ cardId: 588, quantity: 3 }],
     });
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
@@ -10456,7 +10456,7 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     );
-    const dataWall = CARD_DEFINITIONS_BY_ID["onr_v1_238_data-wall-2-0"];
+    const dataWall = CARD_DEFINITIONS_BY_ID[450];
     if (!dataWall || dataWall.type !== "ice") {
       throw new Error("Missing Data Wall test definition.");
     }
@@ -10474,7 +10474,7 @@ describe("authoritative plan-first live runtime", () => {
     }
     input.playerView.own.gripOrHq = [
       visibleCard("zurich-card", "corp", "agenda", {
-        definitionId: "onr_proteus_008_project-zurich",
+        definitionId: 66,
         title: "Project Zurich",
         agendaPoints: 2,
         advancementRequirement: 3,
@@ -10500,7 +10500,7 @@ describe("authoritative plan-first live runtime", () => {
         ],
         [
           visibleCard("vapor-card", "corp", "asset", {
-            definitionId: "onr_v1_347_vapor-ops",
+            definitionId: 559,
             title: "Vapor Ops",
             rezzed: true,
             advancementCounters: 2,
@@ -10533,7 +10533,7 @@ describe("authoritative plan-first live runtime", () => {
     attachOwnDeckSnapshot(input, {
       deckSnapshotId: "counter-bank-replacement-runtime-test",
       side: "corp",
-      cards: [{ cardId: "onr_proteus_008_project-zurich", quantity: 2 }],
+      cards: [{ cardId: 66, quantity: 2 }],
     });
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
@@ -10546,18 +10546,18 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps the Counter Shell Team-to-Falsified line under the exact score owner", () => {
     resetResidentPlanPortfolioMemory();
     const agenda = visibleCard("venice-card", "corp", "agenda", {
-      definitionId: "onr_proteus_007_project-venice",
+      definitionId: 65,
       title: "Project Venice",
       agendaPoints: 2,
       advancementRequirement: 4,
     });
     const team = visibleCard("team-card", "corp", "operation", {
-      definitionId: "onr_v1_305_team-restructuring",
+      definitionId: 517,
       title: "Team Restructuring",
       playCost: { kind: "fixed", credits: 1 },
     });
     const falsified = visibleCard("falsified-card", "corp", "operation", {
-      definitionId: "onr_v1_291_falsified-transactions-expert",
+      definitionId: 503,
       title: "Falsified-Transactions Expert",
       playCost: { kind: "fixed", credits: 0 },
     });
@@ -10586,7 +10586,7 @@ describe("authoritative plan-first live runtime", () => {
         source: team.instanceId,
         payload: {
           cardId: team.instanceId,
-          sourceDefinitionId: "onr_v1_305_team-restructuring",
+          sourceDefinitionId: 517,
           scoreConversionCapability: "place_advancement",
           scoreConversionAdvancementAmount: 2,
           scoreConversionAdvancementMode: "up_to_distinct_targets_one_each",
@@ -10605,7 +10605,7 @@ describe("authoritative plan-first live runtime", () => {
         source: falsified.instanceId,
         payload: {
           cardId: falsified.instanceId,
-          sourceDefinitionId: "onr_v1_291_falsified-transactions-expert",
+          sourceDefinitionId: 503,
           scoreConversionCapability: "move_advancement",
           scoreConversionAdvancementMaximum: 3,
           scoreConversionSourceMode: "chosen_card",
@@ -10627,7 +10627,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("virus-test-site", "corp", "asset", {
-            definitionId: "onr_v1_348_virus-test-site",
+            definitionId: 560,
             title: "Virus Test Site",
             advancementCounters: 2,
           }),
@@ -10641,7 +10641,7 @@ describe("authoritative plan-first live runtime", () => {
     attachOwnDeckSnapshot(input, {
       deckSnapshotId: "counter-shell-team-falsified-runtime-test",
       side: "corp",
-      cards: [{ cardId: "onr_proteus_007_project-venice", quantity: 2 }],
+      cards: [{ cardId: 65, quantity: 2 }],
     });
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
@@ -10733,8 +10733,8 @@ describe("authoritative plan-first live runtime", () => {
         {
           definitionId:
             index === 0
-              ? "onr_v1_295_night-shift"
-              : "onr_v1_284_chance-observation",
+              ? 507
+              : 496,
         },
       ),
     );
@@ -10744,7 +10744,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("bbs-card", "corp", "asset", {
-            definitionId: "onr_v1_309_bbs-whispering-campaign",
+            definitionId: 521,
             title: "BBS Whispering Campaign",
             rezzed: true,
             counters: { bit: 14 },
@@ -10792,8 +10792,8 @@ describe("authoritative plan-first live runtime", () => {
         {
           definitionId:
             index === 0
-              ? "onr_v1_295_night-shift"
-              : "onr_v1_284_chance-observation",
+              ? 507
+              : 496,
         },
       ),
     );
@@ -10812,7 +10812,7 @@ describe("authoritative plan-first live runtime", () => {
     drawBound.playerView.own.stackOrRdCount = 12;
     drawBound.playerView.own.gripOrHq = [
       visibleCard("night-shift-card", "corp", "operation", {
-        definitionId: "onr_v1_295_night-shift",
+        definitionId: 507,
       }),
     ];
     expect(
@@ -10830,7 +10830,7 @@ describe("authoritative plan-first live runtime", () => {
     shortDeckHorizon.playerView.own.stackOrRdCount = 3;
     shortDeckHorizon.playerView.own.gripOrHq = [
       visibleCard("night-shift-card", "corp", "operation", {
-        definitionId: "onr_v1_295_night-shift",
+        definitionId: 507,
       }),
     ];
     expect(
@@ -10869,7 +10869,7 @@ describe("authoritative plan-first live runtime", () => {
       clicks: 1,
     });
     const accountsCard = visibleCard("accounts-card", "corp", "operation", {
-      definitionId: "onr_v1_281_accounts-receivable",
+      definitionId: 493,
     });
 
     resetResidentPlanPortfolioMemory();
@@ -10925,7 +10925,7 @@ describe("authoritative plan-first live runtime", () => {
     ready.playerView.own.gripOrHq = [
       accountsCard,
       visibleCard("efficiency-card", "corp", "operation", {
-        definitionId: "onr_v1_290_efficiency-experts",
+        definitionId: 502,
       }),
     ];
     expect(liveContext().chooseSemanticRuntimeAction(ready, {})).toMatchObject({
@@ -10941,7 +10941,7 @@ describe("authoritative plan-first live runtime", () => {
     efficiencyOnly.playerView.own.stackOrRdCount = 12;
     efficiencyOnly.playerView.own.gripOrHq = [
       visibleCard("efficiency-card", "corp", "operation", {
-        definitionId: "onr_v1_290_efficiency-experts",
+        definitionId: 502,
       }),
     ];
     expect(
@@ -10991,12 +10991,12 @@ describe("authoritative plan-first live runtime", () => {
     blockedFiveAdvance.playerView.own.stackOrRdCount = 12;
     blockedFiveAdvance.playerView.own.gripOrHq = [
       visibleCard("fetal-ai", "corp", "agenda", {
-        definitionId: "onr_proteus_004_fetal-ai",
+        definitionId: 62,
         advancementRequirement: 5,
         agendaPoints: 3,
       }),
       visibleCard("efficiency-card", "corp", "operation", {
-        definitionId: "onr_v1_290_efficiency-experts",
+        definitionId: 502,
       }),
     ];
     expect(
@@ -11036,14 +11036,14 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.stackOrRdCount = 20;
     input.playerView.own.gripOrHq = Array.from({ length: 5 }, (_, index) =>
       visibleCard(`full-hand-${index}`, "corp", "operation", {
-        definitionId: "onr_v1_284_chance-observation",
+        definitionId: 496,
       }),
     );
     Object.assign(input, {
       ownDeckSnapshot: {
         deckSnapshotId: "score-material-observation-deck",
         side: "corp",
-        cards: [{ cardId: "onr_v1_220_tycho-extension", quantity: 3 }],
+        cards: [{ cardId: 432, quantity: 3 }],
       },
     });
     for (const action of input.legalActions) {
@@ -11073,7 +11073,7 @@ describe("authoritative plan-first live runtime", () => {
     afterDraw.playerView.own.clicks = 1;
     afterDraw.playerView.own.gripOrHq.push(
       visibleCard("observed-non-agenda", "corp", "operation", {
-        definitionId: "onr_v1_284_chance-observation",
+        definitionId: 496,
       }),
     );
     for (const action of afterDraw.legalActions) {
@@ -11182,20 +11182,20 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("agenda", "corp", "agenda", {
-        definitionId: "onr_v1_189_artificial-security-directors",
+        definitionId: 401,
         advancementRequirement: 3,
         agendaPoints: 1,
       }),
       ...Array.from({ length: 5 }, (_, index) =>
         visibleCard(`operation-${index}`, "corp", "operation", {
-          definitionId: "onr_v1_284_chance-observation",
+          definitionId: 496,
         }),
       ),
     ];
     input.playerView.servers = [
       server("hq", [
         visibleCard("cinderella", "corp", "ice", {
-          definitionId: "onr_v1_228_cinderella",
+          definitionId: 440,
           rezzed: false,
           rezCost: 8,
           effectiveRezCostQuote: {
@@ -11251,13 +11251,13 @@ describe("authoritative plan-first live runtime", () => {
     resetResidentPlanPortfolioMemory();
     const stateVersion = 23;
     const agenda = visibleCard("tycho", "corp", "agenda", {
-      definitionId: "onr_v1_220_tycho-extension",
+      definitionId: 432,
       title: "Tycho Extension",
       advancementRequirement: 4,
       agendaPoints: 4,
     });
     const cinderella = visibleCard("cinderella", "corp", "ice", {
-      definitionId: "onr_v1_228_cinderella",
+      definitionId: 440,
       title: "Cinderella",
       rezCost: 8,
       strength: 6,
@@ -11274,7 +11274,7 @@ describe("authoritative plan-first live runtime", () => {
           source: agenda.instanceId,
           payload: {
             cardId: agenda.instanceId,
-            sourceDefinitionId: "onr_v1_220_tycho-extension",
+            sourceDefinitionId: 432,
             placement: "root",
             serverId,
             agendaInstallScoreHorizonQuoteSchemaVersion:
@@ -11301,12 +11301,12 @@ describe("authoritative plan-first live runtime", () => {
           source: cinderella.instanceId,
           payload: {
             cardId: cinderella.instanceId,
-            sourceDefinitionId: "onr_v1_228_cinderella",
+            sourceDefinitionId: 440,
             placement: "ice",
             serverId,
             postInstallEffectiveRunQuoteJson: JSON.stringify({
               iceInstanceId: cinderella.instanceId,
-              iceDefinitionId: "onr_v1_228_cinderella",
+              iceDefinitionId: 440,
               effectiveStrength: 6,
               subroutines: [
                 {
@@ -11376,7 +11376,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.agendaPoints = 2;
     input.playerView.opponent.rig = [
       visibleCard("jackhammer", "runner", "program", {
-        definitionId: "onr_v1_036_jackhammer",
+        definitionId: 248,
         title: "Jackhammer",
         installCost: 1,
         memoryCost: 1,
@@ -11388,20 +11388,20 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.servers = [
       server("hq", [
         visibleCard("hq-ice", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           rezzed: true,
         }),
       ]),
       server("rd", [
         visibleCard("rd-ice", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           rezzed: true,
         }),
       ]),
       server("archives"),
       server("remote_1", [
         visibleCard("remote-wall", "corp", "ice", {
-          definitionId: "onr_v1_279_wall-of-static",
+          definitionId: 491,
           title: "Wall of Static",
           rezCost: 3,
           strength: 2,
@@ -11410,20 +11410,20 @@ describe("authoritative plan-first live runtime", () => {
           effectivePostRezRunQuote: {
             context: "installed_post_rez",
             cardId: "remote-wall",
-            iceDefinitionId: "onr_v1_279_wall-of-static",
+            iceDefinitionId: 491,
             targetServerId: "remote_1",
             projectedServerId: "remote_1",
             expiresAtStateVersion: stateVersion,
             complete: true,
             effectiveRunQuote: {
               iceInstanceId: "remote-wall",
-              iceDefinitionId: "onr_v1_279_wall-of-static",
+              iceDefinitionId: 491,
               effectiveStrength: 2,
               subroutines: [
                 {
                   id: "remote-wall-end-the-run",
                   type: "end_the_run",
-                  sourceDefinitionId: "onr_v1_279_wall-of-static",
+                  sourceDefinitionId: 491,
                   sourceTitle: "Wall of Static",
                 },
               ],
@@ -11474,7 +11474,7 @@ describe("authoritative plan-first live runtime", () => {
     conditionalIceInput.playerView.servers[3]!.ice = ["shock-a", "shock-b"].map(
       (instanceId) =>
         visibleCard(instanceId, "corp", "ice", {
-          definitionId: "onr_v1_268_shock-r",
+          definitionId: 480,
           title: "Shock.r",
           rezCost: 1,
           strength: 3,
@@ -11483,14 +11483,14 @@ describe("authoritative plan-first live runtime", () => {
           effectivePostRezRunQuote: {
             context: "installed_post_rez",
             cardId: instanceId,
-            iceDefinitionId: "onr_v1_268_shock-r",
+            iceDefinitionId: 480,
             targetServerId: "remote_1",
             projectedServerId: "remote_1",
             expiresAtStateVersion: stateVersion,
             complete: true,
             effectiveRunQuote: {
               iceInstanceId: instanceId,
-              iceDefinitionId: "onr_v1_268_shock-r",
+              iceDefinitionId: 480,
               effectiveStrength: 3,
               subroutines: [
                 {
@@ -11566,7 +11566,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "agenda-card",
         payload: {
           cardId: "agenda-card",
-          sourceDefinitionId: "onr_v1_220_tycho-extension",
+          sourceDefinitionId: 432,
           placement: "root",
           serverId: "remote_1",
         },
@@ -11582,7 +11582,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "hunter",
         payload: {
           cardId: "hunter",
-          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceDefinitionId: 461,
           placement: "ice",
           serverId: "remote_1",
           iceInstallBaseCost: 1,
@@ -11617,19 +11617,19 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.maxHandSize = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("agenda-card", "corp", "agenda", {
-        definitionId: "onr_v1_220_tycho-extension",
+        definitionId: 432,
         advancementRequirement: 4,
         agendaPoints: 4,
       }),
       visibleCard("hunter", "corp", "ice", {
-        definitionId: "onr_v1_249_hunter",
+        definitionId: 461,
         rezCost: 2,
         strength: 5,
         subtypes: ["sentry", "bloodhound"],
       }),
       ...Array.from({ length: 3 }, (_, index) =>
         visibleCard(`filler-${index}`, "corp", "operation", {
-          definitionId: "onr_v1_284_chance-observation",
+          definitionId: 496,
         }),
       ),
     ];
@@ -11639,7 +11639,7 @@ describe("authoritative plan-first live runtime", () => {
       server("archives"),
       server("remote_1", [
         visibleCard("existing-remote-ice", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           rezCost: 1,
           strength: 0,
           subtypes: ["wall"],
@@ -11649,7 +11649,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.opponent.rig = [
       visibleCard("runner-blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         subtypes: ["icebreaker", "random"],
         rulesText:
           "0 credits: Roll a die. On a 4, 5, or 6, break ice subroutine; otherwise, suffer that much Net damage.\nUse this ability only once on each subroutine during each encounter with a piece of ice.",
@@ -11661,8 +11661,8 @@ describe("authoritative plan-first live runtime", () => {
         deckSnapshotId: "resident-defense-draw-deck",
         side: "corp",
         cards: [
-          { cardId: "onr_v1_237_data-wall", quantity: 2 },
-          { cardId: "onr_v1_249_hunter", quantity: 1 },
+          { cardId: 449, quantity: 2 },
+          { cardId: 461, quantity: 1 },
         ],
       },
     });
@@ -11724,7 +11724,7 @@ describe("authoritative plan-first live runtime", () => {
     afterDraw.playerView.legalActions = afterDraw.legalActions;
     afterDraw.playerView.own.gripOrHq.push(
       visibleCard("drawn-filler", "corp", "operation", {
-        definitionId: "onr_v1_284_chance-observation",
+        definitionId: 496,
       }),
     );
     expect(context.chooseSemanticRuntimeAction(afterDraw, {})).toMatchObject({
@@ -11842,7 +11842,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "pocket-vr",
         payload: {
           cardId: "pocket-vr",
-          sourceDefinitionId: "onr_v1_260_pocket-virtual-reality",
+          sourceDefinitionId: 472,
           placement: "ice",
           serverId: "hq",
           postInstallRezQuoteCardId: "pocket-vr",
@@ -11877,23 +11877,23 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("agenda", "corp", "agenda", {
-        definitionId: "onr_v1_220_tycho-extension",
+        definitionId: 432,
         agendaPoints: 4,
         advancementRequirement: 5,
       }),
       visibleCard("pocket-vr", "corp", "ice", {
-        definitionId: "onr_v1_260_pocket-virtual-reality",
+        definitionId: 472,
         rezCost: 7,
       }),
       visibleCard("olivia", "corp", "upgrade", {
-        definitionId: "onr_v1_363_olivia-salazar",
+        definitionId: 575,
         rezCost: 0,
       }),
     ];
     input.playerView.servers = [
       server("hq", [
         visibleCard("hq-ice-1", "corp", "ice", {
-          definitionId: "onr_v1_261_quandary",
+          definitionId: 473,
           rezCost: 0,
           effectiveRezCostQuote: {
             context: "installed",
@@ -11909,7 +11909,7 @@ describe("authoritative plan-first live runtime", () => {
           },
         }),
         visibleCard("hq-ice-2", "corp", "ice", {
-          definitionId: "onr_v1_242_fatal-attractor",
+          definitionId: 454,
           rezCost: 2,
           effectiveRezCostQuote: {
             context: "installed",
@@ -11973,7 +11973,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "data-wall",
         payload: {
           cardId: "data-wall",
-          sourceDefinitionId: "onr_v1_237_data-wall",
+          sourceDefinitionId: 449,
           placement: "ice",
           serverId: "remote_1",
           iceInstallBaseCost: 0,
@@ -12016,7 +12016,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("data-wall", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         rezCost: 2,
         strength: 0,
         subtypes: ["wall"],
@@ -12082,7 +12082,7 @@ describe("authoritative plan-first live runtime", () => {
     reserve.playerView.own.stackOrRdCount = 12;
     reserve.playerView.own.gripOrHq = [
       visibleCard("night-shift-card", "corp", "operation", {
-        definitionId: "onr_v1_295_night-shift",
+        definitionId: 507,
       }),
     ];
     expect(
@@ -12120,7 +12120,7 @@ describe("authoritative plan-first live runtime", () => {
     afterReserve.playerView.own.stackOrRdCount = 12;
     afterReserve.playerView.own.gripOrHq = [
       visibleCard("hand-card", "corp", "operation", {
-        definitionId: "onr_v1_284_chance-observation",
+        definitionId: 496,
       }),
     ];
     afterReserve.playerView.servers = [
@@ -12129,7 +12129,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("bbs-card", "corp", "asset", {
-            definitionId: "onr_v1_309_bbs-whispering-campaign",
+            definitionId: 521,
             title: "BBS Whispering Campaign",
             rezzed: true,
             counters: { bit: 14 },
@@ -12210,7 +12210,7 @@ describe("authoritative plan-first live runtime", () => {
     scoringFort.playerView.own.credits = 20;
     scoringFort.playerView.own.gripOrHq = [
       visibleCard("red-herrings", "corp", "upgrade", {
-        definitionId: "onr_v1_366_red-herrings",
+        definitionId: 578,
         title: "Red Herrings",
       }),
     ];
@@ -12223,7 +12223,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("agenda", "corp", "agenda", {
-            definitionId: "onr_v1_195_corporate-retreat",
+            definitionId: 407,
             title: "Corporate Retreat",
             advancementRequirement: 4,
           }),
@@ -12297,24 +12297,24 @@ describe("authoritative plan-first live runtime", () => {
           "remote_1",
           [
             visibleCard("inner-ice", "corp", "ice", {
-              definitionId: "onr_v1_237_data-wall",
+              definitionId: 449,
               title: "Data Wall",
               rezzed: true,
             }),
             visibleCard("outer-ice", "corp", "ice", {
-              definitionId: "onr_v1_245_fire-wall",
+              definitionId: 457,
               title: "Fire Wall",
               rezzed: true,
             }),
           ],
           [
             visibleCard("agenda", "corp", "agenda", {
-              definitionId: "onr_v1_195_corporate-retreat",
+              definitionId: 407,
               title: "Corporate Retreat",
               advancementRequirement: 4,
             }),
             visibleCard("red-herrings", "corp", "upgrade", {
-              definitionId: "onr_v1_366_red-herrings",
+              definitionId: 578,
               title: "Red Herrings",
               rezzed: false,
             }),
@@ -12368,14 +12368,14 @@ describe("authoritative plan-first live runtime", () => {
         "rd",
         [
           visibleCard("rd-ice", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             rezzed: true,
           }),
         ],
         [
           visibleCard("red-herrings-rd", "corp", "upgrade", {
-            definitionId: "onr_v1_366_red-herrings",
+            definitionId: 578,
             title: "Red Herrings",
             rezzed: false,
           }),
@@ -12409,7 +12409,7 @@ describe("authoritative plan-first live runtime", () => {
     hqWindow.playerView.own.credits = 20;
     hqWindow.playerView.own.gripOrHq = [
       visibleCard("hq-agenda", "corp", "agenda", {
-        definitionId: "onr_v1_195_corporate-retreat",
+        definitionId: 407,
         title: "Corporate Retreat",
         advancementRequirement: 4,
       }),
@@ -12425,14 +12425,14 @@ describe("authoritative plan-first live runtime", () => {
         "hq",
         [
           visibleCard("hq-ice", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             rezzed: true,
           }),
         ],
         [
           visibleCard("red-herrings-hq", "corp", "upgrade", {
-            definitionId: "onr_v1_366_red-herrings",
+            definitionId: 578,
             title: "Red Herrings",
             rezzed: false,
           }),
@@ -12471,14 +12471,14 @@ describe("authoritative plan-first live runtime", () => {
         "hq",
         [
           visibleCard("hq-ice", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             rezzed: false,
           }),
         ],
         [
           visibleCard("olivia-card", "corp", "upgrade", {
-            definitionId: "onr_v1_363_olivia-salazar",
+            definitionId: 575,
             title: "Olivia Salazar",
             rezzed: false,
           }),
@@ -12571,21 +12571,21 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 2;
     input.playerView.own.gripOrHq = [
       visibleCard(oliviaId, "corp", "upgrade", {
-        definitionId: "onr_v1_363_olivia-salazar",
+        definitionId: 575,
         title: "Olivia Salazar",
       }),
     ];
     input.playerView.servers = [
       server("hq", [
         visibleCard("hq-ice", "corp", "ice", {
-          definitionId: "onr_v1_252_keeper",
+          definitionId: 464,
           title: "Keeper",
           rezzed: false,
         }),
       ]),
       server("rd", [
         visibleCard("rd-ice", "corp", "ice", {
-          definitionId: "onr_v1_245_fire-wall",
+          definitionId: 457,
           title: "Fire Wall",
           rezzed: true,
         }),
@@ -12632,14 +12632,14 @@ describe("authoritative plan-first live runtime", () => {
         "hq",
         [
           visibleCard("hq-ice", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             rezzed: false,
           }),
         ],
         [
           visibleCard("hacker-tracker", "corp", "asset", {
-            definitionId: "onr_v1_325_hacker-tracker-central",
+            definitionId: 537,
             title: "Hacker Tracker Central",
             rezzed: false,
           }),
@@ -12692,7 +12692,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("asset-1", "corp", "asset", {
-            definitionId: "onr_v1_348_virus-test-site",
+            definitionId: 560,
             title: "Virus Test Site",
           }),
         ],
@@ -12734,13 +12734,13 @@ describe("authoritative plan-first live runtime", () => {
         "remote_1",
         [
           visibleCard("ice-1", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             rezzed: true,
           }),
         ],
         [
           visibleCard("agenda-1", "corp", "agenda", {
-            definitionId: "onr_v1_189_artificial-security-directors",
+            definitionId: 401,
             advancementCounters: 2,
             advancementRequirement: 3,
           }),
@@ -12825,7 +12825,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("downsizing-source", "corp", "agenda", {
-            definitionId: "onr_v1_194_corporate-downsizing",
+            definitionId: 406,
             advancementCounters: 4,
             advancementRequirement: 4,
           }),
@@ -12834,19 +12834,19 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.own.gripOrHq = [
       visibleCard("hq-cfo-1", "corp", "agenda", {
-        definitionId: "onr_v1_188_ai-chief-financial-officer",
+        definitionId: 400,
         agendaPoints: 2,
       }),
       visibleCard("hq-cfo-2", "corp", "agenda", {
-        definitionId: "onr_v1_188_ai-chief-financial-officer",
+        definitionId: 400,
         agendaPoints: 2,
       }),
       visibleCard("hq-cfo-3", "corp", "agenda", {
-        definitionId: "onr_v1_188_ai-chief-financial-officer",
+        definitionId: 400,
         agendaPoints: 2,
       }),
       visibleCard("hq-operation", "corp", "operation", {
-        definitionId: "onr_v1_284_chance-observation",
+        definitionId: 496,
       }),
     ];
     const discardKeepScore = (
@@ -12905,11 +12905,11 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.agendaPoints = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("hq-matchpoint", "corp", "agenda", {
-        definitionId: "onr_v1_188_ai-chief-financial-officer",
+        definitionId: 400,
         agendaPoints: 2,
       }),
       visibleCard("hq-operation", "corp", "operation", {
-        definitionId: "onr_v1_284_chance-observation",
+        definitionId: 496,
       }),
     ];
     input.playerView.servers = [
@@ -12918,7 +12918,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("downsizing-matchpoint-source", "corp", "agenda", {
-            definitionId: "onr_v1_194_corporate-downsizing",
+            definitionId: 406,
             advancementCounters: 3,
             advancementRequirement: 3,
             agendaPoints: 2,
@@ -12976,7 +12976,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.servers = [
       server("hq", [
         visibleCard("expensive-ice", "corp", "ice", {
-          definitionId: "onr_v1_273_triggerman",
+          definitionId: 485,
           rezzed: false,
           rezCost: 7,
           effectiveRezCostQuote: {
@@ -12993,7 +12993,7 @@ describe("authoritative plan-first live runtime", () => {
           },
         }),
         visibleCard("cheaper-ice", "corp", "ice", {
-          definitionId: "onr_v1_279_wall-of-static",
+          definitionId: 491,
           rezzed: false,
           rezCost: 5,
           effectiveRezCostQuote: {
@@ -13015,7 +13015,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("priority-requisition", "corp", "agenda", {
-            definitionId: "onr_v1_212_priority-requisition",
+            definitionId: 424,
             advancementCounters: 5,
             advancementRequirement: 5,
             agendaPoints: 3,
@@ -13045,7 +13045,7 @@ describe("authoritative plan-first live runtime", () => {
           freeRezChoiceBinding: {
             targetPurpose: "rez_best_defensive_ice",
             targetCardId: "expensive-ice",
-            targetDefinitionId: "onr_v1_273_triggerman",
+            targetDefinitionId: 485,
             selectedVariantId: "fixed",
             selectedOptionId: "rez_expensive-ice_fixed",
           },
@@ -13073,7 +13073,7 @@ describe("authoritative plan-first live runtime", () => {
     input.decisionId = "score-priority-requisition-variable:11";
     input.playerView.opponent.rig = [
       visibleCard("codecracker", "runner", "program", {
-        definitionId: "onr_v1_014_codecracker",
+        definitionId: 226,
         strength: 0,
         subtypes: ["icebreaker", "codecracker"],
       }),
@@ -13081,7 +13081,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.servers = [
       server("rd", [
         visibleCard("credit-blocks", "corp", "ice", {
-          definitionId: "onr_proteus_017_credit-blocks",
+          definitionId: 75,
           rezzed: false,
           rezCost: 6,
           subtypes: ["sentry"],
@@ -13112,7 +13112,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("priority-requisition", "corp", "agenda", {
-            definitionId: "onr_v1_212_priority-requisition",
+            definitionId: 424,
             advancementCounters: 5,
             advancementRequirement: 5,
             agendaPoints: 3,
@@ -13141,7 +13141,7 @@ describe("authoritative plan-first live runtime", () => {
           targetCardId: "priority-requisition",
           freeRezChoiceBinding: {
             targetCardId: "credit-blocks",
-            targetDefinitionId: "onr_proteus_017_credit-blocks",
+            targetDefinitionId: 75,
             selectedVariantId: "alternate_subtype:base",
             selectedOptionId: "rez_credit-blocks_alternate_subtype:base",
           },
@@ -13169,18 +13169,18 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.servers = [
       server("hq", [
         visibleCard("hq-data-wall", "corp", "ice", {
-          definitionId: "onr_v1_238_data-wall-2-0",
+          definitionId: 450,
           rezzed: true,
           strength: 1,
           effectiveRunQuote: {
             iceInstanceId: "hq-data-wall",
-            iceDefinitionId: "onr_v1_238_data-wall-2-0",
+            iceDefinitionId: 450,
             effectiveStrength: 1,
             subroutines: [
               {
                 id: "etr",
                 type: "end_the_run",
-                sourceDefinitionId: "onr_v1_238_data-wall-2-0",
+                sourceDefinitionId: 450,
                 sourceTitle: "Data Wall 2.0",
               },
             ],
@@ -13191,18 +13191,18 @@ describe("authoritative plan-first live runtime", () => {
         "remote_1",
         [
           visibleCard("empty-remote-wall", "corp", "ice", {
-            definitionId: "onr_v1_279_wall-of-static",
+            definitionId: 491,
             rezzed: true,
             strength: 2,
             effectiveRunQuote: {
               iceInstanceId: "empty-remote-wall",
-              iceDefinitionId: "onr_v1_279_wall-of-static",
+              iceDefinitionId: 491,
               effectiveStrength: 2,
               subroutines: [
                 {
                   id: "etr",
                   type: "end_the_run",
-                  sourceDefinitionId: "onr_v1_279_wall-of-static",
+                  sourceDefinitionId: 491,
                   sourceTitle: "Wall of Static",
                 },
               ],
@@ -13211,7 +13211,7 @@ describe("authoritative plan-first live runtime", () => {
         ],
         [
           visibleCard("ice-transmutation", "corp", "agenda", {
-            definitionId: "onr_v1_204_ice-transmutation",
+            definitionId: 416,
             advancementCounters: 5,
             advancementRequirement: 5,
             agendaPoints: 3,
@@ -13242,7 +13242,7 @@ describe("authoritative plan-first live runtime", () => {
           iceMarkChoiceBinding: {
             targetPurpose: "strengthen_and_repeat_best_ice_subroutine",
             targetCardId: "hq-data-wall",
-            targetDefinitionId: "onr_v1_238_data-wall-2-0",
+            targetDefinitionId: 450,
           },
         },
       },
@@ -13282,7 +13282,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("effective-zero-agenda", "corp", "agenda", {
-            definitionId: "onr_v1_194_corporate-downsizing",
+            definitionId: 406,
             advancementCounters: 0,
             advancementRequirement: 0,
           }),
@@ -13336,7 +13336,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 2;
     input.playerView.own.gripOrHq = [
       visibleCard("bbs-card", "corp", "asset", {
-        definitionId: "onr_v1_309_bbs-whispering-campaign",
+        definitionId: 521,
         title: "BBS Whispering Campaign",
       }),
     ];
@@ -13346,7 +13346,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("agenda-unknown-cost", "corp", "agenda", {
-            definitionId: "onr_v1_189_artificial-security-directors",
+            definitionId: 401,
             advancementCounters: 1,
             advancementRequirement: 3,
           }),
@@ -13388,7 +13388,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("agenda-unknown-cost", "corp", "agenda", {
-            definitionId: "onr_v1_189_artificial-security-directors",
+            definitionId: 401,
             advancementCounters: 1,
             advancementRequirement: 3,
           }),
@@ -13423,7 +13423,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "ice-unknown-rez-cost",
         payload: {
           cardId: "ice-unknown-rez-cost",
-          sourceDefinitionId: "onr_v1_237_data-wall",
+          sourceDefinitionId: 449,
           serverId: "remote_1",
           placement: "ice",
           postInstallRezQuoteCardId: "ice-unknown-rez-cost",
@@ -13440,7 +13440,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 2;
     input.playerView.own.gripOrHq = [
       visibleCard("ice-unknown-rez-cost", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         strength: 0,
         subtypes: ["wall"],
       }),
@@ -13453,7 +13453,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.opponent.rig = [
       visibleCard("runner-blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         strength: 5,
         subtypes: ["icebreaker", "random"],
       }),
@@ -13507,7 +13507,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("coup-card", "corp", "agenda", {
-            definitionId: "onr_v1_193_corporate-coup",
+            definitionId: 405,
             title: "Corporate Coup",
             advancementCounters: 0,
             advancementRequirement: 5,
@@ -13585,13 +13585,13 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.handCount = 5;
     const damageLayer = (instanceId: string) =>
       visibleCard(instanceId, "corp", "ice", {
-        definitionId: "onr_classic_007_brain-drain",
+        definitionId: 11,
         strength: 3,
         subtypes: ["sentry", "black_ice", "ap"],
         rezzed: true,
         effectiveRunQuote: {
           iceInstanceId: instanceId,
-          iceDefinitionId: "onr_classic_007_brain-drain",
+          iceDefinitionId: 11,
           effectiveStrength: 3,
           subroutines: [
             {
@@ -13610,7 +13610,7 @@ describe("authoritative plan-first live runtime", () => {
         [damageLayer("damage-layer-1"), damageLayer("damage-layer-2")],
         [
           visibleCard("agenda-protected", "corp", "agenda", {
-            definitionId: "onr_v1_211_polymer-breakthrough",
+            definitionId: 423,
             advancementCounters: 0,
             advancementRequirement: 6,
             agendaPoints: 3,
@@ -13698,7 +13698,7 @@ describe("authoritative plan-first live runtime", () => {
       {
         source: "blood-cat-1",
         payload: {
-          sourceDefinitionId: "onr_v1_310_blood-cat",
+          sourceDefinitionId: 522,
         },
       },
     );
@@ -13711,7 +13711,7 @@ describe("authoritative plan-first live runtime", () => {
       {
         source: "virus-test-site-1",
         payload: {
-          sourceDefinitionId: "onr_v1_348_virus-test-site",
+          sourceDefinitionId: 560,
           serverId: "new_remote",
         },
       },
@@ -13746,7 +13746,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.tags = 1;
     input.playerView.own.gripOrHq = [
       visibleCard("virus-test-site-1", "corp", "asset", {
-        definitionId: "onr_v1_348_virus-test-site",
+        definitionId: 560,
       }),
     ];
     input.playerView.servers = [
@@ -13755,7 +13755,7 @@ describe("authoritative plan-first live runtime", () => {
         [],
         [
           visibleCard("blood-cat-1", "corp", "asset", {
-            definitionId: "onr_v1_310_blood-cat",
+            definitionId: 522,
             rezzed: true,
           }),
         ],
@@ -13802,7 +13802,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "agenda-1",
         payload: {
           cardId: "agenda-1",
-          sourceDefinitionId: "onr_v1_189_artificial-security-directors",
+          sourceDefinitionId: 401,
           serverId: "new_remote",
           placement: "root",
         },
@@ -13818,7 +13818,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "ice-1",
         payload: {
           cardId: "ice-1",
-          sourceDefinitionId: "onr_v1_237_data-wall",
+          sourceDefinitionId: 449,
           serverId: "new_remote",
           placement: "ice",
           postInstallRezQuoteCardId: "ice-1",
@@ -13847,12 +13847,12 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("agenda-1", "corp", "agenda", {
-        definitionId: "onr_v1_189_artificial-security-directors",
+        definitionId: 401,
         advancementRequirement: 3,
         agendaPoints: 1,
       }),
       visibleCard("ice-1", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         rezCost: 1,
         strength: 0,
         subtypes: ["wall"],
@@ -13861,7 +13861,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     input.playerView.opponent.rig = [
       visibleCard("runner-blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         strength: 5,
         subtypes: ["icebreaker", "random"],
       }),
@@ -13895,7 +13895,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "agenda-1",
         payload: {
           cardId: "agenda-1",
-          sourceDefinitionId: "onr_v1_194_corporate-downsizing",
+          sourceDefinitionId: 406,
           serverId: "new_remote",
           placement: "root",
           agendaInstallScoreHorizonQuoteSchemaVersion:
@@ -13922,7 +13922,7 @@ describe("authoritative plan-first live runtime", () => {
           source: "filter-1",
           payload: {
             cardId: "filter-1",
-            sourceDefinitionId: "onr_v1_244_filter",
+            sourceDefinitionId: 456,
             serverId,
             placement: "ice",
             ...(serverId === "hq"
@@ -13937,7 +13937,7 @@ describe("authoritative plan-first live runtime", () => {
             postInstallEffectiveRunQuoteJson: JSON.stringify(
               quotedFixtureIce({
                 instanceId: "filter-1",
-                definitionId: "onr_v1_244_filter",
+                definitionId: 456,
                 title: "Filter",
                 strength: 0,
                 subtypes: ["code_gate"],
@@ -13985,36 +13985,36 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.memoryLimit = 6;
     input.playerView.own.gripOrHq = [
       visibleCard("agenda-1", "corp", "agenda", {
-        definitionId: "onr_v1_194_corporate-downsizing",
+        definitionId: 406,
         advancementRequirement: 3,
         agendaPoints: 2,
       }),
       visibleCard("agenda-2", "corp", "agenda", {
-        definitionId: "onr_v1_214_project-babylon",
+        definitionId: 426,
         advancementRequirement: 3,
         agendaPoints: 1,
       }),
       visibleCard("agenda-3", "corp", "agenda", {
-        definitionId: "onr_v1_194_corporate-downsizing",
+        definitionId: 406,
         advancementRequirement: 3,
         agendaPoints: 2,
       }),
       visibleCard("filter-1", "corp", "ice", {
-        definitionId: "onr_v1_244_filter",
+        definitionId: 456,
         rezCost: 0,
         strength: 0,
         subtypes: ["code_gate"],
       }),
       visibleCard("operation-1", "corp", "operation", {
-        definitionId: "onr_v1_305_team-restructuring",
+        definitionId: 517,
       }),
       visibleCard("operation-2", "corp", "operation", {
-        definitionId: "onr_v1_305_team-restructuring",
+        definitionId: 517,
       }),
     ];
     const rezzedCentralIce = (id: string) =>
       visibleCard(id, "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         rezCost: 1,
         strength: 0,
         subtypes: ["wall"],
@@ -14050,22 +14050,22 @@ describe("authoritative plan-first live runtime", () => {
       deckSnapshotId: "new-remote-score-protection-vs-central-layer",
       side: "corp",
       cards: [
-        { cardId: "onr_v1_194_corporate-downsizing", quantity: 2 },
-        { cardId: "onr_v1_214_project-babylon", quantity: 1 },
-        { cardId: "onr_v1_244_filter", quantity: 1 },
-        { cardId: "onr_v1_305_team-restructuring", quantity: 2 },
-        { cardId: "onr_v1_237_data-wall", quantity: 10 },
-        { cardId: "onr_v1_288_day-shift", quantity: 1 },
+        { cardId: 406, quantity: 2 },
+        { cardId: 426, quantity: 1 },
+        { cardId: 456, quantity: 1 },
+        { cardId: 517, quantity: 2 },
+        { cardId: 449, quantity: 10 },
+        { cardId: 500, quantity: 1 },
       ],
     });
     input.playerView.opponent.rig = [
       visibleCard("runner-krash", "runner", "program", {
-        definitionId: "onr_v1_039_krash",
+        definitionId: 251,
         strength: 0,
         subtypes: ["icebreaker"],
       }),
       visibleCard("runner-cloak", "runner", "program", {
-        definitionId: "onr_v1_011_cloak",
+        definitionId: 223,
         subtypes: ["stealth"],
         counters: { bit: 3 },
         counterDisplays: [
@@ -14086,7 +14086,7 @@ describe("authoritative plan-first live runtime", () => {
         ],
       }),
       visibleCard("runner-quiet", "runner", "program", {
-        definitionId: "onr_v1_071_vewy-vewy-quiet",
+        definitionId: 283,
         subtypes: ["stealth"],
         counters: { bit: 2 },
         counterDisplays: [
@@ -14107,7 +14107,7 @@ describe("authoritative plan-first live runtime", () => {
         ],
       }),
       visibleCard("runner-spin-chip", "runner", "hardware", {
-        definitionId: "onr_proteus_139_eurocorpse-tm-spin-chip",
+        definitionId: 197,
         subtypes: ["chip"],
         counters: { bit: 2 },
         counterDisplays: [
@@ -14129,11 +14129,11 @@ describe("authoritative plan-first live runtime", () => {
         ],
       }),
       visibleCard("runner-mem-chip", "runner", "hardware", {
-        definitionId: "onr_v1_146_zetatech-mem-chip",
+        definitionId: 358,
         subtypes: ["chip"],
       }),
       visibleCard("runner-short-circuit", "runner", "resource", {
-        definitionId: "onr_v1_177_the-short-circuit",
+        definitionId: 389,
         subtypes: ["bbs"],
       }),
     ];
@@ -14171,7 +14171,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "agenda-1",
         payload: {
           cardId: "agenda-1",
-          sourceDefinitionId: "onr_v1_189_artificial-security-directors",
+          sourceDefinitionId: 401,
           serverId: "remote_1",
           placement: "root",
         },
@@ -14187,7 +14187,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "ice-2",
         payload: {
           cardId: "ice-2",
-          sourceDefinitionId: "onr_v1_237_data-wall",
+          sourceDefinitionId: 449,
           serverId: "remote_1",
           placement: "ice",
           iceInstallBaseCost: 1,
@@ -14213,12 +14213,12 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("agenda-1", "corp", "agenda", {
-        definitionId: "onr_v1_189_artificial-security-directors",
+        definitionId: 401,
         advancementRequirement: 3,
         agendaPoints: 1,
       }),
       visibleCard("ice-2", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         rezCost: 1,
         strength: 0,
         subtypes: ["wall"],
@@ -14230,7 +14230,7 @@ describe("authoritative plan-first live runtime", () => {
       server("archives"),
       server("remote_1", [
         visibleCard("ice-1", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           rezCost: 1,
           strength: 0,
           subtypes: ["wall"],
@@ -14240,7 +14240,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.opponent.rig = [
       visibleCard("runner-blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         strength: 5,
         subtypes: ["icebreaker", "random"],
       }),
@@ -14281,7 +14281,7 @@ describe("authoritative plan-first live runtime", () => {
       );
     protectedInput.playerView.servers[3]!.ice.push(
       visibleCard("ice-existing-2", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         rezCost: 1,
         strength: 0,
         subtypes: ["wall"],
@@ -14320,7 +14320,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "agenda-1",
         payload: {
           cardId: "agenda-1",
-          sourceDefinitionId: "onr_classic_002_superserum",
+          sourceDefinitionId: 6,
           serverId: "remote_1",
           placement: "root",
           agendaInstallScoreHorizonQuoteSchemaVersion:
@@ -14354,7 +14354,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "extra-data-wall",
         payload: {
           cardId: "extra-data-wall",
-          sourceDefinitionId: "onr_v1_237_data-wall",
+          sourceDefinitionId: 449,
           serverId: "remote_1",
           placement: "ice",
           iceInstallBaseCost: 3,
@@ -14388,12 +14388,12 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.runnerNextTurnCreditClicks = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("agenda-1", "corp", "agenda", {
-        definitionId: "onr_classic_002_superserum",
+        definitionId: 6,
         advancementRequirement: 3,
         agendaPoints: 2,
       }),
       visibleCard("extra-data-wall", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         title: "Data Wall",
         rezCost: 5,
         strength: 0,
@@ -14407,21 +14407,21 @@ describe("authoritative plan-first live runtime", () => {
       server("archives"),
       server("remote_1", [
         visibleCard("glacier", "corp", "ice", {
-          definitionId: "onr_classic_011_glacier",
+          definitionId: 15,
           strength: 5,
           subtypes: ["code_gate", "ap"],
           rezzed: false,
           effectivePostRezRunQuote: {
             context: "installed_post_rez",
             cardId: "glacier",
-            iceDefinitionId: "onr_classic_011_glacier",
+            iceDefinitionId: 15,
             targetServerId: "remote_1",
             projectedServerId: "remote_1",
             expiresAtStateVersion: stateVersion,
             complete: true,
             effectiveRunQuote: {
               iceInstanceId: "glacier",
-              iceDefinitionId: "onr_classic_011_glacier",
+              iceDefinitionId: 15,
               effectiveStrength: 5,
               subroutines: [
                 { id: "glacier-etr-1", type: "end_the_run" },
@@ -14443,21 +14443,21 @@ describe("authoritative plan-first live runtime", () => {
           },
         }),
         visibleCard("brain-drain", "corp", "ice", {
-          definitionId: "onr_classic_007_brain-drain",
+          definitionId: 11,
           strength: 3,
           subtypes: ["sentry", "black_ice", "ap"],
           rezzed: false,
           effectivePostRezRunQuote: {
             context: "installed_post_rez",
             cardId: "brain-drain",
-            iceDefinitionId: "onr_classic_007_brain-drain",
+            iceDefinitionId: 11,
             targetServerId: "remote_1",
             projectedServerId: "remote_1",
             expiresAtStateVersion: stateVersion,
             complete: true,
             effectiveRunQuote: {
               iceInstanceId: "brain-drain",
-              iceDefinitionId: "onr_classic_007_brain-drain",
+              iceDefinitionId: 11,
               effectiveStrength: 3,
               subroutines: [
                 {
@@ -14483,21 +14483,21 @@ describe("authoritative plan-first live runtime", () => {
           },
         }),
         visibleCard("entrapment", "corp", "ice", {
-          definitionId: "onr_classic_010_entrapment",
+          definitionId: 14,
           strength: 4,
           subtypes: ["code_gate", "deflector"],
           rezzed: false,
           effectivePostRezRunQuote: {
             context: "installed_post_rez",
             cardId: "entrapment",
-            iceDefinitionId: "onr_classic_010_entrapment",
+            iceDefinitionId: 14,
             targetServerId: "remote_1",
             projectedServerId: "remote_1",
             expiresAtStateVersion: stateVersion,
             complete: true,
             effectiveRunQuote: {
               iceInstanceId: "entrapment",
-              iceDefinitionId: "onr_classic_010_entrapment",
+              iceDefinitionId: 14,
               effectiveStrength: 4,
               subroutines: [
                 {
@@ -14578,7 +14578,7 @@ describe("authoritative plan-first live runtime", () => {
     cheaplyBreakable.playerView.opponent.credits = 17;
     cheaplyBreakable.playerView.opponent.rig = [
       visibleCard("runner-krash", "runner", "program", {
-        definitionId: "onr_v1_039_krash",
+        definitionId: 251,
         strength: 0,
         subtypes: ["icebreaker"],
       }),
@@ -14591,7 +14591,7 @@ describe("authoritative plan-first live runtime", () => {
         "remote_1",
         ["cheap-wall-1", "cheap-wall-2"].map((instanceId) =>
           visibleCard(instanceId, "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             rezCost: 1,
             strength: 0,
@@ -14600,14 +14600,14 @@ describe("authoritative plan-first live runtime", () => {
             effectivePostRezRunQuote: {
               context: "installed_post_rez",
               cardId: instanceId,
-              iceDefinitionId: "onr_v1_237_data-wall",
+              iceDefinitionId: 449,
               targetServerId: "remote_1",
               projectedServerId: "remote_1",
               expiresAtStateVersion: stateVersion,
               complete: true,
               effectiveRunQuote: {
                 iceInstanceId: instanceId,
-                iceDefinitionId: "onr_v1_237_data-wall",
+                iceDefinitionId: 449,
                 effectiveStrength: 0,
                 subroutines: [
                   {
@@ -14651,12 +14651,12 @@ describe("authoritative plan-first live runtime", () => {
     liquidityBindingRemote.playerView.opponent.credits = 10;
     liquidityBindingRemote.playerView.opponent.rig = [
       visibleCard("runner-krash", "runner", "program", {
-        definitionId: "onr_v1_039_krash",
+        definitionId: 251,
         strength: 0,
         subtypes: ["icebreaker"],
       }),
       visibleCard("runner-cloak", "runner", "program", {
-        definitionId: "onr_v1_011_cloak",
+        definitionId: 223,
         subtypes: ["stealth"],
         counters: { bit: 3 },
         counterDisplays: [
@@ -14683,25 +14683,25 @@ describe("authoritative plan-first live runtime", () => {
       server("archives"),
       server("remote_1", [
         visibleCard("data-wall-2", "corp", "ice", {
-          definitionId: "onr_v1_238_data-wall-2-0",
+          definitionId: 450,
           strength: 1,
           subtypes: ["wall"],
           rezzed: true,
           effectiveRunQuote: {
             iceInstanceId: "data-wall-2",
-            iceDefinitionId: "onr_v1_238_data-wall-2-0",
+            iceDefinitionId: 450,
             effectiveStrength: 1,
             subroutines: [{ id: "data-wall-2-etr", type: "end_the_run" }],
           },
         }),
         visibleCard("endless-corridor", "corp", "ice", {
-          definitionId: "onr_v1_239_endless-corridor",
+          definitionId: 451,
           strength: 2,
           subtypes: ["code_gate"],
           rezzed: true,
           effectiveRunQuote: {
             iceInstanceId: "endless-corridor",
-            iceDefinitionId: "onr_v1_239_endless-corridor",
+            iceDefinitionId: 451,
             effectiveStrength: 2,
             subroutines: [
               { id: "endless-corridor-etr-1", type: "end_the_run" },
@@ -14757,7 +14757,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "terminal-agenda",
         payload: {
           cardId: "terminal-agenda",
-          sourceDefinitionId: "onr_v1_191_black-ice-quality-assurance",
+          sourceDefinitionId: 403,
           serverId: "remote_1",
           placement: "root",
         },
@@ -14780,7 +14780,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.stackOrRdCount = 2;
     input.playerView.own.gripOrHq = [
       visibleCard("terminal-agenda", "corp", "agenda", {
-        definitionId: "onr_v1_191_black-ice-quality-assurance",
+        definitionId: 403,
         title: "Black Ice Quality Assurance",
         advancementRequirement: 5,
         agendaPoints: 2,
@@ -14811,7 +14811,7 @@ describe("authoritative plan-first live runtime", () => {
         corpMandatoryOptionalAgendaCardCount: 0,
         corpMandatorySkivvissCardCount: 1,
         corpMandatoryAdditionalSourceCount: 1,
-        corpMandatoryAdditionalSourceDefinitionIds: "onr_v1_064_skivviss",
+        corpMandatoryAdditionalSourceDefinitionIds: 276,
       },
     });
     attachOwnDeckSnapshot(input, {
@@ -14819,7 +14819,7 @@ describe("authoritative plan-first live runtime", () => {
       side: "corp",
       cards: [
         {
-          cardId: "onr_v1_191_black-ice-quality-assurance",
+          cardId: 403,
           quantity: 4,
         },
       ],
@@ -14852,7 +14852,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "deckout-flood-agenda",
         payload: {
           cardId: "deckout-flood-agenda",
-          sourceDefinitionId: "onr_v1_191_black-ice-quality-assurance",
+          sourceDefinitionId: 403,
           serverId: "remote_1",
           placement: "root",
         },
@@ -14873,13 +14873,13 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.stackOrRdCount = 6;
     input.playerView.own.gripOrHq = [
       visibleCard("deckout-flood-agenda", "corp", "agenda", {
-        definitionId: "onr_v1_191_black-ice-quality-assurance",
+        definitionId: 403,
         title: "Black Ice Quality Assurance",
         advancementRequirement: 5,
         agendaPoints: 2,
       }),
       visibleCard("second-deckout-flood-agenda", "corp", "agenda", {
-        definitionId: "onr_v1_191_black-ice-quality-assurance",
+        definitionId: 403,
         title: "Black Ice Quality Assurance",
         advancementRequirement: 5,
         agendaPoints: 2,
@@ -14896,7 +14896,7 @@ describe("authoritative plan-first live runtime", () => {
       side: "corp",
       cards: [
         {
-          cardId: "onr_v1_191_black-ice-quality-assurance",
+          cardId: 403,
           quantity: 4,
         },
       ],
@@ -14929,7 +14929,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "agenda-staged",
         payload: {
           cardId: "agenda-staged",
-          sourceDefinitionId: "onr_v1_189_artificial-security-directors",
+          sourceDefinitionId: 401,
           serverId: "remote_1",
           placement: "root",
         },
@@ -14945,7 +14945,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "additional-ice",
         payload: {
           cardId: "additional-ice",
-          sourceDefinitionId: "onr_v1_237_data-wall",
+          sourceDefinitionId: 449,
           serverId: "remote_1",
           placement: "ice",
           iceInstallBaseCost: 1,
@@ -14979,12 +14979,12 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("agenda-staged", "corp", "agenda", {
-        definitionId: "onr_v1_189_artificial-security-directors",
+        definitionId: 401,
         advancementRequirement: 3,
         agendaPoints: 1,
       }),
       visibleCard("additional-ice", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         rezCost: 1,
         strength: 0,
         subtypes: ["wall"],
@@ -14996,7 +14996,7 @@ describe("authoritative plan-first live runtime", () => {
       server("archives"),
       server("remote_1", [
         visibleCard("staged-ice", "corp", "ice", {
-          definitionId: "onr_v1_223_banpei",
+          definitionId: 435,
           rezzed: false,
           strength: 1,
           subtypes: ["sentry"],
@@ -15017,7 +15017,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.opponent.rig = [
       visibleCard("runner-blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         strength: 5,
         subtypes: ["icebreaker", "random"],
       }),
@@ -15025,7 +15025,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.specialZones = {
       setAside: [
         visibleCard("rent-i-con", "runner", "program", {
-          definitionId: "onr_classic_031_rent-i-con",
+          definitionId: 35,
           strength: 0,
           subtypes: ["icebreaker", "ai"],
         }),
@@ -15087,7 +15087,7 @@ describe("authoritative plan-first live runtime", () => {
 
   it("chooses between equal-layer score remotes only from the exact parent protection baseline and fails closed when it becomes unknown", () => {
     const stateVersion = 1;
-    const agendaDefinitionId = "onr_v1_189_artificial-security-directors";
+    const agendaDefinitionId = 401;
     const installProtected = legalAction(
       "install-agenda-protected",
       "corp",
@@ -15133,13 +15133,13 @@ describe("authoritative plan-first live runtime", () => {
       }),
     ];
     const dataWall = visibleCard("data-wall", "corp", "ice", {
-      definitionId: "onr_v1_237_data-wall",
+      definitionId: 449,
       rezzed: true,
       strength: 0,
       subtypes: ["wall"],
     });
     const secondDataWall = visibleCard("data-wall-2", "corp", "ice", {
-      definitionId: "onr_v1_237_data-wall",
+      definitionId: 449,
       rezzed: true,
       strength: 0,
       subtypes: ["wall"],
@@ -15152,7 +15152,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.opponent.rig = [
       visibleCard("runner-blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         strength: 5,
         subtypes: ["icebreaker", "random"],
       }),
@@ -15193,13 +15193,13 @@ describe("authoritative plan-first live runtime", () => {
       (candidate) => candidate.id === "remote_1",
     )!.ice = [
       visibleCard("hunter-1", "corp", "ice", {
-        definitionId: "onr_v1_249_hunter",
+        definitionId: 461,
         rezzed: true,
         strength: 5,
         subtypes: ["sentry", "bloodhound"],
       }),
       visibleCard("hunter-2", "corp", "ice", {
-        definitionId: "onr_v1_249_hunter",
+        definitionId: 461,
         rezzed: true,
         strength: 5,
         subtypes: ["sentry", "bloodhound"],
@@ -15240,7 +15240,7 @@ describe("authoritative plan-first live runtime", () => {
   });
 
   it("keeps one qualified opening rush stable until Engine RNG selects the posture", () => {
-    const dataWall = CARD_DEFINITIONS_BY_ID["onr_v1_238_data-wall-2-0"]!;
+    const dataWall = CARD_DEFINITIONS_BY_ID[450]!;
     const installAgenda = legalAction(
       "install-agenda",
       "corp",
@@ -15251,7 +15251,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "agenda-1",
         payload: {
           cardId: "agenda-1",
-          sourceDefinitionId: "onr_v1_189_artificial-security-directors",
+          sourceDefinitionId: 401,
           serverId: "remote_1",
           placement: "root",
         },
@@ -15279,17 +15279,17 @@ describe("authoritative plan-first live runtime", () => {
       input.playerView.own.clicks = 3;
       input.playerView.own.gripOrHq = [
         visibleCard("agenda-1", "corp", "agenda", {
-          definitionId: "onr_v1_189_artificial-security-directors",
+          definitionId: 401,
           advancementRequirement: 3,
           agendaPoints: 1,
         }),
         visibleCard("accounts-card", "corp", "operation", {
-          definitionId: "onr_v1_281_accounts-receivable",
+          definitionId: 493,
         }),
       ];
       input.playerView.opponent.rig = [
         visibleCard("blink", "runner", "program", {
-          definitionId: "onr_v1_007_blink",
+          definitionId: 219,
           strength: 5,
           subtypes: ["icebreaker", "random"],
         }),
@@ -15413,7 +15413,7 @@ describe("authoritative plan-first live runtime", () => {
   });
 
   it("keeps a public Shell-Traders breaker outside opening-rush admission", () => {
-    const dataWall = CARD_DEFINITIONS_BY_ID["onr_v1_238_data-wall-2-0"]!;
+    const dataWall = CARD_DEFINITIONS_BY_ID[450]!;
     const installAgenda = legalAction(
       "install-agenda",
       "corp",
@@ -15424,7 +15424,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "agenda-1",
         payload: {
           cardId: "agenda-1",
-          sourceDefinitionId: "onr_v1_189_artificial-security-directors",
+          sourceDefinitionId: 401,
           serverId: "remote_1",
           placement: "root",
         },
@@ -15451,17 +15451,17 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("agenda-1", "corp", "agenda", {
-        definitionId: "onr_v1_189_artificial-security-directors",
+        definitionId: 401,
         advancementRequirement: 3,
         agendaPoints: 1,
       }),
       visibleCard("accounts-card", "corp", "operation", {
-        definitionId: "onr_v1_281_accounts-receivable",
+        definitionId: 493,
       }),
     ];
     input.playerView.opponent.rig = [
       visibleCard("blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         strength: 5,
         subtypes: ["icebreaker", "random"],
       }),
@@ -15469,7 +15469,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.specialZones = {
       setAside: [
         visibleCard("rent-i-con", "runner", "program", {
-          definitionId: "onr_classic_031_rent-i-con",
+          definitionId: 35,
           strength: 0,
           subtypes: ["icebreaker", "ai"],
         }),
@@ -15509,8 +15509,8 @@ describe("authoritative plan-first live runtime", () => {
   });
 
   it("prefers the exact satisfying prepared-remote route over a merely progressing new-remote route", () => {
-    const agendaDefinitionId = "onr_v1_189_artificial-security-directors";
-    const iceDefinitionId = "onr_v1_237_data-wall";
+    const agendaDefinitionId = 401;
+    const iceDefinitionId = 449;
     const stateVersion = 1;
     const installAgendaExisting = legalAction(
       "install-agenda-existing",
@@ -15636,7 +15636,7 @@ describe("authoritative plan-first live runtime", () => {
       server("archives"),
       server("remote_1", [
         visibleCard("ice-1", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           rezCost: 1,
           strength: 0,
           subtypes: ["wall"],
@@ -15646,7 +15646,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.opponent.rig = [
       visibleCard("runner-blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         strength: 5,
         subtypes: ["icebreaker", "random"],
       }),
@@ -15806,7 +15806,7 @@ describe("authoritative plan-first live runtime", () => {
       );
     protectedInput.playerView.servers[3]!.ice.push(
       visibleCard("ice-existing-2", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         rezCost: 1,
         strength: 0,
         subtypes: ["wall"],
@@ -15849,7 +15849,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "canis-major",
         payload: {
           cardId: "canis-major",
-          sourceDefinitionId: "onr_v1_225_canis-major",
+          sourceDefinitionId: 437,
           serverId: "new_remote",
           placement: "ice",
           postInstallRezQuoteCardId: "canis-major",
@@ -15872,21 +15872,21 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.rig = [];
     input.playerView.own.gripOrHq = [
       visibleCard("canis-major", "corp", "ice", {
-        definitionId: "onr_v1_225_canis-major",
+        definitionId: 437,
         title: "Canis Major",
         rezCost: 4,
         strength: 0,
         subtypes: ["sentry"],
       }),
       visibleCard("hq-chance", "corp", "operation", {
-        definitionId: "onr_v1_284_chance-observation",
+        definitionId: 496,
       }),
     ];
     input.playerView.servers = [
       server("hq"),
       server("rd", [
         visibleCard("rd-crystal-wall", "corp", "ice", {
-          definitionId: "onr_v1_232_crystal-wall",
+          definitionId: 444,
           title: "Crystal Wall",
           rezCost: 4,
           strength: 3,
@@ -15927,10 +15927,10 @@ describe("authoritative plan-first live runtime", () => {
       deckSnapshotId: "terminal-rd-rez-reserve",
       side: "corp",
       cards: [
-        { cardId: "onr_v1_232_crystal-wall", quantity: 1 },
-        { cardId: "onr_v1_225_canis-major", quantity: 1 },
-        { cardId: "onr_v1_284_chance-observation", quantity: 2 },
-        { cardId: "onr_v1_201_executive-extraction", quantity: 1 },
+        { cardId: 444, quantity: 1 },
+        { cardId: 437, quantity: 1 },
+        { cardId: 496, quantity: 2 },
+        { cardId: 413, quantity: 1 },
       ],
     });
     expect(allocateCorpCentralDefenseFromAiFacts({ input })).toMatchObject({
@@ -15990,10 +15990,10 @@ describe("authoritative plan-first live runtime", () => {
 
   it("promotes the terminal score parent over another executable P4 score parent", () => {
     const stateVersion = 1;
-    const agendaDefinitionId = "onr_v1_189_artificial-security-directors";
+    const agendaDefinitionId = 401;
     // Distinct canonical point values: changing a one-point card's view to two
     // would contradict the typed CardSpec facts used by the turn projection.
-    const terminalAgendaDefinitionId = "onr_v1_193_corporate-coup";
+    const terminalAgendaDefinitionId = 405;
     const installTerminal = legalAction(
       "install-terminal",
       "corp",
@@ -16044,7 +16044,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "economy-campaign",
         payload: {
           cardId: "economy-campaign",
-          sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+          sourceDefinitionId: 521,
           serverId: "new_remote",
           placement: "root",
         },
@@ -16076,26 +16076,26 @@ describe("authoritative plan-first live runtime", () => {
         agendaPoints: 1,
       }),
       visibleCard("economy-campaign", "corp", "asset", {
-        definitionId: "onr_v1_309_bbs-whispering-campaign",
+        definitionId: 521,
       }),
     ];
     const quotedUnrezzedIce = (instanceId: string) =>
       visibleCard(instanceId, "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         rezzed: false,
         strength: 0,
         subtypes: ["wall"],
         effectivePostRezRunQuote: {
           context: "installed_post_rez",
           cardId: instanceId,
-          iceDefinitionId: "onr_v1_237_data-wall",
+          iceDefinitionId: 449,
           targetServerId: "remote_1",
           projectedServerId: "remote_1",
           expiresAtStateVersion: stateVersion,
           complete: true,
           effectiveRunQuote: {
             iceInstanceId: instanceId,
-            iceDefinitionId: "onr_v1_237_data-wall",
+            iceDefinitionId: 449,
             effectiveStrength: 0,
             subroutines: [{ id: `${instanceId}-etr`, type: "end_the_run" }],
           },
@@ -16115,7 +16115,7 @@ describe("authoritative plan-first live runtime", () => {
       });
     const rezzedIce = (instanceId: string) =>
       visibleCard(instanceId, "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         rezzed: true,
         strength: 0,
         subtypes: ["wall"],
@@ -16132,7 +16132,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.opponent.rig = [
       visibleCard("runner-blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         strength: 5,
         subtypes: ["icebreaker", "random"],
       }),
@@ -16200,7 +16200,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "finite-pool-card",
         payload: {
           cardId: "finite-pool-card",
-          sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+          sourceDefinitionId: 521,
           serverId: "remote_1",
           placement: "root",
         },
@@ -16218,7 +16218,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("finite-pool-card", "corp", "asset", {
-        definitionId: "onr_v1_309_bbs-whispering-campaign",
+        definitionId: 521,
       }),
     ];
     input.playerView.servers = [
@@ -16250,7 +16250,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "protected-finite-pool-card",
         payload: {
           cardId: "protected-finite-pool-card",
-          sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+          sourceDefinitionId: 521,
           serverId: "remote_1",
           placement: "root",
         },
@@ -16269,7 +16269,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.corpFutureFlexibleClicks = [2, 0];
     input.playerView.own.gripOrHq = [
       visibleCard("protected-finite-pool-card", "corp", "asset", {
-        definitionId: "onr_v1_309_bbs-whispering-campaign",
+        definitionId: 521,
       }),
     ];
     input.playerView.opponent.credits = 10;
@@ -16281,7 +16281,7 @@ describe("authoritative plan-first live runtime", () => {
       server("remote_1", [
         quotedFixtureIce({
           instanceId: "protected-economy-wall",
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           title: "Data Wall",
           strength: 2,
           subtypes: ["wall"],
@@ -16321,23 +16321,23 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.stackOrRdCount = 12;
     input.playerView.own.gripOrHq = [
       visibleCard("operation-1", "corp", "operation", {
-        definitionId: "onr_v1_295_night-shift",
+        definitionId: 507,
       }),
       visibleCard("operation-2", "corp", "operation", {
-        definitionId: "onr_v1_304_systematic-layoffs",
+        definitionId: 516,
       }),
       visibleCard("asset-1", "corp", "asset", {
-        definitionId: "onr_v1_309_bbs-whispering-campaign",
+        definitionId: 521,
       }),
       visibleCard("upgrade-1", "corp", "upgrade", {
-        definitionId: "onr_v1_352_chester-mix",
+        definitionId: 564,
       }),
     ];
     Object.assign(input, {
       ownDeckSnapshot: {
         deckSnapshotId: "generic-score-material-parent-deck",
         side: "corp",
-        cards: [{ cardId: "onr_v1_220_tycho-extension", quantity: 3 }],
+        cards: [{ cardId: 432, quantity: 3 }],
       },
     });
     for (const action of input.legalActions) {
@@ -16359,7 +16359,7 @@ describe("authoritative plan-first live runtime", () => {
   it("converts known HQ economy without creating a subsequent speculative agenda search", () => {
     resetResidentPlanPortfolioMemory();
     const accountsCard = visibleCard("accounts-card", "corp", "operation", {
-      definitionId: "onr_v1_281_accounts-receivable",
+      definitionId: 493,
     });
     const accounts = legalAction(
       "accounts",
@@ -16395,7 +16395,7 @@ describe("authoritative plan-first live runtime", () => {
       accountsCard,
       ...Array.from({ length: 3 }, (_, index) =>
         visibleCard(`neutral-${index}`, "corp", "operation", {
-          definitionId: "onr_v1_284_chance-observation",
+          definitionId: 496,
         }),
       ),
     ];
@@ -16403,7 +16403,7 @@ describe("authoritative plan-first live runtime", () => {
       ownDeckSnapshot: {
         deckSnapshotId: "convert-before-score-material-draw",
         side: "corp",
-        cards: [{ cardId: "onr_v1_220_tycho-extension", quantity: 3 }],
+        cards: [{ cardId: 432, quantity: 3 }],
       },
     });
     for (const action of input.legalActions) {
@@ -16452,7 +16452,7 @@ describe("authoritative plan-first live runtime", () => {
   it("does not invent a generic card-development root without an exact parent need", () => {
     resetResidentPlanPortfolioMemory();
     const pacifica = visibleCard("pacifica", "corp", "asset", {
-      definitionId: "onr_v1_334_pacifica-regional-ai",
+      definitionId: 546,
       title: "Pacifica Regional AI",
     });
     const installNewRemote = legalAction(
@@ -16509,13 +16509,13 @@ describe("authoritative plan-first live runtime", () => {
   it("binds score-acceleration setup to the exact blocked score parent and need", () => {
     resetResidentPlanPortfolioMemory();
     const agenda = visibleCard("agenda", "corp", "agenda", {
-      definitionId: "onr_v1_201_executive-extraction",
+      definitionId: 413,
       title: "Executive Extraction",
       advancementRequirement: 3,
       agendaPoints: 2,
     });
     const chicago = visibleCard("chicago", "corp", "asset", {
-      definitionId: "onr_v1_312_chicago-branch",
+      definitionId: 524,
       title: "Chicago Branch",
     });
     const installAgenda = legalAction(
@@ -16608,7 +16608,7 @@ describe("authoritative plan-first live runtime", () => {
       const input = aiInput("corp", [draw]);
       const card = visibleCard("invalid-card", "corp", "operation", {
         definitionId: removeType
-          ? "onr_v1_295_night-shift"
+          ? 507
           : "missing-definition",
       });
       if (removeType) delete card.type;
@@ -16623,7 +16623,7 @@ describe("authoritative plan-first live runtime", () => {
   it("fails closed when a projected agenda value is not finite", () => {
     resetResidentPlanPortfolioMemory();
     const agenda = visibleCard("agenda-with-wrong-points", "corp", "agenda", {
-      definitionId: "onr_v1_194_corporate-downsizing",
+      definitionId: 406,
       agendaPoints: Number.NaN,
     });
     const install = legalAction(
@@ -16734,10 +16734,10 @@ describe("authoritative plan-first live runtime", () => {
         source: "loan-1",
         payload: {
           cardId: "loan-1",
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          sourceDefinitionId: 380,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_v1_168_loan-from-chiba:trash_at_end_of_turn",
+            "380:trash_at_end_of_turn",
           cardImplementationAbilityKey: "trash_at_end_of_turn",
           cardImplementationLifecycleAction: "end_of_runner_turn",
           cardImplementationLifecycleLeavePlayPaymentAmount: 10,
@@ -16751,7 +16751,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 20;
     input.playerView.own.rig = [
       visibleCard("loan-1", "runner", "resource", {
-        definitionId: "onr_v1_168_loan-from-chiba",
+        definitionId: 380,
       }),
     ];
 
@@ -16778,10 +16778,10 @@ describe("authoritative plan-first live runtime", () => {
         source: "loan-1",
         payload: {
           cardId: "loan-1",
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          sourceDefinitionId: 380,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_v1_168_loan-from-chiba:trash_at_end_of_turn",
+            "380:trash_at_end_of_turn",
           cardImplementationAbilityKey: "trash_at_end_of_turn",
           cardImplementationLifecycleAction: "end_of_runner_turn",
           cardImplementationLifecycleLeavePlayPaymentAmount: 10,
@@ -16810,7 +16810,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 20;
     input.playerView.own.rig = [
       visibleCard("loan-1", "runner", "resource", {
-        definitionId: "onr_v1_168_loan-from-chiba",
+        definitionId: 380,
       }),
     ];
 
@@ -16901,7 +16901,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 20;
     input.playerView.own.rig = [
       visibleCard("loan-1", "runner", "resource", {
-        definitionId: "onr_v1_168_loan-from-chiba",
+        definitionId: 380,
       }),
     ];
 
@@ -16954,7 +16954,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 20;
     input.playerView.own.rig = [
       visibleCard("loan-1", "runner", "resource", {
-        definitionId: "onr_v1_168_loan-from-chiba",
+        definitionId: 380,
       }),
     ];
 
@@ -16991,10 +16991,10 @@ describe("authoritative plan-first live runtime", () => {
         source: "loan-1",
         payload: {
           cardId: "loan-1",
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          sourceDefinitionId: 380,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_v1_168_loan-from-chiba:trash_at_end_of_turn",
+            "380:trash_at_end_of_turn",
           cardImplementationAbilityKey: "trash_at_end_of_turn",
           cardImplementationLifecycleAction: "end_of_runner_turn",
           cardImplementationLifecycleLeavePlayPaymentAmount: 10,
@@ -17008,7 +17008,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 20;
     input.playerView.own.rig = [
       visibleCard("loan-1", "runner", "resource", {
-        definitionId: "onr_v1_168_loan-from-chiba",
+        definitionId: 380,
       }),
     ];
 
@@ -17097,11 +17097,11 @@ describe("authoritative plan-first live runtime", () => {
         source: "crash-space",
         payload: {
           cardId: "crash-space",
-          sourceDefinitionId: "onr_classic_044_crash-space",
+          sourceDefinitionId: 48,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "trash_source_action",
           cardImplementationAbilityId:
-            "onr_classic_044_crash-space:trash_source_action",
+            "48:trash_source_action",
           cardImplementationAbilityTiming: "runner_main",
           cardImplementationTrashesSource: true,
         },
@@ -17121,7 +17121,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 19;
     input.playerView.own.rig = [
       visibleCard("crash-space", "runner", "resource", {
-        definitionId: "onr_classic_044_crash-space",
+        definitionId: 48,
       }),
     ];
 
@@ -17155,10 +17155,10 @@ describe("authoritative plan-first live runtime", () => {
         source: "loan-1",
         payload: {
           cardId: "loan-1",
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          sourceDefinitionId: 380,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_v1_168_loan-from-chiba:trash_at_end_of_turn",
+            "380:trash_at_end_of_turn",
           cardImplementationAbilityKey: "trash_at_end_of_turn",
           cardImplementationLifecycleAction: "end_of_runner_turn",
           cardImplementationLifecycleLeavePlayPaymentAmount: 10,
@@ -17187,7 +17187,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 20;
     input.playerView.own.rig = [
       visibleCard("loan-1", "runner", "resource", {
-        definitionId: "onr_v1_168_loan-from-chiba",
+        definitionId: 380,
       }),
     ];
 
@@ -17221,10 +17221,10 @@ describe("authoritative plan-first live runtime", () => {
         source: "loan-1",
         payload: {
           cardId: "loan-1",
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          sourceDefinitionId: 380,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_v1_168_loan-from-chiba:trash_at_end_of_turn",
+            "380:trash_at_end_of_turn",
           cardImplementationAbilityKey: "trash_at_end_of_turn",
           cardImplementationLifecycleAction: "end_of_runner_turn",
           cardImplementationLifecycleLeavePlayPaymentAmount: 10,
@@ -17242,10 +17242,10 @@ describe("authoritative plan-first live runtime", () => {
         source: "loan-2",
         payload: {
           cardId: "loan-2",
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          sourceDefinitionId: 380,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_v1_168_loan-from-chiba:trash_at_end_of_turn",
+            "380:trash_at_end_of_turn",
           cardImplementationAbilityKey: "trash_at_end_of_turn",
           cardImplementationLifecycleAction: "end_of_runner_turn",
           cardImplementationLifecycleLeavePlayPaymentAmount: 10,
@@ -17259,10 +17259,10 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 20;
     input.playerView.own.rig = [
       visibleCard("loan-1", "runner", "resource", {
-        definitionId: "onr_v1_168_loan-from-chiba",
+        definitionId: 380,
       }),
       visibleCard("loan-2", "runner", "resource", {
-        definitionId: "onr_v1_168_loan-from-chiba",
+        definitionId: 380,
       }),
     ];
 
@@ -17366,7 +17366,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 1;
     input.playerView.own.rig = [
       visibleCard("loan-1", "runner", "resource", {
-        definitionId: "onr_v1_168_loan-from-chiba",
+        definitionId: 380,
       }),
     ];
 
@@ -17510,7 +17510,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.rig = [
       visibleCard("installed-tool", "runner", "program", {
-        definitionId: "onr_v1_045_newsgroup-filter",
+        definitionId: 257,
       }),
     ];
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
@@ -18068,7 +18068,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     input.playerView.own.rig = [
       visibleCard("conference", "runner", "resource", {
-        definitionId: "onr_v1_184_top-runners-conference",
+        definitionId: 396,
         title: "Top Runners' Conference",
       }),
     ];
@@ -18086,7 +18086,7 @@ describe("authoritative plan-first live runtime", () => {
   it("installs a compatible recurring breaker-credit engine through its specialized owner", () => {
     resetResidentPlanPortfolioMemory();
     const vewy = visibleCard("vewy-in-grip", "runner", "program", {
-      definitionId: "onr_v1_071_vewy-vewy-quiet",
+      definitionId: 283,
       title: "Vewy Vewy Quiet",
       installCost: 4,
       memoryCost: 1,
@@ -18118,7 +18118,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.gripOrHq = [vewy];
     input.playerView.own.rig = [
       visibleCard("codecracker-installed", "runner", "program", {
-        definitionId: "onr_v1_014_codecracker",
+        definitionId: 226,
         subtypes: ["icebreaker", "decoder"],
       }),
     ];
@@ -18128,7 +18128,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: vewy.instanceId,
-          definitionId: "onr_v1_071_vewy-vewy-quiet",
+          definitionId: 283,
           legalActionId: installVewy.actionId,
           priority: 80,
           duplicateRole: "none",
@@ -18172,7 +18172,7 @@ describe("authoritative plan-first live runtime", () => {
   it("lets the recurring-economy owner install a declared killer-credit engine", () => {
     resetResidentPlanPortfolioMemory();
     const corolla = visibleCard("corolla-declared", "runner", "hardware", {
-      definitionId: "onr_v1_124_corolla-speed-chip",
+      definitionId: 336,
       title: "Corolla Speed Chip",
       installCost: 1,
     });
@@ -18203,7 +18203,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.gripOrHq = [corolla];
     input.playerView.own.rig = [
       visibleCard("loony-goon-declared", "runner", "program", {
-        definitionId: "onr_v1_040_loony-goon",
+        definitionId: 252,
         subtypes: ["icebreaker", "killer"],
       }),
     ];
@@ -18211,8 +18211,8 @@ describe("authoritative plan-first live runtime", () => {
       deckSnapshotId: "declared-killer-credit-engine",
       side: "runner",
       cards: [
-        { cardId: "onr_v1_040_loony-goon", quantity: 2 },
-        { cardId: "onr_v1_124_corolla-speed-chip", quantity: 1 },
+        { cardId: 252, quantity: 2 },
+        { cardId: 336, quantity: 1 },
       ],
     });
 
@@ -18223,7 +18223,7 @@ describe("authoritative plan-first live runtime", () => {
           ...recurringProgramSearchIntent().engineProviders,
           {
             providerId: "runner.provider:onr_v1_124_corolla-speed-chip",
-            cardId: "onr_v1_124_corolla-speed-chip",
+            cardId: 336,
             copies: 1,
             capabilities: ["runner.economy.recurring_breaker"],
             supportCapabilities: [],
@@ -18237,7 +18237,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: corolla.instanceId,
-          definitionId: "onr_v1_124_corolla-speed-chip",
+          definitionId: 336,
           legalActionId: installCorolla.actionId,
           priority: 0,
           duplicateRole: "none",
@@ -18279,7 +18279,7 @@ describe("authoritative plan-first live runtime", () => {
   it("leaves an undeclared restricted-credit card with the development owner", () => {
     resetResidentPlanPortfolioMemory();
     const corolla = visibleCard("corolla-in-grip", "runner", "hardware", {
-      definitionId: "onr_v1_124_corolla-speed-chip",
+      definitionId: 336,
       title: "Corolla Speed Chip",
       installCost: 1,
     });
@@ -18308,7 +18308,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.gripOrHq = [corolla];
     input.playerView.own.rig = [
       visibleCard("loony-goon-installed", "runner", "program", {
-        definitionId: "onr_v1_040_loony-goon",
+        definitionId: 252,
         subtypes: ["icebreaker", "killer"],
       }),
     ];
@@ -18318,7 +18318,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: corolla.instanceId,
-          definitionId: "onr_v1_124_corolla-speed-chip",
+          definitionId: 336,
           legalActionId: installCorolla.actionId,
           priority: 250,
           duplicateRole: "none",
@@ -18372,7 +18372,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [run, credit]);
     const conference = visibleCard("conference", "runner", "resource", {
-      definitionId: "onr_v1_184_top-runners-conference",
+      definitionId: 396,
       title: "Top Runners' Conference",
     });
     input.playerView.own.rig = [conference];
@@ -18395,7 +18395,7 @@ describe("authoritative plan-first live runtime", () => {
               amount: 2,
               reason: "start_of_turn",
               sourceCardInstanceId: conference.instanceId,
-              sourceDefinitionId: "onr_v1_184_top-runners-conference",
+              sourceDefinitionId: 396,
             },
             {
               effectId: "earlier-conference-copy-payout",
@@ -18405,7 +18405,7 @@ describe("authoritative plan-first live runtime", () => {
               amount: 2,
               reason: "start_of_turn",
               sourceCardInstanceId: "earlier-conference-copy",
-              sourceDefinitionId: "onr_v1_184_top-runners-conference",
+              sourceDefinitionId: 396,
             },
           ],
         },
@@ -18470,7 +18470,7 @@ describe("authoritative plan-first live runtime", () => {
       action.expiresAtStateVersion = input.playerView.stateVersion;
     input.playerView.own.rig = [
       visibleCard("conference", "runner", "resource", {
-        definitionId: "onr_v1_184_top-runners-conference",
+        definitionId: 396,
         title: "Top Runners' Conference",
       }),
     ];
@@ -18492,7 +18492,7 @@ describe("authoritative plan-first live runtime", () => {
             side: "runner" as const,
             sourceCardInstanceId: "conference",
             reason: "start_of_turn",
-            sourceDefinitionId: "onr_v1_184_top-runners-conference",
+            sourceDefinitionId: 396,
           })),
         },
       },
@@ -18534,7 +18534,7 @@ describe("authoritative plan-first live runtime", () => {
   it("does not invent recurring-economy ownership for a forged activated gain on an automatic turn-start source", () => {
     resetResidentPlanPortfolioMemory();
     const conference = visibleCard("conference", "runner", "resource", {
-      definitionId: "onr_v1_184_top-runners-conference",
+      definitionId: 396,
       title: "Top Runners' Conference",
     });
     const ownEconomyAction = legalAction(
@@ -18937,7 +18937,7 @@ describe("authoritative plan-first live runtime", () => {
             serverId,
             bonusRunNoClick: true,
             optionalBonusRun: true,
-            bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+            bonusRunSource: 335,
             restrictedActionGrantActionType: "start_run",
             restrictedActionGrantCostProfile: "no_click",
             restrictedActionGrantRemainingActions: 1,
@@ -18999,7 +18999,7 @@ describe("authoritative plan-first live runtime", () => {
           serverId: "hq",
           bonusRunNoClick: true,
           optionalBonusRun: true,
-          bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+          bonusRunSource: 335,
           restrictedActionGrantActionType: "start_run",
           restrictedActionGrantCostProfile: "no_click",
           restrictedActionGrantRemainingActions: 1,
@@ -19018,7 +19018,7 @@ describe("authoritative plan-first live runtime", () => {
           serverId: "rd",
           bonusRunNoClick: true,
           optionalBonusRun: true,
-          bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+          bonusRunSource: 335,
           restrictedActionGrantActionType: "start_run",
           restrictedActionGrantCostProfile: "no_click",
           restrictedActionGrantRemainingActions: 1,
@@ -19037,7 +19037,7 @@ describe("authoritative plan-first live runtime", () => {
           serverId: "archives",
           bonusRunNoClick: true,
           optionalBonusRun: true,
-          bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+          bonusRunSource: 335,
           restrictedActionGrantActionType: "start_run",
           restrictedActionGrantCostProfile: "no_click",
           restrictedActionGrantRemainingActions: 1,
@@ -19348,7 +19348,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("debt-card", "runner", "resource", {
-        definitionId: "onr_v1_168_loan-from-chiba",
+        definitionId: 380,
       }),
     ];
 
@@ -19356,7 +19356,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "debt-card",
-          definitionId: "onr_v1_168_loan-from-chiba",
+          definitionId: 380,
           legalActionId: loan.actionId,
           priority: 9_000,
           currentNeed: "acute",
@@ -19412,7 +19412,7 @@ describe("authoritative plan-first live runtime", () => {
           source: "debt-card",
           payload: {
             cardId: "debt-card",
-            sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+            sourceDefinitionId: 380,
             gainCreditsAmount: 12,
           },
         },
@@ -19429,7 +19429,7 @@ describe("authoritative plan-first live runtime", () => {
       input.playerView.own.clicks = 2;
       input.playerView.own.gripOrHq = [
         visibleCard("debt-card", "runner", "resource", {
-          definitionId: "onr_v1_168_loan-from-chiba",
+          definitionId: 380,
         }),
       ];
       const target = {
@@ -19496,7 +19496,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "debt-card",
         payload: {
           cardId: "debt-card",
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          sourceDefinitionId: 380,
           gainCreditsAmount: 12,
         },
       },
@@ -19513,7 +19513,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 2;
     input.playerView.own.gripOrHq = [
       visibleCard("debt-card", "runner", "resource", {
-        definitionId: "onr_v1_168_loan-from-chiba",
+        definitionId: 380,
       }),
     ];
     const target = {
@@ -19575,7 +19575,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "drine-card",
         payload: {
           cardId: "drine-card",
-          sourceDefinitionId: "onr_classic_036_do-the-drine",
+          sourceDefinitionId: 40,
           xValue: 1,
           damageType: "core",
           damageAmount: 1,
@@ -19594,7 +19594,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "drine-card",
         payload: {
           cardId: "drine-card",
-          sourceDefinitionId: "onr_classic_036_do-the-drine",
+          sourceDefinitionId: 40,
           xValue: 2,
           damageType: "core",
           damageAmount: 2,
@@ -19615,7 +19615,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("drine-card", "runner", "event", {
-        definitionId: "onr_classic_036_do-the-drine",
+        definitionId: 40,
       }),
       visibleCard("buffer-1", "runner", "event"),
       visibleCard("buffer-2", "runner", "event"),
@@ -19625,7 +19625,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "drine-card",
-          definitionId: "onr_classic_036_do-the-drine",
+          definitionId: 40,
           legalActionId: drineOne.actionId,
           priority: 300,
           currentNeed: "acute",
@@ -19665,7 +19665,7 @@ describe("authoritative plan-first live runtime", () => {
           source: "drine-card",
           payload: {
             cardId: "drine-card",
-            sourceDefinitionId: "onr_classic_036_do-the-drine",
+            sourceDefinitionId: 40,
             xValue: amount,
             damageType: "core",
             damageAmount: amount,
@@ -19689,7 +19689,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("drine-card", "runner", "event", {
-        definitionId: "onr_classic_036_do-the-drine",
+        definitionId: 40,
       }),
       visibleCard("buffer-1", "runner", "event"),
       visibleCard("buffer-2", "runner", "event"),
@@ -20227,7 +20227,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "saloon",
         payload: {
           cardId: "saloon",
-          sourceDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+          sourceDefinitionId: 391,
           gainCreditsAmount: 1,
           drawCardsAmount: 1,
           effectKind: "gain_credits",
@@ -20320,7 +20320,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "valu-pak-card",
         payload: {
           cardId: "valu-pak-card",
-          sourceDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+          sourceDefinitionId: 329,
           gainActionsAmount: 5,
           actionCapacityTiming: "immediate",
           actionCapacityRestriction: "program_install_only",
@@ -20339,7 +20339,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "program-card",
         payload: {
           cardId: "program-card",
-          sourceDefinitionId: "onr_v1_045_newsgroup-filter",
+          sourceDefinitionId: 257,
         },
       },
     );
@@ -20354,22 +20354,22 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 0;
     input.playerView.own.gripOrHq = [
       visibleCard("valu-pak-card", "runner", "event", {
-        definitionId: "onr_v1_117_valu-pak-software-bundle",
+        definitionId: 329,
       }),
       visibleCard("program-card", "runner", "program", {
-        definitionId: "onr_v1_045_newsgroup-filter",
+        definitionId: 257,
       }),
     ];
     const handDevelopment = [
       handEvaluation({
         cardInstanceId: "valu-pak-card",
-        definitionId: "onr_v1_117_valu-pak-software-bundle",
+        definitionId: 329,
         legalActionId: "valu-pak",
         priority: 200,
       }),
       handEvaluation({
         cardInstanceId: "program-card",
-        definitionId: "onr_v1_045_newsgroup-filter",
+        definitionId: 257,
         legalActionId: "install-redundant-program",
         priority: 20,
         deferReason: "duplicate",
@@ -20468,7 +20468,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "saloon-engine-card",
         payload: {
           cardId: "saloon-engine-card",
-          sourceDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+          sourceDefinitionId: 391,
         },
       },
     );
@@ -20525,7 +20525,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("saloon-engine-card", "runner", "resource", {
-        definitionId: "onr_v1_179_silicon-saloon-franchise",
+        definitionId: 391,
         installCost: 8,
       }),
     ];
@@ -20625,7 +20625,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "saloon-engine-card",
         payload: {
           cardId: "saloon-engine-card",
-          sourceDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+          sourceDefinitionId: 391,
         },
       },
     );
@@ -20636,7 +20636,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.agendaPointsToWin = 7;
     input.playerView.own.gripOrHq = [
       visibleCard("saloon-engine-card", "runner", "resource", {
-        definitionId: "onr_v1_179_silicon-saloon-franchise",
+        definitionId: 391,
         installCost: 8,
       }),
     ];
@@ -20697,11 +20697,11 @@ describe("authoritative plan-first live runtime", () => {
         source: "networking-card",
         payload: {
           cardId: "networking-card",
-          sourceDefinitionId: "onr_classic_041_networking",
+          sourceDefinitionId: 45,
           gainCreditsAmount: 9,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_classic_041_networking:on_play_gain_nine_credits",
+            "45:on_play_gain_nine_credits",
           cardImplementationAbilityKey: "on_play_gain_nine_credits",
         },
       },
@@ -20729,7 +20729,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.agendaPointsToWin = 7;
     input.playerView.own.gripOrHq = [
       visibleCard("networking-card", "runner", "event", {
-        definitionId: "onr_classic_041_networking",
+        definitionId: 45,
         title: "Networking",
       }),
       ...[1, 2, 3, 4].map((n) =>
@@ -21035,7 +21035,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "lucidrine-card",
         payload: {
           cardId: "lucidrine-card",
-          sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+          sourceDefinitionId: 310,
           serverId: "remote_1",
           runnerEventRun: true,
           runTemporaryCredits: 9,
@@ -21055,7 +21055,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("lucidrine-card", "runner", "event", {
-        definitionId: "onr_v1_098_lucidrine-booster-drug",
+        definitionId: 310,
       }),
     ];
     const knownPayoffRemote = server("remote_1");
@@ -21179,7 +21179,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "guide-card",
         payload: {
           cardId: "guide-card",
-          sourceDefinitionId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+          sourceDefinitionId: 304,
         },
       },
     );
@@ -21196,7 +21196,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("guide-card", "runner", "event", {
-        definitionId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+        definitionId: 304,
         title: "Ice and Data’s Guide to the Net",
       }),
     ];
@@ -21205,7 +21205,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "guide-card",
-          definitionId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+          definitionId: 304,
           legalActionId: guide.actionId,
           priority: 900,
           availability: "legal_now",
@@ -21259,7 +21259,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "smarteye-2",
         payload: {
           cardId: "smarteye-2",
-          sourceDefinitionId: "onr_v1_065_smarteye",
+          sourceDefinitionId: 277,
           runnerProgramTrashBeforeInstall: true,
         },
       },
@@ -21277,14 +21277,14 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 2;
     input.playerView.own.gripOrHq = [
       visibleCard("smarteye-2", "runner", "program", {
-        definitionId: "onr_v1_065_smarteye",
+        definitionId: 277,
         installCost: 2,
         memoryCost: 1,
       }),
     ];
     input.playerView.own.rig = [
       visibleCard("smarteye-1", "runner", "program", {
-        definitionId: "onr_v1_065_smarteye",
+        definitionId: 277,
         installCost: 2,
         memoryCost: 1,
       }),
@@ -21328,7 +21328,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "access-event",
         payload: {
           cardId: "access-event",
-          sourceDefinitionId: "onr_proteus_119_promises-promises",
+          sourceDefinitionId: 177,
         },
       },
     );
@@ -21358,13 +21358,13 @@ describe("authoritative plan-first live runtime", () => {
         visibleCard(`preparation-buffer-${index}`, "runner", "event"),
       ),
       visibleCard("access-event", "runner", "event", {
-        definitionId: "onr_proteus_119_promises-promises",
+        definitionId: 177,
       }),
     ];
     const development = {
       ...handEvaluation({
         cardInstanceId: "access-event",
-        definitionId: "onr_proteus_119_promises-promises",
+        definitionId: 177,
         legalActionId: "prepare-access",
         priority: 220,
       }),
@@ -21378,7 +21378,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(buildActionSemanticCandidates(input)).toContainEqual(
       expect.objectContaining({
         actionId: "prepare-access",
-        sourceDefinitionId: "onr_proteus_119_promises-promises",
+        sourceDefinitionId: 177,
       }),
     );
 
@@ -21407,7 +21407,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "access-event",
         payload: {
           cardId: "access-event",
-          sourceDefinitionId: "onr_proteus_119_promises-promises",
+          sourceDefinitionId: 177,
         },
       },
     );
@@ -21423,13 +21423,13 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("access-event", "runner", "event", {
-        definitionId: "onr_proteus_119_promises-promises",
+        definitionId: 177,
       }),
     ];
     const development = {
       ...handEvaluation({
         cardInstanceId: "access-event",
-        definitionId: "onr_proteus_119_promises-promises",
+        definitionId: 177,
         legalActionId: "prepare-access",
         priority: 220,
       }),
@@ -21474,7 +21474,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "valu-pak-card",
         payload: {
           cardId: "valu-pak-card",
-          sourceDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+          sourceDefinitionId: 329,
           gainActionsAmount: 5,
           actionCapacityTiming: "immediate",
           actionCapacityRestriction: "program_install_only",
@@ -21495,7 +21495,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "program-a",
         payload: {
           cardId: "program-a",
-          sourceDefinitionId: "onr_v1_045_newsgroup-filter",
+          sourceDefinitionId: 257,
         },
       },
     );
@@ -21509,7 +21509,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "program-b",
         payload: {
           cardId: "program-b",
-          sourceDefinitionId: "onr_v1_007_blink",
+          sourceDefinitionId: 219,
         },
       },
     );
@@ -21519,13 +21519,13 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.memoryUsed = 0;
     input.playerView.own.gripOrHq = [
       visibleCard("valu-pak-card", "runner", "event", {
-        definitionId: "onr_v1_117_valu-pak-software-bundle",
+        definitionId: 329,
       }),
       visibleCard("program-a", "runner", "program", {
-        definitionId: "onr_v1_045_newsgroup-filter",
+        definitionId: 257,
       }),
       visibleCard("program-b", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
       }),
       visibleCard("hand-buffer-card", "runner", "event", {
         definitionId: "onr_v1_029_special-order",
@@ -21534,13 +21534,13 @@ describe("authoritative plan-first live runtime", () => {
     const handDevelopment = [
       handEvaluation({
         cardInstanceId: "valu-pak-card",
-        definitionId: "onr_v1_117_valu-pak-software-bundle",
+        definitionId: 329,
         legalActionId: "valu-pak",
         priority: 200,
       }),
       handEvaluation({
         cardInstanceId: "program-a",
-        definitionId: "onr_v1_045_newsgroup-filter",
+        definitionId: 257,
         legalActionId: "install-program-a",
         priority: 80,
         duplicateRole: "none",
@@ -21552,7 +21552,7 @@ describe("authoritative plan-first live runtime", () => {
       }),
       handEvaluation({
         cardInstanceId: "program-b",
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         legalActionId: "install-program-b",
         priority: 70,
         duplicateRole: "none",
@@ -21587,7 +21587,7 @@ describe("authoritative plan-first live runtime", () => {
     const moreOptions = Array.from({ length: 19 }, (_, index) =>
       handEvaluation({
         cardInstanceId: `additional-program-${index}`,
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         legalActionId: `additional-install-${index}`,
         priority: 50,
         duplicateRole: "none",
@@ -21608,7 +21608,7 @@ describe("authoritative plan-first live runtime", () => {
             ...input.playerView.own.gripOrHq,
             ...moreOptions.map((option) =>
               visibleCard(option.cardInstanceId, "runner", "program", {
-                definitionId: "onr_v1_007_blink",
+                definitionId: 219,
               }),
             ),
           ],
@@ -21659,7 +21659,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           ...restrictedPayload,
           cardId: "program-a",
-          sourceDefinitionId: "onr_v1_045_newsgroup-filter",
+          sourceDefinitionId: 257,
         },
       },
     );
@@ -21674,7 +21674,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           ...restrictedPayload,
           cardId: "program-b",
-          sourceDefinitionId: "onr_v1_007_blink",
+          sourceDefinitionId: 219,
         },
       },
     );
@@ -21699,10 +21699,10 @@ describe("authoritative plan-first live runtime", () => {
     afterOpen.playerView.own.memoryUsed = 0;
     afterOpen.playerView.own.gripOrHq = [
       visibleCard("program-a", "runner", "program", {
-        definitionId: "onr_v1_045_newsgroup-filter",
+        definitionId: 257,
       }),
       visibleCard("program-b", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
       }),
     ];
     expect(
@@ -21729,12 +21729,12 @@ describe("authoritative plan-first live runtime", () => {
     afterFirstInstall.playerView.own.memoryUsed = 1;
     afterFirstInstall.playerView.own.rig = [
       visibleCard("program-a", "runner", "program", {
-        definitionId: "onr_v1_045_newsgroup-filter",
+        definitionId: 257,
       }),
     ];
     afterFirstInstall.playerView.own.gripOrHq = [
       visibleCard("program-b", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
       }),
     ];
     expect(
@@ -21757,10 +21757,10 @@ describe("authoritative plan-first live runtime", () => {
     afterSecondInstall.playerView.own.memoryUsed = 2;
     afterSecondInstall.playerView.own.rig = [
       visibleCard("program-a", "runner", "program", {
-        definitionId: "onr_v1_045_newsgroup-filter",
+        definitionId: 257,
       }),
       visibleCard("program-b", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
       }),
     ];
     expect(
@@ -21778,7 +21778,7 @@ describe("authoritative plan-first live runtime", () => {
     resetResidentPlanPortfolioMemory();
     const capacityPayload = {
       cardId: "valu-pak-card",
-      sourceDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+      sourceDefinitionId: 329,
       gainActionsAmount: 5,
       actionCapacityTiming: "immediate",
       actionCapacityRestriction: "program_install_only",
@@ -21822,7 +21822,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "blink-card",
         payload: {
           cardId: "blink-card",
-          sourceDefinitionId: "onr_v1_007_blink",
+          sourceDefinitionId: 219,
         },
       },
     );
@@ -21832,20 +21832,20 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.memoryUsed = 0;
     input.playerView.own.gripOrHq = [
       visibleCard("valu-pak-card", "runner", "event", {
-        definitionId: "onr_v1_117_valu-pak-software-bundle",
+        definitionId: 329,
       }),
       visibleCard("wilson-card", "runner", "resource", {
         definitionId: "onr_v1_038_wilson-weeflerunner",
       }),
       visibleCard("blink-card", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
       }),
     ];
     const decision = liveContext({
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "valu-pak-card",
-          definitionId: "onr_v1_117_valu-pak-software-bundle",
+          definitionId: 329,
           legalActionId: "valu-pak",
           priority: 970,
         }),
@@ -21862,7 +21862,7 @@ describe("authoritative plan-first live runtime", () => {
         }),
         handEvaluation({
           cardInstanceId: "blink-card",
-          definitionId: "onr_v1_007_blink",
+          definitionId: 219,
           legalActionId: "install-blink",
           priority: 1_000,
           deferReason: "preserve_credit_floor",
@@ -21901,7 +21901,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "valu-pak-card",
         payload: {
           cardId: "valu-pak-card",
-          sourceDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+          sourceDefinitionId: 329,
           gainActionsAmount: 5,
           actionCapacityTiming: "immediate",
           actionCapacityRestriction: "program_install_only",
@@ -21933,7 +21933,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.gripOrHq = [
       visibleCard("valu-pak-card", "runner", "event", {
-        definitionId: "onr_v1_117_valu-pak-software-bundle",
+        definitionId: 329,
       }),
     ];
 
@@ -21942,7 +21942,7 @@ describe("authoritative plan-first live runtime", () => {
         evaluateRunnerHandDevelopment: () => [
           handEvaluation({
             cardInstanceId: "valu-pak-card",
-            definitionId: "onr_v1_117_valu-pak-software-bundle",
+            definitionId: 329,
             legalActionId: "valu-pak",
             priority: 970,
             strategicFit: "strong",
@@ -21974,7 +21974,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "valu-pak-card",
         payload: {
           cardId: "valu-pak-card",
-          sourceDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+          sourceDefinitionId: 329,
           gainActionsAmount: 5,
           actionCapacityTiming: "immediate",
           actionCapacityRestriction: "program_install_only",
@@ -21995,7 +21995,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "program-a",
         payload: {
           cardId: "program-a",
-          sourceDefinitionId: "onr_v1_045_newsgroup-filter",
+          sourceDefinitionId: 257,
         },
       },
     );
@@ -22009,7 +22009,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "program-b",
         payload: {
           cardId: "program-b",
-          sourceDefinitionId: "onr_v1_007_blink",
+          sourceDefinitionId: 219,
         },
       },
     );
@@ -22019,27 +22019,27 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.memoryUsed = 0;
     input.playerView.own.gripOrHq = [
       visibleCard("valu-pak-card", "runner", "event", {
-        definitionId: "onr_v1_117_valu-pak-software-bundle",
+        definitionId: 329,
       }),
       visibleCard("program-a", "runner", "program", {
-        definitionId: "onr_v1_045_newsgroup-filter",
+        definitionId: 257,
       }),
       visibleCard("program-b", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
       }),
     ];
     const decision = liveContext({
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "valu-pak-card",
-          definitionId: "onr_v1_117_valu-pak-software-bundle",
+          definitionId: 329,
           legalActionId: "valu-pak",
           priority: 970,
           strategicFit: "strong",
         }),
         handEvaluation({
           cardInstanceId: "program-a",
-          definitionId: "onr_v1_045_newsgroup-filter",
+          definitionId: 257,
           legalActionId: "install-program-a",
           priority: 20,
           currentNeed: "later",
@@ -22051,7 +22051,7 @@ describe("authoritative plan-first live runtime", () => {
         }),
         handEvaluation({
           cardInstanceId: "program-b",
-          definitionId: "onr_v1_007_blink",
+          definitionId: 219,
           legalActionId: "install-program-b",
           priority: 20,
           currentNeed: "later",
@@ -22096,7 +22096,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "valu-pak-card",
         payload: {
           cardId: "valu-pak-card",
-          sourceDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+          sourceDefinitionId: 329,
           gainActionsAmount: 5,
           actionCapacityTiming: "immediate",
           actionCapacityRestriction: "program_install_only",
@@ -22113,10 +22113,10 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.memoryUsed = 0;
     input.playerView.own.gripOrHq = [
       visibleCard("valu-pak-card", "runner", "event", {
-        definitionId: "onr_v1_117_valu-pak-software-bundle",
+        definitionId: 329,
       }),
       visibleCard("acute-program", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
       }),
       visibleCard("hand-buffer-card", "runner", "event", {
         definitionId: "onr_v1_029_special-order",
@@ -22128,13 +22128,13 @@ describe("authoritative plan-first live runtime", () => {
         evaluateRunnerHandDevelopment: () => [
           handEvaluation({
             cardInstanceId: "valu-pak-card",
-            definitionId: "onr_v1_117_valu-pak-software-bundle",
+            definitionId: 329,
             legalActionId: "valu-pak",
             priority: 970,
           }),
           handEvaluation({
             cardInstanceId: "acute-program",
-            definitionId: "onr_v1_007_blink",
+            definitionId: 219,
             legalActionId: "install-after-valu-pak",
             priority: 1_000,
             deferReason: "missing_credits",
@@ -22327,7 +22327,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           ...restrictedPayload,
           cardId: "program-card",
-          sourceDefinitionId: "onr_v1_007_blink",
+          sourceDefinitionId: 219,
         },
       },
     );
@@ -22344,7 +22344,7 @@ describe("authoritative plan-first live runtime", () => {
     for (const action of input.legalActions) action.expiresAtStateVersion = 2;
     input.playerView.own.gripOrHq = [
       visibleCard("program-card", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
       }),
     ];
 
@@ -22529,12 +22529,12 @@ describe("authoritative plan-first live runtime", () => {
           source: "bbs",
           payload: {
             cardId: "bbs",
-            sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+            sourceDefinitionId: 377,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityKey:
               "abilities_activated_runner_main_move_top_trash_to_grip",
             cardImplementationAbilityId:
-              "onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip",
+              "377:abilities_activated_runner_main_move_top_trash_to_grip",
             cardImplementationEffectKind: "move_top_trash_to_grip",
             cardImplementationTopTrashTargetId: "target",
             targetCardId: "target",
@@ -22555,17 +22555,17 @@ describe("authoritative plan-first live runtime", () => {
       input.playerView.opponent.deckCount = 10;
       input.playerView.own.gripOrHq = Array.from({ length: 5 }, (_, i) =>
         visibleCard(`held-${i}`, "runner", "event", {
-          definitionId: "onr_v1_099_mantis-fixer-at-large",
+          definitionId: 311,
         }),
       );
       input.playerView.own.rig = [
         visibleCard("bbs", "runner", "resource", {
-          definitionId: "onr_v1_165_junkyard-bbs",
+          definitionId: 377,
         }),
       ];
       input.playerView.own.heapOrArchives = [
         visibleCard("target", "runner", "hardware", {
-          definitionId: "onr_v1_121_armored-fridge",
+          definitionId: 333,
         }),
       ];
       const decision = liveContext({
@@ -22604,15 +22604,15 @@ describe("authoritative plan-first live runtime", () => {
         source: "recovery-resource",
         payload: {
           cardId: "recovery-resource",
-          sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+          sourceDefinitionId: 377,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "abilities_activated_runner_main_move_top_trash_to_grip",
           cardImplementationAbilityId:
-            "onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip",
+            "377:abilities_activated_runner_main_move_top_trash_to_grip",
           cardImplementationEffectKind: "move_top_trash_to_grip",
           targetCardId: "top-heap-card",
-          targetCardDefinitionId: "onr_v1_176_the-shell-traders",
+          targetCardDefinitionId: 388,
           cardImplementationTopTrashTargetId: "top-heap-card",
         },
       },
@@ -22626,7 +22626,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     input.playerView.own.heapOrArchives = [
       visibleCard("top-heap-card", "runner", "resource", {
-        definitionId: "onr_v1_176_the-shell-traders",
+        definitionId: 388,
         title: "The Shell Traders",
       }),
     ];
@@ -22681,15 +22681,15 @@ describe("authoritative plan-first live runtime", () => {
         source: "recovery-resource",
         payload: {
           cardId: "recovery-resource",
-          sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+          sourceDefinitionId: 377,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "abilities_activated_runner_main_move_top_trash_to_grip",
           cardImplementationAbilityId:
-            "onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip",
+            "377:abilities_activated_runner_main_move_top_trash_to_grip",
           cardImplementationEffectKind: "move_top_trash_to_grip",
           targetCardId: "top-heap-event",
-          targetDefinitionId: "onr_v1_105_priority-wreck",
+          targetDefinitionId: 317,
           cardImplementationTopTrashTargetId: "top-heap-event",
         },
       },
@@ -22703,7 +22703,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     input.playerView.own.heapOrArchives = [
       visibleCard("top-heap-event", "runner", "event", {
-        definitionId: "onr_v1_105_priority-wreck",
+        definitionId: 317,
         title: "Priority Wreck",
       }),
     ];
@@ -23828,15 +23828,15 @@ describe("authoritative plan-first live runtime", () => {
         source: "disgruntled-event",
         payload: {
           cardId: "disgruntled-event",
-          sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+          sourceDefinitionId: 164,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "post_pass_derez_fully_broken_ice_end_run",
           cardImplementationAbilityId:
-            "onr_proteus_106_disgruntled-ice-technician:post_pass_derez_fully_broken_ice_end_run",
+            "164:post_pass_derez_fully_broken_ice_end_run",
           abilityId: "derez_fully_broken_passed_ice_and_end_run",
           targetIceId: "banpei",
-          targetIceDefinitionId: "onr_v1_223_banpei",
+          targetIceDefinitionId: 435,
           runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",
           paymentAmount: 0,
         },
@@ -23856,7 +23856,7 @@ describe("authoritative plan-first live runtime", () => {
       server("hq"),
       server("rd", [
         visibleCard("banpei", "corp", "ice", {
-          definitionId: "onr_v1_223_banpei",
+          definitionId: 435,
           rezzed: true,
         }),
       ]),
@@ -23899,9 +23899,9 @@ describe("authoritative plan-first live runtime", () => {
         source: "incomplete-event",
         payload: {
           cardId: "incomplete-event",
-          sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+          sourceDefinitionId: 164,
           targetIceId: "banpei",
-          targetIceDefinitionId: "onr_v1_223_banpei",
+          targetIceDefinitionId: 435,
           paymentAmount: 0,
         },
       },
@@ -23925,7 +23925,7 @@ describe("authoritative plan-first live runtime", () => {
       server("hq"),
       server("rd", [
         visibleCard("banpei", "corp", "ice", {
-          definitionId: "onr_v1_223_banpei",
+          definitionId: 435,
           rezzed: true,
         }),
       ]),
@@ -23949,15 +23949,15 @@ describe("authoritative plan-first live runtime", () => {
         source: "disgruntled-event",
         payload: {
           cardId: "disgruntled-event",
-          sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+          sourceDefinitionId: 164,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "post_pass_derez_fully_broken_ice_end_run",
           cardImplementationAbilityId:
-            "onr_proteus_106_disgruntled-ice-technician:post_pass_derez_fully_broken_ice_end_run",
+            "164:post_pass_derez_fully_broken_ice_end_run",
           abilityId: "derez_fully_broken_passed_ice_and_end_run",
           targetIceId: "data-wall",
-          targetIceDefinitionId: "onr_v1_237_data-wall",
+          targetIceDefinitionId: 449,
           paymentAmount: 0,
         },
       },
@@ -23983,7 +23983,7 @@ describe("authoritative plan-first live runtime", () => {
       server("hq"),
       server("rd", [
         visibleCard("data-wall", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           rezzed: true,
         }),
       ]),
@@ -24110,7 +24110,7 @@ describe("authoritative plan-first live runtime", () => {
           encounterWillEndRun: true,
           unbrokenSubroutineCount: 1,
           encounterSubroutineIds: "printed_subroutines_end_the_run",
-          sourceDefinitionId: "onr_v1_261_quandary",
+          sourceDefinitionId: 473,
         },
       },
     );
@@ -24126,7 +24126,7 @@ describe("authoritative plan-first live runtime", () => {
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
       encounteredIce: visibleCard("quandary", "corp", "ice", {
-        definitionId: "onr_v1_261_quandary",
+        definitionId: 473,
         rezzed: true,
         subtypes: ["code_gate"],
       }),
@@ -24138,18 +24138,18 @@ describe("authoritative plan-first live runtime", () => {
       server("archives"),
       server("remote_1", [
         visibleCard("quandary", "corp", "ice", {
-          definitionId: "onr_v1_261_quandary",
+          definitionId: 473,
           rezzed: true,
           subtypes: ["code_gate"],
           effectiveRunQuote: {
             iceInstanceId: "quandary",
-            iceDefinitionId: "onr_v1_261_quandary",
+            iceDefinitionId: 473,
             effectiveStrength: 2,
             subroutines: [
               {
                 id: "printed_subroutines_end_the_run",
                 type: "end_the_run",
-                sourceDefinitionId: "onr_v1_261_quandary",
+                sourceDefinitionId: 473,
               },
             ],
           },
@@ -24158,7 +24158,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.own.rig = [
       visibleCard("fubar", "runner", "program", {
-        definitionId: "onr_proteus_088_fubar",
+        definitionId: 146,
         subtypes: ["icebreaker", "noisy"],
         strength: 3,
       }),
@@ -24220,15 +24220,15 @@ describe("authoritative plan-first live runtime", () => {
         source: "disgruntled-event",
         payload: {
           cardId: "disgruntled-event",
-          sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+          sourceDefinitionId: 164,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "post_pass_derez_fully_broken_ice_end_run",
           cardImplementationAbilityId:
-            "onr_proteus_106_disgruntled-ice-technician:post_pass_derez_fully_broken_ice_end_run",
+            "164:post_pass_derez_fully_broken_ice_end_run",
           abilityId: "derez_fully_broken_passed_ice_and_end_run",
           targetIceId: "banpei",
-          targetIceDefinitionId: "onr_v1_223_banpei",
+          targetIceDefinitionId: 435,
           runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",
           paymentAmount: 0,
         },
@@ -24260,13 +24260,13 @@ describe("authoritative plan-first live runtime", () => {
         "remote_1",
         [
           visibleCard("banpei", "corp", "ice", {
-            definitionId: "onr_v1_223_banpei",
+            definitionId: 435,
             rezzed: true,
           }),
         ],
         [
           visibleCard("visible-agenda", "corp", "agenda", {
-            definitionId: "onr_v1_203_hostile-takeover",
+            definitionId: 415,
           }),
         ],
       ),
@@ -24357,7 +24357,7 @@ describe("authoritative plan-first live runtime", () => {
         publicPayload: {
           actor: "runner",
           actionType: "continue_run",
-          sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          sourceDefinitionId: 454,
           unbrokenSubroutineCount: 1,
           resolvedEffects: [
             {
@@ -24366,7 +24366,7 @@ describe("authoritative plan-first live runtime", () => {
               visibility: "public",
               side: "runner",
               reason: "ice_subroutine",
-              sourceDefinitionId: "onr_v1_242_fatal-attractor",
+              sourceDefinitionId: 454,
               amount: 3,
             },
           ],
@@ -24411,13 +24411,13 @@ describe("authoritative plan-first live runtime", () => {
       server("hq"),
       server("rd", [
         visibleCard("brain-drain", "corp", "ice", {
-          definitionId: "onr_classic_007_brain-drain",
+          definitionId: 11,
           rezzed: true,
           strength: 3,
           subtypes: ["sentry", "black_ice", "ap"],
           effectiveRunQuote: {
             iceInstanceId: "brain-drain",
-            iceDefinitionId: "onr_classic_007_brain-drain",
+            iceDefinitionId: 11,
             effectiveStrength: 3,
             subroutines: [
               {
@@ -24425,7 +24425,7 @@ describe("authoritative plan-first live runtime", () => {
                 type: "random_damage",
                 amount: 3,
                 damageType: "core",
-                sourceDefinitionId: "onr_classic_007_brain-drain",
+                sourceDefinitionId: 11,
               },
             ],
           },
@@ -24502,13 +24502,13 @@ describe("authoritative plan-first live runtime", () => {
       server("hq"),
       server("rd", [
         visibleCard("brain-drain", "corp", "ice", {
-          definitionId: "onr_classic_007_brain-drain",
+          definitionId: 11,
           rezzed: true,
           strength: 3,
           subtypes: ["sentry", "black_ice", "ap"],
           effectiveRunQuote: {
             iceInstanceId: "brain-drain",
-            iceDefinitionId: "onr_classic_007_brain-drain",
+            iceDefinitionId: 11,
             effectiveStrength: 3,
             subroutines: [
               {
@@ -24516,7 +24516,7 @@ describe("authoritative plan-first live runtime", () => {
                 type: "random_damage",
                 amount: 3,
                 damageType: "core",
-                sourceDefinitionId: "onr_classic_007_brain-drain",
+                sourceDefinitionId: 11,
               },
             ],
           },
@@ -24604,7 +24604,7 @@ describe("authoritative plan-first live runtime", () => {
         publicPayload: {
           actor: "runner",
           actionType: "continue_run",
-          sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          sourceDefinitionId: 454,
           unbrokenSubroutineCount: 1,
           resolvedEffects: [
             {
@@ -24613,7 +24613,7 @@ describe("authoritative plan-first live runtime", () => {
               visibility: "public",
               side: "runner",
               reason: "ice_subroutine",
-              sourceDefinitionId: "onr_v1_242_fatal-attractor",
+              sourceDefinitionId: 454,
               amount: 3,
             },
           ],
@@ -24811,7 +24811,7 @@ describe("authoritative plan-first live runtime", () => {
         publicPayload: {
           actor: "runner",
           actionType: "continue_run",
-          sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          sourceDefinitionId: 454,
         },
       },
       {
@@ -24896,7 +24896,7 @@ describe("authoritative plan-first live runtime", () => {
         ...safeRuntimeRunTarget(run.actionId, "hq"),
         accessPayoff: "trash_affordable" as const,
         accessFacts: {
-          knownTargetDefinitionIds: ["onr_v1_330_krumz"],
+          knownTargetDefinitionIds: [542],
           trashBudget: 2,
         },
         knownAccessState: "known_payoff" as const,
@@ -24931,7 +24931,7 @@ describe("authoritative plan-first live runtime", () => {
           signal: {
             accessCommitment: {
               intendedAction: "trash",
-              knownTargetDefinitionIds: ["onr_v1_330_krumz"],
+              knownTargetDefinitionIds: [542],
               trashBudget: 2,
             },
           },
@@ -24970,7 +24970,7 @@ describe("authoritative plan-first live runtime", () => {
           [],
           [
             visibleCard("corp-krumz", "corp", "asset", {
-              definitionId: "onr_v1_330_krumz",
+              definitionId: 542,
             }),
           ],
         ),
@@ -25038,7 +25038,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const accessInput = aiInput("runner", [decline, trash]);
     const krumz = visibleCard("corp-krumz", "corp", "asset", {
-      definitionId: "onr_v1_330_krumz",
+      definitionId: 542,
       counters: { bit: 1 },
     });
     accessInput.playerView.stateVersion = 2;
@@ -25093,7 +25093,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [decline, trash]);
     const campaign = visibleCard("visible-campaign", "corp", "asset", {
-      definitionId: "onr_v1_309_bbs-whispering-campaign",
+      definitionId: 521,
       counters: { bit: 14 },
     });
     input.playerView.own.credits = 5;
@@ -25519,7 +25519,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.own.rig = [
       visibleCard("rd-interface", "runner", "hardware", {
-        definitionId: "onr_v1_139_r-and-d-interface",
+        definitionId: 351,
         title: "R&D Interface",
       }),
     ];
@@ -25527,11 +25527,11 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.servers = [server("hq"), server("rd")];
 
     const accessedDefinitions = [
-      "simple_economy_operation",
-      "simple_agenda",
-      "onr_proteus_032_misleading-access-menus",
-      "simple_priority_agenda",
-      "onr_v1_295_night-shift",
+      596,
+      588,
+      90,
+      599,
+      507,
     ];
     const publicEvents: PublicGameEvent[] = [];
     let stateVersion = 0;
@@ -25722,9 +25722,9 @@ describe("authoritative plan-first live runtime", () => {
         source: "temple-card",
         payload: {
           cardId: "temple-card",
-          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          sourceDefinitionId: 326,
           cardImplementationAbilityId:
-            "onr_v1_114_temple-microcode-outlet:abilities_on_play_search_stack_to_grip",
+            "326:abilities_on_play_search_stack_to_grip",
           cardImplementationAbilityKey:
             "abilities_on_play_search_stack_to_grip",
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
@@ -25747,15 +25747,15 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.rig = fullNonNoisyBreakerRig();
     input.playerView.own.gripOrHq = [
       visibleCard("temple-card", "runner", "event", {
-        definitionId: "onr_v1_114_temple-microcode-outlet",
+        definitionId: 326,
       }),
     ];
     attachOwnDeckSnapshot(input, {
       deckSnapshotId: "redundant-breaker-program-search",
       side: "runner",
       cards: [
-        { cardId: "onr_v1_114_temple-microcode-outlet", quantity: 1 },
-        { cardId: "onr_v1_047_pile-driver", quantity: 1 },
+        { cardId: 326, quantity: 1 },
+        { cardId: 259, quantity: 1 },
       ],
     });
 
@@ -25799,7 +25799,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "shell-traders-hand",
         payload: {
           cardId: "shell-traders-hand",
-          cardDefinitionId: "onr_v1_176_the-shell-traders",
+          cardDefinitionId: 388,
         },
       },
     );
@@ -25817,12 +25817,12 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.memoryUsed = 0;
     input.playerView.own.gripOrHq = [
       visibleCard("shell-traders-hand", "runner", "resource", {
-        definitionId: "onr_v1_176_the-shell-traders",
+        definitionId: 388,
         title: "The Shell Traders",
         installCost: 0,
       }),
       visibleCard("rent-i-con-hand", "runner", "program", {
-        definitionId: "onr_classic_031_rent-i-con",
+        definitionId: 35,
         title: "Rent-I-Con",
         installCost: 5,
         memoryCost: 2,
@@ -25833,8 +25833,8 @@ describe("authoritative plan-first live runtime", () => {
       deckSnapshotId: "shell-traders-source-install",
       side: "runner",
       cards: [
-        { cardId: "onr_v1_176_the-shell-traders", quantity: 3 },
-        { cardId: "onr_classic_031_rent-i-con", quantity: 3 },
+        { cardId: 388, quantity: 3 },
+        { cardId: 35, quantity: 3 },
       ],
     });
 
@@ -25876,9 +25876,9 @@ describe("authoritative plan-first live runtime", () => {
         source: "temple-card",
         payload: {
           cardId: "temple-card",
-          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          sourceDefinitionId: 326,
           cardImplementationAbilityId:
-            "onr_v1_114_temple-microcode-outlet:abilities_on_play_search_stack_to_grip",
+            "326:abilities_on_play_search_stack_to_grip",
           cardImplementationAbilityKey:
             "abilities_on_play_search_stack_to_grip",
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
@@ -25905,16 +25905,16 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.rig = fullNonNoisyBreakerRig();
     input.playerView.own.gripOrHq = [
       visibleCard("temple-card", "runner", "event", {
-        definitionId: "onr_v1_114_temple-microcode-outlet",
+        definitionId: 326,
       }),
     ];
     attachOwnDeckSnapshot(input, {
       deckSnapshotId: "recurring-program-search",
       side: "runner",
       cards: [
-        { cardId: "onr_v1_114_temple-microcode-outlet", quantity: 1 },
-        { cardId: "onr_v1_047_pile-driver", quantity: 1 },
-        { cardId: "onr_v1_071_vewy-vewy-quiet", quantity: 2 },
+        { cardId: 326, quantity: 1 },
+        { cardId: 259, quantity: 1 },
+        { cardId: 283, quantity: 2 },
       ],
     });
 
@@ -25950,8 +25950,8 @@ describe("authoritative plan-first live runtime", () => {
       )?.signal?.programSearchCommitment,
     ).toMatchObject({
       sourceCardInstanceId: "temple-card",
-      sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
-      targetDefinitionId: "onr_v1_071_vewy-vewy-quiet",
+      sourceDefinitionId: 326,
+      targetDefinitionId: 283,
       targetPurpose: "recurring_breaker_economy",
       plannedAtStateVersion: 1,
       selectedActionId: "play-temple",
@@ -25976,7 +25976,7 @@ describe("authoritative plan-first live runtime", () => {
       source:
         "p3_37.search_stack_to_grip:temple-card:onr_v1_114_temple-microcode-outlet:program:reveal:shuffle:2",
       sourceCardInstanceId: "temple-card",
-      sourceCardDefinitionId: "onr_v1_114_temple-microcode-outlet",
+      sourceCardDefinitionId: 326,
       prompt: "Choose a program",
       minSelections: 1,
       maxSelections: 1,
@@ -25987,7 +25987,7 @@ describe("authoritative plan-first live runtime", () => {
           id: "choose-pile-driver",
           label: "Pile Driver",
           card: visibleCard("pile-driver-option", "runner", "program", {
-            definitionId: "onr_v1_047_pile-driver",
+            definitionId: 259,
             subtypes: ["icebreaker", "fracter"],
           }),
         },
@@ -25995,7 +25995,7 @@ describe("authoritative plan-first live runtime", () => {
           id: "choose-vewy",
           label: "Vewy Vewy Quiet",
           card: visibleCard("vewy-option", "runner", "program", {
-            definitionId: "onr_v1_071_vewy-vewy-quiet",
+            definitionId: 283,
             installCost: 4,
             memoryCost: 1,
           }),
@@ -26029,13 +26029,13 @@ describe("authoritative plan-first live runtime", () => {
             "breaker_killer",
           ]),
           rigDefinitionIds: new Set([
-            "onr_proteus_083_corrosion",
-            "onr_v1_014_codecracker",
-            "onr_v1_040_loony-goon",
+            141,
+            226,
+            252,
           ]),
         }),
         rolesForCardId: (definitionId) =>
-          definitionId === "onr_v1_071_vewy-vewy-quiet"
+          definitionId === 283
             ? ["recurring_non_noisy_breaker_credits"]
             : ["breaker_fracter"],
         effectsForCardId: () => [],
@@ -26058,7 +26058,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "temple-card",
         payload: {
           cardId: "temple-card",
-          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          sourceDefinitionId: 326,
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: "program",
         },
@@ -26078,7 +26078,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 1;
     input.playerView.own.gripOrHq = [
       visibleCard("temple-card", "runner", "event", {
-        definitionId: "onr_v1_114_temple-microcode-outlet",
+        definitionId: 326,
       }),
     ];
 
@@ -26196,7 +26196,7 @@ describe("authoritative plan-first live runtime", () => {
       source:
         "p3_37.search_stack_to_grip:temple-card:onr_v1_114_temple-microcode-outlet:program:reveal:shuffle:3",
       sourceCardInstanceId: "temple-card",
-      sourceCardDefinitionId: "onr_v1_114_temple-microcode-outlet",
+      sourceCardDefinitionId: 326,
       prompt: "Choose a program",
       minSelections: 1,
       maxSelections: 1,
@@ -26207,7 +26207,7 @@ describe("authoritative plan-first live runtime", () => {
           id: "choose-blink",
           label: "Blink",
           card: visibleCard("blink-option", "runner", "program", {
-            definitionId: "onr_v1_007_blink",
+            definitionId: 219,
           }),
         },
         {
@@ -26236,7 +26236,7 @@ describe("authoritative plan-first live runtime", () => {
           rigDefinitionIds: new Set(),
         }),
         rolesForCardId: (definitionId) =>
-          definitionId === "onr_v1_007_blink" ? ["breaker_universal"] : [],
+          definitionId === 219 ? ["breaker_universal"] : [],
         effectsForCardId: () => [],
       } as Parameters<typeof selectedChoicesForDecision>[2]),
     ).toEqual({
@@ -26299,7 +26299,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 10;
     input.playerView.own.gripOrHq = [
       visibleCard("black-widow", "runner", "program", {
-        definitionId: "onr_proteus_080_black-widow",
+        definitionId: 138,
         installCost: 3,
         subtypes: ["icebreaker", "killer"],
       }),
@@ -26307,18 +26307,18 @@ describe("authoritative plan-first live runtime", () => {
     attachOwnDeckSnapshot(input, {
       deckSnapshotId: "black-widow-mastermind-coverage",
       side: "runner",
-      cards: [{ cardId: "onr_proteus_080_black-widow", quantity: 1 }],
+      cards: [{ cardId: 138, quantity: 1 }],
     });
     input.playerView.servers = [
       server("hq", [
         visibleCard("mastermind", "corp", "ice", {
-          definitionId: "onr_proteus_030_mastermind",
+          definitionId: 88,
           rezzed: true,
           strength: 2,
           subtypes: ["sentry"],
           effectiveRunQuote: {
             iceInstanceId: "mastermind",
-            iceDefinitionId: "onr_proteus_030_mastermind",
+            iceDefinitionId: 88,
             effectiveStrength: 2,
             subroutines: [
               {
@@ -26332,13 +26332,13 @@ describe("authoritative plan-first live runtime", () => {
           },
         }),
         visibleCard("coyote", "corp", "ice", {
-          definitionId: "onr_proteus_016_coyote",
+          definitionId: 74,
           rezzed: true,
           strength: 3,
           subtypes: ["sentry"],
           effectiveRunQuote: {
             iceInstanceId: "coyote",
-            iceDefinitionId: "onr_proteus_016_coyote",
+            iceDefinitionId: 74,
             effectiveStrength: 3,
             subroutines: [
               {
@@ -26351,13 +26351,13 @@ describe("authoritative plan-first live runtime", () => {
           },
         }),
         visibleCard("coyote-2", "corp", "ice", {
-          definitionId: "onr_proteus_016_coyote",
+          definitionId: 74,
           rezzed: true,
           strength: 3,
           subtypes: ["sentry"],
           effectiveRunQuote: {
             iceInstanceId: "coyote-2",
-            iceDefinitionId: "onr_proteus_016_coyote",
+            iceDefinitionId: 74,
             effectiveStrength: 3,
             subroutines: [
               {
@@ -26509,7 +26509,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "ramming-piston",
         payload: {
           cardId: "ramming-piston",
-          sourceDefinitionId: "onr_v1_053_ramming-piston",
+          sourceDefinitionId: 265,
         },
       },
     );
@@ -26523,12 +26523,12 @@ describe("authoritative plan-first live runtime", () => {
         source: "panzer-card",
         payload: {
           cardId: "panzer-card",
-          sourceDefinitionId: "onr_classic_042_panzer-run",
+          sourceDefinitionId: 46,
           gainCreditsAmount: 4,
           drawCardsAmount: 2,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_classic_042_panzer-run:on_play_gain_credits_and_draw",
+            "46:on_play_gain_credits_and_draw",
           cardImplementationAbilityKey: "on_play_gain_credits_and_draw",
         },
       },
@@ -26540,7 +26540,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.gripOrHq = [
       costEffectiveWallBreakerInHand(),
       visibleCard("panzer-card", "runner", "event", {
-        definitionId: "onr_classic_042_panzer-run",
+        definitionId: 46,
         title: "Panzer Run",
       }),
     ];
@@ -26550,8 +26550,8 @@ describe("authoritative plan-first live runtime", () => {
       observerSide: "runner",
       stateVersion: input.playerView.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
-        "ramming-piston": "onr_v1_053_ramming-piston",
-        "panzer-card": "onr_classic_042_panzer-run",
+        "ramming-piston": 265,
+        "panzer-card": 46,
       },
     });
     const baseDomain = {
@@ -26631,7 +26631,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "livewire-card",
         payload: {
           cardId: "livewire-card",
-          sourceDefinitionId: "onr_v1_097_livewires-contacts",
+          sourceDefinitionId: 309,
           gainCreditsAmount: 3,
         },
       },
@@ -26646,7 +26646,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "corrosion-card",
         payload: {
           cardId: "corrosion-card",
-          sourceDefinitionId: "onr_proteus_083_corrosion",
+          sourceDefinitionId: 141,
         },
       },
     );
@@ -26666,7 +26666,7 @@ describe("authoritative plan-first live runtime", () => {
       { credits: 0, clicks: 1 },
     );
     const corrosion = visibleCard("corrosion-card", "runner", "program", {
-      definitionId: "onr_proteus_083_corrosion",
+      definitionId: 141,
       title: "Corrosion",
       installCost: 3,
       strength: 0,
@@ -26681,7 +26681,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.gripOrHq = [
       corrosion,
       visibleCard("livewire-card", "runner", "event", {
-        definitionId: "onr_v1_097_livewires-contacts",
+        definitionId: 309,
         title: "Livewire's Contacts",
       }),
     ];
@@ -26691,7 +26691,7 @@ describe("authoritative plan-first live runtime", () => {
         [
           quotedFixtureIce({
             instanceId: "urgent-remote-wall",
-            definitionId: "onr_v1_279_wall-of-static",
+            definitionId: 491,
             title: "Wall of Static",
             strength: 2,
             subtypes: ["wall"],
@@ -26882,12 +26882,12 @@ describe("authoritative plan-first live runtime", () => {
         source: "wizards-book-card",
         payload: {
           cardId: "wizards-book-card",
-          sourceDefinitionId: "onr_v1_073_wizards-book",
+          sourceDefinitionId: 285,
         },
       },
     );
     const wizardsBook = visibleCard("wizards-book-card", "runner", "program", {
-      definitionId: "onr_v1_073_wizards-book",
+      definitionId: 285,
       title: "Wizard's Book",
       installCost: 5,
       memoryCost: 1,
@@ -26909,7 +26909,7 @@ describe("authoritative plan-first live runtime", () => {
         [
           quotedFixtureIce({
             instanceId: "urgent-remote-code-gate",
-            definitionId: "onr_v1_261_quandary",
+            definitionId: 473,
             title: "Quandary",
             strength: 2,
             subtypes: ["code_gate"],
@@ -27076,7 +27076,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "temple-card",
         payload: {
           cardId: "temple-card",
-          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          sourceDefinitionId: 326,
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: "program",
         },
@@ -27090,7 +27090,7 @@ describe("authoritative plan-first live runtime", () => {
     ]);
     input.playerView.own.gripOrHq = [
       visibleCard("temple-card", "runner", "event", {
-        definitionId: "onr_v1_114_temple-microcode-outlet",
+        definitionId: 326,
       }),
     ];
     const baseCapabilities = costIneffectiveCoverageCapabilities("in_deck");
@@ -27102,7 +27102,7 @@ describe("authoritative plan-first live runtime", () => {
           searchAccess: {
             tools: [
               {
-                cardId: "onr_v1_114_temple-microcode-outlet",
+                cardId: 326,
                 title: "Temple Microcode Outlet",
                 status: "in_hand" as const,
                 canSearchPrograms: true,
@@ -27154,7 +27154,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "temple-card",
         payload: {
           cardId: "temple-card",
-          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          sourceDefinitionId: 326,
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: "program",
         },
@@ -27165,14 +27165,14 @@ describe("authoritative plan-first live runtime", () => {
     const input = costIneffectiveWallInput([temple, run, credit]);
     input.playerView.own.gripOrHq = [
       visibleCard("temple-card", "runner", "event", {
-        definitionId: "onr_v1_114_temple-microcode-outlet",
+        definitionId: 326,
       }),
     ];
     const capabilities = costIneffectiveCoverageCapabilities("none");
     capabilities.runner!.searchAccess = {
       tools: [
         {
-          cardId: "onr_v1_114_temple-microcode-outlet",
+          cardId: 326,
           title: "Temple Microcode Outlet",
           status: "in_hand",
           canSearchPrograms: true,
@@ -27223,7 +27223,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "temple-card",
         payload: {
           cardId: "temple-card",
-          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          sourceDefinitionId: 326,
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: "program",
         },
@@ -27240,7 +27240,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.memoryLimit = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("temple-card", "runner", "event", {
-        definitionId: "onr_v1_114_temple-microcode-outlet",
+        definitionId: 326,
       }),
     ];
     for (const action of input.legalActions) action.expiresAtStateVersion = 12;
@@ -27252,7 +27252,7 @@ describe("authoritative plan-first live runtime", () => {
     capabilities.runner!.searchAccess = {
       tools: [
         {
-          cardId: "onr_v1_114_temple-microcode-outlet",
+          cardId: 326,
           title: "Temple Microcode Outlet",
           status: "in_hand",
           canSearchPrograms: true,
@@ -27318,12 +27318,12 @@ describe("authoritative plan-first live runtime", () => {
         directSearchChoiceBindings: [
           {
             actionId: temple.actionId,
-            targetDefinitionId: "onr_v1_053_ramming-piston",
+            targetDefinitionId: 265,
           },
         ],
         upgradeQuote: {
           schemaVersion: "runner-breaker-upgrade-economic-quote-v2",
-          targetDefinitionId: "onr_v1_053_ramming-piston",
+          targetDefinitionId: 265,
           currentKnownPathCost: 10,
           savingsPerRun: expect.any(Number),
           plannedRunHorizon: 2,
@@ -27345,7 +27345,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "wutech-card",
         payload: {
           cardId: "wutech-card",
-          sourceDefinitionId: "onr_v1_145_wutech-mem-chip",
+          sourceDefinitionId: 357,
         },
       },
     );
@@ -27359,7 +27359,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "tycho-card",
         payload: {
           cardId: "tycho-card",
-          sourceDefinitionId: "onr_v1_144_tycho-mem-chip",
+          sourceDefinitionId: 356,
         },
       },
     );
@@ -27373,7 +27373,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "ramming-piston-card",
         payload: {
           cardId: "ramming-piston-card",
-          sourceDefinitionId: "onr_v1_053_ramming-piston",
+          sourceDefinitionId: 265,
           runnerProgramTrashBeforeInstall: true,
         },
       },
@@ -27395,7 +27395,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.memoryLimit = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("ramming-piston-card", "runner", "program", {
-        definitionId: "onr_v1_053_ramming-piston",
+        definitionId: 265,
         title: "Ramming Piston",
         installCost: 4,
         memoryCost: 1,
@@ -27403,13 +27403,13 @@ describe("authoritative plan-first live runtime", () => {
         subtypes: ["icebreaker", "noisy"],
       }),
       visibleCard("wutech-card", "runner", "hardware", {
-        definitionId: "onr_v1_145_wutech-mem-chip",
+        definitionId: 357,
         title: "WuTech Mem Chip",
         installCost: 1,
         memoryLimitBonus: 1,
       }),
       visibleCard("tycho-card", "runner", "hardware", {
-        definitionId: "onr_v1_144_tycho-mem-chip",
+        definitionId: 356,
         title: "Tycho Mem Chip",
         installCost: 5,
         memoryLimitBonus: 3,
@@ -27467,7 +27467,7 @@ describe("authoritative plan-first live runtime", () => {
         preparationActionIds: [wuTech.actionId],
         upgradeQuote: {
           schemaVersion: "runner-breaker-upgrade-economic-quote-v2",
-          targetDefinitionId: "onr_v1_053_ramming-piston",
+          targetDefinitionId: 265,
           memoryAvailable: 0,
           memorySupportAdditionalMu: 1,
           memorySupportCreditCost: 1,
@@ -27494,7 +27494,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "temple-card",
         payload: {
           cardId: "temple-card",
-          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          sourceDefinitionId: 326,
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: "program",
         },
@@ -27514,13 +27514,13 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.memoryLimit = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("temple-card", "runner", "event", {
-        definitionId: "onr_v1_114_temple-microcode-outlet",
+        definitionId: 326,
       }),
       visibleCard("buffer-rdi-1", "runner", "hardware", {
-        definitionId: "onr_v1_139_r-and-d-interface",
+        definitionId: 351,
       }),
       visibleCard("buffer-rdi-2", "runner", "hardware", {
-        definitionId: "onr_v1_139_r-and-d-interface",
+        definitionId: 351,
       }),
     ];
     for (const action of input.legalActions) action.expiresAtStateVersion = 12;
@@ -27529,7 +27529,7 @@ describe("authoritative plan-first live runtime", () => {
     capabilities.runner!.searchAccess = {
       tools: [
         {
-          cardId: "onr_v1_114_temple-microcode-outlet",
+          cardId: 326,
           title: "Temple Microcode Outlet",
           status: "in_hand",
           canSearchPrograms: true,
@@ -27602,7 +27602,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "temple-card",
         payload: {
           cardId: "temple-card",
-          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          sourceDefinitionId: 326,
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: "program",
         },
@@ -27616,20 +27616,20 @@ describe("authoritative plan-first live runtime", () => {
     ]);
     input.playerView.own.gripOrHq = [
       visibleCard("temple-card", "runner", "event", {
-        definitionId: "onr_v1_114_temple-microcode-outlet",
+        definitionId: 326,
       }),
     ];
     input.playerView.servers[0] = server("hq", [
       quotedFixtureIce({
         instanceId: "hq-keeper",
-        definitionId: "onr_v1_252_keeper",
+        definitionId: 464,
         title: "Keeper",
         strength: 4,
         subtypes: ["code gate"],
       }),
       quotedFixtureIce({
         instanceId: "hq-wall-of-static",
-        definitionId: "onr_v1_279_wall-of-static",
+        definitionId: 491,
         title: "Wall of Static",
         strength: 2,
         subtypes: ["wall"],
@@ -27652,7 +27652,7 @@ describe("authoritative plan-first live runtime", () => {
     capabilities.runner!.breakerInventory = [
       capabilities.runner!.breakerInventory[0]!,
       {
-        cardId: "onr_classic_031_rent-i-con",
+        cardId: 35,
         title: "Rent-I-Con",
         coverage: ["universal"],
         installCost: 3,
@@ -27670,7 +27670,7 @@ describe("authoritative plan-first live runtime", () => {
     capabilities.runner!.searchAccess = {
       tools: [
         {
-          cardId: "onr_v1_114_temple-microcode-outlet",
+          cardId: 326,
           title: "Temple Microcode Outlet",
           status: "in_hand",
           canSearchPrograms: true,
@@ -27709,7 +27709,7 @@ describe("authoritative plan-first live runtime", () => {
         directSearchChoiceBindings: [
           {
             actionId: temple.actionId,
-            targetDefinitionId: "onr_classic_031_rent-i-con",
+            targetDefinitionId: 35,
           },
         ],
       },
@@ -27836,11 +27836,11 @@ describe("authoritative plan-first live runtime", () => {
         source: "jack-card",
         payload: {
           cardId: "jack-card",
-          sourceDefinitionId: "onr_v1_095_jack-n-joe",
+          sourceDefinitionId: 307,
           drawCardsAmount: 3,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_v1_095_jack-n-joe:abilities_on_play_draw_cards",
+            "307:abilities_on_play_draw_cards",
           cardImplementationAbilityKey: "abilities_on_play_draw_cards",
         },
       },
@@ -27852,7 +27852,7 @@ describe("authoritative plan-first live runtime", () => {
     ]);
     input.playerView.own.gripOrHq = [
       visibleCard("jack-card", "runner", "event", {
-        definitionId: "onr_v1_095_jack-n-joe",
+        definitionId: 307,
         title: "Jack 'n' Joe",
       }),
       visibleCard("coverage-draw-buffer-1", "runner", "event"),
@@ -27900,14 +27900,14 @@ describe("authoritative plan-first live runtime", () => {
         source: "meat-upgrade-card",
         payload: {
           cardId: "meat-upgrade-card",
-          sourceDefinitionId: "onr_classic_040_meat-upgrade",
+          sourceDefinitionId: 44,
           drawCardsAmount: 3,
           cardImplementationEffectKind: "remove_tags",
           cardImplementationTagMode: "up_to_amount",
           cardImplementationTagAmount: 2,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_classic_040_meat-upgrade:on_play_remove_tags_and_draw",
+            "44:on_play_remove_tags_and_draw",
           cardImplementationAbilityKey: "on_play_remove_tags_and_draw",
         },
       },
@@ -27920,7 +27920,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.tags = 0;
     input.playerView.own.gripOrHq = [
       visibleCard("meat-upgrade-card", "runner", "event", {
-        definitionId: "onr_classic_040_meat-upgrade",
+        definitionId: 44,
         title: "Meat Upgrade",
       }),
       visibleCard("coverage-draw-buffer-1", "runner", "event"),
@@ -27934,7 +27934,7 @@ describe("authoritative plan-first live runtime", () => {
       cardSemanticProfilesByDefinitionId:
         buildActionCardSemanticProfilesByDefinitionId(),
       visibleSourceDefinitionsByInstanceId: {
-        "meat-upgrade-card": "onr_classic_040_meat-upgrade",
+        "meat-upgrade-card": 44,
       },
     });
     expect(candidate).toMatchObject({
@@ -27981,7 +27981,7 @@ describe("authoritative plan-first live runtime", () => {
         {
           legalActionId: meatUpgrade.actionId,
           cardInstanceId: "meat-upgrade-card",
-          definitionId: "onr_classic_040_meat-upgrade",
+          definitionId: 44,
           availability: "not_relevant_now",
           deferReason: "no_current_need",
         },
@@ -28122,7 +28122,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "gideon-card",
         payload: {
           cardId: "gideon-card",
-          sourceDefinitionId: "onr_v1_089_gideons-pawnshop",
+          sourceDefinitionId: 301,
           cardImplementationEffectKind: "search_trash_to_grip",
           cardImplementationSearchFilter: "any_card",
         },
@@ -28149,12 +28149,12 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("gideon-card", "runner", "event", {
-        definitionId: "onr_v1_089_gideons-pawnshop",
+        definitionId: 301,
       }),
     ];
     input.playerView.own.heapOrArchives = [
       visibleCard("rent-i-con-heap", "runner", "program", {
-        definitionId: "onr_classic_031_rent-i-con",
+        definitionId: 35,
         title: "Rent-I-Con",
         subtypes: ["icebreaker", "ai"],
         rulesText: "1 credit: Break 1 ice subroutine.",
@@ -28186,7 +28186,7 @@ describe("authoritative plan-first live runtime", () => {
         runner: {
           breakerInventory: [
             {
-              cardId: "onr_classic_031_rent-i-con",
+              cardId: 35,
               title: "Rent-I-Con",
               coverage: ["universal"],
               risks: [],
@@ -28234,9 +28234,9 @@ describe("authoritative plan-first live runtime", () => {
           {
             actionId: gideon.actionId,
             sourceCardInstanceId: "gideon-card",
-            sourceDefinitionId: "onr_v1_089_gideons-pawnshop",
+            sourceDefinitionId: 301,
             targetCardInstanceId: "rent-i-con-heap",
-            targetDefinitionId: "onr_classic_031_rent-i-con",
+            targetDefinitionId: 35,
           },
         ],
       },
@@ -28259,7 +28259,7 @@ describe("authoritative plan-first live runtime", () => {
       source:
         "p3_37.search_trash_to_grip:gideon-card:onr_v1_089_gideons-pawnshop:any_card:private:2",
       sourceCardInstanceId: "gideon-card",
-      sourceCardDefinitionId: "onr_v1_089_gideons-pawnshop",
+      sourceCardDefinitionId: 301,
       prompt: "Choose a heap card",
       minSelections: 1,
       maxSelections: 1,
@@ -28270,14 +28270,14 @@ describe("authoritative plan-first live runtime", () => {
           id: "choose-bound-rent-i-con",
           label: "Rent-I-Con",
           card: visibleCard("rent-i-con-heap", "runner", "program", {
-            definitionId: "onr_classic_031_rent-i-con",
+            definitionId: 35,
           }),
         },
         {
           id: "choose-other-breaker",
           label: "Other universal breaker",
           card: visibleCard("other-breaker", "runner", "program", {
-            definitionId: "onr_v1_007_blink",
+            definitionId: 219,
           }),
         },
       ],
@@ -28319,7 +28319,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "sneak-card",
         payload: {
           cardId: "sneak-card",
-          sourceDefinitionId: "onr_v1_110_sneak-preview",
+          sourceDefinitionId: 322,
         },
       },
     );
@@ -28342,18 +28342,18 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("sneak-card", "runner", "event", {
-        definitionId: "onr_v1_110_sneak-preview",
+        definitionId: 322,
       }),
     ];
     input.playerView.own.heapOrArchives = [
       visibleCard("rent-i-con-heap", "runner", "program", {
-        definitionId: "onr_classic_031_rent-i-con",
+        definitionId: 35,
         title: "Rent-I-Con",
         subtypes: ["icebreaker", "ai"],
         rulesText: "1 credit: Break 1 ice subroutine.",
       }),
       visibleCard("invisibility-heap", "runner", "program", {
-        definitionId: "onr_v1_035_invisibility",
+        definitionId: 247,
         subtypes: ["stealth"],
       }),
     ];
@@ -28361,13 +28361,13 @@ describe("authoritative plan-first live runtime", () => {
       server("hq"),
       server("rd", [
         visibleCard("rd-code-gate", "corp", "ice", {
-          definitionId: "onr_v1_252_keeper",
+          definitionId: 464,
           rezzed: true,
           subtypes: ["code gate"],
           strength: 4,
           effectiveRunQuote: {
             iceInstanceId: "rd-code-gate",
-            iceDefinitionId: "onr_v1_252_keeper",
+            iceDefinitionId: 464,
             effectiveStrength: 4,
             subroutines: [{ id: "rd-code-gate:etr", type: "end_the_run" }],
           },
@@ -28389,7 +28389,7 @@ describe("authoritative plan-first live runtime", () => {
         runner: {
           breakerInventory: [
             {
-              cardId: "onr_classic_031_rent-i-con",
+              cardId: 35,
               title: "Rent-I-Con",
               coverage: ["universal"],
               risks: [],
@@ -28422,7 +28422,7 @@ describe("authoritative plan-first live runtime", () => {
           {
             actionId: sneak.actionId,
             targetCardInstanceId: "rent-i-con-heap",
-            targetDefinitionId: "onr_classic_031_rent-i-con",
+            targetDefinitionId: 35,
           },
         ],
       },
@@ -28441,15 +28441,15 @@ describe("authoritative plan-first live runtime", () => {
         source: "junkyard-bbs",
         payload: {
           cardId: "junkyard-bbs",
-          sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+          sourceDefinitionId: 377,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "abilities_activated_runner_main_move_top_trash_to_grip",
           cardImplementationAbilityId:
-            "onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip",
+            "377:abilities_activated_runner_main_move_top_trash_to_grip",
           cardImplementationEffectKind: "move_top_trash_to_grip",
           targetCardId: "rent-i-con-top",
-          targetCardDefinitionId: "onr_classic_031_rent-i-con",
+          targetCardDefinitionId: 35,
           cardImplementationTopTrashTargetId: "rent-i-con-top",
         },
       },
@@ -28473,12 +28473,12 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 4;
     input.playerView.own.rig = [
       visibleCard("junkyard-bbs", "runner", "resource", {
-        definitionId: "onr_v1_165_junkyard-bbs",
+        definitionId: 377,
       }),
     ];
     input.playerView.own.heapOrArchives = [
       visibleCard("rent-i-con-top", "runner", "program", {
-        definitionId: "onr_classic_031_rent-i-con",
+        definitionId: 35,
         title: "Rent-I-Con",
         subtypes: ["icebreaker", "ai"],
         rulesText: "1 credit: Break 1 ice subroutine.",
@@ -28490,7 +28490,7 @@ describe("authoritative plan-first live runtime", () => {
         [
           quotedFixtureIce({
             instanceId: "visible-wall",
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             strength: 2,
             subtypes: ["wall"],
@@ -28520,7 +28520,7 @@ describe("authoritative plan-first live runtime", () => {
         runner: {
           breakerInventory: [
             {
-              cardId: "onr_classic_031_rent-i-con",
+              cardId: 35,
               title: "Rent-I-Con",
               coverage: ["universal"],
               risks: [],
@@ -28551,7 +28551,7 @@ describe("authoritative plan-first live runtime", () => {
     const wrongTop = structuredClone(input);
     wrongTop.playerView.own.heapOrArchives = [
       visibleCard("economy-top", "runner", "event", {
-        definitionId: "onr_classic_037_finders-keepers",
+        definitionId: 41,
       }),
     ];
     const rejected = liveContext({
@@ -28559,7 +28559,7 @@ describe("authoritative plan-first live runtime", () => {
         runner: {
           breakerInventory: [
             {
-              cardId: "onr_classic_031_rent-i-con",
+              cardId: 35,
               title: "Rent-I-Con",
               coverage: ["universal"],
               risks: [],
@@ -28594,15 +28594,15 @@ describe("authoritative plan-first live runtime", () => {
         source: "junkyard-bbs",
         payload: {
           cardId: "junkyard-bbs",
-          sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+          sourceDefinitionId: 377,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "abilities_activated_runner_main_move_top_trash_to_grip",
           cardImplementationAbilityId:
-            "onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip",
+            "377:abilities_activated_runner_main_move_top_trash_to_grip",
           cardImplementationEffectKind: "move_top_trash_to_grip",
           targetCardId: "rent-i-con-top",
-          targetCardDefinitionId: "onr_classic_031_rent-i-con",
+          targetCardDefinitionId: 35,
           cardImplementationTopTrashTargetId: "rent-i-con-top",
         },
       },
@@ -28629,29 +28629,29 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.memoryLimit = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("temple", "runner", "event", {
-        definitionId: "onr_v1_114_temple-microcode-outlet",
+        definitionId: 326,
       }),
       visibleCard("livewire", "runner", "event", {
-        definitionId: "onr_v1_097_livewires-contacts",
+        definitionId: 309,
       }),
       visibleCard("bodyweight", "runner", "event", {
-        definitionId: "onr_v1_079_bodyweight-synthetic-blood",
+        definitionId: 291,
       }),
     ];
     input.playerView.opponent.agendaPoints = 6;
     input.playerView.agendaPointsToWin = 7;
     input.playerView.own.rig = [
       visibleCard("junkyard-bbs", "runner", "resource", {
-        definitionId: "onr_v1_165_junkyard-bbs",
+        definitionId: 377,
       }),
     ];
     input.playerView.own.heapOrArchives = [
       visibleCard("rent-i-con-top", "runner", "program", {
-        definitionId: "onr_classic_031_rent-i-con",
+        definitionId: 35,
         title: "Rent-I-Con",
         subtypes: ["icebreaker", "ai"],
         rulesText:
-          CARD_DEFINITIONS_BY_ID["onr_classic_031_rent-i-con"]!.rulesText,
+          CARD_DEFINITIONS_BY_ID[35]!.rulesText,
         installCost: 3,
         memoryCost: 2,
         strength: 2,
@@ -28660,7 +28660,7 @@ describe("authoritative plan-first live runtime", () => {
     const remote = server("remote_1", [
       quotedFixtureIce({
         instanceId: "remote-wall",
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         title: "Data Wall",
         strength: 0,
         subtypes: ["wall"],
@@ -28701,7 +28701,7 @@ describe("authoritative plan-first live runtime", () => {
         buildDeckCapabilityProfileFromInput(current, {
           deckSnapshotId: "exact-top-heap-recovery",
           side: "runner",
-          cards: [{ cardId: "onr_classic_031_rent-i-con", quantity: 1 }],
+          cards: [{ cardId: 35, quantity: 1 }],
         }),
       evaluateRunnerRunTargets: () => [target],
     }).chooseSemanticRuntimeAction(input, {});
@@ -28729,7 +28729,7 @@ describe("authoritative plan-first live runtime", () => {
         buildDeckCapabilityProfileFromInput(current, {
           deckSnapshotId: "exact-top-heap-recovery",
           side: "runner",
-          cards: [{ cardId: "onr_classic_031_rent-i-con", quantity: 1 }],
+          cards: [{ cardId: 35, quantity: 1 }],
         }),
       evaluateRunnerRunTargets: () => [target],
     }).chooseSemanticRuntimeAction(unadvanced, {});
@@ -28773,7 +28773,7 @@ describe("authoritative plan-first live runtime", () => {
         buildDeckCapabilityProfileFromInput(current, {
           deckSnapshotId: "exact-top-heap-recovery",
           side: "runner",
-          cards: [{ cardId: "onr_classic_031_rent-i-con", quantity: 1 }],
+          cards: [{ cardId: 35, quantity: 1 }],
         }),
       evaluateRunnerRunTargets: () => [unbreakableTarget],
     }).chooseSemanticRuntimeAction(repeatedScoringRemote, {});
@@ -28814,8 +28814,8 @@ describe("authoritative plan-first live runtime", () => {
       (candidate) => candidate.id === "remote_1",
     )!.root = [
       visibleCard("advanced-remote-agenda", "corp", "agenda", {
-        definitionId: "onr_v1_193_corporate-coup",
-        agendaPoints: CARD_DEFINITIONS_BY_ID["onr_v1_193_corporate-coup"]!.agendaPoints!,
+        definitionId: 405,
+        agendaPoints: CARD_DEFINITIONS_BY_ID[405]!.agendaPoints!,
         advancementCounters: 2,
         effectiveStealCostQuote: {
           stateVersion: input.playerView.stateVersion,
@@ -28831,7 +28831,7 @@ describe("authoritative plan-first live runtime", () => {
         buildDeckCapabilityProfileFromInput(current, {
           deckSnapshotId: "exact-top-heap-recovery",
           side: "runner",
-          cards: [{ cardId: "onr_classic_031_rent-i-con", quantity: 1 }],
+          cards: [{ cardId: 35, quantity: 1 }],
         }),
       evaluateRunnerRunTargets: () => [unbreakableTarget],
     }).chooseSemanticRuntimeAction(visibleAgendaRemote, {});
@@ -28908,13 +28908,13 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 4;
     input.playerView.own.rig = [
       visibleCard("morphing-tool", "runner", "program", {
-        definitionId: "onr_proteus_092_morphing-tool",
+        definitionId: 150,
         title: "Morphing Tool",
         selectedSubtype: "code_gate",
         subtypes: ["icebreaker"],
       }),
       visibleCard("boring-bit", "runner", "program", {
-        definitionId: "onr_proteus_081_boring-bit",
+        definitionId: 139,
         title: "Boring Bit",
         subtypes: ["icebreaker", "worm"],
       }),
@@ -28931,7 +28931,7 @@ describe("authoritative plan-first live runtime", () => {
           subtypeChanges: [
             {
               sourceCardInstanceId: "morphing-tool",
-              sourceDefinitionId: "onr_proteus_092_morphing-tool",
+              sourceDefinitionId: 150,
               selectedSubtype: "sentry",
             },
           ],
@@ -28995,7 +28995,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 2;
     input.playerView.own.rig = [
       visibleCard("morphing-tool", "runner", "program", {
-        definitionId: "onr_proteus_092_morphing-tool",
+        definitionId: 150,
         selectedSubtype: "code_gate",
         subtypes: ["icebreaker"],
       }),
@@ -29146,7 +29146,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "temple-card",
         payload: {
           cardId: "temple-card",
-          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          sourceDefinitionId: 326,
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: "program",
         },
@@ -29163,7 +29163,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 1;
     input.playerView.own.gripOrHq = [
       visibleCard("temple-card", "runner", "event", {
-        definitionId: "onr_v1_114_temple-microcode-outlet",
+        definitionId: 326,
       }),
     ];
 
@@ -29212,7 +29212,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "temple-card",
         payload: {
           cardId: "temple-card",
-          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          sourceDefinitionId: 326,
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: "program",
         },
@@ -29229,7 +29229,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 2;
     input.playerView.own.gripOrHq = [
       visibleCard("temple-card", "runner", "event", {
-        definitionId: "onr_v1_114_temple-microcode-outlet",
+        definitionId: 326,
       }),
     ];
 
@@ -29274,7 +29274,7 @@ describe("authoritative plan-first live runtime", () => {
         directSearchChoiceBindings: [
           {
             actionId: temple.actionId,
-            targetDefinitionId: "onr_v1_007_blink",
+            targetDefinitionId: 219,
           },
         ],
       },
@@ -29292,7 +29292,7 @@ describe("authoritative plan-first live runtime", () => {
       {
         source: "",
         payload: {
-          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          sourceDefinitionId: 326,
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: "program",
         },
@@ -29316,10 +29316,10 @@ describe("authoritative plan-first live runtime", () => {
   it("binds a real AP search action and its choice to the producing coverage plan", () => {
     resetResidentPlanPortfolioMemory();
     const searchToolInstanceId = "search-tool-instance";
-    const searchToolDefinitionId = "onr_v1_114_temple-microcode-outlet";
+    const searchToolDefinitionId = 326;
     const alternateSearchToolInstanceId = "alternate-search-tool-instance";
     const alternateSearchToolDefinitionId =
-      "onr_v1_114_temple-microcode-outlet";
+      326;
     const search = legalAction(
       "search-ap-action",
       "runner",
@@ -29420,7 +29420,7 @@ describe("authoritative plan-first live runtime", () => {
       runner: {
         breakerInventory: [
           {
-            cardId: "onr_classic_031_rent-i-con",
+            cardId: 35,
             title: "Rent-I-Con",
             coverage: ["universal"],
             risks: [],
@@ -29548,7 +29548,7 @@ describe("authoritative plan-first live runtime", () => {
           id: "choose-ap",
           label: "Z Rent-I-Con",
           card: visibleCard("ap-option", "runner", "program", {
-            definitionId: "onr_classic_031_rent-i-con",
+            definitionId: 35,
           }),
         },
       ],
@@ -29589,7 +29589,7 @@ describe("authoritative plan-first live runtime", () => {
         rigDefinitionIds: new Set(),
       }),
       rolesForCardId: (definitionId) =>
-        definitionId === "onr_classic_031_rent-i-con"
+        definitionId === 35
           ? ["breaker_universal"]
           : definitionId === "trace-breaker-definition"
             ? ["breaker_trace"]
@@ -29714,7 +29714,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "search-tool-instance",
         payload: {
           cardId: "search-tool-instance",
-          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          sourceDefinitionId: 326,
           cardImplementationEffectKind: "search_stack_to_grip",
           cardImplementationSearchFilter: "program",
         },
@@ -29739,7 +29739,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 1;
     input.playerView.own.gripOrHq = [
       visibleCard("search-tool-instance", "runner", "event", {
-        definitionId: "onr_v1_114_temple-microcode-outlet",
+        definitionId: 326,
       }),
     ];
     input.playerView.servers = [
@@ -29771,7 +29771,7 @@ describe("authoritative plan-first live runtime", () => {
           searchAccess: {
             tools: [
               {
-                cardId: "onr_v1_114_temple-microcode-outlet",
+                cardId: 326,
                 canSearchPrograms: true,
                 canSearchBreakers: true,
                 legalNow: true,
@@ -29909,7 +29909,7 @@ function recurringProgramSearchIntent() {
     engineProviders: [
       {
         providerId: "runner.provider:onr_v1_071_vewy-vewy-quiet",
-        cardId: "onr_v1_071_vewy-vewy-quiet",
+        cardId: 283,
         copies: 2,
         capabilities: ["runner.economy.recurring_breaker"],
         supportCapabilities: [],
@@ -29938,7 +29938,7 @@ function shellTradersIntent(): RunnerStrategicIntentProfile {
     engineProviders: [
       {
         providerId: "runner.provider:onr_v1_176_the-shell-traders",
-        cardId: "onr_v1_176_the-shell-traders",
+        cardId: 388,
         copies: 3,
         capabilities: ["runner.staging.delayed_install"],
         supportCapabilities: [],
@@ -29959,15 +29959,15 @@ function shellTradersIntent(): RunnerStrategicIntentProfile {
 function fullNonNoisyBreakerRig() {
   return [
     visibleCard("corrosion-installed", "runner", "program", {
-      definitionId: "onr_proteus_083_corrosion",
+      definitionId: 141,
       subtypes: ["icebreaker", "fracter"],
     }),
     visibleCard("codecracker-installed", "runner", "program", {
-      definitionId: "onr_v1_014_codecracker",
+      definitionId: 226,
       subtypes: ["icebreaker", "decoder"],
     }),
     visibleCard("loony-goon-installed", "runner", "program", {
-      definitionId: "onr_v1_040_loony-goon",
+      definitionId: 252,
       subtypes: ["icebreaker", "killer"],
     }),
   ];
@@ -29993,7 +29993,7 @@ function universalCoverageSearchCapabilities(includeUniversalAnswer: boolean) {
     searchableNow: inDeckKnown,
     drawOnly: false,
     missing: !inDeckKnown,
-    bestKnownCards: inDeckKnown ? ["onr_v1_007_blink"] : [],
+    bestKnownCards: inDeckKnown ? [219] : [],
     blockers: [],
   });
   return {
@@ -30001,7 +30001,7 @@ function universalCoverageSearchCapabilities(includeUniversalAnswer: boolean) {
       breakerInventory: includeUniversalAnswer
         ? [
             {
-              cardId: "onr_v1_007_blink",
+              cardId: 219,
               title: "Blink",
               coverage: ["universal"],
               risks: [],
@@ -30029,7 +30029,7 @@ function universalCoverageSearchCapabilities(includeUniversalAnswer: boolean) {
       searchAccess: {
         tools: [
           {
-            cardId: "onr_v1_114_temple-microcode-outlet",
+            cardId: 326,
             title: "Temple Microcode Outlet",
             status: "in_hand",
             canSearchPrograms: true,
@@ -30432,7 +30432,7 @@ describe("plan-bound Corp delayed-success continuation", () => {
       input.playerView.own.credits = 5;
       input.playerView.own.gripOrHq = [
         visibleCard("banpei", "corp", "ice", {
-          definitionId: "onr_v1_223_banpei",
+          definitionId: 435,
           title: "Banpei",
         }),
       ];
@@ -30456,7 +30456,7 @@ describe("plan-bound Corp delayed-success continuation", () => {
       };
       const dreffRoot = [
         visibleCard("dr-dreff", "corp", "upgrade", {
-          definitionId: "onr_v1_358_dr-dreff",
+          definitionId: 570,
           title: "Dr. Dreff",
           rezzed: true,
         }),
@@ -31070,7 +31070,7 @@ describe("plan-bound Trace Base-Link continuation", () => {
     };
     input.playerView.trace = {
       traceId: "trace_1",
-      sourceDefinitionId: "onr_v1_251_jack-attack",
+      sourceDefinitionId: 463,
       profile: "modern_open",
       phase: "base_link",
       printedTrace: 5,
@@ -31086,7 +31086,7 @@ describe("plan-bound Trace Base-Link continuation", () => {
     input.playerView.own.credits = 3;
     input.playerView.own.rig = [
       visibleCard("baedeker", "runner", "program", {
-        definitionId: "onr_v1_003_baedekers-net-map",
+        definitionId: 215,
         title: "Baedeker's Net Map",
         baseLink: 1,
       }),
@@ -31100,7 +31100,7 @@ describe("plan-bound Trace Base-Link continuation", () => {
           baseLink: 1,
           activationCost: 0,
           safeForAccess: true,
-          sourceDefinitionId: "onr_v1_003_baedekers-net-map",
+          sourceDefinitionId: 215,
           sourceTitle: "Baedeker's Net Map",
         },
       ],
@@ -31237,7 +31237,7 @@ describe("plan-bound Trace success-cancel continuation", () => {
     };
     input.playerView.trace = {
       traceId: "trace_1",
-      sourceDefinitionId: "onr_v1_236_data-raven",
+      sourceDefinitionId: 448,
       profile: "modern_open",
       phase: "trace_success_cancel",
       printedTrace: 5,
@@ -31256,7 +31256,7 @@ describe("plan-bound Trace success-cancel continuation", () => {
     input.playerView.own.credits = 3;
     input.playerView.own.rig = [
       visibleCard("back-door", "runner", "resource", {
-        definitionId: "onr_proteus_129_back-door-to-netwatch",
+        definitionId: 187,
         title: "Back Door to Netwatch",
       }),
     ];
@@ -31270,7 +31270,7 @@ describe("plan-bound Trace success-cancel continuation", () => {
       traceSuccessCancelOptions: [
         {
           sourceCardInstanceId: "back-door",
-          sourceDefinitionId: "onr_proteus_129_back-door-to-netwatch",
+          sourceDefinitionId: 187,
           sourceTitle: "Back Door to Netwatch",
           activationCost: 3,
           tapSource: false,
@@ -31382,21 +31382,21 @@ describe("match_f291a822af543d48 Corp Ambush continuation", () => {
   it("keeps the resident Vacant Soulkiller plan as owner after a new-remote install", () => {
     resetResidentPlanPortfolioMemory();
     const source = visibleCard(
-      "corp_onr_v1_346_vacant-soulkiller_1",
+      "corp_558_1",
       "corp",
       "asset",
       {
-        definitionId: "onr_v1_346_vacant-soulkiller",
+        definitionId: 558,
         title: "Vacant Soulkiller",
         advancementCounters: 0,
       },
     );
     const support = visibleCard(
-      "corp_onr_proteus_062_lesley-major_1",
+      "corp_120_1",
       "corp",
       "upgrade",
       {
-        definitionId: "onr_proteus_062_lesley-major",
+        definitionId: 120,
         title: "Lesley Major",
       },
     );
@@ -31487,21 +31487,21 @@ describe("match_f291a822af543d48 Corp Ambush continuation", () => {
       },
     );
     const virusTestSite = visibleCard(
-      "corp_onr_v1_348_virus-test-site_2",
+      "corp_560_2",
       "corp",
       "asset",
       {
-        definitionId: "onr_v1_348_virus-test-site",
+        definitionId: 560,
         title: "Virus Test Site",
         advancementCounters: 0,
       },
     );
     const vaporOps = visibleCard(
-      "corp_onr_v1_347_vapor-ops_2",
+      "corp_559_2",
       "corp",
       "asset",
       {
-        definitionId: "onr_v1_347_vapor-ops",
+        definitionId: 559,
         title: "Vapor Ops",
         advancementCounters: 0,
       },
@@ -31588,7 +31588,7 @@ function bindDataWallInstallRunQuotes(input: AiDecisionInput): void {
     const source = input.playerView.own.gripOrHq.find(
       (card) => card.instanceId === action.source,
     );
-    if (source?.definitionId !== "onr_v1_237_data-wall") continue;
+    if (source?.definitionId !== 449) continue;
     action.payload.postInstallEffectiveRunQuoteJson = JSON.stringify(
       quotedFixtureIce({
         instanceId: source.instanceId,
@@ -31737,7 +31737,7 @@ function pacificaOverflowInstall(
 
 function pacificaCard(instanceId: string) {
   return visibleCard(instanceId, "corp", "asset", {
-    definitionId: "onr_v1_334_pacifica-regional-ai",
+    definitionId: 546,
     title: "Pacifica Regional AI",
   });
 }
@@ -31745,7 +31745,7 @@ function pacificaCard(instanceId: string) {
 function corpOverflowFillers(count: number) {
   return Array.from({ length: count }, (_, index) =>
     visibleCard(`overflow-filler-${index}`, "corp", "operation", {
-      definitionId: "onr_v1_284_chance-observation",
+      definitionId: 496,
     }),
   );
 }
@@ -31783,7 +31783,7 @@ function valuPakNumericContractFixture(params: {
       source: "valu-pak-card",
       payload: {
         cardId: "valu-pak-card",
-        sourceDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+        sourceDefinitionId: 329,
         gainActionsAmount: 5,
         actionCapacityTiming: "immediate",
         actionCapacityRestriction: "program_install_only",
@@ -31804,7 +31804,7 @@ function valuPakNumericContractFixture(params: {
       source: "program-card",
       payload: {
         cardId: "program-card",
-        sourceDefinitionId: "onr_v1_007_blink",
+        sourceDefinitionId: 219,
       },
     },
   );
@@ -31814,10 +31814,10 @@ function valuPakNumericContractFixture(params: {
   input.playerView.own.memoryUsed = 0;
   input.playerView.own.gripOrHq = [
     visibleCard("valu-pak-card", "runner", "event", {
-      definitionId: "onr_v1_117_valu-pak-software-bundle",
+      definitionId: 329,
     }),
     visibleCard("program-card", "runner", "program", {
-      definitionId: "onr_v1_007_blink",
+      definitionId: 219,
     }),
   ];
   return {
@@ -31825,13 +31825,13 @@ function valuPakNumericContractFixture(params: {
     evaluations: [
       handEvaluation({
         cardInstanceId: "valu-pak-card",
-        definitionId: "onr_v1_117_valu-pak-software-bundle",
+        definitionId: 329,
         legalActionId: "valu-pak",
         priority: 970,
       }),
       handEvaluation({
         cardInstanceId: "program-card",
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         legalActionId: "install-program",
         priority: 1_000,
         duplicateRole: "none",
@@ -31868,7 +31868,7 @@ function activeRestrictedValuPakInput() {
       payload: {
         ...restrictedPayload,
         cardId: "program-b",
-        sourceDefinitionId: "onr_v1_007_blink",
+        sourceDefinitionId: 219,
       },
     },
   );
@@ -31889,12 +31889,12 @@ function activeRestrictedValuPakInput() {
   input.playerView.own.memoryUsed = 1;
   input.playerView.own.rig = [
     visibleCard("program-a", "runner", "program", {
-      definitionId: "onr_v1_045_newsgroup-filter",
+      definitionId: 257,
     }),
   ];
   input.playerView.own.gripOrHq = [
     visibleCard("program-b", "runner", "program", {
-      definitionId: "onr_v1_007_blink",
+      definitionId: 219,
     }),
   ];
   return input;
@@ -31907,13 +31907,13 @@ function restrictedSequenceCommitment(
 ): RunnerRestrictedProgramInstallSequenceCommitment {
   const targetDefinitionId =
     targetCardInstanceId === "program-a"
-      ? "onr_v1_045_newsgroup-filter"
-      : "onr_v1_007_blink";
+      ? 257
+      : 219;
   return {
     kind: "restricted_program_install_sequence",
     sourceActionId: `open-${sourceCardInstanceId}`,
     sourceCardInstanceId,
-    sourceDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+    sourceDefinitionId: 329,
     plannedAtStateVersion,
     runnerCreditsBeforeOpening: 5,
     grantedActionCount: 5,
@@ -32015,7 +32015,7 @@ function restrictedSequencePlanInstance(
 
 function handEvaluation(params: {
   cardInstanceId: string;
-  definitionId: string;
+  definitionId: number;
   legalActionId: string;
   priority: number;
   deferReason?:
@@ -32124,7 +32124,7 @@ function protectedEngineHandEvaluation(
   const fundingGap = Math.max(0, 12 - currentCredits);
   return handEvaluation({
     cardInstanceId: "saloon-engine-card",
-    definitionId: "onr_v1_179_silicon-saloon-franchise",
+    definitionId: 391,
     legalActionId,
     priority: 900,
     developmentRole: "economy_engine",

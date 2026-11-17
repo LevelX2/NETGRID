@@ -19,8 +19,8 @@ import {
 } from "../runner-run-target-evaluation";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 
-const stockId = "onr_v1_046_pattels-virus",
-  breakerId = "onr_v1_039_krash";
+const stockId = 258,
+  breakerId = 251;
 const runner = catalog.decks.find(
   (d) =>
     d.standardDeckId ===
@@ -77,14 +77,14 @@ function fixture() {
     .withRunnerGripSize(0)
     .withRunnerProgramInstalled(breakerId)
     .withRunnerCardInGrip(stockId)
-    .withRezzedCorpIceOnServer("rd", "onr_v1_245_fire-wall")
-    .withRezzedCorpIceOnServer("hq", "onr_v1_252_keeper");
+    .withRezzedCorpIceOnServer("rd", 457)
+    .withRezzedCorpIceOnServer("hq", 464);
   s.runner.memoryUsed = 1;
   return s;
 }
 
-const memoryId = "onr_v1_146_zetatech-mem-chip";
-function handCopy(s: GameState, definitionId: string) {
+const memoryId = 358;
+function handCopy(s: GameState, definitionId: number) {
   const id = s.runner.stack.find(
     (id) => s.cardInstances[id]!.definitionId === definitionId,
   )!;
@@ -100,7 +100,7 @@ function idleFixture() {
     breakerId,
     breakerId,
     memoryId,
-    "onr_proteus_139_eurocorpse-tm-spin-chip",
+    197,
   ])
     handCopy(s, id);
   for (const server of s.corp.servers)
@@ -132,7 +132,7 @@ function assess(s: GameState) {
 }
 function assertOwner(
   input: ReturnType<typeof assess>["input"],
-  definitionId: string,
+  definitionId: number,
   owner = "runner.develop_board_and_hand",
 ) {
   const d = chooseAiAction(input);
@@ -186,11 +186,11 @@ describe("conditional counter development and its memory milestone", () => {
     s.runner.credits = 15;
     s.runner.clicks = 3;
     RealEngineFixtureBuilder.forState(s)
-      .withRunnerProgramInstalled("onr_v1_012_clown")
-      .withRunnerProgramInstalled("onr_proteus_091_lockjaw")
-      .withRunnerProgramInstalled("onr_v1_071_vewy-vewy-quiet");
+      .withRunnerProgramInstalled(224)
+      .withRunnerProgramInstalled(149)
+      .withRunnerProgramInstalled(283);
     s.runner.memoryUsed = 4;
-    handCopy(s, "onr_v1_011_cloak");
+    handCopy(s, 223);
     s = apply(s, "runner", assertOwner(assess(s).input, memoryId));
     expect(getPlayerView(s, "runner").own.memoryLimit).toBe(6);
     // Preserve the real runtime between steps: no reset may hide commitment bugs.
@@ -199,7 +199,7 @@ describe("conditional counter development and its memory milestone", () => {
       "runner",
       assertOwner(
         assess(s).input,
-        "onr_v1_011_cloak",
+        223,
         "runner.recurring_economy",
       ),
     );
@@ -231,7 +231,7 @@ describe("conditional counter development and its memory milestone", () => {
     if (condition === "urgent_remote")
       RealEngineFixtureBuilder.forState(s).withCorpRemoteRoot(
         "remote_1",
-        "onr_v1_220_tycho-extension",
+        432,
         3,
       );
     if (condition === "existing_copy") {
@@ -268,9 +268,9 @@ describe("conditional counter development and its memory milestone", () => {
       const s = idleFixture();
       s.runner.credits = credits;
       RealEngineFixtureBuilder.forState(s)
-        .withRunnerProgramInstalled("onr_v1_012_clown")
-        .withRunnerProgramInstalled("onr_proteus_091_lockjaw")
-        .withRunnerProgramInstalled("onr_v1_071_vewy-vewy-quiet");
+        .withRunnerProgramInstalled(224)
+        .withRunnerProgramInstalled(149)
+        .withRunnerProgramInstalled(283);
       s.runner.memoryUsed = 4;
       const { input } = assess(s);
       if (credits === 6) assertOwner(input, memoryId);
@@ -289,10 +289,10 @@ describe("conditional counter development and its memory milestone", () => {
     const s = idleFixture();
     s.runner.credits = 15;
     RealEngineFixtureBuilder.forState(s)
-      .withRunnerProgramInstalled("onr_v1_012_clown")
-      .withRunnerProgramInstalled("onr_proteus_091_lockjaw");
+      .withRunnerProgramInstalled(224)
+      .withRunnerProgramInstalled(149);
     s.runner.memoryUsed = 3;
-    handCopy(s, "onr_v1_011_cloak");
+    handCopy(s, 223);
     // The cheap ready virus may precede memory; the admitted memory plan must
     // already exist while one MU remains, rather than waiting for a failed install.
     const d = chooseAiAction(assess(s).input);

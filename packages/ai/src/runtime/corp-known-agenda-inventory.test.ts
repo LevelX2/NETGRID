@@ -44,8 +44,8 @@ function corpInput(): AiDecisionInputWithDeckCapabilities {
       deckSnapshotId: "agenda-inventory-test",
       side: "corp",
       cards: [
-        { cardId: "onr_v1_196_corporate-war", quantity: 3 },
-        { cardId: "onr_v1_252_keeper", quantity: 36 },
+        { cardId: 408, quantity: 3 },
+        { cardId: 464, quantity: 36 },
       ],
     },
     playerView: {
@@ -88,12 +88,12 @@ function corpInput(): AiDecisionInputWithDeckCapabilities {
 }
 
 function agenda(instanceId: string): VisibleCard {
-  return card(instanceId, "onr_v1_196_corporate-war", "agenda", 3);
+  return card(instanceId, 408, "agenda", 3);
 }
 
 function card(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   type: NonNullable<VisibleCard["type"]>,
   agendaPoints?: number,
 ): VisibleCard {

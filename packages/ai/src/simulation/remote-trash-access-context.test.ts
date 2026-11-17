@@ -52,7 +52,7 @@ describe("buildRunnerRemoteTrashAccessContext", () => {
   });
 
   it("records an executed all-in trash and counts only explicit declines as skips", () => {
-    const card = visibleCorpCard("crybaby", "onr_v1_354_crybaby", "upgrade", 2);
+    const card = visibleCorpCard("crybaby", 566, "upgrade", 2);
     const trash = accessAction("trash", "trash_accessed_card", {
       accessTrashTotalCost: 2,
     });
@@ -85,7 +85,7 @@ describe("buildRunnerRemoteTrashAccessContext", () => {
   it("recognizes an installed central-root Crybaby as a paid ambush", () => {
     const crybaby = visibleCorpCard(
       "crybaby-root",
-      "onr_v1_354_crybaby",
+      566,
       "upgrade",
       2,
     );
@@ -186,7 +186,7 @@ function runnerAccessInput(params: {
 
 function visibleCorpCard(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   type: NonNullable<VisibleCard["type"]>,
   trashCost: number,
 ): VisibleCard {
@@ -225,7 +225,7 @@ function accessAction(
 function setupAmbush(): VisibleCard {
   return {
     instanceId: "setup-accessed",
-    definitionId: "onr_v1_340_setup",
+    definitionId: 552,
     title: "Setup!",
     owner: "corp",
     controller: "corp",

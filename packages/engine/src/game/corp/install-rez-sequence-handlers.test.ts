@@ -23,7 +23,7 @@ import {
 } from "./install-rez-sequence-handlers";
 
 const DATA_FORT_RECLAMATION_DEFINITION_ID =
-  "onr_v1_197_data-fort-reclamation" as CardDefinitionId;
+  409 as CardDefinitionId;
 const DATA_FORT_RECLAMATION_CAPABILITY_KEY = "hq_to_new_remote_install_rez";
 
 const DATA_FORT_SEQUENCE = {
@@ -43,7 +43,7 @@ const DATA_FORT_SEQUENCE = {
 } as const;
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"],
   title = id,
   rezCost = 0,
@@ -586,7 +586,7 @@ function zoneFor(
 function expectCanonicalDataFortPrimitiveIdentity(payload: unknown): void {
   expect(payload).toMatchObject({
     cardImplementationAbilityId:
-      "onr_v1_197_data-fort-reclamation:hq_to_new_remote_install_rez",
+      "409:hq_to_new_remote_install_rez",
     cardImplementationAbilityKey: DATA_FORT_RECLAMATION_CAPABILITY_KEY,
     cardImplementationCapabilityBindingKind: "card_spec_capability_key",
     sourceDefinitionId: DATA_FORT_RECLAMATION_DEFINITION_ID,
@@ -617,7 +617,7 @@ describe("corp install rez sequence handlers", () => {
     ).toEqual(["asset_1", "ice_1"]);
     expect(host.legalAction.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_v1_197_data-fort-reclamation:hq_to_new_remote_install_rez",
+        "409:hq_to_new_remote_install_rez",
       cardImplementationAbilityKey: DATA_FORT_RECLAMATION_CAPABILITY_KEY,
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationPrimitiveKind:

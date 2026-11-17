@@ -19,7 +19,7 @@ const load = () =>
     ),
   );
 const gate =
-  "corp.install_card.corp_onr_v1_261_quandary_3.hq.corp_onr_v1_261_quandary_3.1";
+  "corp.install_card.corp_473_3.hq.corp_473_3.1";
 function choose(
   f: ReturnType<typeof load>,
   order: "original" | "reverse" | "gate_first" = "original",

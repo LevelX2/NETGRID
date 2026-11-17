@@ -20,7 +20,7 @@ import {
 } from "./access-flow";
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"],
   trashCost = 0,
 ): CardDefinition {
@@ -34,7 +34,7 @@ function definition(
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
 ): CardInstance {
   return {
@@ -451,7 +451,7 @@ describe("access flow execution", () => {
         asset: definition("asset_def", "asset", 3),
         ice: definition("ice_def", "ice"),
         schematics: definition(
-          "onr_classic_032_schematics-search-engine",
+          36,
           "program",
         ),
       },
@@ -474,7 +474,7 @@ describe("access flow execution", () => {
           id: "schematics" as CardInstanceId,
           instanceId: "schematics" as CardInstanceId,
           definitionId:
-            "onr_classic_032_schematics-search-engine" as CardDefinitionId,
+            36 as CardDefinitionId,
           owner: "runner",
           controller: "runner",
           zone: { side: "runner", zone: "rig" },
@@ -516,7 +516,7 @@ describe("access flow execution", () => {
       hiddenZoneAction:
         "schematics_search_engine_expose_installed_cards_review",
       publicRevealKind: "expose",
-      sourceDefinitionId: "onr_classic_032_schematics-search-engine",
+      sourceDefinitionId: 36,
       revealedCount: 2,
       publicRevealDefinitionIds: "asset_def,ice_def",
       publicRevealTitles: "asset_def||ice_def",
@@ -580,9 +580,9 @@ describe("access flow execution", () => {
   });
 
   it("opens cost support before paying a self-costed accessed agenda", () => {
-    const fetalDefinition = definition("onr_proteus_004_fetal-ai", "agenda");
+    const fetalDefinition = definition(62, "agenda");
     const swissDefinition = definition(
-      "onr_proteus_152_swiss-bank-account",
+      210,
       "resource",
     );
     const swissId = "steal_support_swiss" as CardInstanceId;
@@ -679,10 +679,10 @@ describe("access flow execution", () => {
     const definitions = {
       operation: definition("operation_def", "operation"),
       mercenary: definition(
-        "onr_proteus_145_mercenary-subcontract",
+        203,
         "resource",
       ),
-      boltHole: definition("onr_proteus_132_bolt-hole", "resource"),
+      boltHole: definition(190, "resource"),
       agenda: definition("agenda_def", "agenda"),
     };
     const { host, state, spentRunnerCredits, trashPayments, trashedCards } =
@@ -701,7 +701,7 @@ describe("access flow execution", () => {
           mercenary: {
             id: "mercenary" as CardInstanceId,
             instanceId: "mercenary" as CardInstanceId,
-            definitionId: "onr_proteus_145_mercenary-subcontract",
+            definitionId: 203,
             owner: "runner",
             controller: "runner",
             zone: { side: "runner", zone: "rig" },
@@ -713,7 +713,7 @@ describe("access flow execution", () => {
           bolt: {
             id: "bolt" as CardInstanceId,
             instanceId: "bolt" as CardInstanceId,
-            definitionId: "onr_proteus_132_bolt-hole",
+            definitionId: 190,
             owner: "runner",
             controller: "runner",
             zone: { side: "runner", zone: "rig" },
@@ -745,7 +745,7 @@ describe("access flow execution", () => {
         hiddenResourceCurrentAccessTrash: true,
         hiddenResourceSourceCardId: "mercenary",
         hiddenResourceSourceDefinitionId:
-          "onr_proteus_145_mercenary-subcontract",
+          203,
       },
     } as unknown as LegalAction;
 
@@ -771,7 +771,7 @@ describe("access flow execution", () => {
     });
     expect(legalAction.payload).toMatchObject({
       sourceTrashed: true,
-      trashedCardDefinitionId: "onr_proteus_145_mercenary-subcontract",
+      trashedCardDefinitionId: 203,
       hiddenZoneAction: "proteus_hidden_current_access_free_trash_choice",
     });
     resolveMercenaryCurrentAccessTrashChoice(
@@ -819,7 +819,7 @@ describe("access flow execution", () => {
         bolt: {
           id: "bolt" as CardInstanceId,
           instanceId: "bolt" as CardInstanceId,
-          definitionId: "onr_proteus_132_bolt-hole",
+          definitionId: 190,
           owner: "runner",
           controller: "runner",
           zone: { side: "runner", zone: "rig" },
@@ -851,7 +851,7 @@ describe("access flow execution", () => {
         mercenary: {
           id: "mercenary" as CardInstanceId,
           instanceId: "mercenary" as CardInstanceId,
-          definitionId: "onr_proteus_145_mercenary-subcontract",
+          definitionId: 203,
           owner: "runner",
           controller: "runner",
           zone: { side: "runner", zone: "rig" },
@@ -905,7 +905,7 @@ describe("access flow execution", () => {
         mercenary: {
           id: "mercenary" as CardInstanceId,
           instanceId: "mercenary" as CardInstanceId,
-          definitionId: "onr_proteus_145_mercenary-subcontract",
+          definitionId: 203,
           owner: "runner",
           controller: "runner",
           zone: { side: "runner", zone: "rig" },
@@ -929,7 +929,7 @@ describe("access flow execution", () => {
       asset: definition("asset_def", "asset"),
       agenda: definition("agenda_def", "agenda"),
       mercenary: definition(
-        "onr_proteus_145_mercenary-subcontract",
+        203,
         "resource",
       ),
     };
@@ -982,7 +982,7 @@ describe("access flow execution", () => {
         mercenary: {
           id: "mercenary" as CardInstanceId,
           instanceId: "mercenary" as CardInstanceId,
-          definitionId: "onr_proteus_145_mercenary-subcontract",
+          definitionId: 203,
           owner: "runner",
           controller: "runner",
           zone: { side: "runner", zone: "rig" },
@@ -1013,7 +1013,7 @@ describe("access flow execution", () => {
         hiddenResourceCurrentAccessTrash: true,
         hiddenResourceSourceCardId: "mercenary",
         hiddenResourceSourceDefinitionId:
-          "onr_proteus_145_mercenary-subcontract",
+          203,
       },
     } as unknown as LegalAction;
 

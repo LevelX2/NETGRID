@@ -25,7 +25,7 @@ const recorded = JSON.parse(
   runtime: AiRuntimeCheckpointV1;
   validation: Record<string, boolean>;
 };
-const agendaId = "corp_onr_v1_214_project-babylon_2";
+const agendaId = "corp_426_2";
 beforeEach(resetResidentPlanPortfolioMemory);
 function native() {
   const cp = structuredClone(recorded);

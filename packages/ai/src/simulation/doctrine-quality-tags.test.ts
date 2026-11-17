@@ -129,7 +129,7 @@ function tagsForCorpAgendaInstall(selectedDecision: AiDecision): string[] {
         ({
           instanceId: "agenda-instance",
           known: true,
-          definitionId: "onr_v1_203_hostile-takeover",
+          definitionId: 415,
           type: "agenda",
         }) as never,
       rolesForAction: () => [],

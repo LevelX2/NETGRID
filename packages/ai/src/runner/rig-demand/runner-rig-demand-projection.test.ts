@@ -502,7 +502,7 @@ function demand(
     requirement: RunnerRigRoleDemandInput["requirement"];
     provider: {
       providerId: string;
-      definitionId: string;
+      definitionId: number;
       memoryMode?: "general" | "hosted";
       memoryUnits: number;
     };

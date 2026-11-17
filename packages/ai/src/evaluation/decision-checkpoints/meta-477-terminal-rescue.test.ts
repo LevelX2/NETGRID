@@ -51,7 +51,7 @@ it("binds the native lethal damage replacement to the defense owner", () => {
   expect(decision.selectedChoices).toEqual({
     choiceId: input.playerView.pendingChoice!.choiceId,
     selectedOptionIds: [
-      "flatline_tag_replacement_from_grip_runner_onr_v1_078_arasaka-owns-you_1",
+      "flatline_tag_replacement_from_grip_runner_290_1",
     ],
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
@@ -104,9 +104,9 @@ it("applies the actual Engine rescue without flatlining", () => {
   RealEngineFixtureBuilder.forState(state)
     .withCorpCredits(10)
     .withRunnerGripSize(0)
-    .withRunnerCardInGrip("onr_v1_078_arasaka-owns-you")
+    .withRunnerCardInGrip(290)
     .withRunnerTags(1)
-    .withCorpCardInHq("onr_v1_302_scorched-earth");
+    .withCorpCardInHq(514);
   const operation = getLegalActions(state, "corp").find(
     (a) => a.type === "play_operation" && a.source?.includes("scorched-earth"),
   )!;

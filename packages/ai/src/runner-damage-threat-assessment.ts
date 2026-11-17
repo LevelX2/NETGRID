@@ -107,7 +107,7 @@ export type RunnerDamageThreatAssessment = {
 };
 
 export type RunnerFutureEncounterDamageJackOutAssessment = {
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   projectedDamage: number;
   damageType?: "net" | "meat" | "core";
   handCount: number;
@@ -134,7 +134,7 @@ export type RunnerVisibleLethalIceDamageOptions = {
   postPathDamage?: {
     amount: number;
     damageType: "net" | "meat" | "core";
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
   };
 };
 
@@ -506,13 +506,13 @@ export function runnerCriticalUnknownAccessRequiredHandFloor(
 
 export type RunnerRecentFutureEncounterDamageSafetyAbort = {
   serverId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   evidenceCode: string;
 };
 
 export type RunnerKnownAccessDamageJackOutAssessment = {
   serverId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   advancementCounters: number;
   damageRisk: number;
   evidenceCode: string;
@@ -678,7 +678,7 @@ export function runnerFutureEncounterDamageJackOutAssessment(
     history.length,
   );
   const sourceDefinitionId = triggerEvent?.publicPayload?.sourceDefinitionId;
-  if (typeof sourceDefinitionId !== "string") return undefined;
+  if (typeof sourceDefinitionId !== "number") return undefined;
   const hint = AI_HINTS.get(sourceDefinitionId);
   const futureEffects = (hint?.effects ?? []).filter(
     (effect) => effect.kind === "future_encounter_effect",
@@ -785,7 +785,7 @@ export function runnerRecentFutureEncounterDamageSafetyAbort(
   );
   const sourceDefinitionId = triggerEvent?.publicPayload?.sourceDefinitionId;
   const serverId = history[runStartIndex]?.publicPayload?.serverId;
-  if (typeof sourceDefinitionId !== "string" || typeof serverId !== "string")
+  if (typeof sourceDefinitionId !== "number" || typeof serverId !== "string")
     return undefined;
   const routeChangedAfterAbort = history
     .slice(jackOutIndex + 1)
@@ -1191,7 +1191,7 @@ function futureEncounterDamageTrigger(
       seenCompletedEncounter = true;
     }
     const sourceDefinitionId = payload.sourceDefinitionId;
-    if (typeof sourceDefinitionId !== "string") continue;
+    if (typeof sourceDefinitionId !== "number") continue;
     const futureEffectResolved = payload.resolvedEffects?.some(
       (effect) =>
         effect.kind === "resolve_subroutine" &&
@@ -1248,7 +1248,7 @@ function corpDamageEventEvidence(
 function publicEventCanBeCorpDamage(event: PublicGameEvent): boolean {
   const payload = event.publicPayload ?? {};
   const sourceDefinitionId =
-    typeof payload.sourceDefinitionId === "string"
+    typeof payload.sourceDefinitionId === "number"
       ? payload.sourceDefinitionId
       : undefined;
   // The action actor is not necessarily the damage source: Runner
@@ -1259,7 +1259,7 @@ function publicEventCanBeCorpDamage(event: PublicGameEvent): boolean {
   const resolvedCorpDamageSource = payload.resolvedEffects?.some(
     (effect) =>
       effect.kind === "damage" &&
-      typeof effect.sourceDefinitionId === "string" &&
+      typeof effect.sourceDefinitionId === "number" &&
       AI_HINTS.get(effect.sourceDefinitionId)?.side === "corp",
   );
   // Access-triggered damage is bound to the publicly accessed card, not
@@ -1268,7 +1268,7 @@ function publicEventCanBeCorpDamage(event: PublicGameEvent): boolean {
   const accessedCorpDamageSource =
     event.type === "access_card" &&
     payload.damageResolved === true &&
-    typeof payload.cardDefinitionId === "string" &&
+    typeof payload.cardDefinitionId === "number" &&
     AI_HINTS.get(payload.cardDefinitionId)?.side === "corp";
   if (
     payload.actor !== "corp" &&
@@ -1353,10 +1353,10 @@ type VisibleOpponentDamageSignals = {
   fallbackDamageSourceCount: number;
   score: number;
   kinds: string[];
-  signalDefinitionIds: Set<string>;
-  damageDefinitionIds: Set<string>;
-  deliveryDefinitionIds: Set<string>;
-  payoffDefinitionIds: Set<string>;
+  signalDefinitionIds: Set<number>;
+  damageDefinitionIds: Set<number>;
+  deliveryDefinitionIds: Set<number>;
+  payoffDefinitionIds: Set<number>;
 };
 
 function visibleOpponentDamageSignals(
@@ -1399,7 +1399,7 @@ function activeOpponentDamageSignals(
 
 function damageSignalsForKnownSources(
   visibleCards: readonly VisibleCard[],
-  definitionIds: ReadonlySet<string>,
+  definitionIds: ReadonlySet<number>,
   damageTypes?: readonly RunnerPreventableDamageType[],
 ): VisibleOpponentDamageSignals {
   let score = 0;
@@ -1408,7 +1408,7 @@ function damageSignalsForKnownSources(
   const damageDefinitionIds = new Set<string>();
   const deliveryDefinitionIds = new Set<string>();
   const payoffDefinitionIds = new Set<string>();
-  const compatibleDamage = (definitionId: string): boolean =>
+  const compatibleDamage = (definitionId: number): boolean =>
     AI_HINTS.get(definitionId)?.effects?.some((effect) => {
       if (effect.kind !== "damage") return false;
       if (damageTypes === undefined) return true;
@@ -1523,7 +1523,7 @@ function activeOpponentCards(input: AiDecisionInput): VisibleCard[] {
   ].filter((card) => card.known !== false);
 }
 
-function publicEventDefinitionIds(event: PublicGameEvent): string[] {
+function publicEventDefinitionIds(event: PublicGameEvent): number[] {
   const payload = event.publicPayload ?? {};
   return [
     payload.sourceDefinitionId,

@@ -44,7 +44,7 @@ function fridgeEvaluation(input: AiDecisionInputWithDeckCapabilities) {
         ]),
       ),
     }),
-  }).find((value) => value.definitionId === "onr_v1_121_armored-fridge");
+  }).find((value) => value.definitionId === 333);
 }
 
 it("removes only the generic cash floor from the recognized acute compatible shield", () => {
@@ -166,9 +166,9 @@ it("chooses the active Meat shield and survives the native three-damage line whe
   expect(unprotectedState.gameEndReason).toBe("flatline");
 });
 
-const FRIDGE = "onr_v1_121_armored-fridge";
-const BROKER = "onr_v1_154_broker";
-const SOLO = "onr_v1_342_solo-squad";
+const FRIDGE = 333;
+const BROKER = 366;
+const SOLO = 554;
 
 function activePreventionFixture() {
   const runnerDeck = { ...ORIGINALSET_DEFAULT_DECKS.runner, cards: [

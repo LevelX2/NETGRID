@@ -27,7 +27,7 @@
       "id": "proteus_runner_hq_virus_derez_2026_05_25",
       "name": "Proteus Runner - HQ Virus & Derez",
       "side": "runner",
-      "identity": "runner_identity_001",
+      "identity": 587,
       "focus": "HQ-Druck mit Crumble, Taxman, Vienna 22 und HQ Mole aufbauen, ICE nach vollständigem Break mit Disintegrator derezzen und die breitere Proteus-Programmsuite über klassische Economy absichern.",
       "totalCards": 45,
       "proteusCards": 35,
@@ -38,155 +38,155 @@
       },
       "cards": [
         {
-          "id": "onr_proteus_078_armageddon",
+          "id": 136,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_079_big-frackin-gun",
+          "id": 137,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_080_black-widow",
+          "id": 138,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_081_boring-bit",
+          "id": 139,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_083_corrosion",
+          "id": 141,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_084_crumble",
+          "id": 142,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_085_disintegrator",
+          "id": 143,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_086_enterprise-inc-shields",
+          "id": 144,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_089_garbage-in",
+          "id": 147,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_090_highlighter",
+          "id": 148,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_091_lockjaw",
+          "id": 149,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_095_skeleton-passkeys",
+          "id": 153,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_097_taxman",
+          "id": 155,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_098_vienna-22",
+          "id": 156,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_099_viral-pipeline",
+          "id": 157,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_100_wrecking-ball",
+          "id": 158,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_103_cruising-for-netwatch",
+          "id": 161,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_110_hijack",
+          "id": 168,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_114_on-the-fast-track",
+          "id": 172,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_120_reconnaissance",
+          "id": 178,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_126_test-spin",
+          "id": 184,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_133_chiba-bank-account",
+          "id": 191,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_134_cortical-cybermodem",
+          "id": 192,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_135_cortical-stimulators",
+          "id": 193,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_142_hq-mole",
+          "id": 200,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_143_liberated-savings-account",
+          "id": 201,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_146_precision-bribery",
+          "id": 204,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_150_streetware-distributor",
+          "id": 208,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_151_sunburst-cranial-interface",
+          "id": 209,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_152_swiss-bank-account",
+          "id": 210,
           "quantity": 1
         },
         {
-          "id": "onr_v1_014_codecracker",
+          "id": 226,
           "quantity": 1
         },
         {
-          "id": "onr_v1_021_dwarf",
+          "id": 233,
           "quantity": 1
         },
         {
-          "id": "onr_v1_039_krash",
+          "id": 251,
           "quantity": 1
         },
         {
-          "id": "onr_v1_040_loony-goon",
+          "id": 252,
           "quantity": 1
         },
         {
-          "id": "onr_v1_075_zetatech-software-installer",
+          "id": 287,
           "quantity": 1
         },
         {
-          "id": "onr_v1_097_livewires-contacts",
+          "id": 309,
           "quantity": 2
         },
         {
-          "id": "onr_v1_108_score",
+          "id": 320,
           "quantity": 2
         },
         {
-          "id": "onr_v1_145_wutech-mem-chip",
+          "id": 357,
           "quantity": 1
         }
       ],
@@ -200,7 +200,7 @@
       "id": "proteus_runner_rd_bad_publicity_2026_05_25",
       "name": "Proteus Runner - R&D Virus & Bad Publicity",
       "side": "runner",
-      "identity": "runner_identity_001",
+      "identity": 587,
       "focus": "R&D mit Garbage In, Highlighter, Viral Pipeline und R&D Mole überladen, parallel Bad Publicity über die volle Proteus-Event-Schiene erzwingen und über flexible Proteus-Breaker wiederholt Zugriff bekommen.",
       "totalCards": 45,
       "proteusCards": 35,
@@ -211,155 +211,155 @@
       },
       "cards": [
         {
-          "id": "onr_proteus_079_big-frackin-gun",
+          "id": 137,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_082_bulldozer",
+          "id": 140,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_083_corrosion",
+          "id": 141,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_084_crumble",
+          "id": 142,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_085_disintegrator",
+          "id": 143,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_088_fubar",
+          "id": 146,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_089_garbage-in",
+          "id": 147,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_090_highlighter",
+          "id": 148,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_092_morphing-tool",
+          "id": 150,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_094_scaldan",
+          "id": 152,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_095_skeleton-passkeys",
+          "id": 153,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_097_taxman",
+          "id": 155,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_098_vienna-22",
+          "id": 156,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_099_viral-pipeline",
+          "id": 157,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_105_demolition-run",
+          "id": 163,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_106_disgruntled-ice-technician",
+          "id": 164,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_108_faked-hit",
+          "id": 166,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_109_frame-up",
+          "id": 167,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_113_live-news-feed",
+          "id": 171,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_116_pirate-broadcast",
+          "id": 174,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_117_poisoned-water-supply",
+          "id": 175,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_119_promises-promises",
+          "id": 177,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_121_remote-detonator",
+          "id": 179,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_122_rush-hour",
+          "id": 180,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_123_senatorial-field-trip",
+          "id": 181,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_125_subliminal-corruption",
+          "id": 183,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_129_back-door-to-netwatch",
+          "id": 187,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_147_r-and-d-mole",
+          "id": 205,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_150_streetware-distributor",
+          "id": 208,
           "quantity": 1
         },
         {
-          "id": "onr_v1_014_codecracker",
+          "id": 226,
           "quantity": 1
         },
         {
-          "id": "onr_v1_021_dwarf",
+          "id": 233,
           "quantity": 1
         },
         {
-          "id": "onr_v1_040_loony-goon",
+          "id": 252,
           "quantity": 1
         },
         {
-          "id": "onr_v1_108_score",
+          "id": 320,
           "quantity": 2
         },
         {
-          "id": "onr_v1_151_aujourdoui",
+          "id": 363,
           "quantity": 1
         },
         {
-          "id": "onr_v1_154_broker",
+          "id": 366,
           "quantity": 1
         },
         {
-          "id": "onr_v1_157_crash-everett-inventive-fixer",
+          "id": 369,
           "quantity": 1
         },
         {
-          "id": "onr_v1_166_karl-de-veres-corporate-stooge",
+          "id": 378,
           "quantity": 1
         },
         {
-          "id": "onr_v1_177_the-short-circuit",
+          "id": 389,
           "quantity": 1
         }
       ],
@@ -373,7 +373,7 @@
       "id": "proteus_corp_region_fast_score_2026_05_25",
       "name": "Proteus Korp - Region Fast Score",
       "side": "corp",
-      "identity": "corp_identity_001",
+      "identity": 3,
       "focus": "Remote-Scoring mit Proteus-Regionen, Sysops und mehr Proteus-Operations: Zurich, Venice, Networked Center, Research Bunker und Weapons Depot verkürzen das Scoring-Fenster, während eine breitere Proteus-ICE-Suite den Server offen hält.",
       "totalCards": 45,
       "proteusCards": 37,
@@ -385,159 +385,159 @@
       },
       "cards": [
         {
-          "id": "onr_proteus_001_ai-board-member",
+          "id": 59,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_002_charity-takeover",
+          "id": 60,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_007_project-venice",
+          "id": 65,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_008_project-zurich",
+          "id": 66,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_010_world-domination",
+          "id": 68,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_013_caryatid",
+          "id": 71,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_017_credit-blocks",
+          "id": 75,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_018_datacomb",
+          "id": 76,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_023_galatea",
+          "id": 81,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_024_gatekeeper",
+          "id": 82,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_027_iceberg",
+          "id": 85,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_031_minotaur",
+          "id": 89,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_032_misleading-access-menus",
+          "id": 90,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_033_mobile-barricade",
+          "id": 91,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_034_riddler",
+          "id": 92,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_036_sandstorm",
+          "id": 94,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_037_scaffolding",
+          "id": 95,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_041_toughoniumtm-wall",
+          "id": 99,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_042_tumblers",
+          "id": 100,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_044_walking-wall",
+          "id": 102,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_046_corporate-guard-r-temps",
+          "id": 104,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_047_credit-consolidation",
+          "id": 105,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_048_data-sifters",
+          "id": 106,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_049_emergency-rig",
+          "id": 107,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_051_rent-to-own-contract",
+          "id": 109,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_055_cybertech-think-tank",
+          "id": 113,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_058_executive-boot-camp",
+          "id": 116,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_059_government-contract",
+          "id": 117,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_060_herman-revista",
+          "id": 118,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_062_lesley-major",
+          "id": 120,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_065_networked-center",
+          "id": 123,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_072_research-bunker",
+          "id": 130,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_077_weapons-depot",
+          "id": 135,
           "quantity": 1
         },
         {
-          "id": "onr_v1_281_accounts-receivable",
+          "id": 493,
           "quantity": 2
         },
         {
-          "id": "onr_v1_282_annual-reviews",
+          "id": 494,
           "quantity": 1
         },
         {
-          "id": "onr_v1_288_day-shift",
+          "id": 500,
           "quantity": 1
         },
         {
-          "id": "onr_v1_290_efficiency-experts",
+          "id": 502,
           "quantity": 2
         },
         {
-          "id": "onr_v1_297_overtime-incentives",
+          "id": 509,
           "quantity": 1
         },
         {
-          "id": "onr_v1_309_bbs-whispering-campaign",
+          "id": 521,
           "quantity": 1
         }
       ],
@@ -551,7 +551,7 @@
       "id": "proteus_corp_antibody_tax_2026_05_25",
       "name": "Proteus Korp - Antibody Tax & Ambush",
       "side": "corp",
-      "identity": "corp_identity_001",
+      "identity": 3,
       "focus": "Runner-Zugriffe bestrafen: Fetal AI, Marked Accounts und die volle Antibody-Familie machen zentrale Runs teuer, während AP-, Trace-, variable und Billig-ICE den Runner zu schlechten Purge- und Run-Entscheidungen zwingen.",
       "totalCards": 45,
       "proteusCards": 37,
@@ -563,167 +563,167 @@
       },
       "cards": [
         {
-          "id": "onr_proteus_003_corporate-headhunters",
+          "id": 61,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_004_fetal-ai",
+          "id": 62,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_005_marked-accounts",
+          "id": 63,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_006_please-dont-choke-anyone",
+          "id": 64,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_009_viral-breeding-ground",
+          "id": 67,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_011_brain-wash",
+          "id": 69,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_012_bug-zapper",
+          "id": 70,
           "quantity": 2
         },
         {
-          "id": "onr_proteus_014_chihuahua",
+          "id": 72,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_015_colonel-failure",
+          "id": 73,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_016_coyote",
+          "id": 74,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_020_digiconda",
+          "id": 78,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_021_dog-pile",
+          "id": 79,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_022_food-fight",
+          "id": 80,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_025_homing-missile",
+          "id": 83,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_026_hunting-pack",
+          "id": 84,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_028_lesser-arcana",
+          "id": 86,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_029_marionette",
+          "id": 87,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_030_mastermind",
+          "id": 88,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_035_roadblock",
+          "id": 93,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_039_sphinx-2006",
+          "id": 97,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_040_sumo-2008",
+          "id": 98,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_045_washed-up-solo-construct",
+          "id": 103,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_046_corporate-guard-r-temps",
+          "id": 104,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_050_manhunt",
+          "id": 108,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_052_schlaghund-pointers",
+          "id": 110,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_053_underworld-mole",
+          "id": 111,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_054_bel-digmo-antibody",
+          "id": 112,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_056_department-of-misinformation",
+          "id": 114,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_057_doppelganger-antibody",
+          "id": 115,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_061_ldl-traffic-analyzers",
+          "id": 119,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_067_panic-button",
+          "id": 125,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_068_pattel-antibody",
+          "id": 126,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_070_rasmin-bridger",
+          "id": 128,
           "quantity": 1
         },
         {
-          "id": "onr_proteus_075_stereogram-antibody",
+          "id": 133,
           "quantity": 1
         },
         {
-          "id": "onr_v1_281_accounts-receivable",
+          "id": 493,
           "quantity": 1
         },
         {
-          "id": "onr_v1_282_annual-reviews",
+          "id": 494,
           "quantity": 1
         },
         {
-          "id": "onr_v1_287_datapool-by-zetatech",
+          "id": 499,
           "quantity": 1
         },
         {
-          "id": "onr_v1_290_efficiency-experts",
+          "id": 502,
           "quantity": 1
         },
         {
-          "id": "onr_v1_293_netwatch-credit-voucher",
+          "id": 505,
           "quantity": 1
         },
         {
-          "id": "onr_v1_295_night-shift",
+          "id": 507,
           "quantity": 1
         },
         {
-          "id": "onr_v1_309_bbs-whispering-campaign",
+          "id": 521,
           "quantity": 2
         }
       ],

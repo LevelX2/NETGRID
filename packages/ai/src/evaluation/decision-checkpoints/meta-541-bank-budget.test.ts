@@ -55,7 +55,7 @@ describe("pairing 541 native credit-bank budgets", () => {
         ?.type,
     ).not.toBe("install_card");
     expect(decision.evidence).toContain(
-      "plan_portfolio_blocked_evidence:plan:runner.credit_bank:runner_onr_v1_154_broker_1:runner_credit_bank_install_deferred_portfolio_budget_funded",
+      "plan_portfolio_blocked_evidence:plan:runner.credit_bank:runner_366_1:runner_credit_bank_install_deferred_portfolio_budget_funded",
     );
   });
 

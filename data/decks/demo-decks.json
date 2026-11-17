@@ -16,14 +16,14 @@
       "purpose": "engine_test_and_tutorial",
       "version": "0.1.0",
       "legal": false,
-      "identity": "runner_identity_001",
+      "identity": 587,
       "minimumCardCount": 12,
       "cards": [
-        { "id": "simple_economy_event", "quantity": 3 },
-        { "id": "simple_run_event", "quantity": 3 },
-        { "id": "simple_fracter", "quantity": 2 },
-        { "id": "simple_decoder", "quantity": 2 },
-        { "id": "simple_killer", "quantity": 2 }
+        { "id": 595, "quantity": 3 },
+        { "id": 600, "quantity": 3 },
+        { "id": 597, "quantity": 2 },
+        { "id": 591, "quantity": 2 },
+        { "id": 598, "quantity": 2 }
       ],
       "developmentNotes": [
         "Technisches Testdeck, nicht turnierlegal.",
@@ -38,16 +38,16 @@
       "purpose": "engine_test_and_tutorial",
       "version": "0.1.0",
       "legal": false,
-      "identity": "corp_identity_001",
+      "identity": 3,
       "agendaPoints": 6,
       "minimumCardCount": 18,
       "cards": [
-        { "id": "simple_agenda", "quantity": 3 },
-        { "id": "simple_economy_operation", "quantity": 3 },
-        { "id": "simple_economy_asset", "quantity": 3 },
-        { "id": "simple_barrier_ice", "quantity": 3 },
-        { "id": "simple_code_gate_ice", "quantity": 3 },
-        { "id": "simple_sentry_ice", "quantity": 3 }
+        { "id": 588, "quantity": 3 },
+        { "id": 596, "quantity": 3 },
+        { "id": 594, "quantity": 3 },
+        { "id": 589, "quantity": 3 },
+        { "id": 590, "quantity": 3 },
+        { "id": 601, "quantity": 3 }
       ],
       "developmentNotes": [
         "Technisches Testdeck, nicht turnierlegal.",

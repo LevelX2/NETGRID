@@ -117,7 +117,7 @@ describe("four-match card-hint decision checkpoints", () => {
 
     const unprotected = structuredClone(result.input);
     unprotected.playerView.own.rig = unprotected.playerView.own.rig!.filter(
-      (card) => card.definitionId !== "onr_v1_161_fall-guy",
+      (card) => card.definitionId !== 373,
     );
     const unprotectedHq = evaluateRunnerRunTargets({ input: unprotected }).find(
       (entry) => entry.actionId === "runner.start_run.hq",

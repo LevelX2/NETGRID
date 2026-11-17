@@ -64,13 +64,13 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
       const development = residentPlanPortfolioSnapshot(input)!.instances.find(
         (i) =>
           i.moduleId === "runner.develop_board_and_hand" &&
-          i.target?.id === "onr_v1_021_dwarf",
+          i.target?.id === 233,
       )!;
       expect(development.moduleState).toMatchObject({
         signal: {
           assignedDomainPlanIds: [],
           actionIds: [
-            "runner.install_card.runner_onr_v1_021_dwarf_2.runner_onr_v1_021_dwarf_2",
+            "runner.install_card.runner_233_2.runner_233_2",
           ],
         },
       });
@@ -80,11 +80,11 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
         name === "r9-g1-d142"
           ? {
               rootPlanInstanceId:
-                "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_021_dwarf_2",
+                "plan:runner.develop_board_and_hand:card%3Arunner_233_2",
               leafExecutorInstanceId: development.instanceId,
               route: {
                 actionId:
-                  "runner.install_card.runner_onr_v1_021_dwarf_2.runner_onr_v1_021_dwarf_2",
+                  "runner.install_card.runner_233_2.runner_233_2",
               },
             }
           : {
@@ -92,7 +92,7 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
               leafExecutorInstanceId: coverageInstanceId,
               route: {
                 actionId:
-                  "runner.install_card.runner_onr_v1_074_worm_1.runner_onr_v1_074_worm_1",
+                  "runner.install_card.runner_286_1.runner_286_1",
               },
             },
       );
@@ -119,11 +119,11 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
     const input = checkpoint("r9-g5-d256");
     const worm = input.legalActions.find(
       (a) =>
-        a.type === "pump_breaker" && a.source === "runner_onr_v1_074_worm_1",
+        a.type === "pump_breaker" && a.source === "runner_286_1",
     )!;
     const krash = input.legalActions.find(
       (a) =>
-        a.type === "pump_breaker" && a.source === "runner_onr_v1_039_krash_2",
+        a.type === "pump_breaker" && a.source === "runner_251_2",
     )!;
     expect(pureEndRunEncounterPayment(input, worm)?.cost).toBe(6);
     expect(pureEndRunEncounterPayment(input, krash)?.cost).toBe(10);
@@ -145,11 +145,11 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
   it("prefers breaker-bound funds over spending cash on the nominally cheaper sequence", () => {
     const input = checkpoint("r9-g5-d256");
     input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_v1_039_krash",
+      (c) => c.definitionId === 251,
     )!.hostedOn = "spin-chip";
     input.playerView.own.rig!.push({
       instanceId: "spin-chip",
-      definitionId: "onr_proteus_139_eurocorpse-tm-spin-chip",
+      definitionId: 197,
       known: true,
       type: "hardware",
       subtypes: ["chip"],
@@ -170,11 +170,11 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
     });
     const worm = input.legalActions.find(
       (a) =>
-        a.type === "pump_breaker" && a.source === "runner_onr_v1_074_worm_1",
+        a.type === "pump_breaker" && a.source === "runner_286_1",
     )!;
     const krash = input.legalActions.find(
       (a) =>
-        a.type === "pump_breaker" && a.source === "runner_onr_v1_039_krash_2",
+        a.type === "pump_breaker" && a.source === "runner_251_2",
     )!;
     const wormPayment = pureEndRunEncounterPayment(input, worm)!;
     const krashPayment = pureEndRunEncounterPayment(input, krash)!;
@@ -200,7 +200,7 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
       iceIndex: 1,
     };
     input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_v1_039_krash",
+      (c) => c.definitionId === 251,
     )!.strengthAfterEncounter = 0;
     const payments = input.legalActions
       .filter((a) => a.type === "pump_breaker")

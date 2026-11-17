@@ -44,8 +44,8 @@ describe("match F5D27033 runner flatline-risk checkpoints", () => {
     const checkpoint = fixture(confirmedDamageReserveJson);
     const publicPrefix = JSON.stringify(checkpoint.engine.eventPrefix);
 
-    expect(publicPrefix).not.toContain("onr_v1_284_chance-observation");
-    expect(publicPrefix).not.toContain("onr_v1_307_urban-renewal");
+    expect(publicPrefix).not.toContain(496);
+    expect(publicPrefix).not.toContain(519);
     expect(publicPrefix).not.toContain("Chance Observation");
     expect(publicPrefix).not.toContain("Urban Renewal");
   });
@@ -110,7 +110,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
     checkpoint.expectation = {
       acceptableActions: [{ actionId: "runner.gain_credit" }],
       forbiddenActions: [
-        { sourceDefinitionId: "onr_v1_146_zetatech-mem-chip" },
+        { sourceDefinitionId: 358 },
       ],
       planExecution: {
         acceptablePlanKinds: ["runner.defense_and_recovery"],

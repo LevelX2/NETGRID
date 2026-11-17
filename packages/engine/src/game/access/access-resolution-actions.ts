@@ -283,7 +283,7 @@ export function resolveMercenaryCurrentAccessTrashChoice(
     };
   }
 
-  const trashedDefinitionIds: string[] = [];
+  const trashedDefinitionIds: number[] = [];
   for (const cardId of selectedIds) {
     const definition = host.cards.definitionFor(cardId);
     const instance = host.cards.cardInstanceFor(cardId);

@@ -23,7 +23,7 @@ describe("no-fresh central diagnostics", () => {
 
   it("does not count HQ-only multiaccess as an R&D closeout", () => {
     const hqOnly = input();
-    hqOnly.playerView.own.rig = [card("onr_v1_129_hq-interface")];
+    hqOnly.playerView.own.rig = [card(341)];
     expect(closeoutForRoles(["multiaccess"], hqOnly).opportunity).toBe(false);
 
     const emptyRd = input();
@@ -184,7 +184,7 @@ function startRun(serverId: "hq" | "rd" | "archives"): LegalAction {
   };
 }
 
-function card(definitionId: string): VisibleCard {
+function card(definitionId: number): VisibleCard {
   return {
     instanceId: definitionId,
     definitionId,

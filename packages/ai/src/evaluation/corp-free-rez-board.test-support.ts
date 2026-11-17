@@ -19,7 +19,7 @@ import type { AiDecisionInputWithDeckCapabilities } from "../runtime/ai-decision
  * replay of the old match. */
 export function corpFreeRezBoardCompanion(
   input: AiDecisionInputWithDeckCapabilities,
-  operationDefinitionId: string,
+  operationDefinitionId: number,
 ) {
   const sources = new Set(
     input.playerView.own.gripOrHq

@@ -388,7 +388,7 @@ export function createLifecycleRuntime(
     cardIds: readonly CardInstanceId[],
   ): { publicPayload: Record<string, string | number | boolean> } {
     let daemonHostedTrashCount = 0;
-    const returnedDefinitionIds: string[] = [];
+    const returnedDefinitionIds: number[] = [];
     for (const cardId of cardIds) {
       if (!state.runner.rig.programs.includes(cardId)) continue;
       if (deps.definitionFor(state, cardId).type !== "program") continue;

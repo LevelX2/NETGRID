@@ -31,16 +31,16 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
-const AUDIT = "onr_v1_283_audit-of-call-records";
-const CHANCE = "onr_v1_284_chance-observation";
-const FALL_GUY = "onr_v1_161_fall-guy";
-const HUNTER = "onr_v1_249_hunter";
-const URBAN = "onr_v1_307_urban-renewal";
-const SCORCHED = "onr_v1_302_scorched-earth";
-const PUNITIVE = "onr_v1_301_punitive-counterstrike";
-const MRAM = "onr_v1_134_mram-chip";
-const BODYWEIGHT = "onr_v1_079_bodyweight-synthetic-blood";
-const JETTISON_ICE = "onr_v1_080_core-command-jettison-ice";
+const AUDIT = 495;
+const CHANCE = 496;
+const FALL_GUY = 373;
+const HUNTER = 461;
+const URBAN = 519;
+const SCORCHED = 514;
+const PUNITIVE = 513;
+const MRAM = 346;
+const BODYWEIGHT = 291;
+const JETTISON_ICE = 292;
 
 afterEach(resetResidentPlanPortfolioMemory);
 
@@ -153,7 +153,7 @@ it("prepares the fifth Grip card at manual D61 when the payoff is known but the 
     cardSpecPlanningCardByDefinitionId(JETTISON_ICE)!.definition;
   if (drawnCard.type !== "event") throw new Error("Expected a Runner event");
   view.own.gripOrHq.push({
-    instanceId: "runner_onr_v1_080_core-command-jettison-ice_3",
+    instanceId: "runner_292_3",
     known: true,
     owner: "runner",
     title: drawnCard.title,
@@ -334,7 +334,7 @@ it("holds a legal credit bank installation that would spend the fifth Grip card 
       input.playerView.own.gripOrHq.some(
         (card) =>
           card.instanceId === action.source &&
-          card.definitionId === "onr_v1_178_short-term-contract",
+          card.definitionId === 390,
       ),
   );
   expect(install).toBeDefined();
@@ -485,7 +485,7 @@ it("uses ready meat prevention and respects a base link above the blind trace li
     {
       instanceId: "synthetic-installed-dermatech",
       known: true,
-      definitionId: "onr_v1_125_dermatech-bodyplating",
+      definitionId: 337,
       owner: "runner",
       type: "hardware",
       rezzed: true,
@@ -832,7 +832,7 @@ function legal(
   state: GameState,
   side: "runner" | "corp",
   type: LegalAction["type"],
-  definitionId?: string,
+  definitionId?: number,
 ): LegalAction {
   const action = getLegalActions(state, side).find(
     (candidate) =>

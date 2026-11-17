@@ -52,7 +52,7 @@ describe("semantic runtime corp board triage", () => {
 
   it("recognizes a concrete ETR path while conservatively ignoring non-access-preventing damage", () => {
     const corticalScrub = iceCard("cortical-scrub", {
-      definitionId: "onr_v1_231_cortical-scrub",
+      definitionId: 443,
       title: "Cortical Scrub",
       subtypes: ["Sentry"],
       rulesText: "Do 1 core damage. End the run.",
@@ -362,7 +362,7 @@ describe("semantic runtime corp board triage", () => {
       "quandary",
     );
     const quandary = iceCard("quandary", {
-      definitionId: "onr_v1_261_quandary",
+      definitionId: 473,
       title: "Quandary",
       rezCost: 2,
       rulesText: "End the run.",
@@ -690,14 +690,14 @@ describe("semantic runtime corp board triage", () => {
       corpHq: [
         iceCard("remote-hunter", {
           title: "Hunter",
-          definitionId: "onr_v1_249_hunter",
+          definitionId: 461,
           subtypes: ["Sentry"],
           rulesText: "Trace 3 - Give the Runner one tag.",
           rezCost: 1,
         }),
         iceCard("remote-wall", {
           title: "Remote Wall",
-          definitionId: "onr_v1_279_wall-of-static",
+          definitionId: 491,
           subtypes: ["Wall"],
           rulesText: "End the run.",
           rezCost: 2,
@@ -1355,7 +1355,7 @@ describe("semantic runtime corp board triage", () => {
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", [
           iceCard("rd-ice", {
-            definitionId: "onr_v1_261_quandary",
+            definitionId: 473,
             title: "Quandary",
           }),
         ]),
@@ -1399,7 +1399,7 @@ describe("semantic runtime corp board triage", () => {
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", [
           iceCard("rd-wall", {
-            definitionId: "onr_v1_279_wall-of-static",
+            definitionId: 491,
             title: "Wall of Static",
             subtypes: ["wall"],
           }),
@@ -1447,7 +1447,7 @@ describe("semantic runtime corp board triage", () => {
         agendaCard("hq-agenda", 2),
         iceCard("rd-hunter", {
           title: "Hunter",
-          definitionId: "onr_v1_249_hunter",
+          definitionId: 461,
           subtypes: ["Sentry"],
           rulesText: "Trace 3 - Give the Runner one tag.",
         }),
@@ -1537,7 +1537,7 @@ describe("semantic runtime corp board triage", () => {
         agendaCard("hq-agenda", 2),
         iceCard("rd-wall", {
           title: "R&D Wall",
-          definitionId: "onr_v1_279_wall-of-static",
+          definitionId: 491,
           subtypes: ["Wall"],
           rulesText: "*End the run.",
           rezCost: 0,
@@ -1626,13 +1626,13 @@ describe("semantic runtime corp board triage", () => {
       corpHq: [
         iceCard("rd-wall", {
           title: "Wall of Static",
-          definitionId: "onr_v1_279_wall-of-static",
+          definitionId: 491,
           subtypes: ["Wall"],
           rulesText: "End the run.",
         }),
         iceCard("rd-hunter", {
           title: "Hunter",
-          definitionId: "onr_v1_249_hunter",
+          definitionId: 461,
           subtypes: ["Sentry"],
           rulesText: "Trace 3 - Give the Runner one tag.",
         }),

@@ -39,25 +39,25 @@ function position(badPublicity: number): GameState {
         id: "bp-access-runner",
         name: "BP access",
         side: "runner",
-        identity: "runner_identity_001",
+        identity: 587,
         cards: [
-          "onr_v1_039_krash",
-          "onr_v1_014_codecracker",
-          "onr_v1_095_jack-n-joe",
-          "onr_v1_108_score",
-          "onr_v1_097_livewires-contacts",
+          251,
+          226,
+          307,
+          320,
+          309,
         ].map((id) => ({ id, quantity: 3 })),
       },
       corpDeck: {
         id: "bp-access-corp",
         name: "BP access",
         side: "corp",
-        identity: "corp_identity_001",
+        identity: 3,
         cards: [
-          { id: "onr_v1_215_security-net-optimization", quantity: 3 },
-          { id: "onr_v1_245_fire-wall", quantity: 3 },
-          { id: "onr_v1_270_sleeper", quantity: 3 },
-          { id: "simple_agenda", quantity: 8 },
+          { id: 427, quantity: 3 },
+          { id: 457, quantity: 3 },
+          { id: 482, quantity: 3 },
+          { id: 588, quantity: 8 },
         ],
       },
     }),
@@ -66,11 +66,11 @@ function position(badPublicity: number): GameState {
   );
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
-    .withCorpRemoteRoot("remote_1", "onr_v1_215_security-net-optimization")
-    .withRezzedCorpIceOnServer("remote_1", "onr_v1_270_sleeper")
-    .withRezzedCorpIceOnServer("remote_1", "onr_v1_245_fire-wall")
-    .withRunnerProgramInstalled("onr_v1_039_krash")
-    .withRunnerProgramInstalled("onr_v1_014_codecracker")
+    .withCorpRemoteRoot("remote_1", 427)
+    .withRezzedCorpIceOnServer("remote_1", 482)
+    .withRezzedCorpIceOnServer("remote_1", 457)
+    .withRunnerProgramInstalled(251)
+    .withRunnerProgramInstalled(226)
     .withRunnerCredits(7);
   state.corp.badPublicity = badPublicity;
   return state;
@@ -90,10 +90,10 @@ describe("public next-run credits in a Corp protection assessment", () => {
           deckSnapshotId: "bp-access-corp",
           side: "corp",
           cards: [
-            { cardId: "onr_v1_215_security-net-optimization", quantity: 3 },
-            { cardId: "onr_v1_245_fire-wall", quantity: 3 },
-            { cardId: "onr_v1_270_sleeper", quantity: 3 },
-            { cardId: "simple_agenda", quantity: 8 },
+            { cardId: 427, quantity: 3 },
+            { cardId: 457, quantity: 3 },
+            { cardId: 482, quantity: 3 },
+            { cardId: 588, quantity: 8 },
           ],
         },
       });

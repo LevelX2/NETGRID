@@ -26,7 +26,7 @@ describe("SP-082 score-campaign loss-point checkpoints", () => {
       viability: "ready",
       portfolioRole: "foreground",
       openNeedIds: [
-        "score-support:agenda:corp_onr_proteus_005_marked-accounts_1:remote_1",
+        "score-support:agenda:corp_63_1:remote_1",
       ],
     });
     expect(planFirst?.rootPlanInstanceId).toBe(scoreParent?.instanceId);
@@ -34,7 +34,7 @@ describe("SP-082 score-campaign loss-point checkpoints", () => {
       moduleId: "corp.economy",
       parentInstanceId: scoreParent?.instanceId,
       parentNeedId:
-        "score-support:agenda:corp_onr_proteus_005_marked-accounts_1:remote_1",
+        "score-support:agenda:corp_63_1:remote_1",
       executionState: "executor",
     });
     expect(planFirst?.leafExecutorInstanceId).toBe(supportLeaf?.instanceId);

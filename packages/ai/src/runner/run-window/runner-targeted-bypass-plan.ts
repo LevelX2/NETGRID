@@ -9,7 +9,7 @@ import {
 import { runnerActionRequiresTargetedIceTrashPlan } from "../../runtime/runner-targeted-ice-trash-plan";
 import { runnerAgendaStealCreditRequirement } from "../../run-analysis/runner-agenda-steal-cost";
 
-export const SOCIAL_ENGINEERING_DEFINITION_ID = "onr_v1_111_social-engineering";
+export const SOCIAL_ENGINEERING_DEFINITION_ID = 323;
 
 export type RunnerTargetedBypassCommitment = {
   kind: "targeted_bypass_run";
@@ -53,7 +53,7 @@ export function runnerActionRequiresTargetedBypassPlan(
 }
 
 export function runnerDefinitionRequiresTargetedBypassPlan(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   return definitionId === SOCIAL_ENGINEERING_DEFINITION_ID;
 }

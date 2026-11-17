@@ -112,8 +112,8 @@ describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
     expect(creditsSpent).toBe(10);
     expect(state.runner.credits).toBe(14);
     expect(breaks).toEqual([
-      { iceId: "corp_onr_v1_234_data-darts_1", index: 0 },
-      { iceId: "corp_onr_v1_234_data-darts_1", index: 1 },
+      { iceId: "corp_446_1", index: 0 },
+      { iceId: "corp_446_1", index: 1 },
     ]);
   });
 

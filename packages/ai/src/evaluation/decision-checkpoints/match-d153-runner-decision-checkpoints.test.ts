@@ -24,7 +24,7 @@ describe("match D153 Runner decision checkpoints", () => {
   it("still installs Broker when the existing empty bank is unavailable", () => {
     const cp = fixture(releaseRemotePlanD131Json);
     const state = cp.engine.testOnlyGameState;
-    const id = "runner_onr_v1_154_broker_2";
+    const id = "runner_366_2";
     state.runner.rig.resources = state.runner.rig.resources.filter(
       (cardId) => cardId !== id,
     );
@@ -66,7 +66,7 @@ describe("match D153 Runner decision checkpoints", () => {
       // Broker permits only one action on this source in this turn.
       expect(
         input.legalActions.some(
-          (action) => action.source === "runner_onr_v1_154_broker_2",
+          (action) => action.source === "runner_366_2",
         ),
       ).toBe(false);
       expect(
@@ -171,7 +171,7 @@ describe("match D153 Runner decision checkpoints", () => {
       acceptableActions: [
         {
           actionId:
-            "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+            "runner.activated_card_ability.runner_366_1.runner_366_1.activated.onr_v1_154_broker:withdraw_credits",
         },
       ],
       planExecution: {
@@ -234,7 +234,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
       acceptableActions: [
         {
           actionId:
-            "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
+            "runner.activated_card_ability.runner_366_2.runner_366_2.activated.onr_v1_154_broker:store_credits",
         },
       ],
       planExecution: {

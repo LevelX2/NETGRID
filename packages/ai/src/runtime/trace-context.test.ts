@@ -38,7 +38,7 @@ describe("latestTraceContext", () => {
     input.playerView.own.credits = 2;
     input.playerView.trace = {
       traceId: "open-trace",
-      sourceDefinitionId: "onr_v1_249_hunter",
+      sourceDefinitionId: 461,
       profile: "modern_open",
       phase: "runner_bid",
       printedTrace: 5,
@@ -72,7 +72,7 @@ describe("latestTraceContext", () => {
     input.playerView.stateVersion = 4;
     input.playerView.trace = {
       traceId: "hunter-trace",
-      sourceDefinitionId: "onr_v1_249_hunter",
+      sourceDefinitionId: 461,
       profile: "modern_open",
       phase: "runner_bid",
       printedTrace: 5,
@@ -90,7 +90,7 @@ describe("latestTraceContext", () => {
         stateVersionAfter: 3,
         stateHashAfter: "hash",
         publicPayload: {
-          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceDefinitionId: 461,
           traceId: "hunter-trace",
           traceValue: 2,
           corpBid: 2,
@@ -105,7 +105,7 @@ describe("latestTraceContext", () => {
         stateHashAfter: "hash-other",
         publicPayload: {
           traceId: "other-trace",
-          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceDefinitionId: 461,
           traceValue: 5,
           corpBid: 5,
         },

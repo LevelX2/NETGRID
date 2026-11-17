@@ -31,7 +31,7 @@ import {
 describe("Corp ambush plan signal duplicate scope", () => {
   it("admits an agenda ambush only when its exact access effect prevents the steal", () => {
     const source = visibleCard("fetal-ai-in-hq", "corp", "agenda", {
-      definitionId: "onr_proteus_004_fetal-ai",
+      definitionId: 62,
       title: "Fetal AI",
       advancementRequirement: 5,
       agendaPoints: 3,
@@ -93,9 +93,9 @@ describe("Corp ambush plan signal duplicate scope", () => {
     );
   });
   it.each([
-    ["onr_proteus_054_bel-digmo-antibody", false],
-    ["onr_proteus_075_stereogram-antibody", false],
-    ["onr_proteus_004_fetal-ai", true],
+    [112, false],
+    [133, false],
+    [62, true],
   ] as const)(
     "does not confuse access-zone identity with remote preparation: %s",
     (definitionId, remotePreparation) => {
@@ -151,7 +151,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
             assignedDomainPlanIds: ["corp.ambush_bluff"],
           }),
         ]);
-      } else if (definitionId === "onr_proteus_054_bel-digmo-antibody") {
+      } else if (definitionId === 112) {
         expect(signals).toMatchObject([
           {
             patternKind: "rd_recycle",
@@ -171,7 +171,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
   );
 
   it("counts only same-definition copies in active remote roots as installed duplicates", () => {
-    const definitionId = "onr_v1_345_trap";
+    const definitionId = 557;
     const handCopy = visibleCard("trap-in-hq", "corp", "asset", {
       definitionId,
       title: "TRAP!",
@@ -278,7 +278,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
       },
     );
     const agenda = visibleCard("followup-agenda-1", "corp", "agenda", {
-      definitionId: "simple_agenda",
+      definitionId: 588,
       advancementRequirement: 3,
       agendaPoints: 2,
     });
@@ -302,7 +302,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
     input.playerView.opponent.credits = 4;
     input.playerView.opponent.rig = [
       visibleCard("generic-breaker-1", "runner", "program", {
-        definitionId: "onr_classic_031_rent-i-con",
+        definitionId: 35,
         subtypes: ["icebreaker"],
         strength: 2,
       }),
@@ -313,7 +313,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
       server("archives"),
       server("remote_1", [
         visibleCard("remote-code-gate-1", "corp", "ice", {
-          definitionId: "onr_v1_261_quandary",
+          definitionId: 473,
           rezzed: true,
           subtypes: ["code_gate"],
           strength: 2,
@@ -500,11 +500,11 @@ describe("Corp ambush plan signal duplicate scope", () => {
 
   it("reconciles a new-remote Vacant Soulkiller install into its exact advance route", () => {
     const source = visibleCard(
-      "corp_onr_v1_346_vacant-soulkiller_1",
+      "corp_558_1",
       "corp",
       "asset",
       {
-        definitionId: "onr_v1_346_vacant-soulkiller",
+        definitionId: 558,
         title: "Vacant Soulkiller",
         advancementCounters: 0,
       },
@@ -597,7 +597,7 @@ describe("Corp compromised Ambush disposition", () => {
       recycleRoute: {
         actionId: "recycle-trap",
         recyclerSourceInstanceId: "recycler-installed",
-        recyclerSourceDefinitionId: "onr_v1_316_cowboy-sysop",
+        recyclerSourceDefinitionId: 528,
         targetCardInstanceId: "trap-installed",
       },
     });
@@ -667,7 +667,7 @@ describe("Corp compromised Ambush disposition", () => {
     });
     const [signal] = buildCorpAmbushPlanSignals(fixture);
     expect(signal).toMatchObject({
-      sourceDefinitionId: "onr_v1_348_virus-test-site",
+      sourceDefinitionId: 560,
       phase: "trigger",
       actionIds: ["rez-prepared-trap"],
     });
@@ -678,7 +678,7 @@ describe("Corp compromised Ambush disposition", () => {
       exposed: false,
       corpCredits: 0,
       zeroCostAccessRez: true,
-      definitionId: "onr_v1_340_setup",
+      definitionId: 552,
       counters: 0,
     });
     const signals = buildCorpAmbushPlanSignals(fixture);
@@ -723,7 +723,7 @@ describe("Corp compromised Ambush disposition", () => {
         corpCredits,
         zeroCostAccessRez: true,
         accessRezCredits: 2,
-        definitionId: "onr_v1_345_trap",
+        definitionId: 557,
         counters: 0,
       });
       const [signal] = buildCorpAmbushPlanSignals(fixture);
@@ -732,9 +732,9 @@ describe("Corp compromised Ambush disposition", () => {
   );
 
   it.each([
-    ["onr_v1_340_setup", 0, true],
-    ["onr_v1_348_virus-test-site", 0, false],
-    ["onr_v1_348_virus-test-site", 3, true],
+    [552, 0, true],
+    [560, 0, false],
+    [560, 3, true],
   ] as const)(
     "binds the actual post-rez payoff for %s with %i counters",
     (definitionId, counters, shouldRez) => {
@@ -757,7 +757,7 @@ describe("Corp compromised Ambush disposition", () => {
     const left = installedTrapFixture({ exposed: true, corpCredits: 3 });
     const right = installedTrapFixture({ exposed: true, corpCredits: 3 });
     type InputWithTestOnlyHiddenRunnerHand = AiDecisionInput & {
-      testOnlyHiddenRunnerHandDefinitionIds: string[];
+      testOnlyHiddenRunnerHandDefinitionIds: number[];
     };
     (
       left.input as InputWithTestOnlyHiddenRunnerHand
@@ -785,12 +785,12 @@ describe("Corp compromised Ambush disposition", () => {
 describe("Corp Ambush advancement support ownership", () => {
   it("keeps an exact support install inside the resident Ambush plan", () => {
     const trap = visibleCard("trap-installed", "corp", "asset", {
-      definitionId: "onr_v1_346_vacant-soulkiller",
+      definitionId: 558,
       title: "Vacant Soulkiller",
       advancementCounters: 0,
     });
     const support = visibleCard("lesley-in-hq", "corp", "upgrade", {
-      definitionId: "onr_proteus_062_lesley-major",
+      definitionId: 120,
       title: "Lesley Major",
     });
     const install = legalAction(
@@ -875,12 +875,12 @@ describe("Corp Ambush advancement support ownership", () => {
 
   it("binds the exact support trigger and Ambush target without changing the resident root", () => {
     const trap = visibleCard("trap-installed", "corp", "asset", {
-      definitionId: "onr_v1_346_vacant-soulkiller",
+      definitionId: 558,
       title: "Vacant Soulkiller",
       advancementCounters: 0,
     });
     const support = visibleCard("lesley-installed", "corp", "upgrade", {
-      definitionId: "onr_proteus_062_lesley-major",
+      definitionId: 120,
       title: "Lesley Major",
       rezzed: true,
     });
@@ -1003,7 +1003,7 @@ function installedTrapFixture(options: {
   triggerAction?: boolean;
   zeroCostAccessRez?: boolean;
   accessRezCredits?: number;
-  definitionId?: string;
+  definitionId?: number;
   counters?: number;
 }): {
   input: AiDecisionInput;
@@ -1014,15 +1014,15 @@ function installedTrapFixture(options: {
     definitionId:
       options.definitionId ??
       (options.zeroCostAccessRez
-        ? "onr_v1_348_virus-test-site"
-        : "onr_v1_345_trap"),
+        ? 560
+        : 557),
     title: options.zeroCostAccessRez ? "Virus Test Site" : "TRAP!",
     rezzed: false,
     advancementCounters:
       options.counters ?? (options.zeroCostAccessRez ? 3 : 0),
   });
   const recycler = visibleCard("recycler-installed", "corp", "asset", {
-    definitionId: "onr_v1_316_cowboy-sysop",
+    definitionId: 528,
     title: "Cowboy Sysop",
     rezzed: true,
   });
@@ -1086,8 +1086,8 @@ function installedTrapFixture(options: {
       actor: "runner",
       actionType: "resolve_choice",
       publicRevealKind: "expose",
-      publicRevealDefinitionId: "onr_v1_345_trap",
-      exposedCardDefinitionId: "onr_v1_345_trap",
+      publicRevealDefinitionId: 557,
+      exposedCardDefinitionId: 557,
       exposedServerId: "remote_1",
       exposedArea: "root",
       exposedIndex: 0,
@@ -1155,7 +1155,7 @@ function installedTrapFixture(options: {
 function ambushInstallCandidate(
   actionId: string,
   sourceInstanceId: string,
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
   serverId: "remote_1",
 ): ActionSemanticCandidate {
   return {

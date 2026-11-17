@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_162_field-reporter-for-ice-and-data",
+      374,
     ),
     title: "Field Reporter for Ice and Data",
     side: "runner",

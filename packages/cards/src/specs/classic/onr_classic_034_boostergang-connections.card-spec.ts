@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_classic_034_boostergang-connections",
+      38,
     ),
     title: "Boostergang Connections",
     side: "runner",

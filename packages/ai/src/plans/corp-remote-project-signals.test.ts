@@ -22,8 +22,8 @@ describe("resident Corp scoring remote project", () => {
   ] as const)(
     "quotes the real Remote Rex path in %s",
     (traceRulesProfile, accessStatus, phase) => {
-      const agenda = "onr_v1_207_netwatch-operations-office";
-      const rex = "onr_v1_264_rex";
+      const agenda = 419;
+      const rex = 476;
       const deck = ORIGINALSET_DEFAULT_DECKS.corp;
       const corpDeck = {
         ...deck,

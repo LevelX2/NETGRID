@@ -20,11 +20,11 @@ import {
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import type { CardInstanceId, GameState } from "@netgrid/shared";
 
-const CITY_SURVEILLANCE_ID = "onr_v1_313_city-surveillance";
-const JACK_N_JOE_ID = "onr_v1_095_jack-n-joe";
-const BODYWEIGHT_ID = "onr_v1_079_bodyweight-synthetic-blood";
-const CRASH_EVERETT_ID = "onr_v1_157_crash-everett-inventive-fixer";
-const FALL_GUY_ID = "onr_v1_161_fall-guy";
+const CITY_SURVEILLANCE_ID = 525;
+const JACK_N_JOE_ID = 307;
+const BODYWEIGHT_ID = 291;
+const CRASH_EVERETT_ID = 369;
+const FALL_GUY_ID = 373;
 
 describe("City Surveillance per-draw decisions", () => {
   it("lets Jack 'n' Joe resolve three independent pay-or-tag decisions", () => {

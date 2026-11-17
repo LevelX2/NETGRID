@@ -93,7 +93,7 @@ describe("plan route binding", () => {
       "install-psychic-friend",
       "install_card",
       "install.card",
-      "onr_classic_030_psychic-friend",
+      34,
     );
 
     expect(
@@ -137,7 +137,7 @@ describe("plan route binding", () => {
               "install-psychic-friend",
               "install_card",
               "install.card",
-              "onr_classic_030_psychic-friend",
+              34,
             ),
             5,
             ["breaker_code_gate"],
@@ -414,7 +414,7 @@ function candidate(
   actionId: string,
   actionType = "gain_credit",
   semanticActionType = "economy.gain_credit",
-  sourceDefinitionId?: string,
+  sourceDefinitionId?: number,
 ): ActionSemanticCandidate {
   return {
     actionId,

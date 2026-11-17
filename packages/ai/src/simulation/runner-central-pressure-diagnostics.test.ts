@@ -124,7 +124,7 @@ function startRun(): LegalAction {
   };
 }
 
-function card(definitionId: string): VisibleCard {
+function card(definitionId: number): VisibleCard {
   return {
     instanceId: definitionId,
     definitionId,

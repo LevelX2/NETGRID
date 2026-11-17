@@ -607,11 +607,11 @@ function legalActionCost(
 
 function isKnownAgenda(
   card: VisibleCard,
-): card is VisibleCard & { definitionId: string } {
+): card is VisibleCard & { definitionId: number } {
   return (
     card.known === true &&
     card.type === "agenda" &&
-    typeof card.definitionId === "string" &&
+    typeof card.definitionId === "number" &&
     card.definitionId.length > 0
   );
 }

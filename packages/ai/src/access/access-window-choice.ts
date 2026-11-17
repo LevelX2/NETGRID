@@ -8,7 +8,7 @@ import {
 export function projectAccessWindowChoice(params: {
   actionType: LegalAction["type"];
   serverId: string | undefined;
-  knownRootDefinitionId?: string;
+  knownRootDefinitionId?: number;
   targetType: string;
   trashCost: number;
   stealCost?: number;

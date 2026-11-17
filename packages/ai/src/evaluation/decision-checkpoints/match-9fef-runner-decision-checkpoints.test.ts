@@ -79,14 +79,14 @@ describe("match 9FEF runner decision checkpoints", () => {
       portfolio.instances.find(
         (instance) =>
           instance.instanceId ===
-          "plan:runner.credit_bank:runner_onr_v1_154_broker_2",
+          "plan:runner.credit_bank:runner_366_2",
       )?.moduleState,
     ).toMatchObject({
       phase: "build",
       signal: {
         priorityClass: "P4",
         actionIds: expect.arrayContaining([
-          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
+          "runner.activated_card_ability.runner_366_2.runner_366_2.activated.onr_v1_154_broker:store_credits",
         ]),
       },
     });

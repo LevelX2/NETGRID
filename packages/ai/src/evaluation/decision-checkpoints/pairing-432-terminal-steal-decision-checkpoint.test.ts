@@ -26,11 +26,11 @@ it("preserves the nonterminal score owner while funding equal-cost exposure alte
     capture.runtime,
   );
   const decision = chooseAiAction(capture.input);
-  const agenda = "corp_onr_v1_193_corporate-coup_1";
+  const agenda = "corp_405_1";
   const root = `plan:corp.score_agenda:agenda%3A${agenda}%3Aremote_1`;
   const funding = `plan:corp.economy:score-support%3Aagenda%3A${agenda}%3Aremote_1`;
   const fundingAction =
-    "corp.play_operation.corp_onr_v1_290_efficiency-experts_3.corp_onr_v1_290_efficiency-experts_3.onr_v1_290_efficiency-experts:abilities_on_play_gain_credits";
+    "corp.play_operation.corp_502_3.corp_502_3.onr_v1_290_efficiency-experts:abilities_on_play_gain_credits";
   expect(decision).toMatchObject({
     actionId: fundingAction,
     fallbackUsed: false,
@@ -64,7 +64,7 @@ it("preserves the nonterminal score owner while funding equal-cost exposure alte
   );
   const terminal = lines.find((line) =>
     line.evidenceCodes.includes(
-      "root_plan_instance:plan:corp.score_agenda:agenda%3Acorp_onr_v1_215_security-net-optimization_1%3Aremote_1",
+      "root_plan_instance:plan:corp.score_agenda:agenda%3Acorp_427_1%3Aremote_1",
     ),
   );
   expect(coup?.evidenceCodes).toContain("score_route_exposure:known");
@@ -98,7 +98,7 @@ it("preserves the nonterminal score owner while funding equal-cost exposure alte
     portfolio.instances.find(
       (plan) =>
         plan.instanceId ===
-        "plan:corp.score_agenda:agenda%3Acorp_onr_v1_215_security-net-optimization_1%3Aremote_1",
+        "plan:corp.score_agenda:agenda%3Acorp_427_1%3Aremote_1",
     )?.moduleState,
   ).toMatchObject({
     kind: "score",

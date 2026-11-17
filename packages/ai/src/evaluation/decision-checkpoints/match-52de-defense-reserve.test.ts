@@ -155,7 +155,7 @@ describe("match 52de cross-server defense reserve", () => {
     });
     expect(assessment.claims[0]!.expectedPoints).toBeCloseTo(4 / 3);
     expect(assessment.claims[0]!.iceIds).toEqual([
-      "corp_onr_v1_261_quandary_1",
+      "corp_473_1",
     ]);
   });
 

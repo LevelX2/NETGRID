@@ -94,7 +94,7 @@ export type CorpScoreProjectSignal = {
     creditsBeforeScorePayout: number;
   };
   projectId: string;
-  agendaDefinitionId?: string;
+  agendaDefinitionId?: number;
   agendaPoints: number;
   agendaInstanceId?: string;
   serverId?: string;
@@ -179,7 +179,7 @@ export type CorpScoreProjectSignal = {
     needId: string;
     actionId: string;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
   };
   /**
    * Narrow, Engine-certified preparation state for an advanceable Corp asset
@@ -188,7 +188,7 @@ export type CorpScoreProjectSignal = {
    */
   counterBank?: {
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     serverId: string;
     advancementCounters: number;
     counterTarget: number;

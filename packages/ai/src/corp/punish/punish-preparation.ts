@@ -144,7 +144,7 @@ export function corpStrategicFundingPhaseBlocksPreparation(
 }
 
 export function corpDefinitionIsTraceSupport(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   if (!definitionId) return false;
   const hint = AI_HINTS_BY_CARD.get(definitionId);
@@ -159,7 +159,7 @@ export function corpDefinitionIsTraceSupport(
 }
 
 export function corpDefinitionIsTraceSource(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   return corpDefinitionHasTraceSource(definitionId);
 }

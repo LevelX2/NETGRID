@@ -18,7 +18,7 @@ export type RunnerSetupCoverageCompositionDependencies = {
     cardId: string,
   ) => Pick<VisibleCard, "definitionId"> | undefined;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
-  rolesForCardId: (definitionId: string | undefined) => string[];
+  rolesForCardId: (definitionId: number | undefined) => string[];
 };
 
 export function createRunnerSetupCoverageComposition(

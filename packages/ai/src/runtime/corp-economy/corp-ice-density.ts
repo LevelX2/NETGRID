@@ -206,7 +206,7 @@ function nonNegativeSafeInteger(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 }
 
-function exactKnownDefinitionType(definitionId: string): string | undefined {
+function exactKnownDefinitionType(definitionId: number): string | undefined {
   const direct = CARD_DEFINITIONS_BY_ID[definitionId];
   if (direct) return direct.type;
   const engineCardId = RUNTIME_CARDS[definitionId]?.engineCardId;

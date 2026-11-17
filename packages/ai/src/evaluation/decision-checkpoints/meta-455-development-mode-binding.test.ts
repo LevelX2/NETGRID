@@ -49,14 +49,14 @@ it.each([false, true])(
     const modes = input.legalActions.filter(
       (a) =>
         a.type === "install_card" &&
-        a.payload?.cardId === "runner_onr_proteus_092_morphing-tool_1" &&
+        a.payload?.cardId === "runner_150_1" &&
         !a.payload.runnerProgramTrashBeforeInstall,
     );
     expect(modes).toHaveLength(3);
     const development = residentPlanPortfolioSnapshot(input)!.instances.find(
       (instance) =>
         instance.instanceId ===
-        "plan:runner.develop_board_and_hand:card%3Arunner_onr_proteus_092_morphing-tool_1",
+        "plan:runner.develop_board_and_hand:card%3Arunner_150_1",
     );
     expect(development?.moduleState).toMatchObject({
       kind: "development",

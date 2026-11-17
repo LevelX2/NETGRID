@@ -13,7 +13,7 @@ describe("access decision projection", () => {
     const projection = projectAccessDecision({
       source: "pre_run",
       serverId: "remote_1",
-      knownRootDefinitionId: "simple_agenda",
+      knownRootDefinitionId: 588,
       target: "agenda",
       intendedAccessAction: "steal",
     });
@@ -32,7 +32,7 @@ describe("access decision projection", () => {
     const projection = projectAccessDecision({
       source: "access_window",
       serverId: "remote_1",
-      knownRootDefinitionId: "simple_agenda",
+      knownRootDefinitionId: 588,
       target: "agenda",
       intendedAccessAction: "steal",
       stealCost: 5,
@@ -55,7 +55,7 @@ describe("access decision projection", () => {
     const projection = projectAccessDecision({
       source: "access_window",
       serverId: "remote_1",
-      knownRootDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      knownRootDefinitionId: 521,
       target: "asset",
       intendedAccessAction: "trash",
       trashCost: 4,
@@ -102,7 +102,7 @@ describe("access decision projection", () => {
     const projection = projectAccessDecision({
       source: "plan_memory",
       serverId: "remote_1",
-      knownRootDefinitionId: "onr_v1_326_holovid-campaign",
+      knownRootDefinitionId: 538,
       target: "asset",
       intendedAccessAction: "decline",
       trashCost: 7,
@@ -145,7 +145,7 @@ describe("access decision projection", () => {
     const projection = projectAccessDecision({
       source: "access_window",
       serverId: "remote_1",
-      knownRootDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      knownRootDefinitionId: 521,
       target: "asset",
       intendedAccessAction: "trash",
       targetChoiceWouldSelect,
@@ -199,7 +199,7 @@ describe("access decision projection", () => {
     const projection = projectAccessDecision({
       source: "access_window",
       serverId: "remote_1",
-      knownRootDefinitionId: "onr_v1_322_euromarket-consortium",
+      knownRootDefinitionId: 534,
       target: "asset",
       intendedAccessAction: "trash",
       targetChoiceWouldSelect,
@@ -209,7 +209,7 @@ describe("access decision projection", () => {
       {
         positionKey: "root:0",
         instanceId: "euromarket-1",
-        definitionId: "onr_v1_322_euromarket-consortium",
+        definitionId: 534,
         targetKind: "asset",
         commitment: {
           serverId: "remote_1",

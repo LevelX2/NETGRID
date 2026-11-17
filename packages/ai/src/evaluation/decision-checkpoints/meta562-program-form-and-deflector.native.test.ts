@@ -114,10 +114,10 @@ it("resolves the original accessed-agenda MU choice with an installed program-fo
     f.memory.input.playerView.own.memoryLimit!,
   );
   expect(after.runner.rig.programs).toContain(
-    "corp_onr_classic_004_theorem-proof_1",
+    "corp_8_1",
   );
   expect(
-    after.cardInstances["corp_onr_classic_004_theorem-proof_1"]
+    after.cardInstances["corp_8_1"]
       ?.installedAsRunnerProgram?.memoryCost,
   ).toBe(2);
 });
@@ -169,7 +169,7 @@ it("retains the same native Trapdoor rez when an actual subsidiary target exists
   const f = fixture(),
     state = f.trapdoorState;
   const targetIce = state.corp.hq.find(
-    (id) => state.cardInstances[id]?.definitionId === "onr_classic_015_vortex",
+    (id) => state.cardInstances[id]?.definitionId === 19,
   )!;
   expect(targetIce).toBeDefined();
   state.corp.hq = state.corp.hq.filter((id) => id !== targetIce);

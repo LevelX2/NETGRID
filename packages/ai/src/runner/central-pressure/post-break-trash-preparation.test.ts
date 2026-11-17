@@ -28,9 +28,9 @@ import { buildAiDecisionInputDto } from "../../input-dto";
 const runnerDeck = {
   ...ORIGINALSET_DEFAULT_DECKS.runner,
   cards: [
-    { id: "onr_v1_068_startup-immolator", quantity: 3 },
-    { id: "onr_v1_039_krash", quantity: 3 },
-    { id: "onr_v1_108_score", quantity: 3 },
+    { id: 280, quantity: 3 },
+    { id: 251, quantity: 3 },
+    { id: 320, quantity: 3 },
   ],
 };
 function fixture() {
@@ -40,8 +40,8 @@ function fixture() {
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
-        { id: "onr_v1_238_data-wall-2-0", quantity: 3 },
-        { id: "onr_v1_188_ai-chief-financial-officer", quantity: 6 },
+        { id: 450, quantity: 3 },
+        { id: 400, quantity: 6 },
       ],
     },
   });
@@ -201,7 +201,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     );
     const preparation = chooseAiAction(first.input);
     expect(preparation.actionId).toContain(
-      "runner.install_card.runner_onr_v1_068_startup-immolator_2",
+      "runner.install_card.runner_280_2",
     );
     for (const cp of checkpoints.slice(1)) {
       const decision = chooseAiAction(cp.input);
@@ -232,7 +232,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       expect(owner.moduleState).toMatchObject({
         signal: {
           postBreakTrashCommitment: {
-            sourceCardInstanceId: "runner_onr_v1_068_startup-immolator_2",
+            sourceCardInstanceId: "runner_280_2",
             serverId: "rd",
           },
         },
@@ -263,15 +263,15 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       serverId: "hq",
       sources: [
         {
-          sourceCardInstanceId: "runner_onr_v1_068_startup-immolator_1",
-          sourceDefinitionId: "onr_v1_068_startup-immolator",
+          sourceCardInstanceId: "runner_280_1",
+          sourceDefinitionId: 280,
           installed: false,
         },
       ],
       targets: [
         {
-          targetIceInstanceId: "corp_onr_v1_238_data-wall-2-0_2",
-          targetDefinitionId: "onr_v1_238_data-wall-2-0",
+          targetIceInstanceId: "corp_450_2",
+          targetDefinitionId: 450,
           trashCredits: 2,
         },
       ],
@@ -285,7 +285,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     );
     const decision = chooseAiAction(input);
     expect(decision.actionId).toContain(
-      "runner.install_card.runner_onr_v1_068_startup-immolator_1",
+      "runner.install_card.runner_280_1",
     );
     expect(decision.reasonCode).toBe("plan_first.runner.pressure_central");
     expect(decision.fallbackUsed).toBe(false);
@@ -424,7 +424,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
         .ice.push(second.instanceId);
     }
     if (condition === "deflector")
-      ice.definitionId = "onr_classic_010_entrapment";
+      ice.definitionId = 14;
     expect(signals(state)).toEqual([]);
   });
   it.each(["stale_state", "wrong_action", "invalid_json"])(
@@ -454,7 +454,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
   it("revalidates a prepared installation and executes the bound post-pass ability through the live chooser", () => {
     let { state } = fixture();
     for (const agenda of Object.values(state.cardInstances)
-      .filter((c) => c.definitionId === "onr_v1_188_ai-chief-financial-officer")
+      .filter((c) => c.definitionId === 400)
       .slice(0, 3)) {
       removeEverywhere(state, agenda.instanceId);
       agenda.zone = { side: "runner", zone: "scoreArea" };

@@ -47,7 +47,7 @@ export type DamageSummary = {
 
 export type SubroutineEffectResolutionResult = {
   handled: boolean;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   subroutineId?: string;
   setRunMarkers?: string[];
   encounterTaxAmount?: number;
@@ -81,7 +81,7 @@ export type PostEncounterResult = {
 export type PassIceFollowupResult = {
   handled: boolean;
   choiceOpened?: boolean;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   stateChanged?: boolean;
 };
 
@@ -944,7 +944,7 @@ export function appendResolvedSubroutineEffect(
     amount?: number;
     paidCredits?: number;
     endedRun?: boolean;
-    cardDefinitionId?: string;
+    cardDefinitionId?: number;
     cardTitle?: string;
     cardsTrashed?: number;
     dieRoll?: number;

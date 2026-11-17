@@ -60,10 +60,10 @@ it.each(["stale","incomplete","unfundable","no_recycling_agenda","healthy_deck"]
   if(variant==="stale")quote.expiresAtStateVersion--;
   if(variant==="incomplete")agenda.scoreContinuationQuote={context:quote.context,agendaCardId:quote.agendaCardId,serverId:quote.serverId,expiresAtStateVersion:quote.expiresAtStateVersion,complete:false,reason:"not_completable_next_corp_turn"};
   if(variant==="unfundable")quote.creditsRequiredBeforeNextCorpTurn=input.playerView.own.credits+input.playerView.own.clicks+1;
-  if(variant==="no_recycling_agenda")agenda.definitionId="onr_v1_203_hostile-takeover";
+  if(variant==="no_recycling_agenda")agenda.definitionId=415;
   if(variant==="healthy_deck")input.playerView.own.stackOrRdCount=7;
   const {projects}=decide(f);
-  const current=projects.filter(p=>p.agendaInstanceId==="corp_onr_v1_194_corporate-downsizing_3" && p.phase==="install_agenda");
+  const current=projects.filter(p=>p.agendaInstanceId==="corp_406_3" && p.phase==="install_agenda");
   expect(current.length).toBeGreaterThan(0);
   expect(current.some(p=>p.routeAssessment==="corp_resident_score_parent_dominates_sibling_route")).toBe(false);
 });
@@ -71,7 +71,7 @@ it("keeps a separately admitted winning new agenda available over a nonterminal 
   const f=fixture(6,382),input=f.checkpoint.input as AiDecisionInputWithDeckCapabilities;
   input.playerView.own.agendaPoints=4;
   const {projects}=decide(f);
-  const war=projects.filter(p=>p.agendaDefinitionId==="onr_v1_196_corporate-war"&&p.phase==="install_agenda");
+  const war=projects.filter(p=>p.agendaDefinitionId===408&&p.phase==="install_agenda");
   expect(war.some(p=>p.terminalScore&&p.feasible)).toBe(true);
   expect(war.some(p=>p.routeAssessment==="corp_resident_score_parent_dominates_sibling_route")).toBe(false);
 });

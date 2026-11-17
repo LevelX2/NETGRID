@@ -640,7 +640,7 @@ describe("Corp core plan modules", () => {
       ),
       sourceKind: "card" as const,
       sourceCardInstanceId: "systematic-layoffs-card",
-      sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+      sourceDefinitionId: 516,
     };
     const sibling = {
       ...committed,
@@ -988,13 +988,13 @@ describe("Corp core plan modules", () => {
       needId: "score-setup:agenda:agenda-1:remote_1:chicago",
       actionId: "install-chicago",
       sourceCardInstanceId: "chicago",
-      sourceDefinitionId: "onr_v1_312_chicago-branch",
+      sourceDefinitionId: 524,
     };
     const corpContext = context([], {
       scoreProjects: [
         {
           projectId: "agenda:agenda-1:remote_1",
-          agendaDefinitionId: "onr_v1_201_executive-extraction",
+          agendaDefinitionId: 413,
           agendaPoints: 2,
           agendaInstanceId: "agenda-1",
           serverId: "remote_1",
@@ -3818,7 +3818,7 @@ describe("Corp core plan modules", () => {
     const rezDataMasons = cardAction(
       "rez-data-masons",
       "corp_window.rez",
-      "onr_v1_317_data-masons",
+      529,
     );
     const corpContext = context(
       [installHq, installRd, rezDataMasons],
@@ -3851,7 +3851,7 @@ describe("Corp core plan modules", () => {
             defenseId: "rez-exact-card-support:data-masons",
             serverId: "remote_1",
             phase: "rez_response",
-            sourceDefinitionIds: ["onr_v1_317_data-masons"],
+            sourceDefinitionIds: [529],
             actionIds: [rezDataMasons.actionId],
             urgent: false,
             rezWindowVerdict: "productive",
@@ -3899,7 +3899,7 @@ describe("Corp core plan modules", () => {
     const rezDataMasons = cardAction(
       "rez-data-masons",
       "corp_window.rez",
-      "onr_v1_317_data-masons",
+      529,
     );
     const corpContext = context(
       [installHq, installRd, rezDataMasons],
@@ -3932,7 +3932,7 @@ describe("Corp core plan modules", () => {
             defenseId: "rez-exact-card-support:data-masons",
             serverId: "remote_1",
             phase: "rez_response",
-            sourceDefinitionIds: ["onr_v1_317_data-masons"],
+            sourceDefinitionIds: [529],
             actionIds: [rezDataMasons.actionId],
             urgent: false,
             rezWindowVerdict: "productive",
@@ -3981,7 +3981,7 @@ describe("Corp core plan modules", () => {
     const rezDataMasons = cardAction(
       "rez-data-masons",
       "corp_window.rez",
-      "onr_v1_317_data-masons",
+      529,
     );
     const dataMasonsEvidence =
       "corp_rez_data_masons_supports_visible_installed_walls:data-wall";
@@ -4005,7 +4005,7 @@ describe("Corp core plan modules", () => {
             defenseId: "rez-exact-card-support:data-masons",
             serverId: "remote_1",
             phase: "rez_response",
-            sourceDefinitionIds: ["onr_v1_317_data-masons"],
+            sourceDefinitionIds: [529],
             actionIds: [rezDataMasons.actionId],
             urgent: false,
             rezWindowVerdict: "productive",
@@ -4037,7 +4037,7 @@ describe("Corp core plan modules", () => {
     const rezDataMasons = cardAction(
       "rez-data-masons",
       "corp_window.rez",
-      "onr_v1_317_data-masons",
+      529,
     );
     const dataMasonsEvidence =
       "corp_rez_data_masons_supports_visible_installed_walls:data-wall";
@@ -4060,7 +4060,7 @@ describe("Corp core plan modules", () => {
           defenseId: "rez-exact-card-support:data-masons",
           serverId: "remote_1",
           phase: "rez_response",
-          sourceDefinitionIds: ["onr_v1_317_data-masons"],
+          sourceDefinitionIds: [529],
           actionIds: [rezDataMasons.actionId],
           urgent: false,
           rezWindowVerdict: "productive",
@@ -4104,7 +4104,7 @@ describe("Corp core plan modules", () => {
     const module = corpModule("corp.defend_servers");
     const scoreSignal = (
       actionId: string,
-      definitionId: string,
+      definitionId: number,
       effect: "progress" | "satisfied",
       probability: { numerator: number; denominator: number },
       totalInstallAndRezCredits: number,
@@ -4471,7 +4471,7 @@ describe("Corp core plan modules", () => {
     const experimentalAi = cardAction(
       "install-experimental-ai",
       "install.card",
-      "onr_v1_323_experimental-ai",
+      535,
     );
 
     expect(corpEconomyActionIsOwned(experimentalAi)).toBe(false);
@@ -4848,7 +4848,7 @@ describe("Corp core plan modules", () => {
       ...cardAction(
         "install-campaign",
         "install.card",
-        "onr_v1_309_bbs-whispering-campaign",
+        521,
       ),
       sourceCardInstanceId: "bbs-card",
       targetContext: targetContext("remote_1", "server"),
@@ -4974,7 +4974,7 @@ describe("Corp core plan modules", () => {
     );
     nightShift.sourceKind = "card";
     nightShift.sourceCardInstanceId = "night-shift-card";
-    nightShift.sourceDefinitionId = "onr_v1_295_night-shift";
+    nightShift.sourceDefinitionId = 507;
     nightShift.economyProjection = {
       ...nightShift.economyProjection!,
       grossLiquidCreditGain: 2,
@@ -5824,7 +5824,7 @@ describe("Corp core plan modules", () => {
       ...cardAction(
         "install-campaign",
         "install.card",
-        "onr_v1_309_bbs-whispering-campaign",
+        521,
       ),
       sourceCardInstanceId: "bbs-card",
       targetContext: targetContext("remote_1", "server"),
@@ -5835,7 +5835,7 @@ describe("Corp core plan modules", () => {
           kind: "develop_campaign",
           needId: "economy-campaign:bbs-card",
           sourceInstanceId: "bbs-card",
-          sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+          sourceDefinitionId: 521,
           phase: "install",
           actionIds: ["install-campaign"],
           cadence: {
@@ -5879,7 +5879,7 @@ describe("Corp core plan modules", () => {
       ...candidate("play-accounts", "play_operation", "economy.gain_credit"),
       sourceKind: "card" as const,
       sourceCardInstanceId: "accounts-card",
-      sourceDefinitionId: "onr_v1_281_accounts-receivable",
+      sourceDefinitionId: 493,
       costProfile: {
         clickCost: 1,
         creditCost: 5,
@@ -5910,7 +5910,7 @@ describe("Corp core plan modules", () => {
       kind: "convert_immediate_operation" as const,
       needId: "economy-immediate-operation:accounts-card",
       sourceInstanceId: "accounts-card",
-      sourceDefinitionId: "onr_v1_281_accounts-receivable",
+      sourceDefinitionId: 493,
       actionIds: ["play-accounts"] as [string],
       conversion: {
         clickCost: 1,
@@ -5993,7 +5993,7 @@ describe("Corp core plan modules", () => {
           kind: "develop_campaign",
           needId: "economy-campaign:bbs-card",
           sourceInstanceId: "bbs-card",
-          sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+          sourceDefinitionId: 521,
           phase: "install",
           actionIds: [],
           cadence: {
@@ -6356,7 +6356,7 @@ function knownInstallProjection<
 >(params: {
   actionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   targetServerId: string;
   effect: Effect;
   probability: { numerator: number; denominator: number };
@@ -6627,7 +6627,7 @@ function remoteProjectSignal(): CorpCorePlanDomain["remoteProjects"][number] {
 function cardAction(
   actionId: string,
   semanticActionType: string,
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
 ): ActionSemanticCandidate {
   return {
     ...candidate(actionId, "install_card", semanticActionType),

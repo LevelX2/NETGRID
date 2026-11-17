@@ -38,7 +38,7 @@ function instance(
   } as CardInstance;
 }
 
-function definition(id: string): CardDefinition {
+function definition(id: number): CardDefinition {
   return {
     id,
     title: id,

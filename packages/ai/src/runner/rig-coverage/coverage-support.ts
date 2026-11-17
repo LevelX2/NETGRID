@@ -691,7 +691,7 @@ export function runnerCoverageSearchTargetIsPayable(
 export function runnerPreferredCoverageSearchDefinitionId(
   deckCapabilities: DeckCapabilityProfile,
   requiredRole: RunnerCoverageGapSignal["requiredRole"],
-): string | undefined {
+): number | undefined {
   return (deckCapabilities.runner?.breakerInventory ?? [])
     .filter(
       (breaker) =>

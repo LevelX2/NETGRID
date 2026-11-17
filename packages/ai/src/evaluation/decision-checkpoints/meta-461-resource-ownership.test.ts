@@ -53,7 +53,7 @@ describe("meta461 round6 causal resource ownership", () => {
       input.legalActions.find((a) => a.actionId === decision.actionId),
     ).toMatchObject({
       type: "install_card",
-      source: "runner_onr_classic_028_matador_1",
+      source: "runner_32_1",
     });
     expect(decision.fallbackUsed).toBe(false);
   });
@@ -73,7 +73,7 @@ describe("meta461 round6 causal resource ownership", () => {
       a = input.legalActions.find((a) => a.actionId === decision.actionId)!;
     expect(a).not.toMatchObject({
       type: "advance_card",
-      source: "corp_onr_v1_347_vapor-ops_1",
+      source: "corp_559_1",
     });
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
@@ -88,7 +88,7 @@ describe("source-lock coverage contrasts", () => {
     const v = fixture("g8-d193").playerView,
       s = v.servers.find((s) => s.id === "remote_1")!;
     const rig = v.own.rig!.filter(
-      (c) => c.definitionId !== "onr_classic_030_psychic-friend",
+      (c) => c.definitionId !== 34,
     );
     expect(assessKnownRezzedIcePath(s.ice, rig, 24, s.root, 0)).toMatchObject({
       missingCoverage: ["code_gate"],
@@ -111,7 +111,7 @@ describe("source-lock coverage contrasts", () => {
     const v = fixture("g8-d193").playerView,
       s = v.servers.find((s) => s.id === "remote_1")!,
       matador = v.own.gripOrHq.find(
-        (c) => c.definitionId === "onr_classic_028_matador",
+        (c) => c.definitionId === 32,
       )!,
       rig = [...v.own.rig!, { ...matador, rezzed: true }];
     expect(assessKnownRezzedIcePath(s.ice, rig, 24, s.root, 0)).toMatchObject({

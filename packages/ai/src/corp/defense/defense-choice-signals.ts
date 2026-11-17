@@ -234,7 +234,7 @@ type ClassicDeflectorChoiceContext = Readonly<{
   runId: string;
   sourceIceInstanceId: string;
   subroutineIndex: number;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   subroutineId: string;
   targetProfile: "archives" | "any_data_fort" | "subsidiary_data_fort";
   creditCost: number;

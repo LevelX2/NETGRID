@@ -29,7 +29,7 @@ function fixture(name = "current-tagged-access") {
   } as AiDecisionInput;
   const source = input.playerView.servers
     .flatMap((s) => s.root)
-    .find((c) => c.definitionId === "onr_v1_356_dedicated-response-team")!;
+    .find((c) => c.definitionId === 568)!;
   const rez = input.legalActions.find(
     (a) => a.type === "rez_card" && a.source === source.instanceId,
   )!;

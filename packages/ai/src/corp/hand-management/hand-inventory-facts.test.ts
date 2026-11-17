@@ -346,7 +346,7 @@ function corpInput(
 
 function card(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   type: NonNullable<VisibleCard["type"]>,
 ): VisibleCard {
   return {
@@ -363,7 +363,7 @@ function card(
 function candidate(
   actionId: string,
   sourceCardInstanceId: string,
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
 ): ActionSemanticCandidate {
   return {
     actionId,
@@ -410,7 +410,7 @@ function candidate(
 function economyCandidate(
   actionId: string,
   sourceCardInstanceId: string,
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
   netCredits: number,
 ): ActionSemanticCandidate {
   return {

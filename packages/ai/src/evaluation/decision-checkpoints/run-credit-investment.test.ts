@@ -26,7 +26,7 @@ function context() {
       : {}),
   };
   const evaluation = evaluateRunnerHandDevelopment(params).find(
-    (e) => e.definitionId === "onr_v1_166_karl-de-veres-corporate-stooge",
+    (e) => e.definitionId === 378,
   )!;
   return {
     input,
@@ -54,9 +54,9 @@ it("develops the real run-income source through its existing owner without spend
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     stateVersion: input.playerView.stateVersion,
     rootPlanInstanceId:
-      "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_166_karl-de-veres-corporate-stooge_1",
+      "plan:runner.develop_board_and_hand:card%3Arunner_378_1",
     leafExecutorInstanceId:
-      "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_166_karl-de-veres-corporate-stooge_1",
+      "plan:runner.develop_board_and_hand:card%3Arunner_378_1",
     route: {
       actionId: decision.actionId,
       stateVersion: input.playerView.stateVersion,

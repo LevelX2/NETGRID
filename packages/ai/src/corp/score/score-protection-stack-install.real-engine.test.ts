@@ -12,14 +12,14 @@ import { assessCorpScoreProtection } from "../../runtime/corp-score-protection-a
 import { assessCorpScoreRushRisk } from "../../runtime/corp-score-rush-risk";
 import { assessCorpTerminalAgendaDefense } from "../defense/corp-terminal-agenda-defense";
 
-const sourceId = "onr_v1_059_self-modifying-code";
-const breakerId = "onr_v1_030_grubb";
-const agendaId = "onr_v1_191_black-ice-quality-assurance";
-const iceId = "onr_v1_237_data-wall";
+const sourceId = 271;
+const breakerId = 242;
+const agendaId = 403;
+const iceId = 449;
 const corpCards = [
   { id: agendaId, quantity: 3 },
   { id: iceId, quantity: 3 },
-  { id: "simple_agenda", quantity: 8 },
+  { id: 588, quantity: 8 },
 ];
 
 function corpStep(state: GameState, type: LegalAction["type"]): GameState {
@@ -50,19 +50,19 @@ function position({
         id: "stack-install-runner",
         name: "Stack install",
         side: "runner",
-        identity: "runner_identity_001",
+        identity: 587,
         cards: [
           sourceId,
           breakerId,
-          "onr_v1_095_jack-n-joe",
-          "onr_v1_108_score",
+          307,
+          320,
         ].map((id) => ({ id, quantity: 3 })),
       },
       corpDeck: {
         id: "stack-install-corp",
         name: "Stack install",
         side: "corp",
-        identity: "corp_identity_001",
+        identity: 3,
         cards: corpCards,
       },
     }),
@@ -87,7 +87,7 @@ function position({
   }
   if (readyAgenda) {
     const scored = state.corp.rd
-      .filter((id) => state.cardInstances[id]!.definitionId === "simple_agenda")
+      .filter((id) => state.cardInstances[id]!.definitionId === 588)
       .slice(0, 3);
     if (scored.length !== 3) throw new Error("missing fixture score cards");
     state.corp.rd = state.corp.rd.filter((id) => !scored.includes(id));

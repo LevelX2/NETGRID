@@ -147,8 +147,8 @@ export type RunnerPersistentDeckReplacementStatus =
 export type RunnerPersistentDeckReplacementAssessment = {
   status: RunnerPersistentDeckReplacementStatus;
   admitted: boolean;
-  conflictingDefinitionIds: string[];
-  unassessedDefinitionIds: string[];
+  conflictingDefinitionIds: number[];
+  unassessedDefinitionIds: number[];
   gainedFunctionalCoverage: string[];
   lostFunctionalCoverage: string[];
   evidence: string[];
@@ -206,7 +206,7 @@ export type RunnerHandDevelopmentEvaluation = {
   hostedBreakerDevelopment?: import("./hosted-breaker-development").HostedBreakerDevelopment;
   schemaVersion: typeof RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION;
   cardInstanceId: string;
-  definitionId?: string;
+  definitionId?: number;
   title?: string;
   cardType?: VisibleCard["type"];
   availability: RunnerHandDevelopmentAvailability;

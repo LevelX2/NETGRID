@@ -381,7 +381,7 @@ function boundedProgramSearchEffect(
   action: LegalAction,
   binding: {
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
   },
 ) {
   const abilityId = action.abilityRef?.sourceAbilityId;

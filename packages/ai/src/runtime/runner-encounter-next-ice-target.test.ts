@@ -24,7 +24,7 @@ describe("next-encounter break purpose", () => {
     const input = aiInput("runner", [action]);
     const ice = withEffectiveRunQuote(
       visibleCard("neural", "corp", "ice", {
-        definitionId: "onr_v1_258_neural-blade",
+        definitionId: 470,
         rezzed: true,
         strength: 4,
       }),

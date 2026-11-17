@@ -16,7 +16,7 @@ import {
 } from "./access-effect-handlers";
 
 function definition(
-  id: string,
+  id: number,
   title: string,
   type: CardDefinition["type"] = "asset",
 ): CardDefinition {
@@ -25,7 +25,7 @@ function definition(
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"] = {
     side: "corp",
     zone: "serverRoot",
@@ -45,14 +45,14 @@ function instance(
 
 function makeHost(legalAction: LegalAction) {
   const definitions: Record<string, CardDefinition> = {
-    setup: definition("onr_v1_340_setup", "Setup!"),
-    trap: definition("onr_v1_345_trap", "TRAP!"),
+    setup: definition(552, "Setup!"),
+    trap: definition(557, "TRAP!"),
     dedicated: definition(
-      "onr_v1_356_dedicated-response-team",
+      568,
       "Dedicated Response Team",
       "upgrade",
     ),
-    dieter: definition("onr_v1_357_dieter-esslin", "Dieter Esslin", "upgrade"),
+    dieter: definition(569, "Dieter Esslin", "upgrade"),
     crybaby: definition("onr_v1_352_crybaby", "Crybaby", "upgrade"),
     turbeau: definition(
       "onr_v1_361_turbeau-delacroix",
@@ -64,7 +64,7 @@ function makeHost(legalAction: LegalAction) {
       "Corprunner's Shattered Remains",
     ),
     bizarre: definition(
-      "onr_v1_351_bizarre-encryption-scheme",
+      563,
       "Bizarre Encryption Scheme",
       "upgrade",
     ),
@@ -429,7 +429,7 @@ describe("access effect handlers", () => {
 
     expect(result.handled).toBe(true);
     expect(calls.damages).toEqual([
-      { type: "net", amount: 2, source: "onr_v1_340_setup" },
+      { type: "net", amount: 2, source: 552 },
     ]);
     expect(action.payload).toMatchObject({
       hiddenZoneAction: "v1917_access_ambush",
@@ -474,12 +474,12 @@ describe("access effect handlers", () => {
 
     expect(calls.spentCredits).toEqual([4]);
     expect(calls.damages).toEqual([
-      { type: "net", amount: 3, source: "onr_v1_345_trap" },
+      { type: "net", amount: 3, source: 557 },
     ]);
     expect(action.payload).toMatchObject({
       ambushPaidCost: 4,
       corpCreditsAfter: 2,
-      publicRevealDefinitionId: "onr_v1_345_trap",
+      publicRevealDefinitionId: 557,
       damageResolved: true,
       damageAmount: 3,
     });
@@ -565,10 +565,10 @@ describe("access effect handlers", () => {
     handleAccessEffectsForCard(dieter.host, "dieter" as CardInstanceId);
 
     expect(dedicated.calls.damages).toEqual([
-      { type: "meat", amount: 3, source: "onr_v1_356_dedicated-response-team" },
+      { type: "meat", amount: 3, source: 568 },
     ]);
     expect(dieter.calls.damages).toEqual([
-      { type: "net", amount: 1, source: "onr_v1_357_dieter-esslin" },
+      { type: "net", amount: 1, source: 569 },
     ]);
   });
 

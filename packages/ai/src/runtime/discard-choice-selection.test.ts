@@ -51,7 +51,7 @@ describe("selectedDiscardChoiceOptionIds", () => {
   });
 });
 
-function card(instanceId: string, definitionId: string): VisibleCard {
+function card(instanceId: string, definitionId: number): VisibleCard {
   return {
     instanceId,
     definitionId,

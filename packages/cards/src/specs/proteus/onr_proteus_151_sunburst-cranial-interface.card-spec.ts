@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_proteus_151_sunburst-cranial-interface",
+      209,
     ),
     title: "Sunburst Cranial Interface",
     side: "runner",

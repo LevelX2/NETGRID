@@ -50,10 +50,10 @@ it.each([
     expect(d.selectedChoices?.selectedOptionIds).toHaveLength(2);
     expect(d.selectedChoices?.selectedOptionIds).toEqual(
       expect.arrayContaining([
-        "card_corp_onr_proteus_021_dog-pile_1",
+        "card_corp_79_1",
         keep
-          ? "card_corp_onr_proteus_007_project-venice_1"
-          : "card_corp_onr_v1_304_systematic-layoffs_1",
+          ? "card_corp_65_1"
+          : "card_corp_516_1",
       ]),
     );
     expect(d.decisionDebug!.planFirstDecision!).toMatchObject({
@@ -82,27 +82,27 @@ it.each([
 it("does not treat distinct-target counters or generated actions as unrestricted counters", () => {
   expect(
     corpGuaranteedOnPlayAdvancementCountersPerTarget(
-      "onr_v1_304_systematic-layoffs",
+      516,
     ),
   ).toBe(2);
   expect(
     corpGuaranteedOnPlayAdvancementCountersPerTarget(
-      "onr_v1_292_management-shake-up",
+      504,
     ),
   ).toBe(3);
   expect(
     corpGuaranteedOnPlayAdvancementCountersPerTarget(
-      "onr_v1_305_team-restructuring",
+      517,
     ),
   ).toBe(1);
   expect(
     corpGuaranteedOnPlayAdvancementCountersPerTarget(
-      "onr_v1_297_overtime-incentives",
+      509,
     ),
   ).toBe(0);
   expect(
     corpGuaranteedOnPlayAdvancementCountersPerTarget(
-      "onr_v1_312_chicago-branch",
+      524,
     ),
   ).toBe(0);
 });

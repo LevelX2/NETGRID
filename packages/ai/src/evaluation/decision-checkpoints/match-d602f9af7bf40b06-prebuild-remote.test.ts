@@ -33,7 +33,7 @@ type ReconstructedDecisionCapture = {
 };
 
 const INSTALL_NERVE_LABYRINTH =
-  "corp.install_card.corp_onr_v1_257_nerve-labyrinth_1.remote_2.corp_onr_v1_257_nerve-labyrinth_1.1";
+  "corp.install_card.corp_469_1.remote_2.corp_469_1.1";
 
 describe("match d602f9af7bf40b06 strategic remote prebuild", () => {
   it("draws for missing HQ defense when no concrete installation remains", () => {

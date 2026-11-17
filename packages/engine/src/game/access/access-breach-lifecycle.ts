@@ -298,7 +298,7 @@ export function applyHqAccessExposeInstalledCorpCards(
   if (exposedCardIds.length === 0) return;
 
   const existingDefinitionIds =
-    typeof legalAction.payload?.publicRevealDefinitionIds === "string" &&
+    typeof legalAction.payload?.publicRevealDefinitionIds === "number" &&
     legalAction.payload.publicRevealDefinitionIds.length > 0
       ? legalAction.payload.publicRevealDefinitionIds.split(",")
       : [];

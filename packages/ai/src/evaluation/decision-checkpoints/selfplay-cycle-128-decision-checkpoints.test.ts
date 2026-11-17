@@ -26,10 +26,10 @@ describe("selfplay cycle 128 decision checkpoints", () => {
     expect(deckSnapshotId).toBeDefined();
     // Both targets tie on current affordable coverage. Both are canonical
     // icebreakers, so the existing install-cost tie-break selects Rent-I-Con.
-    expect(AI_HINTS_BY_CARD.get("onr_classic_030_psychic-friend")?.roles).toContain(
+    expect(AI_HINTS_BY_CARD.get(34)?.roles).toContain(
       "icebreaker",
     );
-    expect(AI_HINTS_BY_CARD.get("onr_classic_031_rent-i-con")?.roles).toContain(
+    expect(AI_HINTS_BY_CARD.get(35)?.roles).toContain(
       "icebreaker",
     );
     resetResidentPlanPortfolioMemory();
@@ -41,7 +41,7 @@ describe("selfplay cycle 128 decision checkpoints", () => {
       actionId: "corp.resolve_choice",
       selectedChoices: {
         choiceId: "trash_installed_program_120",
-        selectedOptionIds: ["card_runner_onr_classic_031_rent-i-con_1"],
+        selectedOptionIds: ["card_runner_35_1"],
       },
     });
     expect(decision.decisionDebug?.fallbackUsed).toBe(false);

@@ -36,7 +36,7 @@ it("SP-459 consumes the real next-encounter lock at Canis before the deeper Keep
   });
   expect(path(input)).toMatchObject({ canReachAccess: true, visibleBreakCost: 8 });
   expect(path(input).paidSubroutineBreaks).toEqual([
-    { iceInstanceId: "corp_onr_v1_258_neural-blade_3", subroutineId: "printed_subroutines_damage_net" },
+    { iceInstanceId: "corp_470_3", subroutineId: "printed_subroutines_damage_net" },
   ]);
   const decision = chooseAiAction(input);
   expect(decision.fallbackUsed).toBe(false);

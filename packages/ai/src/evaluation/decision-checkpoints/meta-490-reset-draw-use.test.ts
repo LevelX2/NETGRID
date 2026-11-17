@@ -30,7 +30,7 @@ it("preserves the actual cheaper breaker search under the canonical deck profile
   const snapshot = {
     ...source,
     cards: source.cards.map(
-      (c: { cardId?: string; definitionId?: string; quantity: number }) => ({
+      (c: { cardId?: string; definitionId?: number; quantity: number }) => ({
         cardId: c.cardId ?? c.definitionId!,
         quantity: c.quantity,
       }),

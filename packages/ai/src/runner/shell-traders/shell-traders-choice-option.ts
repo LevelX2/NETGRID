@@ -15,7 +15,7 @@ export function selectedShellTradersStartTurnChoiceOptionId(
   choice: PendingChoice,
   context?: {
     input: AiDecisionInput;
-    rolesForCardId: (definitionId: string | undefined) => readonly string[];
+    rolesForCardId: (definitionId: number | undefined) => readonly string[];
   },
 ): string | undefined {
   const scored = choice.options.flatMap((option) => {
@@ -47,7 +47,7 @@ function shellTradersStartTurnOptionScore(
   remainingCounters: number,
   context: {
     input: AiDecisionInput;
-    rolesForCardId: (definitionId: string | undefined) => readonly string[];
+    rolesForCardId: (definitionId: number | undefined) => readonly string[];
   },
 ): number {
   const target = shellTradersChoiceTarget(option, context.input);
@@ -108,7 +108,7 @@ function shellTradersChoiceTarget(
 function installedProgramHasUniqueBreakerRole(
   card: VisibleCard,
   rig: readonly VisibleCard[],
-  rolesForCardId: (definitionId: string | undefined) => readonly string[],
+  rolesForCardId: (definitionId: number | undefined) => readonly string[],
 ): boolean {
   const roles = rolesForCardId(card.definitionId);
   if (!rolesHaveBreakerRole(roles)) return false;

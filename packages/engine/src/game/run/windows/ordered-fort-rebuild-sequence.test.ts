@@ -37,7 +37,7 @@ describe("ordered fort rebuild sequence contract", () => {
 
   it("emits only count and public-location payload", () => {
     const payload = orderedFortRebuildPublicPayload({
-      sourceDefinitionId: "onr_proteus_069_pavit-bharat",
+      sourceDefinitionId: 127,
       targetServerId: "remote_1",
       removedCardCount: 3,
       replacementCardCount: 3,
@@ -49,7 +49,7 @@ describe("ordered fort rebuild sequence contract", () => {
       sequenceKind: "ordered_fort_rebuild_sequence",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "ordered_fort_rebuild_sequence",
-      sourceDefinitionId: "onr_proteus_069_pavit-bharat",
+      sourceDefinitionId: 127,
       targetServerId: "remote_1",
       removedCardCount: 3,
       replacementCardCount: 3,
@@ -63,7 +63,7 @@ describe("ordered fort rebuild sequence contract", () => {
     expect(() =>
       sanitizeCardImplementationSurfacePayload({
         ...orderedFortRebuildPublicPayload({
-          sourceDefinitionId: "onr_proteus_069_pavit-bharat",
+          sourceDefinitionId: 127,
           targetServerId: "remote_1",
           removedCardCount: 1,
           replacementCardCount: 1,

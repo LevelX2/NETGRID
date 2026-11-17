@@ -16,8 +16,8 @@ import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 function fixture(
-  operation = "onr_proteus_051_rent-to-own-contract",
-  target = "onr_proteus_024_gatekeeper",
+  operation = 109,
+  target = 82,
   overflow = false,
 ) {
   const d = catalog.decks.find(
@@ -53,11 +53,11 @@ function fixture(
     .withCorpCredits(1);
   if (overflow) {
     builder
-      .withCorpCardInHq("onr_proteus_002_charity-takeover")
-      .withCorpCardInHq("onr_proteus_007_project-venice")
-      .withCorpCardInHq("onr_proteus_008_project-zurich")
-      .withCorpCardInHq("onr_proteus_005_marked-accounts")
-      .withCorpCardInHq("onr_proteus_011_brain-wash");
+      .withCorpCardInHq(60)
+      .withCorpCardInHq(65)
+      .withCorpCardInHq(66)
+      .withCorpCardInHq(63)
+      .withCorpCardInHq(69);
     s.corp.clicks = 1;
   }
   const i = buildAiDecisionInput(s, "corp", {
@@ -92,8 +92,8 @@ function fixture(
   };
 }
 it.each([
-  "onr_proteus_051_rent-to-own-contract",
-  "onr_proteus_049_emergency-rig",
+  109,
+  107,
 ])(
   "dispositions the actual empty Gatekeeper result of %s through the live DTO",
   (operation) => {
@@ -108,11 +108,11 @@ it.each([
   },
 );
 it.each([
-  "onr_proteus_012_bug-zapper",
-  "onr_proteus_014_chihuahua",
-  "onr_proteus_034_riddler",
+  70,
+  72,
+  92,
 ])("preserves the real stopper, income or paid effect on %s", (target) => {
-  const p = fixture("onr_proteus_051_rent-to-own-contract", target);
+  const p = fixture(109, target);
   expect(
     corpIceRezSupportEmptyTargetDispositionEvidence(p.i, p.candidate),
   ).toBeUndefined();
@@ -135,10 +135,10 @@ it.each(["stale", "source", "action", "target", "cost"])(
 );
 
 it.each([
-  "onr_proteus_051_rent-to-own-contract",
-  "onr_proteus_049_emergency-rig",
+  109,
+  107,
 ])("keeps %s out of an empty encounter even with HQ overflow", (operation) => {
-  const { i, action } = fixture(operation, "onr_proteus_024_gatekeeper", true);
+  const { i, action } = fixture(operation, 82, true);
   expect(i.playerView.own.gripOrHq.length).toBeGreaterThan(
     i.playerView.own.maxHandSize,
   );

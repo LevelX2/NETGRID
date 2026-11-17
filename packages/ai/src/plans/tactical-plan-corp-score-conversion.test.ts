@@ -587,7 +587,7 @@ describe("Corp same-turn score conversion", () => {
   it("counts a projected distinct-target operation as one counter on the agenda", () => {
     const agenda = card("agenda", "agenda", { advancementRequirement: 2 });
     const teamRestructuring = card("team", "operation", {
-      definitionId: "onr_v1_305_team-restructuring",
+      definitionId: 517,
       playCost: { kind: "fixed", credits: 1 },
     });
     const input = corpInput({
@@ -914,7 +914,7 @@ describe("Corp same-turn score conversion", () => {
   it("takes a visible overadvance threshold only when it costs no extra step", () => {
     const agenda = card("agenda", "agenda", {
       advancementRequirement: 3,
-      definitionId: "onr_v1_214_project-babylon",
+      definitionId: 426,
       agendaPoints: 1,
       overadvanceThreshold: 2,
       overadvanceReward: "agenda_points",
@@ -950,7 +950,7 @@ describe("Corp same-turn score conversion", () => {
   it("keeps exact-fit when an overadvance threshold needs another action", () => {
     const agenda = card("agenda", "agenda", {
       advancementRequirement: 3,
-      definitionId: "onr_v1_214_project-babylon",
+      definitionId: 426,
       agendaPoints: 1,
       overadvanceThreshold: 2,
       overadvanceReward: "agenda_points",
@@ -975,7 +975,7 @@ describe("Corp same-turn score conversion", () => {
 
   it("uses an exact visible zero requirement instead of the printed agenda requirement", () => {
     const agenda = card("corporate-downsizing", "agenda", {
-      definitionId: "onr_v1_194_corporate-downsizing",
+      definitionId: 406,
       advancementRequirement: 0,
       advancementCounters: 0,
     });
@@ -1022,7 +1022,7 @@ describe("Corp same-turn score conversion", () => {
 
   it("uses the printed agenda requirement when the visible runtime value is absent", () => {
     const agenda = card("printed-requirement-fallback", "agenda", {
-      definitionId: "onr_v1_194_corporate-downsizing",
+      definitionId: 406,
       advancementCounters: 3,
     });
     const input = corpInput({
@@ -1060,7 +1060,7 @@ describe("Corp same-turn score conversion", () => {
 
   it("does not replace an invalid visible requirement with the printed value", () => {
     const agenda = card("invalid-current-requirement", "agenda", {
-      definitionId: "onr_v1_194_corporate-downsizing",
+      definitionId: 406,
       advancementRequirement: Number.NaN,
       advancementCounters: 0,
     });

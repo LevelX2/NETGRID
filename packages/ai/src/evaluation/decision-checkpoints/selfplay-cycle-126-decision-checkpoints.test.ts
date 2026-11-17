@@ -36,10 +36,10 @@ describe("selfplay cycle 126 decision checkpoints", () => {
       source: "basic_action",
     });
     expect(selectedAction?.actionId).not.toBe(
-      "corp.install_card.corp_onr_proteus_038_snowbank_3.remote_1.corp_onr_proteus_038_snowbank_3.4",
+      "corp.install_card.corp_96_3.remote_1.corp_96_3.4",
     );
     expect(selectedAction?.actionId).not.toContain(
-      "corp_onr_v1_296_off-site-backups_1",
+      "corp_508_1",
     );
     expect(decision.decisionDebug?.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({

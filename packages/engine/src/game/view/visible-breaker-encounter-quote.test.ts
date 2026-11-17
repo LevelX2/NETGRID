@@ -8,10 +8,10 @@ describe("visibleBreakerEncounterQuote", () => {
   it("preserves negative public breaker strength after counter penalties", () => {
     expect(
       visibleBreakerEncounterQuote({
-        breakerDefinitionId: "onr_v1_039_krash",
+        breakerDefinitionId: 251,
         breakerInstanceId: "krash",
         breakerStrength: -1,
-        iceDefinitionId: "onr_proteus_012_bug-zapper",
+        iceDefinitionId: 70,
       }),
     ).toMatchObject({ effectiveStrength: -1 });
   });
@@ -19,10 +19,10 @@ describe("visibleBreakerEncounterQuote", () => {
   it("preserves a signed resolved random-strength adjustment", () => {
     expect(
       visibleBreakerEncounterQuote({
-        breakerDefinitionId: "onr_v1_002_ai-boon",
+        breakerDefinitionId: 214,
         breakerInstanceId: "boon",
         breakerStrength: -1,
-        iceDefinitionId: "onr_proteus_012_bug-zapper",
+        iceDefinitionId: 70,
         randomRunStrengthState: {
           status: "resolved",
           actualStrength: 2,
@@ -35,10 +35,10 @@ describe("visibleBreakerEncounterQuote", () => {
   it("preserves Psychic Friend's current-turn pump horizon", () => {
     expect(
       visibleBreakerEncounterQuote({
-        breakerDefinitionId: "onr_classic_030_psychic-friend",
+        breakerDefinitionId: 34,
         breakerInstanceId: "psychic-friend",
         breakerStrength: 1,
-        iceDefinitionId: "simple_code_gate_ice",
+        iceDefinitionId: 590,
         iceSubtypes: ["code_gate"],
       })?.pumpOptions,
     ).toEqual([
@@ -53,10 +53,10 @@ describe("visibleBreakerEncounterQuote", () => {
   it("quotes Big Frackin' Gun's printed pump and five-subroutine break", () => {
     expect(
       visibleBreakerEncounterQuote({
-        breakerDefinitionId: "onr_proteus_079_big-frackin-gun",
+        breakerDefinitionId: 137,
         breakerInstanceId: "bfg",
         breakerStrength: 7,
-        iceDefinitionId: "onr_v1_223_banpei",
+        iceDefinitionId: 435,
         iceSubtypes: ["sentry"],
       }),
     ).toMatchObject({
@@ -76,10 +76,10 @@ describe("visibleBreakerEncounterQuote", () => {
   it("keeps run-start random strength unresolved even when the displayed strength is positive", () => {
     expect(
       visibleBreakerEncounterQuote({
-        breakerDefinitionId: "onr_v1_002_ai-boon",
+        breakerDefinitionId: 214,
         breakerInstanceId: "ai-boon",
         breakerStrength: 5,
-        iceDefinitionId: "onr_v1_223_banpei",
+        iceDefinitionId: 435,
         iceSubtypes: ["sentry"],
         randomRunStrengthState: { status: "unresolved" },
       }),
@@ -96,10 +96,10 @@ describe("visibleBreakerEncounterQuote", () => {
   it("uses an explicit resolved run-start value, including zero", () => {
     expect(
       visibleBreakerEncounterQuote({
-        breakerDefinitionId: "onr_proteus_087_forwards-legacy",
+        breakerDefinitionId: 145,
         breakerInstanceId: "legacy",
         breakerStrength: 5,
-        iceDefinitionId: "onr_v1_223_banpei",
+        iceDefinitionId: 435,
         iceSubtypes: ["sentry"],
         randomRunStrengthState: {
           status: "resolved",
@@ -120,10 +120,10 @@ describe("visibleBreakerEncounterQuote", () => {
   it("rejects a resolved random strength that does not explain the visible strength", () => {
     expect(() =>
       visibleBreakerEncounterQuote({
-        breakerDefinitionId: "onr_v1_002_ai-boon",
+        breakerDefinitionId: 214,
         breakerInstanceId: "ai-boon",
         breakerStrength: 5,
-        iceDefinitionId: "onr_v1_223_banpei",
+        iceDefinitionId: 435,
         iceSubtypes: ["sentry"],
         randomRunStrengthState: {
           status: "resolved",
@@ -136,11 +136,11 @@ describe("visibleBreakerEncounterQuote", () => {
 
   it("applies an implementation-declared chosen-ICE strength bonus only to its bound instance", () => {
     const common = {
-      breakerDefinitionId: "onr_proteus_080_black-widow" as const,
+      breakerDefinitionId: 138 as const,
       breakerInstanceId: "black_widow",
       breakerStrength: 2,
       selectedTargetCardId: "chosen_ice",
-      iceDefinitionId: "onr_v1_223_banpei" as const,
+      iceDefinitionId: 435 as const,
       iceSubtypes: ["sentry"],
     };
 
@@ -163,10 +163,10 @@ describe("visibleBreakerEncounterQuote", () => {
 
   it("uses selected subtype state and reports an unresolved selectable breaker", () => {
     const common = {
-      breakerDefinitionId: "onr_proteus_088_fubar" as const,
+      breakerDefinitionId: 146 as const,
       breakerInstanceId: "fubar",
       breakerStrength: 1,
-      iceDefinitionId: "onr_v1_223_banpei" as const,
+      iceDefinitionId: 435 as const,
       iceSubtypes: ["sentry"],
     };
     expect(visibleBreakerEncounterQuote(common)).toMatchObject({
@@ -188,10 +188,10 @@ describe("visibleBreakerEncounterQuote", () => {
   it("reports partial coverage when a breaker matches only structured trace subroutines", () => {
     expect(
       visibleBreakerEncounterQuote({
-        breakerDefinitionId: "onr_v1_056_replicator",
+        breakerDefinitionId: 268,
         breakerInstanceId: "replicator",
         breakerStrength: 2,
-        iceDefinitionId: "onr_v1_223_banpei",
+        iceDefinitionId: 435,
         iceSubtypes: ["sentry"],
         subroutines: [
           { id: "trace", type: "initiate_trace" },
@@ -207,10 +207,10 @@ describe("visibleBreakerEncounterQuote", () => {
   it("quotes Flak against only AP-tagged subroutines", () => {
     expect(
       visibleBreakerEncounterQuote({
-        breakerDefinitionId: "onr_v1_027_flak",
+        breakerDefinitionId: 239,
         breakerInstanceId: "flak",
         breakerStrength: 2,
-        iceDefinitionId: "onr_v1_223_banpei",
+        iceDefinitionId: 435,
         iceSubtypes: ["sentry", "ap"],
         subroutines: [
           { id: "ap", type: "do_damage", breakTags: ["ap"] },
@@ -225,7 +225,7 @@ describe("visibleBreakerEncounterQuote", () => {
 
   it("quotes Dogcatcher from dog ICE subtypes", () => {
     const common = {
-      breakerDefinitionId: "onr_v1_018_dogcatcher" as const,
+      breakerDefinitionId: 230 as const,
       breakerInstanceId: "dogcatcher",
       breakerStrength: 2,
       iceSubtypes: ["sentry", "pit_bull"],
@@ -234,13 +234,13 @@ describe("visibleBreakerEncounterQuote", () => {
     expect(
       visibleBreakerEncounterQuote({
         ...common,
-        iceDefinitionId: "onr_v1_240_fang",
+        iceDefinitionId: 452,
       }),
     ).toMatchObject({ coverageStatus: "full" });
     expect(
       visibleBreakerEncounterQuote({
         ...common,
-        iceDefinitionId: "onr_v1_223_banpei",
+        iceDefinitionId: 435,
         iceSubtypes: ["sentry"],
       }),
     ).toMatchObject({ coverageStatus: "none" });
@@ -249,10 +249,10 @@ describe("visibleBreakerEncounterQuote", () => {
   it("quotes Reflector from stable subroutine break tags", () => {
     expect(
       visibleBreakerEncounterQuote({
-        breakerDefinitionId: "onr_v1_055_reflector",
+        breakerDefinitionId: 267,
         breakerInstanceId: "reflector",
         breakerStrength: 4,
-        iceDefinitionId: "onr_v1_223_banpei",
+        iceDefinitionId: 435,
         iceSubtypes: ["sentry"],
         subroutines: [
           { id: "stun", type: "do_damage", breakTags: ["stun"] },
@@ -270,10 +270,10 @@ describe("visibleBreakerEncounterQuote", () => {
   it("quotes Pile Driver's stealth loss once per four-subroutine break use", () => {
     expect(
       visibleBreakerEncounterQuote({
-        breakerDefinitionId: "onr_v1_047_pile-driver",
+        breakerDefinitionId: 259,
         breakerInstanceId: "pile-driver",
         breakerStrength: 7,
-        iceDefinitionId: "onr_v1_232_crystal-wall",
+        iceDefinitionId: 444,
         iceSubtypes: ["wall"],
       }),
     ).toMatchObject({
@@ -300,7 +300,7 @@ describe("visibleBreakerEncounterQuote", () => {
         breakerDefinitionId: "unknown-breaker" as never,
         breakerInstanceId: "unknown",
         breakerStrength: 5,
-        iceDefinitionId: "onr_v1_223_banpei",
+        iceDefinitionId: 435,
         iceSubtypes: ["sentry"],
       }),
     ).toBeUndefined();
@@ -309,10 +309,10 @@ describe("visibleBreakerEncounterQuote", () => {
   it("quotes Japanese Water Torture's future-click loss with its variable pump", () => {
     expect(
       visibleBreakerEncounterQuote({
-        breakerDefinitionId: "onr_v1_037_japanese-water-torture",
+        breakerDefinitionId: 249,
         breakerInstanceId: "torture",
         breakerStrength: 2,
-        iceDefinitionId: "onr_v1_232_crystal-wall",
+        iceDefinitionId: 444,
         iceSubtypes: ["wall"],
       }),
     ).toMatchObject({
@@ -330,10 +330,10 @@ describe("visibleBreakerEncounterQuote", () => {
   it("derives Blink's probability and net-damage range from its structured die effect", () => {
     expect(
       visibleBreakerEncounterQuote({
-        breakerDefinitionId: "onr_v1_007_blink",
+        breakerDefinitionId: 219,
         breakerInstanceId: "blink",
         breakerStrength: 5,
-        iceDefinitionId: "onr_v1_223_banpei",
+        iceDefinitionId: 435,
         iceSubtypes: ["sentry"],
       }),
     ).toMatchObject({
@@ -354,12 +354,12 @@ describe("visibleBreakerEncounterQuote", () => {
 });
 
 describe("visibleBreakerCoverageQuote", () => {
-  it.each(["onr_v1_279_wall-of-static", "onr_v1_261_quandary"])(
+  it.each([491, 473])(
     "proves no applicable random Sentry break on %s without a strength",
     (iceDefinitionId) => {
       expect(
         visibleBreakerCoverageQuote({
-          breakerDefinitionId: "onr_v1_002_ai-boon",
+          breakerDefinitionId: 214,
           iceDefinitionId,
         }),
       ).toEqual({ breakOptions: [], coverageStatus: "none" });
@@ -368,8 +368,8 @@ describe("visibleBreakerCoverageQuote", () => {
   it("keeps matching Sentry coverage separate from unresolved strength", () => {
     expect(
       visibleBreakerCoverageQuote({
-        breakerDefinitionId: "onr_v1_002_ai-boon",
-        iceDefinitionId: "onr_v1_223_banpei",
+        breakerDefinitionId: 214,
+        iceDefinitionId: 435,
         subroutines: [{ id: "etr", type: "end_the_run" }],
       }),
     ).toMatchObject({
@@ -378,32 +378,32 @@ describe("visibleBreakerCoverageQuote", () => {
     });
     expect(
       visibleBreakerEncounterQuote({
-        breakerDefinitionId: "onr_v1_002_ai-boon",
+        breakerDefinitionId: 214,
         breakerInstanceId: "boon",
         breakerStrength: 0,
-        iceDefinitionId: "onr_v1_223_banpei",
+        iceDefinitionId: 435,
       }),
     ).toBeUndefined();
   });
   it("requires a subtype choice rather than declaring no coverage", () => {
     expect(
       visibleBreakerCoverageQuote({
-        breakerDefinitionId: "onr_proteus_088_fubar",
-        iceDefinitionId: "onr_v1_223_banpei",
+        breakerDefinitionId: 146,
+        iceDefinitionId: 435,
       })?.coverageStatus,
     ).toBe("requires_selection");
   });
   it("does not invent an unknown ICE or breaker definition", () => {
     expect(
       visibleBreakerCoverageQuote({
-        breakerDefinitionId: "onr_v1_002_ai-boon",
+        breakerDefinitionId: 214,
         iceDefinitionId: "missing_ice",
       }),
     ).toBeUndefined();
     expect(
       visibleBreakerCoverageQuote({
         breakerDefinitionId: "missing_breaker",
-        iceDefinitionId: "onr_v1_223_banpei",
+        iceDefinitionId: 435,
       }),
     ).toBeUndefined();
   });

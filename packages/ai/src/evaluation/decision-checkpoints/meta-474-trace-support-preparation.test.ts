@@ -46,7 +46,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 
 it("consumes actual trace-credit effects and installs global support under the existing Punish executor", () => {
   const input = fixture();
-  const definitionId = "onr_v1_325_hacker-tracker-central";
+  const definitionId = 537;
   expect(AI_HINTS_BY_CARD.get(definitionId)!.effects).toContainEqual(
     expect.objectContaining({
       kind: "trace_credit",
@@ -61,7 +61,7 @@ it("consumes actual trace-credit effects and installs global support under the e
   )!;
   expect(action.type).toBe("install_card");
   expect(action.payload).toMatchObject({
-    cardId: "corp_onr_v1_325_hacker-tracker-central_1",
+    cardId: "corp_537_1",
     serverId: "new_remote",
   });
   expect(decision.fallbackUsed).toBe(false);
@@ -121,7 +121,7 @@ it("keeps canonical fort support bound to the fort containing the trace source",
       observerSide: "corp",
       stateVersion: input.playerView.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
-        paris: "onr_v1_365_paris-city-grid",
+        paris: 577,
       },
     })[0]!;
   const candidate = forServer("hq");
@@ -135,5 +135,5 @@ it("keeps canonical fort support bound to the fort containing the trace source",
   expect(
     corpTraceSupportTargetHasVisibleTraceSource(input, forServer("new_remote")),
   ).toBe(false);
-  expect(corpDefinitionIsTraceSupport("onr_v1_237_data-wall")).toBe(false);
+  expect(corpDefinitionIsTraceSupport(449)).toBe(false);
 });

@@ -25,14 +25,14 @@ const corpRdTopArrangeSourceId = "too_many_doors" as CardDefinitionId;
 const sourceCardId = "source" as CardInstanceId;
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"] = "program",
   title = id,
 ): CardDefinition {
   return { id: id as CardDefinitionId, type, title } as CardDefinition;
 }
 
-function instance(definitionId: string): CardInstance {
+function instance(definitionId: number): CardInstance {
   return {
     id: definitionId as CardInstanceId,
     definitionId: definitionId as CardDefinitionId,

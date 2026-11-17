@@ -21,8 +21,8 @@ function native(index: number, label: string) {
 }
 
 it.each([
-  [188, "onr_v1_146_zetatech-mem-chip"],
-  [356, "onr_v1_145_wutech-mem-chip"],
+  [188, 358],
+  [356, 357],
 ])("does not revive the final rejected rig demand through delayed preparation at D%s", (index, definitionId) => {
   const { fixture, input } = native(Number(index), "unused-shell-memory");
   const frames: Array<{ projected: boolean; currentNeed: string | undefined }> = [];

@@ -14,7 +14,7 @@ type BoundRunStartOption = Readonly<{
   optionId: string;
   sourceCardInstanceId: string;
   sourceKind: "random_strength" | "self_trash";
-  definitionId: string;
+  definitionId: number;
 }>;
 
 /**
@@ -114,7 +114,7 @@ function boundRunStartTrashOption(
     (card) =>
       card.instanceId === sourceCardInstanceId &&
       card.known !== false &&
-      typeof card.definitionId === "string",
+      typeof card.definitionId === "number",
   );
   if (!source?.definitionId) return undefined;
   const completeProfile =

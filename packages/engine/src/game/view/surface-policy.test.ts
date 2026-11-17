@@ -117,7 +117,7 @@ describe("surface policy", () => {
     expect(
       sanitizePayloadForSurface(
         {
-          sourceDefinitionId: "onr_proteus_069_pavit-bharat",
+          sourceDefinitionId: 127,
           targetServerId: "remote_1",
           removedCardCount: 2,
           replacementCardCount: 2,
@@ -125,7 +125,7 @@ describe("surface policy", () => {
         { surface: "public_event", family: "run_window_sequence" },
       ),
     ).toEqual({
-      sourceDefinitionId: "onr_proteus_069_pavit-bharat",
+      sourceDefinitionId: 127,
       targetServerId: "remote_1",
       removedCardCount: 2,
       replacementCardCount: 2,

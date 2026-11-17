@@ -20,11 +20,11 @@ import {
 } from "./root-rez-credit-outcome";
 
 const BASKERVILLE_ID = "baskerville_1" as CardInstanceId;
-const BASKERVILLE_DEFINITION_ID = "onr_classic_005_baskerville";
+const BASKERVILLE_DEFINITION_ID = 9;
 const GLACIER_ID = "glacier_1" as CardInstanceId;
-const GLACIER_DEFINITION_ID = "onr_classic_011_glacier";
+const GLACIER_DEFINITION_ID = 15;
 const ACME_ID = "acme_1" as CardInstanceId;
-const ACME_DEFINITION_ID = "onr_v1_308_acme-savings-and-loan";
+const ACME_DEFINITION_ID = 520;
 
 function makeState(noisyUsed = false): GameState {
   return {

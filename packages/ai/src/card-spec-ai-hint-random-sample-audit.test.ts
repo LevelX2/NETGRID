@@ -14,7 +14,7 @@ function hint(cardId: string) {
 describe("random production-card sample semantic corrections", () => {
   it("keeps Batch 3 target profiles attached only to real, side-safe choices", () => {
     expect(
-      hint("onr_proteus_053_underworld-mole").targetProfiles,
+      hint(111).targetProfiles,
     ).toContainEqual({
       schemaVersion: "target-profile-v1",
       kind: "use_target",
@@ -28,12 +28,12 @@ describe("random production-card sample semantic corrections", () => {
       avoid: ["unknown_low_information_target"],
       hiddenInfoPolicy: "legal_targets_only",
     });
-    expect(hint("onr_v1_065_smarteye").targetProfiles).toBeUndefined();
+    expect(hint(277).targetProfiles).toBeUndefined();
     expect(
-      hint("onr_v1_092_ice-and-datas-guide-to-the-net").targetProfiles,
+      hint(304).targetProfiles,
     ).toBeUndefined();
 
-    const specialReport = hint("onr_proteus_111_ice-and-data-special-report");
+    const specialReport = hint(169);
     expect(specialReport.targetProfiles).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -52,7 +52,7 @@ describe("random production-card sample semantic corrections", () => {
     );
 
     expect(
-      hint("onr_v1_093_if-you-want-it-done-right").targetProfiles,
+      hint(305).targetProfiles,
     ).toContainEqual({
       schemaVersion: "target-profile-v1",
       kind: "use_target",
@@ -68,42 +68,42 @@ describe("random production-card sample semantic corrections", () => {
   });
 
   it("calibrates Batch 3 roles, anchors, remote roles, and risks", () => {
-    expect(hint("onr_proteus_053_underworld-mole").planRoles).not.toContain(
+    expect(hint(111).planRoles).not.toContain(
       "build_scoring_remote",
     );
     expect(
-      hint("onr_proteus_053_underworld-mole").strategyAnchors ?? [],
+      hint(111).strategyAnchors ?? [],
     ).not.toContain("corp.tag_trace_punish");
-    expect(hint("onr_v1_065_smarteye").strategyAnchors ?? []).not.toContain(
+    expect(hint(277).strategyAnchors ?? []).not.toContain(
       "runner.run_event_tempo",
     );
-    expect(hint("onr_v1_368_roving-submarine").remoteRole).toEqual({
+    expect(hint(580).remoteRole).toEqual({
       kind: "scoring_protection",
       threatLevel: "medium",
       serverScope: "remote",
     });
     expect(
-      hint("onr_proteus_072_research-bunker").tacticSignals ?? [],
+      hint(130).tacticSignals ?? [],
     ).not.toContain("corp.remote_protection");
-    expect(hint("onr_proteus_007_project-venice").strategyAnchors).toContain(
+    expect(hint(65).strategyAnchors).toContain(
       "corp.overadvance_value",
     );
     expect(
-      hint("onr_proteus_017_credit-blocks").strategyAnchors ?? [],
+      hint(75).strategyAnchors ?? [],
     ).not.toContain("corp.ice_tax_glacier");
-    expect(hint("onr_proteus_116_pirate-broadcast").riskTags).toContain(
+    expect(hint(174).riskTags).toContain(
       "future_action_debt_on_failed_run_sequence",
     );
     expect(
-      hint("onr_proteus_116_pirate-broadcast").strategyAnchors ?? [],
+      hint(174).strategyAnchors ?? [],
     ).not.toContain("runner.run_event_tempo");
-    expect(hint("onr_v1_037_japanese-water-torture").riskTags).toContain(
+    expect(hint(249).riskTags).toContain(
       "variable_future_action_debt",
     );
   });
 
   it("classifies Aujourd'Oui as controller-known program search, not recovery", () => {
-    const aujourdOui = hint("onr_v1_151_aujourdoui");
+    const aujourdOui = hint(363);
 
     expect(aujourdOui.planRoles).toEqual(
       expect.arrayContaining(["build_rig", "draw_for_answers"]),
@@ -121,7 +121,7 @@ describe("random production-card sample semantic corrections", () => {
   });
 
   it("classifies Time to Collect as resource protection with a positive choice preference", () => {
-    const timeToCollect = hint("onr_proteus_153_time-to-collect");
+    const timeToCollect = hint(211);
 
     expect(timeToCollect.planRoles).toContain("protect_rig");
     expect(timeToCollect.planRoles).not.toContain("build_rig");
@@ -138,7 +138,7 @@ describe("random production-card sample semantic corrections", () => {
   });
 
   it("keeps Namatoki as capacity support without protection or anchor semantics", () => {
-    const namatoki = hint("onr_v1_361_namatoki-plaza");
+    const namatoki = hint(573);
 
     expect(namatoki.tacticSignals ?? []).not.toContain(
       "corp.remote_protection",
@@ -158,7 +158,7 @@ describe("random production-card sample semantic corrections", () => {
   });
 
   it("projects Paris as fort-bound trace credit support without direct run tax", () => {
-    const paris = hint("onr_v1_365_paris-city-grid");
+    const paris = hint(577);
 
     expect(paris.planRoles).not.toContain("remote_upgrade_tax");
     expect(paris.remoteRole).toBeUndefined();
@@ -183,7 +183,7 @@ describe("random production-card sample semantic corrections", () => {
       expect.objectContaining({ kind: "run_tax" }),
     );
 
-    const actualServerLock = hint("onr_v1_368_roving-submarine");
+    const actualServerLock = hint(580);
     expect(actualServerLock.functionSignals).toEqual(
       expect.arrayContaining([
         "condition.corp_installed_or_advanced_this_fort_last_turn",
@@ -194,7 +194,7 @@ describe("random production-card sample semantic corrections", () => {
   });
 
   it("classifies Get Ready to Rumble as HQ pressure rather than rig or run setup", () => {
-    const rumble = hint("onr_proteus_141_get-ready-to-rumble");
+    const rumble = hint(199);
 
     expect(rumble.planRoles).toEqual(["pressure_hq"]);
     expect(rumble.functionSignals).toEqual(
@@ -206,7 +206,7 @@ describe("random production-card sample semantic corrections", () => {
   });
 
   it("allows Crash Everett to evaluate controller-known drawn cards", () => {
-    const crash = hint("onr_v1_157_crash-everett-inventive-fixer");
+    const crash = hint(369);
 
     expect(crash.targetProfiles).toContainEqual({
       schemaVersion: "target-profile-v1",
@@ -223,28 +223,28 @@ describe("random production-card sample semantic corrections", () => {
   });
 
   it("keeps information and ordinary ICE cards below strategy-anchor level", () => {
-    const clerk = hint("onr_classic_046_executive-file-clerk");
+    const clerk = hint(50);
     expect(clerk.strategyAnchors ?? []).not.toContain("runner.hq_pressure");
     expect(clerk.targetProfiles).toBeUndefined();
 
     for (const cardId of [
-      "onr_proteus_035_roadblock",
-      "onr_proteus_037_scaffolding",
-      "onr_proteus_042_tumblers",
-      "onr_v1_352_chester-mix",
+      93,
+      95,
+      100,
+      564,
     ]) {
       expect(hint(cardId).strategyAnchors ?? [], cardId).not.toContain(
         "corp.ice_tax_glacier",
       );
     }
-    expect(hint("onr_proteus_035_roadblock").riskTags).toEqual(
+    expect(hint(93).riskTags).toEqual(
       expect.arrayContaining([
         "deterministic_random",
         "self_derez",
         "automatic_pass_failure",
       ]),
     );
-    expect(hint("onr_v1_352_chester-mix").strategySupportPairs).toContainEqual(
+    expect(hint(564).strategySupportPairs).toContainEqual(
       expect.objectContaining({
         strategyId: "corp.ice_tax_glacier",
         roleDetail: "ice_install_discount_fort_builder",
@@ -253,7 +253,7 @@ describe("random production-card sample semantic corrections", () => {
   });
 
   it("keeps run-history and HQ denial semantics aligned with their effects", () => {
-    const manhunt = hint("onr_proteus_050_manhunt");
+    const manhunt = hint(108);
     expect(manhunt.planRoles ?? []).not.toContain("build_scoring_remote");
     expect(manhunt.strategySupportPairs).toContainEqual(
       expect.objectContaining({
@@ -262,7 +262,7 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
 
-    const frameUp = hint("onr_proteus_109_frame-up");
+    const frameUp = hint(167);
     expect(frameUp.planRoles).toEqual(
       expect.arrayContaining(["pressure_hq", "pressure_rnd"]),
     );
@@ -270,7 +270,7 @@ describe("random production-card sample semantic corrections", () => {
       "runner.run_event_tempo",
     );
 
-    const creditSubversion = hint("onr_proteus_136_credit-subversion");
+    const creditSubversion = hint(194);
     expect(creditSubversion.planRoles).toContain("pressure_hq");
     expect(creditSubversion.planRoles).not.toContain("safe_probe_run");
     expect(creditSubversion.tacticSignals ?? []).not.toContain("economy.card");
@@ -280,10 +280,10 @@ describe("random production-card sample semantic corrections", () => {
   });
 
   it("uses side-safe target semantics only for real ICE choices", () => {
-    expect(hint("onr_v1_068_startup-immolator").targetProfiles).toBeUndefined();
+    expect(hint(280).targetProfiles).toBeUndefined();
 
     expect(
-      hint("onr_v1_109_security-code-worm-chip").targetProfiles,
+      hint(321).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         purpose: "unrezzed_ice_trash",
@@ -292,7 +292,7 @@ describe("random production-card sample semantic corrections", () => {
     );
 
     expect(
-      hint("onr_proteus_060_herman-revista").targetProfiles,
+      hint(118).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         purpose: "rearrange_fort_ice",
@@ -305,7 +305,7 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
 
-    const omni = hint("onr_v1_364_omni-kismet-ph-d");
+    const omni = hint(576);
     expect(omni.remoteRole).toEqual({
       kind: "ice_modifier",
       threatLevel: "medium",
@@ -327,58 +327,58 @@ describe("random production-card sample semantic corrections", () => {
 
   it("keeps Batch 4 roles and anchors aligned with the actual card effects", () => {
     expect(
-      hint("onr_classic_006_bolter-swarm").strategyAnchors ?? [],
+      hint(10).strategyAnchors ?? [],
     ).not.toContain("corp.economy_rez_reserve");
-    expect(hint("onr_classic_015_vortex").strategyAnchors).toEqual([
+    expect(hint(19).strategyAnchors).toEqual([
       "corp.ice_tax_glacier",
     ]);
     expect(
-      hint("onr_v1_050_r-and-d-protocol-files").strategyAnchors ?? [],
+      hint(262).strategyAnchors ?? [],
     ).not.toContain("runner.rnd_pressure");
-    expect(hint("onr_proteus_048_data-sifters").planRoles ?? []).not.toContain(
+    expect(hint(106).planRoles ?? []).not.toContain(
       "build_scoring_remote",
     );
     expect(
-      hint("onr_proteus_048_data-sifters").strategyAnchors ?? [],
+      hint(106).strategyAnchors ?? [],
     ).not.toContain("corp.tag_trace_punish");
     expect(
-      hint("onr_proteus_068_pattel-antibody").planRoles ?? [],
+      hint(126).planRoles ?? [],
     ).not.toContain("build_scoring_remote");
-    expect(hint("onr_v1_138_pk-6089a").planRoles).toEqual(
+    expect(hint(350).planRoles).toEqual(
       expect.arrayContaining(["build_rig", "trace_bid_support"]),
     );
-    expect(hint("onr_v1_138_pk-6089a").tacticSignals ?? []).not.toContain(
+    expect(hint(350).tacticSignals ?? []).not.toContain(
       "economy.card",
     );
-    expect(hint("onr_proteus_110_hijack").planRoles).toContain("build_rig");
-    expect(hint("onr_proteus_110_hijack").planRoles).not.toContain(
+    expect(hint(168).planRoles).toContain("build_rig");
+    expect(hint(168).planRoles).not.toContain(
       "recover_economy",
     );
   });
 
   it("binds Batch 4 choices to controller-known mechanical owners", () => {
-    expect(hint("onr_v1_046_pattels-virus").targetProfiles).toContainEqual(
+    expect(hint(258).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "place_strength_reduction_counter_on_fully_broken_ice",
         targetType: "installed_ice",
         hiddenInfoPolicy: "visible_or_known_only",
       }),
     );
-    expect(hint("onr_v1_089_gideons-pawnshop").targetProfiles).toContainEqual(
+    expect(hint(301).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "generic_heap_recovery",
         targetType: "card",
         hiddenInfoPolicy: "public_or_controller_known_only",
       }),
     );
-    expect(hint("onr_v1_103_organ-donor").targetProfiles).toContainEqual(
+    expect(hint(315).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "convert_expendable_grip_cards_to_credits",
         targetType: "card",
         hiddenInfoPolicy: "public_or_controller_known_only",
       }),
     );
-    expect(hint("onr_v1_316_cowboy-sysop").targetProfiles).toContainEqual(
+    expect(hint(528).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "protect_or_reuse_installed_corp_card",
         targetType: "card",
@@ -386,13 +386,13 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
     expect(
-      hint("onr_proteus_106_disgruntled-ice-technician").targetProfiles ?? [],
+      hint(164).targetProfiles ?? [],
     ).not.toEqual(
       expect.arrayContaining([
         expect.objectContaining({ purpose: "derez_fully_broken_ice" }),
       ]),
     );
-    expect(hint("onr_proteus_110_hijack").targetProfiles).toContainEqual(
+    expect(hint(168).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "install_best_legal_target",
         hiddenInfoPolicy: "public_or_controller_known_only",
@@ -402,18 +402,18 @@ describe("random production-card sample semantic corrections", () => {
 
   it("models Batch 4 run payoff and closeout semantics without unconditional priority", () => {
     expect(
-      hint("onr_proteus_113_live-news-feed").targetProfiles,
+      hint(171).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         purpose: "maximize_live_news_feed_aftermath",
         targetType: "server",
       }),
     );
-    expect(hint("onr_proteus_113_live-news-feed").riskTags).toContain(
+    expect(hint(171).riskTags).toContain(
       "self_tag",
     );
     expect(
-      hint("onr_proteus_125_subliminal-corruption").targetProfiles,
+      hint(183).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         purpose: "maximize_advertisement_trash_during_run",
@@ -421,8 +421,8 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
     for (const cardId of [
-      "onr_v1_083_desperate-competitor",
-      "onr_v1_090_hot-tip-for-wns",
+      295,
+      302,
     ]) {
       expect(hint(cardId).planRoles).toContain("score_now");
       expect(hint(cardId).lineSupport).toContain("score_closeout");
@@ -431,47 +431,47 @@ describe("random production-card sample semantic corrections", () => {
   });
 
   it("keeps Batch 5 support cards from becoming strategy anchors", () => {
-    expect(hint("onr_classic_007_brain-drain").strategyAnchors).toBeUndefined();
+    expect(hint(11).strategyAnchors).toBeUndefined();
     expect(
-      hint("onr_proteus_075_stereogram-antibody").strategyAnchors,
+      hint(133).strategyAnchors,
     ).toBeUndefined();
     expect(
-      hint("onr_proteus_075_stereogram-antibody").planRoles ?? [],
+      hint(133).planRoles ?? [],
     ).not.toContain("build_scoring_remote");
     expect(
-      hint("onr_proteus_043_twisty-passages").strategyAnchors,
+      hint(101).strategyAnchors,
     ).toBeUndefined();
-    expect(hint("onr_proteus_043_twisty-passages").lineSupport).toContain(
+    expect(hint(101).lineSupport).toContain(
       "corp.ice_tax_glacier",
     );
-    expect(hint("onr_proteus_043_twisty-passages").riskTags).toContain(
+    expect(hint(101).riskTags).toContain(
       "self_bounce_or_maintenance_cost",
     );
-    expect(hint("onr_v1_363_olivia-salazar").strategyAnchors).toBeUndefined();
+    expect(hint(575).strategyAnchors).toBeUndefined();
 
     expect(
-      hint("onr_proteus_003_corporate-headhunters").strategyAnchors,
+      hint(61).strategyAnchors,
     ).toEqual(
       expect.arrayContaining(["corp.damage_kill", "corp.tag_trace_punish"]),
     );
   });
 
   it("binds Batch 5 target guidance only to real controller-known choices", () => {
-    expect(hint("onr_v1_100_misc-for-sale").targetProfiles).toContainEqual(
+    expect(hint(312).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "convert_expendable_installed_cards_to_credits",
         targetType: "card",
         hiddenInfoPolicy: "public_or_controller_known_only",
       }),
     );
-    expect(hint("onr_v1_294_new-blood").targetProfiles).toContainEqual(
+    expect(hint(506).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "conceal_and_reorder_installed_ice",
         targetType: "ice_position",
         hiddenInfoPolicy: "public_or_controller_known_only",
       }),
     );
-    expect(hint("onr_v1_077_anonymous-tip").targetProfiles).toContainEqual(
+    expect(hint(289).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "black_ice_derez",
         targetType: "installed_ice",
@@ -479,7 +479,7 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
     expect(
-      hint("onr_v1_059_self-modifying-code").targetProfiles,
+      hint(271).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         purpose: "install_program_that_answers_current_ice_or_setup_gap",
@@ -487,10 +487,10 @@ describe("random production-card sample semantic corrections", () => {
         hiddenInfoPolicy: "public_or_controller_known_only",
       }),
     );
-    expect(hint("onr_v1_059_self-modifying-code").planRoles).not.toContain(
+    expect(hint(271).planRoles).not.toContain(
       "recover_rig",
     );
-    expect(hint("onr_v1_363_olivia-salazar").targetProfiles).toContainEqual(
+    expect(hint(575).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "temporarily_rez_ice_on_fort",
         targetType: "installed_ice",
@@ -498,22 +498,22 @@ describe("random production-card sample semantic corrections", () => {
         serverScope: "source_fort",
       }),
     );
-    expect(hint("onr_classic_033_superglue").targetProfiles).toBeUndefined();
+    expect(hint(37).targetProfiles).toBeUndefined();
   });
 
   it("keeps Batch 5 restricted economy and drawbacks explicit", () => {
-    const techtronica = hint("onr_v1_143_techtronica-utility-suit");
+    const techtronica = hint(355);
     expect(techtronica.planRoles).toContain("trace_bid_support");
     expect(techtronica.tacticSignals ?? []).not.toContain("economy.card");
     expect(techtronica.riskTags).toContain("deck_replacement_conflict");
 
-    const retreat = hint("onr_v1_195_corporate-retreat");
+    const retreat = hint(407);
     expect(retreat.strategicExchangeKinds).toContain(
       "ongoing_economy_for_board_development",
     );
     expect(retreat.riskTags).toContain("board_development_lock");
 
-    const arasaka = hint("onr_v1_078_arasaka-owns-you");
+    const arasaka = hint(290);
     expect(arasaka.tacticSignals ?? []).not.toContain("economy.card");
     expect(arasaka.riskTags).toEqual(
       expect.arrayContaining([
@@ -525,19 +525,19 @@ describe("random production-card sample semantic corrections", () => {
       expect.objectContaining({ class: "action_debt", amount: 4 }),
     );
 
-    expect(hint("onr_v1_330_krumz").planRoles).toContain(
+    expect(hint(542).planRoles).toContain(
       "remote_asset_modifier",
     );
-    expect(hint("onr_v1_330_krumz").planRoles).not.toContain(
+    expect(hint(542).planRoles).not.toContain(
       "remote_asset_pressure",
     );
-    expect(hint("onr_v1_049_pox").tacticSignals ?? []).not.toContain(
+    expect(hint(261).tacticSignals ?? []).not.toContain(
       "corp.remote_protection",
     );
   });
 
   it("projects Batch 6 access replacements by their actual successful-run effect", () => {
-    const weather = hint("onr_v1_118_weather-to-finance-pipe");
+    const weather = hint(330);
     expect(weather.roles).toEqual(
       expect.arrayContaining(["hq_pressure", "corp_credit_denial"]),
     );
@@ -560,40 +560,40 @@ describe("random production-card sample semantic corrections", () => {
     });
 
     expect(
-      hint("onr_classic_038_gypsytm-schedule-analyzer").effects,
+      hint(42).effects,
     ).toContainEqual(
       expect.objectContaining({
         kind: "topdeck_info",
         target: "reveal_until_agenda",
       }),
     );
-    expect(hint("onr_proteus_102_blackmail").effects).toContainEqual(
+    expect(hint(160).effects).toContainEqual(
       expect.objectContaining({
         kind: "scored_agenda_action",
         target: "runner_gain_agenda_point",
       }),
     );
-    expect(hint("onr_proteus_105_demolition-run").effects).toContainEqual(
+    expect(hint(163).effects).toContainEqual(
       expect.objectContaining({
         kind: "ice_trash",
         target: "trash_rezzed_ice_on_fort",
       }),
     );
-    expect(hint("onr_v1_050_r-and-d-protocol-files").effects).toContainEqual(
+    expect(hint(262).effects).toContainEqual(
       expect.objectContaining({
         kind: "topdeck_info",
         target: "private_look_top_rd",
         amount: 5,
       }),
     );
-    expect(hint("onr_v1_142_record-reconstructor").effects).toContainEqual(
+    expect(hint(354).effects).toContainEqual(
       expect.objectContaining({
         kind: "card_recovery",
         target: "archives_faceup_to_rd",
         amount: 2,
       }),
     );
-    expect(hint("onr_v1_105_priority-wreck").effects).toContainEqual(
+    expect(hint(317).effects).toContainEqual(
       expect.objectContaining({
         kind: "access_replacement",
         target: "runner_spend_corp_lose_credits",
@@ -602,7 +602,7 @@ describe("random production-card sample semantic corrections", () => {
   });
 
   it("binds Batch 6 private choices without treating controller-known cards as unknown", () => {
-    expect(hint("onr_v1_058_seeya").targetProfiles).toContainEqual(
+    expect(hint(270).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "expose_installed_card",
         targetType: "card",
@@ -610,7 +610,7 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
     expect(
-      hint("onr_v1_212_priority-requisition").targetProfiles,
+      hint(424).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         purpose: "rez_best_defensive_ice",
@@ -619,7 +619,7 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
     expect(
-      hint("onr_classic_025_strategic-planning-group").targetProfiles,
+      hint(29).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         purpose: "bottom_lowest_value_drawn_card",
@@ -627,14 +627,14 @@ describe("random production-card sample semantic corrections", () => {
         hiddenInfoPolicy: "public_or_controller_known_only",
       }),
     );
-    expect(hint("onr_proteus_020_digiconda").targetProfiles).toContainEqual(
+    expect(hint(78).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "choose_effective_rez_strength_x",
         targetType: "mode_choice",
         hiddenInfoPolicy: "legal_options_only",
       }),
     );
-    expect(hint("onr_proteus_100_wrecking-ball").targetProfiles).toContainEqual(
+    expect(hint(158).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "spend_least_needed_stealth_credit_source",
         targetType: "card",
@@ -642,7 +642,7 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
     expect(
-      hint("onr_v1_314_corporate-negotiating-center").targetProfiles,
+      hint(526).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         purpose: "show_hq_agendas_for_needed_credits",
@@ -651,40 +651,40 @@ describe("random production-card sample semantic corrections", () => {
         hiddenInfoPolicy: "public_or_controller_known_only",
       }),
     );
-    expect(hint("onr_proteus_104_decoy-signal").targetProfiles).toEqual([
+    expect(hint(162).targetProfiles).toEqual([
       expect.objectContaining({ targetType: "server" }),
     ]);
   });
 
   it("keeps Batch 6 strategy roles and restricted resources calibrated", () => {
-    expect(hint("onr_v1_334_pacifica-regional-ai").strategyAnchors).toContain(
+    expect(hint(546).strategyAnchors).toContain(
       "corp.fast_advance",
     );
     expect(
-      hint("onr_classic_025_strategic-planning-group").strategyAnchors,
+      hint(29).strategyAnchors,
     ).toContain("corp.draw_engine");
-    expect(hint("onr_v1_214_project-babylon").strategyAnchors).toContain(
+    expect(hint(426).strategyAnchors).toContain(
       "corp.overadvance_value",
     );
-    expect(hint("onr_proteus_020_digiconda").strategyAnchors).toBeUndefined();
+    expect(hint(78).strategyAnchors).toBeUndefined();
     expect(
-      hint("onr_proteus_062_lesley-major").strategyAnchors,
+      hint(120).strategyAnchors,
     ).toBeUndefined();
-    expect(hint("onr_classic_050_sandbox-dig").strategyAnchors).toBeUndefined();
+    expect(hint(54).strategyAnchors).toBeUndefined();
     expect(
-      hint("onr_proteus_104_decoy-signal").strategyAnchors,
+      hint(162).strategyAnchors,
     ).toBeUndefined();
-    expect(hint("onr_v1_164_hells-run").tacticSignals ?? []).not.toContain(
+    expect(hint(376).tacticSignals ?? []).not.toContain(
       "economy.card",
     );
     expect(
-      hint("onr_classic_054_phone-freak").tacticSignals ?? [],
+      hint(58).tacticSignals ?? [],
     ).not.toContain("economy.card");
     expect(
-      hint("onr_proteus_077_weapons-depot").tacticSignals ?? [],
+      hint(135).tacticSignals ?? [],
     ).not.toContain("corp.remote_protection");
     expect(
-      hint("onr_v1_287_datapool-by-zetatech").actionStrategySupportPairs,
+      hint(499).actionStrategySupportPairs,
     ).toContainEqual(
       expect.objectContaining({
         role: "enabler",
@@ -696,7 +696,7 @@ describe("random production-card sample semantic corrections", () => {
 
   it("binds Batch 13 target profiles to real controller-known choices", () => {
     expect(
-      hint("onr_v1_112_stumble-through-wilderspace").targetProfiles,
+      hint(324).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         purpose: "choose_trace_heavy_run_server",
@@ -706,7 +706,7 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
     expect(
-      hint("onr_proteus_145_mercenary-subcontract").targetProfiles,
+      hint(203).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         purpose: "currently_accessed_cards_free_trash",
@@ -714,7 +714,7 @@ describe("random production-card sample semantic corrections", () => {
         hiddenInfoPolicy: "current_access_only",
       }),
     );
-    expect(hint("onr_v1_358_dr-dreff").targetProfiles).toContainEqual(
+    expect(hint(570).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "choose_hq_ice_for_temporary_encounter",
         targetType: "card",
@@ -722,7 +722,7 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
     expect(
-      hint("onr_v1_369_singapore-city-grid").targetProfiles,
+      hint(581).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         purpose: "swap_unrezzed_fort_ice_with_hq_ice",
@@ -730,7 +730,7 @@ describe("random production-card sample semantic corrections", () => {
         hiddenInfoPolicy: "public_or_controller_known_only",
       }),
     );
-    expect(hint("onr_v1_353_chimera").targetProfiles).toContainEqual(
+    expect(hint(565).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "trash_high_value_daemon",
         targetType: "card",
@@ -738,7 +738,7 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
     expect(
-      hint("onr_proteus_064_marcel-desoleil").targetProfiles,
+      hint(122).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         purpose: "repeat_subroutine_on_fort_ice",
@@ -746,7 +746,7 @@ describe("random production-card sample semantic corrections", () => {
         hiddenInfoPolicy: "public_or_controller_known_only",
       }),
     );
-    expect(hint("onr_v1_155_code-viral-cache").targetProfiles).toContainEqual(
+    expect(hint(367).targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "preserve_two_high_value_virus_counters",
         targetType: "counter",
@@ -754,12 +754,12 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
     expect(
-      hint("onr_proteus_146_precision-bribery").targetProfiles,
+      hint(204).targetProfiles,
     ).toBeUndefined();
   });
 
   it("keeps Batch 13 fort, hand, tag, draw, and access semantics proportional", () => {
-    const london = hint("onr_classic_020_london-city-grid");
+    const london = hint(24);
     expect(london.functionSignals).toContain("tax.noisy_breaker_ability");
     expect(london.conditions ?? []).not.toContainEqual({
       kind: "requires_remote_server",
@@ -772,7 +772,7 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
 
-    const reprisal = hint("onr_v1_115_terrorist-reprisal");
+    const reprisal = hint(327);
     expect(reprisal.conditions).toContainEqual({
       kind: "requires_corp_scored_black_ops_agenda_last_turn",
     });
@@ -785,25 +785,25 @@ describe("random production-card sample semantic corrections", () => {
     );
 
     expect(
-      hint("onr_classic_019_indiscriminate-response-team").tacticSignals ?? [],
+      hint(23).tacticSignals ?? [],
     ).not.toContain("draw.card");
     expect(
-      hint("onr_proteus_019_death-yo-yo").strategyAnchors ?? [],
+      hint(77).strategyAnchors ?? [],
     ).not.toContain("corp.ice_tax_glacier");
     expect(
-      hint("onr_classic_003_unlisted-research-lab").strategyAnchors,
+      hint(7).strategyAnchors,
     ).toContain("corp.draw_engine");
     expect(
-      hint("onr_classic_021_satellite-monitors").strategyAnchors,
+      hint(25).strategyAnchors,
     ).toBeUndefined();
-    expect(hint("onr_proteus_067_panic-button").planRoles).toEqual(
+    expect(hint(125).planRoles).toEqual(
       expect.arrayContaining(["protect_hq", "corp_repeatable_draw"]),
     );
-    expect(hint("onr_v1_085_executive-wiretaps").strategyAnchors).toEqual([
+    expect(hint(297).strategyAnchors).toEqual([
       "runner.hq_pressure",
     ]);
     expect(
-      hint("onr_proteus_139_eurocorpse-tm-spin-chip").functionSignals,
+      hint(197).functionSignals,
     ).toEqual(
       expect.arrayContaining([
         "setup.program_host",

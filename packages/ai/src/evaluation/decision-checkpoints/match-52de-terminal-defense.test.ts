@@ -99,7 +99,7 @@ describe("match 52de terminal agenda defense", () => {
     const { input } = replay;
     const quote = assessCorpTerminalAgendaDefense(input, "remote_1", "test");
     expect(quote?.install?.sourceDefinitionId).toBe(
-      "onr_v1_367_rio-de-janeiro-city-grid",
+      579,
     );
     expect(quote?.best.protection.runnerAccessSuccessProbability).toEqual({
       numerator: 25,

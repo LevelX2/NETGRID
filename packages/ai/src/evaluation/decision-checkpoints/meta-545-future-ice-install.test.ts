@@ -94,8 +94,8 @@ describe("position-bound ICE installation", () => {
       expect(action.type).toBe("install_card");
       expect(action.payload.placement).toBe("ice");
       const expected = name.includes("g26")
-        ? "onr_v1_225_canis-major"
-        : "onr_v1_258_neural-blade";
+        ? 437
+        : 470;
       expect(
         f.input.playerView.own.gripOrHq.find(
           (c: { instanceId: string }) => c.instanceId === action.source,

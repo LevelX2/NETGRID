@@ -47,7 +47,7 @@ export function corpVisibleHandHasActionIceRezSupport(
   return input.playerView.own.gripOrHq.some(
     (card) =>
       card.known &&
-      typeof card.definitionId === "string" &&
+      typeof card.definitionId === "number" &&
       definitionHasActionIceRezSupport(card.definitionId),
   );
 }
@@ -201,7 +201,7 @@ export function corpPostPassIceLifecycleDefenseSignal(
     typeof action.payload.postPassIceTrashedUnlessReturned !== "boolean" ||
     typeof action.source !== "string" ||
     action.source.length === 0 ||
-    typeof sourceDefinitionId !== "string" ||
+    typeof sourceDefinitionId !== "number" ||
     sourceDefinitionId.length === 0 ||
     typeof serverId !== "string" ||
     !isServerId(serverId) ||

@@ -39,7 +39,7 @@ const nativeInput = () => {
 function freshlyQuotedSource() {
   const state = createGame({ ...fixture.engineConfig, setupMode: "completed" });
   const source = Object.values(state.cardInstances).find(
-    (c) => c.definitionId === "onr_v1_268_shock-r",
+    (c) => c.definitionId === 480,
   )!;
   expect(source).toBeDefined();
   for (const zone of [state.corp.hq, state.corp.rd, state.corp.archives]) {
@@ -138,7 +138,7 @@ it("preserves the lock when the known next ICE must be broken", () => {
     remote = input.playerView.servers.find((s) => s.id === "remote_1")!;
   const wall = input.playerView.servers
     .find((s) => s.id === "hq")!
-    .ice.find((i) => i.definitionId === "onr_v1_245_fire-wall")!;
+    .ice.find((i) => i.definitionId === 457)!;
   expect(wall.effectiveRunQuote).toBeDefined();
   const assessment = assessKnownRezzedIcePath(
     [wall, freshlyQuotedSource()],

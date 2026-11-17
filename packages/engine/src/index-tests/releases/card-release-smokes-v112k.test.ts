@@ -195,52 +195,52 @@ describe("V1.1.2K Card Release", () => {
       );
     }
 
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_006_black-dahlia"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[218]).toMatchObject({
       installCost: 10,
       memoryCost: 1,
       strength: 5,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_014_codecracker"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[226]).toMatchObject({
       installCost: 2,
       memoryCost: 1,
       strength: 0,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_016_cyfermaster"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[228]).toMatchObject({
       installCost: 4,
       memoryCost: 1,
       strength: 5,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_040_loony-goon"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[252]).toMatchObject({
       installCost: 4,
       memoryCost: 1,
       strength: 0,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_060_shaka"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[272]).toMatchObject({
       installCost: 4,
       memoryCost: 1,
       strength: 2,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_073_wizards-book"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[285]).toMatchObject({
       installCost: 5,
       memoryCost: 1,
       strength: 2,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_253_laser-wire"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[465]).toMatchObject({
       rezCost: 4,
       strength: 2,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_257_nerve-labyrinth"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[469]).toMatchObject({
       rezCost: 6,
       strength: 4,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_278_wall-of-ice"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[490]).toMatchObject({
       rezCost: 13,
       strength: 6,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_293_netwatch-credit-voucher"],
+      CARD_DEFINITIONS_BY_ID[505],
     ).toMatchObject({ cost: 0 });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_295_night-shift"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[507]).toMatchObject({
       cost: 0,
     });
   });
@@ -260,8 +260,8 @@ describe("V1.1.2K Card Release", () => {
     expect(corpValidation.errors).toEqual([]);
     expect(corpValidation.ok).toBe(true);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_015_codeslinger"]).toBeDefined();
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_220_tycho-extension"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID[227]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID[432]).toBeDefined();
   });
 
   it("installs V1.1.2K breakers and uses the existing code-gate and sentry break rules", () => {
@@ -272,12 +272,12 @@ describe("V1.1.2K Card Release", () => {
     installState.runner.clicks = 12;
     installState.runner.memoryLimit = 10;
     for (const definitionId of [
-      "onr_v1_006_black-dahlia",
-      "onr_v1_014_codecracker",
-      "onr_v1_016_cyfermaster",
-      "onr_v1_040_loony-goon",
-      "onr_v1_060_shaka",
-      "onr_v1_073_wizards-book",
+      218,
+      226,
+      228,
+      252,
+      272,
+      285,
     ] as const) {
       moveRunnerCardToGrip(installState, definitionId);
       installState = apply(
@@ -294,9 +294,9 @@ describe("V1.1.2K Card Release", () => {
       v112kCardReleaseGame("v112k-codecracker-quandary"),
     );
     codeGateState.runner.credits = 20;
-    installRunnerProgramForTest(codeGateState, "onr_v1_014_codecracker");
-    putCorpIceOnServer(codeGateState, "rd", "onr_v1_261_quandary");
-    putCorpCardOnTopOfRd(codeGateState, "simple_economy_operation");
+    installRunnerProgramForTest(codeGateState, 226);
+    putCorpIceOnServer(codeGateState, "rd", 473);
+    putCorpCardOnTopOfRd(codeGateState, 596);
     codeGateState.corp.credits = 20;
 
     codeGateState = apply(
@@ -310,7 +310,7 @@ describe("V1.1.2K Card Release", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(codeGateState, action) === "onr_v1_261_quandary",
+        sourceDefinition(codeGateState, action) === 473,
     );
     codeGateState = enterEncounterFromMovementWindow(codeGateState);
     codeGateState = apply(
@@ -318,21 +318,21 @@ describe("V1.1.2K Card Release", () => {
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(codeGateState, action) === "onr_v1_014_codecracker",
+        sourceDefinition(codeGateState, action) === 226,
     );
     codeGateState = apply(
       codeGateState,
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(codeGateState, action) === "onr_v1_014_codecracker",
+        sourceDefinition(codeGateState, action) === 226,
     );
     codeGateState = apply(
       codeGateState,
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(codeGateState, action) === "onr_v1_014_codecracker",
+        sourceDefinition(codeGateState, action) === 226,
     );
     codeGateState = continueRunThroughMovement(codeGateState);
     codeGateState = apply(
@@ -342,16 +342,16 @@ describe("V1.1.2K Card Release", () => {
     );
     expect(codeGateState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
     });
 
     let sentryState = toRunnerTurn(
       v112kCardReleaseGame("v112k-loony-goon-face"),
     );
     sentryState.runner.credits = 20;
-    installRunnerProgramForTest(sentryState, "onr_v1_040_loony-goon");
-    putCorpIceOnServer(sentryState, "rd", "onr_v1_259_in-the-face");
-    putCorpCardOnTopOfRd(sentryState, "simple_economy_operation");
+    installRunnerProgramForTest(sentryState, 252);
+    putCorpIceOnServer(sentryState, "rd", 471);
+    putCorpCardOnTopOfRd(sentryState, 596);
     sentryState.corp.credits = 20;
 
     sentryState = apply(
@@ -365,7 +365,7 @@ describe("V1.1.2K Card Release", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(sentryState, action) === "onr_v1_259_in-the-face",
+        sourceDefinition(sentryState, action) === 471,
     );
     sentryState = enterEncounterFromMovementWindow(sentryState);
     sentryState = apply(
@@ -373,28 +373,28 @@ describe("V1.1.2K Card Release", () => {
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon",
+        sourceDefinition(sentryState, action) === 252,
     );
     sentryState = apply(
       sentryState,
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon",
+        sourceDefinition(sentryState, action) === 252,
     );
     sentryState = apply(
       sentryState,
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon",
+        sourceDefinition(sentryState, action) === 252,
     );
     sentryState = apply(
       sentryState,
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon",
+        sourceDefinition(sentryState, action) === 252,
     );
     sentryState = continueRunThroughMovement(sentryState);
     sentryState = apply(
@@ -404,7 +404,7 @@ describe("V1.1.2K Card Release", () => {
     );
     expect(sentryState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
     });
   });
 
@@ -415,7 +415,7 @@ describe("V1.1.2K Card Release", () => {
         ...ONR_V1_1_2K_RUNNER_DECK,
         id: "v112k_corp_operations_fall_guy_runner",
         cards: [
-          { id: "onr_v1_161_fall-guy", quantity: 1 },
+          { id: 373, quantity: 1 },
           ...ONR_V1_1_2K_RUNNER_DECK.cards,
         ],
       },
@@ -430,11 +430,11 @@ describe("V1.1.2K Card Release", () => {
     operationState.corp.credits = 20;
     operationState.corp.clicks = 8;
     operationState.runner.tags = 1;
-    moveCorpCardToHq(operationState, "onr_v1_293_netwatch-credit-voucher");
-    moveCorpCardToHq(operationState, "onr_v1_295_night-shift");
+    moveCorpCardToHq(operationState, 505);
+    moveCorpCardToHq(operationState, 507);
     const fallGuyId = installRunnerResourceForTest(
       operationState,
-      "onr_v1_161_fall-guy",
+      373,
     );
 
     const beforeVoucherTags = operationState.runner.tags;
@@ -447,7 +447,7 @@ describe("V1.1.2K Card Release", () => {
       (action) =>
         action.type === "play_operation" &&
         sourceDefinition(operationState, action) ===
-          "onr_v1_293_netwatch-credit-voucher",
+          505,
     );
     expect(operationState.runner.tags).toBe(beforeVoucherTags);
     expect(operationState.corp.credits).toBe(beforeVoucherCredits);
@@ -506,7 +506,7 @@ describe("V1.1.2K Card Release", () => {
     const nightShiftAction = getLegalActions(operationState, "corp").find(
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(operationState, action) === "onr_v1_295_night-shift",
+        sourceDefinition(operationState, action) === 507,
     );
     expect(nightShiftAction?.payload).toMatchObject({
       gainCreditsAmount: 2,
@@ -517,22 +517,22 @@ describe("V1.1.2K Card Release", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(operationState, action) === "onr_v1_295_night-shift",
+        sourceDefinition(operationState, action) === 507,
     );
     expect(operationState.corp.credits).toBe(beforeNightShiftCredits + 2);
     expect(operationState.corp.hq.length).toBe(beforeNightShiftCards);
 
     for (const definitionId of [
-      "onr_v1_253_laser-wire",
-      "onr_v1_257_nerve-labyrinth",
-      "onr_v1_262_razor-wire",
-      "onr_v1_263_reinforced-wall",
-      "onr_v1_265_rock-is-strong",
-      "onr_v1_266_scramble",
-      "onr_v1_269_shotgun-wire",
-      "onr_v1_270_sleeper",
-      "onr_v1_278_wall-of-ice",
-      "onr_v1_279_wall-of-static",
+      465,
+      469,
+      474,
+      475,
+      477,
+      478,
+      481,
+      482,
+      490,
+      491,
     ] as const) {
       let state = toRunnerTurn(
         v112kCardReleaseGame(`v112k-ice-${definitionId}`),

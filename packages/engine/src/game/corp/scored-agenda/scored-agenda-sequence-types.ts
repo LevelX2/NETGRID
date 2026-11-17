@@ -24,7 +24,7 @@ export type SequenceResolution = {
 export type CorpSequenceContext = {
   step: string;
   sourceAgendaId?: CardInstanceId | string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   selectedCount?: number;
   revealedCount?: number;
   shownCount?: number;

@@ -121,7 +121,7 @@ function action(
 
 function blockedCandidate(
   sourceCardInstanceId: string,
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
 ): ActionSemanticCandidate {
   return candidate({
     sourceCardInstanceId,

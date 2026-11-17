@@ -16,7 +16,7 @@ import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
-const PSYCHIC_FRIEND_ID = "runner_onr_classic_030_psychic-friend_1";
+const PSYCHIC_FRIEND_ID = "runner_34_1";
 
 describe("match B34E runner decision checkpoints", () => {
   it.each([

@@ -23,11 +23,11 @@ const hints = [...createAiHintsByCard().values()] as EconomyHint[];
 
 describe("economy card hint contracts", () => {
   it.each([
-    ["onr_v1_193_corporate-coup", 3],
-    ["onr_v1_195_corporate-retreat", 2],
-    ["onr_v1_206_marine-arcology", 3],
-    ["onr_v1_209_political-coup", 3],
-    ["onr_v1_210_political-overthrow", 3],
+    [405, 3],
+    [407, 2],
+    [418, 3],
+    [421, 3],
+    [422, 3],
   ])("publishes %s as one liquid scored action", (cardId, amount) => {
     const effects = hint(cardId).effects ?? [];
     expect(
@@ -56,7 +56,7 @@ describe("economy card hint contracts", () => {
   });
 
   it("separates Corporate Coup's payout from its finite 15-credit pool", () => {
-    expect(hint("onr_v1_193_corporate-coup").effects).toEqual(
+    expect(hint(405).effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           amount: 3,
@@ -74,7 +74,7 @@ describe("economy card hint contracts", () => {
   });
 
   it("publishes BBS as one 2-credit payout backed by one finite pool", () => {
-    const effects = hint("onr_v1_309_bbs-whispering-campaign").effects ?? [];
+    const effects = hint(521).effects ?? [];
     expect(effects).toEqual([
       expect.objectContaining({
         amount: 2,
@@ -90,7 +90,7 @@ describe("economy card hint contracts", () => {
   });
 
   it("models Broker as a voluntary bank rather than a finite pool", () => {
-    const broker = hint("onr_v1_154_broker");
+    const broker = hint(366);
     const effects = broker.effects ?? [];
     expect(effects).toEqual(
       expect.arrayContaining([
@@ -130,7 +130,7 @@ describe("economy card hint contracts", () => {
   });
 
   it("publishes Streetware Distributor's fixed bank load as an action", () => {
-    const streetware = hint("onr_proteus_150_streetware-distributor");
+    const streetware = hint(208);
 
     expect(streetware.effects).toEqual(
       expect.arrayContaining([
@@ -151,7 +151,7 @@ describe("economy card hint contracts", () => {
     );
   });
 
-  it.each(["onr_v1_193_corporate-coup", "onr_v1_209_political-coup"])(
+  it.each([405, 421])(
     "marks the scored hosted-credit pool on %s as temporary",
     (cardId) => {
       const card = hint(cardId);
@@ -173,7 +173,7 @@ describe("economy card hint contracts", () => {
   );
 
   it("matches Department of Truth Enhancement's hosted-credit load and all-cashout contract", () => {
-    const effects = hint("onr_v1_318_department-of-truth-enhancement").effects;
+    const effects = hint(530).effects;
     expect(effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

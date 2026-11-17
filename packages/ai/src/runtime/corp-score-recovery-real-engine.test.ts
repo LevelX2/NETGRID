@@ -21,10 +21,10 @@ import { corpSameTurnScoreConversionPaths } from "../plans/tactical-plan-corp-sc
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { sanitizeCorpScoreRecoveryQuote } from "./corp-score-recovery-quote-input";
 
-const RECOVERY = "onr_v1_296_off-site-backups";
-const SUPPORT = "onr_v1_300_project-consultants";
-const AGENDA = "onr_v1_196_corporate-war";
-const HOSTILE = "onr_v1_203_hostile-takeover";
+const RECOVERY = 508;
+const SUPPORT = 512;
+const AGENDA = 408;
+const HOSTILE = 415;
 const extra = [RECOVERY, SUPPORT, AGENDA, HOSTILE];
 const corpDeck = {
   ...DEMO_DECKS.demo_corp_001,

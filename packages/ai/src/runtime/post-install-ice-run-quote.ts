@@ -17,7 +17,7 @@ type PostInstallEffectiveRunQuoteRead =
 export function readPostInstallEffectiveRunQuote(
   action: LegalAction,
   sourceCardInstanceId: string,
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
   targetServerId: VisibleCorpRezCostQuote["targetServerId"],
   observedAtStateVersion: number,
 ): PostInstallEffectiveRunQuoteRead | undefined {

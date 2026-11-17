@@ -24,13 +24,13 @@ import {
 import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decision-context";
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 
-const DATA_WALL_DEFINITION_ID = "onr_v1_237_data-wall";
-const CORPORATE_WAR_DEFINITION_ID = "onr_v1_196_corporate-war";
-const CORPORATE_DOWNSIZING_DEFINITION_ID = "onr_v1_194_corporate-downsizing";
-const TYCHO_EXTENSION_DEFINITION_ID = "onr_v1_220_tycho-extension";
-const FILLER_DEFINITION_ID = "onr_v1_284_chance-observation";
-const DATA_MASONS_DEFINITION_ID = "onr_v1_317_data-masons";
-const RED_HERRINGS_DEFINITION_ID = "onr_v1_366_red-herrings";
+const DATA_WALL_DEFINITION_ID = 449;
+const CORPORATE_WAR_DEFINITION_ID = 408;
+const CORPORATE_DOWNSIZING_DEFINITION_ID = 406;
+const TYCHO_EXTENSION_DEFINITION_ID = 432;
+const FILLER_DEFINITION_ID = 496;
+const DATA_MASONS_DEFINITION_ID = 529;
+const RED_HERRINGS_DEFINITION_ID = 578;
 
 describe("plan-first live Corp central-defense allocation contract", () => {
   it("selects HQ from complete exact facts when HQ has the material agenda risk", () => {
@@ -667,7 +667,7 @@ function fourPlusOneNearTieInput() {
 
 function centralDefenseInput(params: {
   hqCards: VisibleCard[];
-  rdDefinitionIds: string[];
+  rdDefinitionIds: number[];
   hqAccessCount: number;
   rdAccessCount: number;
 }) {
@@ -859,7 +859,7 @@ function centralAccessQuote(serverId: "hq" | "rd", accessCount: number) {
   };
 }
 
-function agenda(instanceId: string, definitionId: string): VisibleCard {
+function agenda(instanceId: string, definitionId: number): VisibleCard {
   return visibleCard(instanceId, "corp", "agenda", { definitionId });
 }
 
@@ -877,7 +877,7 @@ function filler(instanceId: string): VisibleCard {
   });
 }
 
-function definitionCounts(definitionIds: string[]) {
+function definitionCounts(definitionIds: number[]) {
   const counts = new Map<string, number>();
   for (const definitionId of definitionIds) {
     counts.set(definitionId, (counts.get(definitionId) ?? 0) + 1);

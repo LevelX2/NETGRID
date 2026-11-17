@@ -176,7 +176,7 @@ export type TraceOrchestrationHost = {
 
 export function startTraceFromOperation(
   host: TraceOrchestrationHost,
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
   traceLimit: number,
   legalAction: LegalAction,
   successEffect: TraceSuccessEffect = { type: "add_tag", amount: 1 },
@@ -1527,9 +1527,9 @@ function traceSuccessTagAmountForOperation(
 function applyTraceAvoidRewardsForOperation(
   state: GameState,
   trace: CurrentTrace,
-): { amount: number; sourceDefinitionIds: string[] } {
+): { amount: number; sourceDefinitionIds: number[] } {
   let amount = 0;
-  const sourceDefinitionIds: string[] = [];
+  const sourceDefinitionIds: number[] = [];
   for (const reward of trace.traceAvoidRewardUsages ?? []) {
     if (!Number.isInteger(reward.amount) || reward.amount <= 0) continue;
     amount += reward.amount;

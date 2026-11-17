@@ -82,7 +82,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 it("retains the native unused universal source at equal complete current path cost", () => {
   const d = decide("g8d112");
   expect(d.actionId).toBe(
-    "runner.pump_breaker.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.corp_onr_v1_245_fire-wall_2.onr_classic_027_early-worm:pump_strength_three",
+    "runner.pump_breaker.runner_31_2.runner_31_2.runner_31_2.corp_457_2.onr_classic_027_early-worm:pump_strength_three",
   );
   const selected = economics(d.input, d.actionId);
   const rent = economics(d.input, load("g8d112-before").decision.actionId);
@@ -123,8 +123,8 @@ it("counts an already bound source once, leaves it usable in the same run, and p
   ).toBe(0);
   const { input, state, cp } = engineInput("g8d119");
   const rent = input.playerView.own.rig.find(
-    (c: { definitionId: string }) =>
-      c.definitionId === "onr_classic_031_rent-i-con",
+    (c: { definitionId: number }) =>
+      c.definitionId === 35,
   )!;
   for (const side of ["runner", "corp"] as const) {
     const view = getPlayerView(state, side);
@@ -156,8 +156,8 @@ it("does not count preservation when actual visible inner Gate coverage still co
   const state = load("g8d112-engine") as GameState;
   const hq = state.corp.servers.find((s) => s.id === "hq")!;
   const rd = state.corp.servers.find((s) => s.id === "rd")!;
-  const gate = "corp_onr_proteus_039_sphinx-2006_2",
-    snow = "corp_onr_proteus_038_snowbank_3";
+  const gate = "corp_97_2",
+    snow = "corp_96_3";
   expect(hq.ice[1]).toBe(gate);
   expect(rd.ice[0]).toBe(snow);
   hq.ice[1] = snow;
@@ -178,12 +178,12 @@ it("does not count preservation when actual visible inner Gate coverage still co
   const early = input.legalActions.find(
     (a: { type: string; source: string }) =>
       a.type === "pump_breaker" &&
-      a.source === "runner_onr_classic_027_early-worm_2",
+      a.source === "runner_31_2",
   )!;
   const rent = input.legalActions.find(
     (a: { type: string; source: string }) =>
       a.type === "pump_breaker" &&
-      a.source === "runner_onr_classic_031_rent-i-con_2",
+      a.source === "runner_35_2",
   )!;
   expect(economics(input, early.actionId).newRunEndTrashSourceCount).toBe(1);
   expect(economics(input, rent.actionId).newRunEndTrashSourceCount).toBe(1);
@@ -220,7 +220,7 @@ it.each([
     expect(state.runner.credits).toBe(credits);
     expect(
       getPlayerView(state, "runner").own.rig?.some(
-        (c) => c.definitionId === "onr_classic_031_rent-i-con",
+        (c) => c.definitionId === 35,
       ),
     ).toBe(true);
   },
@@ -256,13 +256,13 @@ it("requires exact offered open continuation payment and rejects an unknown inne
     ).toBeUndefined();
   }
   const state = load("g8d112-engine") as GameState;
-  state.cardInstances["corp_onr_proteus_038_snowbank_3"]!.rezzed = false;
-  state.cardInstances["corp_onr_proteus_038_snowbank_3"]!.faceup = false;
+  state.cardInstances["corp_96_3"]!.rezzed = false;
+  state.cardInstances["corp_96_3"]!.faceup = false;
   const unknown = engineInput("g8d112", state).input;
   const early = unknown.legalActions.find(
     (a: { type: string; source: string }) =>
       a.type === "pump_breaker" &&
-      a.source === "runner_onr_classic_027_early-worm_2",
+      a.source === "runner_31_2",
   )!;
   const payment = pureEndRunEncounterPayment(unknown, early);
   expect(payment).toBeDefined();

@@ -3,7 +3,7 @@ import { cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_classic_054_phone-freak"),
+    cardDefinitionId: cardDefinitionId(58),
     title: "Phone Freak",
     side: "runner",
     cardType: "resource",

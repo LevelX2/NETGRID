@@ -84,12 +84,12 @@ it.each([
     const gap = domain.coverageGaps.find(
       (gap) => gap.requiredRole === "breaker_wall",
     )!;
-    expect(gap.handAnswerDefinitionId).toBe("onr_v1_074_worm");
+    expect(gap.handAnswerDefinitionId).toBe(286);
     expect(
       gap.installActionIds?.every((action) => action.includes("worm")),
     ).toBe(true);
     const dwarf = domain.developments.find(
-      (signal) => signal.definitionId === "onr_v1_021_dwarf",
+      (signal) => signal.definitionId === 233,
     )!;
     expect(dwarf.assignedDomainPlanIds).toEqual([]);
     expect(dwarf.actionIds.some((action) => action.includes("dwarf"))).toBe(
@@ -106,7 +106,7 @@ it.each([
     expect(parent.evidenceCode).toContain(
       "runner_known_access_damage_ambush_requires_jack_out",
     );
-    expect(gap.handAnswerDefinitionId).toBe("onr_v1_021_dwarf");
+    expect(gap.handAnswerDefinitionId).toBe(233);
     for (const actionId of gap.installActionIds!) {
       expect(observed!.actionDispositions).toContainEqual({
         actionId,

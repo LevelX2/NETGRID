@@ -110,7 +110,7 @@ describe("King of the Road remote run regressions", () => {
     const { input } = replayDecision(rezzedBypassReplay);
     input.playerView.own.rig?.push(
       visibleCard("dwarf-in-rig", "runner", "program", {
-        definitionId: "onr_v1_021_dwarf",
+        definitionId: 233,
         subtypes: ["icebreaker"],
         strength: 3,
       }),

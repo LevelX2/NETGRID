@@ -12,7 +12,7 @@ import {
   CardImplementationPrimitiveIdentityError,
 } from "./card-implementation-primitives";
 
-const DATA_FORT_RECLAMATION_DEFINITION_ID = "onr_v1_197_data-fort-reclamation";
+const DATA_FORT_RECLAMATION_DEFINITION_ID = 409;
 
 describe("card implementation primitive ability keys", () => {
   it("are unique per card definition for primitive-backed abilities", () => {

@@ -18,7 +18,7 @@ export type SearchChoiceFeatureSnapshot = {
   readonly memoryRemaining: number;
   readonly hasInstalledNonNoisyIcebreaker: boolean;
   readonly rigRoles: ReadonlySet<string>;
-  readonly rigDefinitionIds: ReadonlySet<string>;
+  readonly rigDefinitionIds: ReadonlySet<number>;
   readonly gripDefinitionCounts?: ReadonlyMap<string, number>;
 };
 
@@ -31,7 +31,7 @@ export type SearchChoiceScoringContext = {
   readonly requiredCoverage?: RequiredCapabilityKind;
   readonly preferredServerId?: string;
   readonly preferredCardInstanceId?: string;
-  readonly preferredCardDefinitionId?: string;
+  readonly preferredCardDefinitionId?: number;
   readonly optionalExactTargetOnly?: boolean;
 };
 

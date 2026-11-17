@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_proteus_139_eurocorpse-tm-spin-chip",
+      197,
     ),
     title: "Eurocorpse (TM) Spin Chip",
     side: "runner",

@@ -54,7 +54,7 @@ it("funds the current Defense tag clear through Broker before losing the three e
     input.legalActions.find((a) => a.actionId === result.actionId),
   ).toMatchObject({
     type: "activated_card_ability",
-    source: "runner_onr_v1_154_broker_2",
+    source: "runner_366_2",
     payload: { cardImplementationAbilityKey: "withdraw_credits" },
   });
   expect(result.decisionDebug?.planFirstDecision).toMatchObject({

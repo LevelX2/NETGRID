@@ -17,10 +17,10 @@ const deck: StandardDeckGuideDeckSource = {
   version: "1.0.0",
   name: "Fixture Runner",
   side: "runner",
-  identityCardId: "runner_identity_001",
+  identityCardId: 587,
   cards: [
-    { cardId: "card_a", quantity: 3 },
-    { cardId: "card_b", quantity: 2 },
+    { cardId: 926, quantity: 3 },
+    { cardId: 927, quantity: 2 },
   ],
 };
 
@@ -95,7 +95,7 @@ describe("standard deck guides", () => {
   it("marks malformed content and foreign key cards as invalid", () => {
     const invalid = guide();
     invalid.contentByLocale.en.summary = "";
-    invalid.contentByLocale.en.keyCards[0]!.cardId = "foreign_card";
+    invalid.contentByLocale.en.keyCards[0]!.cardId = 929;
 
     expect(
       resolveStandardDeckGuide({ deck, manifest: manifest([invalid]) }),
@@ -174,7 +174,7 @@ function guide(
         },
         keyCards: [
           {
-            cardId: "card_a",
+            cardId: 926,
             title: "Karte A",
             role: "Carries the core game plan.",
           },
@@ -192,7 +192,7 @@ function guide(
         },
         keyCards: [
           {
-            cardId: "card_a",
+            cardId: 926,
             title: "Karte A",
             role: "Trägt den zentralen Spielplan.",
           },

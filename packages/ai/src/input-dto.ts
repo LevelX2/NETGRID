@@ -3286,7 +3286,7 @@ function sanitizeChoiceContinuation(
   playerViewSide: Side,
   choiceSide: Side,
   sourceCardInstanceId: string | undefined,
-  sourceCardDefinitionId: string | undefined,
+  sourceCardDefinitionId: number | undefined,
 ): VisibleChoiceRequest["continuation"] | undefined {
   if (playerViewSide !== choiceSide || !value) return undefined;
   if (
@@ -3337,7 +3337,7 @@ function sanitizeChoiceContinuation(
     choiceSide === "runner" &&
     typeof value.sourceCardInstanceId === "string" &&
     value.sourceCardInstanceId.length > 0 &&
-    typeof value.sourceCardDefinitionId === "string" &&
+    typeof value.sourceCardDefinitionId === "number" &&
     value.sourceCardDefinitionId.length > 0 &&
     typeof value.sourceCapabilityKey === "string" &&
     value.sourceCapabilityKey.length > 0 &&

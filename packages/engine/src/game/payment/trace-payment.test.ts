@@ -315,7 +315,7 @@ describe("trace payment pools", () => {
         {
           kind: "corp_trace_bit_pool",
           sourceCardInstanceId: krumzId,
-          sourceDefinitionId: "onr_v1_330_krumz",
+          sourceDefinitionId: 542,
           available: available.get(krumzId) ?? 0,
         },
       ],
@@ -323,7 +323,7 @@ describe("trace payment pools", () => {
         {
           kind: "corp_trace_counter_pool",
           sourceCardInstanceId: trackerId,
-          sourceDefinitionId: "onr_v1_325_hacker-tracker-central",
+          sourceDefinitionId: 537,
           available: available.get(trackerId) ?? 0,
         },
       ],

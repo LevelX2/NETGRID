@@ -40,7 +40,7 @@ describe("match 678d D50 central opening", () => {
 
     const decision = chooseAiAction(input);
     expect(decision.actionId).toBe(
-      "runner.install_card.runner_onr_v1_068_startup-immolator_1.runner_onr_v1_068_startup-immolator_1",
+      "runner.install_card.runner_280_1.runner_280_1",
     );
     const plan = decision.decisionDebug?.planFirstDecision;
     expect(plan?.route).toMatchObject({

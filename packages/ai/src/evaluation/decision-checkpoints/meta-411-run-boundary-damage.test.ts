@@ -65,7 +65,7 @@ describe("meta 411 future damage belongs to the creating run", () => {
     const original = input.eventTail.find(
       (e) =>
         e.type === "continue_run" &&
-        e.publicPayload?.sourceDefinitionId === "onr_v1_242_fatal-attractor" &&
+        e.publicPayload?.sourceDefinitionId === 454 &&
         e.publicPayload?.resolvedEffects?.some(
           (x) => x.kind === "resolve_subroutine",
         ),
@@ -77,7 +77,7 @@ describe("meta 411 future damage belongs to the creating run", () => {
     input.playerView.stateVersion = 166;
     input.eventTail.push(current);
     expect(runnerFutureEncounterDamageJackOutAssessment(input)).toMatchObject({
-      sourceDefinitionId: "onr_v1_242_fatal-attractor",
+      sourceDefinitionId: 454,
       projectedDamage: 3,
     });
   });

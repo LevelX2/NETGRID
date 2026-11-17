@@ -5,7 +5,7 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { ActionCardSemanticProfile } from "../action-semantic-candidate-types";
 
 const brokerProfile: ActionCardSemanticProfile = {
-  cardId: "onr_v1_154_broker",
+  cardId: 366,
   tacticSignals: [],
   actionPlanOwnerBindings: [
     {
@@ -25,8 +25,8 @@ describe("capability-bound action plan owners", () => {
   it("keeps Broker build and cash-out on distinct exact LegalAction capabilities", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: [
-        canonicalAction("onr_v1_154_broker", "store_credits", "runner", 0),
-        canonicalAction("onr_v1_154_broker", "withdraw_credits", "runner", 1),
+        canonicalAction(366, "store_credits", "runner", 0),
+        canonicalAction(366, "withdraw_credits", "runner", 1),
       ],
       cardSemanticProfilesByDefinitionId: {
         onr_v1_154_broker: brokerProfile,
@@ -49,8 +49,8 @@ describe("capability-bound action plan owners", () => {
 
   it("binds Loan and Data Fort owners from their exact capabilities", () => {
     const profiles: Readonly<Record<string, ActionCardSemanticProfile>> = {
-      "onr_v1_168_loan-from-chiba": {
-        cardId: "onr_v1_168_loan-from-chiba",
+      380: {
+        cardId: 380,
         tacticSignals: [],
         actionPlanOwnerBindings: [
           {
@@ -59,8 +59,8 @@ describe("capability-bound action plan owners", () => {
           },
         ],
       },
-      "onr_v1_197_data-fort-reclamation": {
-        cardId: "onr_v1_197_data-fort-reclamation",
+      409: {
+        cardId: 409,
         tacticSignals: [],
         actionPlanOwnerBindings: [
           {
@@ -73,13 +73,13 @@ describe("capability-bound action plan owners", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: [
         canonicalAction(
-          "onr_v1_168_loan-from-chiba",
+          380,
           "trash_at_end_of_turn",
           "runner",
           0,
         ),
         canonicalAction(
-          "onr_v1_197_data-fort-reclamation",
+          409,
           "hq_to_new_remote_install_rez",
           "corp",
           1,
@@ -96,7 +96,7 @@ describe("capability-bound action plan owners", () => {
   it("does not fall back card-wide for missing or forged capabilities", () => {
     const forgedCapability = buildActionSemanticCandidates({
       legalActions: [
-        canonicalAction("onr_v1_154_broker", "forged_route", "runner", 0),
+        canonicalAction(366, "forged_route", "runner", 0),
       ],
       cardSemanticProfilesByDefinitionId: {
         onr_v1_154_broker: brokerProfile,
@@ -105,7 +105,7 @@ describe("capability-bound action plan owners", () => {
     expect(forgedCapability?.planOwnerBinding).toBeUndefined();
 
     const nonCanonical = canonicalAction(
-      "onr_v1_154_broker",
+      366,
       "store_credits",
       "runner",
       1,
@@ -130,7 +130,7 @@ describe("capability-bound action plan owners", () => {
     expect(() =>
       buildActionSemanticCandidates({
         legalActions: [
-          canonicalAction("onr_v1_154_broker", "store_credits", "runner", 0),
+          canonicalAction(366, "store_credits", "runner", 0),
         ],
         cardSemanticProfilesByDefinitionId: {
           onr_v1_154_broker: {
@@ -147,7 +147,7 @@ describe("capability-bound action plan owners", () => {
 });
 
 function canonicalAction(
-  definitionId: string,
+  definitionId: number,
   capabilityKey: string,
   side: "runner" | "corp",
   index: number,

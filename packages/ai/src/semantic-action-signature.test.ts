@@ -12,7 +12,7 @@ describe("semantic action signatures", () => {
       actionType: "install_card",
       semanticActionType: "board_development",
       sourceKind: "visible_card_or_ability",
-      sourceDefinitionId: "onr_v1_001_afreet",
+      sourceDefinitionId: 213,
       abilityId: "install",
       targetIdentity: "ownCard:grip:onr_v1_001_afreet",
       costClass: "known:known,click:1,credit:3",

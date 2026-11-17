@@ -113,7 +113,7 @@ export function primitiveContractRecords(
 
   return records.sort(
     (left, right) =>
-      left.cardDefinitionId.localeCompare(right.cardDefinitionId) ||
+      left.cardDefinitionId - right.cardDefinitionId ||
       left.abilityKey.localeCompare(right.abilityKey) ||
       left.primitiveKind.localeCompare(right.primitiveKind),
   );

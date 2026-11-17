@@ -146,7 +146,7 @@ it("credits the mandatory Grip return of an exact heap search on the final actio
     boundSearch.input,
   ) as unknown as AiDecisionInputWithDeckCapabilities;
   const { playerView } = input;
-  const definitionId = "onr_v1_089_gideons-pawnshop";
+  const definitionId = 301;
   const instanceId = `runner_${definitionId}_1`;
   const abilityKey = "abilities_on_play_search_trash_to_grip";
   const abilityId = `${definitionId}:${abilityKey}`;

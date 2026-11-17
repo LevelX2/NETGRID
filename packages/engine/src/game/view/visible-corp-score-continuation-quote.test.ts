@@ -78,7 +78,7 @@ function agenda(
 ): CardInstance {
   return {
     instanceId,
-    definitionId: "simple_agenda",
+    definitionId: 588,
     owner: "corp" as const,
     controller: "corp" as const,
     zone,

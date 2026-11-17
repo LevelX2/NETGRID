@@ -17,7 +17,7 @@ import {
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 
-const TRACE_UPGRADE = "onr_v1_372_turbeau-delacroix";
+const TRACE_UPGRADE = 584;
 
 describe("installed access source zones (SP-781, P637 D10 regression)", () => {
   it.each(["hq", "rd", "remote_1"] as const)(

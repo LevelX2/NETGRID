@@ -23,9 +23,9 @@ import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-port
 const runnerDeck = {
   ...ORIGINALSET_DEFAULT_DECKS.runner,
   cards: [
-    { id: "onr_v1_074_worm", quantity: 1 },
+    { id: 286, quantity: 1 },
     ...ORIGINALSET_DEFAULT_DECKS.runner.cards.filter(
-      (c) => c.id !== "onr_v1_074_worm",
+      (c) => c.id !== 286,
     ),
   ],
 };
@@ -115,14 +115,14 @@ function encounter(): GameState {
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
-        { id: "onr_v1_278_wall-of-ice", quantity: 1 },
-        { id: "onr_v1_265_rock-is-strong", quantity: 1 },
+        { id: 490, quantity: 1 },
+        { id: 477, quantity: 1 },
         ...ORIGINALSET_DEFAULT_DECKS.corp.cards,
       ],
     },
   });
-  installRunnerProgramForTest(state, "onr_v1_074_worm");
-  for (const id of ["onr_v1_265_rock-is-strong", "onr_v1_278_wall-of-ice"]) {
+  installRunnerProgramForTest(state, 286);
+  for (const id of [477, 490]) {
     const instance = putCorpIceOnServer(state, "rd", id);
     state.cardInstances[instance]!.rezzed = true;
     state.cardInstances[instance]!.faceup = true;

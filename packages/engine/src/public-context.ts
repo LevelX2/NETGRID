@@ -172,7 +172,7 @@ export function publicContextForAction(
   }
   if (
     typeof legalAction.payload?.installedAccessBonusSourceDefinitionIds ===
-    "string"
+    "number"
   )
     context.installedAccessBonusSourceDefinitionIds =
       legalAction.payload.installedAccessBonusSourceDefinitionIds;
@@ -304,7 +304,7 @@ export function publicContextForAction(
     )
       context.brokenIceVirusCounterChoiceOpened =
         legalAction.payload.brokenIceVirusCounterChoiceOpened;
-    if (typeof legalAction.payload.targetCardDefinitionId === "string")
+    if (typeof legalAction.payload.targetCardDefinitionId === "number")
       context.targetCardDefinitionId =
         legalAction.payload.targetCardDefinitionId;
     if (typeof legalAction.payload.targetServerLabel === "string")
@@ -313,7 +313,7 @@ export function publicContextForAction(
       context.virusCounterType = legalAction.payload.virusCounterType;
     if (typeof legalAction.payload.virusCounterLocation === "string")
       context.virusCounterLocation = legalAction.payload.virusCounterLocation;
-    if (typeof legalAction.payload.sourceDefinitionId === "string")
+    if (typeof legalAction.payload.sourceDefinitionId === "number")
       context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
     if (typeof legalAction.payload.choiceVisibility === "string")
       context.choiceVisibility = legalAction.payload.choiceVisibility;
@@ -469,7 +469,7 @@ export function publicContextForAction(
     } else if (Number.isInteger(payload.drawnCount)) {
       context.amount = Number(payload.drawnCount);
     }
-    if (typeof payload.sourceDefinitionId === "string")
+    if (typeof payload.sourceDefinitionId === "number")
       context.sourceDefinitionId = payload.sourceDefinitionId;
   } else if (legalAction.type === "gain_credit") {
     if (Number.isInteger(legalAction.payload?.gainCreditsAmount)) {
@@ -477,7 +477,7 @@ export function publicContextForAction(
     } else if (legalAction.payload?.traceStarted !== true) {
       context.amount = 1;
     }
-    if (typeof legalAction.payload?.sourceDefinitionId === "string")
+    if (typeof legalAction.payload?.sourceDefinitionId === "number")
       context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
     const agendaPointCostPaid = legalAction.payload?.agendaPointCostPaid;
     if (Number.isInteger(agendaPointCostPaid))
@@ -489,7 +489,7 @@ export function publicContextForAction(
       context.abilityId = RUNNER_PROGRAM_TRASH_BEFORE_INSTALL_ABILITY_ID;
       context.effectKind = "install_card";
       const installedProgramDefinitionId =
-        typeof legalAction.payload.sourceDefinitionId === "string"
+        typeof legalAction.payload.sourceDefinitionId === "number"
           ? legalAction.payload.sourceDefinitionId
           : undefined;
       if (installedProgramDefinitionId) {
@@ -765,7 +765,7 @@ export function publicContextForAction(
         const value = legalAction.payload[key];
         if (typeof value === "number") context[key] = value;
       }
-      if (typeof legalAction.payload.trashedCardDefinitionIds === "string") {
+      if (typeof legalAction.payload.trashedCardDefinitionIds === "number") {
         context.trashedCardDefinitionIds =
           legalAction.payload.trashedCardDefinitionIds;
       }
@@ -787,7 +787,7 @@ export function publicContextForAction(
       );
       if (attackedServerLabel) context.serverLabel = attackedServerLabel;
     }
-    if (typeof legalAction.payload?.trashedCardDefinitionId === "string")
+    if (typeof legalAction.payload?.trashedCardDefinitionId === "number")
       context.trashedCardDefinitionId =
         legalAction.payload.trashedCardDefinitionId;
     if (typeof legalAction.payload?.trashedCardType === "string")
@@ -899,7 +899,7 @@ export function publicContextForAction(
     if (
       !blindTraceStart &&
       typeof legalAction.payload.temporaryTraceCreditsSourceDefinitionId ===
-        "string"
+        "number"
     )
       context.temporaryTraceCreditsSourceDefinitionId =
         legalAction.payload.temporaryTraceCreditsSourceDefinitionId;
@@ -1064,7 +1064,7 @@ export function publicContextForAction(
       legalAction.payload.scoredAgendaFreeRezTarget;
   if (
     typeof legalAction.payload?.scoredAgendaFreeRezTargetDefinitionId ===
-    "string"
+    "number"
   )
     context.scoredAgendaFreeRezTargetDefinitionId =
       legalAction.payload.scoredAgendaFreeRezTargetDefinitionId;
@@ -1154,13 +1154,13 @@ export function publicContextForAction(
     )
       context.installedConnectionTrashChoiceResolved =
         legalAction.payload.installedConnectionTrashChoiceResolved;
-    if (typeof legalAction.payload.trashedCardDefinitionIds === "string")
+    if (typeof legalAction.payload.trashedCardDefinitionIds === "number")
       context.trashedCardDefinitionIds =
         legalAction.payload.trashedCardDefinitionIds;
-    if (typeof legalAction.payload.publicTrashedCardDefinitionIds === "string")
+    if (typeof legalAction.payload.publicTrashedCardDefinitionIds === "number")
       context.publicTrashedCardDefinitionIds =
         legalAction.payload.publicTrashedCardDefinitionIds;
-    if (typeof legalAction.payload.returnedProgramDefinitionIds === "string")
+    if (typeof legalAction.payload.returnedProgramDefinitionIds === "number")
       context.returnedProgramDefinitionIds =
         legalAction.payload.returnedProgramDefinitionIds;
     if (typeof legalAction.payload.returnedProgramCount === "number")
@@ -1250,7 +1250,7 @@ export function publicContextForAction(
         legalAction.payload.scoredAgendaFreeRezTarget;
     if (
       typeof legalAction.payload.scoredAgendaFreeRezTargetDefinitionId ===
-      "string"
+      "number"
     )
       context.scoredAgendaFreeRezTargetDefinitionId =
         legalAction.payload.scoredAgendaFreeRezTargetDefinitionId;
@@ -1298,17 +1298,17 @@ export function publicContextForAction(
     if (typeof legalAction.payload.shuffledFaceUpArchivesCount === "number")
       context.shuffledFaceUpArchivesCount =
         legalAction.payload.shuffledFaceUpArchivesCount;
-    if (typeof legalAction.payload.ambushDefinitionId === "string")
+    if (typeof legalAction.payload.ambushDefinitionId === "number")
       context.ambushDefinitionId = legalAction.payload.ambushDefinitionId;
     if (typeof legalAction.payload.advancementCounterCount === "number")
       context.advancementCounterCount =
         legalAction.payload.advancementCounterCount;
     if (typeof legalAction.payload.runnerTagsAfter === "number")
       context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
-    if (typeof legalAction.payload.trashedCardDefinitionId === "string")
+    if (typeof legalAction.payload.trashedCardDefinitionId === "number")
       context.trashedCardDefinitionId =
         legalAction.payload.trashedCardDefinitionId;
-    if (typeof legalAction.payload.targetCardDefinitionId === "string")
+    if (typeof legalAction.payload.targetCardDefinitionId === "number")
       context.targetCardDefinitionId =
         legalAction.payload.targetCardDefinitionId;
     if (typeof legalAction.payload.removedCounterAmount === "number")
@@ -1323,16 +1323,16 @@ export function publicContextForAction(
       context.searchShuffleAfter = legalAction.payload.searchShuffleAfter;
     if (typeof legalAction.payload.temporaryInstall === "boolean")
       context.temporaryInstall = legalAction.payload.temporaryInstall;
-    if (typeof legalAction.payload.installedProgramDefinitionId === "string")
+    if (typeof legalAction.payload.installedProgramDefinitionId === "number")
       context.installedProgramDefinitionId =
         legalAction.payload.installedProgramDefinitionId;
-    if (typeof legalAction.payload.installedCardDefinitionId === "string")
+    if (typeof legalAction.payload.installedCardDefinitionId === "number")
       context.installedCardDefinitionId =
         legalAction.payload.installedCardDefinitionId;
-    if (typeof legalAction.payload.publicRevealDefinitionId === "string")
+    if (typeof legalAction.payload.publicRevealDefinitionId === "number")
       context.publicRevealDefinitionId =
         legalAction.payload.publicRevealDefinitionId;
-    if (typeof legalAction.payload.returnedProgramDefinitionId === "string")
+    if (typeof legalAction.payload.returnedProgramDefinitionId === "number")
       context.returnedProgramDefinitionId =
         legalAction.payload.returnedProgramDefinitionId;
     if (typeof legalAction.payload.serverId === "string")
@@ -1373,38 +1373,38 @@ export function publicContextForAction(
       const value = legalAction.payload[key];
       if (typeof value === "number") context[key] = value;
     }
-    if (typeof legalAction.payload.trashedForMemoryDefinitionIds === "string")
+    if (typeof legalAction.payload.trashedForMemoryDefinitionIds === "number")
       context.trashedForMemoryDefinitionIds =
         legalAction.payload.trashedForMemoryDefinitionIds;
     if (
       typeof legalAction.payload.runnerInstallPaymentSourceDefinitionIds ===
-      "string"
+      "number"
     )
       context.runnerInstallPaymentSourceDefinitionIds =
         legalAction.payload.runnerInstallPaymentSourceDefinitionIds;
-    if (typeof legalAction.payload.trashedCardDefinitionIds === "string")
+    if (typeof legalAction.payload.trashedCardDefinitionIds === "number")
       context.trashedCardDefinitionIds =
         legalAction.payload.trashedCardDefinitionIds;
     if (typeof legalAction.payload.returnedCount === "number")
       context.returnedCount = legalAction.payload.returnedCount;
-    if (typeof legalAction.payload.returnedCardDefinitionIds === "string")
+    if (typeof legalAction.payload.returnedCardDefinitionIds === "number")
       context.returnedCardDefinitionIds =
         legalAction.payload.returnedCardDefinitionIds;
     if (typeof legalAction.payload.archivesRevealCount === "number")
       context.archivesRevealCount = legalAction.payload.archivesRevealCount;
-    if (typeof legalAction.payload.archivesRevealDefinitionIds === "string")
+    if (typeof legalAction.payload.archivesRevealDefinitionIds === "number")
       context.archivesRevealDefinitionIds =
         legalAction.payload.archivesRevealDefinitionIds;
     if (typeof legalAction.payload.archivesRevealTitles === "string")
       context.archivesRevealTitles = legalAction.payload.archivesRevealTitles;
     if (
-      typeof legalAction.payload.archivesRevealAgendaDefinitionIds === "string"
+      typeof legalAction.payload.archivesRevealAgendaDefinitionIds === "number"
     )
       context.archivesRevealAgendaDefinitionIds =
         legalAction.payload.archivesRevealAgendaDefinitionIds;
     if (typeof legalAction.payload.revealedCount === "number")
       context.revealedCount = legalAction.payload.revealedCount;
-    if (typeof legalAction.payload.revealedAgendaDefinitionIds === "string")
+    if (typeof legalAction.payload.revealedAgendaDefinitionIds === "number")
       context.revealedAgendaDefinitionIds =
         legalAction.payload.revealedAgendaDefinitionIds;
     if (typeof legalAction.payload.publicRevealTitles === "string")
@@ -1430,13 +1430,13 @@ export function publicContextForAction(
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
     if (legalAction.payload.oncePerRunConsumed === true)
       context.oncePerRunConsumed = true;
-    if (typeof legalAction.payload.publicRevealDefinitionIds === "string")
+    if (typeof legalAction.payload.publicRevealDefinitionIds === "number")
       context.publicRevealDefinitionIds =
         legalAction.payload.publicRevealDefinitionIds;
     if (typeof legalAction.payload.exposedCardInstanceIds === "string")
       context.exposedCardInstanceIds =
         legalAction.payload.exposedCardInstanceIds;
-    if (typeof legalAction.payload.shownCardDefinitionIds === "string")
+    if (typeof legalAction.payload.shownCardDefinitionIds === "number")
       context.shownCardDefinitionIds =
         legalAction.payload.shownCardDefinitionIds;
     if (typeof legalAction.payload.exposedServerIds === "string")
@@ -1458,7 +1458,7 @@ export function publicContextForAction(
       legalAction.payload.exposedIndex >= 0
     )
       context.exposedIndex = legalAction.payload.exposedIndex;
-    if (typeof legalAction.payload.targetCardDefinitionIds === "string")
+    if (typeof legalAction.payload.targetCardDefinitionIds === "number")
       context.targetCardDefinitionIds =
         legalAction.payload.targetCardDefinitionIds;
     context.redactedKind = "hidden_zone";
@@ -1480,7 +1480,7 @@ export function publicContextForAction(
     if (typeof value === "number") context[key] = value;
   }
   if (
-    typeof legalAction.payload?.accessTrashCostSourceDefinitionIds === "string"
+    typeof legalAction.payload?.accessTrashCostSourceDefinitionIds === "number"
   )
     context.accessTrashCostSourceDefinitionIds =
       legalAction.payload.accessTrashCostSourceDefinitionIds;
@@ -1501,7 +1501,7 @@ export function publicContextForAction(
     context.stealCost = legalAction.payload.stealCost;
   if (typeof legalAction.payload?.stealAdditionalCost === "number")
     context.stealAdditionalCost = legalAction.payload.stealAdditionalCost;
-  if (typeof legalAction.payload?.stealCostSourceDefinitionIds === "string")
+  if (typeof legalAction.payload?.stealCostSourceDefinitionIds === "number")
     context.stealCostSourceDefinitionIds =
       legalAction.payload.stealCostSourceDefinitionIds;
   if (typeof legalAction.payload?.stealCostSourceTitles === "string")
@@ -1512,7 +1512,7 @@ export function publicContextForAction(
     context.revealKind = legalAction.payload.publicRevealKind;
   if (typeof legalAction.payload?.publicRevealKind === "string")
     context.publicRevealKind = legalAction.payload.publicRevealKind;
-  if (typeof legalAction.payload?.publicRevealDefinitionId === "string")
+  if (typeof legalAction.payload?.publicRevealDefinitionId === "number")
     context.publicRevealDefinitionId =
       legalAction.payload.publicRevealDefinitionId;
   if (legalAction.payload?.hiddenRunnerResourceRevealed === true) {
@@ -1543,7 +1543,7 @@ export function publicContextForAction(
     context.badPublicityAfter = legalAction.payload.badPublicityAfter;
   if (typeof legalAction.payload?.targetCount === "number")
     context.targetCount = legalAction.payload.targetCount;
-  if (typeof legalAction.payload?.targetCardDefinitionIds === "string")
+  if (typeof legalAction.payload?.targetCardDefinitionIds === "number")
     context.targetCardDefinitionIds =
       legalAction.payload.targetCardDefinitionIds;
   if (typeof legalAction.payload?.removedTags === "number")
@@ -1719,7 +1719,7 @@ export function publicContextForAction(
     context.runStartBypassAutoPassedIce = true;
     if (
       typeof legalAction.payload.runStartBypassPassedIceDefinitionId ===
-      "string"
+      "number"
     )
       context.runStartBypassPassedIceDefinitionId =
         legalAction.payload.runStartBypassPassedIceDefinitionId;
@@ -1728,7 +1728,7 @@ export function publicContextForAction(
     context.scoredAsAgenda = true;
   if (typeof legalAction.payload?.sourceTrashed === "boolean")
     context.sourceTrashed = legalAction.payload.sourceTrashed;
-  if (typeof legalAction.payload?.ambushDefinitionId === "string")
+  if (typeof legalAction.payload?.ambushDefinitionId === "number")
     context.ambushDefinitionId = legalAction.payload.ambushDefinitionId;
   if (typeof legalAction.payload?.tagConditionMet === "boolean")
     context.tagConditionMet = legalAction.payload.tagConditionMet;
@@ -1775,7 +1775,7 @@ export function publicContextForAction(
   }
   if (typeof legalAction.payload?.agendaAbility === "string")
     context.agendaAbility = legalAction.payload.agendaAbility;
-  if (typeof legalAction.payload?.cardDefinitionId === "string")
+  if (typeof legalAction.payload?.cardDefinitionId === "number")
     context.cardDefinitionId = legalAction.payload.cardDefinitionId;
   if (typeof legalAction.payload?.spentPowerCounters === "number")
     context.spentPowerCounters = legalAction.payload.spentPowerCounters;
@@ -1947,14 +1947,14 @@ export function publicContextForAction(
   }
   if (typeof legalAction.payload?.runStartTaxCredits === "number")
     context.runStartTaxCredits = legalAction.payload.runStartTaxCredits;
-  if (typeof legalAction.payload?.runStartTaxSourceDefinitionIds === "string")
+  if (typeof legalAction.payload?.runStartTaxSourceDefinitionIds === "number")
     context.runStartTaxSourceDefinitionIds =
       legalAction.payload.runStartTaxSourceDefinitionIds;
   if (typeof legalAction.payload?.runStartLossCredits === "number")
     context.runStartLossCredits = legalAction.payload.runStartLossCredits;
   if (typeof legalAction.payload?.runStartLossApplied === "number")
     context.runStartLossApplied = legalAction.payload.runStartLossApplied;
-  if (typeof legalAction.payload?.runStartLossSourceDefinitionIds === "string")
+  if (typeof legalAction.payload?.runStartLossSourceDefinitionIds === "number")
     context.runStartLossSourceDefinitionIds =
       legalAction.payload.runStartLossSourceDefinitionIds;
   if (typeof legalAction.payload?.v1918UpgradeAbility === "string") {
@@ -1967,7 +1967,7 @@ export function publicContextForAction(
       context.remainingCounters = legalAction.payload.remainingCounters;
     if (typeof legalAction.payload.runnerTagsAfter === "number")
       context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
-    if (typeof legalAction.payload.runStartTaxSourceDefinitionIds === "string")
+    if (typeof legalAction.payload.runStartTaxSourceDefinitionIds === "number")
       context.runStartTaxSourceDefinitionIds =
         legalAction.payload.runStartTaxSourceDefinitionIds;
   }
@@ -1982,7 +1982,7 @@ export function publicContextForAction(
     context.v1919OperationAbility = legalAction.payload.v1919OperationAbility;
     if (typeof legalAction.payload.targetCardId === "string")
       context.targetCardId = legalAction.payload.targetCardId;
-    if (typeof legalAction.payload.targetCardDefinitionId === "string")
+    if (typeof legalAction.payload.targetCardDefinitionId === "number")
       context.targetCardDefinitionId =
         legalAction.payload.targetCardDefinitionId;
     if (typeof legalAction.payload.addedCounterAmount === "number")
@@ -2002,13 +2002,13 @@ export function publicContextForAction(
         legalAction.payload.advancementCountersMoved;
     if (
       typeof legalAction.payload.advancementCounterSourceDefinitionId ===
-      "string"
+      "number"
     )
       context.advancementCounterSourceDefinitionId =
         legalAction.payload.advancementCounterSourceDefinitionId;
     if (
       typeof legalAction.payload.advancementCounterTargetDefinitionId ===
-      "string"
+      "number"
     )
       context.advancementCounterTargetDefinitionId =
         legalAction.payload.advancementCounterTargetDefinitionId;
@@ -2020,7 +2020,7 @@ export function publicContextForAction(
         legalAction.payload.advancementCounterTargetAfter;
     if (typeof legalAction.payload.agendaPointCostPaid === "number")
       context.agendaPointCostPaid = legalAction.payload.agendaPointCostPaid;
-    if (typeof legalAction.payload.forfeitedAgendaDefinitionId === "string")
+    if (typeof legalAction.payload.forfeitedAgendaDefinitionId === "number")
       context.forfeitedAgendaDefinitionId =
         legalAction.payload.forfeitedAgendaDefinitionId;
     if (typeof legalAction.payload.specialZone === "string")
@@ -2039,12 +2039,12 @@ export function publicContextForAction(
       legalAction.payload.v1915RunnerProgramAbility ?? "card_implementation";
     if (typeof legalAction.payload.revealCount === "number")
       context.revealCount = legalAction.payload.revealCount;
-    if (typeof legalAction.payload.revealedCardDefinitionIds === "string")
+    if (typeof legalAction.payload.revealedCardDefinitionIds === "number")
       context.revealedCardDefinitionIds =
         legalAction.payload.revealedCardDefinitionIds;
     if (typeof legalAction.payload.revealedProgramCount === "number")
       context.revealedProgramCount = legalAction.payload.revealedProgramCount;
-    if (typeof legalAction.payload.installedProgramDefinitionId === "string")
+    if (typeof legalAction.payload.installedProgramDefinitionId === "number")
       context.installedProgramDefinitionId =
         legalAction.payload.installedProgramDefinitionId;
     if (typeof legalAction.payload.installedProgramCount === "number")
@@ -2078,10 +2078,10 @@ export function publicContextForAction(
       context.rezCostPaid = legalAction.payload.rezCostPaid;
     if (typeof legalAction.payload.trashedCount === "number")
       context.trashedCount = legalAction.payload.trashedCount;
-    if (typeof legalAction.payload.trashedCardDefinitionId === "string")
+    if (typeof legalAction.payload.trashedCardDefinitionId === "number")
       context.trashedCardDefinitionId =
         legalAction.payload.trashedCardDefinitionId;
-    if (typeof legalAction.payload.targetIceDefinitionId === "string")
+    if (typeof legalAction.payload.targetIceDefinitionId === "number")
       context.targetIceDefinitionId = legalAction.payload.targetIceDefinitionId;
     if (legalAction.payload.sourceAbilityExhausted === true)
       context.sourceAbilityExhausted = true;
@@ -2101,7 +2101,7 @@ export function publicContextForAction(
     if (typeof legalAction.payload.hostedProgramCountAfter === "number")
       context.hostedProgramCountAfter =
         legalAction.payload.hostedProgramCountAfter;
-    if (typeof legalAction.payload.returnedCardDefinitionId === "string")
+    if (typeof legalAction.payload.returnedCardDefinitionId === "number")
       context.returnedCardDefinitionId =
         legalAction.payload.returnedCardDefinitionId;
     if (legalAction.payload.returnedToGrip === true)
@@ -2110,7 +2110,7 @@ export function publicContextForAction(
   if (typeof legalAction.payload?.v1919RunnerProgramAbility === "string") {
     context.v1919RunnerProgramAbility =
       legalAction.payload.v1919RunnerProgramAbility;
-    if (typeof legalAction.payload.sourceDefinitionId === "string")
+    if (typeof legalAction.payload.sourceDefinitionId === "number")
       context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
     if (typeof legalAction.payload.serverLabel === "string")
       context.serverLabel = legalAction.payload.serverLabel;
@@ -2190,7 +2190,7 @@ export function publicContextForAction(
     if (typeof legalAction.payload.corpBonusAgendaPointsSpent === "number")
       context.corpBonusAgendaPointsSpent =
         legalAction.payload.corpBonusAgendaPointsSpent;
-    if (typeof legalAction.payload.spentAgendaDefinitionIds === "string")
+    if (typeof legalAction.payload.spentAgendaDefinitionIds === "number")
       context.spentAgendaDefinitionIds =
         legalAction.payload.spentAgendaDefinitionIds;
   }
@@ -2223,9 +2223,9 @@ export function publicContextForAction(
     context.v1921UpgradeAbility = legalAction.payload.v1921UpgradeAbility;
     if (typeof legalAction.payload.v1921DieRoll === "number")
       context.v1921DieRoll = legalAction.payload.v1921DieRoll;
-    if (typeof legalAction.payload.sourceDefinitionId === "string")
+    if (typeof legalAction.payload.sourceDefinitionId === "number")
       context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
-    if (typeof legalAction.payload.passedIceDefinitionId === "string")
+    if (typeof legalAction.payload.passedIceDefinitionId === "number")
       context.passedIceDefinitionId = legalAction.payload.passedIceDefinitionId;
     if (typeof legalAction.payload.serverLabel === "string")
       context.serverLabel = legalAction.payload.serverLabel;
@@ -2244,7 +2244,7 @@ export function publicContextForAction(
     if (typeof legalAction.payload.runStartRandomStrength === "number")
       context.runStartRandomStrength =
         legalAction.payload.runStartRandomStrength;
-    if (typeof legalAction.payload.sourceDefinitionId === "string")
+    if (typeof legalAction.payload.sourceDefinitionId === "number")
       context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
     if (typeof legalAction.payload.randomCounterAfter === "number")
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
@@ -2301,7 +2301,7 @@ export function publicContextForAction(
     }
     if (typeof legalAction.payload.derezzedCount === "number")
       context.derezzedCount = legalAction.payload.derezzedCount;
-    if (typeof legalAction.payload.targetCardDefinitionId === "string")
+    if (typeof legalAction.payload.targetCardDefinitionId === "number")
       context.targetCardDefinitionId =
         legalAction.payload.targetCardDefinitionId;
     if (typeof legalAction.payload.targetServerLabel === "string")
@@ -2350,7 +2350,7 @@ export function publicContextForAction(
     if (typeof legalAction.payload.breakSubroutineTotalCost === "number")
       context.breakSubroutineTotalCost =
         legalAction.payload.breakSubroutineTotalCost;
-    if (typeof legalAction.payload.sourceDefinitionId === "string")
+    if (typeof legalAction.payload.sourceDefinitionId === "number")
       context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
     if (typeof legalAction.payload.runLockActionsAdded === "number")
       context.runLockActionsAdded = legalAction.payload.runLockActionsAdded;
@@ -2519,7 +2519,7 @@ export function publicContextForAction(
       context.delayedAgendaAccessScoreScheduled = true;
     if (
       typeof legalAction.payload?.delayedAgendaAccessSourceDefinitionId ===
-      "string"
+      "number"
     )
       context.delayedAgendaAccessSourceDefinitionId =
         legalAction.payload.delayedAgendaAccessSourceDefinitionId;
@@ -2652,7 +2652,7 @@ function publicInstalledCorpCardDefinitionId(
   state: GameState,
   cardId: string,
   deps: PublicContextForActionDependencies,
-): string | undefined {
+): number | undefined {
   const instance = state.cardInstances[cardId];
   if (!instance || instance.zone.side !== "corp") return undefined;
   const area =

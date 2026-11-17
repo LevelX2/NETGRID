@@ -68,7 +68,7 @@ it.each(["hidden_source", "already_funded", "last_click", "hand_buffer_met"])(
       )!.payload!.visibleDrawTaxSourceCount = 0;
       for (const server of input.playerView.servers)
         server.root = server.root.filter(
-          (c) => c.definitionId !== "onr_v1_313_city-surveillance",
+          (c) => c.definitionId !== 525,
         );
     }
     if (variant === "already_funded") input.playerView.own.credits = 1;

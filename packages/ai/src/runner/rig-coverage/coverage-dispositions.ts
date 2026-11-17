@@ -317,7 +317,7 @@ export function runnerCoverageAlternativeCopyDisposition(params: {
   candidates: readonly ActionSemanticCandidate[];
   coverageGaps: readonly RunnerCoverageGapSignal[];
   developments: readonly {
-    definitionId?: string;
+    definitionId?: number;
     assignedDomainPlanIds: readonly string[];
   }[];
 }): string | undefined {

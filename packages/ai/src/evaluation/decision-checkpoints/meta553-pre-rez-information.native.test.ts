@@ -244,7 +244,7 @@ describe("native pre-rez approach information", () => {
     for (const server of ["archives", "remote_1"]) {
       const c = cs.find(
         (c) =>
-          c.sourceDefinitionId === "onr_proteus_104_decoy-signal" &&
+          c.sourceDefinitionId === 162 &&
           input.legalActions.find((a) => a.actionId === c.actionId)?.payload
             ?.serverId === server,
       )!;
@@ -255,7 +255,7 @@ describe("native pre-rez approach information", () => {
     }
     const rd = cs.find(
       (c) =>
-        c.sourceDefinitionId === "onr_proteus_104_decoy-signal" &&
+        c.sourceDefinitionId === 162 &&
         input.legalActions.find((a) => a.actionId === c.actionId)?.payload
           ?.serverId === "rd",
     )!;

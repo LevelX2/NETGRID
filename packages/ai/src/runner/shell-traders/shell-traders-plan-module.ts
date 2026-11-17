@@ -207,7 +207,7 @@ function shellTradersCandidateMatchesExactBinding(
   if (typeof payloadTargetCardId === "string") {
     return (
       payloadTargetCardId === signal.targetCardInstanceId &&
-      (typeof payloadTargetDefinitionId !== "string" ||
+      (typeof payloadTargetDefinitionId !== "number" ||
         payloadTargetDefinitionId === signal.targetDefinitionId)
     );
   }

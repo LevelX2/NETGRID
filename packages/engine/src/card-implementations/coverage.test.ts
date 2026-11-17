@@ -84,22 +84,22 @@ describe("CardImplementation coverage and registry invariants", () => {
   });
   it("keeps every avoid-tag card in the shared prevention registry with its printed cost", () => {
     const cases = [
-      ["onr_v1_135_nasuko-cycle", { kind: "credit", amount: 3 }, 125],
-      ["onr_v1_161_fall-guy", { kind: "trash_source" }, 120],
-      ["onr_v1_167_leland-corporate-bodyguard", { kind: "trash_source" }, 122],
-      ["onr_v1_170_nomad-allies", { kind: "trash_source" }, 121],
+      [347, { kind: "credit", amount: 3 }, 125],
+      [373, { kind: "trash_source" }, 120],
+      [379, { kind: "trash_source" }, 122],
+      [382, { kind: "trash_source" }, 121],
       [
-        "onr_v1_187_wilson-weeflerunner-apprentice",
+        399,
         { kind: "trash_source" },
         130,
       ],
       [
-        "onr_proteus_140_expendable-family-member",
+        198,
         { kind: "credit_and_trash_source", amount: 1 },
         118,
       ],
       [
-        "onr_classic_051_vintage-camaro",
+        55,
         { kind: "credit_and_forgo_next_action", amount: 1 },
         130,
       ],
@@ -122,24 +122,24 @@ describe("CardImplementation coverage and registry invariants", () => {
   });
 
   const p344SimpleIcebreakers = [
-    "onr_v1_039_krash",
-    "onr_v1_014_codecracker",
-    "onr_v1_016_cyfermaster",
-    "onr_v1_052_raffles",
-    "onr_v1_070_tinweasel",
-    "onr_v1_073_wizards-book",
-    "onr_v1_021_dwarf",
-    "onr_v1_074_worm",
-    "onr_v1_006_black-dahlia",
-    "onr_v1_015_codeslinger",
-    "onr_v1_040_loony-goon",
-    "onr_v1_054_raptor",
-    "onr_v1_060_shaka",
-    "onr_v1_072_wild-card",
-    "onr_v1_027_flak",
-    "onr_v1_018_dogcatcher",
-    "onr_v1_055_reflector",
-    "onr_v1_056_replicator",
+    251,
+    226,
+    228,
+    264,
+    282,
+    285,
+    233,
+    286,
+    218,
+    227,
+    252,
+    266,
+    272,
+    284,
+    239,
+    230,
+    267,
+    268,
   ] as const;
 
   it("migrates P3.44 simple icebreakers into CardImplementation coverage", () => {
@@ -158,25 +158,25 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
     expect(
       CARD_IMPLEMENTATION_COVERAGE_OVERRIDES.some(
-        (entry) => entry.cardDefinitionId === "onr_v1_039_krash",
+        (entry) => entry.cardDefinitionId === 251,
       ),
     ).toBe(false);
   });
 
   const p345SpecialIcebreakers = [
-    "onr_v1_031_hammer",
-    "onr_v1_036_jackhammer",
-    "onr_v1_047_pile-driver",
-    "onr_v1_053_ramming-piston",
-    "onr_v1_019_dropp",
-    "onr_v1_030_grubb",
-    "onr_v1_037_japanese-water-torture",
-    "onr_v1_066_snowball",
-    "onr_v1_002_ai-boon",
-    "onr_v1_007_blink",
-    "onr_v1_005_bartmoss-memorial-icebreaker",
-    "onr_v1_020_dupre",
-    "onr_v1_023_evil-twin",
+    243,
+    248,
+    259,
+    265,
+    231,
+    242,
+    249,
+    278,
+    214,
+    219,
+    217,
+    232,
+    235,
   ] as const;
 
   it("migrates P3.45 special icebreakers into CardImplementation coverage", () => {
@@ -194,7 +194,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_023_evil-twin"),
+      cardImplementationForDefinitionId(235),
     ).toMatchObject({
       damagePreventionSources: expect.any(Array),
     });
@@ -202,9 +202,9 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates P3.46 daemon hosting and Chimera into CardImplementation coverage", () => {
     const daemonSpecs = [
-      ["onr_v1_001_afreet", 3, true],
-      ["onr_v1_033_imp", 2, true],
-      ["onr_v1_069_succubus", 3, false],
+      [213, 3, true],
+      [245, 2, true],
+      [281, 3, false],
     ] as const;
     for (const [definitionId, capacityMu, reducesStrength] of daemonSpecs) {
       const implementation = cardImplementationForDefinitionId(definitionId);
@@ -225,7 +225,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_353_chimera")?.accessEffects,
+      cardImplementationForDefinitionId(565)?.accessEffects,
     ).toEqual([
       expect.objectContaining({
         capabilityKey: "access_effects_on_access_trash_installed_runner_cards",
@@ -244,16 +244,16 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     ]);
     expect(
-      cardImplementationCoverageForDefinitionId("onr_v1_353_chimera"),
+      cardImplementationCoverageForDefinitionId(565),
     ).toMatchObject({
-      cardDefinitionId: "onr_v1_353_chimera",
+      cardDefinitionId: 565,
       status: "implemented",
     });
   });
 
   it("migrates P3.47 runner recycle preps into CardImplementation coverage", () => {
     expect(
-      cardImplementationForDefinitionId("onr_v1_100_misc-for-sale")?.abilities,
+      cardImplementationForDefinitionId(312)?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "on_play",
@@ -270,7 +270,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_103_organ-donor")?.abilities,
+      cardImplementationForDefinitionId(315)?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "on_play",
@@ -286,7 +286,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_101_mit-west-tier")?.abilities,
+      cardImplementationForDefinitionId(313)?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "on_play",
@@ -301,9 +301,9 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     for (const definitionId of [
-      "onr_v1_100_misc-for-sale",
-      "onr_v1_101_mit-west-tier",
-      "onr_v1_103_organ-donor",
+      312,
+      313,
+      315,
     ] as const) {
       expect(
         cardImplementationCoverageForDefinitionId(definitionId),
@@ -314,21 +314,21 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
     expect(
       cardImplementationCoverageForDefinitionId(
-        "onr_v1_131_microtech-backup-drive",
+        343,
       )?.status,
     ).toBe("implemented");
   });
 
   it("migrates P3.48 run control cards into CardImplementation coverage", () => {
     const implemented = [
-      "onr_v1_076_all-nighter",
-      "onr_v1_094_inside-job",
-      "onr_v1_112_stumble-through-wilderspace",
-      "onr_v1_123_bodyweight-data-creche",
-      "onr_v1_080_core-command-jettison-ice",
-      "onr_v1_109_security-code-worm-chip",
-      "onr_v1_044_netspace-inverter",
-      "onr_v1_086_forged-activation-orders",
+      288,
+      306,
+      324,
+      335,
+      292,
+      321,
+      256,
+      298,
     ] as const;
 
     for (const definitionId of implemented) {
@@ -344,7 +344,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_123_bodyweight-data-creche")
+      cardImplementationForDefinitionId(335)
         ?.successfulRunFollowups,
     ).toContainEqual(
       expect.objectContaining({
@@ -352,7 +352,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_044_netspace-inverter")
+      cardImplementationForDefinitionId(256)
         ?.successfulRunFollowups,
     ).toContainEqual(
       expect.objectContaining({
@@ -360,27 +360,27 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_088_fortress-respecification"),
+      cardImplementationForDefinitionId(300),
     ).toBeDefined();
   });
 
   it("migrates P3.51 Corp utility operations and nodes into CardImplementation coverage", () => {
     const p351Cards = [
-      "onr_v1_297_overtime-incentives",
-      "onr_v1_289_edgerunner-inc-temps",
-      "onr_v1_296_off-site-backups",
-      "onr_v1_298_planning-consultants",
-      "onr_v1_306_trojan-horse",
-      "onr_v1_303_silver-lining-recovery-protocol",
-      "onr_v1_286_corporate-detective-agency",
-      "onr_v1_299_power-grid-overload",
-      "onr_v1_322_euromarket-consortium",
-      "onr_v1_336_rescheduler",
-      "onr_v1_316_cowboy-sysop",
-      "onr_v1_333_omniscience-foundation",
-      "onr_v1_319_disinfectant-inc",
-      "onr_v1_332_newsgroup-taunting",
-      "onr_v1_330_krumz",
+      509,
+      501,
+      508,
+      510,
+      518,
+      515,
+      498,
+      511,
+      534,
+      548,
+      528,
+      545,
+      531,
+      544,
+      542,
     ] as const;
 
     for (const definitionId of p351Cards) {
@@ -396,11 +396,11 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_319_disinfectant-inc")
+      cardImplementationForDefinitionId(531)
         ?.corpUtility,
     ).toMatchObject({ kind: "counter_prevention_replacement" });
     expect(
-      cardImplementationForDefinitionId("onr_v1_330_krumz")?.corpUtility,
+      cardImplementationForDefinitionId(542)?.corpUtility,
     ).toMatchObject({
       kind: "recurring_trace_credit_pool",
       amount: 1,
@@ -412,10 +412,10 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates P3.52 fort ICE-control windows into CardImplementation coverage", () => {
     const p352Cards = [
-      "onr_v1_363_olivia-salazar",
-      "onr_v1_364_omni-kismet-ph-d",
-      "onr_v1_369_singapore-city-grid",
-      "onr_v1_026_false-echo",
+      575,
+      576,
+      581,
+      238,
     ] as const;
 
     for (const definitionId of p352Cards) {
@@ -431,7 +431,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_363_olivia-salazar")
+      cardImplementationForDefinitionId(575)
         ?.fortRunWindows,
     ).toContainEqual(
       expect.objectContaining({
@@ -440,7 +440,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_364_omni-kismet-ph-d")
+      cardImplementationForDefinitionId(576)
         ?.fortRunWindows,
     ).toContainEqual(
       expect.objectContaining({
@@ -448,7 +448,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_369_singapore-city-grid")
+      cardImplementationForDefinitionId(581)
         ?.fortRunWindows,
     ).toContainEqual(
       expect.objectContaining({
@@ -456,7 +456,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_026_false-echo")
+      cardImplementationForDefinitionId(238)
         ?.successfulRunFollowups,
     ).toContainEqual(
       expect.objectContaining({
@@ -467,11 +467,11 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates P3.53 run/encounter interventions into CardImplementation coverage", () => {
     const p353Cards = [
-      "onr_v1_065_smarteye",
-      "onr_v1_067_speed-trap",
-      "onr_v1_242_fatal-attractor",
-      "onr_v1_247_haunting-inquisition",
-      "onr_v1_271_tko-2-0",
+      277,
+      279,
+      454,
+      459,
+      483,
     ] as const;
 
     for (const definitionId of p353Cards) {
@@ -487,7 +487,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_065_smarteye")
+      cardImplementationForDefinitionId(277)
         ?.runEncounterInterventions,
     ).toContainEqual(
       expect.objectContaining({
@@ -495,7 +495,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_067_speed-trap")
+      cardImplementationForDefinitionId(279)
         ?.runEncounterInterventions,
     ).toContainEqual(
       expect.objectContaining({
@@ -503,7 +503,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_242_fatal-attractor"]?.subroutines,
+      CARD_DEFINITIONS_BY_ID[454]?.subroutines,
     ).toContainEqual(
       expect.objectContaining({
         type: "set_next_encounter_unless_fully_break_damage",
@@ -511,39 +511,39 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_242_fatal-attractor")
+      cardImplementationForDefinitionId(454)
         ?.printedSubroutines,
     ).toBeUndefined();
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_247_haunting-inquisition"]?.subroutines,
+      CARD_DEFINITIONS_BY_ID[459]?.subroutines,
     ).toContainEqual(
       expect.objectContaining({
         type: "set_runner_run_lock_actions",
         amount: 6,
       }),
     );
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_271_tko-2-0"]?.subroutines).toEqual([
+    expect(CARD_DEFINITIONS_BY_ID[483]?.subroutines).toEqual([
       expect.objectContaining({
         type: "end_the_run_and_runner_forgoes_next_action",
       }),
     ]);
     expect(
-      cardImplementationForDefinitionId("onr_v1_247_haunting-inquisition")
+      cardImplementationForDefinitionId(459)
         ?.printedSubroutines,
     ).toBeUndefined();
     expect(
-      cardImplementationForDefinitionId("onr_v1_271_tko-2-0")
+      cardImplementationForDefinitionId(483)
         ?.printedSubroutines,
     ).toBeUndefined();
   });
 
   it("migrates P3.54 delayed fort run windows into CardImplementation coverage", () => {
     const p354Cards = [
-      "onr_v1_349_aardvark",
-      "onr_v1_358_dr-dreff",
-      "onr_v1_359_jenny-jett",
-      "onr_v1_372_turbeau-delacroix",
-      "onr_v1_373_twenty-four-hour-surveillance",
+      561,
+      570,
+      571,
+      584,
+      585,
     ] as const;
 
     for (const definitionId of p354Cards) {
@@ -559,14 +559,14 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_358_dr-dreff")?.fortRunWindows,
+      cardImplementationForDefinitionId(570)?.fortRunWindows,
     ).toContainEqual(
       expect.objectContaining({
         kind: "temporary_hq_ice_encounter_after_successful_run",
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_359_jenny-jett")
+      cardImplementationForDefinitionId(571)
         ?.fortRunWindows,
     ).toContainEqual(
       expect.objectContaining({
@@ -575,7 +575,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     );
     expect(
       cardImplementationForDefinitionId(
-        "onr_v1_373_twenty-four-hour-surveillance",
+        585,
       )?.fortRunWindows,
     ).toContainEqual(
       expect.objectContaining({
@@ -583,7 +583,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_372_turbeau-delacroix")
+      cardImplementationForDefinitionId(584)
         ?.accessEffects?.[0]?.effects,
     ).toContainEqual(
       expect.objectContaining({
@@ -595,11 +595,11 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates P3.55 fort region longtail cards into CardImplementation coverage", () => {
     const p355Cards = [
-      "onr_v1_365_paris-city-grid",
-      "onr_v1_367_rio-de-janeiro-city-grid",
-      "onr_v1_368_roving-submarine",
-      "onr_v1_371_tokyo-chiba-infighting",
-      "onr_v1_361_namatoki-plaza",
+      577,
+      579,
+      580,
+      583,
+      573,
     ] as const;
 
     for (const definitionId of p355Cards) {
@@ -615,7 +615,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_365_paris-city-grid")
+      cardImplementationForDefinitionId(577)
         ?.fortRunWindows,
     ).toContainEqual(
       expect.objectContaining({
@@ -624,7 +624,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_367_rio-de-janeiro-city-grid")
+      cardImplementationForDefinitionId(579)
         ?.fortRunWindows,
     ).toContainEqual(
       expect.objectContaining({
@@ -632,7 +632,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_368_roving-submarine")
+      cardImplementationForDefinitionId(580)
         ?.fortRunWindows,
     ).toContainEqual(
       expect.objectContaining({
@@ -643,7 +643,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_371_tokyo-chiba-infighting")
+      cardImplementationForDefinitionId(583)
         ?.fortRunWindows,
     ).toContainEqual(
       expect.objectContaining({
@@ -652,7 +652,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_361_namatoki-plaza")
+      cardImplementationForDefinitionId(573)
         ?.fortCapacityModifiers,
     ).toContainEqual(
       expect.objectContaining({
@@ -664,13 +664,13 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates P3.56 remaining Corp ICE longtail subroutines into CardImplementation coverage", () => {
     const p356Cards = [
-      "onr_v1_222_ball-and-chain",
-      "onr_v1_228_cinderella",
-      "onr_v1_248_homewrecker",
-      "onr_v1_260_pocket-virtual-reality",
-      "onr_v1_272_too-many-doors",
-      "onr_v1_275_vacuum-link",
-      "onr_v1_276_viral-15",
+      434,
+      440,
+      460,
+      472,
+      484,
+      487,
+      488,
     ] as const;
 
     for (const definitionId of p356Cards) {
@@ -686,32 +686,32 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_260_pocket-virtual-reality")
+      cardImplementationForDefinitionId(472)
         ?.iceEncounter,
     ).toMatchObject({
       kind: "add_encounter_temporary_credits",
       amount: 4,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.subroutines,
+      CARD_DEFINITIONS_BY_ID[488]?.subroutines,
     ).toHaveLength(2);
     expect(
-      cardImplementationForDefinitionId("onr_v1_276_viral-15")
+      cardImplementationForDefinitionId(488)
         ?.printedSubroutines,
     ).toBeUndefined();
   });
 
   it("migrates Proteus Phase 1a reuse-only cards into CardImplementation coverage", () => {
     const phase1aCards = [
-      "onr_proteus_041_toughoniumtm-wall",
-      "onr_proteus_065_networked-center",
-      "onr_proteus_072_research-bunker",
-      "onr_proteus_077_weapons-depot",
-      "onr_proteus_150_streetware-distributor",
+      99,
+      123,
+      130,
+      135,
+      208,
     ] as const;
 
     for (const definitionId of phase1aCards) {
-      if (definitionId === "onr_proteus_041_toughoniumtm-wall") {
+      if (definitionId === 99) {
         expect(cardImplementationForDefinitionId(definitionId)).toBeUndefined();
         expect(
           cardImplementationCoverageForDefinitionId(definitionId),
@@ -733,11 +733,11 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_proteus_041_toughoniumtm-wall"]?.subroutines,
+      CARD_DEFINITIONS_BY_ID[99]?.subroutines,
     ).toHaveLength(4);
     expect(
       cardImplementationForDefinitionId(
-        "onr_proteus_150_streetware-distributor",
+        208,
       )?.abilities?.[0],
     ).toMatchObject({
       kind: "activated",
@@ -748,8 +748,8 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus Phase 1b dynamic public ETR ICE into CardImplementation coverage", () => {
     const phase1bCards = [
-      "onr_proteus_031_minotaur",
-      "onr_proteus_034_riddler",
+      89,
+      92,
     ] as const;
 
     for (const definitionId of phase1bCards) {
@@ -765,7 +765,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_proteus_031_minotaur")
+      cardImplementationForDefinitionId(89)
         ?.modifiers?.[0],
     ).toMatchObject({
       kind: "additional_subroutine",
@@ -778,7 +778,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       },
     });
     expect(
-      cardImplementationForDefinitionId("onr_proteus_034_riddler")
+      cardImplementationForDefinitionId(92)
         ?.abilities?.[0],
     ).toMatchObject({
       kind: "activated",
@@ -789,8 +789,8 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus Phase 1d public fort pass windows into CardImplementation coverage", () => {
     const phase1dCards = [
-      "onr_proteus_062_lesley-major",
-      "onr_proteus_070_rasmin-bridger",
+      120,
+      128,
     ] as const;
 
     for (const definitionId of phase1dCards) {
@@ -806,7 +806,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_proteus_062_lesley-major")
+      cardImplementationForDefinitionId(120)
         ?.fortRunWindows?.[0],
     ).toMatchObject({
       kind: "add_advancement_counters_after_passing_last_ice_on_this_fort",
@@ -814,7 +814,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       target: "installed_card_in_this_fort",
     });
     expect(
-      cardImplementationForDefinitionId("onr_proteus_070_rasmin-bridger")
+      cardImplementationForDefinitionId(128)
         ?.fortRunWindows?.[0],
     ).toMatchObject({
       kind: "runner_pay_or_end_run_after_passing_ice_on_this_fort",
@@ -824,7 +824,7 @@ describe("CardImplementation coverage and registry invariants", () => {
   });
 
   it("migrates Proteus Phase 1g post-pass derez utility into CardImplementation coverage", () => {
-    const definitionId = "onr_proteus_085_disintegrator";
+    const definitionId = 143;
     expect(
       cardImplementationForDefinitionId(definitionId),
       definitionId,
@@ -847,10 +847,10 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus Phase 8d runner virus run counters into CardImplementation coverage", () => {
     const implemented = [
-      "onr_proteus_090_highlighter",
-      "onr_proteus_097_taxman",
-      "onr_proteus_098_vienna-22",
-      "onr_proteus_099_viral-pipeline",
+      148,
+      155,
+      156,
+      157,
     ] as const;
 
     for (const definitionId of implemented) {
@@ -870,8 +870,8 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus Phase 8e virus access-trash programs into CardImplementation coverage", () => {
     const implemented = [
-      "onr_proteus_084_crumble",
-      "onr_proteus_089_garbage-in",
+      142,
+      147,
     ] as const;
 
     for (const definitionId of implemented) {
@@ -891,8 +891,8 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus Phase 8f random Bad-Publicity virus longtails into CardImplementation coverage", () => {
     const implemented = [
-      "onr_proteus_078_armageddon",
-      "onr_proteus_094_scaldan",
+      136,
+      152,
     ] as const;
 
     for (const definitionId of implemented) {
@@ -911,7 +911,7 @@ describe("CardImplementation coverage and registry invariants", () => {
   });
 
   it("migrates Proteus Phase 2b scored-agenda Bad Publicity into CardImplementation coverage", () => {
-    const definitionId = "onr_proteus_002_charity-takeover";
+    const definitionId = 60;
     expect(
       cardImplementationForDefinitionId(definitionId),
       definitionId,
@@ -938,7 +938,7 @@ describe("CardImplementation coverage and registry invariants", () => {
   });
 
   it("migrates Proteus Phase 2c direct runner event BP damage into CardImplementation coverage", () => {
-    const definitionId = "onr_proteus_108_faked-hit";
+    const definitionId = 166;
     expect(
       cardImplementationForDefinitionId(definitionId),
       definitionId,
@@ -967,7 +967,7 @@ describe("CardImplementation coverage and registry invariants", () => {
   });
 
   it("migrates Proteus Phase 2d installed-connection BP cost into CardImplementation coverage", () => {
-    const definitionId = "onr_proteus_117_poisoned-water-supply";
+    const definitionId = 175;
     expect(
       cardImplementationForDefinitionId(definitionId),
       definitionId,
@@ -991,7 +991,7 @@ describe("CardImplementation coverage and registry invariants", () => {
   it("migrates Proteus Phase 3a variable ICE into CardImplementation coverage", () => {
     const cases = [
       {
-        definitionId: "onr_proteus_020_digiconda",
+        definitionId: 78,
         variableRez: {
           kind: "x_strength",
           additionalCostPerValue: 1,
@@ -1000,7 +1000,7 @@ describe("CardImplementation coverage and registry invariants", () => {
         },
       },
       {
-        definitionId: "onr_proteus_022_food-fight",
+        definitionId: 80,
         variableRez: {
           kind: "paid_end_the_run_subroutines",
           additionalCostPerSubroutine: 2,
@@ -1029,23 +1029,23 @@ describe("CardImplementation coverage and registry invariants", () => {
   it("migrates Proteus Phase 3b variable ICE into CardImplementation coverage", () => {
     const cases = [
       {
-        definitionId: "onr_proteus_013_caryatid",
+        definitionId: 71,
         variableRez: { kind: "alternate_subtype", additionalCost: 1 },
       },
       {
-        definitionId: "onr_proteus_017_credit-blocks",
+        definitionId: 75,
         variableRez: { kind: "alternate_subtype", additionalCost: 1 },
       },
       {
-        definitionId: "onr_proteus_023_galatea",
+        definitionId: 81,
         variableRez: { kind: "alternate_subtype", additionalCost: 1 },
       },
       {
-        definitionId: "onr_proteus_024_gatekeeper",
+        definitionId: 82,
         variableRez: { kind: "paid_end_the_run_subroutines" },
       },
       {
-        definitionId: "onr_proteus_025_homing-missile",
+        definitionId: 83,
         variableRez: {
           kind: "x_strength",
           maxValue: 8,
@@ -1053,19 +1053,19 @@ describe("CardImplementation coverage and registry invariants", () => {
         },
       },
       {
-        definitionId: "onr_proteus_028_lesser-arcana",
+        definitionId: 86,
         variableRez: { kind: "alternate_subtype", additionalCost: 1 },
       },
       {
-        definitionId: "onr_proteus_036_sandstorm",
+        definitionId: 94,
         variableRez: { kind: "paid_end_the_run_subroutines" },
       },
       {
-        definitionId: "onr_proteus_039_sphinx-2006",
+        definitionId: 97,
         variableRez: { kind: "alternate_subtype", additionalCost: 4 },
       },
       {
-        definitionId: "onr_proteus_040_sumo-2008",
+        definitionId: 98,
         variableRez: { kind: "alternate_subtype", additionalCost: 1 },
       },
     ] as const;
@@ -1089,10 +1089,10 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus Phase 3c relative ICE into CardImplementation coverage", () => {
     const cases = [
-      "onr_proteus_012_bug-zapper",
-      "onr_proteus_021_dog-pile",
-      "onr_proteus_026_hunting-pack",
-      "onr_proteus_030_mastermind",
+      70,
+      79,
+      84,
+      88,
     ] as const;
 
     for (const definitionId of cases) {
@@ -1116,8 +1116,8 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus Phase 3e ICE repositioning into CardImplementation coverage", () => {
     const cases = [
-      "onr_proteus_033_mobile-barricade",
-      "onr_proteus_044_walking-wall",
+      91,
+      102,
     ] as const;
 
     for (const definitionId of cases) {
@@ -1144,7 +1144,7 @@ describe("CardImplementation coverage and registry invariants", () => {
   it("migrates Proteus PRO004 simple icebreakers into CardImplementation coverage", () => {
     const cases = [
       {
-        definitionId: "onr_proteus_079_big-frackin-gun",
+        definitionId: 137,
         breakCost: 6,
         matcher: { kind: "ice_subtype", subtype: "sentry" },
         count: 5,
@@ -1152,21 +1152,21 @@ describe("CardImplementation coverage and registry invariants", () => {
         pumpAmount: 1,
       },
       {
-        definitionId: "onr_proteus_081_boring-bit",
+        definitionId: 139,
         breakCost: 2,
         matcher: { kind: "ice_subtype", subtype: "wall" },
         pumpCost: 1,
         pumpAmount: 1,
       },
       {
-        definitionId: "onr_proteus_083_corrosion",
+        definitionId: 141,
         breakCost: 0,
         matcher: { kind: "ice_subtype", subtype: "wall" },
         pumpCost: 1,
         pumpAmount: 1,
       },
       {
-        definitionId: "onr_proteus_093_redecorator",
+        definitionId: 151,
         breakCost: 1,
         matcher: { kind: "ice_subtype", subtype: "sentry" },
         count: 2,
@@ -1174,14 +1174,14 @@ describe("CardImplementation coverage and registry invariants", () => {
         pumpAmount: 1,
       },
       {
-        definitionId: "onr_proteus_095_skeleton-passkeys",
+        definitionId: 153,
         breakCost: 0,
         matcher: { kind: "ice_subtype", subtype: "code_gate" },
         pumpCost: 3,
         pumpAmount: 4,
       },
       {
-        definitionId: "onr_proteus_100_wrecking-ball",
+        definitionId: 158,
         breakCost: 0,
         matcher: { kind: "ice_subtype", subtype: "wall" },
         pumpCost: 2,
@@ -1250,7 +1250,7 @@ describe("CardImplementation coverage and registry invariants", () => {
   it("migrates Proteus PRO005 simple runner economy/draw events into CardImplementation coverage", () => {
     const cases = [
       {
-        definitionId: "onr_proteus_103_cruising-for-netwatch",
+        definitionId: 161,
         effects: [
           {
             kind: "gain_credits",
@@ -1267,7 +1267,7 @@ describe("CardImplementation coverage and registry invariants", () => {
         ],
       },
       {
-        definitionId: "onr_proteus_124_stakeout",
+        definitionId: 182,
         effects: [
           {
             kind: "gain_credits",
@@ -1309,7 +1309,7 @@ describe("CardImplementation coverage and registry invariants", () => {
   });
 
   it("migrates Proteus Phase 9d data-fort creation lock into CardImplementation coverage", () => {
-    const definitionId = "onr_proteus_146_precision-bribery";
+    const definitionId = 204;
 
     expect(cardImplementationForDefinitionId(definitionId)).toMatchObject({
       modifiers: [
@@ -1332,14 +1332,14 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates P3.57 runner sabotage prep cards into CardImplementation coverage", () => {
     const p357Cards = [
-      "onr_v1_077_anonymous-tip",
-      "onr_v1_082_deal-with-militech",
-      "onr_v1_083_desperate-competitor",
-      "onr_v1_090_hot-tip-for-wns",
-      "onr_v1_098_lucidrine-booster-drug",
-      "onr_v1_113_synchronized-attack-on-hq",
-      "onr_v1_115_terrorist-reprisal",
-      "onr_v1_117_valu-pak-software-bundle",
+      289,
+      294,
+      295,
+      302,
+      310,
+      325,
+      327,
+      329,
     ] as const;
 
     for (const definitionId of p357Cards) {
@@ -1355,21 +1355,21 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_088_fortress-respecification"),
+      cardImplementationForDefinitionId(300),
     ).toBeDefined();
     expect(
-      cardImplementationForDefinitionId("onr_v1_111_social-engineering"),
+      cardImplementationForDefinitionId(323),
     ).toBeDefined();
   });
 
   it("migrates P3.58 hidden replacement longtail cards into CardImplementation coverage", () => {
     const p358Cards = [
-      "onr_v1_088_fortress-respecification",
-      "onr_v1_111_social-engineering",
-      "onr_v1_294_new-blood",
-      "onr_v1_176_the-shell-traders",
-      "onr_v1_351_bizarre-encryption-scheme",
-      "onr_v1_155_code-viral-cache",
+      300,
+      323,
+      506,
+      388,
+      563,
+      367,
     ] as const;
 
     for (const definitionId of p358Cards) {
@@ -1385,21 +1385,21 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_131_microtech-backup-drive"),
+      cardImplementationForDefinitionId(343),
     ).toBeDefined();
   });
 
   it("migrates P3.59 runner utility longtail cards into CardImplementation coverage", () => {
     const p359Cards = [
-      "onr_v1_131_microtech-backup-drive",
-      "onr_v1_068_startup-immolator",
-      "onr_v1_051_rabbit",
-      "onr_v1_182_submarine-uplink",
-      "onr_v1_032_i-spy",
-      "onr_v1_162_field-reporter-for-ice-and-data",
-      "onr_v1_171_preying-mantis",
-      "onr_v1_172_quest-for-cattekin",
-      "onr_v1_132_microtech-trode-set",
+      343,
+      280,
+      263,
+      394,
+      244,
+      374,
+      383,
+      384,
+      344,
     ] as const;
 
     for (const definitionId of p359Cards) {
@@ -1418,13 +1418,13 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates P3.60 Corporate Ally Karl de Veres Smith's Pawnshop Databroker Wilson Nevinyrral I Got a Rock Schlaghund Crash Everett unique direct CardImplementation coverage", () => {
     const p360ImplementedCards = [
-      "onr_v1_156_corporate-ally",
-      "onr_v1_166_karl-de-veres-corporate-stooge",
-      "onr_v1_180_smiths-pawnshop",
-      "onr_v1_159_databroker",
-      "onr_v1_331_nevinyrral",
-      "onr_v1_327_i-got-a-rock",
-      "onr_v1_339_schlaghund",
+      368,
+      378,
+      392,
+      371,
+      543,
+      539,
+      551,
     ] as const;
 
     for (const definitionId of p360ImplementedCards) {
@@ -1441,25 +1441,25 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
     expect(
       cardImplementationForDefinitionId(
-        "onr_v1_187_wilson-weeflerunner-apprentice",
+        399,
       ),
     ).toBeDefined();
     expect(
       cardImplementationForDefinitionId(
-        "onr_v1_157_crash-everett-inventive-fixer",
+        369,
       ),
     ).toBeDefined();
   });
 
   it("migrates P3.61 remaining replacement longtail CardImplementation coverage", () => {
     const p361Cards = [
-      "onr_v1_157_crash-everett-inventive-fixer",
-      "onr_v1_187_wilson-weeflerunner-apprentice",
-      "onr_v1_308_acme-savings-and-loan",
-      "onr_v1_329_investment-firm",
-      "onr_v1_313_city-surveillance",
-      "onr_v1_325_hacker-tracker-central",
-      "onr_v1_354_crybaby",
+      369,
+      399,
+      520,
+      541,
+      525,
+      537,
+      566,
     ] as const;
 
     for (const definitionId of p361Cards) {
@@ -1478,9 +1478,9 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates P3.62 remaining singleton CardImplementation coverage", () => {
     const implementedCards = [
-      "onr_v1_012_clown",
-      "onr_v1_104_playful-ai",
-      "onr_v1_173_restrictive-net-zoning",
+      224,
+      316,
+      385,
     ] as const;
 
     for (const definitionId of implementedCards) {
@@ -1496,12 +1496,12 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_220_tycho-extension"),
+      cardImplementationForDefinitionId(432),
     ).toBeUndefined();
     expect(
-      cardImplementationCoverageForDefinitionId("onr_v1_220_tycho-extension"),
+      cardImplementationCoverageForDefinitionId(432),
     ).toMatchObject({
-      cardDefinitionId: "onr_v1_220_tycho-extension",
+      cardDefinitionId: 432,
       status: "no_engine_behavior_required",
     });
   });
@@ -1684,22 +1684,22 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("registers migrated runner successful-run and access-interface cards as implemented", () => {
     const p332Cases = [
-      "onr_v1_081_custodial-position",
-      "onr_v1_084_edited-shipping-manifests",
-      "onr_v1_085_executive-wiretaps",
-      "onr_v1_096_kilroy-was-here",
-      "onr_v1_105_priority-wreck",
-      "onr_v1_106_private-ldl-access",
-      "onr_v1_107_romp-through-hq",
-      "onr_v1_118_weather-to-finance-pipe",
-      "onr_v1_062_shredder-uplink-protocol",
-      "onr_v1_050_r-and-d-protocol-files",
-      "onr_v1_129_hq-interface",
-      "onr_v1_139_r-and-d-interface",
-      "onr_v1_024_expert-schedule-analyzer",
-      "onr_v1_183_technician-lover",
-      "onr_v1_041_microtech-ai-interface",
-      "onr_v1_142_record-reconstructor",
+      293,
+      296,
+      297,
+      308,
+      317,
+      318,
+      319,
+      330,
+      274,
+      262,
+      341,
+      351,
+      236,
+      395,
+      253,
+      354,
     ] as const;
 
     for (const definitionId of p332Cases) {
@@ -1717,7 +1717,7 @@ describe("CardImplementation coverage and registry invariants", () => {
   it("migrates Proteus PRO006 simple Corp ICE resolvers into CardImplementation coverage", () => {
     const cases = [
       {
-        definitionId: "onr_proteus_011_brain-wash",
+        definitionId: 69,
         printedSubroutines: [
           {
             kind: "damage",
@@ -1729,7 +1729,7 @@ describe("CardImplementation coverage and registry invariants", () => {
         ],
       },
       {
-        definitionId: "onr_proteus_015_colonel-failure",
+        definitionId: 73,
         printedSubroutines: [
           { kind: "trash_program", text: "*Trash a program." },
           { kind: "trash_program", text: "*Trash a program." },
@@ -1739,7 +1739,7 @@ describe("CardImplementation coverage and registry invariants", () => {
         ],
       },
       {
-        definitionId: "onr_proteus_032_misleading-access-menus",
+        definitionId: 90,
         printedSubroutines: [
           {
             kind: "end_the_run_unless_runner_pays",
@@ -1759,7 +1759,7 @@ describe("CardImplementation coverage and registry invariants", () => {
         },
       },
       {
-        definitionId: "onr_proteus_038_snowbank",
+        definitionId: 96,
         printedSubroutines: [
           {
             kind: "end_the_run_unless_runner_pays",
@@ -1782,8 +1782,8 @@ describe("CardImplementation coverage and registry invariants", () => {
 
     for (const testCase of cases) {
       const definitionOnly =
-        testCase.definitionId === "onr_proteus_011_brain-wash" ||
-        testCase.definitionId === "onr_proteus_015_colonel-failure";
+        testCase.definitionId === 69 ||
+        testCase.definitionId === 73;
       if (definitionOnly) {
         expect(
           cardImplementationForDefinitionId(testCase.definitionId),
@@ -1799,7 +1799,7 @@ describe("CardImplementation coverage and registry invariants", () => {
           CARD_DEFINITIONS_BY_ID[testCase.definitionId]?.subroutines,
           testCase.definitionId,
         ).toEqual(
-          testCase.definitionId === "onr_proteus_011_brain-wash"
+          testCase.definitionId === 69
             ? [
                 {
                   id: "subroutine_brain_damage_one",
@@ -1865,7 +1865,7 @@ describe("CardImplementation coverage and registry invariants", () => {
   it("migrates Proteus PRO007 Corp Operation economy, trace, and history cards into CardImplementation coverage", () => {
     const cases = [
       {
-        definitionId: "onr_proteus_047_credit-consolidation",
+        definitionId: 105,
         ability: {
           kind: "on_play",
           costs: "printed",
@@ -1880,7 +1880,7 @@ describe("CardImplementation coverage and registry invariants", () => {
         },
       },
       {
-        definitionId: "onr_proteus_048_data-sifters",
+        definitionId: 106,
         ability: {
           kind: "on_play",
           costs: "printed",
@@ -1896,7 +1896,7 @@ describe("CardImplementation coverage and registry invariants", () => {
         },
       },
       {
-        definitionId: "onr_proteus_050_manhunt",
+        definitionId: 108,
         ability: {
           kind: "on_play",
           costs: "printed",
@@ -1918,7 +1918,7 @@ describe("CardImplementation coverage and registry invariants", () => {
         },
       },
       {
-        definitionId: "onr_proteus_052_schlaghund-pointers",
+        definitionId: 110,
         ability: {
           kind: "on_play",
           costs: "printed",
@@ -1942,7 +1942,7 @@ describe("CardImplementation coverage and registry invariants", () => {
         },
       },
       {
-        definitionId: "onr_proteus_053_underworld-mole",
+        definitionId: 111,
         ability: {
           kind: "on_play",
           costs: "printed",
@@ -1984,19 +1984,19 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus PRO008 Runner Event Run/Economy/Followup Suite into CardImplementation coverage", () => {
     const cases = [
-      "onr_proteus_101_all-hands",
-      "onr_proteus_104_decoy-signal",
-      "onr_proteus_105_demolition-run",
-      "onr_proteus_106_disgruntled-ice-technician",
-      "onr_proteus_107_drone-for-a-day",
-      "onr_proteus_114_on-the-fast-track",
-      "onr_proteus_118_prearranged-drop",
-      "onr_proteus_120_reconnaissance",
-      "onr_proteus_121_remote-detonator",
-      "onr_proteus_122_rush-hour",
-      "onr_proteus_127_weefle-initiation",
-      "onr_proteus_130_back-door-to-rivals",
-      "onr_proteus_148_runner-sensei",
+      159,
+      162,
+      163,
+      164,
+      165,
+      172,
+      176,
+      178,
+      179,
+      180,
+      185,
+      188,
+      206,
     ] as const;
 
     for (const definitionId of cases) {
@@ -2013,7 +2013,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
 
     expect(
-      cardImplementationForDefinitionId("onr_proteus_101_all-hands")?.abilities,
+      cardImplementationForDefinitionId(159)?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "on_play",
@@ -2028,7 +2028,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_proteus_130_back-door-to-rivals")
+      cardImplementationForDefinitionId(188)
         ?.abilities,
     ).toContainEqual(
       expect.objectContaining({
@@ -2046,14 +2046,14 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus PRO011 hidden resource economy/access suite into CardImplementation coverage", () => {
     const cases = [
-      "onr_proteus_128_airport-locker",
-      "onr_proteus_133_chiba-bank-account",
-      "onr_proteus_142_hq-mole",
-      "onr_proteus_143_liberated-savings-account",
-      "onr_proteus_147_r-and-d-mole",
-      "onr_proteus_149_simulacrum",
-      "onr_proteus_152_swiss-bank-account",
-      "onr_proteus_153_time-to-collect",
+      186,
+      191,
+      200,
+      201,
+      205,
+      207,
+      210,
+      211,
     ] as const;
 
     for (const definitionId of cases) {
@@ -2070,11 +2070,11 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
 
     expect(
-      cardImplementationForDefinitionId("onr_proteus_152_swiss-bank-account")
+      cardImplementationForDefinitionId(210)
         ?.abilities,
     ).toHaveLength(2);
     expect(
-      cardImplementationForDefinitionId("onr_proteus_153_time-to-collect")
+      cardImplementationForDefinitionId(211)
         ?.trashPreventionSources,
     ).toContainEqual(
       expect.objectContaining({
@@ -2087,14 +2087,14 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus PRO012 hidden resource prevention/sabotage suite into CardImplementation coverage", () => {
     const cases = [
-      "onr_proteus_129_back-door-to-netwatch",
-      "onr_proteus_132_bolt-hole",
-      "onr_proteus_136_credit-subversion",
-      "onr_proteus_137_death-from-above",
-      "onr_proteus_140_expendable-family-member",
-      "onr_proteus_141_get-ready-to-rumble",
-      "onr_proteus_145_mercenary-subcontract",
-      "onr_proteus_154_wired-switchboard",
+      187,
+      190,
+      194,
+      195,
+      198,
+      199,
+      203,
+      212,
     ] as const;
 
     for (const definitionId of cases) {
@@ -2111,7 +2111,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
 
     expect(
-      cardImplementationForDefinitionId("onr_proteus_132_bolt-hole")
+      cardImplementationForDefinitionId(190)
         ?.damagePreventionSources,
     ).toContainEqual(
       expect.objectContaining({
@@ -2122,7 +2122,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     );
     expect(
       cardImplementationForDefinitionId(
-        "onr_proteus_140_expendable-family-member",
+        198,
       )?.tagPreventionSources,
     ).toContainEqual(
       expect.objectContaining({
@@ -2131,7 +2131,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_proteus_154_wired-switchboard")
+      cardImplementationForDefinitionId(212)
         ?.abilities,
     ).toContainEqual(
       expect.objectContaining({
@@ -2143,14 +2143,14 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus PRO013 agenda steal and overadvance suite into CardImplementation coverage", () => {
     const cases = [
-      "onr_proteus_003_corporate-headhunters",
-      "onr_proteus_004_fetal-ai",
-      "onr_proteus_005_marked-accounts",
-      "onr_proteus_008_project-zurich",
-      "onr_proteus_010_world-domination",
-      "onr_proteus_102_blackmail",
-      "onr_proteus_116_pirate-broadcast",
-      "onr_proteus_119_promises-promises",
+      61,
+      62,
+      63,
+      66,
+      68,
+      160,
+      174,
+      177,
     ] as const;
 
     for (const definitionId of cases) {
@@ -2167,7 +2167,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
 
     expect(
-      cardImplementationForDefinitionId("onr_proteus_004_fetal-ai")
+      cardImplementationForDefinitionId(62)
         ?.selfStealCosts,
     ).toContainEqual(
       expect.objectContaining({
@@ -2176,7 +2176,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_proteus_116_pirate-broadcast")
+      cardImplementationForDefinitionId(174)
         ?.abilities?.[0]?.effects,
     ).toContainEqual(
       expect.objectContaining({

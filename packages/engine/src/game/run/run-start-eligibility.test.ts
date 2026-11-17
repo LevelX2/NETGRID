@@ -25,7 +25,7 @@ describe("run-start eligibility", () => {
     );
     const sourceCardInstanceId = putCorpRootInRemote(
       state,
-      "onr_v1_368_roving-submarine",
+      580,
     );
     const source = state.cardInstances[sourceCardInstanceId]!;
     source.rezzed = true;
@@ -84,7 +84,7 @@ describe("run-start eligibility", () => {
     });
     const sourceCardInstanceId = putCorpRootInRemote(
       state,
-      "onr_v1_368_roving-submarine",
+      580,
     );
     const source = state.cardInstances[sourceCardInstanceId]!;
     source.selectedServerId = "rd";

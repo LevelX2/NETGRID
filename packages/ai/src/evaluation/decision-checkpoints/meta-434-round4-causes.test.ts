@@ -79,7 +79,7 @@ it.each([true, false])(
       (a) => a.actionId === result.actionId,
     )!;
     expect(action.actionId).toBe(
-      "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+      "runner.activated_card_ability.runner_366_1.runner_366_1.activated.onr_v1_154_broker:withdraw_credits",
     );
     if (loanAvailable) {
       const target = evaluateRunnerRunTargets({ input }).find(
@@ -99,7 +99,7 @@ it.each([true, false])(
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
       leafExecutorInstanceId:
-        "plan:runner.credit_bank:runner_onr_v1_154_broker_1",
+        "plan:runner.credit_bank:runner_366_1",
     });
     expect(result.decisionDebug?.planFirstDecision?.route).toMatchObject({
       actionId: action.actionId,

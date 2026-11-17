@@ -158,7 +158,7 @@ it("rejects G27/D109 optional installation and an automatic load with no margina
     expect.arrayContaining([
       expect.objectContaining({
         actionId:
-          "runner.install_card.runner_onr_v1_177_the-short-circuit_2.runner_onr_v1_177_the-short-circuit_2",
+          "runner.install_card.runner_389_2.runner_389_2",
         ownerModuleId: "runner.develop_board_and_hand",
         disposition: "explicitly_nonproductive",
       }),
@@ -169,7 +169,7 @@ it("retains G34/D307 development with a genuine spare hand and followup action",
   const { input } = native("g34d307"),
     { d, pf } = decide(input);
   expect(d.actionId).toBe(
-    "runner.install_card.runner_onr_v1_177_the-short-circuit_1.runner_onr_v1_177_the-short-circuit_1",
+    "runner.install_card.runner_389_1.runner_389_1",
   );
   expect(pf.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
 });
@@ -181,7 +181,7 @@ it("keeps safe last-action development after an actual native G34 credit action"
   expect(input.playerView.own.clicks).toBe(1);
   expect(input.playerView.own.gripOrHq).toHaveLength(8);
   expect(d.actionId).toBe(
-    "runner.install_card.runner_onr_v1_177_the-short-circuit_1.runner_onr_v1_177_the-short-circuit_1",
+    "runner.install_card.runner_389_1.runner_389_1",
   );
   expect(pf.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
   expect(apply(afterGain, "runner", d.actionId!).runner.grip).toHaveLength(7);
@@ -231,7 +231,7 @@ it("admits the real G9/D16 bank after Draw when installation preserves the four-
   );
   expect(facts.minimumHandBuffer).toBe(4);
   const id =
-    "runner.install_card.runner_onr_proteus_150_streetware-distributor_1.runner_onr_proteus_150_streetware-distributor_1";
+    "runner.install_card.runner_208_1.runner_208_1";
   expect(signals).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
@@ -256,20 +256,20 @@ it.each(["g9d18", "g27d109"])(
     expect(state.runner.grip).toHaveLength(4);
     state = apply(state, "corp", "corp.mandatory_draw");
     if (key === "g9d18") state = apply(state, "corp", "corp.gain_credit");
-    else state = operation(state, "corp_onr_v1_290_efficiency-experts_3");
+    else state = operation(state, "corp_502_3");
     state = traceZero(
       operation(
         state,
         key === "g9d18"
-          ? "corp_onr_proteus_050_manhunt_1"
-          : "corp_onr_proteus_050_manhunt_2",
+          ? "corp_108_1"
+          : "corp_108_2",
       ),
     );
     state = operation(
       state,
       key === "g9d18"
-        ? "corp_onr_v1_302_scorched-earth_1"
-        : "corp_onr_v1_302_scorched-earth_3",
+        ? "corp_514_1"
+        : "corp_514_3",
     );
     expect(state.runner.grip).toHaveLength(0);
     expect(state.winner).toBeNull();

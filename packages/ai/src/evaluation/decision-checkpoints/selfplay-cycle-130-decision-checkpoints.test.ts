@@ -37,9 +37,9 @@ describe("selfplay cycle 130 decision checkpoints", () => {
       actionId: "runner.resolve_choice",
       selectedChoices: {
         choiceId:
-          "v120_choice_v120_window_imminent_damage_306_run_305.corp_onr_v1_234_data-darts_2.0_next_100_runner",
+          "v120_choice_v120_window_imminent_damage_306_run_305.corp_446_2.0_next_100_runner",
         selectedOptionIds: [
-          "card_implementation_damage_prevent_runner_onr_v1_028_force-shield_1_0_1__prevent_amount_1",
+          "card_implementation_damage_prevent_runner_240_1_0_1__prevent_amount_1",
         ],
       },
     });

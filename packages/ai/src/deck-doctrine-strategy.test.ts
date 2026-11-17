@@ -51,7 +51,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     const damageOnly = buildDeckStrategyProfile({
       deckSnapshotId: "corp-damage-without-program-trash",
       side: "corp",
-      cards: [{ cardId: "onr_proteus_012_bug-zapper", quantity: 3 }],
+      cards: [{ cardId: 70, quantity: 3 }],
     });
     expect(damageOnly.corpProfile?.iceProfile.programTrash).toBe("unknown");
   });
@@ -61,8 +61,8 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       deckSnapshotId: "runner-burst-diagnostic",
       side: "runner",
       cards: [
-        { cardId: "onr_v1_108_score", quantity: 3 },
-        { cardId: "onr_v1_178_short-term-contract", quantity: 2 },
+        { cardId: 320, quantity: 3 },
+        { cardId: 390, quantity: 2 },
       ],
     });
     expect(profile.functionSignalCounts["economy.burst_credit"]).toBe(3);
@@ -73,7 +73,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     const gradual = buildDeckStrategyProfile({
       deckSnapshotId: "runner-gradual-diagnostic",
       side: "runner",
-      cards: [{ cardId: "onr_v1_178_short-term-contract", quantity: 2 }],
+      cards: [{ cardId: 390, quantity: 2 }],
     });
     expect(gradual.runnerProfile?.economyProfile.burst).toBe(0);
   });
@@ -135,12 +135,12 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     const oneCopy = buildDeckStrategyProfile({
       deckSnapshotId: "one-copy-recycle-anchor",
       side: "corp",
-      cards: [{ cardId: "onr_v1_188_ai-chief-financial-officer", quantity: 1 }],
+      cards: [{ cardId: 400, quantity: 1 }],
     }).strategyScores["corp.deck_recycle_engine"];
     const threeCopies = buildDeckStrategyProfile({
       deckSnapshotId: "three-copy-recycle-anchor",
       side: "corp",
-      cards: [{ cardId: "onr_v1_188_ai-chief-financial-officer", quantity: 3 }],
+      cards: [{ cardId: 400, quantity: 3 }],
     }).strategyScores["corp.deck_recycle_engine"];
 
     expect(oneCopy?.anchorEvidence).toHaveLength(1);
@@ -221,10 +221,10 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       deckSnapshotId: "conditional-wall-bypass-contract",
       side: "runner",
       cards: [
-        { cardId: "onr_v1_006_black-dahlia", quantity: 1 },
-        { cardId: "onr_v1_016_cyfermaster", quantity: 1 },
-        { cardId: "onr_v1_094_inside-job", quantity: 2 },
-        { cardId: "onr_v1_107_romp-through-hq", quantity: 2 },
+        { cardId: 218, quantity: 1 },
+        { cardId: 228, quantity: 1 },
+        { cardId: 306, quantity: 2 },
+        { cardId: 319, quantity: 2 },
       ],
     });
     const selectedScores = [
@@ -297,7 +297,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          cardId: "onr_v1_081_custodial-position",
+          cardId: 293,
           source: "lineSupport",
         }),
       ]),
@@ -305,8 +305,8 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     expect(
       profile.strategyScores["runner.interface_closeout"]?.anchorEvidence.some(
         (entry) =>
-          entry.cardId === "onr_v1_081_custodial-position" ||
-          entry.cardId === "onr_v1_085_executive-wiretaps",
+          entry.cardId === 293 ||
+          entry.cardId === 297,
       ),
     ).toBe(true);
   });
@@ -316,11 +316,11 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       deckSnapshotId: "ai006-runner-breaker-search-diagnostic",
       side: "runner",
       cards: [
-        { cardId: "onr_v1_021_dwarf", quantity: 2 },
-        { cardId: "onr_v1_039_krash", quantity: 2 },
-        { cardId: "onr_v1_059_self-modifying-code", quantity: 2 },
-        { cardId: "onr_v1_066_snowball", quantity: 2 },
-        { cardId: "onr_v1_108_score", quantity: 2 },
+        { cardId: 233, quantity: 2 },
+        { cardId: 251, quantity: 2 },
+        { cardId: 271, quantity: 2 },
+        { cardId: 278, quantity: 2 },
+        { cardId: 320, quantity: 2 },
       ],
     });
 
@@ -335,7 +335,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          cardId: "onr_v1_059_self-modifying-code",
+          cardId: 271,
           signal: "setup.search",
         }),
       ]),
@@ -352,7 +352,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     const profile = buildDeckStrategyProfile({
       deckSnapshotId: "ai006-runner-economy-only-diagnostic",
       side: "runner",
-      cards: [{ cardId: "onr_v1_108_score", quantity: 3 }],
+      cards: [{ cardId: 320, quantity: 3 }],
     });
 
     expect(profile.functionSignalCounts["economy.generic"]).toBe(3);
@@ -393,7 +393,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     const profile = buildDeckStrategyProfile({
       deckSnapshotId: "ai006-runner-dropp-emergency-only-diagnostic",
       side: "runner",
-      cards: [{ cardId: "onr_v1_019_dropp", quantity: 3 }],
+      cards: [{ cardId: 231, quantity: 3 }],
     });
 
     expect(profile.functionSignalCounts["breaker.emergency_coverage"]).toBe(3);
@@ -439,24 +439,24 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       deckSnapshotId: "manhunt-low-agenda-kill-line",
       side: "corp",
       cards: [
-        { cardId: "onr_v1_196_corporate-war", quantity: 3 },
-        { cardId: "onr_v1_223_banpei", quantity: 2 },
-        { cardId: "onr_v1_237_data-wall", quantity: 3 },
-        { cardId: "onr_v1_244_filter", quantity: 3 },
-        { cardId: "onr_v1_252_keeper", quantity: 2 },
-        { cardId: "onr_v1_261_quandary", quantity: 3 },
-        { cardId: "onr_v1_275_vacuum-link", quantity: 2 },
-        { cardId: "onr_v1_279_wall-of-static", quantity: 2 },
-        { cardId: "onr_v1_283_audit-of-call-records", quantity: 3 },
-        { cardId: "onr_v1_284_chance-observation", quantity: 3 },
-        { cardId: "onr_v1_285_closed-accounts", quantity: 3 },
-        { cardId: "onr_v1_299_power-grid-overload", quantity: 1 },
-        { cardId: "onr_v1_302_scorched-earth", quantity: 3 },
-        { cardId: "onr_v1_304_systematic-layoffs", quantity: 3 },
-        { cardId: "onr_v1_307_urban-renewal", quantity: 3 },
-        { cardId: "onr_v1_309_bbs-whispering-campaign", quantity: 3 },
-        { cardId: "onr_v1_313_city-surveillance", quantity: 2 },
-        { cardId: "onr_v1_327_i-got-a-rock", quantity: 1 },
+        { cardId: 408, quantity: 3 },
+        { cardId: 435, quantity: 2 },
+        { cardId: 449, quantity: 3 },
+        { cardId: 456, quantity: 3 },
+        { cardId: 464, quantity: 2 },
+        { cardId: 473, quantity: 3 },
+        { cardId: 487, quantity: 2 },
+        { cardId: 491, quantity: 2 },
+        { cardId: 495, quantity: 3 },
+        { cardId: 496, quantity: 3 },
+        { cardId: 497, quantity: 3 },
+        { cardId: 511, quantity: 1 },
+        { cardId: 514, quantity: 3 },
+        { cardId: 516, quantity: 3 },
+        { cardId: 519, quantity: 3 },
+        { cardId: 521, quantity: 3 },
+        { cardId: 525, quantity: 2 },
+        { cardId: 539, quantity: 1 },
       ],
     });
 
@@ -474,7 +474,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       side: "corp",
       cards: [
         {
-          cardId: "onr_v1_355_crystal-palace-station-grid",
+          cardId: 567,
           quantity: 1,
         },
       ],
@@ -485,7 +485,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          cardId: "onr_v1_355_crystal-palace-station-grid",
+          cardId: 567,
           source: "lineSupport",
         }),
       ]),
@@ -500,7 +500,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       deckSnapshotId: "ai030-corp-city-grid-id-diagnostic",
       side: "corp",
       cards: [
-        { cardId: "onr_v1_367_rio-de-janeiro-city-grid", quantity: 2 },
+        { cardId: 579, quantity: 2 },
         { cardId: "test_city-gridish-noise", quantity: 3 },
       ],
     });
@@ -523,7 +523,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          cardId: "onr_v1_317_data-masons",
+          cardId: 529,
           signal: "economy.rez_discount",
         }),
       ]),
@@ -535,10 +535,10 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       deckSnapshotId: "ai006-corp-normal-ice-diagnostic",
       side: "corp",
       cards: [
-        { cardId: "onr_v1_232_crystal-wall", quantity: 2 },
-        { cardId: "onr_v1_237_data-wall", quantity: 2 },
-        { cardId: "onr_v1_261_quandary", quantity: 2 },
-        { cardId: "onr_v1_279_wall-of-static", quantity: 2 },
+        { cardId: 444, quantity: 2 },
+        { cardId: 449, quantity: 2 },
+        { cardId: 473, quantity: 2 },
+        { cardId: 491, quantity: 2 },
       ],
     });
 
@@ -612,7 +612,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     const profile = buildDeckStrategyProfile({
       deckSnapshotId: "ai006-runner-legacy-only-diagnostic",
       side: "runner",
-      cards: [{ cardId: "simple_run_event", quantity: 3 }],
+      cards: [{ cardId: 600, quantity: 3 }],
     });
 
     expect(profile.legacySignalCounts["planRole:pressure_rnd"]).toBeUndefined();
@@ -744,7 +744,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     const diagnostic = buildDeckDoctrineV2Diagnostic({
       deckSnapshotId: "ai006-runner-legacy-only-diagnostic",
       side: "runner",
-      cards: [{ cardId: "simple_run_event", quantity: 3 }],
+      cards: [{ cardId: 600, quantity: 3 }],
     });
 
     expect(diagnostic.status).toBe("anchorless");

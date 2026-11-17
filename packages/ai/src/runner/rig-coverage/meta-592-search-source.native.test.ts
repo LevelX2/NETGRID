@@ -61,7 +61,7 @@ it("keeps the Stack-bound Rent-I-Con target through the real source and target E
         current.playerView.pendingChoice!.options.find(
           (o: any) => o.id === selectedOptionIds?.[0],
         )?.card?.definitionId,
-      ).toBe("onr_classic_031_rent-i-con");
+      ).toBe(35);
     const result = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
@@ -81,12 +81,12 @@ it("keeps the Stack-bound Rent-I-Con target through the real source and target E
   }
   expect(
     getPlayerView(state, "runner").own.rig?.some(
-      (c) => c.definitionId === "onr_classic_031_rent-i-con",
+      (c) => c.definitionId === 35,
     ),
   ).toBe(true);
   expect(
     getPlayerView(state, "runner").own.rig?.some(
-      (c) => c.definitionId === "onr_v1_011_cloak",
+      (c) => c.definitionId === 223,
     ),
   ).toBe(false);
   expect(validateGameState(state).ok).toBe(true);

@@ -88,7 +88,7 @@ it.each([
     const source = input.playerView.own.gripOrHq.find(
       (card) => card.instanceId === action.source,
     );
-    expect(source?.definitionId).not.toBe("onr_v1_161_fall-guy");
+    expect(source?.definitionId).not.toBe(373);
   }
   expect(
     portfolio.instances

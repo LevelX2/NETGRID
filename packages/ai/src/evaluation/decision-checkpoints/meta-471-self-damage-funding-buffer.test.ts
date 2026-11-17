@@ -68,7 +68,7 @@ function replay(
           evidenceCodes: expect.arrayContaining(
             ordinaryCompanion
               ? [
-                  "runner_funding_consumer_buffer_budget_uncovered:runner.play_event.runner_onr_classic_036_do-the-drine_1.runner_onr_classic_036_do-the-drine_1.1",
+                  "runner_funding_consumer_buffer_budget_uncovered:runner.play_event.runner_40_1.runner_40_1.1",
                   "runner_funding_consumer_hand_after_funding:2|required:4",
                   "runner_funding_consumer_buffer_repair_reserved:2|clicks:2|credits:0|action:runner.draw_card",
                 ]

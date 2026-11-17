@@ -10,7 +10,7 @@ import { createRunnerShellTradersPipelineModule } from "../runner/shell-traders/
 import type { PlanModule } from "./plan-scheduler";
 
 export type RunnerCorePlanDependencies = {
-  rolesForDefinitionId?: (definitionId: string) => readonly string[];
+  rolesForDefinitionId?: (definitionId: number) => readonly string[];
 };
 
 export function createRunnerCorePlanModules(

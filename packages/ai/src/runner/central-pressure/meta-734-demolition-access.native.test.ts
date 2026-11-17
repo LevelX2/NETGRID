@@ -22,12 +22,12 @@ import { activeRunRootPlan } from "../run-window/run-window-origin";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 
-const demolition = "onr_proteus_105_demolition-run";
-const dwarf = "onr_v1_021_dwarf";
-const krash = "onr_v1_039_krash";
-const highlighter = "onr_proteus_090_highlighter";
-const cheapWall = "onr_v1_238_data-wall-2-0";
-const costlyWall = "onr_v1_245_fire-wall";
+const demolition = 163;
+const dwarf = 233;
+const krash = 251;
+const highlighter = 148;
+const cheapWall = 450;
+const costlyWall = 457;
 
 function takeDeckCard(
   state: GameState,
@@ -92,8 +92,8 @@ function fixture(
     state.runner.rig.programs.push(card.instanceId);
   }
   for (const definition of [
-    "onr_v1_220_tycho-extension",
-    "onr_v1_214_project-babylon",
+    432,
+    426,
   ]) {
     const card = takeDeckCard(state, "corp", definition);
     card.controller = "runner";

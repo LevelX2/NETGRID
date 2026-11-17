@@ -349,7 +349,7 @@ describe("scored agenda sequence contract matrix", () => {
     ).toThrow(/hidden card data/i);
 
     const orderedFortPayload = orderedFortRebuildPublicPayload({
-      sourceDefinitionId: "onr_proteus_069_pavit-bharat",
+      sourceDefinitionId: 127,
       targetServerId: "remote_1",
       removedCardCount: 2,
       replacementCardCount: 2,

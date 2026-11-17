@@ -19,7 +19,7 @@ export type RunnerSetupMissingCoverageType =
   | "special";
 
 type RunnerSetupCoverageDependencies = {
-  rolesForCardId: (definitionId: string | undefined) => string[];
+  rolesForCardId: (definitionId: number | undefined) => string[];
   assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
 };
 
@@ -43,8 +43,8 @@ export function runnerVisibleMissingBreakerCoverage(
   return input.playerView.servers.some((server) =>
     server.ice
       .filter(
-        (ice): ice is typeof ice & { definitionId: string } =>
-          ice.known && typeof ice.definitionId === "string",
+        (ice): ice is typeof ice & { definitionId: number } =>
+          ice.known && typeof ice.definitionId === "number",
       )
       .flatMap((ice) => runnerMissingBreakerRolesForMetrics(ice.definitionId))
       .some((role) => !rigRoles.has(role)),
@@ -63,7 +63,7 @@ export function runnerMissingCoverageTypesForInput(
   const missing = new Set<RunnerSetupMissingCoverageType>();
   for (const server of input.playerView.servers) {
     for (const ice of server.ice) {
-      if (!ice.known || typeof ice.definitionId !== "string") continue;
+      if (!ice.known || typeof ice.definitionId !== "number") continue;
       for (const role of runnerMissingBreakerRolesForMetrics(
         ice.definitionId,
       )) {
@@ -196,7 +196,7 @@ export function createRunnerCoverageActionContext(
 }
 
 export function runnerMissingBreakerRolesForMetrics(
-  definitionId: string,
+  definitionId: number,
 ): string[] {
   const definition =
     RUNTIME_CARDS[definitionId] ?? CARD_DEFINITIONS_BY_ID[definitionId];

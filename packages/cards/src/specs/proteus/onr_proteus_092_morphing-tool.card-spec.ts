@@ -18,7 +18,7 @@ const coverageAvoid = [
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_proteus_092_morphing-tool"),
+    cardDefinitionId: cardDefinitionId(150),
     title: "Morphing Tool",
     side: "runner",
     cardType: "program",

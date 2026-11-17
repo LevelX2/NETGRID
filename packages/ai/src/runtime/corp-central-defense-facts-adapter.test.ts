@@ -5,21 +5,21 @@ import { allocateCorpCentralDefenseFromAiFacts } from "../corp/defense/corp-cent
 
 const agenda = (id: string): VisibleCard => ({
   instanceId: id,
-  definitionId: "onr_v1_196_corporate-war",
+  definitionId: 408,
   type: "agenda",
   known: true,
   title: "ignored",
 });
 const twoPointAgenda = (id: string): VisibleCard => ({
   instanceId: id,
-  definitionId: "onr_v1_194_corporate-downsizing",
+  definitionId: 406,
   type: "agenda",
   known: true,
   title: "ignored",
 });
 const asset = (id: string): VisibleCard => ({
   instanceId: id,
-  definitionId: "simple_economy_asset",
+  definitionId: 594,
   type: "asset",
   known: true,
   title: "ignored",
@@ -98,7 +98,7 @@ function withSnapshot(value: AiDecisionInput): AiDecisionInput {
   (value as AiDecisionInput & { ownDeckSnapshot: unknown }).ownDeckSnapshot = {
     deckSnapshotId: "deck",
     side: "corp",
-    cards: [{ cardId: "onr_v1_196_corporate-war", quantity: 2 }],
+    cards: [{ cardId: 408, quantity: 2 }],
   };
   return value;
 }
@@ -107,7 +107,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
     const value = withSnapshot(input());
     value.playerView.opponent.scoreArea.push({
       instanceId: "runner-bonus",
-      definitionId: "onr_v1_083_desperate-competitor",
+      definitionId: 295,
       known: true,
       type: "event",
       owner: "runner",
@@ -207,7 +207,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
       .find((server) => server.id === "rd")!
       .ice.push({
         instanceId: "rd-data-wall",
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         type: "ice",
         known: true,
         owner: "corp",
@@ -219,7 +219,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
         ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
       }
     ).ownDeckSnapshot.cards.push({
-      cardId: "onr_v1_237_data-wall",
+      cardId: 449,
       quantity: 1,
     });
 
@@ -247,7 +247,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
         ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
       }
     ).ownDeckSnapshot.cards.push({
-      cardId: "simple_economy_asset",
+      cardId: 594,
       quantity: 1,
     });
 
@@ -259,7 +259,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
     const value = withSnapshot(input());
     value.playerView.specialZones!.setAside.push({
       instanceId: "runner-set-aside",
-      definitionId: "onr_v1_144_tycho-mem-chip",
+      definitionId: 356,
       type: "hardware",
       known: true,
       owner: "runner",
@@ -298,7 +298,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
         ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
       }
     ).ownDeckSnapshot.cards.push({
-      cardId: "simple_economy_asset",
+      cardId: 594,
       quantity: 2,
     });
 
@@ -314,7 +314,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
         ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
       }
     ).ownDeckSnapshot.cards.push({
-      cardId: "simple_economy_asset",
+      cardId: 594,
       quantity: 1,
     });
 
@@ -347,7 +347,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
       ...value.playerView.corpCentralAccessQuotes![1]!,
       effectiveAccessCount: 3,
       isMultiaccess: true,
-      sourceDefinitionIds: ["onr_proteus_090_highlighter"],
+      sourceDefinitionIds: [148],
       serverBoundEffects: [
         {
           id: "corp:highlighter",
@@ -355,7 +355,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
           serverId: "rd",
           counterKind: "highlighter",
           formula: "per_counter_after_first",
-          sourceDefinitionId: "onr_proteus_090_highlighter",
+          sourceDefinitionId: 148,
           counterCount: 3,
           additionalAccessCount: 2,
         },
@@ -371,7 +371,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
       ...value.playerView.corpCentralAccessQuotes![0]!,
       effectiveAccessCount: 2,
       isMultiaccess: true,
-      sourceDefinitionIds: ["onr_proteus_090_highlighter"],
+      sourceDefinitionIds: [148],
       serverBoundEffects: [
         {
           id: "corp:highlighter",
@@ -379,7 +379,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
           serverId: "rd",
           counterKind: "highlighter",
           formula: "per_counter_after_first",
-          sourceDefinitionId: "onr_proteus_090_highlighter",
+          sourceDefinitionId: 148,
           counterCount: 2,
           additionalAccessCount: 1,
         },
@@ -398,7 +398,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
         ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
       }
     ).ownDeckSnapshot.cards.push({
-      cardId: "simple_economy_asset",
+      cardId: 594,
       quantity: 1,
     });
     expect(
@@ -432,7 +432,7 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
         ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };
       }
     ).ownDeckSnapshot.cards = [
-      { cardId: "onr_v1_194_corporate-downsizing", quantity: 3 },
+      { cardId: 406, quantity: 3 },
     ];
     expect(
       allocateCorpCentralDefenseFromAiFacts({ input: value }),

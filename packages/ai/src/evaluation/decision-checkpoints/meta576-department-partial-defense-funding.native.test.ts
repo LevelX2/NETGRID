@@ -106,7 +106,7 @@ it("does not reserve an unfunded no-progress installation but retains its genuin
   });
   expect(funded.unknown).toEqual([]);
   expect(funded.actionIds).toContain(
-    "corp.install_card.corp_onr_v1_278_wall-of-ice_1.hq.corp_onr_v1_278_wall-of-ice_1.5",
+    "corp.install_card.corp_490_1.hq.corp_490_1.5",
   );
 });
 it("retains a veto when the current Engine post-install quote is missing", () => {
@@ -115,7 +115,7 @@ it("retains a veto when the current Engine post-install quote is missing", () =>
     action = input.legalActions.find(
       (a) =>
         a.actionId ===
-        "corp.install_card.corp_onr_v1_278_wall-of-ice_1.hq.corp_onr_v1_278_wall-of-ice_1.5",
+        "corp.install_card.corp_490_1.hq.corp_490_1.5",
     )!;
   delete action.payload!.postInstallRezQuoteComplete;
   const params = windowParams(input, f.runtime.residentPlanPortfolio);

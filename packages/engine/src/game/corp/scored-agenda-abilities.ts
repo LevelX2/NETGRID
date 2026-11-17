@@ -77,7 +77,7 @@ export type ScoredAgendaActivatedAbilityHandlerResult = {
   handled: boolean;
   stateChanged?: boolean;
   sourceCardId?: CardInstanceId;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   gainedCredits?: number;
   drawCount?: number;
   removedCounters?: number;

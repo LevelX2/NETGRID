@@ -44,13 +44,13 @@ it("binds the available bank payout to the complete urgent path before spending 
     (a) => a.actionId === result.actionId,
   )!;
   expect(action.actionId).toBe(
-    "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+    "runner.activated_card_ability.runner_366_1.runner_366_1.activated.onr_v1_154_broker:withdraw_credits",
   );
   expect(result.fallbackUsed).toBe(false);
   expect(result.decisionDebug?.planFirstDecision).toMatchObject({
     rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_2",
     leafExecutorInstanceId:
-      "plan:runner.credit_bank:runner_onr_v1_154_broker_1",
+      "plan:runner.credit_bank:runner_366_1",
     route: {
       actionId: action.actionId,
       stateVersion: input.playerView.stateVersion,
@@ -85,7 +85,7 @@ it.each([
     expect(result.fallbackUsed).toBe(false);
     const bank = residentPlanPortfolioSnapshot(input)?.instances.find(
       (p) =>
-        p.instanceId === "plan:runner.credit_bank:runner_onr_v1_154_broker_1",
+        p.instanceId === "plan:runner.credit_bank:runner_366_1",
     );
     expect(bank?.parentNeedId).toBeUndefined();
   },
@@ -94,10 +94,10 @@ it.each([
 it("keeps one provider when two banks can fund the same exact run", () => {
   const { input, runtime } = checkpoint();
   const first = input.playerView.own.rig!.find(
-    (c) => c.instanceId === "runner_onr_v1_154_broker_1",
+    (c) => c.instanceId === "runner_366_1",
   )!;
   const second = input.playerView.own.rig!.find(
-    (c) => c.instanceId === "runner_onr_v1_154_broker_2",
+    (c) => c.instanceId === "runner_366_2",
   )!;
   if (!first.counters || !first.counterDisplays)
     throw Error("Fixture bank must carry its quoted payout");
@@ -108,8 +108,8 @@ it("keeps one provider when two banks can fund the same exact run", () => {
   )!;
   const secondAction = JSON.parse(
     JSON.stringify(firstAction).replaceAll(
-      "runner_onr_v1_154_broker_1",
-      "runner_onr_v1_154_broker_2",
+      "runner_366_1",
+      "runner_366_2",
     ),
   );
   input.legalActions.push(secondAction);
@@ -136,6 +136,6 @@ it("keeps one provider when two banks can fund the same exact run", () => {
     (p) => p.parentNeedId === "run-support:remote:remote_2",
   );
   expect(providers.map((p) => p.instanceId)).toEqual([
-    "plan:runner.credit_bank:runner_onr_v1_154_broker_1",
+    "plan:runner.credit_bank:runner_366_1",
   ]);
 });

@@ -48,7 +48,7 @@ export type RunnerInstalledRunPayoff = {
 export type RunnerConsumableRunOpportunityQuote = {
   schemaVersion: typeof RUNNER_CONSUMABLE_RUN_OPPORTUNITY_SCHEMA_VERSION;
   kind: "bypass_first_ice" | "card_backed_run";
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   gripCopyCount: number;
   handAtCapacity: boolean;
   baseOpportunityCost: number;
@@ -108,7 +108,7 @@ export type RunActionProjection = {
   runTraceLinkBonus?: number;
   corpRezCostSurcharge?: {
     kind: "matching_printed_rez_cost";
-    sourceDefinitionId?: string;
+    sourceDefinitionId?: number;
   };
   runnerCreditGainOnCorpRez?: number;
   successfulRunSelfTags?: number;

@@ -48,9 +48,9 @@ it("keeps the exact coverage target and fills the grip search with complementary
   expect(decision.actionId).toBe("runner.resolve_choice");
   expect(payload.choiceId).toBe(choice.choiceId);
   expect(payload.selectedOptionIds).toHaveLength(5);
-  expect(definitions[0]).toBe("onr_classic_030_psychic-friend");
+  expect(definitions[0]).toBe(34);
   expect(new Set(definitions).size).toBe(5);
-  expect(definitions).toContain("onr_classic_027_early-worm");
+  expect(definitions).toContain(31);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
     "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
   );
@@ -65,7 +65,7 @@ it("preserves the complete offered set while excluding a disabled option", () =>
   const input = restoredInput();
   const choice = input.playerView.pendingChoice!;
   const disabled = choice.options.find(
-    (option) => option.card?.definitionId === "onr_classic_027_early-worm",
+    (option) => option.card?.definitionId === 31,
   )!;
   disabled.selectable = false;
   const decision = chooseAiAction(input);
@@ -84,7 +84,7 @@ it("keeps legal duplicates when the exact engine selection count requires them",
   const input = restoredInput();
   const choice = input.playerView.pendingChoice!;
   choice.options = choice.options.filter(
-    (o) => o.card?.definitionId === "onr_classic_030_psychic-friend",
+    (o) => o.card?.definitionId === 34,
   );
   choice.minSelections = choice.maxSelections = 3;
   const requirement = input.legalActions[0]!.choiceRequirements![0]!;
@@ -119,7 +119,7 @@ it("does not replace a vanished exact target with an unrelated search pick", () 
   const input = restoredInput();
   const choice = input.playerView.pendingChoice!;
   choice.options = choice.options.filter(
-    (o) => o.card?.definitionId !== "onr_classic_030_psychic-friend",
+    (o) => o.card?.definitionId !== 34,
   );
   input.legalActions[0]!.choiceRequirements![0]!.optionIds = choice.options.map(
     (o) => o.id,

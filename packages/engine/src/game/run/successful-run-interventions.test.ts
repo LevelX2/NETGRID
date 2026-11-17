@@ -31,7 +31,7 @@ afterEach(() => {
 });
 
 function definition(
-  id: string,
+  id: number,
   title: string,
   type: CardDefinition["type"],
   options: Partial<CardDefinition> = {},
@@ -46,7 +46,7 @@ function definition(
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
   options: Partial<CardInstance> = {},
 ): CardInstance {
@@ -65,7 +65,7 @@ function instance(
 
 function makeHost(
   options: {
-    sourceDefinitionId?: string;
+    sourceDefinitionId?: number;
     sourceTitle?: string;
     hqIceRezCost?: number;
     existingIceCount?: number;
@@ -84,7 +84,7 @@ function makeHost(
   canonicallyRezzedIceIds: CardInstanceId[];
 } {
   const sourceDefinitionId =
-    options.sourceDefinitionId ?? "onr_v1_358_dr-dreff";
+    options.sourceDefinitionId ?? 570;
   const sourceTitle = options.sourceTitle ?? "Dr. Dreff";
   const hqIceRezCost = options.hqIceRezCost ?? 5;
   const existingIceCount = options.existingIceCount ?? 1;
@@ -100,34 +100,34 @@ function makeHost(
     existing_ice_def: definition("existing_ice_def", "Existing ICE", "ice", {
       rezCost: 3,
     }),
-    "onr_v1_026_false-echo": definition(
-      "onr_v1_026_false-echo",
+    238: definition(
+      238,
       "False Echo",
       "program",
     ),
-    "onr_v1_044_netspace-inverter": definition(
-      "onr_v1_044_netspace-inverter",
+    256: definition(
+      256,
       "Netspace Inverter",
       "program",
     ),
-    "onr_v1_032_i-spy": definition("onr_v1_032_i-spy", "I Spy", "program"),
-    "onr_v1_123_bodyweight-data-creche": definition(
-      "onr_v1_123_bodyweight-data-creche",
+    244: definition(244, "I Spy", "program"),
+    335: definition(
+      335,
       "Bodyweight Data Creche",
       "hardware",
     ),
-    "onr_v1_166_karl-de-veres-corporate-stooge": definition(
-      "onr_v1_166_karl-de-veres-corporate-stooge",
+    378: definition(
+      378,
       "Karl de Veres",
       "resource",
     ),
-    "onr_proteus_136_credit-subversion": definition(
-      "onr_proteus_136_credit-subversion",
+    194: definition(
+      194,
       "Credit Subversion",
       "resource",
     ),
     onr_proteus_078_armageddon: definition(
-      "onr_proteus_078_armageddon",
+      136,
       "Armageddon",
       "program",
     ),
@@ -159,35 +159,35 @@ function makeHost(
       { faceup: true, rezzed: true },
     ),
     hq_ice: instance("hq_ice", "hq_ice_def", { side: "corp", zone: "hq" }),
-    false_echo: instance("false_echo", "onr_v1_026_false-echo", {
+    false_echo: instance("false_echo", 238, {
       side: "runner",
       zone: "rig",
     }),
-    netspace: instance("netspace", "onr_v1_044_netspace-inverter", {
+    netspace: instance("netspace", 256, {
       side: "runner",
       zone: "rig",
     }),
-    i_spy: instance("i_spy", "onr_v1_032_i-spy", {
+    i_spy: instance("i_spy", 244, {
       side: "runner",
       zone: "rig",
     }),
-    bodyweight: instance("bodyweight", "onr_v1_123_bodyweight-data-creche", {
+    bodyweight: instance("bodyweight", 335, {
       side: "runner",
       zone: "rig",
     }),
-    karl: instance("karl", "onr_v1_166_karl-de-veres-corporate-stooge", {
+    karl: instance("karl", 378, {
       side: "runner",
       zone: "rig",
     }),
     credit_subversion: instance(
       "credit_subversion",
-      "onr_proteus_136_credit-subversion",
+      194,
       {
         side: "runner",
         zone: "rig",
       },
     ),
-    armageddon: instance("armageddon", "onr_proteus_078_armageddon", {
+    armageddon: instance("armageddon", 136, {
       side: "runner",
       zone: "rig",
     }),
@@ -614,7 +614,7 @@ describe("successful run interventions", () => {
 
   it("resolves Jenny Jett by installing innermost at current ICE count cost", () => {
     const fixture = makeHost({
-      sourceDefinitionId: "onr_v1_359_jenny-jett",
+      sourceDefinitionId: 571,
       sourceTitle: "Jenny Jett",
       existingIceCount: 2,
     });
@@ -652,7 +652,7 @@ describe("successful run interventions", () => {
 
   it("applies normal ICE-install cost modifiers to Jenny Jett", () => {
     const fixture = makeHost({
-      sourceDefinitionId: "onr_v1_359_jenny-jett",
+      sourceDefinitionId: 571,
       sourceTitle: "Jenny Jett",
       existingIceCount: 2,
       iceInstallCostModifier: 2,
@@ -711,7 +711,7 @@ describe("successful run interventions", () => {
     expect(legalAction.payload).toMatchObject({
       temporaryEncounterTrashed: true,
       temporaryIceDefinitionId: "hq_ice_def",
-      sourceDefinitionId: "onr_v1_358_dr-dreff",
+      sourceDefinitionId: 570,
       serverId: "remote_1",
       successfulRunFinalizedAfterIntervention: true,
       delayedSuccessfulRun: false,
@@ -737,7 +737,7 @@ describe("successful run interventions", () => {
     expect(legalAction.payload).toMatchObject({
       hiddenZoneAction: "successful_run_intervention_declined",
       interventionDecision: "decline",
-      sourceDefinitionId: "onr_v1_358_dr-dreff",
+      sourceDefinitionId: 570,
       delayedSuccessfulRun: false,
     });
     expect(legalAction.payload).not.toHaveProperty("publicRevealDefinitionId");
@@ -848,7 +848,7 @@ describe("successful run interventions", () => {
     );
     expect(action?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+        "194:hq_success_reveal_trash_source_corp_lose_three",
       cardImplementationAbilityKey:
         "hq_success_reveal_trash_source_corp_lose_three",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
@@ -858,7 +858,7 @@ describe("successful run interventions", () => {
       abilityRef: {
         sourceCardInstanceId: "credit_subversion",
         sourceAbilityId:
-          "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+          "194:hq_success_reveal_trash_source_corp_lose_three",
       },
       effectRef:
         "effect.onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
@@ -985,7 +985,7 @@ describe("successful run interventions", () => {
     expect(result).toMatchObject({
       handled: true,
       sourceCardId: "armageddon",
-      sourceDefinitionId: "onr_proteus_078_armageddon",
+      sourceDefinitionId: 136,
       counterPlaced: true,
     });
     expect(fixture.state.purgeableRunnerVirusCounters?.corp).toMatchObject({
@@ -1000,7 +1000,7 @@ describe("successful run interventions", () => {
       counterType: "doom",
       counterDelta: 1,
       counterTotalAfter: 1,
-      sourceCardDefinitionId: "onr_proteus_078_armageddon",
+      sourceCardDefinitionId: 136,
       serverId: "rd",
     });
   });
@@ -1029,7 +1029,7 @@ describe("successful run interventions", () => {
     expect(legalAction.payload).toMatchObject({
       karlSuccessfulRunCreditGain: 1,
       successfulRunExtraRunPending: true,
-      sourceDefinitionId: "onr_v1_123_bodyweight-data-creche",
+      sourceDefinitionId: 335,
     });
   });
 });

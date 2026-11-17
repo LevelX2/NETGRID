@@ -24,7 +24,7 @@ export type RunnerRemoteThreatTargetingCompositionDependencies = {
     input: AiDecisionInput,
     serverId: string,
   ) => boolean;
-  rolesForCardId: (definitionId: string | undefined) => string[];
+  rolesForCardId: (definitionId: number | undefined) => string[];
   runnerCreditReserveTargetForInput: (input: AiDecisionInput) => number;
   sourceDefinitionIdForSimulationAction: (
     input: AiDecisionInput,

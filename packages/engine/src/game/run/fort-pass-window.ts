@@ -27,7 +27,7 @@ export type FortPassWindowActionBuildResult = {
 export type FortPassWindowExecutionResult = {
   handled: boolean;
   sourceCardId?: CardInstanceId;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   serverId?: Exclude<ServerId, "new_remote"> | string;
   serverLabel?: string;
   windowPassed?: boolean;

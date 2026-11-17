@@ -147,7 +147,7 @@ function sourceCardInstanceIdForAction(
 type ResolvedAbilityBinding = {
   abilityId: string;
   method: ActionAbilityBindingMethod;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   evidence: string[];
 };
 
@@ -277,7 +277,7 @@ function abilityBindingForAction(
 
 function abilityBindingFromVisibleRuntimeCard(
   action: LegalAction,
-  sourceDefinitionId: string | undefined,
+  sourceDefinitionId: number | undefined,
 ): ResolvedAbilityBinding | undefined {
   if (sourceDefinitionId === undefined) return undefined;
   if (!requiresAbilityBinding(action)) return undefined;

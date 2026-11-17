@@ -240,7 +240,7 @@ function validTargetProjectedServerBinding(
 
 function canonicalCommaSeparatedDefinitionIds(
   value: unknown,
-): string[] | undefined {
+): number[] | undefined {
   if (value === undefined) return [];
   if (typeof value !== "string" || value.length === 0) return undefined;
   const ids = value.split(",");

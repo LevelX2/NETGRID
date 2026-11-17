@@ -56,7 +56,7 @@ function fixture(card: string, credits: number) {
     .withCorpHqSize(0)
     .withCorpCredits(credits)
     .withRunnerCredits(3)
-    .withCorpCardInHq("onr_proteus_005_marked-accounts")
+    .withCorpCardInHq(63)
     .withCorpCardInHq(card);
   return s;
 }
@@ -75,7 +75,7 @@ function input(s: GameState) {
 }
 afterEach(resetResidentPlanPortfolioMemory);
 
-it.each([["onr_proteus_020_digiconda", 6]] as const)(
+it.each([[78, 6]] as const)(
   "binds the minimum x-strength installation, Defense plan and actual rez of %s",
   (card, cost) => {
     let s = fixture(card, cost);
@@ -144,7 +144,7 @@ it.each([["onr_proteus_020_digiconda", 6]] as const)(
   },
 );
 
-it.each(["onr_proteus_025_homing-missile"])(
+it.each([83])(
   "does not invent an unbound variable projection for %s",
   (card) => {
     const s = fixture(card, 20),
@@ -161,8 +161,8 @@ it.each(["onr_proteus_025_homing-missile"])(
 );
 
 it.each([
-  ["onr_proteus_024_gatekeeper", 5],
-  ["onr_proteus_036_sandstorm", 6],
+  [82, 5],
+  [94, 6],
 ] as const)(
   "binds the first paid stopping routine, Defense owner and actual rez of %s",
   (card, credits) => {
@@ -225,7 +225,7 @@ it.each([
 );
 
 it("keeps the minimum-X effect quote separate from current installed rez choices", () => {
-  let s = fixture("onr_proteus_020_digiconda", 6);
+  let s = fixture(78, 6);
   const install = getLegalActions(s, "corp").find(
     (a) =>
       a.type === "install_card" &&
@@ -242,7 +242,7 @@ it("keeps the minimum-X effect quote separate from current installed rez choices
   ).toMatchObject({ complete: false, reason: "variable_rez_choice_required" });
 });
 
-it.each(["onr_proteus_024_gatekeeper", "onr_proteus_036_sandstorm"])(
+it.each([82, 94])(
   "does not bind a current installed paid-routine rez choice from the installation quote for %s",
   (card) => {
     let s = fixture(card, 20);
@@ -268,8 +268,8 @@ it.each(["onr_proteus_024_gatekeeper", "onr_proteus_036_sandstorm"])(
 );
 
 it.each([
-  ["onr_proteus_024_gatekeeper", 5],
-  ["onr_proteus_036_sandstorm", 6],
+  [82, 5],
+  [94, 6],
 ] as const)(
   "keeps the first-stop qualitative installation fail-closed without the Engine effect quote for %s",
   (card, credits) => {
@@ -287,7 +287,7 @@ it.each([
 );
 
 it("keeps an unfunded minimum-X installation at the existing staging milestone", () => {
-  const s = fixture("onr_proteus_020_digiconda", 5),
+  const s = fixture(78, 5),
     i = input(s),
     r = chooseAiAction(i);
   const selected = i.legalActions.find((a) => a.actionId === r.actionId)!;
@@ -327,7 +327,7 @@ it.each([
 ] as const)(
   "rejects %s rather than substituting a minimum price",
   (_name, patch) => {
-    const s = fixture("onr_proteus_020_digiconda", 6);
+    const s = fixture(78, 6);
     const install = getLegalActions(s, "corp").find(
       (a) => a.type === "install_card" && a.source.includes("digiconda"),
     )!;
@@ -347,7 +347,7 @@ it.each([
   "postInstallEffectiveRunQuoteJson",
   "postInstallRezQuoteExpiresAtStateVersion",
 ])("keeps the native owner fail-closed without %s", (key) => {
-  const i = input(fixture("onr_proteus_020_digiconda", 6));
+  const i = input(fixture(78, 6));
   for (const a of i.legalActions.filter(
     (a) => a.source.includes("digiconda") && a.type === "install_card",
   ))

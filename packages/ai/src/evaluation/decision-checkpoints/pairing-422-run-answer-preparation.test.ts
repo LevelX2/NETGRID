@@ -52,7 +52,7 @@ function replay(json: unknown) {
 it("prepares the exposed heap top for an affordable same-turn buried coverage answer", () => {
   const { capture, decision, portfolio, action } = replay(heapJson);
   expect(action?.payload?.targetCardId).toBe(
-    "runner_onr_classic_042_panzer-run_1",
+    "runner_46_1",
   );
   expect(action?.payload?.cardImplementationEffectKind).toBe(
     "move_top_trash_to_grip",
@@ -134,8 +134,8 @@ it.each([
   else
     expect(quote).toMatchObject({
       actionId: recovery.actionId,
-      currentTopCardInstanceId: "runner_onr_classic_042_panzer-run_1",
-      targetCardInstanceId: "runner_onr_classic_031_rent-i-con_1",
+      currentTopCardInstanceId: "runner_46_1",
+      targetCardInstanceId: "runner_35_1",
       recoveryCount: 2,
       requiredClicks: 4,
       upfrontCredits: 5,

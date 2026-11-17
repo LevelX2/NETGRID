@@ -26,10 +26,10 @@ const cp = JSON.parse(
     "utf8",
   ),
 );
-const lab = "onr_classic_003_unlisted-research-lab";
-const supers = "onr_classic_002_superserum";
-const data = "onr_classic_001_data-fort-remapping";
-const theorem = "onr_classic_004_theorem-proof";
+const lab = 7;
+const supers = 6;
+const data = 5;
+const theorem = 8;
 afterEach(resetResidentPlanPortfolioMemory);
 function apply(state: GameState, actionId: string) {
   const result = applyAction(state, {
@@ -43,7 +43,7 @@ function apply(state: GameState, actionId: string) {
 }
 function ready(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   serverId: Exclude<ServerId, "new_remote">,
 ) {
   const id = [...state.corp.rd, ...state.corp.hq].find(

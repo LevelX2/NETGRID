@@ -16,11 +16,11 @@ import {
 describe("runner Shell Traders pipeline signals", () => {
   it("reserves memory only for programs actually staged by Shell Traders", () => {
     const source = shellTraders();
-    const target = card("dwarf-new", "onr_v1_021_dwarf", "program", {
+    const target = card("dwarf-new", 233, "program", {
       installCost: 3,
       memoryCost: 1,
     });
-    const otherSetAside = card("dwarf-set-aside", "onr_v1_021_dwarf", "program", {
+    const otherSetAside = card("dwarf-set-aside", 233, "program", {
       memoryCost: 1,
     });
     const action = shellAction("prepare-dwarf", source.instanceId, target, {
@@ -40,7 +40,7 @@ describe("runner Shell Traders pipeline signals", () => {
   });
 
   it("stays completely inactive without an installed Shell Traders source", () => {
-    const target = card("dwarf", "onr_v1_021_dwarf", "program", {
+    const target = card("dwarf", 233, "program", {
       installCost: 3,
       memoryCost: 1,
     });
@@ -60,7 +60,7 @@ describe("runner Shell Traders pipeline signals", () => {
 
   it("binds an exact preparation action to the missing breaker role and server", () => {
     const source = shellTraders();
-    const target = card("dwarf", "onr_v1_021_dwarf", "program", {
+    const target = card("dwarf", 233, "program", {
       installCost: 3,
       memoryCost: 1,
     });
@@ -100,7 +100,7 @@ describe("runner Shell Traders pipeline signals", () => {
     const source = shellTraders();
     const prepared = card(
       "cyfermaster-prepared",
-      "onr_v1_016_cyfermaster",
+      228,
       "program",
       {
         installCost: 4,
@@ -108,7 +108,7 @@ describe("runner Shell Traders pipeline signals", () => {
         counters: { shell: 1 },
       },
     );
-    const dwarf = card("dwarf-installed", "onr_v1_021_dwarf", "program", {
+    const dwarf = card("dwarf-installed", 233, "program", {
       installCost: 3,
       memoryCost: 1,
     });
@@ -148,12 +148,12 @@ describe("runner Shell Traders pipeline signals", () => {
 
   it("keeps a viable same-role replacement but holds payment without a quoted access path", () => {
     const source = shellTraders();
-    const prepared = card("dwarf-new", "onr_v1_021_dwarf", "program", {
+    const prepared = card("dwarf-new", 233, "program", {
       installCost: 3,
       memoryCost: 1,
       counters: { shell: 1 },
     });
-    const oldDwarf = card("dwarf-old", "onr_v1_021_dwarf", "program", {
+    const oldDwarf = card("dwarf-old", 233, "program", {
       installCost: 3,
       memoryCost: 1,
     });
@@ -192,16 +192,16 @@ describe("runner Shell Traders pipeline signals", () => {
   });
 
   it("chooses the minimum-displacement memory combination instead of a greedy prefix", () => {
-    const target = card("dwarf-new", "onr_v1_021_dwarf", "program", {
+    const target = card("dwarf-new", 233, "program", {
       memoryCost: 2,
     });
-    const decoder = card("decoder-wide", "simple_decoder", "program", {
+    const decoder = card("decoder-wide", 591, "program", {
       memoryCost: 2,
     });
-    const firstDwarf = card("dwarf-small-a", "onr_v1_021_dwarf", "program", {
+    const firstDwarf = card("dwarf-small-a", 233, "program", {
       memoryCost: 1,
     });
-    const secondDwarf = card("dwarf-small-b", "onr_v1_021_dwarf", "program", {
+    const secondDwarf = card("dwarf-small-b", 233, "program", {
       memoryCost: 1,
     });
     const gap = coverageGap("wall-gap", "breaker_wall", "remote_2", "P2");
@@ -233,7 +233,7 @@ describe("runner Shell Traders pipeline signals", () => {
 
   it("adds doctrine evidence only for an exact required provider near overflow", () => {
     const source = shellTraders();
-    const target = card("dwarf", "onr_v1_021_dwarf", "program", {
+    const target = card("dwarf", 233, "program", {
       installCost: 3,
       memoryCost: 1,
     });
@@ -255,7 +255,7 @@ describe("runner Shell Traders pipeline signals", () => {
       signals(
         input,
         [coverageGap("wall-gap", "breaker_wall")],
-        shellDoctrineIntent("onr_v1_021_dwarf"),
+        shellDoctrineIntent(233),
       ),
     ).toEqual([
       expect.objectContaining({
@@ -272,7 +272,7 @@ describe("runner Shell Traders pipeline signals", () => {
     const source = shellTraders();
     const target = card(
       "rd-interface",
-      "onr_v1_139_r-and-d-interface",
+      351,
       "hardware",
       { installCost: 4 },
     );
@@ -312,7 +312,7 @@ describe("runner Shell Traders pipeline signals", () => {
     const source = shellTraders();
     const target = card(
       "zero-cost-program",
-      "onr_v1_035_invisibility",
+      247,
       "program",
       {
         installCost: 0,
@@ -362,7 +362,7 @@ function signals(
     observerSide: "runner",
     stateVersion: input.playerView.stateVersion,
     visibleSourceDefinitionsByInstanceId: {
-      "shell-source": "onr_v1_176_the-shell-traders",
+      "shell-source": 388,
     },
   });
   return buildRunnerShellTradersPipelineSignals({
@@ -375,7 +375,7 @@ function signals(
 }
 
 function shellDoctrineIntent(
-  targetDefinitionId: string,
+  targetDefinitionId: number,
 ): RunnerStrategicIntentProfile {
   return {
     schemaVersion: "runner-strategic-intent-profile-v1",
@@ -459,7 +459,7 @@ function runnerInput(
       activeSide: "runner",
       phase: "runner_action_phase",
       own: {
-        identity: card("runner-identity", "runner_identity_001", "identity"),
+        identity: card("runner-identity", 587, "identity"),
         credits: 8,
         clicks: 4,
         agendaPoints: 0,
@@ -474,7 +474,7 @@ function runnerInput(
         memoryUsed: options.memoryUsed ?? 0,
       },
       opponent: {
-        identity: card("corp-identity", "corp_identity_001", "identity"),
+        identity: card("corp-identity", 3, "identity"),
         credits: 5,
         clicks: 3,
         agendaPoints: 0,
@@ -534,7 +534,7 @@ function shellAction(
     expiresAtStateVersion: 7,
     payload: {
       cardId: source,
-      sourceDefinitionId: "onr_v1_176_the-shell-traders",
+      sourceDefinitionId: 388,
       targetCardId: target.instanceId,
       targetCardDefinitionId: target.definitionId!,
       ...payload,
@@ -543,14 +543,14 @@ function shellAction(
 }
 
 function shellTraders(): VisibleCard {
-  return card("shell-source", "onr_v1_176_the-shell-traders", "resource", {
+  return card("shell-source", 388, "resource", {
     installCost: 0,
   });
 }
 
 function card(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   type: NonNullable<VisibleCard["type"]>,
   extra: Partial<VisibleCard> = {},
 ): VisibleCard {
@@ -574,20 +574,20 @@ function card(
 
 describe("Shell Traders hosted-program displacement", () => {
   it("counts actual host losses while daemon children provide no selectable MU", () => {
-    const host = card("afreet", "onr_v1_001_afreet", "program", {
+    const host = card("afreet", 213, "program", {
       memoryCost: 1,
     });
-    const wall = card("wall", "onr_v1_047_pile-driver", "program", {
+    const wall = card("wall", 259, "program", {
       memoryCost: 1,
       hostedOn: host.instanceId,
     });
     const filler = card(
       "installer",
-      "onr_v1_075_zetatech-software-installer",
+      287,
       "program",
       { memoryCost: 1 },
     );
-    const target = card("target", "onr_v1_016_cyfermaster", "program", {
+    const target = card("target", 228, "program", {
       memoryCost: 1,
     });
     const gap = coverageGap("wall-gap", "breaker_wall", "remote_1", "P2");

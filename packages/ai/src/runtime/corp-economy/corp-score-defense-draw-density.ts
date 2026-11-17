@@ -15,7 +15,7 @@ type CorpScoreDefenseEffectSuitableIceDensity = Readonly<{
   remainingDeckCount: number;
   remainingSuitableIceCount?: number;
   remainingSuitableIceDensity?: number;
-  suitableDefinitionIds: readonly string[];
+  suitableDefinitionIds: readonly number[];
   evidence: readonly string[];
 }>;
 
@@ -69,7 +69,7 @@ export function corpScoreDefenseEffectSuitableIceDensity(
   }));
   const outsideByDefinitionId = visibleCorpCardsOutsideRdByDefinition(input);
   let remainingSuitableIceCount = 0;
-  const suitableDefinitionIds: string[] = [];
+  const suitableDefinitionIds: number[] = [];
   const deckDefinitionIds = new Set<string>();
   for (const entry of snapshot.cards) {
     if (!Number.isSafeInteger(entry.quantity) || entry.quantity < 0) {
@@ -171,7 +171,7 @@ function unknownScoreDefenseDensity(
   };
 }
 
-function resolvedEngineDefinitionId(definitionId: string): string | undefined {
+function resolvedEngineDefinitionId(definitionId: number): number | undefined {
   if (CARD_DEFINITIONS_BY_ID[definitionId]) return definitionId;
   const engineCardId = RUNTIME_CARDS[definitionId]?.engineCardId;
   return engineCardId && CARD_DEFINITIONS_BY_ID[engineCardId]

@@ -48,7 +48,7 @@ describe("match E8886 runner decision checkpoints", () => {
       result.input.legalActions.some(
         (action) =>
           action.type === "play_event" &&
-          action.actionId.includes("onr_v1_094_inside-job") &&
+          action.actionId.includes(306) &&
           action.payload?.serverId === "rd",
       ),
     ).toBe(true);
@@ -60,7 +60,7 @@ describe("match E8886 runner decision checkpoints", () => {
       const target = state.runner.grip.find(
         (instanceId) =>
           state.cardInstances[instanceId]?.definitionId ===
-          "onr_v1_079_bodyweight-synthetic-blood",
+          291,
       );
       if (!target) throw new Error("Expected Bodyweight recovery target");
       state.runner.grip = state.runner.grip.filter(
@@ -79,7 +79,7 @@ describe("match E8886 runner decision checkpoints", () => {
           acceptablePlanKinds: ["runner.economy"],
           acceptableCapabilities: ["gain_general_liquid_credits"],
           requiredAssessmentEvidence: [
-            "runner_development_funding:card:runner_onr_v1_165_junkyard-bbs_1",
+            "runner_development_funding:card:runner_377_1",
           ],
         },
       };
@@ -91,7 +91,7 @@ describe("match E8886 runner decision checkpoints", () => {
       result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
         ?.rootPlanInstanceId,
     ).toBe(
-      "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_165_junkyard-bbs_1",
+      "plan:runner.develop_board_and_hand:card%3Arunner_377_1",
     );
     const portfolioItems =
       result.decision?.decisionDebug?.detailSections?.find(
@@ -101,7 +101,7 @@ describe("match E8886 runner decision checkpoints", () => {
       portfolioItems.some(
         (item) =>
           item.includes("module:runner.develop_board_and_hand") &&
-          item.includes("card%3Arunner_onr_v1_165_junkyard-bbs_1") &&
+          item.includes("card%3Arunner_377_1") &&
           item.includes("phase:fund") &&
           item.includes("viability:ready"),
       ),
@@ -114,12 +114,12 @@ describe("match E8886 runner decision checkpoints", () => {
       const junkyard = state.runner.grip.find(
         (instanceId) =>
           state.cardInstances[instanceId]?.definitionId ===
-          "onr_v1_165_junkyard-bbs",
+          377,
       );
       const target = state.runner.grip.find(
         (instanceId) =>
           state.cardInstances[instanceId]?.definitionId ===
-          "onr_v1_079_bodyweight-synthetic-blood",
+          291,
       );
       if (!junkyard || !target)
         throw new Error("Expected Junkyard and recovery target");

@@ -11,7 +11,7 @@ import type {
 import { buildPlanningRulesContext, chooseRunnerAction } from "./index";
 import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
 
-const WILSON_DEFINITION_ID = "onr_v1_187_wilson-weeflerunner-apprentice";
+const WILSON_DEFINITION_ID = 399;
 
 describe("Runner Wilson run action utilization", () => {
   const originalRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
@@ -190,7 +190,7 @@ describe("Runner Wilson run action utilization", () => {
     const runRd = runAction("runner.start_run.rd", "rd");
     const input = runnerInput({
       credits: 8,
-      rig: [visibleBreaker("simple-fracter", "simple_fracter", 2)],
+      rig: [visibleBreaker("simple-fracter", 597, 2)],
       servers: [
         server("rd", {
           ice: [highCostBarrierIce()],
@@ -386,7 +386,7 @@ function server(
 function highCostBarrierIce(): VisibleCard {
   return {
     instanceId: "rd-high-cost-barrier",
-    definitionId: "simple_barrier_ice",
+    definitionId: 589,
     title: "High Cost Barrier",
     type: "ice",
     owner: "corp",
@@ -397,7 +397,7 @@ function highCostBarrierIce(): VisibleCard {
     strength: 6,
     effectiveRunQuote: {
       iceInstanceId: "rd-high-cost-barrier",
-      iceDefinitionId: "simple_barrier_ice",
+      iceDefinitionId: 589,
       effectiveStrength: 6,
       subroutines: [{ id: "high_cost_barrier_etr", type: "end_the_run" }],
     } satisfies VisibleEffectiveIceRunQuote,
@@ -418,7 +418,7 @@ function visibleWilson(): VisibleCard {
 
 function visibleBreaker(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   strength: number,
 ): VisibleCard {
   return {
@@ -437,7 +437,7 @@ function visibleBreaker(
 function visibleGripCard(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "simple_run_event",
+    definitionId: 600,
     title: instanceId,
     owner: "runner",
     controller: "runner",

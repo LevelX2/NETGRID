@@ -27,7 +27,7 @@ type RunnerDecision = ReturnType<typeof chooseRunnerAction>;
 
 function wallOfStatic(instanceId: string) {
   const ice = visibleCard(instanceId, "corp", "ice", {
-    definitionId: "onr_v1_279_wall-of-static",
+    definitionId: 491,
     title: "Wall of Static",
     rezzed: true,
     strength: 2,
@@ -39,7 +39,7 @@ function wallOfStatic(instanceId: string) {
       {
         id: `${instanceId}-end-the-run`,
         type: "end_the_run",
-        sourceDefinitionId: "onr_v1_279_wall-of-static",
+        sourceDefinitionId: 491,
         sourceTitle: "Wall of Static",
       },
     ],
@@ -48,13 +48,13 @@ function wallOfStatic(instanceId: string) {
 
 function brokerAbilityPayload(
   route: "build" | "cash_out",
-  sourceCardInstanceId = "onr_v1_154_broker",
+  sourceCardInstanceId = 366,
 ) {
   const capabilityKey =
     route === "build" ? "store_credits" : "withdraw_credits";
   return {
     cardId: sourceCardInstanceId,
-    sourceDefinitionId: "onr_v1_154_broker",
+    sourceDefinitionId: 366,
     cardImplementationCapabilityBindingKind:
       "card_spec_capability_key" as const,
     cardImplementationAbilityId: `onr_v1_154_broker:${capabilityKey}`,
@@ -105,7 +105,7 @@ function bindPlainRemoteAgendaQuote(input: ReturnType<typeof aiInput>): void {
     (entry) => entry.id === "remote_1",
   )!;
   const agenda = remote.root.find(
-    (card) => card.definitionId === "simple_agenda",
+    (card) => card.definitionId === 588,
   )!;
   expect(agenda.type).toBe("agenda");
   agenda.effectiveStealCostQuote = {
@@ -187,29 +187,29 @@ function rdExpressDeckSnapshot() {
     deckSnapshotId: "standard_runner_rd_express:1.1.0",
     side: "runner" as const,
     cards: [
-      { cardId: "onr_v1_014_codecracker", quantity: 2 },
-      { cardId: "onr_v1_040_loony-goon", quantity: 2 },
-      { cardId: "onr_v1_071_vewy-vewy-quiet", quantity: 2 },
-      { cardId: "onr_v1_089_gideons-pawnshop", quantity: 1 },
-      { cardId: "onr_v1_094_inside-job", quantity: 3 },
-      { cardId: "onr_v1_095_jack-n-joe", quantity: 3 },
-      { cardId: "onr_v1_097_livewires-contacts", quantity: 3 },
-      { cardId: "onr_v1_102_open-ended-mileage-program", quantity: 2 },
-      { cardId: "onr_v1_108_score", quantity: 2 },
-      { cardId: "onr_v1_114_temple-microcode-outlet", quantity: 3 },
-      { cardId: "onr_v1_124_corolla-speed-chip", quantity: 1 },
-      { cardId: "onr_v1_129_hq-interface", quantity: 2 },
-      { cardId: "onr_v1_139_r-and-d-interface", quantity: 3 },
-      { cardId: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
+      { cardId: 226, quantity: 2 },
+      { cardId: 252, quantity: 2 },
+      { cardId: 283, quantity: 2 },
+      { cardId: 301, quantity: 1 },
+      { cardId: 306, quantity: 3 },
+      { cardId: 307, quantity: 3 },
+      { cardId: 309, quantity: 3 },
+      { cardId: 314, quantity: 2 },
+      { cardId: 320, quantity: 2 },
+      { cardId: 326, quantity: 3 },
+      { cardId: 336, quantity: 1 },
+      { cardId: 341, quantity: 2 },
+      { cardId: 351, quantity: 3 },
+      { cardId: 358, quantity: 1 },
       {
-        cardId: "onr_v1_166_karl-de-veres-corporate-stooge",
+        cardId: 378,
         quantity: 1,
       },
-      { cardId: "onr_v1_178_short-term-contract", quantity: 3 },
-      { cardId: "onr_proteus_083_corrosion", quantity: 2 },
-      { cardId: "onr_proteus_103_cruising-for-netwatch", quantity: 3 },
-      { cardId: "onr_proteus_122_rush-hour", quantity: 3 },
-      { cardId: "onr_proteus_124_stakeout", quantity: 3 },
+      { cardId: 390, quantity: 3 },
+      { cardId: 141, quantity: 2 },
+      { cardId: 161, quantity: 3 },
+      { cardId: 180, quantity: 3 },
+      { cardId: 182, quantity: 3 },
     ],
   };
 }
@@ -302,8 +302,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("archives"),
       server(
         "remote_1",
-        [wallOfStatic("onr_v1_279_wall-of-static")],
-        [visibleCard("simple_agenda", "corp", "agenda")],
+        [wallOfStatic(491)],
+        [visibleCard(588, "corp", "agenda")],
       ),
     ];
 
@@ -323,7 +323,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       "runner",
       "resource",
       {
-        definitionId: "onr_v1_154_broker",
+        definitionId: 366,
         title: "Credit Bank Source",
       },
     );
@@ -362,7 +362,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       "runner",
       "resource",
       {
-        definitionId: "onr_v1_154_broker",
+        definitionId: 366,
         title: "Credit Bank Source",
         counterDisplays: [
           {
@@ -418,7 +418,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       "runner",
       "resource",
       {
-        definitionId: "onr_v1_154_broker",
+        definitionId: 366,
         title: "Credit Bank Source",
       },
     );
@@ -488,7 +488,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       "runner",
       "resource",
       {
-        definitionId: "onr_v1_154_broker",
+        definitionId: 366,
         title: "Credit Bank Source",
         counters: { power: 3 },
       },
@@ -559,7 +559,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "3 Credits auf Broker legen",
         { credits: 0 },
         {
-          source: "onr_v1_154_broker",
+          source: 366,
           payload: brokerAbilityPayload("build"),
         },
       ),
@@ -575,7 +575,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     input.playerView.own.credits = 6;
     input.playerView.own.rig = [
-      visibleCard("onr_v1_154_broker", "runner", "resource"),
+      visibleCard(366, "runner", "resource"),
     ];
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
 
@@ -609,7 +609,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "3 Credits auf Broker legen",
         { credits: 0 },
         {
-          source: "onr_v1_154_broker",
+          source: 366,
           payload: brokerAbilityPayload("build"),
         },
       ),
@@ -624,13 +624,13 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     input.playerView.own.credits = 6;
     input.playerView.own.rig = [
-      visibleCard("onr_v1_154_broker", "runner", "resource"),
+      visibleCard(366, "runner", "resource"),
     ];
     input.playerView.servers = [
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [visibleCard("simple_agenda", "corp", "agenda")]),
+      server("remote_1", [], [visibleCard(588, "corp", "agenda")]),
     ];
     bindPlainRemoteAgendaQuote(input);
 
@@ -660,10 +660,10 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "Install Broker",
         { credits: 3, clicks: 1 },
         {
-          source: "onr_v1_154_broker",
+          source: 366,
           payload: {
-            cardId: "onr_v1_154_broker",
-            sourceDefinitionId: "onr_v1_154_broker",
+            cardId: 366,
+            sourceDefinitionId: 366,
           },
         },
       ),
@@ -690,7 +690,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [
-      visibleCard("onr_v1_154_broker", "runner", "resource"),
+      visibleCard(366, "runner", "resource"),
     ];
 
     const decision = chooseRunnerAction(input);
@@ -713,7 +713,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       "runner",
       "program",
       {
-        definitionId: "onr_v1_016_cyfermaster",
+        definitionId: 228,
         title: "Cyfermaster",
         subtypes: ["icebreaker"],
         rulesText: "Break code gate subroutine. +1 strength.",
@@ -748,7 +748,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.gripOrHq = [cyfermasterHand];
     input.playerView.own.rig = [
       visibleCard("cyfermaster-installed", "runner", "program", {
-        definitionId: "onr_v1_016_cyfermaster",
+        definitionId: 228,
         title: "Cyfermaster",
         subtypes: ["icebreaker"],
         rulesText: "Break code gate subroutine. +1 strength.",
@@ -760,7 +760,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
   it("uses last productive liquidity instead of preparing a redundant wall breaker at the finite reserve", () => {
     const dwarf = visibleCard("dwarf-hand", "runner", "program", {
-      definitionId: "onr_v1_021_dwarf",
+      definitionId: 233,
       title: "Dwarf",
       subtypes: ["icebreaker"],
       rulesText: "Break wall subroutine. +1 strength.",
@@ -804,11 +804,11 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.gripOrHq = [dwarf];
     input.playerView.own.rig = [
       visibleCard("shell-traders-installed", "runner", "resource", {
-        definitionId: "onr_v1_176_the-shell-traders",
+        definitionId: 388,
         title: "The Shell Traders",
       }),
       visibleCard("pile-driver-installed", "runner", "program", {
-        definitionId: "onr_v1_047_pile-driver",
+        definitionId: 259,
         title: "Pile Driver",
         subtypes: ["icebreaker", "noisy"],
         rulesText:
@@ -828,7 +828,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "Broker: 3 Credits auf Broker legen",
         { credits: 0 },
         {
-          source: "onr_v1_154_broker",
+          source: 366,
           payload: brokerAbilityPayload("build"),
         },
       ),
@@ -839,7 +839,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "Broker: Credits von Broker nehmen",
         { credits: 0 },
         {
-          source: "onr_v1_154_broker",
+          source: 366,
           payload: brokerAbilityPayload("cash_out"),
         },
       ),
@@ -867,7 +867,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     });
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.rig = [
-      visibleCard("onr_v1_154_broker", "runner", "resource", {
+      visibleCard(366, "runner", "resource", {
         counters: { bit: 6 },
         counterDisplays: [
           {
@@ -903,7 +903,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "Broker: Credits von Broker nehmen",
         { credits: 0 },
         {
-          source: "onr_v1_154_broker",
+          source: 366,
           payload: brokerAbilityPayload("cash_out"),
         },
       ),
@@ -914,7 +914,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.credits = 6;
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.rig = [
-      visibleCard("onr_v1_154_broker", "runner", "resource", {
+      visibleCard(366, "runner", "resource", {
         counters: { bit: 12 },
         counterDisplays: [
           {
@@ -941,7 +941,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "Credits von Broker nehmen",
         { credits: 0 },
         {
-          source: "onr_v1_154_broker",
+          source: 366,
           payload: brokerAbilityPayload("cash_out"),
         },
       ),
@@ -960,7 +960,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.credits = 6;
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.rig = [
-      visibleCard("onr_v1_154_broker", "runner", "resource", {
+      visibleCard(366, "runner", "resource", {
         counters: { bit: 3 },
         counterDisplays: [
           {
@@ -987,7 +987,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "Broker: 3 Credits auf Broker legen",
         { credits: 0 },
         {
-          source: "onr_v1_154_broker",
+          source: 366,
           payload: brokerAbilityPayload("build"),
         },
       ),
@@ -998,7 +998,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "Broker: Credits von Broker nehmen",
         { credits: 0 },
         {
-          source: "onr_v1_154_broker",
+          source: 366,
           payload: brokerAbilityPayload("cash_out"),
         },
       ),
@@ -1008,13 +1008,13 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "install_card",
         "The Short Circuit installieren",
         { credits: 1 },
-        { source: "onr_v1_177_the-short-circuit" },
+        { source: 389 },
       ),
     ]);
     input.playerView.own.credits = 13;
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.rig = [
-      visibleCard("onr_v1_154_broker", "runner", "resource", {
+      visibleCard(366, "runner", "resource", {
         counters: { bit: 21 },
         counterDisplays: [
           {
@@ -1029,7 +1029,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       }),
     ];
     input.playerView.own.gripOrHq = [
-      visibleCard("onr_v1_177_the-short-circuit", "runner", "resource"),
+      visibleCard(389, "runner", "resource"),
     ];
 
     const decision = chooseRunnerAction(input);
@@ -1075,7 +1075,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
             cardId: "mantis-card",
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityId:
-              "onr_v1_099_mantis-fixer-at-large:abilities_on_play_search_stack_to_grip",
+              "311:abilities_on_play_search_stack_to_grip",
             cardImplementationAbilityKey: "abilities_on_play_search_stack_to_grip",
             cardImplementationEffectKind: "search_stack_to_grip",
             cardImplementationSearchFilter: "any_card",
@@ -1087,7 +1087,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.credits = 13;
     input.playerView.own.gripOrHq = [
       visibleCard("mantis-card", "runner", "event", {
-        definitionId: "onr_v1_099_mantis-fixer-at-large",
+        definitionId: 311,
         title: "Mantis, Fixer-at-Large",
         rulesText:
           "Search your stack for a card and bring it into your grip. Shuffle your stack afterwards.",
@@ -1116,7 +1116,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
   it("lets the Shell Traders pipeline prepare the exact missing wall breaker", () => {
     const dwarf = visibleCard("dwarf-card", "runner", "program", {
-      definitionId: "onr_v1_021_dwarf",
+      definitionId: 233,
       title: "Dwarf",
       memoryCost: 1,
       installCost: 5,
@@ -1142,7 +1142,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
           source: "shell-traders-installed",
           payload: {
             cardId: "shell-traders-installed",
-            sourceDefinitionId: "onr_v1_176_the-shell-traders",
+            sourceDefinitionId: 388,
             delayedInstallAbility: "set_aside_from_grip",
             targetCardId: dwarf.instanceId,
             targetCardDefinitionId: dwarf.definitionId!,
@@ -1158,7 +1158,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.gripOrHq = [dwarf];
     input.playerView.own.rig = [
       visibleCard("shell-traders-installed", "runner", "resource", {
-        definitionId: "onr_v1_176_the-shell-traders",
+        definitionId: 388,
         title: "The Shell Traders",
       }),
     ];
@@ -1245,7 +1245,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
           source: "bodyweight-card",
           payload: {
             cardId: "bodyweight-card",
-            sourceDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+            sourceDefinitionId: 291,
             drawCardsAmount: 5,
           },
         },
@@ -1255,7 +1255,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.credits = 13;
     input.playerView.own.gripOrHq = [
       visibleCard("bodyweight-card", "runner", "event", {
-        definitionId: "onr_v1_079_bodyweight-synthetic-blood",
+        definitionId: 291,
         title: "Bodyweight Synthetic Blood",
         rulesText: "Draw five cards.",
       }),
@@ -1299,7 +1299,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.credits = 13;
     input.playerView.own.gripOrHq = [
       visibleCard("short-circuit-card", "runner", "resource", {
-        definitionId: "onr_v1_177_the-short-circuit",
+        definitionId: 389,
         title: "The Short Circuit",
         rulesText:
           "[A], [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.",
@@ -1344,7 +1344,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.credits = 13;
     input.playerView.own.gripOrHq = [
       visibleCard("short-circuit-card", "runner", "resource", {
-        definitionId: "onr_v1_177_the-short-circuit",
+        definitionId: 389,
         title: "The Short Circuit",
         rulesText:
           "[A], [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.",
@@ -1385,13 +1385,13 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
           source: "short-circuit",
           payload: {
             cardId: "short-circuit",
-            sourceDefinitionId: "onr_v1_177_the-short-circuit",
+            sourceDefinitionId: 389,
             cardImplementationAbility: "activated",
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityKey:
               "abilities_activated_runner_main_search_stack_to_grip",
             cardImplementationAbilityId:
-              "onr_v1_177_the-short-circuit:abilities_activated_runner_main_search_stack_to_grip",
+              "389:abilities_activated_runner_main_search_stack_to_grip",
             cardImplementationEffectKind: "search_stack_to_grip",
             cardImplementationSearchFilter: "program",
           },
@@ -1404,14 +1404,14 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.credits = 2;
     input.playerView.own.rig = [
       visibleCard("short-circuit", "runner", "resource", {
-        definitionId: "onr_v1_177_the-short-circuit",
+        definitionId: 389,
         title: "The Short Circuit",
         rulesText: "Search your stack for a program.",
       }),
     ];
     input.playerView.own.gripOrHq = [
       visibleCard("pile-driver", "runner", "program", {
-        definitionId: "onr_v1_047_pile-driver",
+        definitionId: 259,
         title: "Pile Driver",
         subtypes: ["icebreaker", "fracter", "noisy"],
         installCost: 1,
@@ -1474,7 +1474,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
           source: "bodyweight-card",
           payload: {
             cardId: "bodyweight-card",
-            sourceDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+            sourceDefinitionId: 291,
             drawCardsAmount: 5,
           },
         },
@@ -1484,7 +1484,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.credits = 13;
     input.playerView.own.gripOrHq = [
       visibleCard("bodyweight-card", "runner", "event", {
-        definitionId: "onr_v1_079_bodyweight-synthetic-blood",
+        definitionId: 291,
         title: "Bodyweight Synthetic Blood",
         rulesText: "Draw five cards.",
       }),
@@ -1610,7 +1610,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "install_card",
         "Install Broker",
         { credits: 3 },
-        { source: "onr_v1_154_broker" },
+        { source: 366 },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -1619,7 +1619,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.credits = 3;
     input.playerView.own.clicks = 1;
     input.playerView.own.gripOrHq = [
-      visibleCard("onr_v1_154_broker", "runner", "resource"),
+      visibleCard(366, "runner", "resource"),
       ...nonEmergencyRunnerHand(),
     ];
 
@@ -1657,7 +1657,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("rigged-1", "runner", "resource", {
-        definitionId: "onr_v1_174_rigged-investments",
+        definitionId: 386,
         title: "Rigged Investments",
       }),
     ];
@@ -1700,7 +1700,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     input.playerView.own.credits = 4;
     input.playerView.own.rig = [
-      visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
+      visibleCard(396, "runner", "resource"),
     ];
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
 
@@ -1727,7 +1727,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
   it("does not follow a just-installed no-run recurring investment with a pre-known run", () => {
     const conference = visibleCard("conference-card", "runner", "resource", {
-      definitionId: "onr_v1_184_top-runners-conference",
+      definitionId: 396,
       title: "Top Runners' Conference",
     });
     const firstInput = versionedRunnerTurnInput(1, [
@@ -1931,7 +1931,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       input.playerView.own.clicks = 5 - stateVersion;
       input.playerView.own.gripOrHq = [
         visibleCard("rnd-interface-card", "runner", "hardware", {
-          definitionId: "onr_v1_139_r-and-d-interface",
+          definitionId: 351,
           title: "R&D Interface",
         }),
       ];
@@ -2005,7 +2005,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
           source: "rnd-interface-card",
           payload: {
             cardId: "rnd-interface-card",
-            sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+            sourceDefinitionId: 351,
           },
         },
       ),
@@ -2023,7 +2023,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.opponent.deckCount = 40;
     input.playerView.own.gripOrHq = [
       visibleCard("rnd-interface-card", "runner", "hardware", {
-        definitionId: "onr_v1_139_r-and-d-interface",
+        definitionId: 351,
         title: "R&D Interface",
       }),
     ];
@@ -2060,11 +2060,11 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
           source: "score-card",
           payload: {
             cardId: "score-card",
-            sourceDefinitionId: "onr_v1_108_score",
+            sourceDefinitionId: 320,
             gainCreditsAmount: 9,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityId:
-              "onr_v1_108_score:abilities_on_play_gain_credits",
+              "320:abilities_on_play_gain_credits",
             cardImplementationAbilityKey: "abilities_on_play_gain_credits",
           },
         },
@@ -2079,7 +2079,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
           source: "rnd-interface-card",
           payload: {
             cardId: "rnd-interface-card",
-            sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+            sourceDefinitionId: 351,
           },
         },
       ),
@@ -2101,11 +2101,11 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
           source: "jack-card",
           payload: {
             cardId: "jack-card",
-            sourceDefinitionId: "onr_v1_095_jack-n-joe",
+            sourceDefinitionId: 307,
             drawCardsAmount: 3,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityId:
-              "onr_v1_095_jack-n-joe:abilities_on_play_draw_cards",
+              "307:abilities_on_play_draw_cards",
             cardImplementationAbilityKey: "abilities_on_play_draw_cards",
           },
         },
@@ -2116,23 +2116,23 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.opponent.deckCount = 40;
     input.playerView.own.gripOrHq = [
       visibleCard("score-card", "runner", "event", {
-        definitionId: "onr_v1_108_score",
+        definitionId: 320,
         title: "Score!",
       }),
       visibleCard("rnd-interface-card", "runner", "hardware", {
-        definitionId: "onr_v1_139_r-and-d-interface",
+        definitionId: 351,
         title: "R&D Interface",
       }),
       visibleCard("jack-card", "runner", "event", {
-        definitionId: "onr_v1_095_jack-n-joe",
+        definitionId: 307,
         title: "Jack 'n' Joe",
       }),
       visibleCard("short-term-card", "runner", "resource", {
-        definitionId: "onr_v1_178_short-term-contract",
+        definitionId: 390,
         title: "Short-Term Contract",
       }),
       visibleCard("cruising-card", "runner", "event", {
-        definitionId: "onr_proteus_103_cruising-for-netwatch",
+        definitionId: 161,
         title: "Cruising for Netwatch",
       }),
     ];
@@ -2230,7 +2230,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [visibleCard("simple_agenda", "corp", "agenda")]),
+      server("remote_1", [], [visibleCard(588, "corp", "agenda")]),
     ];
     bindPlainRemoteAgendaQuote(secondInput);
     observeFixtureBasicAction(firstInput, secondInput, "gain-credit");
@@ -2312,8 +2312,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.opponent.credits = 1_000;
     input.playerView.traceRulesProfile = "modern_open";
     input.playerView.own.rig = [
-      visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
-      visibleCard("onr_v1_007_blink", "runner", "program"),
+      visibleCard(396, "runner", "resource"),
+      visibleCard(219, "runner", "program"),
     ];
     input.playerView.own.gripOrHq = Array.from({ length: 5 }, (_, index) =>
       visibleCard(`runner-buffer-${index}`, "runner", "event"),
@@ -2322,7 +2322,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("hq"),
       server("rd", [
         withEffectiveRunQuote(
-          visibleCard("onr_v1_264_rex", "corp", "ice", {
+          visibleCard(476, "corp", "ice", {
             rezzed: true,
             strength: 3,
           }),
@@ -2337,7 +2337,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
                   type: "end_run_and_run_lock",
                   amount: 2,
                 },
-                sourceDefinitionId: "onr_v1_264_rex",
+                sourceDefinitionId: 476,
                 sourceTitle: "Rex",
               },
             ],
@@ -2382,7 +2382,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "install_card",
         "Install Top Runners' Conference",
         { credits: 0 },
-        { source: "onr_v1_184_top-runners-conference" },
+        { source: 396 },
       ),
       legalAction(
         "run-rd",
@@ -2395,7 +2395,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [
-      visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
+      visibleCard(396, "runner", "resource"),
     ];
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
 
@@ -2432,13 +2432,13 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     input.playerView.own.credits = 4;
     input.playerView.own.rig = [
-      visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
+      visibleCard(396, "runner", "resource"),
     ];
     input.playerView.servers = [
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [visibleCard("simple_agenda", "corp", "agenda")]),
+      server("remote_1", [], [visibleCard(588, "corp", "agenda")]),
     ];
     bindPlainRemoteAgendaQuote(input);
 
@@ -2478,7 +2478,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.own.credits = 20;
     input.playerView.opponent.agendaPoints = 5;
     input.playerView.own.rig = [
-      visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
+      visibleCard(396, "runner", "resource"),
     ];
     input.playerView.servers = [
       server("hq"),
@@ -2502,7 +2502,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
               side: "runner",
               amount: 2,
               reason: "start_of_turn",
-              sourceDefinitionId: "onr_v1_184_top-runners-conference",
+              sourceDefinitionId: 396,
               sourceTitle: "Top Runners' Conference",
               visibility: "public",
             },
@@ -2545,7 +2545,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     input.playerView.own.credits = 6;
     input.playerView.own.rig = [
-      visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
+      visibleCard(396, "runner", "resource"),
     ];
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     input.eventTail = [
@@ -2564,7 +2564,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
               side: "runner",
               amount: 2,
               reason: "start_of_turn",
-              sourceDefinitionId: "onr_v1_184_top-runners-conference",
+              sourceDefinitionId: 396,
               sourceTitle: "Top Runners' Conference",
               visibility: "public",
             },
@@ -2603,7 +2603,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     input.playerView.own.credits = 6;
     input.playerView.own.rig = [
-      visibleCard("onr_v1_295_night-shift", "runner", "resource"),
+      visibleCard(507, "runner", "resource"),
     ];
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
 
@@ -2651,13 +2651,13 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server(
         "remote_1",
         [wallOfStatic("onr_v1_279.wall-of-static.fixture")],
-        [visibleCard("simple_agenda", "corp", "agenda")],
+        [visibleCard(588, "corp", "agenda")],
       ),
     ];
     attachOwnDeckSnapshot(centralInput, {
       deckSnapshotId: "runner-wall-coverage-fixture",
       side: "runner",
-      cards: [{ cardId: "onr_v1_053_ramming-piston", quantity: 1 }],
+      cards: [{ cardId: 265, quantity: 1 }],
     });
 
     const centralDecision = chooseRunnerAction(centralInput);
@@ -2691,7 +2691,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     attachOwnDeckSnapshot(followupInput, {
       deckSnapshotId: "runner-wall-coverage-fixture",
       side: "runner",
-      cards: [{ cardId: "onr_v1_053_ramming-piston", quantity: 1 }],
+      cards: [{ cardId: 265, quantity: 1 }],
     });
 
     const followupDecision = chooseRunnerAction(followupInput, {
@@ -2786,7 +2786,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         ...rdAccessEvent(
           "semantic-rd-rock-access",
           1,
-          "onr_v1_265_rock-is-strong",
+          477,
         ),
         turnSerial: followupTurnSerial,
       },
@@ -2859,7 +2859,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         ...rdAccessEvent(
           "semantic-rd-rock-fallback-access",
           1,
-          "onr_v1_265_rock-is-strong",
+          477,
         ),
         turnSerial: currentTurnSerial,
       },

@@ -677,7 +677,7 @@ function runnerArchivesVisibilityDiagnosticsForSimulationAction(
     input.playerView.servers.find((server) => server.id === "archives")?.root ??
     [];
   const knownCards = visibleArchives.filter(
-    (card) => card.known && typeof card.definitionId === "string",
+    (card) => card.known && typeof card.definitionId === "number",
   );
   const unknownCardCount = Math.max(
     0,

@@ -25,7 +25,7 @@ import { visibleDeflectorSubroutineCanResolve } from "../visible-run-analysis";
 export type CorpExactIceRezRouteProjection = Readonly<{
   actionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   targetServerId: string;
   quote: Extract<VisibleCorpRezCostQuote, { complete: true }>;
   before?: KnownCorpScoreProtectionAssessment;
@@ -61,13 +61,13 @@ export type CorpExactIceRezRouteProjection = Readonly<{
     runnerNonNormalRunCreditsApplied: number;
     runnerNormalCreditsLostOnAccessPath: number;
     runnerBreakerInstanceId: string;
-    runnerBreakerDefinitionId: string;
+    runnerBreakerDefinitionId: number;
     runnerConsumedCardInstanceIds: readonly string[];
     layeredCentralPathTax?: true;
     otherRezzedIceCount?: number;
     runnerRandomConsequences?: readonly Readonly<{
       cardId: string;
-      definitionId: string;
+      definitionId: number;
       kind: "post_encounter_self_trash_check";
       numerator: number;
       denominator: number;
@@ -1366,7 +1366,7 @@ function discountedRezActionQuote(
   };
 }
 
-function commaSeparatedDefinitionIds(value: unknown): string[] | undefined {
+function commaSeparatedDefinitionIds(value: unknown): number[] | undefined {
   if (typeof value !== "string" || value.length === 0) return undefined;
   const values = value.split(",");
   return values.every(nonBlankString) && new Set(values).size === values.length

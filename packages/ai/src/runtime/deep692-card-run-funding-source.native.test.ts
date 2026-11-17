@@ -53,7 +53,7 @@ function funding(
 ) {
   const input = original(),
     actionId = cardRun
-      ? "runner.play_event.runner_onr_classic_039_library-search_1.rd.runner_onr_classic_039_library-search_1"
+      ? "runner.play_event.runner_43_1.rd.runner_43_1"
       : "runner.start_run.rd";
   const target = evaluateRunnerRunTargets({ input }).find(
     (t) => t.actionId === actionId,

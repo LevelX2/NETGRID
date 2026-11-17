@@ -29,7 +29,7 @@ const recorded = JSON.parse(
   input: AiDecisionInputWithDeckCapabilities;
   runtime: AiRuntimeCheckpointV1;
 };
-const genetics = "corp_onr_v1_202_genetics-visionary-acquisition_2";
+const genetics = "corp_414_2";
 const actionId = "corp.install_card." + genetics + ".remote_1." + genetics;
 beforeEach(resetResidentPlanPortfolioMemory);
 

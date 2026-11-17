@@ -301,7 +301,7 @@ function visiblePunishComponent(
       ? card.rezzed !== true ||
         (card.type !== "asset" && card.type !== "upgrade")
       : card.type !== (sourceZone === "scoreArea" ? "agenda" : "operation")) ||
-    typeof card.definitionId !== "string"
+    typeof card.definitionId !== "number"
   ) {
     return undefined;
   }

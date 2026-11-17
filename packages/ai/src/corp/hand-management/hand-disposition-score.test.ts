@@ -7,7 +7,7 @@ describe("Corp hand disposition score", () => {
   it("can return an agenda to R&D when HQ is flooded", () => {
     const agenda = card(
       "agenda-1",
-      "onr_v1_188_ai-chief-financial-officer",
+      400,
       "agenda",
       2,
     );
@@ -15,8 +15,8 @@ describe("Corp hand disposition score", () => {
       agenda,
       { ...agenda, instanceId: "agenda-2" },
       { ...agenda, instanceId: "agenda-3" },
-      card("operation", "onr_v1_284_chance-observation", "operation"),
-      card("ice", "onr_v1_261_quandary", "ice"),
+      card("operation", 496, "operation"),
+      card("ice", 473, "ice"),
     ]);
 
     const score = corpHandDispositionScore({
@@ -38,7 +38,7 @@ describe("Corp hand disposition score", () => {
   it("protects a matchpoint agenda despite agenda flood", () => {
     const agenda = card(
       "agenda-1",
-      "onr_v1_188_ai-chief-financial-officer",
+      400,
       "agenda",
       2,
     );
@@ -67,7 +67,7 @@ describe("Corp hand disposition score", () => {
   it("prices immediate R&D exposure more strongly for shuffle than bottom", () => {
     const agenda = card(
       "agenda-1",
-      "onr_v1_188_ai-chief-financial-officer",
+      400,
       "agenda",
       2,
     );
@@ -97,7 +97,7 @@ describe("Corp hand disposition score", () => {
   it("preserves a card bound to the current plan", () => {
     const agenda = card(
       "agenda-1",
-      "onr_v1_188_ai-chief-financial-officer",
+      400,
       "agenda",
       2,
     );
@@ -148,7 +148,7 @@ function corpInput(
       activeSide: "corp",
       phase: "corp_action_phase",
       own: {
-        identity: card("corp-id", "corp_identity_001", "identity"),
+        identity: card("corp-id", 3, "identity"),
         credits: 5,
         clicks: 1,
         agendaPoints: options.ownAgendaPoints ?? 0,
@@ -161,7 +161,7 @@ function corpInput(
         tags: 0,
       },
       opponent: {
-        identity: card("runner-id", "runner_identity_001", "identity"),
+        identity: card("runner-id", 587, "identity"),
         credits: 5,
         clicks: 4,
         agendaPoints: 0,
@@ -193,7 +193,7 @@ function server(id: "hq" | "rd" | "archives", iceCount: number) {
     kind: id,
     label: id,
     ice: Array.from({ length: iceCount }, (_, index) =>
-      card(`${id}-ice-${index}`, "onr_v1_261_quandary", "ice", undefined, {
+      card(`${id}-ice-${index}`, 473, "ice", undefined, {
         rezzed: true,
       }),
     ),
@@ -203,7 +203,7 @@ function server(id: "hq" | "rd" | "archives", iceCount: number) {
 
 function card(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   type: VisibleCard["type"],
   agendaPoints?: number,
   overrides: Partial<VisibleCard> = {},

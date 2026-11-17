@@ -24,7 +24,7 @@ import {
 describe("Runner canonical card facts", () => {
   it("derives the voluntary self-trash tradeoff from the complete lifecycle", () => {
     expect(
-      runnerVoluntarySelfTrashLifecycleProfile("onr_classic_044_crash-space"),
+      runnerVoluntarySelfTrashLifecycleProfile(48),
     ).toEqual({
       capabilityKey: "trash_source_action",
       actionCost: 1,
@@ -36,7 +36,7 @@ describe("Runner canonical card facts", () => {
 
   it("recognizes only a complete run-start random-strength breaker", () => {
     expect(
-      runnerRunStartRandomStrengthSourceProfile("onr_v1_002_ai-boon"),
+      runnerRunStartRandomStrengthSourceProfile(214),
     ).toEqual({ sourceEffect: "random_run_strength", dieSides: 6 });
     expect(
       runnerRunStartRandomStrengthSourceProfileFromPlanningCard({
@@ -53,7 +53,7 @@ describe("Runner canonical card facts", () => {
 
   it("accepts run-start ordering only for a complete pure self-trash lifecycle", () => {
     expect(
-      runnerRunStartTrashSourceProfile("onr_v1_184_top-runners-conference"),
+      runnerRunStartTrashSourceProfile(396),
     ).toEqual({ sourceEffect: "trash_source" });
     expect(
       runnerRunStartTrashSourceProfileFromPlanningCard({
@@ -83,7 +83,7 @@ describe("Runner canonical card facts", () => {
 
   it("projects no-run recurring economy from the canonical lifecycle", () => {
     expect(
-      runnerNoRunRecurringEconomyProfile("onr_v1_184_top-runners-conference"),
+      runnerNoRunRecurringEconomyProfile(396),
     ).toEqual({
       installCost: 0,
       turnStartCredits: 2,
@@ -94,7 +94,7 @@ describe("Runner canonical card facts", () => {
 
   it("does not infer the profile for unrelated Runner resources", () => {
     expect(
-      runnerNoRunRecurringEconomyProfile("onr_v1_295_night-shift"),
+      runnerNoRunRecurringEconomyProfile(507),
     ).toBeUndefined();
   });
 
@@ -134,7 +134,7 @@ describe("Runner canonical card facts", () => {
   });
 
   it("derives the full debt consequence from Loan's canonical lifecycle", () => {
-    expect(runnerDebtFinancingProfile("onr_v1_168_loan-from-chiba")).toEqual({
+    expect(runnerDebtFinancingProfile(380)).toEqual({
       installCost: 0,
       installCreditGain: 12,
       startOfTurnCreditLoss: 1,
@@ -214,9 +214,9 @@ describe("Runner canonical card facts", () => {
   it("counts two installed debts as two net next-turn credit losses", () => {
     expect(
       runnerInstalledDebtFinancingLiability([
-        "onr_v1_168_loan-from-chiba",
-        "onr_v1_168_loan-from-chiba",
-        "onr_v1_295_night-shift",
+        380,
+        380,
+        507,
       ]),
     ).toEqual({
       instanceCount: 2,
@@ -227,7 +227,7 @@ describe("Runner canonical card facts", () => {
 
   it("profiles a hosted-credit start trigger without identifying the card by name", () => {
     expect(
-      runnerStartOfTurnCreditProfile("onr_v1_174_rigged-investments"),
+      runnerStartOfTurnCreditProfile(386),
     ).toEqual({
       orderClass: "credit_gain",
       amount: 1,
@@ -266,7 +266,7 @@ describe("Runner canonical card facts", () => {
   it("profiles a complete public Runner start-turn random table without identifying the card by name", () => {
     expect(
       runnerStartOfTurnRandomEffectProfile(
-        "onr_classic_048_omnitech-spinal-tap-cybermodem",
+        52,
       ),
     ).toEqual({
       orderClass: "random_effect",
@@ -315,7 +315,7 @@ describe("Runner canonical card facts", () => {
   it("profiles an optional installed-card conversion from the complete canonical contract", () => {
     expect(
       runnerStartOfTurnOptionalInstalledCardConversionProfile(
-        "onr_v1_180_smiths-pawnshop",
+        392,
       ),
     ).toEqual({
       orderClass: "optional_installed_card_conversion",
@@ -362,7 +362,7 @@ describe("Runner canonical card facts", () => {
   it("profiles a delayed-install countdown from the canonical hidden replacement contract", () => {
     expect(
       runnerStartOfTurnDelayedInstallCountdownProfile(
-        "onr_v1_176_the-shell-traders",
+        388,
       ),
     ).toEqual({
       orderClass: "delayed_install_countdown",

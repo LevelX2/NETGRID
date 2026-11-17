@@ -37,7 +37,7 @@ function checkpoint() {
 function assessment(input: AiDecisionInputWithDeckCapabilities) {
   const server = input.playerView.servers.find((s) => s.id === "rd")!;
   const sourceCard = server.ice.find(
-    (c) => c.definitionId === "onr_v1_245_fire-wall",
+    (c) => c.definitionId === 457,
   )!;
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -84,14 +84,14 @@ describe("pairing 474: reserve the best funded partial terminal defense", () => 
         runnerCreditsRemainingOnBestAccessPath: 0,
       },
       selectedRezCosts: [
-        { iceInstanceId: "corp_onr_v1_252_keeper_1", credits: 4 },
+        { iceInstanceId: "corp_464_1", credits: 4 },
       ],
     });
     expect(reserve).toMatchObject({
       preservesReserve: false,
       availableCreditsAfterRez: 2,
       requiredCreditsAfterRez: 4,
-      immediateRezIceIds: ["corp_onr_v1_252_keeper_1"],
+      immediateRezIceIds: ["corp_464_1"],
     });
   });
 

@@ -30,11 +30,11 @@ describe("deck opening hand role classification", () => {
   it("mulligans the historical Manhunt hand when its strategy pieces are not opening-executable", () => {
     const historical = corpOpeningInput(
       [
-        "onr_v1_285_closed-accounts",
-        "onr_v1_313_city-surveillance",
-        "onr_v1_283_audit-of-call-records",
-        "onr_v1_302_scorched-earth",
-        "onr_v1_304_systematic-layoffs",
+        497,
+        525,
+        495,
+        514,
+        516,
       ],
       ["corp.fast_advance", "corp.tag_trace_punish", "corp.damage_kill"],
     );
@@ -58,11 +58,11 @@ describe("deck opening hand role classification", () => {
     const evaluation = evaluateCorpOpeningHand(
       corpOpeningInput(
         [
-          "onr_v1_287_datapool-by-zetatech",
-          "onr_v1_301_punitive-counterstrike",
-          "onr_v1_302_scorched-earth",
-          "onr_v1_302_scorched-earth",
-          "onr_v1_333_omniscience-foundation",
+          499,
+          513,
+          514,
+          514,
+          545,
         ],
         ["corp.tag_trace_punish", "corp.damage_kill"],
       ),
@@ -83,11 +83,11 @@ describe("deck opening hand role classification", () => {
     const evaluation = evaluateCorpOpeningHand(
       corpOpeningInput(
         [
-          "onr_v1_196_corporate-war",
-          "onr_v1_304_systematic-layoffs",
-          "onr_v1_309_bbs-whispering-campaign",
-          "onr_v1_285_closed-accounts",
-          "onr_v1_302_scorched-earth",
+          408,
+          516,
+          521,
+          497,
+          514,
         ],
         ["corp.fast_advance"],
       ),
@@ -104,11 +104,11 @@ describe("deck opening hand role classification", () => {
     const evaluation = evaluateCorpOpeningHand(
       corpOpeningInput(
         [
-          "onr_v1_223_banpei",
-          "onr_v1_313_city-surveillance",
-          "onr_v1_285_closed-accounts",
-          "onr_v1_302_scorched-earth",
-          "onr_v1_304_systematic-layoffs",
+          435,
+          525,
+          497,
+          514,
+          516,
         ],
         ["corp.tag_trace_punish", "corp.damage_kill"],
       ),
@@ -541,7 +541,7 @@ function runnerSearchOpeningInput(
 
 function input(
   side: Side,
-  definitionIds: string[],
+  definitionIds: number[],
   extra: Record<string, unknown> = {},
 ): AiDecisionInput {
   return {
@@ -565,7 +565,7 @@ function input(
 }
 
 function corpOpeningInput(
-  definitionIds: string[],
+  definitionIds: number[],
   primaryStrategies: string[],
 ): AiDecisionInput {
   const result = input("corp", definitionIds, {

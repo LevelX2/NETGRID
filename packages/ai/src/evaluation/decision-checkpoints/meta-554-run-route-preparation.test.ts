@@ -243,12 +243,12 @@ it.each(["bypass", "decoder"] as const)(
   (variant) => {
     const snapshot = fixture(24, 139).input.ownDeckSnapshot!;
     const corpCards = [
-      { id: "onr_v1_214_project-babylon", quantity: 1 },
-      { id: "onr_proteus_007_project-venice", quantity: 1 },
-      { id: "onr_proteus_008_project-zurich", quantity: 3 },
-      { id: "onr_v1_245_fire-wall", quantity: 1 },
-      { id: "onr_v1_252_keeper", quantity: 1 },
-      { id: "onr_v1_261_quandary", quantity: 1 },
+      { id: 426, quantity: 1 },
+      { id: 65, quantity: 1 },
+      { id: 66, quantity: 3 },
+      { id: 457, quantity: 1 },
+      { id: 464, quantity: 1 },
+      { id: 473, quantity: 1 },
     ];
     let state = createGameAfterSetup({
       seed: "meta554-" + variant,
@@ -270,22 +270,22 @@ it.each(["bypass", "decoder"] as const)(
       },
     });
     state = toRunnerTurn(state);
-    installRunnerProgramForTest(state, "onr_v1_039_krash");
-    moveRunnerCardToGrip(state, "onr_v1_094_inside-job");
+    installRunnerProgramForTest(state, 251);
+    moveRunnerCardToGrip(state, 306);
     if (variant === "decoder")
-      moveRunnerCardToGrip(state, "onr_v1_016_cyfermaster");
+      moveRunnerCardToGrip(state, 228);
     const target = putCorpRootInRemote(
       state,
       variant === "bypass"
-        ? "onr_v1_214_project-babylon"
-        : "onr_proteus_008_project-zurich",
+        ? 426
+        : 66,
     );
     state.cardInstances[target]!.faceup = variant === "bypass";
     state.cardInstances[target]!.advancementCounters =
       variant === "bypass" ? 0 : 1;
     for (const id of variant === "bypass"
-      ? ["onr_v1_245_fire-wall"]
-      : ["onr_v1_252_keeper", "onr_v1_261_quandary"]) {
+      ? [457]
+      : [464, 473]) {
       const ice =
         state.cardInstances[putCorpIceOnServer(state, "remote_1", id)]!;
       ice.rezzed = variant === "decoder";
@@ -295,8 +295,8 @@ it.each(["bypass", "decoder"] as const)(
       scoreRunnerAgendaForTest(
         state,
         variant === "decoder"
-          ? "onr_proteus_007_project-venice"
-          : "onr_proteus_008_project-zurich",
+          ? 65
+          : 66,
       );
     state.runner.credits = variant === "bypass" ? 3 : 10;
     state.runner.clicks = variant === "bypass" ? 4 : 3;

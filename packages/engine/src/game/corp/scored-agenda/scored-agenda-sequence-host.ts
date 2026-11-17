@@ -149,7 +149,7 @@ export type CorpInstallRezSequenceHandlerResult = {
   trashedCardIds?: CardInstanceId[];
   temporaryCreditsGranted?: number;
   temporaryCreditsReturned?: number;
-  shownCardDefinitionIds?: string[];
+  shownCardDefinitionIds?: number[];
   shownCount?: number;
   resolvedPayload?: SequencePayload;
 };

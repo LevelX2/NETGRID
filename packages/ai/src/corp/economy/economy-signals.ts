@@ -92,7 +92,7 @@ export function corpOptionalActionCapacityConversions(
       candidate.semanticActionType !==
         "score_conversion.gain_action_capacity" ||
       typeof candidate.sourceCardInstanceId !== "string" ||
-      typeof candidate.sourceDefinitionId !== "string" ||
+      typeof candidate.sourceDefinitionId !== "number" ||
       projection?.timing !== "immediate" ||
       projection.reliability !== "guaranteed" ||
       projection.followupActionCapacity !== 1 ||
@@ -788,7 +788,7 @@ function corpEconomyCampaignTargetServerId(
 }
 
 function corpCounterCashoutProfile(
-  definitionId: string,
+  definitionId: number,
 ): { creditsPerCounter: number } | undefined {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   if (

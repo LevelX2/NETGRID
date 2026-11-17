@@ -146,7 +146,7 @@ function assess(
           ? [
               {
                 instanceId: "rent-i-con",
-                definitionId: "onr_classic_031_rent-i-con",
+                definitionId: 35,
                 known: true,
               },
             ]
@@ -157,7 +157,7 @@ function assess(
   const project = {
     projectId: "agenda:agenda-1:remote_1",
     agendaInstanceId: "agenda-1",
-    agendaDefinitionId: "onr_v1_189_artificial-security-directors",
+    agendaDefinitionId: 401,
     serverId: "remote_1",
     actionIds: ["install-agenda"],
     phase: "install_agenda",
@@ -216,9 +216,9 @@ function assess(
               randomBreaks: [
                 {
                   iceInstanceId: "ice-1",
-                  iceDefinitionId: "onr_v1_238_data-wall-2-0",
+                  iceDefinitionId: 450,
                   breakerInstanceId: "blink",
-                  breakerDefinitionId: "onr_v1_007_blink",
+                  breakerDefinitionId: 219,
                   attempts: 1,
                   successProbabilityPerAttempt: {
                     numerator: 1,

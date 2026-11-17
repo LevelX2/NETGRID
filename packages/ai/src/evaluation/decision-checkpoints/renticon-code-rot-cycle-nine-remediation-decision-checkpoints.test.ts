@@ -47,10 +47,10 @@ describe("Rent-I-Con versus CODE ROT cycle-nine remediation checkpoint", () => {
     // before the technical line hash. Keep its selected agenda parent and
     // every delegation/commitment binding under test.
     const scoreParent =
-      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_197_data-fort-reclamation_2%3Aremote_1";
+      "plan:corp.score_agenda:agenda%3Acorp_409_2%3Aremote_1";
     expect(portfolio?.rootForegroundInstanceId).toBe(scoreParent);
     expect(portfolio?.executorInstanceId).toBe(
-      "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_197_data-fort-reclamation_2%3Aremote_1",
+      "plan:corp.economy:score-support%3Aagenda%3Acorp_409_2%3Aremote_1",
     );
     expect(result.decision?.evidence).toContain(
       `plan_priority_delegated_from:${scoreParent}`,

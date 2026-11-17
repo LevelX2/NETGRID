@@ -46,10 +46,10 @@ describe("Testset CardSpec AI hint reviewed semantic golden", () => {
         .map(({ cardId, hint }) => ({ cardId, hint })),
     ).toEqual(reviewedGolden.cards);
     expect(generatedArtifact.cardIds).not.toContain(
-      "catalog_preview_operation_001",
+      1,
     );
     expect(generatedArtifact.cardIds).not.toContain(
-      "catalog_preview_resource_001",
+      2,
     );
   });
 
@@ -72,7 +72,7 @@ describe("Testset CardSpec AI hint reviewed semantic golden", () => {
   it("does not infer breaker or remote roles from card type alone", () => {
     const entries = cardSpecPlanningCards();
     const hardware = entries.find(
-      (entry) => entry.definition.id === "simple_setup_hardware",
+      (entry) => entry.definition.id === 602,
     )!;
     const programWithoutBreaker = {
       ...hardware,
@@ -83,7 +83,7 @@ describe("Testset CardSpec AI hint reviewed semantic golden", () => {
     ).not.toContain("encounter");
 
     const upgrade = entries.find(
-      (entry) => entry.definition.id === "simple_upgrade",
+      (entry) => entry.definition.id === 606,
     )!;
     const upgradeWithoutRemoteValue = {
       ...upgrade,

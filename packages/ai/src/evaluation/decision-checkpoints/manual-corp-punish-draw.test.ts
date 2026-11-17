@@ -24,18 +24,18 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
-const CHANCE = "onr_v1_284_chance-observation";
-const AUDIT = "onr_v1_283_audit-of-call-records";
-const PUNITIVE = "onr_v1_301_punitive-counterstrike";
-const SCORCHED = "onr_v1_302_scorched-earth";
-const URBAN = "onr_v1_307_urban-renewal";
-const SHOCK = "onr_v1_268_shock-r";
-const HUNTER = "onr_v1_249_hunter";
-const WALL = "onr_v1_279_wall-of-static";
-const POLITICAL = "onr_v1_209_political-coup";
-const ON_CALL = "onr_v1_208_on-call-solo-team";
-const FILLER = "onr_v1_192_corporate-boon";
-const LAB = "onr_classic_003_unlisted-research-lab";
+const CHANCE = 496;
+const AUDIT = 495;
+const PUNITIVE = 513;
+const SCORCHED = 514;
+const URBAN = 519;
+const SHOCK = 480;
+const HUNTER = 461;
+const WALL = 491;
+const POLITICAL = 421;
+const ON_CALL = 420;
+const FILLER = 404;
+const LAB = 7;
 const DRAW = "corp.draw_card";
 
 const testedMatches = new Set<string>();
@@ -292,10 +292,10 @@ function fixture(
     ...(options.scored ? [options.scored] : []),
     ...Array<string>(6).fill(FILLER),
   ]);
-  const fallGuy = "onr_v1_161_fall-guy";
+  const fallGuy = 373;
   const runnerDeck = deck("runner", [
     fallGuy,
-    ...Array<string>(7).fill("onr_v1_039_krash"),
+    ...Array<string>(7).fill(251),
   ]);
   const state = createGame({
     seed: "punish-component-draw",
@@ -323,7 +323,7 @@ function fixture(
       .withRezzedCorpIceOnServer("remote_1", WALL);
   if (options.fallGuy)
     builder.withRunnerResourceInstalled(fallGuy).withRunnerGripSize(5);
-  const score = (definitionId: string, side: "corp" | "runner") => {
+  const score = (definitionId: number, side: "corp" | "runner") => {
     const index = state.corp.rd.findIndex(
       (id) => state.cardInstances[id]?.definitionId === definitionId,
     );

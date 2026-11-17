@@ -116,7 +116,7 @@ it("does not certify damage-only access when the same known damage is lethal", (
 it("keeps actual missing coverage when the required breaker is absent", () => {
   const { input } = checkpoint(11);
   input.playerView.own.rig = (input.playerView.own.rig ?? []).filter(
-    (card) => card.definitionId !== "onr_v1_039_krash",
+    (card) => card.definitionId !== 251,
   );
   const target = evaluateRunnerRunTargets({ input }).find(
     (t) => t.actionId === "runner.start_run.remote_1",

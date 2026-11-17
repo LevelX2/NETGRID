@@ -10,7 +10,7 @@ import {
 export function currentCorpScoreCreditFixture(
   credits: number,
   terminal = false,
-  definitionId = "onr_v1_196_corporate-war",
+  definitionId = 408,
 ) {
   const initial = createMechanicFixtureGameAfterSetup({
     seed: `score-credit-outcome-${credits}-${terminal}`,
@@ -18,12 +18,12 @@ export function currentCorpScoreCreditFixture(
     corpDeck: {
       ...DEMO_DECKS.demo_corp_001,
       cards: [
-        { id: "onr_v1_196_corporate-war", quantity: 3 },
-        { id: "onr_v1_193_corporate-coup", quantity: 3 },
-        { id: "onr_v1_212_priority-requisition", quantity: 3 },
-        { id: "onr_v1_290_efficiency-experts", quantity: 3 },
-        { id: "onr_v1_279_wall-of-static", quantity: 3 },
-        { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+        { id: 408, quantity: 3 },
+        { id: 405, quantity: 3 },
+        { id: 424, quantity: 3 },
+        { id: 502, quantity: 3 },
+        { id: 491, quantity: 3 },
+        { id: 415, quantity: 3 },
       ],
     },
   });
@@ -37,8 +37,8 @@ export function currentCorpScoreCreditFixture(
   state.corp.credits = credits;
   state.corp.clicks = 0;
   if (terminal) {
-    scoreCorpAgendaForTest(state, "onr_v1_193_corporate-coup");
-    scoreCorpAgendaForTest(state, "onr_v1_212_priority-requisition");
+    scoreCorpAgendaForTest(state, 405);
+    scoreCorpAgendaForTest(state, 424);
   }
   return { state, agendaId };
 }

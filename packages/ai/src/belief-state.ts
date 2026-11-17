@@ -82,10 +82,10 @@ export type RndTopFreshnessMemory = {
     | "fresh_after_top_removed"
     | "stale_known_same_top"
     | "invalidated";
-  knownTopDefinitionId?: string;
+  knownTopDefinitionId?: number;
   knownTopIsAgenda?: boolean;
   knownTopIsLowValue?: boolean;
-  knownSequenceDefinitionIds?: string[];
+  knownSequenceDefinitionIds?: number[];
   freshenedByRunnerAccess?: boolean;
   invalidationReasons: string[];
 };
@@ -93,7 +93,7 @@ export type RndTopFreshnessMemory = {
 export type KnownPositionMemory = {
   zone: string;
   positionKey: string;
-  definitionId: string;
+  definitionId: number;
   certainty: "observed";
   sourceEventId: string;
   sourceKind?: "access" | "reveal" | "expose" | "rd_top_to_hq_draw";
@@ -102,7 +102,7 @@ export type KnownPositionMemory = {
 
 export type RunnerKnownCorpCardMemory = {
   cardInstanceId: string;
-  definitionId: string;
+  definitionId: number;
   serverId: string;
   area: "root" | "ice";
   positionKey: string;
@@ -127,12 +127,12 @@ export type KnownHqHandMemory = {
 };
 
 export type KnownDefinitionCountMemory = {
-  definitionId: string;
+  definitionId: number;
   count: number;
 };
 
 export type HqHandSafeDefinitionMemory = {
-  definitionId: string;
+  definitionId: number;
   count: number;
   sourceEventIds: string[];
 };
@@ -252,13 +252,13 @@ const HQ_ALL_KNOWN_CONTRADICTION_WARNING =
 
 type KnownHqHandEntry = {
   key: string;
-  definitionId: string;
+  definitionId: number;
   eventId: string;
 };
 
 type KnownRndDrawMemory = {
   drawEventId: string;
-  definitionIds: readonly string[];
+  definitionIds: readonly number[];
   sourceEventId: string;
 };
 
@@ -1179,7 +1179,7 @@ function deriveKnownHqHandMemory(
 function gypsyStoredAgendaInHqDefinitionId(
   event: PublicGameEvent,
   classification: BeliefEventClassification,
-): string | undefined {
+): number | undefined {
   if (
     classification.actor !== "runner" ||
     classification.actionType !== "resolve_choice" ||
@@ -1385,7 +1385,7 @@ function hqHiddenInstallDepartureMemory(
 
 function reconcileHqCandidateGroups(
   event: BeliefEventClassification,
-  definitionId: string | undefined,
+  definitionId: number | undefined,
   knownCards: KnownHqHandEntry[],
   candidateGroups: HqHandCandidateGroupMemory[],
   invalidationReasons: string[],
@@ -1454,7 +1454,7 @@ function hqCandidateReconciliationEvent(
 
 function subtractOneKnownDefinitionCount(
   definitions: KnownDefinitionCountMemory[],
-  definitionId: string,
+  definitionId: number,
 ): KnownDefinitionCountMemory[] {
   return definitions.flatMap((definition) => {
     if (definition.definitionId !== definitionId) return [definition];
@@ -1639,7 +1639,7 @@ function deriveHiddenRemoteCandidateMemory(
 
 function reconcileHiddenRemoteCandidateMemories(
   event: BeliefEventClassification,
-  definitionId: string | undefined,
+  definitionId: number | undefined,
   memories: HiddenRemoteCandidateMemory[],
 ): void {
   if (!definitionId || !event.serverId || memories.length === 0) return;
@@ -1674,7 +1674,7 @@ function publicInstalledSourceWasTrashed(
   const payload = event?.publicPayload;
   return (
     payload?.actionType === "activated_card_ability" &&
-    typeof payload.sourceDefinitionId === "string" &&
+    typeof payload.sourceDefinitionId === "number" &&
     payload.trashedCardDefinitionId === payload.sourceDefinitionId &&
     typeof payload.installedPositionKey === "string" &&
     (payload.installPlacement === "root" || payload.installPlacement === "ice")
@@ -1919,9 +1919,9 @@ function observedHqHandCountAfter(
 }
 
 function rememberObservedHqAccessDefinition(
-  knownCards: Array<{ key: string; definitionId: string; eventId: string }>,
+  knownCards: Array<{ key: string; definitionId: number; eventId: string }>,
   eventId: string,
-  definitionId: string,
+  definitionId: number,
 ): void {
   if (knownCards.some((card) => card.definitionId === definitionId)) return;
   knownCards.push({
@@ -1936,7 +1936,7 @@ function rememberObservedHqAccessDefinitionWithConsistencyCheck(
   candidateGroups: HqHandCandidateGroupMemory[],
   handCount: number | undefined,
   eventId: string,
-  definitionId: string,
+  definitionId: number,
   invalidationReasons?: string[],
 ): void {
   if (
@@ -1960,7 +1960,7 @@ function hqAccessContradictsCompleteHandMemory(
   knownCards: KnownHqHandEntry[],
   candidateGroups: HqHandCandidateGroupMemory[],
   handCount: number | undefined,
-  definitionId: string,
+  definitionId: number,
 ): boolean {
   return (
     handCount !== undefined &&
@@ -1972,7 +1972,7 @@ function hqAccessContradictsCompleteHandMemory(
 }
 
 function countKnownDefinitionEntries(
-  definitionIds: string[],
+  definitionIds: number[],
 ): KnownDefinitionCountMemory[] {
   const counts = new Map<string, number>();
   for (const definitionId of definitionIds) {
@@ -2036,7 +2036,7 @@ function rndPrivateLookDefinitions(event: PublicGameEvent): string[] {
 function rndTopDefinitionFromEvent(
   event: PublicGameEvent,
   classification: BeliefEventClassification,
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): string | undefined {
   const privateLookTop = rndPrivateLookDefinitions(event)[0];
   if (privateLookTop) return privateLookTop;
@@ -2057,7 +2057,7 @@ function rndTopDefinitionFromEvent(
 function publicKnownCardDefinitionId(
   event: PublicGameEvent,
   classification: BeliefEventClassification,
-): string | undefined {
+): number | undefined {
   const cardDefinitionId = stringValue(event.publicPayload.cardDefinitionId);
   if (cardDefinitionId) return cardDefinitionId;
   if (classification.actor !== "corp") return undefined;
@@ -2081,7 +2081,7 @@ function publicKnownCardDefinitionId(
 
 function publicCardOrSourceDefinitionId(
   event: PublicGameEvent,
-): string | undefined {
+): number | undefined {
   return (
     stringValue(event.publicPayload.cardDefinitionId) ??
     stringValue(event.publicPayload.sourceDefinitionId)
@@ -2104,8 +2104,8 @@ function installPlacementFromEvent(
 function knownDefinitionsFromEvent(
   event: PublicGameEvent,
   classification: BeliefEventClassification,
-  definitionId: string | undefined,
-): Array<{ definitionId: string; positionKey: string }> {
+  definitionId: number | undefined,
+): Array<{ definitionId: number; positionKey: string }> {
   const rndPrivateLook = rndPrivateLookDefinitions(event);
   if (rndPrivateLook.length > 0) {
     return rndPrivateLook.map((knownDefinitionId, index) => ({
@@ -2176,7 +2176,7 @@ function knownDefinitionsFromEvent(
 }
 
 function hqDefinitionMatchesInstallPlacement(
-  definitionId: string,
+  definitionId: number,
   placement: HqInstallPlacementMemory,
 ): boolean {
   const type = beliefDefinitionType(definitionId);
@@ -2190,7 +2190,7 @@ function hqDefinitionMatchesInstallPlacement(
 
 function hqHandMemoryAdjustment(
   event: BeliefEventClassification,
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ):
   | {
       kind:
@@ -2268,21 +2268,21 @@ function beliefRemoteServerId(serverId: string): boolean {
   );
 }
 
-function beliefDefinitionType(definitionId: string): string | undefined {
+function beliefDefinitionType(definitionId: number): string | undefined {
   return (
     CARD_DEFINITIONS_BY_ID[definitionId]?.type ??
     RUNTIME_CARDS[definitionId]?.type
   );
 }
 
-function beliefDefinitionSide(definitionId: string): Side | undefined {
+function beliefDefinitionSide(definitionId: number): Side | undefined {
   return (
     CARD_DEFINITIONS_BY_ID[definitionId]?.side ??
     RUNTIME_CARDS[definitionId]?.side
   );
 }
 
-function beliefDefinitionTrashCost(definitionId: string): number | undefined {
+function beliefDefinitionTrashCost(definitionId: number): number | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
     CARD_DEFINITIONS_BY_ID[definitionId]?.trashCost
@@ -2677,7 +2677,7 @@ type ParsedPublicVisibilityTransition = {
   serverId: string;
   counterType: string;
   cards: Array<{
-    definitionId: string;
+    definitionId: number;
     serverId: string;
     area: "root" | "ice";
     positionKey: string;
@@ -2815,7 +2815,7 @@ function parseExactBoardPositionKey(
 function uniqueCurrentCorpCardPosition(
   playerView: PlayerView,
   serverId: string,
-  definitionId: string,
+  definitionId: number,
 ): string | undefined {
   const server = playerView.servers.find((entry) => entry.id === serverId);
   if (!server) return undefined;
@@ -2897,7 +2897,7 @@ function deriveRndKnowledgeTimeline(
 ): RndKnowledgeTimeline {
   const eventsById = new Map(history.map((event) => [event.eventId, event]));
   type AccessBatchEntry = {
-    definitionId: string;
+    definitionId: number;
     accessIndex: number;
     removed: boolean;
   };
@@ -2909,7 +2909,7 @@ function deriveRndKnowledgeTimeline(
   };
   let lastKnownAccessEventId: string | undefined;
   let freshness: RndTopFreshnessMemory["freshness"] = "invalidated";
-  let knownSequenceDefinitionIds: string[] = [];
+  let knownSequenceDefinitionIds: number[] = [];
   let freshenedByRunnerAccess = false;
   const invalidationReasons: string[] = [];
   const knownDraws: KnownRndDrawMemory[] = [];
@@ -3154,11 +3154,11 @@ function rndInvalidationReason(
   return undefined;
 }
 
-function definitionLooksAgenda(definitionId: string): boolean {
+function definitionLooksAgenda(definitionId: number): boolean {
   return CARD_DEFINITIONS_BY_ID[definitionId]?.type === "agenda";
 }
 
-function definitionLooksLowValueRndAccess(definitionId: string): boolean {
+function definitionLooksLowValueRndAccess(definitionId: number): boolean {
   const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (!definition) return false;
   return (
@@ -3338,7 +3338,7 @@ function structuredPrivateLookEvent(event: PublicGameEvent): boolean {
       event.publicPayload.privateLookZone === "rd") &&
     (Array.isArray(event.publicPayload.knownHqDefinitionIds) ||
       Array.isArray(event.publicPayload.knownRndDefinitionIds) ||
-      typeof event.publicPayload.knownRndTopDefinitionId === "string")
+      typeof event.publicPayload.knownRndTopDefinitionId === "number")
   );
 }
 

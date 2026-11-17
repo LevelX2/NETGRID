@@ -85,7 +85,7 @@ describe("meta 403 round 5 exact owner regressions", () => {
       input.playerView.pendingChoice?.choiceId,
     );
     expect(result.selectedChoices?.selectedOptionIds).not.toContain(
-      "card_runner_onr_proteus_128_airport-locker_1",
+      "card_runner_186_1",
     );
     expect(result.selectedChoices?.selectedOptionIds).toHaveLength(1);
     const selectedOptionIds = result.selectedChoices

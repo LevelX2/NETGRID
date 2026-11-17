@@ -21,7 +21,7 @@ describe("match 3aac Corp regression evidence", () => {
       acceptablePlanKinds: ["corp.economy"],
       acceptableCapabilities: ["develop_or_convert_corp_economy"],
       requiredAssessmentEvidence: [
-        "corp_defense_exact_route_funding_required:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0",
+        "corp_defense_exact_route_funding_required:hq:corp.install_card.corp_75_2.hq.corp_75_2.0",
       ],
     };
     const result = runAiDecisionCheckpoint(checkpoint);
@@ -37,7 +37,7 @@ describe("match 3aac Corp regression evidence", () => {
     const defenseRootInstanceId =
       "plan:corp.defend_servers:server-defense-portfolio";
     const fundingExecutorId =
-      "plan:corp.economy:defense-reserve%3Ahq%3Acorp_onr_proteus_017_credit-blocks_2";
+      "plan:corp.economy:defense-reserve%3Ahq%3Acorp_75_2";
     const executor = portfolio?.instances.find(
       (instance) => instance.instanceId === portfolio.executorInstanceId,
     );
@@ -59,14 +59,14 @@ describe("match 3aac Corp regression evidence", () => {
       instanceId: fundingExecutorId,
       parentInstanceId: defenseRootInstanceId,
       parentNeedId:
-        "install:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0",
+        "install:hq:corp.install_card.corp_75_2.hq.corp_75_2.0",
     });
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
         `plan_first_root:${defenseRootInstanceId}`,
         `plan_first_executor:${fundingExecutorId}`,
         "plan_step_capability:develop_or_convert_corp_economy",
-        "plan_assessment_evidence:corp_defense_exact_route_funding_required:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0",
+        "plan_assessment_evidence:corp_defense_exact_route_funding_required:hq:corp.install_card.corp_75_2.hq.corp_75_2.0",
       ]),
     );
     expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
@@ -90,7 +90,7 @@ describe("match 3aac Corp regression evidence", () => {
                 expect.objectContaining({
                   planInstanceId: fundingExecutorId,
                   parentNeedId:
-                    "install:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0",
+                    "install:hq:corp.install_card.corp_75_2.hq.corp_75_2.0",
                 }),
               ]),
             }),
@@ -117,7 +117,7 @@ describe("match 3aac Corp regression evidence", () => {
     });
     const install = chooseAiAction(next);
     expect(install.actionId).toBe(
-      "corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0",
+      "corp.install_card.corp_75_2.hq.corp_75_2.0",
     );
     expect(install.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: defenseRootInstanceId,

@@ -36,7 +36,7 @@ import {
 
 describe("turn projection", () => {
   it("matches the native Accounts Receivable payment and payout", () => {
-    const cardId = "onr_v1_281_accounts-receivable";
+    const cardId = 493;
     const corpDeck = DEMO_DECKS.demo_corp_001;
     const setup = createGameAfterSetup({
       seed: "projection-accounts-receivable",
@@ -726,7 +726,7 @@ function decisionInput(): AiDecisionInput {
 
 function card(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   type: NonNullable<VisibleCard["type"]>,
 ): VisibleCard {
   return {

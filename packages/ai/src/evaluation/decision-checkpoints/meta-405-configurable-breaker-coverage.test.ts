@@ -50,7 +50,7 @@ it("keeps a once-selected wall Fubar from masquerading as simultaneous decoder c
   const input =
     checkpoint.input as unknown as AiDecisionInputWithDeckCapabilities;
   const fubar = input.playerView.own.gripOrHq.find(
-    (c) => c.definitionId === "onr_proteus_088_fubar",
+    (c) => c.definitionId === 146,
   )!;
   const rd = input.playerView.servers.find((s) => s.id === "rd")!;
   const path = (selectedSubtype?: string) =>

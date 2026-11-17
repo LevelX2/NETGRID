@@ -17,7 +17,7 @@ describe("buildDeckDoctrineRuntimeContext", () => {
       deckSnapshot: {
         deckSnapshotId: "runner-fixture",
         side: "runner",
-        cards: [{ cardId: "simple_fracter", quantity: 1 }],
+        cards: [{ cardId: 597, quantity: 1 }],
       },
     });
 

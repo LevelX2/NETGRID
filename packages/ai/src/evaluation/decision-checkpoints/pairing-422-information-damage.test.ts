@@ -106,11 +106,11 @@ it.each([2, 3])(
     // spendable pools and offered break actions together.
     input.playerView.own.credits = credits;
     const breaker = input.playerView.own.rig!.find(
-      (card) => card.definitionId === "onr_classic_031_rent-i-con",
+      (card) => card.definitionId === 35,
     )!;
     breaker.strength = 6;
     const pool = input.playerView.own.rig!.find(
-      (card) => card.definitionId === "onr_v1_035_invisibility",
+      (card) => card.definitionId === 247,
     )!;
     pool.counters!.bit = 0;
     pool.counterDisplays!.forEach((display) => {
@@ -127,7 +127,7 @@ it.each([2, 3])(
         abilityRef: {
           sourceCardInstanceId: breaker.instanceId,
           sourceAbilityId:
-            "onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
+            "35:break_any_subroutine_and_trash_after_run",
         },
         effectRef:
           "effect.onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
@@ -138,7 +138,7 @@ it.each([2, 3])(
           cardId: breaker.instanceId,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
+            "35:break_any_subroutine_and_trash_after_run",
           cardImplementationAbilityKey:
             "break_any_subroutine_and_trash_after_run",
         },

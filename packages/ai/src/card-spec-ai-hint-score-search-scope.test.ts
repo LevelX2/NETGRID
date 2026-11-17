@@ -9,8 +9,8 @@ function hint(id: string) {
 }
 
 it("distinguishes fort-wide score strength from a separately selected ICE mark", () => {
-  const fort = hint("onr_v1_215_security-net-optimization");
-  const single = hint("onr_v1_204_ice-transmutation");
+  const fort = hint(427);
+  const single = hint(416);
   expect(fort.effects).toContainEqual(
     expect.objectContaining({
       kind: "global_modifier",
@@ -37,7 +37,7 @@ it("distinguishes fort-wide score strength from a separately selected ICE mark",
 });
 
 it("projects the exact Stack program search of the combined install/run source", () => {
-  const combined = hint("onr_proteus_126_test-spin");
+  const combined = hint(184);
   expect(combined.effects).toContainEqual(
     expect.objectContaining({
       kind: "search",

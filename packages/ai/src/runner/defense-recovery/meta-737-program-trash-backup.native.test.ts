@@ -12,9 +12,9 @@ import { RealEngineFixtureBuilder } from "../../evaluation/real-engine-fixture-b
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 
-const BACKUP = "onr_v1_131_microtech-backup-drive";
-const PROGRAM = "onr_v1_014_codecracker";
-const ICE = "onr_v1_233_d-arc-knight";
+const BACKUP = 343;
+const PROGRAM = 226;
+const ICE = 445;
 
 function deck(id: string, side: "runner" | "corp") {
   const entry = catalog.decks.find((deck) => deck.standardDeckId === id);

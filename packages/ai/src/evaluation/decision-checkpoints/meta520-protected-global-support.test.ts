@@ -21,7 +21,7 @@ import {
 } from "./runtime-checkpoint";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 
-const source = "corp_onr_v1_317_data-masons_1";
+const source = "corp_529_1";
 function fixture() {
   const state = structuredClone(nativeState) as unknown as GameState;
   const cp = structuredClone(checkpoint) as unknown as {

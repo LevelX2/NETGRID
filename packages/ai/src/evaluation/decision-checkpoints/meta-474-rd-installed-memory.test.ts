@@ -18,7 +18,7 @@ it("SP-478 retains the publicly rezzed R&D ICE identity after Olivia derezzes it
     expect.objectContaining({
       zone: "rd",
       positionKey: "installed-position-v1:735a9fc9",
-      definitionId: "onr_v1_223_banpei",
+      definitionId: 435,
       sourceEventId: "evt_270",
     }),
   );
@@ -61,7 +61,7 @@ it("keeps installed R&D ICE knowledge when only the hidden deck is shuffled", ()
   expect(
     reconstructBeliefState(input).runnerOpponentModel?.knownPositionMemory,
   ).toContainEqual(
-    expect.objectContaining({ zone: "rd", definitionId: "onr_v1_223_banpei" }),
+    expect.objectContaining({ zone: "rd", definitionId: 435 }),
   );
 });
 
@@ -90,6 +90,6 @@ it("invalidates R&D installed identity after an actual public board reorder", ()
   expect(
     reconstructBeliefState(input).runnerOpponentModel?.knownPositionMemory,
   ).not.toContainEqual(
-    expect.objectContaining({ zone: "rd", definitionId: "onr_v1_223_banpei" }),
+    expect.objectContaining({ zone: "rd", definitionId: 435 }),
   );
 });

@@ -88,7 +88,7 @@ function blindCorpTraceState(): GameState {
   const sourceCardInstanceId = "native_trace_hunter";
   state.cardInstances[sourceCardInstanceId] = {
     instanceId: sourceCardInstanceId,
-    definitionId: "onr_v1_249_hunter",
+    definitionId: 461,
     owner: "corp",
     controller: "corp",
     zone: { side: "corp", zone: "serverIce", serverId: "rd" },

@@ -23,7 +23,7 @@ import { runnerRecurringEconomySignals } from "../runner/recurring-economy/recur
 import type { RunnerEconomyPosture } from "../run-analysis/runner-run-target-types";
 import { buildRunnerStrategicIntentProfile } from "../runner-strategic-intent";
 
-const CONFERENCE = "onr_v1_184_top-runners-conference";
+const CONFERENCE = 396;
 function deck(id: string): DeckDefinition {
   const current = standardDeckCatalog.decks.find(
     (d) => d.standardDeckId === id,
@@ -72,19 +72,19 @@ function fixture(payouts: number, killer = true): GameState {
   state = native(state, "corp", "mandatory_draw");
   const builder = RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
-    .withCorpCardInHq("onr_v1_199_employee-empowerment")
+    .withCorpCardInHq(411)
     .withCorpCredits(15)
-    .withRezzedCorpIceOnServer("hq", "onr_v1_264_rex")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_223_banpei")
+    .withRezzedCorpIceOnServer("hq", 476)
+    .withRezzedCorpIceOnServer("rd", 435)
     .withRunnerCredits(50)
     .withRunnerGripSize(0)
     .withRunnerCardInGrip(CONFERENCE)
-    .withRunnerCardInGrip("onr_v1_079_bodyweight-synthetic-blood")
-    .withRunnerCardInGrip("onr_v1_157_crash-everett-inventive-fixer")
-    .withRunnerCardInGrip("onr_v1_108_score")
-    .withRunnerProgramInstalled("onr_v1_074_worm")
-    .withRunnerProgramInstalled("onr_v1_014_codecracker");
-  if (killer) builder.withRunnerProgramInstalled("onr_v1_054_raptor");
+    .withRunnerCardInGrip(291)
+    .withRunnerCardInGrip(369)
+    .withRunnerCardInGrip(320)
+    .withRunnerProgramInstalled(286)
+    .withRunnerProgramInstalled(226);
+  if (killer) builder.withRunnerProgramInstalled(266);
   state.runner.memoryUsed = killer ? 3 : 2;
   state = native(state, "corp", "end_turn");
   state = apply(
@@ -263,8 +263,8 @@ it.each(["funding", "clicks", "path"] as const)(
     if (blocker === "clicks") state.runner.clicks = 1;
     if (blocker === "path")
       RealEngineFixtureBuilder.forState(state)
-        .withRezzedCorpIceOnServer("hq", "onr_v1_223_banpei")
-        .withRezzedCorpIceOnServer("rd", "onr_v1_271_tko-2-0");
+        .withRezzedCorpIceOnServer("hq", 435)
+        .withRezzedCorpIceOnServer("rd", 483);
     const input = inputFor(state),
       release = releaseFor(input);
     expect(runnerRunLockReleaseProjection(input, release)?.status).toBe(

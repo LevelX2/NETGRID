@@ -4,12 +4,12 @@ import {
   runnerRestrictedRunCreditProfileFromPlanningCard,
 } from "./runner-canonical-card-facts";
 it.each([
-  ["onr_classic_048_omnitech-spinal-tap-cybermodem", 2],
-  ["onr_proteus_134_cortical-cybermodem", 2],
-  ["onr_v1_119_arasaka-portable-prototype", 3],
-  ["onr_v1_122_artemis-2020", 2],
-  ["onr_v1_137_parraline-5750", 1],
-  ["onr_v1_140_raven-microcyb-eagle", 1],
+  [52, 2],
+  [192, 2],
+  [331, 3],
+  [334, 2],
+  [349, 1],
+  [352, 1],
 ])(
   "projects the canonical generic breaker pool of %s without treating it as liquid bank",
   (id, capacity) => {
@@ -22,16 +22,16 @@ it.each([
 );
 it("preserves non-noisy and killer restrictions and the distinct host/event owners", () => {
   expect(
-    runnerRestrictedRunCreditProfile("onr_v1_071_vewy-vewy-quiet")?.uses,
+    runnerRestrictedRunCreditProfile(283)?.uses,
   ).toEqual(["using_icebreaker_during_run_non_noisy"]);
   expect(
-    runnerRestrictedRunCreditProfile("onr_v1_124_corolla-speed-chip")?.uses,
+    runnerRestrictedRunCreditProfile(336)?.uses,
   ).toEqual(["using_killer_during_run"]);
   expect(
-    runnerRestrictedRunCreditProfile("onr_proteus_139_eurocorpse-tm-spin-chip"),
+    runnerRestrictedRunCreditProfile(197),
   ).toBeUndefined();
   expect(
-    runnerRestrictedRunCreditProfile("onr_classic_052_zetatech-portastation"),
+    runnerRestrictedRunCreditProfile(56),
   ).toBeUndefined();
 });
 it("derives the use qualifier for a differently named canonical fixture", () => {

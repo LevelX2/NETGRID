@@ -36,7 +36,7 @@ describe("match 7BFE exact decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_onr_v1_309_bbs-whispering-campaign_2.new_remote.corp_onr_v1_309_bbs-whispering-campaign_2",
+              "corp.install_card.corp_521_2.new_remote.corp_521_2",
           },
         ],
       };
@@ -46,7 +46,7 @@ describe("match 7BFE exact decision checkpoints", () => {
     expect(corpSameTurnScoreConversionPaths(result.input)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          agendaCardId: "corp_onr_v1_196_corporate-war_3",
+          agendaCardId: "corp_408_3",
           sameTurnGuaranteed: true,
           creditsRequired: 6,
           clicksRequired: 3,
@@ -57,7 +57,7 @@ describe("match 7BFE exact decision checkpoints", () => {
       residentPlanPortfolioSnapshot(result.input)!.instances.find(
         (plan) =>
           plan.instanceId ===
-          "plan:corp.score_agenda:agenda%3Acorp_onr_v1_196_corporate-war_3%3Aremote_1",
+          "plan:corp.score_agenda:agenda%3Acorp_408_3%3Aremote_1",
       )?.moduleState,
     ).toMatchObject({
       signal: {
@@ -76,7 +76,7 @@ describe("match 7BFE exact decision checkpoints", () => {
         acceptableActions: [
           {
             type: "install_card",
-            sourceDefinitionId: "onr_v1_196_corporate-war",
+            sourceDefinitionId: 408,
           },
         ],
       };
@@ -91,7 +91,7 @@ describe("match 7BFE exact decision checkpoints", () => {
       ...checkpoint.expectation,
       acceptableActions: [{
         type: "install_card",
-        sourceDefinitionId: "onr_v1_279_wall-of-static",
+        sourceDefinitionId: 491,
         targetServerId: "new_remote",
       }],
       planExecution: {
@@ -112,7 +112,7 @@ describe("match 7BFE exact decision checkpoints", () => {
         acceptableActions: [
           {
             type: "play_operation",
-            sourceDefinitionId: "onr_v1_285_closed-accounts",
+            sourceDefinitionId: 497,
           },
         ],
         planExecution: {
@@ -143,7 +143,7 @@ describe("match 7BFE exact decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_onr_v1_244_filter_1.rd.corp_onr_v1_244_filter_1.4",
+              "corp.install_card.corp_456_1.rd.corp_456_1.4",
           },
         ],
         planExecution: {
@@ -176,7 +176,7 @@ describe("match 7BFE exact decision checkpoints", () => {
       state.runner.tags = 2;
       fixture.expectation = {
         discardChoice: {
-          mustRetainDefinitionIds: ["onr_v1_327_i-got-a-rock"],
+          mustRetainDefinitionIds: [539],
         },
       };
     });

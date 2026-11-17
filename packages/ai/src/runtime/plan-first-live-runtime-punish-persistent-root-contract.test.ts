@@ -19,7 +19,7 @@ import {
   visibleCard,
 } from "../semantic-ai-runtime-cutover.test-support";
 
-const CLOSED_ACCOUNTS_DEFINITION_ID = "onr_v1_285_closed-accounts";
+const CLOSED_ACCOUNTS_DEFINITION_ID = 497;
 const CLOSED_ACCOUNTS_CAMPAIGN_ID = "tagged-closed-accounts";
 const CLOSED_ACCOUNTS_ROUTE_ID = "closed-accounts-payoff";
 const CLOSED_ACCOUNTS_FUNDING_NEED = `punish-funding:${CLOSED_ACCOUNTS_CAMPAIGN_ID}:${CLOSED_ACCOUNTS_ROUTE_ID}`;
@@ -289,7 +289,7 @@ function advanceToUnknownQuoteWithScoreAlternative(
 ): void {
   const stateVersion = 2;
   const agenda = visibleCard("score-agenda", "corp", "agenda", {
-    definitionId: "onr_v1_203_hostile-takeover",
+    definitionId: 415,
     title: "Hostile Takeover",
     agendaPoints: 2,
     advancementRequirement: 1,

@@ -68,7 +68,7 @@ export type KnownRemoteAccessPayoff = {
 };
 
 type KnownRemoteRoot = {
-  definitionId: string;
+  definitionId: number;
   positionKey: string;
   source: "player_view" | "position_memory";
   sourceEventId?: string;
@@ -78,7 +78,7 @@ type KnownRemoteRoot = {
 export type ObservedRemoteAccessDamage = {
   amount: number;
   damageType: "net" | "meat" | "core";
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   preventionRemaining: number;
   survivalCapacity: number;
   survivable: boolean;
@@ -793,14 +793,14 @@ function changedRemotePayoff(
   };
 }
 
-function cardDefinitionTrashCost(definitionId: string): number | undefined {
+function cardDefinitionTrashCost(definitionId: number): number | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
     CARD_DEFINITIONS_BY_ID[definitionId]?.trashCost
   );
 }
 
-function cardDefinitionType(definitionId: string): string | undefined {
+function cardDefinitionType(definitionId: number): string | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.type ??
     CARD_DEFINITIONS_BY_ID[definitionId]?.type

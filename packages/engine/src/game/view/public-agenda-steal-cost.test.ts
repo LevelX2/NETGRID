@@ -11,20 +11,20 @@ function fixture() {
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
-        { id: "onr_v1_366_red-herrings", quantity: 2 },
-        { id: "onr_proteus_008_project-zurich", quantity: 1 },
+        { id: 578, quantity: 2 },
+        { id: 66, quantity: 1 },
         ...ORIGINALSET_DEFAULT_DECKS.corp.cards.filter(
           (c) =>
             ![
-              "onr_v1_366_red-herrings",
-              "onr_proteus_008_project-zurich",
+              578,
+              66,
             ].includes(c.id),
         ),
       ],
     },
   });
-  const tax = putCorpRootInRemote(state, "onr_v1_366_red-herrings");
-  const agenda = putCorpRootInRemote(state, "onr_proteus_008_project-zurich");
+  const tax = putCorpRootInRemote(state, 578);
+  const agenda = putCorpRootInRemote(state, 66);
   return { state, tax, agenda };
 }
 it("quotes only public active server modifiers before any agenda is known", () => {
@@ -43,7 +43,7 @@ it("quotes only public active server modifiers before any agenda is known", () =
   expect(quote().root[1]).toMatchObject({ known: false });
   expect(quote().root[1]).not.toHaveProperty("definitionId");
   const original = structuredClone(quote().runnerAgendaStealCostQuote);
-  state.cardInstances[agenda]!.definitionId = "onr_v1_366_red-herrings";
+  state.cardInstances[agenda]!.definitionId = 578;
   expect(quote().runnerAgendaStealCostQuote).toEqual(original);
   expect(
     getPlayerView(state, "corp").servers.find((s) => s.id === "remote_1"),
@@ -87,7 +87,7 @@ it("counts a public access snapshot once and preserves it after its active sourc
       remote_1: [
         {
           sourceCardInstanceId: tax,
-          sourceDefinitionId: "onr_v1_366_red-herrings",
+          sourceDefinitionId: 578,
           sourceTitle: "Red Herrings",
           amount: 5,
           visibility: "public",

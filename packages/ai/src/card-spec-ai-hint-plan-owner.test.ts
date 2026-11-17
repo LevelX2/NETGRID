@@ -28,7 +28,7 @@ describe("capability-bound CardSpec plan owners", () => {
   });
 
   it("projects all current bindings deterministically from exact capabilities", () => {
-    const broker = deriveCardSpecAiHint(entry("onr_v1_154_broker"));
+    const broker = deriveCardSpecAiHint(entry(366));
     expect(broker.actionPlanOwnerBindings).toEqual([
       {
         capabilityKey: "store_credits",
@@ -42,7 +42,7 @@ describe("capability-bound CardSpec plan owners", () => {
       },
     ]);
     expect(
-      deriveCardSpecAiHint(entry("onr_v1_178_short-term-contract"))
+      deriveCardSpecAiHint(entry(390))
         .actionPlanOwnerBindings,
     ).toEqual([
       {
@@ -52,7 +52,7 @@ describe("capability-bound CardSpec plan owners", () => {
       },
     ]);
     expect(
-      deriveCardSpecAiHint(entry("onr_v1_168_loan-from-chiba"))
+      deriveCardSpecAiHint(entry(380))
         .actionPlanOwnerBindings,
     ).toEqual([
       {
@@ -61,7 +61,7 @@ describe("capability-bound CardSpec plan owners", () => {
       },
     ]);
     expect(
-      deriveCardSpecAiHint(entry("onr_v1_197_data-fort-reclamation"))
+      deriveCardSpecAiHint(entry(409))
         .actionPlanOwnerBindings,
     ).toEqual([
       {
@@ -72,7 +72,7 @@ describe("capability-bound CardSpec plan owners", () => {
   });
 
   it("rejects missing, duplicate annotation, and duplicate mechanical owners", () => {
-    const broker = entry("onr_v1_154_broker");
+    const broker = entry(366);
     const forgedMissing = {
       ...broker,
       planning: {

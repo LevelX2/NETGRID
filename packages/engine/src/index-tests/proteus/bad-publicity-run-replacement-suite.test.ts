@@ -33,16 +33,16 @@ import {
 } from "@netgrid/shared";
 import { CARD_IMPLEMENTATIONS } from "../../card-implementations/registry";
 
-const FRAME_UP = "onr_proteus_109_frame-up";
-const IDENTITY_DONOR = "onr_proteus_112_identity-donor";
-const LIVE_NEWS_FEED = "onr_proteus_113_live-news-feed";
-const SENATORIAL_FIELD_TRIP = "onr_proteus_123_senatorial-field-trip";
-const SUBLIMINAL_CORRUPTION = "onr_proteus_125_subliminal-corruption";
-const SCORCHED_EARTH = "onr_v1_302_scorched-earth";
-const BLACK_ICE = "onr_v1_227_cerberus";
+const FRAME_UP = 167;
+const IDENTITY_DONOR = 170;
+const LIVE_NEWS_FEED = 171;
+const SENATORIAL_FIELD_TRIP = 181;
+const SUBLIMINAL_CORRUPTION = 183;
+const SCORCHED_EARTH = 514;
+const BLACK_ICE = 439;
 const TEST_BLACK_OPS_ASSET = "test_black_ops_asset";
-const BLACK_OPS_AGENDA = "onr_proteus_002_charity-takeover";
-const ADVERTISEMENT = "onr_v1_309_bbs-whispering-campaign";
+const BLACK_OPS_AGENDA = 60;
+const ADVERTISEMENT = 521;
 
 const PRO015_IDS = [
   FRAME_UP,
@@ -79,7 +79,7 @@ function baseState(seed: string): GameState {
 
 function addRunnerGripCard(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -102,7 +102,7 @@ function addRunnerGripCard(
 
 function addCorpHqCard(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -125,7 +125,7 @@ function addCorpHqCard(
 
 function addCorpRdCard(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -148,7 +148,7 @@ function addCorpRdCard(
 
 function addCorpRootCard(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   serverId: Exclude<ServerId, "new_remote">,
   rezzed = false,
@@ -186,7 +186,7 @@ function addCorpRootCard(
 
 function addCorpIce(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   serverId: Exclude<ServerId, "new_remote">,
   rezzed = true,
@@ -523,7 +523,7 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
     let state = baseState("pro015-live-news-feed");
     const fallGuyId = addRunnerGripCard(
       state,
-      "onr_v1_161_fall-guy",
+      373,
       "live_news_fall_guy",
     );
     state = takeRunnerAction(
@@ -712,7 +712,7 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
     );
     addCorpHqCard(state, SCORCHED_EARTH, "scorched");
     for (let index = 0; index < 5; index += 1)
-      addRunnerGripCard(state, "onr_v1_012_clown", `grip_${index}`);
+      addRunnerGripCard(state, 224, `grip_${index}`);
     const before = structuredClone(state);
 
     state = apply(

@@ -26,7 +26,7 @@ it("SP-288 installs the visible Code Gate answer that funds the whole mixed ICE 
   const install = input.legalActions.find(
     (action) =>
       action.type === "install_card" &&
-      action.source === "runner_onr_v1_014_codecracker_1" &&
+      action.source === "runner_226_1" &&
       !action.payload?.runnerProgramTrashBeforeInstall,
   )!;
   expect(install).toBeDefined();
@@ -51,7 +51,7 @@ it("searches cheaper Wall coverage without inventing the absent Code Gate instal
   };
   bindSyntheticAgendaStealQuotes(input, "remote_1", 0, {});
   input.legalActions = input.legalActions.filter(
-    (action) => action.source !== "runner_onr_v1_014_codecracker_1",
+    (action) => action.source !== "runner_226_1",
   );
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(
@@ -76,7 +76,7 @@ it("searches cheaper Wall coverage without inventing the absent Code Gate instal
   });
   expect(
     input.legalActions.some(
-      (action) => action.source === "runner_onr_v1_014_codecracker_1",
+      (action) => action.source === "runner_226_1",
     ),
   ).toBe(false);
   expect(result.evidence).toContain(

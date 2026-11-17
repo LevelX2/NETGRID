@@ -126,7 +126,7 @@ it("retains a current installed free tag-avoidance source", () => {
   const f = fixture();
   (f.input.playerView.own.rig ??= []).push({
     instanceId: "owned-free-tag-avoidance",
-    definitionId: "onr_v1_161_fall-guy",
+    definitionId: 373,
     known: true,
     rezzed: true,
     type: "resource",
@@ -175,7 +175,7 @@ it("quotes two tag avoidances from repeated credits or separate single-use sourc
   };
   const card = {
     instanceId: "owned-tag-avoidance",
-    definitionId: "onr_v1_135_nasuko-cycle",
+    definitionId: 347,
     known: true,
     rezzed: true,
     type: "resource" as const,
@@ -192,7 +192,7 @@ it("quotes two tag avoidances from repeated credits or separate single-use sourc
   input.playerView.own.rig = [card];
   expect(checkSafety(6)).toBeUndefined();
   expect(checkSafety(5)).toContain("unavoided_tags:1");
-  const fallGuy = { ...card, definitionId: "onr_v1_161_fall-guy" };
+  const fallGuy = { ...card, definitionId: 373 };
   input.playerView.own.rig = [fallGuy];
   expect(checkSafety(0)).toContain("unavoided_tags:1");
   input.playerView.own.rig.push({ ...fallGuy, instanceId: "second-fall-guy" });

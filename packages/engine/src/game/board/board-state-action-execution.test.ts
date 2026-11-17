@@ -15,8 +15,8 @@ import {
 const ADVANCED_CARD_ID = "advanced_1" as CardInstanceId;
 const RESOURCE_ID = "resource_1" as CardInstanceId;
 const HIDDEN_RESOURCE_SLOT_ID = "hidden_resource_slot_1" as CardInstanceId;
-const ADVANCED_CARD_DEFINITION_ID = "onr_v1_308_acme-savings-and-loan";
-const RESOURCE_DEFINITION_ID = "onr_v1_151_aujourdoui";
+const ADVANCED_CARD_DEFINITION_ID = 520;
+const RESOURCE_DEFINITION_ID = 363;
 
 function baseState(): GameState {
   const remote: CorpServer = {
@@ -77,7 +77,7 @@ function baseState(): GameState {
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {

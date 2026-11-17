@@ -49,7 +49,7 @@ export function selectedRunnerHiddenDrawReplacementOptionId(
           (option) =>
             option.card?.instanceId === cardId &&
             option.card.known !== false &&
-            typeof option.card.definitionId === "string" &&
+            typeof option.card.definitionId === "number" &&
             option.card.definitionId.length > 0,
         )
       );

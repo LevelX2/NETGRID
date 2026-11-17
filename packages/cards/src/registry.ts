@@ -125,7 +125,7 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
   for (const spec of input.cardSpecs) assertCardSpecContract(spec);
   for (const set of input.setSpecs) assertSetSpecContract(set);
 
-  const cardIds = new Set<string>();
+  const cardIds = new Set<CardDefinitionId>();
   const printingIds = new Set<string>();
   const setIds = new Set<string>();
   const capabilityIds = new Set<string>();
@@ -181,10 +181,7 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
   const cards = input.cardSpecs
     .map(finalizeCardSpec)
     .sort((left, right) =>
-      compareText(
-        left.identity.cardDefinitionId,
-        right.identity.cardDefinitionId,
-      ),
+      left.identity.cardDefinitionId - right.identity.cardDefinitionId,
     );
   const sets = input.setSpecs
     .map(finalizeSetSpec)
@@ -344,9 +341,9 @@ export function createRulesContextForRegistry(
   const registryAccess = access(registry);
   assertEngineRegistryVersionContext(versions);
   const definitionIds = [...versions.matchCardPoolDefinitionIds].sort(
-    compareText,
+    (left, right) => left - right,
   );
-  const rows: readonly (readonly [string, string])[] = definitionIds.map(
+  const rows: readonly (readonly [CardDefinitionId, string])[] = definitionIds.map(
     (definitionId) => {
       const section = registryAccess.sectionFingerprints.get(
         definitionId as CardDefinitionId,
@@ -556,10 +553,10 @@ function access(registry: CardRegistry): RegistryAccess {
 
 function fail(
   code: CardRegistryErrorCode,
-  value: string,
+  value: string | CardDefinitionId,
   message: string,
 ): never {
-  throw new CardRegistryError(code, value, message);
+  throw new CardRegistryError(code, String(value), message);
 }
 
 function compareText(left: string, right: string): number {

@@ -197,7 +197,7 @@ describe("Runner Golden Deck strategy and debug", () => {
       servers: [server("hq")],
       grip: [
         visibleCard("access-card", {
-          definitionId: "onr_v1_129_hq-interface",
+          definitionId: 341,
           title: "HQ Interface",
           type: "hardware",
           rulesText:
@@ -270,7 +270,7 @@ describe("Runner Golden Deck strategy and debug", () => {
           ...rdAccessEvent(
             "golden-rd-low-value-access",
             1,
-            "onr_v1_281_accounts-receivable",
+            493,
           ),
           turnSerial: 0,
         },
@@ -354,7 +354,7 @@ describe("Runner Golden Deck strategy and debug", () => {
         server("remote_1", {
           root: [
             visibleCard("remote-root-1", {
-              definitionId: "onr_v1_281_accounts-receivable",
+              definitionId: 493,
               type: "operation",
               known: true,
             }),
@@ -632,7 +632,7 @@ function visibleCard(
 
 function wallOfStatic(instanceId: string): VisibleCard {
   const ice = visibleCard(instanceId, {
-    definitionId: "onr_v1_279_wall-of-static",
+    definitionId: 491,
     title: "Wall of Static",
     type: "ice",
     subtypes: ["wall"],
@@ -646,7 +646,7 @@ function wallOfStatic(instanceId: string): VisibleCard {
       {
         id: `${instanceId}-end-the-run`,
         type: "end_the_run",
-        sourceDefinitionId: "onr_v1_279_wall-of-static",
+        sourceDefinitionId: 491,
         sourceTitle: "Wall of Static",
       },
     ],
@@ -656,7 +656,7 @@ function wallOfStatic(instanceId: string): VisibleCard {
 function rdAccessEvent(
   eventId: string,
   stateVersionBefore: number,
-  cardDefinitionId: string,
+  cardDefinitionId: number,
 ): PublicGameEvent {
   return {
     eventId,

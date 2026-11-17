@@ -6,7 +6,7 @@ import { corpScorelineFeasibilityForDecisionInput } from "./corp-scoreline-feasi
 describe("corpScorelineFeasibilityForDecisionInput", () => {
   it("subtracts printed agendas that are scored or removed while using actual Corp score", () => {
     const input = aiInput("corp", []);
-    const definitionId = "onr_v1_191_black-ice-quality-assurance";
+    const definitionId = 403;
     const card = {
       definitionId,
       known: true as const,
@@ -64,7 +64,7 @@ describe("corpScorelineFeasibilityForDecisionInput", () => {
         corpMandatoryOptionalAgendaCardCount: 2,
         corpMandatorySkivvissCardCount: 1,
         corpMandatoryAdditionalSourceCount: 1,
-        corpMandatoryAdditionalSourceDefinitionIds: "onr_v1_064_skivviss",
+        corpMandatoryAdditionalSourceDefinitionIds: 276,
       },
     });
     Object.assign(input, {
@@ -73,7 +73,7 @@ describe("corpScorelineFeasibilityForDecisionInput", () => {
         side: "corp",
         cards: [
           {
-            cardId: "onr_v1_191_black-ice-quality-assurance",
+            cardId: 403,
             quantity: 4,
           },
         ],

@@ -22,18 +22,18 @@ import { buildAiDecisionInput, chooseRunnerAction } from "../index";
 import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 
-const INSIDE_JOB = "onr_v1_094_inside-job";
-const ZOMBIE = "onr_v1_280_zombie";
+const INSIDE_JOB = 306;
+const ZOMBIE = 492;
 const HAND = [
   INSIDE_JOB,
-  "onr_v1_052_raffles",
-  "onr_v1_070_tinweasel",
-  "onr_v1_106_private-ldl-access",
+  264,
+  282,
+  318,
 ];
 const PROGRAMS = [
-  "onr_v1_031_hammer",
-  "onr_v1_073_wizards-book",
-  "onr_v1_072_wild-card",
+  243,
+  285,
+  284,
 ];
 afterEach(resetResidentPlanPortfolioMemory);
 
@@ -131,7 +131,7 @@ it("rejects an isolated event whose consumed card leaves the quoted hand buffer 
 });
 
 function fixture(handCount: number): GameState {
-  const corp = [ZOMBIE, "onr_v1_279_wall-of-static"];
+  const corp = [ZOMBIE, 491];
   const runner = [...HAND, ...PROGRAMS];
   let state = createGameAfterSetup({
     seed: "run-entry-reserve-cd482",

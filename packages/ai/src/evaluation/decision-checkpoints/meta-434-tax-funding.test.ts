@@ -71,10 +71,10 @@ it.each([
     const action = input.legalActions.find((candidate) =>
       bankAvailable
         ? candidate.actionId ===
-          "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits"
+          "runner.activated_card_ability.runner_366_1.runner_366_1.activated.onr_v1_154_broker:withdraw_credits"
         : loanAvailable
           ? candidate.actionId ===
-            "runner.install_card.runner_onr_v1_168_loan-from-chiba_1.runner_onr_v1_168_loan-from-chiba_1"
+            "runner.install_card.runner_380_1.runner_380_1"
           : candidate.actionId === "runner.gain_credit",
     )!;
     if (bankAvailable || loanAvailable) {
@@ -94,7 +94,7 @@ it.each([
           selectedStep: {
             parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
             planInstanceId: bankAvailable
-              ? "plan:runner.credit_bank:runner_onr_v1_154_broker_1"
+              ? "plan:runner.credit_bank:runner_366_1"
               : "plan:runner.economy:run-support%3Aremote%3Aremote_1",
             needId: "run-support:remote:remote_1",
           },

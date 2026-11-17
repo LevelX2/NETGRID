@@ -71,8 +71,8 @@ it.each([
     choiceId: "discard_corp_221",
     selectedOptionIds: [
       keep
-        ? "card_corp_onr_proteus_007_project-venice_1"
-        : "card_corp_onr_v1_297_overtime-incentives_1",
+        ? "card_corp_65_1"
+        : "card_corp_509_1",
     ],
   });
   expect(d.decisionDebug!.planFirstDecision!).toMatchObject({

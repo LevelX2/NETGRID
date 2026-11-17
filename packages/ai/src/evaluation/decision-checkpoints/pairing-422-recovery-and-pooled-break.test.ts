@@ -44,8 +44,8 @@ describe("pairing 422 recovery and pooled break checkpoints", () => {
     expect(capture.input.playerView.own.credits).toBe(24);
     expect(action?.type).toBe("play_event");
     expect([
-      "onr_v1_087_forgotten-backup-chip",
-      "onr_v1_110_sneak-preview",
+      299,
+      322,
     ]).toContain(
       action?.payload?.sourceDefinitionId ??
         capture.input.playerView.own.gripOrHq.find(
@@ -65,8 +65,8 @@ describe("pairing 422 recovery and pooled break checkpoints", () => {
           directSearchChoiceBindings: expect.arrayContaining([
             expect.objectContaining({
               actionId: decision.actionId,
-              targetDefinitionId: "onr_classic_031_rent-i-con",
-              targetCardInstanceId: "runner_onr_classic_031_rent-i-con_1",
+              targetDefinitionId: 35,
+              targetCardInstanceId: "runner_35_1",
             }),
           ]),
         },
@@ -80,7 +80,7 @@ describe("pairing 422 recovery and pooled break checkpoints", () => {
     expect(action?.type).toBe("break_subroutine");
     expect(action?.payload).toMatchObject({
       subroutineIndex: 0,
-      iceId: "corp_onr_v1_237_data-wall_1",
+      iceId: "corp_449_1",
     });
     expect(decision.fallbackUsed).toBe(false);
     expect(
@@ -105,13 +105,13 @@ describe("pairing 422 recovery and pooled break checkpoints", () => {
       const input = structuredClone(breakJson.input) as AiDecisionInput;
       const rig = input.playerView.own.rig!;
       const poolCard = rig.find(
-        (card) => card.definitionId === "onr_v1_071_vewy-vewy-quiet",
+        (card) => card.definitionId === 283,
       )!;
       poolCard.counters = { bit: pool };
       poolCard.counterDisplays![0]!.amount = pool;
       if (noisy)
         rig.find(
-          (card) => card.definitionId === "onr_classic_031_rent-i-con",
+          (card) => card.definitionId === 35,
         )!.subtypes = ["icebreaker", "noisy"];
       input.playerView.run!.badPublicityCredits = badPublicity;
       const action = input.legalActions.find(

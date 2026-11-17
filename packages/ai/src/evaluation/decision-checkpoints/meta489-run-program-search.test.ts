@@ -8,7 +8,7 @@ import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { resolvePlanBoundRunnerRunProgramSearchChoice } from "../../runner/run-window/run-window-program-search-binding";
 
-const sourceId = "runner_onr_v1_059_self-modifying-code_1";
+const sourceId = "runner_271_1";
 const root = "plan:runner.contest_remote:remote%3Aremote_1";
 const leaf = "plan:runner.convert_run_window:run%3Arun_134";
 const read = (name: string) =>
@@ -78,7 +78,7 @@ describe("native in-run program search (SP-333)", () => {
     expect(decision.actionId).toBe("runner.resolve_choice");
     expect(decision.selectedChoices).toEqual({
       choiceId: "p3_38_search_stack_install_138",
-      selectedOptionIds: ["card_runner_onr_v1_014_codecracker_1"],
+      selectedOptionIds: ["card_runner_226_1"],
     });
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: root,
@@ -189,12 +189,12 @@ describe("native in-run program search (SP-333)", () => {
       if (boundary === "version") choice.stateVersion += 1;
       if (boundary === "target")
         choice.options = choice.options.filter(
-          (option) => option.card?.definitionId !== "onr_v1_014_codecracker",
+          (option) => option.card?.definitionId !== 226,
         );
       if (boundary === "run") input.playerView.run!.runId = "different_run";
       if (boundary === "install_cost")
         for (const option of choice.options)
-          if (option.card?.definitionId === "onr_v1_014_codecracker")
+          if (option.card?.definitionId === 226)
             option.card.installCost = 9;
       expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
     },

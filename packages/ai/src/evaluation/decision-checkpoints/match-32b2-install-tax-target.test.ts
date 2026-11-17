@@ -24,8 +24,8 @@ const capture = JSON.parse(
   validation: Record<string, boolean>;
 };
 
-const definitionId = "onr_v1_173_restrictive-net-zoning";
-const instanceId = "runner_onr_v1_173_restrictive-net-zoning_1";
+const definitionId = 385;
+const instanceId = "runner_385_1";
 
 function taxOffers(input: AiDecisionInputWithDeckCapabilities) {
   return buildActionSemanticCandidates(input).filter(

@@ -123,7 +123,7 @@ it("produces and consumes the same binding through all three native decisions", 
   expect(order.selectedChoices).toMatchObject({
     choiceId: "runner_run_start_order_80",
     selectedOptionIds: [
-      "source_card_implementation:runner_onr_v1_184_top-runners-conference_2",
+      "source_card_implementation:runner_396_2",
     ],
   });
   expect(

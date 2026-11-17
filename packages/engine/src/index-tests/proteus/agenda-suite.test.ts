@@ -26,17 +26,17 @@ import {
   type Side,
 } from "@netgrid/shared";
 
-const CORPORATE_HEADHUNTERS = "onr_proteus_003_corporate-headhunters";
-const FETAL_AI = "onr_proteus_004_fetal-ai";
-const MARKED_ACCOUNTS = "onr_proteus_005_marked-accounts";
-const PROJECT_ZURICH = "onr_proteus_008_project-zurich";
-const WORLD_DOMINATION = "onr_proteus_010_world-domination";
-const FALL_GUY = "onr_v1_161_fall-guy";
-const BLACKMAIL = "onr_proteus_102_blackmail";
-const PIRATE_BROADCAST = "onr_proteus_116_pirate-broadcast";
-const PREARRANGED_DROP = "onr_proteus_118_prearranged-drop";
-const PROMISES_PROMISES = "onr_proteus_119_promises-promises";
-const NON_AGENDA_ASSET = "onr_v1_309_bbs-whispering-campaign";
+const CORPORATE_HEADHUNTERS = 61;
+const FETAL_AI = 62;
+const MARKED_ACCOUNTS = 63;
+const PROJECT_ZURICH = 66;
+const WORLD_DOMINATION = 68;
+const FALL_GUY = 373;
+const BLACKMAIL = 160;
+const PIRATE_BROADCAST = 174;
+const PREARRANGED_DROP = 176;
+const PROMISES_PROMISES = 177;
+const NON_AGENDA_ASSET = 521;
 
 function baseState(seed: string): GameState {
   const state = toRunnerTurn(
@@ -80,7 +80,7 @@ function applyLegal(
 
 function addCorpCard(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   zone: "hq" | "rd" | "archives" | "remote_1",
 ): CardInstanceId {
@@ -123,7 +123,7 @@ function addCorpCard(
 
 function addRunnerGripCard(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -146,7 +146,7 @@ function addRunnerGripCard(
 
 function installRunnerPreventionCard(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   type: "hardware" | "resource",
   faceup = true,
@@ -167,7 +167,7 @@ function installRunnerPreventionCard(
 
 function scoreCorpAgenda(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   advancementCounters = 0,
 ): CardInstanceId {
@@ -271,7 +271,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     ).toBe(false);
 
     state.runner.tags = 1;
-    addRunnerGripCard(state, "onr_v1_010_cascade", "pro013_damage_card");
+    addRunnerGripCard(state, 222, "pro013_damage_card");
     const heapBefore = state.runner.heap.length;
     const action = mustAction(
       state,
@@ -326,8 +326,8 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     let fetal = baseState("pro013-fetal");
     addCorpCard(fetal, MARKED_ACCOUNTS, "pro013_marked_hidden_rd", "rd");
     const fetalId = addCorpCard(fetal, FETAL_AI, "pro013_fetal_rd", "rd");
-    addRunnerGripCard(fetal, "onr_v1_010_cascade", "pro013_net_1");
-    addRunnerGripCard(fetal, "onr_v1_011_cloak", "pro013_net_2");
+    addRunnerGripCard(fetal, 222, "pro013_net_1");
+    addRunnerGripCard(fetal, 223, "pro013_net_2");
     const heapBefore = fetal.runner.heap.length;
     openAccess(fetal, "rd");
     const before = structuredClone(fetal);
@@ -393,7 +393,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
 
     let archives = baseState("pro013-fetal-archives");
     addCorpCard(archives, FETAL_AI, "pro013_fetal_archives", "archives");
-    addRunnerGripCard(archives, "onr_v1_010_cascade", "pro013_archives_grip");
+    addRunnerGripCard(archives, 222, "pro013_archives_grip");
     archives = accessTopCard(archives, "archives");
     expect(archives.runner.heap).not.toContain("pro013_archives_grip");
     expect(
@@ -442,8 +442,8 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       "pro013_fetal_installed",
       "remote_1",
     );
-    addRunnerGripCard(fetal, "onr_v1_010_cascade", "pro013_fetal_installed_1");
-    addRunnerGripCard(fetal, "onr_v1_011_cloak", "pro013_fetal_installed_2");
+    addRunnerGripCard(fetal, 222, "pro013_fetal_installed_1");
+    addRunnerGripCard(fetal, 223, "pro013_fetal_installed_2");
     const heapBefore = fetal.runner.heap.length;
     openAccess(fetal, "remote_1");
     fetal = apply(fetal, "runner", (action) => action.type === "access_card");
@@ -479,7 +479,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     );
     addRunnerGripCard(
       state,
-      "onr_v1_086_forged-activation-orders",
+      298,
       "pro013_lethal_only_grip_card",
     );
     addCorpCard(state, FETAL_AI, "pro013_lethal_fetal_installed", "remote_1");
@@ -505,7 +505,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     state.runner.credits = 7;
     const redHerringsId = addCorpCard(
       state,
-      "onr_v1_366_red-herrings",
+      578,
       "pro013_combined_red_herrings",
       "remote_1",
     );
@@ -520,8 +520,8 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       "pro013_combined_fetal_ai",
       "remote_1",
     );
-    addRunnerGripCard(state, "onr_v1_010_cascade", "pro013_combined_net_1");
-    addRunnerGripCard(state, "onr_v1_011_cloak", "pro013_combined_net_2");
+    addRunnerGripCard(state, 222, "pro013_combined_net_1");
+    addRunnerGripCard(state, 223, "pro013_combined_net_2");
     openAccess(state, "remote_1");
     const before = structuredClone(state);
 
@@ -664,7 +664,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
   it("revalidates all seven public tag-avoid sources on a non-trace access continuation", () => {
     const sources = [
       {
-        definitionId: "onr_v1_135_nasuko-cycle",
+        definitionId: 347,
         type: "hardware",
         creditCost: 3,
         trashes: false,
@@ -676,32 +676,32 @@ describe("Proteus PRO013 agenda suite behavior", () => {
         trashes: true,
       },
       {
-        definitionId: "onr_v1_167_leland-corporate-bodyguard",
+        definitionId: 379,
         type: "resource",
         creditCost: 0,
         trashes: true,
       },
       {
-        definitionId: "onr_v1_170_nomad-allies",
+        definitionId: 382,
         type: "resource",
         creditCost: 0,
         trashes: true,
       },
       {
-        definitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
+        definitionId: 399,
         type: "resource",
         creditCost: 0,
         trashes: true,
       },
       {
-        definitionId: "onr_proteus_140_expendable-family-member",
+        definitionId: 198,
         type: "resource",
         creditCost: 1,
         trashes: true,
         faceup: false,
       },
       {
-        definitionId: "onr_classic_051_vintage-camaro",
+        definitionId: 55,
         type: "hardware",
         creditCost: 1,
         trashes: false,

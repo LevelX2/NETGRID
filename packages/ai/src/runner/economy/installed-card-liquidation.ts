@@ -35,7 +35,7 @@ export function runnerInstalledCardLiquidationChoiceSignal(
           card.instanceId === sourceResourceInstanceId &&
           card.known &&
           card.type === "resource" &&
-          typeof card.definitionId === "string" &&
+          typeof card.definitionId === "number" &&
           card.definitionId.length > 0,
       )
     : undefined;

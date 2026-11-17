@@ -12,8 +12,8 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 
-const KRASH_INSTANCE_ID = "runner_onr_v1_039_krash_1";
-const STREETWARE_DEFINITION_ID = "onr_proteus_150_streetware-distributor";
+const KRASH_INSTANCE_ID = "runner_251_1";
+const STREETWARE_DEFINITION_ID = 208;
 
 describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
   it.each([
@@ -51,7 +51,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(control);
     expect(result.ok, result.message).toBe(true);
     const bankId =
-      "plan:runner.credit_bank:runner_onr_proteus_150_streetware-distributor_2";
+      "plan:runner.credit_bank:runner_208_2";
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.portfolio,
     ).toEqual(
@@ -67,7 +67,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     );
     const bankAction = result.input.legalActions.find(
       (action) =>
-        action.source === "runner_onr_proteus_150_streetware-distributor_2" &&
+        action.source === "runner_208_2" &&
         action.payload?.cardImplementationAddsHostedCredits === true,
     );
     expect(bankAction).toBeDefined();
@@ -84,7 +84,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     const bank = residentPlanPortfolioSnapshot(result.input)!.instances.find(
       (instance) =>
         instance.instanceId ===
-        "plan:runner.credit_bank:runner_onr_proteus_150_streetware-distributor_2",
+        "plan:runner.credit_bank:runner_208_2",
     )!;
     expect(bank.moduleState).toMatchObject({
       phase: "hold",
@@ -99,7 +99,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expect(
       result.input.legalActions.some(
         (action) =>
-          action.source === "runner_onr_proteus_150_streetware-distributor_2" &&
+          action.source === "runner_208_2" &&
           action.payload?.cardImplementationAddsHostedCredits === true,
       ),
     ).toBe(true);
@@ -196,7 +196,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
           acceptableActions: [
             {
               type: "activated_card_ability",
-              sourceDefinitionId: "onr_v1_177_the-short-circuit",
+              sourceDefinitionId: 389,
             },
           ],
           forbiddenActions: [

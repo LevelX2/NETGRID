@@ -9,7 +9,7 @@ describe("declarative effective values", () => {
       cardInstances: {
         [breakerId]: {
           id: breakerId,
-          definitionId: "simple_decoder",
+          definitionId: 591,
           zone: { side: "runner", zone: "rigPrograms" },
           faceup: true,
           rezzed: false,

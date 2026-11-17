@@ -67,7 +67,7 @@ it("keeps the native transfer valid but does not choose unneeded memory preparat
   const before = JSON.stringify(input.playerView),
     decision = chooseAiAction(input);
   expect(decision).toMatchObject({
-    actionId: "runner.play_event.runner_onr_v1_108_score_1.runner_onr_v1_108_score_1.onr_v1_108_score:abilities_on_play_gain_credits",
+    actionId: "runner.play_event.runner_320_1.runner_320_1.onr_v1_108_score:abilities_on_play_gain_credits",
     fallbackUsed: false,
     timeoutUsed: false,
   });

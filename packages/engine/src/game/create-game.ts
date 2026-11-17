@@ -7,6 +7,7 @@ import {
   DEMO_DECKS,
   ORIGINALSET_DEFAULT_DECKS,
   type CardDefinition,
+  type CardDefinitionId,
   type CardInstance,
   type CardInstanceId,
   type ChoiceRequest,
@@ -256,7 +257,7 @@ export function createGameAfterSetup(config: CreateGameConfig = {}): GameState {
 
 function expandDeck(
   side: Side,
-  cards: Array<{ id: string; quantity: number }>,
+  cards: Array<{ id: CardDefinitionId; quantity: number }>,
   instances: Record<CardInstanceId, CardInstance>,
 ): CardInstanceId[] {
   const ids: CardInstanceId[] = [];
@@ -279,7 +280,7 @@ function expandDeck(
 
 function createInstance(
   side: Side,
-  definitionId: string,
+  definitionId: number,
   copy: number,
   zone: CardInstance["zone"],
 ): CardInstance {

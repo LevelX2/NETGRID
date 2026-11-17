@@ -26,7 +26,7 @@ describe("Runner tactical plan modules", () => {
       ...candidate("play-guide", "play_event", "play.runner_event"),
       sourceKind: "card" as const,
       sourceCardInstanceId: "guide-card",
-      sourceDefinitionId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+      sourceDefinitionId: 304,
       abilityKey: "abilities_on_play_expose_outermost_ice_each_fort",
     };
     const module = tacticalModule("runner.expose_information");
@@ -36,7 +36,7 @@ describe("Runner tactical plan modules", () => {
           kind: "proactive",
           informationId: "card:guide-card",
           sourceCardInstanceId: "guide-card",
-          sourceDefinitionId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+          sourceDefinitionId: 304,
           targetPositionKeys: ["hq:ice:0"],
           phase: "play_information_event",
           selectedActionId: "play-guide",
@@ -165,7 +165,7 @@ describe("Runner tactical plan modules", () => {
       const social = {
         ...candidate("play-social", "play_event", "play.runner_event"),
         sourceKind: "card" as const,
-        sourceDefinitionId: "onr_v1_111_social-engineering",
+        sourceDefinitionId: 323,
         sourceCardInstanceId: "social-card",
         functionalEffects: [
           {
@@ -194,14 +194,14 @@ describe("Runner tactical plan modules", () => {
             reachable: true,
             marginalValue: 120,
             evidenceCode: "runner_targeted_bypass_preflight:hq:0",
-            sourceDefinitionIds: ["onr_v1_111_social-engineering"],
+            sourceDefinitionIds: [323],
             preparationActionIds: ["play-social"],
             routePreparation: "targeted_bypass",
             targetedBypassCommitment: {
               kind: "targeted_bypass_run",
               sourceActionId: "play-social",
               sourceCardInstanceId: "social-card",
-              sourceDefinitionId: "onr_v1_111_social-engineering",
+              sourceDefinitionId: 323,
               plannedAtStateVersion: 10,
               ownerModuleId: "runner.pressure_central",
               ownerDedupeKey: "central:hq",
@@ -267,7 +267,7 @@ describe("Runner tactical plan modules", () => {
     delete protocol.runProjectionSummary;
     protocol.semanticActionType = "ability.activate";
     protocol.sourceKind = "card";
-    protocol.sourceDefinitionId = "onr_v1_050_r-and-d-protocol-files";
+    protocol.sourceDefinitionId = 262;
     const module = tacticalModule("runner.pressure_central");
     const runnerContext = context([basic, protocol], {
       centralPressure: [
@@ -310,7 +310,7 @@ describe("Runner tactical plan modules", () => {
     const protocol = run("run-rd-protocol", "rd");
     protocol.semanticActionType = "play.runner_event";
     protocol.sourceKind = "card";
-    protocol.sourceDefinitionId = "onr_v1_050_r-and-d-protocol-files";
+    protocol.sourceDefinitionId = 262;
     const module = tacticalModule("runner.pressure_central");
     const runnerContext = context([basic, protocol], {
       centralPressure: [
@@ -323,7 +323,7 @@ describe("Runner tactical plan modules", () => {
           reachable: true,
           marginalValue: 20,
           evidenceCode: "mixed_exact_rd_routes",
-          sourceDefinitionIds: ["onr_v1_050_r-and-d-protocol-files"],
+          sourceDefinitionIds: [262],
           runActionIds: ["run-rd-basic"],
         },
       ],
@@ -359,7 +359,7 @@ describe("Runner tactical plan modules", () => {
       actionType: "play_event",
       semanticActionType: "play.runner_event",
       sourceKind: "card" as const,
-      sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+      sourceDefinitionId: 164,
       costProfile: {
         clickCost: 1,
         creditCost: 2,
@@ -456,7 +456,7 @@ describe("Runner tactical plan modules", () => {
       actionType: "play_event",
       semanticActionType: "play.runner_event",
       sourceKind: "card" as const,
-      sourceDefinitionId: "onr_proteus_105_demolition-run",
+      sourceDefinitionId: 163,
       costProfile: {
         clickCost: 1,
         creditCost: 4,
@@ -531,7 +531,7 @@ describe("Runner tactical plan modules", () => {
       actionType: "play_event",
       semanticActionType: "play.runner_event",
       sourceKind: "card" as const,
-      sourceDefinitionId: "onr_v1_094_inside-job",
+      sourceDefinitionId: 306,
       costProfile: {
         clickCost: 1,
         creditCost: 2,
@@ -690,7 +690,7 @@ describe("Runner tactical plan modules", () => {
   it("keeps source binding on the concrete central payoff-development phase", () => {
     const develop = cardAction(
       "install-rd-protocol",
-      "onr_v1_050_r-and-d-protocol-files",
+      262,
     );
     const module = tacticalModule("runner.pressure_central");
     const runnerContext = context([develop], {
@@ -704,7 +704,7 @@ describe("Runner tactical plan modules", () => {
           reachable: true,
           marginalValue: 20,
           evidenceCode: "develop_rd_payoff",
-          sourceDefinitionIds: ["onr_v1_050_r-and-d-protocol-files"],
+          sourceDefinitionIds: [262],
           preparationActionIds: ["install-rd-protocol"],
           routePreparation: "develop_payoff",
         },
@@ -721,7 +721,7 @@ describe("Runner tactical plan modules", () => {
     );
 
     expect(materialized.step.capability.requiredSourceDefinitionIds).toEqual([
-      "onr_v1_050_r-and-d-protocol-files",
+      262,
     ]);
     expect(
       bindBestCurrentPlanRoute({
@@ -1376,7 +1376,7 @@ describe("Runner tactical plan modules", () => {
     const trash = {
       ...candidate("trash-krumz", "trash_accessed_card", "access.trash_card"),
       sourceKind: "card" as const,
-      sourceDefinitionId: "onr_v1_330_krumz",
+      sourceDefinitionId: 542,
       costProfile: {
         costKnownStatus: "known" as const,
         creditCost: 2,
@@ -1401,7 +1401,7 @@ describe("Runner tactical plan modules", () => {
           accessCommitment: {
             payoff: "trash_affordable",
             intendedAction: "trash",
-            knownTargetDefinitionIds: ["onr_v1_330_krumz"],
+            knownTargetDefinitionIds: [542],
             trashBudget: 2,
             evidenceCode: "central_memory_payoff:trash_affordable",
           },
@@ -1604,7 +1604,7 @@ function run(actionId: string, serverId: string): ActionSemanticCandidate {
 
 function cardAction(
   actionId: string,
-  definitionId: string,
+  definitionId: number,
 ): ActionSemanticCandidate {
   return {
     ...candidate(actionId, "install_card", "install.card"),

@@ -39,20 +39,20 @@ import {
   toRunnerTurnFromCorpMain,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 
-const IRT = "onr_classic_019_indiscriminate-response-team";
-const LONDON_CITY_GRID = "onr_classic_020_london-city-grid";
-const SATELLITE_MONITORS = "onr_classic_021_satellite-monitors";
-const SELF_DESTRUCT = "onr_classic_022_self-destruct";
-const SHOCK_TREATMENT = "onr_classic_023_shock-treatment";
-const STERDROID = "onr_classic_024_sterdroid";
-const STRATEGIC_PLANNING_GROUP = "onr_classic_025_strategic-planning-group";
-const CORPORATE_SHUFFLE = "onr_classic_017_corporate-shuffle";
-const DAY_SHIFT = "onr_v1_288_day-shift";
-const UNLISTED_RESEARCH_LAB = "onr_classic_003_unlisted-research-lab";
-const EMPLOYEE_EMPOWERMENT = "onr_v1_199_employee-empowerment";
-const SKIVVISS = "onr_v1_064_skivviss";
-const STREET_ENFORCER = "onr_classic_026_street-enforcer";
-const FALL_GUY = "onr_v1_161_fall-guy";
+const IRT = 23;
+const LONDON_CITY_GRID = 24;
+const SATELLITE_MONITORS = 25;
+const SELF_DESTRUCT = 26;
+const SHOCK_TREATMENT = 27;
+const STERDROID = 28;
+const STRATEGIC_PLANNING_GROUP = 29;
+const CORPORATE_SHUFFLE = 21;
+const DAY_SHIFT = 500;
+const UNLISTED_RESEARCH_LAB = 7;
+const EMPLOYEE_EMPOWERMENT = 411;
+const SKIVVISS = 276;
+const STREET_ENFORCER = 30;
+const FALL_GUY = 373;
 
 const CLASSIC_08_IDS = [
   IRT,
@@ -69,15 +69,15 @@ const CLASSIC_08_CORP_DECK: DeckDefinition = {
   id: "classic_08_corp_assets_upgrades_smoke_corp",
   name: "Classic 08 Corp Assets Upgrades Smoke Corp",
   side: "corp",
-  identity: "corp_identity_001",
+  identity: 3,
   cards: [
-    { id: "simple_agenda", quantity: 8 },
-    { id: "simple_barrier_ice", quantity: 2 },
-    { id: "onr_v1_237_data-wall", quantity: 2 },
-    { id: "onr_v1_232_crystal-wall", quantity: 2 },
-    { id: "simple_upgrade", quantity: 2 },
-    { id: "simple_economy_asset", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 12 },
+    { id: 588, quantity: 8 },
+    { id: 589, quantity: 2 },
+    { id: 449, quantity: 2 },
+    { id: 444, quantity: 2 },
+    { id: 606, quantity: 2 },
+    { id: 594, quantity: 2 },
+    { id: 596, quantity: 12 },
   ],
 };
 
@@ -85,15 +85,15 @@ const CLASSIC_08_RUNNER_DECK: DeckDefinition = {
   id: "classic_08_corp_assets_upgrades_smoke_runner",
   name: "Classic 08 Corp Assets Upgrades Smoke Runner",
   side: "runner",
-  identity: "runner_identity_001",
+  identity: 587,
   cards: [
-    { id: "simple_setup_hardware", quantity: 3 },
-    { id: "simple_fracter", quantity: 3 },
-    { id: "simple_decoder", quantity: 2 },
-    { id: "onr_v1_021_dwarf", quantity: 2 },
-    { id: "onr_v1_031_hammer", quantity: 2 },
-    { id: "simple_economy_event", quantity: 12 },
-    { id: "simple_run_event", quantity: 8 },
+    { id: 602, quantity: 3 },
+    { id: 597, quantity: 3 },
+    { id: 591, quantity: 2 },
+    { id: 233, quantity: 2 },
+    { id: 243, quantity: 2 },
+    { id: 595, quantity: 12 },
+    { id: 600, quantity: 8 },
   ],
 };
 
@@ -147,7 +147,7 @@ function corpMainClassic08FallGuyGame(seed: string): GameState {
 
 function addScoredCorpAgendaForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   suffix: string,
 ): CardInstanceId {
   const cardId = addCorpCardToHqForTest(state, definitionId, suffix);
@@ -309,13 +309,13 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     addRezzedCorpRootForTest(state, LONDON_CITY_GRID, "remote_1", "london");
     const dataWallId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_237_data-wall",
+      449,
       "remote_1",
       "wall",
     );
     const hammerId = addInstalledRunnerProgramForTest(
       state,
-      "onr_v1_031_hammer",
+      243,
       "hammer",
     );
     state.cardInstances[hammerId] = {
@@ -366,13 +366,13 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     addRezzedCorpRootForTest(state, LONDON_CITY_GRID, "remote_1", "london");
     const laserWireId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_253_laser-wire",
+      465,
       "remote_1",
       "laser_wire",
     );
     const pileDriverId = addInstalledRunnerProgramForTest(
       state,
-      "onr_v1_047_pile-driver",
+      259,
       "pile_driver",
     );
     state.cardInstances[pileDriverId] = {
@@ -551,7 +551,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     );
     const otherRootId = addRezzedCorpRootForTest(
       state,
-      "simple_upgrade",
+      606,
       "remote_1",
       "other",
     );
@@ -593,12 +593,12 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     state.runner.tags = 4;
     const hardwareId = installRunnerHardwareForTest(
       state,
-      "simple_setup_hardware",
+      602,
     );
-    const firstProgramId = installRunnerProgramForTest(state, "simple_fracter");
+    const firstProgramId = installRunnerProgramForTest(state, 597);
     const secondProgramId = installRunnerProgramForTest(
       state,
-      "simple_decoder",
+      591,
     );
     addRezzedCorpRootForTest(state, SHOCK_TREATMENT, "remote_1", "shock");
 
@@ -629,12 +629,12 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
   it("lets the Corp choose exactly two Shock Treatment program targets when more are installed", () => {
     let state = toRunnerClassic08Game("classic-08-shock-treatment-choice");
     state.runner.tags = 4;
-    const firstProgramId = installRunnerProgramForTest(state, "simple_fracter");
+    const firstProgramId = installRunnerProgramForTest(state, 597);
     const secondProgramId = installRunnerProgramForTest(
       state,
-      "simple_decoder",
+      591,
     );
-    const thirdProgramId = moveRunnerCardCopyToGrip(state, "simple_fracter");
+    const thirdProgramId = moveRunnerCardCopyToGrip(state, 597);
     state.runner.grip = state.runner.grip.filter(
       (cardId) => cardId !== thirdProgramId,
     );
@@ -688,7 +688,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     );
     const iceId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_232_crystal-wall",
+      444,
       "rd",
       "crystal",
     );
@@ -719,7 +719,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
       cardDefinitionId: STERDROID,
-      targetCardDefinitionId: "onr_v1_232_crystal-wall",
+      targetCardDefinitionId: 444,
       iceStrengthBonusApplied: expect.any(Number),
     });
 
@@ -740,8 +740,8 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       "remote_1",
       "strategic",
     );
-    const baseDrawId = putCorpCardOnTopOfRd(state, "simple_agenda");
-    const extraDrawId = putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const baseDrawId = putCorpCardOnTopOfRd(state, 588);
+    const extraDrawId = putCorpCardOnTopOfRd(state, 596);
     const hqBefore = state.corp.hq.length;
     const rdBefore = state.corp.rd.length;
     const initial = structuredClone(state);
@@ -847,10 +847,10 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       "strategic",
     );
     state = toRunnerTurnFromCorpMain(state);
-    const firstDrawId = putCorpCardOnTopOfRd(state, "simple_agenda");
+    const firstDrawId = putCorpCardOnTopOfRd(state, 588);
     const secondDrawId = putCorpCardOnTopOfRd(
       state,
-      "simple_economy_operation",
+      596,
     );
     state = apply(state, "runner", (action) => action.type === "end_turn");
 
@@ -942,12 +942,12 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     ).toBeUndefined();
     state = toRunnerTurnFromCorpMain(state);
     for (const definitionId of [
-      "simple_agenda",
-      "simple_barrier_ice",
-      "onr_v1_237_data-wall",
-      "onr_v1_232_crystal-wall",
-      "simple_upgrade",
-      "simple_economy_asset",
+      588,
+      589,
+      449,
+      444,
+      606,
+      594,
     ])
       putCorpCardOnTopOfRd(state, definitionId);
     const hqBeforeMandatoryDraw = state.corp.hq.length;
@@ -1070,9 +1070,9 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     );
     const hqBefore = state.corp.hq.length;
     const drawnIds = [
-      putCorpCardOnTopOfRd(state, "simple_agenda"),
-      putCorpCardOnTopOfRd(state, "simple_economy_operation"),
-      putCorpCardOnTopOfRd(state, "simple_barrier_ice"),
+      putCorpCardOnTopOfRd(state, 588),
+      putCorpCardOnTopOfRd(state, 596),
+      putCorpCardOnTopOfRd(state, 589),
     ];
 
     drawCorpCards(state, 3);
@@ -1108,13 +1108,13 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
   it.each([
     {
       title: "Annual Reviews",
-      definitionId: "onr_v1_282_annual-reviews",
+      definitionId: 494,
       sourceZone: "hq",
       drawCount: 3,
     },
     {
       title: "Night Shift",
-      definitionId: "onr_v1_295_night-shift",
+      definitionId: 507,
       sourceZone: "hq",
       drawCount: 1,
     },
@@ -1126,13 +1126,13 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     },
     {
       title: "ESA Contract",
-      definitionId: "onr_v1_321_esa-contract",
+      definitionId: 533,
       sourceZone: "serverRoot",
       drawCount: 2,
     },
     {
       title: "Euromarket Consortium",
-      definitionId: "onr_v1_322_euromarket-consortium",
+      definitionId: 534,
       sourceZone: "serverRoot",
       drawCount: 2,
     },
@@ -1222,12 +1222,12 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       "corporate_shuffle",
     );
     for (const definitionId of [
-      "simple_agenda",
-      "simple_barrier_ice",
-      "onr_v1_237_data-wall",
-      "onr_v1_232_crystal-wall",
-      "simple_upgrade",
-      "simple_economy_asset",
+      588,
+      589,
+      449,
+      444,
+      606,
+      594,
     ])
       putCorpCardOnTopOfRd(state, definitionId);
     const hqBeforePlay = state.corp.hq.length;
@@ -1274,9 +1274,9 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       "spg_effect_commands",
     );
     for (const definitionId of [
-      "simple_agenda",
-      "simple_barrier_ice",
-      "simple_upgrade",
+      588,
+      589,
+      606,
     ])
       putCorpCardOnTopOfRd(state, definitionId);
     const creditsBefore = state.corp.credits;
@@ -1319,9 +1319,9 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     );
     const operationId = addCorpCardToHqForTest(state, DAY_SHIFT, "day_shift");
     for (const definitionId of [
-      "simple_agenda",
-      "simple_barrier_ice",
-      "simple_upgrade",
+      588,
+      589,
+      606,
     ])
       putCorpCardOnTopOfRd(state, definitionId);
     const hqBeforePlay = state.corp.hq.length;
@@ -1368,7 +1368,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       "remote_1",
       "strategic",
     );
-    const onlyCardId = putCorpCardOnTopOfRd(state, "simple_agenda");
+    const onlyCardId = putCorpCardOnTopOfRd(state, 588);
     const movedToArchives = state.corp.rd.filter(
       (cardId) => cardId !== onlyCardId,
     );
@@ -1398,9 +1398,9 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     );
     addRezzedCorpRootForTest(state, IRT, "remote_1", "irt");
     emptyRunnerGripForTest(state);
-    moveRunnerCardCopyToGrip(state, "simple_economy_event");
-    moveRunnerCardCopyToGrip(state, "simple_run_event");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    moveRunnerCardCopyToGrip(state, 595);
+    moveRunnerCardCopyToGrip(state, 600);
+    putCorpCardOnTopOfRd(state, 596);
     const gripBefore = state.runner.grip.length;
     const randomBefore = state.randomDrawRecords.length;
 

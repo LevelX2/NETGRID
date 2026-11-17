@@ -74,7 +74,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
 
     input.playerView.opponent.rig = [
       visibleCard("visible-runner-program", "runner", "program", {
-        definitionId: "onr_v1_011_cloak",
+        definitionId: 223,
         title: "Cloak",
       }),
     ];
@@ -313,7 +313,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
         [],
         [
           visibleCard("existing-remote-asset", "corp", "asset", {
-            definitionId: "onr_v1_309_bbs-whispering-campaign",
+            definitionId: 521,
             title: "BBS Whispering Campaign",
           }),
         ],
@@ -368,7 +368,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
         "remote_1",
         [
           visibleCard("remote-ice", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             rezzed: true,
           }),
@@ -398,7 +398,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
         "remote_1",
         [
           visibleCard("remote-ice", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             rezzed: true,
           }),
@@ -423,7 +423,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
   it("keeps TRAP! exclusively in the Ambush plan instead of also routing it through a generic punish campaign [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = visibleCard("trap", "corp", "asset", {
-      definitionId: "onr_v1_345_trap",
+      definitionId: 557,
       title: "TRAP!",
     });
     const installProtected = installAmbush(
@@ -445,7 +445,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
         "remote_1",
         [
           visibleCard("remote-ice", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             rezzed: true,
           }),
@@ -565,7 +565,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     input.actionNumber = 2;
     input.playerView.own.gripOrHq = [];
     const scoringAgenda = visibleCard("scoring-agenda", "corp", "agenda", {
-      definitionId: "onr_v1_189_artificial-security-directors",
+      definitionId: 401,
       title: "Artificial Security Directors",
       advancementCounters: 1,
       advancementRequirement: 3,
@@ -683,7 +683,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
         "remote_1",
         [
           visibleCard("remote-ice", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             rezzed: true,
           }),
@@ -734,7 +734,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     resetResidentPlanPortfolioMemory();
     const trap = vacantSoulkiller();
     const lesley = visibleCard("lesley-major", "corp", "upgrade", {
-      definitionId: "onr_proteus_062_lesley-major",
+      definitionId: 120,
       title: "Lesley Major",
     });
     const installTrap = installAmbush(
@@ -852,21 +852,21 @@ describe("plan-first Corp ambush preplanning contract", () => {
 
 function vacantSoulkiller(): VisibleCard {
   return visibleCard("vacant-soulkiller", "corp", "asset", {
-    definitionId: "onr_v1_346_vacant-soulkiller",
+    definitionId: 558,
     title: "Vacant Soulkiller",
   });
 }
 
 function experimentalAi(): VisibleCard {
   return visibleCard("experimental-ai", "corp", "asset", {
-    definitionId: "onr_v1_323_experimental-ai",
+    definitionId: 535,
     title: "Experimental AI",
   });
 }
 
 function fetalAi(): VisibleCard {
   return visibleCard("fetal-ai", "corp", "agenda", {
-    definitionId: "onr_proteus_004_fetal-ai",
+    definitionId: 62,
     title: "Fetal AI",
     advancementCounters: 0,
     advancementRequirement: 5,

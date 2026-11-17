@@ -329,7 +329,7 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
           kind: "lose_credits",
           side: "corp",
           amount: 2,
-          sourceDefinitionId: "onr_proteus_097_taxman",
+          sourceDefinitionId: 155,
         }),
         expect.objectContaining({
           kind: "counter_change",
@@ -355,7 +355,7 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
       state.runner.rig.programs.push(sourceCardId);
       state.cardInstances[sourceCardId] = {
         instanceId: sourceCardId,
-        definitionId: "onr_proteus_099_viral-pipeline" as CardDefinitionId,
+        definitionId: 157 as CardDefinitionId,
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "rig" },
@@ -441,7 +441,7 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
             kind: "counter_change",
             counterType: "pipe",
             amount: 1,
-            sourceDefinitionId: "onr_proteus_099_viral-pipeline",
+            sourceDefinitionId: 157,
           }),
         ]),
       );
@@ -485,7 +485,7 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
         expect.objectContaining({
           counterType: "scaldan",
           dieSize: 6,
-          sourceDefinitionId: "onr_proteus_094_scaldan",
+          sourceDefinitionId: 152,
         }),
       ]),
     );

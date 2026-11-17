@@ -26,7 +26,7 @@ it("compares the whole known remainder for carrying and ordinary breakers under 
   const decision = chooseAiAction(input);
   const action = input.legalActions.find(a => a.actionId === decision.actionId)!;
   expect(action.type).toBe("break_subroutine");
-  expect(action.source).toBe("runner_onr_v1_066_snowball_1");
+  expect(action.source).toBe("runner_278_1");
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.rootPlanInstanceId).toBe("plan:runner.pressure_central:central%3Ahq");
   expect(plan.leafExecutorInstanceId).toBe("plan:runner.convert_run_window:run%3Arun_233");
@@ -61,7 +61,7 @@ it("does not invent a whole-path price for an explicitly unknown inner-ICE compa
   const payment = completeEncounterBreakerPayment(input, action)!;
   expect(pureEndRunEncounterEconomics(input, payment)).toBeUndefined();
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toContain("break_subroutine.runner_onr_v1_039_krash_2");
+  expect(decision.actionId).toContain("break_subroutine.runner_251_2");
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
 });
 
@@ -72,6 +72,6 @@ it("retains the ordinary breaker when the specialist is absent in an explicit co
   input.playerView.own.rig = input.playerView.own.rig!.filter(c => !c.instanceId.includes("snowball"));
   input.legalActions = input.legalActions.filter(a => !a.source?.includes("snowball"));
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toContain("break_subroutine.runner_onr_v1_039_krash_2");
+  expect(decision.actionId).toContain("break_subroutine.runner_251_2");
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
 });

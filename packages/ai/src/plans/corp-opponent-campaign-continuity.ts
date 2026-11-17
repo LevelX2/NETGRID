@@ -644,7 +644,7 @@ function outcomesForEvent(
     !actionType.startsWith("decline_") &&
     (actionType.includes("trash") ||
       typeof payload.trashedCount === "number" ||
-      typeof payload.trashedCardDefinitionId === "string");
+      typeof payload.trashedCardDefinitionId === "number");
   const exactCampaignTargetTrashed =
     targetCardInstanceId !== undefined &&
     campaign.origin.targetCardInstanceId !== undefined &&

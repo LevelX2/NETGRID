@@ -101,8 +101,8 @@ it("converts the original free winning access without trashing and running Archi
 });
 
 it.each([
-  "onr_v1_207_netwatch-operations-office",
-  "onr_v1_205_main-office-relocation",
+  419,
+  417,
 ])(
   "keeps the free agenda gain over virus trash without a terminal or card-name bonus: %s",
   (definitionId) => {

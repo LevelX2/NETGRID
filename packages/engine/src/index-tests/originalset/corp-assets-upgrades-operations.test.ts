@@ -196,7 +196,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const rockerboyId = moveCorpCardToHq(
       state,
-      "onr_v1_337_rockerboy-promotion",
+      549,
     );
     state = apply(
       state,
@@ -212,7 +212,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_337_rockerboy-promotion",
+        sourceDefinition(state, action) === 549,
     );
 
     const ability = mustAction(
@@ -273,7 +273,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     expect(cardCounterAmount(state, rockerboyId, "bit")).toBe(12);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
-      cardDefinitionId: "onr_v1_337_rockerboy-promotion",
+      cardDefinitionId: 549,
       cardImplementationAbility: "activated",
       hostedCreditsTaken: 3,
       hostedCreditsAfter: 12,
@@ -283,7 +283,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
           kind: "take_hosted_credits",
           amount: 3,
           remainingCounters: 12,
-          sourceDefinitionId: "onr_v1_337_rockerboy-promotion",
+          sourceDefinitionId: 549,
         }),
       ],
     });
@@ -299,16 +299,16 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     let state = v199CardReleaseGame("spotcheck-chester-server-scope");
     state.corp.credits = 20;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const chesterId = putCorpRootInRemote(state, "onr_v1_352_chester-mix");
+    const chesterId = putCorpRootInRemote(state, 564);
     state.cardInstances[chesterId] = {
       ...state.cardInstances[chesterId]!,
       faceup: true,
       rezzed: true,
     };
-    putCorpIceOnServer(state, "remote_1", "onr_v1_279_wall-of-static");
-    putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
-    const discountedIceId = moveCorpCardToHq(state, "simple_code_gate_ice");
-    const fullCostIceId = moveCorpCardCopyToHq(state, "simple_code_gate_ice");
+    putCorpIceOnServer(state, "remote_1", 491);
+    putCorpIceOnServer(state, "rd", 491);
+    const discountedIceId = moveCorpCardToHq(state, 590);
+    const fullCostIceId = moveCorpCardCopyToHq(state, 590);
 
     const discounted = mustAction(
       state,
@@ -342,7 +342,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     accessState.runner.credits = 10;
     const namatokiId = putCorpRootInRemote(
       accessState,
-      "onr_v1_361_namatoki-plaza",
+      573,
     );
     accessState.cardInstances[namatokiId] = {
       ...accessState.cardInstances[namatokiId]!,
@@ -364,7 +364,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     );
     expect(accessState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "onr_v1_361_namatoki-plaza",
+      cardDefinitionId: 573,
     });
     expect(
       JSON.stringify(accessState.eventLog.at(-1)?.publicPayload),
@@ -405,7 +405,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     state.corp.credits = 20;
     const namatokiId = addCorpCardToHqForTest(
       state,
-      "onr_v1_361_namatoki-plaza",
+      573,
       "namatoki_capacity",
     );
     const namatokiInstall = mustAction(
@@ -434,7 +434,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
 
     const agendaId = addCorpCardToHqForTest(
       state,
-      "simple_agenda",
+      588,
       "namatoki_agenda",
     );
     state = apply(
@@ -448,7 +448,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     );
     const assetId = addCorpCardToHqForTest(
       state,
-      "simple_economy_asset",
+      594,
       "namatoki_asset",
     );
     const assetInstall = mustAction(
@@ -540,7 +540,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
         expect.objectContaining({
           kind: "trash_card",
           reason: "fort_capacity_exceeded",
-          sourceDefinitionId: "onr_v1_361_namatoki-plaza",
+          sourceDefinitionId: 573,
         }),
       ],
     });
@@ -555,8 +555,8 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
   it("resolves migrated Chimera access without legacy daemon choices", () => {
     let state = toRunnerTurn(v199CardReleaseGame("spotcheck-chimera-source"));
     state.runner.credits = 20;
-    const daemonId = installRunnerProgramForTest(state, "onr_v1_001_afreet");
-    const chimeraId = putCorpRootInRemote(state, "onr_v1_353_chimera");
+    const daemonId = installRunnerProgramForTest(state, 213);
+    const chimeraId = putCorpRootInRemote(state, 565);
     state.cardInstances[chimeraId] = {
       ...state.cardInstances[chimeraId]!,
       faceup: true,
@@ -603,7 +603,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     expect(state.pendingChoice).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      trashedCardDefinitionId: "onr_v1_001_afreet",
+      trashedCardDefinitionId: 213,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
@@ -627,15 +627,15 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     state.corp.credits = 20;
     state.corp.clicks = 10;
     state.corp.maxHandSize = 100;
-    moveCorpCardToHq(state, "onr_v1_295_night-shift");
-    moveCorpCardToHq(state, "onr_v1_297_overtime-incentives");
+    moveCorpCardToHq(state, 507);
+    moveCorpCardToHq(state, 509);
 
     const night = mustAction(
       state,
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_295_night-shift",
+        sourceDefinition(state, action) === 507,
     );
     const stale = applyAction(state, {
       matchId: state.matchId,
@@ -659,7 +659,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     expect(state.corp.credits).toBe(creditsBeforeNight + 2);
     expect(state.corp.hq.length).toBe(hqBeforeNight);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_295_night-shift",
+      cardDefinitionId: 507,
       gainedCredits: 2,
       drawnCards: 1,
       corpCreditsAfter: state.corp.credits,
@@ -669,14 +669,14 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
           side: "corp",
           amount: 2,
           reason: "card_resolver",
-          sourceDefinitionId: "onr_v1_295_night-shift",
+          sourceDefinitionId: 507,
         }),
         expect.objectContaining({
           kind: "draw_cards",
           side: "corp",
           amount: 1,
           reason: "card_resolver",
-          sourceDefinitionId: "onr_v1_295_night-shift",
+          sourceDefinitionId: 507,
         }),
       ],
     });
@@ -690,11 +690,11 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_297_overtime-incentives",
+        sourceDefinition(state, action) === 509,
     );
     expect(state.corp.clicks).toBe(clicksBeforeOvertime + 1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_297_overtime-incentives",
+      cardDefinitionId: 509,
       gainedActions: 2,
       corpClicksAfter: state.corp.clicks,
     });
@@ -710,11 +710,11 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       "corp",
       (action) => action.type === "mandatory_draw",
     );
-    const trojanId = moveCorpCardToHq(trojan, "onr_v1_306_trojan-horse");
+    const trojanId = moveCorpCardToHq(trojan, 518);
     keepOnlyCorpHqCard(trojan, trojanId);
     trojan.corp.credits = 8;
     trojan = apply(trojan, "corp", (action) => action.type === "end_turn");
-    moveCorpCardToArchives(trojan, "onr_v1_220_tycho-extension");
+    moveCorpCardToArchives(trojan, 432);
     trojan = apply(
       trojan,
       "runner",
@@ -733,7 +733,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       "corp",
       (action) => action.type === "mandatory_draw",
     );
-    const activeTrojanId = moveCorpCardToHq(trojan, "onr_v1_306_trojan-horse");
+    const activeTrojanId = moveCorpCardToHq(trojan, 518);
     keepOnlyCorpHqCard(trojan, activeTrojanId);
     trojan.corp.credits = 8;
     const trojanInitial = structuredClone(trojan);
@@ -744,11 +744,11 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(trojan, action) === "onr_v1_306_trojan-horse",
+        sourceDefinition(trojan, action) === 518,
     );
     expect(trojan.runner.tags).toBe(tagsBefore + 1);
     expect(trojan.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_306_trojan-horse",
+      cardDefinitionId: 518,
       tagsAdded: 1,
       runnerTagsAfter: trojan.runner.tags,
     });
@@ -771,7 +771,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     );
     trace.corp.credits = 20;
     trace.runner.credits = 10;
-    const bloodCatId = moveCorpCardToHq(trace, "onr_v1_310_blood-cat");
+    const bloodCatId = moveCorpCardToHq(trace, 522);
     trace = apply(
       trace,
       "corp",
@@ -783,7 +783,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(trace, action) === "onr_v1_310_blood-cat",
+        sourceDefinition(trace, action) === 522,
     );
     const traceInitial = structuredClone(trace);
     const traceReplayStart = trace.eventLog.length;
@@ -795,7 +795,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
         action.payload?.cardId === bloodCatId,
     );
     expect(trace.trace).toMatchObject({
-      sourceDefinitionId: "onr_v1_310_blood-cat",
+      sourceDefinitionId: 522,
       traceLimit: 5,
     });
     trace = applyChoice(trace, "corp", "bid_1");
@@ -814,9 +814,9 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
           id: "spotcheck_cowboy_runner",
           name: "Spotcheck Cowboy Runner",
           cards: [
-            { id: "onr_v1_158_danshis-second-id", quantity: 1 },
+            { id: 370, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.assetNodeEffects.runner.cards.filter(
-              (card) => card.id !== "onr_v1_158_danshis-second-id",
+              (card) => card.id !== 370,
             ),
           ],
         },
@@ -830,9 +830,9 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     cowboy.runner.credits = 20;
     const corpTargetId = putCorpRootInRemote(
       cowboy,
-      "onr_v1_309_bbs-whispering-campaign",
+      521,
     );
-    const cowboyId = moveCorpCardToHq(cowboy, "onr_v1_316_cowboy-sysop");
+    const cowboyId = moveCorpCardToHq(cowboy, 528);
     cowboy = apply(
       cowboy,
       "corp",
@@ -844,7 +844,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(cowboy, action) === "onr_v1_316_cowboy-sysop",
+        sourceDefinition(cowboy, action) === 528,
     );
     const cowboyAction = mustAction(
       cowboy,
@@ -884,8 +884,8 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     });
 
     for (const definitionId of [
-      "onr_v1_344_spinn-public-relations",
-      "onr_v1_321_esa-contract",
+      556,
+      533,
     ] as const) {
       let state = apply(
         createGameAfterSetup({
@@ -946,7 +946,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     department.runner.credits = 10;
     const departmentId = putCorpRootInRemote(
       department,
-      "onr_v1_318_department-of-truth-enhancement",
+      530,
     );
     department.cardInstances[departmentId] = {
       ...department.cardInstances[departmentId]!,
@@ -985,18 +985,18 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       (action) => action.type === "mandatory_draw",
     );
     encoder.corp.credits = 20;
-    putCorpRootInRemote(encoder, "onr_v1_320_encoder-inc");
+    putCorpRootInRemote(encoder, 532);
     encoder = apply(
       encoder,
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(encoder, action) === "onr_v1_320_encoder-inc",
+        sourceDefinition(encoder, action) === 532,
     );
     const codeGateId = putCorpIceOnServer(
       encoder,
       "rd",
-      "onr_v1_230_cortical-scanner",
+      442,
     );
     encoder = apply(encoder, "corp", (action) => action.type === "end_turn");
     encoder = apply(
@@ -1016,6 +1016,6 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     });
     expect(
       String(rezCodeGate.payload?.rezCostReductionSourceDefinitionIds),
-    ).toContain("onr_v1_320_encoder-inc");
+    ).toContain(532);
   });
 });

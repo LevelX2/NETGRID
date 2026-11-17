@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest";
 import { visibleRunnerExposureCreditValue } from "./visible-runner-action-economy";
 
 describe("visible Runner exposure income", () => {
-  const shortTerm = "onr_v1_178_short-term-contract";
-  const broker = "onr_v1_154_broker";
-  const filter = "onr_v1_045_newsgroup-filter";
+  const shortTerm = 390;
+  const broker = 366;
+  const filter = 257;
 
   it.each([
     [1, 3, 3],
@@ -36,7 +36,7 @@ describe("visible Runner exposure income", () => {
   });
 });
 
-function card(definitionId: string, bits?: number): VisibleCard {
+function card(definitionId: number, bits?: number): VisibleCard {
   return {
     instanceId: definitionId,
     definitionId,

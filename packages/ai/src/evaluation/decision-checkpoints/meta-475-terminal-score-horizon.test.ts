@@ -115,7 +115,7 @@ it.each([
     const theorem = scoreSignals(input).find(
       (signal) =>
         signal.serverId === "remote_1" &&
-        signal.agendaInstanceId === "corp_onr_classic_004_theorem-proof_1",
+        signal.agendaInstanceId === "corp_8_1",
     )!;
     expect(
       theorem.routeAssessment === "corp_shorter_terminal_score_route_dominates",
@@ -154,12 +154,12 @@ it.each([
       (signal) =>
         signal.serverId === "remote_1" &&
         signal.agendaInstanceId ===
-          "corp_onr_classic_003_unlisted-research-lab_3",
+          "corp_7_3",
     )!;
     const longer = signals.find(
       (signal) =>
         signal.serverId === "remote_1" &&
-        signal.agendaInstanceId === "corp_onr_classic_004_theorem-proof_1",
+        signal.agendaInstanceId === "corp_8_1",
     )!;
     // Re-enter the comparison before it marks the dominated route blocked.
     longer.feasible = true;
@@ -258,12 +258,12 @@ it.each([
   const shorter = signals.find(
     (s) =>
       s.serverId === "remote_1" &&
-      s.agendaInstanceId === "corp_onr_classic_003_unlisted-research-lab_1",
+      s.agendaInstanceId === "corp_7_1",
   )!;
   const longer = signals.find(
     (s) =>
       s.serverId === "remote_1" &&
-      s.agendaInstanceId === "corp_onr_classic_004_theorem-proof_2",
+      s.agendaInstanceId === "corp_8_2",
   )!;
   expect(shorter.protectionNeed!.baseline.knowledge).toBe("unknown");
   expect(longer.routeAssessment).toBe(

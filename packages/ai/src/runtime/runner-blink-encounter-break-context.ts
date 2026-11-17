@@ -19,7 +19,7 @@ export type RunnerRandomBreakOrDamageEncounterContextDependencies = {
     action: LegalAction,
   ) => string;
   randomBreakOrDamageRiskProfileForDefinitionId: (
-    definitionId: string | undefined,
+    definitionId: number | undefined,
   ) => RandomBreakOrDamageRiskProfile | undefined;
   breakSubroutineIndexesForAction: (action: LegalAction) => Set<number>;
   encounteredSubroutines: (

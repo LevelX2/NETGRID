@@ -18,7 +18,7 @@ export function finiteBankTurnLiquiditySupport(params: {
   input: AiDecisionInput;
   candidates: readonly ActionSemanticCandidate[];
   needs: readonly RunnerFundingNeedSignal[];
-  definitionId: string;
+  definitionId: number;
   bankId: string;
   cashOutActionIds: readonly string[];
   estimatedPayout: number;

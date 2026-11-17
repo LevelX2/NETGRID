@@ -59,7 +59,7 @@ function discovery(
   const candidate = candidates.find(
     (c) =>
       c.actionId ===
-      "corp.install_card.corp_onr_classic_005_baskerville_1.hq.corp_onr_classic_005_baskerville_1.2",
+      "corp.install_card.corp_9_1.hq.corp_9_1.2",
   )!;
   expect(candidate).toBeDefined();
   return { domain, candidate, candidates };
@@ -135,7 +135,7 @@ describe("pairing 475: local central rez reserve survives unknown global allocat
       const upgrade = candidates.find(
         (c) =>
           c.actionId ===
-          "corp.install_card.corp_onr_classic_020_london-city-grid_2.rd.corp_onr_classic_020_london-city-grid_2",
+          "corp.install_card.corp_24_2.rd.corp_24_2",
       )!;
       expect(upgrade.costProfile.creditCost).toBe(3);
       const placement = corpDefensiveUpgradePlacement(

@@ -19,7 +19,7 @@ export type FixedTaggedDamageOperation = {
 
 /** Simple canonical operation facts, independent of any current LegalAction. */
 export function fixedTagOperation(
-  definitionId: string,
+  definitionId: number,
 ): FixedTagOperation | undefined {
   const credits = corpFixedOperationPlayCredits(definitionId);
   if (credits === undefined) return undefined;
@@ -58,7 +58,7 @@ export function fixedTagOperation(
 }
 
 export function fixedTaggedDamageOperation(
-  definitionId: string,
+  definitionId: number,
 ): FixedTaggedDamageOperation | undefined {
   const credits = corpFixedOperationPlayCredits(definitionId);
   if (credits === undefined) return undefined;

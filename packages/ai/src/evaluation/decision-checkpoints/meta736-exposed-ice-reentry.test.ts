@@ -103,7 +103,7 @@ describe("SP-523: an immediate repeat after a lethal exposed ICE exit", () => {
       ...fixture.input,
       ...buildAiDecisionInputDto(fixture.input),
     };
-    const target = "corp_onr_v1_278_wall-of-ice_2";
+    const target = "corp_490_2";
     const remembered = portfolio.runnerExposeInformationMemory?.find(
       (record) => record.targetIceInstanceId === target,
     );

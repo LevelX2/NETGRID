@@ -63,7 +63,7 @@ describe("runner install main actions", () => {
         game,
         "loan-instance" as never,
         runnerCardDefinition(
-          "onr_v1_168_loan-from-chiba",
+          380,
           "resource",
           "Credit Exchange",
           0,

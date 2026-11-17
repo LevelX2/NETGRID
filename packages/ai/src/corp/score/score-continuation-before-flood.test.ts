@@ -45,7 +45,7 @@ describe("existing terminal score continuation before emergency agenda flood", (
       (i) =>
         i.moduleId === "corp.score_agenda" &&
         i.dedupeKey ===
-          "agenda:corp_onr_v1_188_ai-chief-financial-officer_1:remote_1",
+          "agenda:corp_400_1:remote_1",
     )!;
     expect(score.moduleState).toMatchObject({
       signal: {
@@ -74,13 +74,13 @@ describe("existing terminal score continuation before emergency agenda flood", (
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("corp_onr_v1_204_ice-transmutation_2"),
+        expect.stringContaining("corp_416_2"),
       ]),
     );
     const owner = residentPlanPortfolioSnapshot(cp.input)!.instances.find(
       (i) =>
         i.moduleId === "corp.score_agenda" &&
-        i.dedupeKey === "agenda:corp_onr_v1_204_ice-transmutation_2:remote_1",
+        i.dedupeKey === "agenda:corp_416_2:remote_1",
     )!;
     expect(owner.moduleState).toMatchObject({
       signal: {
@@ -118,7 +118,7 @@ describe("existing terminal score continuation before emergency agenda flood", (
     // its unprotected terminal steal. Nonterminal flood alternatives remain.
     expect(root.moduleState).toMatchObject({
       signal: {
-        projectId: "agenda:corp_onr_v1_220_tycho-extension_1:new_remote",
+        projectId: "agenda:corp_432_1:new_remote",
         phase: "install_agenda",
         feasible: false,
         routeAssessment: "corp_score_protection_required",
@@ -201,7 +201,7 @@ describe("existing terminal score continuation before emergency agenda flood", (
         // separate HQ-agenda escape project retains its real multi-turn need.
         expect(root.moduleState).toMatchObject({
           signal: {
-            projectId: "agenda:corp_onr_v1_204_ice-transmutation_3:remote_2",
+            projectId: "agenda:corp_416_3:remote_2",
             routeAssessment: "corp_deckout_agenda_flood_score_install",
             fundingMilestone: { deadline: "multi_turn", targetCredits: 5 },
           },

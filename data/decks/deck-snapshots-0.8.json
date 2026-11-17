@@ -12,34 +12,34 @@
       "deckVersion": "0.1.0",
       "name": "Corp Demo Deck 01 - Build & Score",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.5",
       "formatProfileId": "local-demo-v0.6",
       "rulesBaselineId": "rules-baseline-mvp-0.1",
       "immutable": true,
       "cards": [
         {
-          "cardId": "simple_agenda",
+          "cardId": 588,
           "quantity": 3
         },
         {
-          "cardId": "simple_barrier_ice",
+          "cardId": 589,
           "quantity": 3
         },
         {
-          "cardId": "simple_code_gate_ice",
+          "cardId": 590,
           "quantity": 3
         },
         {
-          "cardId": "simple_economy_asset",
+          "cardId": 594,
           "quantity": 3
         },
         {
-          "cardId": "simple_economy_operation",
+          "cardId": 596,
           "quantity": 3
         },
         {
-          "cardId": "simple_sentry_ice",
+          "cardId": 601,
           "quantity": 3
         }
       ],
@@ -54,13 +54,13 @@
       },
       "publicMetadata": {
         "side": "corp",
-        "identityCardId": "corp_identity_001",
+        "identityCardId": 3,
         "deckName": "Corp Demo Deck 01 - Build & Score",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:b07b9fbb"
+        "deckHash": "fnv1a:c28b3e81"
       },
-      "deckHash": "fnv1a:b07b9fbb"
+      "deckHash": "fnv1a:c28b3e81"
     },
     {
       "deckSnapshotId": "demo_corp_004_snapshot_v0_6",
@@ -68,58 +68,58 @@
       "deckVersion": "0.4.0",
       "name": "Corp Demo Deck 04 - Build, Tax & Tag",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.5",
       "formatProfileId": "local-demo-v0.6",
       "rulesBaselineId": "rules-baseline-mvp-0.4",
       "immutable": true,
       "cards": [
         {
-          "cardId": "simple_agenda",
+          "cardId": 588,
           "quantity": 2
         },
         {
-          "cardId": "simple_barrier_ice",
+          "cardId": 589,
           "quantity": 2
         },
         {
-          "cardId": "simple_code_gate_ice",
+          "cardId": 590,
           "quantity": 2
         },
         {
-          "cardId": "simple_draw_operation",
+          "cardId": 593,
           "quantity": 2
         },
         {
-          "cardId": "simple_economy_asset",
+          "cardId": 594,
           "quantity": 2
         },
         {
-          "cardId": "simple_economy_operation",
+          "cardId": 596,
           "quantity": 3
         },
         {
-          "cardId": "simple_priority_agenda",
+          "cardId": 599,
           "quantity": 1
         },
         {
-          "cardId": "simple_sentry_ice",
+          "cardId": 601,
           "quantity": 2
         },
         {
-          "cardId": "simple_tag_ice",
+          "cardId": 603,
           "quantity": 2
         },
         {
-          "cardId": "simple_tag_punishment_operation",
+          "cardId": 604,
           "quantity": 2
         },
         {
-          "cardId": "simple_taxing_barrier_ice",
+          "cardId": 605,
           "quantity": 2
         },
         {
-          "cardId": "simple_upgrade",
+          "cardId": 606,
           "quantity": 2
         }
       ],
@@ -134,13 +134,13 @@
       },
       "publicMetadata": {
         "side": "corp",
-        "identityCardId": "corp_identity_001",
+        "identityCardId": 3,
         "deckName": "Corp Demo Deck 04 - Build, Tax & Tag",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:54c7851f"
+        "deckHash": "fnv1a:f8ae8139"
       },
-      "deckHash": "fnv1a:54c7851f"
+      "deckHash": "fnv1a:f8ae8139"
     },
     {
       "deckSnapshotId": "demo_runner_001_snapshot_v0_6",
@@ -148,30 +148,30 @@
       "deckVersion": "0.1.0",
       "name": "Runner Demo Deck 01 - Run & Steal",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.5",
       "formatProfileId": "local-demo-v0.6",
       "rulesBaselineId": "rules-baseline-mvp-0.1",
       "immutable": true,
       "cards": [
         {
-          "cardId": "simple_decoder",
+          "cardId": 591,
           "quantity": 2
         },
         {
-          "cardId": "simple_economy_event",
+          "cardId": 595,
           "quantity": 3
         },
         {
-          "cardId": "simple_fracter",
+          "cardId": 597,
           "quantity": 2
         },
         {
-          "cardId": "simple_killer",
+          "cardId": 598,
           "quantity": 2
         },
         {
-          "cardId": "simple_run_event",
+          "cardId": 600,
           "quantity": 3
         }
       ],
@@ -186,13 +186,13 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "Runner Demo Deck 01 - Run & Steal",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:b4f61cd0"
+        "deckHash": "fnv1a:5f6bb935"
       },
-      "deckHash": "fnv1a:b4f61cd0"
+      "deckHash": "fnv1a:5f6bb935"
     },
     {
       "deckSnapshotId": "demo_runner_004_snapshot_v0_6",
@@ -200,42 +200,42 @@
       "deckVersion": "0.4.0",
       "name": "Runner Demo Deck 04 - Setup & Pressure",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.5",
       "formatProfileId": "local-demo-v0.6",
       "rulesBaselineId": "rules-baseline-mvp-0.4",
       "immutable": true,
       "cards": [
         {
-          "cardId": "efficient_fracter",
+          "cardId": 4,
           "quantity": 2
         },
         {
-          "cardId": "simple_decoder",
+          "cardId": 591,
           "quantity": 2
         },
         {
-          "cardId": "simple_draw_event",
+          "cardId": 592,
           "quantity": 3
         },
         {
-          "cardId": "simple_economy_event",
+          "cardId": 595,
           "quantity": 3
         },
         {
-          "cardId": "simple_fracter",
+          "cardId": 597,
           "quantity": 2
         },
         {
-          "cardId": "simple_killer",
+          "cardId": 598,
           "quantity": 2
         },
         {
-          "cardId": "simple_run_event",
+          "cardId": 600,
           "quantity": 3
         },
         {
-          "cardId": "simple_setup_hardware",
+          "cardId": 602,
           "quantity": 2
         }
       ],
@@ -250,13 +250,13 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "Runner Demo Deck 04 - Setup & Pressure",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:d3ad4e1c"
+        "deckHash": "fnv1a:8fcdd81b"
       },
-      "deckHash": "fnv1a:d3ad4e1c"
+      "deckHash": "fnv1a:8fcdd81b"
     },
     {
       "deckSnapshotId": "demo_runner_008_snapshot_v0_8",
@@ -264,70 +264,70 @@
       "deckVersion": "0.8.0",
       "name": "Runner Demo Deck 08 - Starter Pressure",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.8",
       "immutable": true,
       "cards": [
         {
-          "cardId": "efficient_fracter",
+          "cardId": 4,
           "quantity": 2
         },
         {
-          "cardId": "simple_decoder",
+          "cardId": 591,
           "quantity": 1
         },
         {
-          "cardId": "simple_draw_event",
+          "cardId": 592,
           "quantity": 2
         },
         {
-          "cardId": "simple_economy_event",
+          "cardId": 595,
           "quantity": 3
         },
         {
-          "cardId": "simple_fracter",
+          "cardId": 597,
           "quantity": 1
         },
         {
-          "cardId": "simple_killer",
+          "cardId": 598,
           "quantity": 1
         },
         {
-          "cardId": "simple_run_event",
+          "cardId": 600,
           "quantity": 2
         },
         {
-          "cardId": "simple_setup_hardware",
+          "cardId": 602,
           "quantity": 1
         },
         {
-          "cardId": "v08_adaptive_killer",
+          "cardId": 607,
           "quantity": 1
         },
         {
-          "cardId": "v08_burst_credit_event",
+          "cardId": 609,
           "quantity": 3
         },
         {
-          "cardId": "v08_deep_draw_event",
+          "cardId": 612,
           "quantity": 3
         },
         {
-          "cardId": "v08_memory_chip",
+          "cardId": 614,
           "quantity": 2
         },
         {
-          "cardId": "v08_overclock_run_event",
+          "cardId": 615,
           "quantity": 2
         },
         {
-          "cardId": "v08_precise_decoder",
+          "cardId": 616,
           "quantity": 1
         },
         {
-          "cardId": "v08_steady_fracter",
+          "cardId": 618,
           "quantity": 2
         }
       ],
@@ -342,13 +342,13 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "Runner Demo Deck 08 - Starter Pressure",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:8354f22c"
+        "deckHash": "fnv1a:dd26e868"
       },
-      "deckHash": "fnv1a:8354f22c"
+      "deckHash": "fnv1a:dd26e868"
     },
     {
       "deckSnapshotId": "demo_corp_008_snapshot_v0_8",
@@ -356,82 +356,82 @@
       "deckVersion": "0.8.0",
       "name": "Corp Demo Deck 08 - Starter Score Grid",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.8",
       "immutable": true,
       "cards": [
         {
-          "cardId": "simple_agenda",
+          "cardId": 588,
           "quantity": 1
         },
         {
-          "cardId": "simple_barrier_ice",
+          "cardId": 589,
           "quantity": 1
         },
         {
-          "cardId": "simple_code_gate_ice",
+          "cardId": 590,
           "quantity": 1
         },
         {
-          "cardId": "simple_draw_operation",
+          "cardId": 593,
           "quantity": 1
         },
         {
-          "cardId": "simple_economy_asset",
+          "cardId": 594,
           "quantity": 1
         },
         {
-          "cardId": "simple_economy_operation",
+          "cardId": 596,
           "quantity": 2
         },
         {
-          "cardId": "simple_priority_agenda",
+          "cardId": 599,
           "quantity": 1
         },
         {
-          "cardId": "simple_sentry_ice",
+          "cardId": 601,
           "quantity": 1
         },
         {
-          "cardId": "simple_tag_ice",
+          "cardId": 603,
           "quantity": 1
         },
         {
-          "cardId": "simple_taxing_barrier_ice",
+          "cardId": 605,
           "quantity": 1
         },
         {
-          "cardId": "simple_upgrade",
+          "cardId": 606,
           "quantity": 1
         },
         {
-          "cardId": "v08_archive_planning_operation",
+          "cardId": 608,
           "quantity": 2
         },
         {
-          "cardId": "v08_cashout_asset",
+          "cardId": 610,
           "quantity": 2
         },
         {
-          "cardId": "v08_credit_surge_operation",
+          "cardId": 611,
           "quantity": 3
         },
         {
-          "cardId": "v08_gate_ice",
+          "cardId": 613,
           "quantity": 2
         },
         {
-          "cardId": "v08_project_agenda",
+          "cardId": 617,
           "quantity": 1
         },
         {
-          "cardId": "v08_wall_ice",
+          "cardId": 619,
           "quantity": 2
         },
         {
-          "cardId": "v08_watchdog_ice",
+          "cardId": 620,
           "quantity": 2
         }
       ],
@@ -446,13 +446,13 @@
       },
       "publicMetadata": {
         "side": "corp",
-        "identityCardId": "corp_identity_001",
+        "identityCardId": 3,
         "deckName": "Corp Demo Deck 08 - Starter Score Grid",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:028a75f1"
+        "deckHash": "fnv1a:46b19d5c"
       },
-      "deckHash": "fnv1a:028a75f1"
+      "deckHash": "fnv1a:46b19d5c"
     },
     {
       "deckSnapshotId": "demo_runner_123_snapshot_v1_2_3",
@@ -460,38 +460,38 @@
       "deckVersion": "1.2.3-local",
       "name": "Runner Demo Deck 1.2.3 - Mechanic Unlock 1",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.94",
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_066_snowball",
+          "cardId": 278,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_074_worm",
+          "cardId": 286,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_081_custodial-position",
+          "cardId": 293,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_085_executive-wiretaps",
+          "cardId": 297,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_101_mit-west-tier",
+          "cardId": 313,
           "quantity": 2
         }
       ],
@@ -506,13 +506,13 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "Runner Demo Deck 1.2.3 - Mechanic Unlock 1",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:349726b4"
+        "deckHash": "fnv1a:6ce0beca"
       },
-      "deckHash": "fnv1a:349726b4"
+      "deckHash": "fnv1a:6ce0beca"
     },
     {
       "deckSnapshotId": "demo_corp_123_snapshot_v1_2_3",
@@ -520,46 +520,46 @@
       "deckVersion": "1.2.3-local",
       "name": "Corp Demo Deck 1.2.3 - Mechanic Unlock 1",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.94",
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_v1_203_hostile-takeover",
+          "cardId": 415,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_259_in-the-face",
+          "cardId": 471,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_297_overtime-incentives",
+          "cardId": 509,
           "quantity": 3
         },
         {
-          "cardId": "simple_economy_operation",
+          "cardId": 596,
           "quantity": 1
         }
       ],
@@ -574,13 +574,13 @@
       },
       "publicMetadata": {
         "side": "corp",
-        "identityCardId": "corp_identity_001",
+        "identityCardId": 3,
         "deckName": "Corp Demo Deck 1.2.3 - Mechanic Unlock 1",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:1c48dea7"
+        "deckHash": "fnv1a:38f53ef0"
       },
-      "deckHash": "fnv1a:1c48dea7"
+      "deckHash": "fnv1a:38f53ef0"
     },
     {
       "deckSnapshotId": "demo_runner_130_snapshot_v1_3_0",
@@ -588,7 +588,7 @@
       "deckVersion": "1.3.0-local",
       "name": "Runner Demo Deck 1.3.0 - Private Local Format",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
@@ -597,31 +597,31 @@
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_066_snowball",
+          "cardId": 278,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_074_worm",
+          "cardId": 286,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_081_custodial-position",
+          "cardId": 293,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_085_executive-wiretaps",
+          "cardId": 297,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_101_mit-west-tier",
+          "cardId": 313,
           "quantity": 2
         }
       ],
@@ -636,15 +636,15 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "Runner Demo Deck 1.3.0 - Private Local Format",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "cardPoolVersion": "private-local-onr-v1",
         "formatProfileId": "netgrid_private_local_v1",
         "formatProfileVersion": "1.3.0",
-        "deckHash": "fnv1a:55bfa3a5"
+        "deckHash": "fnv1a:58c6c28f"
       },
-      "deckHash": "fnv1a:55bfa3a5"
+      "deckHash": "fnv1a:58c6c28f"
     },
     {
       "deckSnapshotId": "demo_corp_130_snapshot_v1_3_0",
@@ -652,42 +652,42 @@
       "deckVersion": "1.3.0-local",
       "name": "Corp Demo Deck 1.3.0 - Private Local Format",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.94",
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_v1_203_hostile-takeover",
+          "cardId": 415,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_259_in-the-face",
+          "cardId": 471,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_297_overtime-incentives",
+          "cardId": 509,
           "quantity": 3
         }
       ],
@@ -702,13 +702,13 @@
       },
       "publicMetadata": {
         "side": "corp",
-        "identityCardId": "corp_identity_001",
+        "identityCardId": 3,
         "deckName": "Corp Demo Deck 1.3.0 - Private Local Format",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:187a16b4"
+        "deckHash": "fnv1a:a704f37a"
       },
-      "deckHash": "fnv1a:187a16b4"
+      "deckHash": "fnv1a:a704f37a"
     },
     {
       "deckSnapshotId": "king_of_the_road_runner_ai_snapshot_v1",
@@ -716,7 +716,7 @@
       "deckVersion": "king-of-the-road-ai-approval-v1",
       "name": "King of the Road",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
@@ -725,59 +725,59 @@
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_v1_006_black-dahlia",
+          "cardId": 218,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_016_cyfermaster",
+          "cardId": 228,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_040_loony-goon",
+          "cardId": 252,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_052_raffles",
+          "cardId": 264,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_054_raptor",
+          "cardId": 266,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_060_shaka",
+          "cardId": 272,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_070_tinweasel",
+          "cardId": 282,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_072_wild-card",
+          "cardId": 284,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_073_wizards-book",
+          "cardId": 285,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_145_wutech-mem-chip",
+          "cardId": 357,
           "quantity": 1
         }
       ],
@@ -792,15 +792,15 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "King of the Road",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "cardPoolVersion": "private-local-onr-v1",
         "formatProfileId": "netgrid_private_local_v1",
         "formatProfileVersion": "1.3.0",
-        "deckHash": "fnv1a:7c029283"
+        "deckHash": "fnv1a:8325ac5b"
       },
-      "deckHash": "fnv1a:7c029283"
+      "deckHash": "fnv1a:8325ac5b"
     },
     {
       "deckSnapshotId": "onr_origin_runner_ai_snapshot_v1",
@@ -808,7 +808,7 @@
       "deckVersion": "onr-origin-ai-v1",
       "name": "Runner Origins AI - Probe Pressure",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
@@ -817,51 +817,51 @@
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_v1_014_codecracker",
+          "cardId": 226,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_015_codeslinger",
+          "cardId": 227,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_066_snowball",
+          "cardId": 278,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_074_worm",
+          "cardId": 286,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_081_custodial-position",
+          "cardId": 293,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_085_executive-wiretaps",
+          "cardId": 297,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_101_mit-west-tier",
+          "cardId": 313,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_129_hq-interface",
+          "cardId": 341,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_145_wutech-mem-chip",
+          "cardId": 357,
           "quantity": 1
         }
       ],
@@ -876,15 +876,15 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "Runner Origins AI - Probe Pressure",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "cardPoolVersion": "private-local-onr-v1",
         "formatProfileId": "netgrid_private_local_v1",
         "formatProfileVersion": "1.3.0",
-        "deckHash": "fnv1a:25185df8"
+        "deckHash": "fnv1a:0037ec1a"
       },
-      "deckHash": "fnv1a:25185df8"
+      "deckHash": "fnv1a:0037ec1a"
     },
     {
       "deckSnapshotId": "onr_origin_corp_ai_snapshot_v1",
@@ -892,66 +892,66 @@
       "deckVersion": "onr-origin-ai-v1",
       "name": "Corp Origins AI - Tax & Punish",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.94",
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_v1_203_hostile-takeover",
+          "cardId": 415,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_214_project-babylon",
+          "cardId": 426,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_232_crystal-wall",
+          "cardId": 444,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_282_annual-reviews",
+          "cardId": 494,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_285_closed-accounts",
+          "cardId": 497,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_297_overtime-incentives",
+          "cardId": 509,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_301_punitive-counterstrike",
+          "cardId": 513,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_317_data-masons",
+          "cardId": 529,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_350_antiquated-interface-routines",
+          "cardId": 562,
           "quantity": 1
         }
       ],
@@ -966,13 +966,13 @@
       },
       "publicMetadata": {
         "side": "corp",
-        "identityCardId": "corp_identity_001",
+        "identityCardId": 3,
         "deckName": "Corp Origins AI - Tax & Punish",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:c75d3d9c"
+        "deckHash": "fnv1a:5fb92fd3"
       },
-      "deckHash": "fnv1a:c75d3d9c"
+      "deckHash": "fnv1a:5fb92fd3"
     },
     {
       "deckSnapshotId": "onr_origin_runner_ai_event_pressure_snapshot_v1",
@@ -980,7 +980,7 @@
       "deckVersion": "onr-origin-ai-v1-variant-02",
       "name": "Runner Origins AI - Event Pressure",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
@@ -989,51 +989,51 @@
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_066_snowball",
+          "cardId": 278,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_074_worm",
+          "cardId": 286,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_084_edited-shipping-manifests",
+          "cardId": 296,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_101_mit-west-tier",
+          "cardId": 313,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_129_hq-interface",
+          "cardId": 341,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_144_tycho-mem-chip",
+          "cardId": 356,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_145_wutech-mem-chip",
+          "cardId": 357,
           "quantity": 1
         }
       ],
@@ -1048,15 +1048,15 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "Runner Origins AI - Event Pressure",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "cardPoolVersion": "private-local-onr-v1",
         "formatProfileId": "netgrid_private_local_v1",
         "formatProfileVersion": "1.3.0",
-        "deckHash": "fnv1a:69fcf450"
+        "deckHash": "fnv1a:27979ffc"
       },
-      "deckHash": "fnv1a:69fcf450"
+      "deckHash": "fnv1a:27979ffc"
     },
     {
       "deckSnapshotId": "onr_origin_corp_ai_tag_ops_snapshot_v1",
@@ -1064,70 +1064,70 @@
       "deckVersion": "onr-origin-ai-v1-variant-02",
       "name": "Corp Origins AI - Tag Ops Control",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.94",
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_v1_203_hostile-takeover",
+          "cardId": 415,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_243_fetch-4-0-1",
+          "cardId": 455,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_249_hunter",
+          "cardId": 461,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_282_annual-reviews",
+          "cardId": 494,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_285_closed-accounts",
+          "cardId": 497,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_287_datapool-by-zetatech",
+          "cardId": 499,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_293_netwatch-credit-voucher",
+          "cardId": 505,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_297_overtime-incentives",
+          "cardId": 509,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_317_data-masons",
+          "cardId": 529,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_350_antiquated-interface-routines",
+          "cardId": 562,
           "quantity": 1
         }
       ],
@@ -1142,13 +1142,13 @@
       },
       "publicMetadata": {
         "side": "corp",
-        "identityCardId": "corp_identity_001",
+        "identityCardId": 3,
         "deckName": "Corp Origins AI - Tag Ops Control",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:36c22e6c"
+        "deckHash": "fnv1a:2777b868"
       },
-      "deckHash": "fnv1a:36c22e6c"
+      "deckHash": "fnv1a:2777b868"
     },
     {
       "deckSnapshotId": "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
@@ -1156,7 +1156,7 @@
       "deckVersion": "proteus-playtest-2026-05-25",
       "name": "Proteus Runner - HQ Virus & Derez",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
@@ -1165,155 +1165,155 @@
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_proteus_078_armageddon",
+          "cardId": 136,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_079_big-frackin-gun",
+          "cardId": 137,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_080_black-widow",
+          "cardId": 138,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_081_boring-bit",
+          "cardId": 139,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_083_corrosion",
+          "cardId": 141,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_084_crumble",
+          "cardId": 142,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_085_disintegrator",
+          "cardId": 143,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_086_enterprise-inc-shields",
+          "cardId": 144,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_089_garbage-in",
+          "cardId": 147,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_090_highlighter",
+          "cardId": 148,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_091_lockjaw",
+          "cardId": 149,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_095_skeleton-passkeys",
+          "cardId": 153,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_097_taxman",
+          "cardId": 155,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_098_vienna-22",
+          "cardId": 156,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_099_viral-pipeline",
+          "cardId": 157,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_100_wrecking-ball",
+          "cardId": 158,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "cardId": 161,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_110_hijack",
+          "cardId": 168,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_114_on-the-fast-track",
+          "cardId": 172,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_120_reconnaissance",
+          "cardId": 178,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_126_test-spin",
+          "cardId": 184,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_133_chiba-bank-account",
+          "cardId": 191,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_134_cortical-cybermodem",
+          "cardId": 192,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_135_cortical-stimulators",
+          "cardId": 193,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_142_hq-mole",
+          "cardId": 200,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_143_liberated-savings-account",
+          "cardId": 201,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_146_precision-bribery",
+          "cardId": 204,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_150_streetware-distributor",
+          "cardId": 208,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_151_sunburst-cranial-interface",
+          "cardId": 209,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_152_swiss-bank-account",
+          "cardId": 210,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_014_codecracker",
+          "cardId": 226,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_040_loony-goon",
+          "cardId": 252,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_075_zetatech-software-installer",
+          "cardId": 287,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_145_wutech-mem-chip",
+          "cardId": 357,
           "quantity": 1
         }
       ],
@@ -1328,15 +1328,15 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "Proteus Runner - HQ Virus & Derez",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
         "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
         "formatProfileVersion": "1.0.0",
-        "deckHash": "fnv1a:245f95fc"
+        "deckHash": "fnv1a:07ea7ab6"
       },
-      "deckHash": "fnv1a:245f95fc"
+      "deckHash": "fnv1a:07ea7ab6"
     },
     {
       "deckSnapshotId": "proteus_runner_rd_bad_publicity_snapshot_v2026_05_25",
@@ -1344,7 +1344,7 @@
       "deckVersion": "proteus-playtest-2026-05-25",
       "name": "Proteus Runner - R&D Virus & Bad Publicity",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
@@ -1353,155 +1353,155 @@
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_proteus_079_big-frackin-gun",
+          "cardId": 137,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_082_bulldozer",
+          "cardId": 140,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_083_corrosion",
+          "cardId": 141,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_084_crumble",
+          "cardId": 142,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_085_disintegrator",
+          "cardId": 143,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_088_fubar",
+          "cardId": 146,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_089_garbage-in",
+          "cardId": 147,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_090_highlighter",
+          "cardId": 148,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_092_morphing-tool",
+          "cardId": 150,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_094_scaldan",
+          "cardId": 152,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_095_skeleton-passkeys",
+          "cardId": 153,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_097_taxman",
+          "cardId": 155,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_098_vienna-22",
+          "cardId": 156,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_099_viral-pipeline",
+          "cardId": 157,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_105_demolition-run",
+          "cardId": 163,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_106_disgruntled-ice-technician",
+          "cardId": 164,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_108_faked-hit",
+          "cardId": 166,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_109_frame-up",
+          "cardId": 167,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_113_live-news-feed",
+          "cardId": 171,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_116_pirate-broadcast",
+          "cardId": 174,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_117_poisoned-water-supply",
+          "cardId": 175,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_119_promises-promises",
+          "cardId": 177,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_121_remote-detonator",
+          "cardId": 179,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_122_rush-hour",
+          "cardId": 180,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_123_senatorial-field-trip",
+          "cardId": 181,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_125_subliminal-corruption",
+          "cardId": 183,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_129_back-door-to-netwatch",
+          "cardId": 187,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_147_r-and-d-mole",
+          "cardId": 205,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_150_streetware-distributor",
+          "cardId": 208,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_014_codecracker",
+          "cardId": 226,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_040_loony-goon",
+          "cardId": 252,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_151_aujourdoui",
+          "cardId": 363,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": 366,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+          "cardId": 369,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+          "cardId": 378,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_177_the-short-circuit",
+          "cardId": 389,
           "quantity": 1
         }
       ],
@@ -1516,15 +1516,15 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "Proteus Runner - R&D Virus & Bad Publicity",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
         "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
         "formatProfileVersion": "1.0.0",
-        "deckHash": "fnv1a:3177fef9"
+        "deckHash": "fnv1a:59145f20"
       },
-      "deckHash": "fnv1a:3177fef9"
+      "deckHash": "fnv1a:59145f20"
     },
     {
       "deckSnapshotId": "proteus_corp_region_fast_score_snapshot_v2026_05_25",
@@ -1532,166 +1532,166 @@
       "deckVersion": "proteus-playtest-2026-05-25",
       "name": "Proteus Korp - Region Fast Score",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.94",
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_proteus_001_ai-board-member",
+          "cardId": 59,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_002_charity-takeover",
+          "cardId": 60,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_007_project-venice",
+          "cardId": 65,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_008_project-zurich",
+          "cardId": 66,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_010_world-domination",
+          "cardId": 68,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_013_caryatid",
+          "cardId": 71,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_017_credit-blocks",
+          "cardId": 75,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_018_datacomb",
+          "cardId": 76,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_023_galatea",
+          "cardId": 81,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_024_gatekeeper",
+          "cardId": 82,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_027_iceberg",
+          "cardId": 85,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_031_minotaur",
+          "cardId": 89,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_032_misleading-access-menus",
+          "cardId": 90,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_033_mobile-barricade",
+          "cardId": 91,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_034_riddler",
+          "cardId": 92,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_036_sandstorm",
+          "cardId": 94,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_037_scaffolding",
+          "cardId": 95,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_041_toughoniumtm-wall",
+          "cardId": 99,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_042_tumblers",
+          "cardId": 100,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_044_walking-wall",
+          "cardId": 102,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_046_corporate-guard-r-temps",
+          "cardId": 104,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_047_credit-consolidation",
+          "cardId": 105,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_048_data-sifters",
+          "cardId": 106,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_049_emergency-rig",
+          "cardId": 107,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_051_rent-to-own-contract",
+          "cardId": 109,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_055_cybertech-think-tank",
+          "cardId": 113,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_058_executive-boot-camp",
+          "cardId": 116,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_059_government-contract",
+          "cardId": 117,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_060_herman-revista",
+          "cardId": 118,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_062_lesley-major",
+          "cardId": 120,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_065_networked-center",
+          "cardId": 123,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_072_research-bunker",
+          "cardId": 130,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_077_weapons-depot",
+          "cardId": 135,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_282_annual-reviews",
+          "cardId": 494,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_288_day-shift",
+          "cardId": 500,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_297_overtime-incentives",
+          "cardId": 509,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 1
         }
       ],
@@ -1706,13 +1706,13 @@
       },
       "publicMetadata": {
         "side": "corp",
-        "identityCardId": "corp_identity_001",
+        "identityCardId": 3,
         "deckName": "Proteus Korp - Region Fast Score",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:3a460197"
+        "deckHash": "fnv1a:5d464e47"
       },
-      "deckHash": "fnv1a:3a460197"
+      "deckHash": "fnv1a:5d464e47"
     },
     {
       "deckSnapshotId": "proteus_corp_antibody_tax_snapshot_v2026_05_25",
@@ -1720,174 +1720,174 @@
       "deckVersion": "proteus-playtest-2026-05-25",
       "name": "Proteus Korp - Antibody Tax & Ambush",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.94",
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_proteus_003_corporate-headhunters",
+          "cardId": 61,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_004_fetal-ai",
+          "cardId": 62,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_005_marked-accounts",
+          "cardId": 63,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_006_please-dont-choke-anyone",
+          "cardId": 64,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_009_viral-breeding-ground",
+          "cardId": 67,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_011_brain-wash",
+          "cardId": 69,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_012_bug-zapper",
+          "cardId": 70,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_014_chihuahua",
+          "cardId": 72,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_015_colonel-failure",
+          "cardId": 73,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_016_coyote",
+          "cardId": 74,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_020_digiconda",
+          "cardId": 78,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_021_dog-pile",
+          "cardId": 79,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_022_food-fight",
+          "cardId": 80,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_025_homing-missile",
+          "cardId": 83,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_026_hunting-pack",
+          "cardId": 84,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_028_lesser-arcana",
+          "cardId": 86,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_029_marionette",
+          "cardId": 87,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_030_mastermind",
+          "cardId": 88,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_035_roadblock",
+          "cardId": 93,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_039_sphinx-2006",
+          "cardId": 97,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_040_sumo-2008",
+          "cardId": 98,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_045_washed-up-solo-construct",
+          "cardId": 103,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_046_corporate-guard-r-temps",
+          "cardId": 104,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_050_manhunt",
+          "cardId": 108,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_052_schlaghund-pointers",
+          "cardId": 110,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_053_underworld-mole",
+          "cardId": 111,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_054_bel-digmo-antibody",
+          "cardId": 112,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_056_department-of-misinformation",
+          "cardId": 114,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_057_doppelganger-antibody",
+          "cardId": 115,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_061_ldl-traffic-analyzers",
+          "cardId": 119,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_067_panic-button",
+          "cardId": 125,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_068_pattel-antibody",
+          "cardId": 126,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_070_rasmin-bridger",
+          "cardId": 128,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_075_stereogram-antibody",
+          "cardId": 133,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_282_annual-reviews",
+          "cardId": 494,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_287_datapool-by-zetatech",
+          "cardId": 499,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_293_netwatch-credit-voucher",
+          "cardId": 505,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 2
         }
       ],
@@ -1902,13 +1902,13 @@
       },
       "publicMetadata": {
         "side": "corp",
-        "identityCardId": "corp_identity_001",
+        "identityCardId": 3,
         "deckName": "Proteus Korp - Antibody Tax & Ambush",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:0602f943"
+        "deckHash": "fnv1a:c06b7d42"
       },
-      "deckHash": "fnv1a:0602f943"
+      "deckHash": "fnv1a:c06b7d42"
     },
     {
       "deckSnapshotId": "classic_runner_ai_snapshot_v1",
@@ -1916,7 +1916,7 @@
       "deckVersion": "classic-ai-v1",
       "name": "Classic Runner AI - Toolbox Pressure",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-playtest",
       "formatProfileId": "netgrid_private_local_classic_playtest_v1",
@@ -1925,107 +1925,107 @@
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_classic_027_early-worm",
+          "cardId": 31,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_028_matador",
+          "cardId": 32,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_029_ms-todon",
+          "cardId": 33,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_030_psychic-friend",
+          "cardId": 34,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_031_rent-i-con",
+          "cardId": 35,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_032_schematics-search-engine",
+          "cardId": 36,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_033_superglue",
+          "cardId": 37,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_034_boostergang-connections",
+          "cardId": 38,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_035_corruption",
+          "cardId": 39,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_036_do-the-drine",
+          "cardId": 40,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_037_finders-keepers",
+          "cardId": 41,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+          "cardId": 42,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_039_library-search",
+          "cardId": 43,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_040_meat-upgrade",
+          "cardId": 44,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_041_networking",
+          "cardId": 45,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_042_panzer-run",
+          "cardId": 46,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_043_running-interference",
+          "cardId": 47,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_044_crash-space",
+          "cardId": 48,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_045_elena-laskova",
+          "cardId": 49,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_046_executive-file-clerk",
+          "cardId": 50,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_047_little-black-box",
+          "cardId": 51,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
+          "cardId": 52,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_049_omnitech-wet-drive",
+          "cardId": 53,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_050_sandbox-dig",
+          "cardId": 54,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_051_vintage-camaro",
+          "cardId": 55,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_052_zetatech-portastation",
+          "cardId": 56,
           "quantity": 2
         }
       ],
@@ -2040,15 +2040,15 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "Classic Runner AI - Toolbox Pressure",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "cardPoolVersion": "private-local-onr-v1-plus-classic-playtest",
         "formatProfileId": "netgrid_private_local_classic_playtest_v1",
         "formatProfileVersion": "1.0.0",
-        "deckHash": "fnv1a:e1ecdc2c"
+        "deckHash": "fnv1a:a057d19d"
       },
-      "deckHash": "fnv1a:e1ecdc2c"
+      "deckHash": "fnv1a:a057d19d"
     },
     {
       "deckSnapshotId": "classic_corp_ai_snapshot_v1",
@@ -2056,114 +2056,114 @@
       "deckVersion": "classic-ai-v1",
       "name": "Classic Corp AI - Agenda Tax Control",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.94",
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_classic_001_data-fort-remapping",
+          "cardId": 5,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_002_superserum",
+          "cardId": 6,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_003_unlisted-research-lab",
+          "cardId": 7,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_004_theorem-proof",
+          "cardId": 8,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_005_baskerville",
+          "cardId": 9,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_006_bolter-swarm",
+          "cardId": 10,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_007_brain-drain",
+          "cardId": 11,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_008_deadeye",
+          "cardId": 12,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_009_dumpster",
+          "cardId": 13,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_010_entrapment",
+          "cardId": 14,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_011_glacier",
+          "cardId": 15,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_012_imperial-guard",
+          "cardId": 16,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_013_puzzle",
+          "cardId": 17,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_014_trapdoor",
+          "cardId": 18,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_015_vortex",
+          "cardId": 19,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_016_badtimes",
+          "cardId": 20,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_017_corporate-shuffle",
+          "cardId": 21,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_018_reclamation-project",
+          "cardId": 22,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_019_indiscriminate-response-team",
+          "cardId": 23,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_020_london-city-grid",
+          "cardId": 24,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_021_satellite-monitors",
+          "cardId": 25,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_022_self-destruct",
+          "cardId": 26,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_023_shock-treatment",
+          "cardId": 27,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_024_sterdroid",
+          "cardId": 28,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_025_strategic-planning-group",
+          "cardId": 29,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_026_street-enforcer",
+          "cardId": 30,
           "quantity": 1
         }
       ],
@@ -2178,13 +2178,13 @@
       },
       "publicMetadata": {
         "side": "corp",
-        "identityCardId": "corp_identity_001",
+        "identityCardId": 3,
         "deckName": "Classic Corp AI - Agenda Tax Control",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:712bfe19"
+        "deckHash": "fnv1a:bf186b7c"
       },
-      "deckHash": "fnv1a:712bfe19"
+      "deckHash": "fnv1a:bf186b7c"
     }
   ]
 }

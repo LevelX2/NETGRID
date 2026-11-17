@@ -56,7 +56,7 @@ function currentOperationCompanion(input: AiDecisionInputWithDeckCapabilities) {
     (action) =>
       action.type === "play_operation" && action.payload?.xValue !== undefined,
   )
-    ? corpFreeRezBoardCompanion(copy, "onr_proteus_049_emergency-rig").input
+    ? corpFreeRezBoardCompanion(copy, 107).input
     : copy;
 }
 
@@ -237,7 +237,7 @@ describe("match 41df Corp scoring", () => {
         expect(decision.evidence).toEqual(
           expect.arrayContaining([
             "plan_priority_delegated_from:plan:corp.defend_servers:server-defense-portfolio",
-            "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:hq:corp_onr_proteus_015_colonel-failure_1:gap_4",
+            "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:hq:corp_73_1:gap_4",
           ]),
         );
         const remote = projects.find(

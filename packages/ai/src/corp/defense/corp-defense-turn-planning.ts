@@ -438,7 +438,7 @@ function exactBoundDefenseInstallCandidate(
   binding: {
     actionId: string;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     serverId: string;
     placement?: "ice" | "root";
   },

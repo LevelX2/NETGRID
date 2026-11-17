@@ -4,7 +4,7 @@ import { PlanResolutionFailure } from "./plans/plan-resolution-failure";
 export type PublicInstalledExposure = Readonly<{
   serverId: string;
   positionKey: string;
-  definitionId: string;
+  definitionId: number;
 }>;
 
 /** Projects only the Engine's aligned public multi-expose observation facts. */

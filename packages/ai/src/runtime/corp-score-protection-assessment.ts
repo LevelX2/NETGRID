@@ -52,9 +52,9 @@ export function compareExactProbabilities(
 
 export type CorpScoreProtectionRandomBreak = Readonly<{
   iceInstanceId: string;
-  iceDefinitionId: string;
+  iceDefinitionId: number;
   breakerInstanceId: string;
-  breakerDefinitionId: string;
+  breakerDefinitionId: number;
   attempts: number;
   successProbabilityPerAttempt: ExactProbability;
   combinedSuccessProbability: ExactProbability;
@@ -113,7 +113,7 @@ export type CorpScoreProtectionAssessment =
 export type CorpScoreProtectionIceInput = Readonly<{
   instanceId: string;
   known: boolean;
-  definitionId?: string;
+  definitionId?: number;
   rezzed?: boolean;
   strength?: number;
   subtypes?: string[];
@@ -257,9 +257,9 @@ type Rational = Readonly<{
 
 type RandomBreakChoice = Readonly<{
   iceInstanceId: string;
-  iceDefinitionId: string;
+  iceDefinitionId: number;
   breakerInstanceId: string;
-  breakerDefinitionId: string;
+  breakerDefinitionId: number;
   attempts: number;
   successProbabilityPerAttempt: Rational;
   combinedSuccessProbability: Rational;

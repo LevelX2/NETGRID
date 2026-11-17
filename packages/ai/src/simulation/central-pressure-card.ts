@@ -10,7 +10,7 @@ import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import { quoteVisibleRunnerPathForMetrics } from "./visible-run-path-for-metrics";
 
 export function isCentralPressureCardForMetrics(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
   installedOnly: boolean,
 ): boolean {
   if (!definitionId) return false;
@@ -22,18 +22,18 @@ export function isCentralPressureCardForMetrics(
 }
 
 export function centralPressureTargetsForCard(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CentralServerId[] {
   if (!definitionId) return [];
   const roles = centralPressureRolesForCard(definitionId);
   const targets: CentralServerId[] = [];
   if (
-    definitionId === "onr_v1_139_r-and-d-interface" ||
+    definitionId === 351 ||
     rolesMatch(roles, ["pressure_rnd", "rnd_pressure"])
   )
     targets.push("rd");
   if (
-    definitionId === "onr_v1_129_hq-interface" ||
+    definitionId === 341 ||
     rolesMatch(roles, ["pressure_hq", "hq_pressure"])
   )
     targets.push("hq");
@@ -42,16 +42,16 @@ export function centralPressureTargetsForCard(
     targets.length === 0 &&
     rolesMatch(roles, ["multiaccess"]) &&
     [
-      "onr_v1_024_expert-schedule-analyzer",
-      "onr_v1_041_microtech-ai-interface",
-      "onr_v1_105_priority-wreck",
+      236,
+      253,
+      317,
     ].includes(definitionId)
   )
     targets.push("rd", "hq");
   return sortedUnique(targets) as CentralServerId[];
 }
 
-function centralPressureRolesForCard(definitionId: string): string[] {
+function centralPressureRolesForCard(definitionId: number): string[] {
   return cardRolesForId(definitionId, AI_HINTS_BY_CARD);
 }
 

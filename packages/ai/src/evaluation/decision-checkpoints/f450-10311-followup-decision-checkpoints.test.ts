@@ -15,9 +15,9 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import { withCurrentF450DamageZoneExpectation } from "./f450-damage-zone-fixture.test-support";
 
-const KRASH = "onr_v1_039_krash";
-const TEMPLE_MICROCODE_OUTLET = "onr_v1_114_temple-microcode-outlet";
-const SCORE = "onr_v1_108_score";
+const KRASH = 251;
+const TEMPLE_MICROCODE_OUTLET = 326;
+const SCORE = 320;
 
 describe("F450 and 10311 follow-up decision checkpoints", () => {
   it.each([

@@ -28,7 +28,7 @@ export type CorpPunishCampaignSignal = {
     | "tag"
     | "damage"
     | "kill";
-  sourceDefinitionIds: string[];
+  sourceDefinitionIds: number[];
   actionIds?: string[];
   initiatingSemanticActionType?: string;
   feasible: boolean;
@@ -58,7 +58,7 @@ export type CorpPunishCampaignSignal = {
     currentHeadActionId?: string;
     traceBidBinding?: {
       sourceCardInstanceId: string;
-      sourceDefinitionId: string;
+      sourceDefinitionId: number;
       quotedAtStateVersion: number;
       amount: number;
     };

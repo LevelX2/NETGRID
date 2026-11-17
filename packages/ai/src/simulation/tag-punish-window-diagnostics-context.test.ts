@@ -13,15 +13,15 @@ import {
 
 describe("tag punish window diagnostics", () => {
   it("distinguishes trace limit reduction from a link ability", () => {
-    const context = (definitionId: string) =>
+    const context = (definitionId: number) =>
       runnerSurvivalCounterContextForInput({
         playerView: { opponent: { rig: [{ known: true, definitionId }] } },
       } as unknown as AiDecisionInput);
-    expect(context("onr_v1_051_rabbit")).toMatchObject({
+    expect(context(263)).toMatchObject({
       trace: true,
       link: false,
     });
-    expect(context("onr_v1_063_signpost")).toMatchObject({
+    expect(context(275)).toMatchObject({
       trace: true,
       link: true,
     });

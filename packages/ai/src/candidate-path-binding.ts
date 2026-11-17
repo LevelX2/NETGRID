@@ -12,7 +12,7 @@ export type CandidatePathBinding = {
   stateVersion: number;
   actionType: string;
   side: Side;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   abilityId?: string;
   targetIdentity: string;
   costClass: string;

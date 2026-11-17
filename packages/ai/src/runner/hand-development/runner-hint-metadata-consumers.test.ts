@@ -43,7 +43,7 @@ describe("Runner hint metadata consumers", () => {
     "keeps post-break ICE payment out of income setup at %i credits",
     (credits) => {
       const startup = visibleCard("startup", {
-        definitionId: "onr_v1_068_startup-immolator",
+        definitionId: 280,
         title: "Startup Immolator",
         type: "program",
         installCost: 0,
@@ -76,7 +76,7 @@ describe("Runner hint metadata consumers", () => {
   );
   it("recognizes Microtech Backup Drive as program-protection support", () => {
     const backupDrive = visibleCard("microtech-backup-drive", {
-      definitionId: "onr_v1_131_microtech-backup-drive",
+      definitionId: 343,
       title: "Microtech Backup Drive",
       type: "hardware",
       installCost: 0,

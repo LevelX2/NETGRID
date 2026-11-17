@@ -18,10 +18,10 @@ export function bindSelectedEngineWindowRunnerVacuumLinkOrigin(
   );
   const canOpenRunnerVacuumLinkRewind =
     selectedAction?.type === "continue_run" &&
-    selectedAction.payload?.sourceDefinitionId === "onr_v1_275_vacuum-link" &&
+    selectedAction.payload?.sourceDefinitionId === 487 &&
     Number(selectedAction.payload?.unbrokenSubroutineCount) > 0 &&
     input.playerView.run?.encounteredIce?.definitionId ===
-      "onr_v1_275_vacuum-link";
+      487;
   if (!canOpenRunnerVacuumLinkRewind || !selectedAction) return;
 
   const currentPortfolio = result.portfolio;
@@ -139,7 +139,7 @@ export function bindSelectedEngineWindowRunnerVacuumLinkOrigin(
     sourceStepId,
     sourceActionType: "continue_run",
     sourceCardInstanceId: input.playerView.run!.encounteredIce!.instanceId,
-    sourceCardDefinitionId: "onr_v1_275_vacuum-link",
+    sourceCardDefinitionId: 487,
   };
 }
 
@@ -175,7 +175,7 @@ export function resolvePlanBoundRunnerVacuumLinkChoice(
           actionId: string;
           selectedOptionId: string;
           sourceCardInstanceId: string;
-          sourceCardDefinitionId: string;
+          sourceCardDefinitionId: number;
           observedAtStateVersion: number;
         };
       }

@@ -8,7 +8,7 @@ import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 import { corpBluffDefenseNeed } from "../defense/corp-bluff-defense";
 
 /** Mechanical profile only. No remote damage is inferred from central access. */
-export function corpAccessZonePreparationProfile(definitionId: string) {
+export function corpAccessZonePreparationProfile(definitionId: number) {
   const spec = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
   if (spec?.side !== "corp" || spec.cardType !== "asset") return undefined;
   const engine = spec.engine;

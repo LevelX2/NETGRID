@@ -84,7 +84,7 @@ describe("corp install main actions", () => {
     const cardId = Object.values(state.cardInstances).find(
       (instance) =>
         instance.owner === "corp" &&
-        instance.definitionId === "onr_v1_237_data-wall",
+        instance.definitionId === 449,
     )?.instanceId;
     if (!cardId) throw new Error("Expected Data Wall in the Corp deck");
 
@@ -107,7 +107,7 @@ describe("corp install main actions", () => {
       JSON.parse(action.payload?.postInstallEffectiveRunQuoteJson as string),
     ).toMatchObject({
       iceInstanceId: cardId,
-      iceDefinitionId: "onr_v1_237_data-wall",
+      iceDefinitionId: 449,
       subroutines: expect.any(Array),
     });
   });

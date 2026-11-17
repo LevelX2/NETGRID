@@ -39,8 +39,8 @@ it("keeps the real cheaper-answer recovery in acquisition instead of installing 
       ]),
       directSearchChoiceBindings: expect.arrayContaining([
         expect.objectContaining({
-          sourceDefinitionId: "onr_v1_099_mantis-fixer-at-large",
-          targetDefinitionId: "onr_v1_021_dwarf",
+          sourceDefinitionId: 311,
+          targetDefinitionId: 233,
         }),
       ]),
     },
@@ -50,7 +50,7 @@ it("keeps the real cheaper-answer recovery in acquisition instead of installing 
       .installActionIds ?? [],
   ).toEqual([]);
   expect(decision.actionId).not.toBe(
-    "runner.install_card.runner_onr_v1_074_worm_2.runner_onr_v1_074_worm_2",
+    "runner.install_card.runner_286_2.runner_286_2",
   );
   expect(input.legalActions.some((a) => a.actionId === decision.actionId)).toBe(
     true,

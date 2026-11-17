@@ -208,7 +208,7 @@ describe("Defense hand-buffer phase ownership", () => {
             drawCardsAmount: 3,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityId:
-              "onr_classic_040_meat-upgrade:on_play_remove_tags_and_draw",
+              "44:on_play_remove_tags_and_draw",
             cardImplementationAbilityKey: "on_play_remove_tags_and_draw",
           },
         },
@@ -220,7 +220,7 @@ describe("Defense hand-buffer phase ownership", () => {
         "meat-upgrade",
         "runner",
         "event",
-        { definitionId: "onr_classic_040_meat-upgrade" },
+        { definitionId: 44 },
       );
       f.defense.handBufferActionIds = [f.draw.actionId, meatUpgrade.actionId];
       const candidates = buildActionSemanticCandidates({
@@ -228,7 +228,7 @@ describe("Defense hand-buffer phase ownership", () => {
         observerSide: "runner",
         stateVersion: f.input.playerView.stateVersion,
         visibleSourceDefinitionsByInstanceId: {
-          "meat-upgrade": "onr_classic_040_meat-upgrade",
+          "meat-upgrade": 44,
         },
         cardSemanticProfilesByDefinitionId:
           buildActionCardSemanticProfilesByDefinitionId(),
@@ -384,7 +384,7 @@ function creditDrawBufferFixture(tags = 0) {
         cardImplementationAbilityKey:
           "abilities_activated_runner_main_gain_credits",
         cardImplementationAbilityId:
-          "onr_v1_179_silicon-saloon-franchise:abilities_activated_runner_main_gain_credits",
+          "391:abilities_activated_runner_main_gain_credits",
       },
     },
   );
@@ -392,7 +392,7 @@ function creditDrawBufferFixture(tags = 0) {
   f.input.legalActions.push(action);
   f.input.playerView.own.rig = [
     visibleCard(source, "runner", "resource", {
-      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      definitionId: 391,
     }),
   ];
   const candidates = buildActionSemanticCandidates({
@@ -400,7 +400,7 @@ function creditDrawBufferFixture(tags = 0) {
     observerSide: "runner",
     stateVersion: f.input.playerView.stateVersion,
     visibleSourceDefinitionsByInstanceId: {
-      [source]: "onr_v1_179_silicon-saloon-franchise",
+      [source]: 391,
     },
     cardSemanticProfilesByDefinitionId:
       buildActionCardSemanticProfilesByDefinitionId(),

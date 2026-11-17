@@ -44,7 +44,7 @@ describe("selfplay cycle 164 decision checkpoints", () => {
 
     expect(decision).toMatchObject({
       actionId:
-        "runner.pump_breaker.runner_onr_v1_054_raptor_1.runner_onr_v1_054_raptor_1.runner_onr_v1_054_raptor_1.corp_onr_classic_007_brain-drain_1.onr_v1_054_raptor:icebreaker_abilities_increase_strength",
+        "runner.pump_breaker.runner_266_1.runner_266_1.runner_266_1.corp_11_1.onr_v1_054_raptor:icebreaker_abilities_increase_strength",
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
       decisionDebug: {

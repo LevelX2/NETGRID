@@ -354,7 +354,7 @@ function runnerDrawSummary(): CreditEconomyRunnerDrawSummary {
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   owner: Side,
   advancementCounters = 0,
 ): CardInstance {

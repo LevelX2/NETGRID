@@ -85,7 +85,7 @@ it("funds the financeable terminal last-draw parent before installation instead 
     plan = result.decisionDebug!.planFirstDecision!;
   expect(result.actionId).toBe("corp.gain_credit");
   expect(plan.rootPlanInstanceId).toContain(
-    "corp.score_agenda:agenda%3Acorp_onr_v1_214_project-babylon_1",
+    "corp.score_agenda:agenda%3Acorp_426_1",
   );
   expect(plan.selectedPlan?.moduleId).toBe("corp.economy");
   expect(plan.priority?.effectiveClass).toBe("P2");
@@ -110,7 +110,7 @@ it("installs the exact terminal Babylon route after its full three-credit floor 
   cp.input.playerView.own.credits = 3;
   const result = decide(cp);
   expect(result.actionId).toContain(
-    "install_card.corp_onr_v1_214_project-babylon_1",
+    "install_card.corp_426_1",
   );
   expect(result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "corp.score_agenda",

@@ -59,7 +59,7 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
       forbiddenActions: [
         {
           type: "activated_card_ability",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
         },
       ],
       planExecution: {
@@ -75,12 +75,12 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
     checkpoint.expectation = {
       contractKind: "correctness",
       acceptableActions: [
-        { type: "play_event", sourceDefinitionId: "onr_v1_101_mit-west-tier" },
+        { type: "play_event", sourceDefinitionId: 313 },
       ],
       forbiddenActions: [
         {
           type: "activated_card_ability",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
         },
       ],
       planExecution: {
@@ -123,7 +123,7 @@ function expectSavingsPreservedBySelectedAction(
     const rig = getPlayerView(game, "runner").own.rig;
     expect(rig).toBeDefined();
     return rig!
-      .filter((card) => card.definitionId === "onr_v1_154_broker")
+      .filter((card) => card.definitionId === 366)
       .map((card) => card.counters?.bit ?? 0);
   };
   const before = balances(state);

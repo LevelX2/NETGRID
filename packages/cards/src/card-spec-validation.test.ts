@@ -105,7 +105,7 @@ describe("CardSpec validation", () => {
     expect(() =>
       assertAbilityRefIdentity({
         sourceCardInstanceId: "source",
-        sourceAbilityId: "test_card:ability",
+        sourceAbilityId: "901:ability",
       }),
     ).not.toThrow();
     for (const invalid of [
@@ -114,7 +114,7 @@ describe("CardSpec validation", () => {
       {
         sourceCardInstanceId: "source",
         abilityId: "legacy",
-        sourceAbilityId: "test_card:ability",
+        sourceAbilityId: "901:ability",
       },
       { sourceCardInstanceId: "source", sourceAbilityId: "not-canonical" },
     ])
@@ -700,7 +700,7 @@ describe("CardSpec validation", () => {
 
   it("rejects invalid definition IDs", () => {
     const spec = untypedSpec();
-    (spec.identity as Record<string, unknown>).cardDefinitionId = "Bad/Id";
+    (spec.identity as Record<string, unknown>).cardDefinitionId = -1;
     expect(() => validateUntyped(spec)).toThrowError(CapabilityIdentityError);
   });
 
@@ -838,8 +838,8 @@ describe("identity and set contracts", () => {
   it("uses one capability key domain and canonical card-scoped IDs", () => {
     const key = capabilityKey("gain-credit");
     expect(abilityKey("gain-credit")).toBe(key);
-    expect(canonicalCapabilityId("test_card", key)).toBe(
-      "test_card:gain-credit",
+    expect(canonicalCapabilityId(901, key)).toBe(
+      "901:gain-credit",
     );
     expect(() => capabilityKey("Bad/Key")).toThrow(CapabilityIdentityError);
   });

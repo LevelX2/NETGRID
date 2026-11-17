@@ -57,7 +57,7 @@ it.each([3, 30])(
       signal: {
         programSearchCommitment: {
           engineContinuationAtStateVersion: input.playerView.stateVersion,
-          targetDefinitionId: "onr_v1_011_cloak",
+          targetDefinitionId: 223,
         },
       },
     });

@@ -54,7 +54,7 @@ it.each([
     } else if (!stackExhausted) {
       expect(
         input.playerView.opponent.rig?.some(
-          (card) => card.definitionId === "onr_v1_059_self-modifying-code",
+          (card) => card.definitionId === 271,
         ),
       ).toBe(true);
       expect(input.playerView.opponent.deckCount).toBeGreaterThan(0);

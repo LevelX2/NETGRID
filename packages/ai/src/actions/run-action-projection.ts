@@ -819,7 +819,7 @@ function visibleOwnCardById(
 
 type VisibleOwnCardLike = {
   instanceId?: string;
-  definitionId?: string;
+  definitionId?: number;
   type?: string;
   known?: boolean;
 };
@@ -1150,7 +1150,7 @@ function corpRezCostSurchargeForRunAction(
     return undefined;
   return {
     kind: "matching_printed_rez_cost",
-    ...(typeof payload.corpRezCostSurchargeSourceDefinitionId === "string"
+    ...(typeof payload.corpRezCostSurchargeSourceDefinitionId === "number"
       ? {
           sourceDefinitionId: payload.corpRezCostSurchargeSourceDefinitionId,
         }

@@ -10,7 +10,7 @@ import { rolesMatch } from "../../role-match";
 
 export type CorpIceCardFacts = {
   iceInstanceId?: string;
-  iceDefinitionId?: string;
+  iceDefinitionId?: number;
   title?: string;
   immediateStop: boolean;
   softStop: boolean;
@@ -41,7 +41,7 @@ export function corpCentralIceProfile(card: VisibleCard | undefined): {
   positionDependent: boolean;
   modeChoice: boolean;
   alternateWallMode: boolean;
-  definitionId?: string;
+  definitionId?: number;
 } {
   const profile = buildCorpIceCardFacts(card);
   const hint = profile.iceDefinitionId

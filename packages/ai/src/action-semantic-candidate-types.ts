@@ -286,7 +286,7 @@ export type LegalTarget = {
     | "unknown";
   targetSide: "runner" | "corp" | "both" | "unknown";
   targetZone?: string;
-  targetDefinitionId?: string;
+  targetDefinitionId?: number;
   targetTitle?: string;
   targetSubtypes?: string[];
   targetConstraints?: string[];
@@ -299,7 +299,7 @@ export type LegalTargetSummary = {
   targetKind: LegalTarget["targetKind"];
   targetSide: LegalTarget["targetSide"];
   targetZone?: string;
-  targetDefinitionId?: string;
+  targetDefinitionId?: number;
   targetTitle?: string;
   targetSubtypes?: string[];
   targetConstraints?: string[];

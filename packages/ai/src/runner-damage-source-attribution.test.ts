@@ -66,7 +66,7 @@ describe("public damage source attribution", () => {
         } else {
           payload.sourceDefinitionId =
             condition === "runner_source"
-              ? "onr_v1_095_jack-n-joe"
+              ? 307
               : "unknown-source";
           for (const effect of payload.resolvedEffects)
             effect.sourceDefinitionId = payload.sourceDefinitionId;

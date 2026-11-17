@@ -585,7 +585,7 @@ function validHardwareTrashProjection(
 
 function canonicalCapabilityMatchesDefinition(
   sourceCapabilityId: string,
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
 ): boolean {
   try {
     return (

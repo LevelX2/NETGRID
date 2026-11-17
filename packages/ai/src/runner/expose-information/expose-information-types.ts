@@ -6,7 +6,7 @@ export type RunnerExposeInformationSignal = {
   serverId?: string;
   runId?: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   targetIceInstanceId?: string;
   targetPositionKeys?: string[];
   phase:

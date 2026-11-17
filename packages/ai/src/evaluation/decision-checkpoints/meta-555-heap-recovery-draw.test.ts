@@ -141,7 +141,7 @@ it.each([
   if (boundary === "no_matching_heap_answer")
     input.playerView.own.heapOrArchives =
       input.playerView.own.heapOrArchives.filter(
-        (c) => c.definitionId !== "onr_classic_031_rent-i-con",
+        (c) => c.definitionId !== 35,
       );
   if (boundary === "no_recovery_remaining")
     for (const tool of tools) tool.status = "discarded";
@@ -151,8 +151,8 @@ it.each([
     tool.status = "in_deck";
     tool.cardId =
       boundary === "stack_search_only"
-        ? "onr_v1_114_temple-microcode-outlet"
-        : "onr_v1_165_junkyard-bbs";
+        ? 326
+        : 377;
   }
   expect(support(input).drawForAnswerActionIds).not.toContain(
     "runner.draw_card",

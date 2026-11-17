@@ -8,9 +8,9 @@ import * as development from "../../runner/hand-development/hand-development-eva
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 
 it.each([
-  [1, 76, "onr_classic_032_schematics-search-engine", "runner.develop_board_and_hand", "useful_now"],
-  [4, 53, "onr_classic_037_finders-keepers", "runner.develop_board_and_hand", "none"],
-  [7, 48, "onr_classic_029_ms-todon", "runner.rig_and_coverage", "useful_now"],
+  [1, 76, 36, "runner.develop_board_and_hand", "useful_now"],
+  [4, 53, 41, "runner.develop_board_and_hand", "none"],
+  [7, 48, 33, "runner.rig_and_coverage", "useful_now"],
 ] as const)(
   "uses real information needs and preserves the selected native owner in G%i/D%i",
   (game, index, selectedDefinition, owner, informationNeed) => {
@@ -55,12 +55,12 @@ it.each([
     expect(plan?.route?.planInstanceId).toBe(plan?.leafExecutorInstanceId);
     expect(plan?.selectedStep?.planInstanceId).toBe(plan?.leafExecutorInstanceId);
     expect(observed.some((e) =>
-      e.definitionId === "onr_classic_032_schematics-search-engine" &&
+      e.definitionId === 36 &&
       e.developmentRole === "access_payoff" && e.currentNeed === informationNeed,
     )).toBe(true);
     if (game === 1) {
       expect(plan?.route?.purpose).toContain("access_payoff:useful_now");
-      expect(observed.some((e) => e.definitionId === "onr_classic_033_superglue" &&
+      expect(observed.some((e) => e.definitionId === 37 &&
         e.developmentRole === "access_payoff" && e.currentNeed === "none")).toBe(true);
     }
     if (game === 7) {

@@ -13,8 +13,8 @@ import { assessCorpEconomyFundingRoute } from "./economy-routes";
 import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/action-card-semantic-profiles";
 
-const SYD = "onr_proteus_076_syd-meyer-superstores";
-const WALL = "onr_v1_279_wall-of-static";
+const SYD = 134;
+const WALL = 491;
 const deck = {
   ...DEMO_DECKS.demo_corp_001,
   id: "ice-liquidation-corp",

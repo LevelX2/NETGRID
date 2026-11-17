@@ -10,7 +10,7 @@ import type { RunnerRigRoleDemandInput } from "../rig-demand/runner-rig-demand-p
 import { runnerRestrictedRunCreditProfile } from "../../runtime/runner-canonical-card-facts";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 
-export function successfulRunStrengthCounter(definitionId: string | undefined) {
+export function successfulRunStrengthCounter(definitionId: number | undefined) {
   const mechanic = definitionId
     ? cardSpecPlanningCardByDefinitionId(definitionId)?.planning.engine
         .virusCounter

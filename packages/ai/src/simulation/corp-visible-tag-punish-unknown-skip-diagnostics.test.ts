@@ -26,11 +26,11 @@ describe("corp visible tag punish unknown skip diagnostics", () => {
       diagnose([], 3).corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal,
     ).toBeUndefined();
     expect(
-      diagnose([], 4, "onr_v1_302_scorched-earth")
+      diagnose([], 4, 514)
         .corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal,
     ).toBe(true);
     expect(
-      diagnose([], 3, "onr_v1_302_scorched-earth", true)
+      diagnose([], 3, 514, true)
         .corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal,
     ).toBeUndefined();
   });

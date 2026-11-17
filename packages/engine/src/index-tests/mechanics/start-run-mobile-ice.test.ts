@@ -19,18 +19,18 @@ function fixture(outer: boolean, rezzedSource = true) {
     runnerDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.runner,
       cards: [
-        { id: "onr_v1_039_krash", quantity: 3 },
-        { id: "onr_v1_108_score", quantity: 8 },
+        { id: 251, quantity: 3 },
+        { id: 320, quantity: 8 },
       ],
     },
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
-        { id: "onr_classic_011_glacier", quantity: 2 },
-        { id: "onr_classic_004_theorem-proof", quantity: 3 },
-        { id: "onr_classic_014_trapdoor", quantity: 3 },
-        { id: "onr_v1_283_audit-of-call-records", quantity: 4 },
-        { id: "onr_classic_025_strategic-planning-group", quantity: 2 },
+        { id: 15, quantity: 2 },
+        { id: 8, quantity: 3 },
+        { id: 18, quantity: 3 },
+        { id: 495, quantity: 4 },
+        { id: 29, quantity: 2 },
       ],
     },
   });
@@ -41,7 +41,7 @@ function fixture(outer: boolean, rezzedSource = true) {
   state.runner.clicks = 4;
   state.corp.credits = 3;
   const glacier = Object.values(state.cardInstances).find(
-    (c) => c.definitionId === "onr_classic_011_glacier",
+    (c) => c.definitionId === 15,
   )!;
   removeEverywhere(state, glacier.instanceId);
   glacier.zone = { side: "corp", zone: "serverIce", serverId: "remote_1" };
@@ -56,7 +56,7 @@ function fixture(outer: boolean, rezzedSource = true) {
   });
   if (outer) {
     const trap = Object.values(state.cardInstances).find(
-      (c) => c.definitionId === "onr_classic_014_trapdoor",
+      (c) => c.definitionId === 18,
     )!;
     removeEverywhere(state, trap.instanceId);
     trap.zone = { side: "corp", zone: "serverIce", serverId: "hq" };
@@ -120,7 +120,7 @@ describe("current Engine start-run ICE movement", () => {
         getPlayerView(state, "runner")
           .servers.find((s) => s.id === "hq")!
           .ice.at(-1)?.definitionId,
-      ).toBe("onr_classic_011_glacier");
+      ).toBe(15);
     },
   );
   it("reveals an unrezzed source when moving to an initially empty fort", () => {
@@ -161,7 +161,7 @@ describe("current Engine start-run ICE movement", () => {
     const { state } = fixture(false);
     state.corp.credits = 2;
     const root = Object.values(state.cardInstances).find(
-      (c) => c.definitionId === "onr_classic_025_strategic-planning-group",
+      (c) => c.definitionId === 29,
     )!;
     removeEverywhere(state, root.instanceId);
     root.zone = { side: "corp", zone: "serverRoot", serverId: "remote_1" };

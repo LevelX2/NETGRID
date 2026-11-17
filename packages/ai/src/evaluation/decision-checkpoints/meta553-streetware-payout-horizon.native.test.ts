@@ -45,7 +45,7 @@ describe("pairing 553 native automatic bank payout horizon", () => {
       true,
     );
     const source = recorded.input.playerView.own.rig?.find(
-      (c) => c.definitionId === "onr_proteus_150_streetware-distributor",
+      (c) => c.definitionId === 208,
     );
     expect(source).toBeDefined();
     // The Engine omits counters on an empty source; it does not emit bit: 0.

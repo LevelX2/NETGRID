@@ -44,7 +44,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
     const state = checkpoint.engine.testOnlyGameState;
     const secondShield = getLegalActions(state, "runner").find(
       (action) => action.type === "install_card" &&
-        state.cardInstances[action.source!]?.definitionId === "onr_v1_028_force-shield" &&
+        state.cardInstances[action.source!]?.definitionId === 240 &&
         !action.actionId.includes("runner_program_trash_before_install"),
     );
     expect(secondShield).toBeDefined();
@@ -115,12 +115,12 @@ describe("match 424A runner endgame decision checkpoints", () => {
       const state = checkpoint.engine.testOnlyGameState;
       const krash = state.runner.rig.programs.find(
         (instanceId) =>
-          state.cardInstances[instanceId]?.definitionId === "onr_v1_039_krash",
+          state.cardInstances[instanceId]?.definitionId === 251,
       );
       if (!krash) throw new Error("Expected installed Krash control card");
       const wallBreakers = state.runner.rig.programs.filter(
         (instanceId) =>
-          state.cardInstances[instanceId]?.definitionId === "onr_v1_039_krash",
+          state.cardInstances[instanceId]?.definitionId === 251,
       );
       state.runner.rig.programs = state.runner.rig.programs.filter(
         (instanceId) => !wallBreakers.includes(instanceId),
@@ -136,7 +136,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
       const neuralBlade = hq?.ice.find(
         (instanceId) =>
           state.cardInstances[instanceId]?.definitionId ===
-          "onr_v1_258_neural-blade",
+          470,
       );
       if (!neuralBlade)
         throw new Error("Expected rezzed Neural Blade control ICE");
@@ -149,7 +149,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
       delete checkpoint.expectation.runTargets;
       checkpoint.expectation = {
         acceptableActions: [
-          { sourceDefinitionId: "onr_v1_086_forged-activation-orders" },
+          { sourceDefinitionId: 298 },
         ],
         planExecution: {
           acceptablePlanKinds: ["runner.contest_remote"],

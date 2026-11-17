@@ -13,7 +13,7 @@ describe("runnerHqSuccessWindowSetupAssessment", () => {
     input.playerView.own.gripOrHq = [
       {
         instanceId: "jettison",
-        definitionId: "onr_v1_080_core-command-jettison-ice",
+        definitionId: 292,
         title: "Jettison Ice",
         owner: "runner",
         controller: "runner",
@@ -43,7 +43,7 @@ describe("runnerHqSuccessWindowSetupAssessment", () => {
     expect(
       runnerHqSuccessWindowSetupAssessment(input, startRun("hq"), "hq"),
     ).toMatchObject({
-      sourceDefinitionId: "onr_v1_080_core-command-jettison-ice",
+      sourceDefinitionId: 292,
       minimumIceTrashCost: 2,
     });
   });

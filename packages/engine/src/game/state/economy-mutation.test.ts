@@ -70,13 +70,13 @@ describe("economy-mutation", () => {
     current.trace = {
       traceId: "trace_unrestricted_credits",
       sourceCardInstanceId: "ldl_1",
-      sourceDefinitionId: "onr_proteus_061_ldl-traffic-analyzers",
+      sourceDefinitionId: 119,
       traceLimit: 5,
       status: "corp_bid",
       successEffect: { type: "none" },
       corpTemporaryTraceCredits: {
         sourceCardInstanceId: "ldl_1",
-        sourceDefinitionId: "onr_proteus_061_ldl-traffic-analyzers",
+        sourceDefinitionId: 119,
         remaining: 5,
         includedInCorpCreditPool: true,
         usableFor: "unrestricted_during_current_trace",
@@ -95,7 +95,7 @@ describe("economy-mutation", () => {
     current.corp.credits = 12;
     current.corpTemporaryInstallRezCredits = {
       sourceCardInstanceId: "install_source",
-      sourceDefinitionId: "simple_economy_asset",
+      sourceDefinitionId: 594,
       remaining: 3,
       usableFor: "corp_install_or_rez",
       returnUnusedAtTurnEnd: true,
@@ -103,7 +103,7 @@ describe("economy-mutation", () => {
     current.run = {
       corpRunTemporaryCredits: {
         sourceCardInstanceId: "run_source",
-        sourceDefinitionId: "simple_upgrade",
+        sourceDefinitionId: 606,
         remaining: 4,
         usableFor: "corp_costs_during_this_run",
         returnUnusedAtRunEnd: true,
@@ -112,7 +112,7 @@ describe("economy-mutation", () => {
     current.trace = {
       corpTemporaryTraceCredits: {
         sourceCardInstanceId: "trace_source",
-        sourceDefinitionId: "simple_upgrade",
+        sourceDefinitionId: 606,
         remaining: 5,
         includedInCorpCreditPool: true,
         usableFor: "unrestricted_during_current_trace",

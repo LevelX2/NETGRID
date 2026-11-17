@@ -30,7 +30,7 @@ export type BuildRunnerRigDemandProjectionForCoverageParams = Readonly<{
   strategicIntent: RunnerStrategicIntentProfile;
   deckCapabilities: DeckCapabilityProfile;
   coverageGaps: readonly RunnerCoverageGapSignal[];
-  rolesForDefinitionId: (definitionId: string) => readonly string[];
+  rolesForDefinitionId: (definitionId: number) => readonly string[];
 }>;
 
 /**
@@ -583,7 +583,7 @@ function memorySupportProviders(
 
 function additionalMemoryCapacity(
   input: AiDecisionInput,
-  definitionId: string | undefined,
+  definitionId: number | undefined,
   capacity: number,
 ): number {
   if (
@@ -609,7 +609,7 @@ function additionalMemoryCapacity(
 
 function memoryCapacityForCard(
   card: VisibleCard,
-  rolesForDefinitionId: (definitionId: string) => readonly string[],
+  rolesForDefinitionId: (definitionId: number) => readonly string[],
 ): number {
   const visibleCapacity = Math.max(0, card.memoryLimitBonus ?? 0);
   if (visibleCapacity > 0) return visibleCapacity;
@@ -625,7 +625,7 @@ function memoryCapacityForCard(
   return 0;
 }
 
-function memoryCapacityForDefinition(definitionId: string): number {
+function memoryCapacityForDefinition(definitionId: number): number {
   const capacity =
     cardSpecPlanningCardByDefinitionId(definitionId)?.planning.engine
       .characteristics.memoryLimitBonus;

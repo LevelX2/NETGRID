@@ -26,7 +26,7 @@ export type CorpTerminalAgendaDefense = Readonly<{
   install?: Readonly<{
     actionId: string;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     placement: "ice" | "root";
     credits: number;
     clicks: number;

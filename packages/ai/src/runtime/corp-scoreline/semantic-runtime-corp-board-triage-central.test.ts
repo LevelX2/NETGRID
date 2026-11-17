@@ -96,7 +96,7 @@ describe("semantic runtime corp board triage central protection", () => {
       corpHq: [
         iceCard("rd-wall", {
           title: "Wall of Ice",
-          definitionId: "onr_v1_278_wall-of-ice",
+          definitionId: 490,
           subtypes: ["Wall"],
           rulesText: "End the run.",
           rezCost: 6,
@@ -217,7 +217,7 @@ describe("semantic runtime corp board triage central protection", () => {
         centralServer("hq", [
           iceCard("hq-wall", {
             title: "Wall of Static",
-            definitionId: "onr_v1_279_wall-of-static",
+            definitionId: 491,
             rezzed: true,
             subtypes: ["Wall"],
             rulesText: "End the run.",
@@ -294,7 +294,7 @@ describe("semantic runtime corp board triage central protection", () => {
           agendaCard("hq-agenda", 2),
           iceCard("hq-wall", {
             title: "HQ Wall",
-            definitionId: "onr_v1_279_wall-of-static",
+            definitionId: 491,
             subtypes: ["Wall"],
             rulesText: "End the run.",
           }),

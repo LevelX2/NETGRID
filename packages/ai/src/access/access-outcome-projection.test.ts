@@ -8,7 +8,7 @@ describe("access outcome projection", () => {
   it("keeps projected access outcomes distinct from observed outcomes", () => {
     const projected = createProjectedAccessOutcome({
       serverId: "remote_1",
-      knownRootDefinitionId: "onr_v1_326_holovid-campaign",
+      knownRootDefinitionId: 538,
       projectedIntent: "decline",
       reason: "reserve_would_break",
       stateVersion: 12,
@@ -26,7 +26,7 @@ describe("access outcome projection", () => {
   it("models observed access outcomes separately", () => {
     const observed = observedAccessOutcomeEvidence({
       serverId: "remote_1",
-      knownRootDefinitionId: "onr_v1_326_holovid-campaign",
+      knownRootDefinitionId: 538,
       observedIntent: "trash",
       reason: "trash_affordable",
       stateVersion: 13,

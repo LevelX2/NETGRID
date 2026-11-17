@@ -49,7 +49,7 @@ describe("match Manhunt exact decision checkpoints", () => {
       const action = getLegalActions(state, "corp").find((candidate) =>
         index === 0
           ? candidate.actionId === result.decision!.actionId
-          : candidate.source === "corp_onr_v1_309_bbs-whispering-campaign_2" &&
+          : candidate.source === "corp_521_2" &&
             (index === 1
               ? candidate.type === "rez_card"
               : candidate.payload?.cardImplementationTakesHostedCredits ===
@@ -131,7 +131,7 @@ describe("match Manhunt exact decision checkpoints", () => {
         acceptableActions: [
           {
             type: "activated_card_ability",
-            sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+            sourceDefinitionId: 521,
           },
         ],
         planExecution: {
@@ -205,21 +205,21 @@ describe("match Manhunt exact decision checkpoints", () => {
   });
 });
 
-const CHANCE_OBSERVATION = "onr_v1_284_chance-observation";
-const AUDIT_OF_CALL_RECORDS = "onr_v1_283_audit-of-call-records";
-const URBAN_RENEWAL = "onr_v1_307_urban-renewal";
-const I_GOT_A_ROCK = "onr_v1_327_i-got-a-rock";
-const BBS_WHISPERING_CAMPAIGN = "onr_v1_309_bbs-whispering-campaign";
+const CHANCE_OBSERVATION = 496;
+const AUDIT_OF_CALL_RECORDS = 495;
+const URBAN_RENEWAL = 519;
+const I_GOT_A_ROCK = 539;
+const BBS_WHISPERING_CAMPAIGN = 521;
 const TAG_SOURCE_DEFINITION_IDS = new Set([
   CHANCE_OBSERVATION,
   AUDIT_OF_CALL_RECORDS,
-  "onr_v1_313_city-surveillance",
+  525,
 ]);
 const KILL_LINE_DEFINITION_IDS = new Set([
   ...TAG_SOURCE_DEFINITION_IDS,
-  "onr_v1_285_closed-accounts",
-  "onr_v1_299_power-grid-overload",
-  "onr_v1_302_scorched-earth",
+  497,
+  511,
+  514,
   URBAN_RENEWAL,
   I_GOT_A_ROCK,
 ]);
@@ -239,7 +239,7 @@ function campaignDevelopmentExpectation(): AiDecisionCheckpointV1["expectation"]
     acceptableActions: [
       {
         actionId:
-          "corp.install_card.corp_onr_v1_309_bbs-whispering-campaign_2.remote_1.corp_onr_v1_309_bbs-whispering-campaign_2",
+          "corp.install_card.corp_521_2.remote_1.corp_521_2",
       },
     ],
     planExecution: {
@@ -265,7 +265,7 @@ function mutateFixture(
 
 function moveCorpCardsToArchives(
   fixture: AiDecisionCheckpointV1,
-  definitionIds: ReadonlySet<string>,
+  definitionIds: ReadonlySet<number>,
 ): void {
   const state = fixture.engine.testOnlyGameState;
   const matchingIds = Object.values(state.cardInstances)

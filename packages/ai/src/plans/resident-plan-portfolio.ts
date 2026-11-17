@@ -179,7 +179,7 @@ export type ResidentSelectedActionOrigin = Readonly<{
     | Readonly<{
         immediateChoicePolicy: "select_bound_corp_archives_cards_to_hq";
         sourceCardInstanceId: string;
-        sourceCardDefinitionId: string;
+        sourceCardDefinitionId: number;
         selectionMode: "one" | "all";
         eligibleArchiveCardInstanceIds: string[];
         selectedArchiveCardInstanceIds: string[];
@@ -195,7 +195,7 @@ export type ResidentSelectedActionOrigin = Readonly<{
         sourceStepId: string;
         sourceActionType: "continue_run";
         sourceCardInstanceId: string;
-        sourceCardDefinitionId: string;
+        sourceCardDefinitionId: number;
       }>
     | Readonly<{
         immediateChoicePolicy: "resolve_runner_program_trash_before_install";
@@ -725,7 +725,7 @@ export function assertResidentPlanPortfolio(
         selectedActionOrigin.sourceActionType === "continue_run" &&
         selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&
         selectedActionOrigin.sourceCardDefinitionId ===
-          "onr_v1_275_vacuum-link") ||
+          487) ||
       (selectedActionOrigin.immediateChoicePolicy ===
         "resolve_runner_program_trash_before_install" &&
         selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&

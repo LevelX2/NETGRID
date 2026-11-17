@@ -124,7 +124,7 @@ it.each([true, false])(
     expect(input.playerView.opponent.agendaPoints).toBe(6);
     if (!diversionVisible) {
       input.playerView.opponent.rig = input.playerView.opponent.rig!.filter(
-        (card) => card.definitionId !== "onr_v1_062_shredder-uplink-protocol",
+        (card) => card.definitionId !== 274,
       );
     }
     const decision = chooseAiAction(input);

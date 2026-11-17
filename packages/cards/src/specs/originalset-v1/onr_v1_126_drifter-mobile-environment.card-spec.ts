@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_126_drifter-mobile-environment"),
+    cardDefinitionId: cardDefinitionId(338),
     title: "“Drifter” Mobile Environment",
     side: "runner",
     cardType: "hardware",

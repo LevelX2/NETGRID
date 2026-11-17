@@ -208,7 +208,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
     ).toBe("playable_mvp");
   });
 
@@ -221,7 +221,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
           ...MECHANIC_SMOKE_DECKS.agendaScoring.corp,
           id: "v1919_overadvance_score_corp",
           cards: [
-            { id: "onr_v1_214_project-babylon", quantity: 1 },
+            { id: 426, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
           ],
         },
@@ -234,7 +234,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     state.corp.clicks = 30;
     state.corp.maxHandSize = 100;
 
-    const agendaId = putCorpRootInRemote(state, "onr_v1_214_project-babylon");
+    const agendaId = putCorpRootInRemote(state, 426);
     const initial = structuredClone(state);
     for (let index = 0; index < 7; index += 1) {
       state = apply(
@@ -282,7 +282,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
 
     const agendaId = putCorpRootInRemote(
       state,
-      "onr_v1_202_genetics-visionary-acquisition",
+      414,
     );
     for (let index = 0; index < 4; index += 1) {
       state = apply(
@@ -300,7 +300,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
         action.type === "score_agenda" &&
         String(action.payload?.cardId) === agendaId,
     );
-    putCorpCardOnTopOfRd(state, "simple_agenda");
+    putCorpCardOnTopOfRd(state, 588);
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "Simple Agenda",
     );
@@ -309,7 +309,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       getLegalActions(state, "corp").some(
         (action) =>
           sourceDefinition(state, action) ===
-          "onr_v1_202_genetics-visionary-acquisition",
+          414,
       ),
     ).toBe(false);
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
@@ -327,11 +327,11 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     corpState.corp.clicks = 30;
     const chicagoId = putCorpRootInRemote(
       corpState,
-      "onr_v1_312_chicago-branch",
+      524,
     );
     const informationId = putCorpRootInRemote(
       corpState,
-      "onr_v1_328_information-laundering",
+      540,
     );
     corpState.cardInstances[chicagoId] = {
       ...corpState.cardInstances[chicagoId]!,
@@ -344,7 +344,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       rezzed: true,
       advancementCounters: 2,
     };
-    const targetAgendaId = putCorpRootInRemote(corpState, "simple_agenda");
+    const targetAgendaId = putCorpRootInRemote(corpState, 588);
 
     corpState = apply(
       corpState,
@@ -374,7 +374,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(corpState.corp.credits).toBe(beforeCredits + 8);
     expect(corpState.corp.archives).toContain(informationId);
     expect(corpState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      sourceDefinitionId: "onr_v1_328_information-laundering",
+      sourceDefinitionId: 540,
       advancementCounterCount: 2,
       gainedCredits: 8,
       sourceTrashed: true,
@@ -386,11 +386,11 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     accessState.runner.credits = 20;
     const programId = installRunnerProgramForTest(
       accessState,
-      "simple_decoder",
+      591,
     );
     const programTrashByAdvancementAssetId = putCorpRootInRemote(
       accessState,
-      "onr_v1_323_experimental-ai",
+      535,
     );
     accessState.cardInstances[programTrashByAdvancementAssetId] = {
       ...accessState.cardInstances[programTrashByAdvancementAssetId]!,
@@ -412,7 +412,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(accessState, action) === "onr_v1_323_experimental-ai",
+        sourceDefinition(accessState, action) === 535,
     );
     accessState = passRootRezWindowBeforeAccessIfOpen(accessState);
     accessState = apply(
@@ -424,8 +424,8 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(accessState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
       hiddenZoneAction: "v1919_access_ambush_trash_installed",
-      ambushDefinitionId: "onr_v1_323_experimental-ai",
-      trashedCardDefinitionId: "simple_decoder",
+      ambushDefinitionId: 535,
+      trashedCardDefinitionId: 591,
     });
     expect(accessState.eventLog.at(-1)?.visibilityClass).toBe(
       "hidden_info_barrier",
@@ -447,15 +447,15 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
 
     const agendaId = putCorpRootInRemote(
       state,
-      "onr_v1_202_genetics-visionary-acquisition",
+      414,
     );
-    moveCorpCardToHq(state, "onr_v1_300_project-consultants");
+    moveCorpCardToHq(state, 512);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_300_project-consultants",
+        sourceDefinition(state, action) === 512,
     );
     expect(state.pendingChoice?.source).toContain(
       "p3_34.distribute_advancement",
@@ -468,7 +468,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(state.cardInstances[agendaId]?.advancementCounters).toBe(4);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      sourceDefinitionId: "onr_v1_300_project-consultants",
+      sourceDefinitionId: 512,
       addedAdvancementCounters: 4,
     });
 
@@ -476,15 +476,15 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       ...state.cardInstances[agendaId]!,
       advancementCounters: 4,
     };
-    const secondAgendaId = putCorpRootInRemote(state, "simple_agenda");
-    moveCorpCardToHq(state, "onr_v1_291_falsified-transactions-expert");
+    const secondAgendaId = putCorpRootInRemote(state, 588);
+    moveCorpCardToHq(state, 503);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "play_operation" &&
         sourceDefinition(state, action) ===
-          "onr_v1_291_falsified-transactions-expert",
+          503,
     );
     const falsifiedOption = state.pendingChoice?.options.find(
       (option) => String(option.value) === `${agendaId}|${secondAgendaId}|3`,
@@ -494,14 +494,14 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(state.cardInstances[agendaId]?.advancementCounters).toBe(1);
     expect(state.cardInstances[secondAgendaId]?.advancementCounters).toBe(3);
 
-    moveCorpCardToHq(state, "onr_v1_304_systematic-layoffs");
+    moveCorpCardToHq(state, 516);
     const creditsBeforeLayoffs = state.corp.credits;
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
+        sourceDefinition(state, action) === 516,
     );
     expect(state.pendingChoice?.source).toContain(
       "p3_34.distribute_advancement",
@@ -516,7 +516,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     const layoffsPayload = state.eventLog.at(-1)?.publicPayload;
     expect(layoffsPayload).toMatchObject({
       actionType: "resolve_choice",
-      sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+      sourceDefinitionId: 516,
       addedAdvancementCounters: 2,
       targetCount: 1,
       publicTargetCount: 0,
@@ -529,7 +529,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(layoffsPayload).not.toHaveProperty("targetCardDefinitionIds");
     expect(JSON.stringify(layoffsPayload)).not.toContain(agendaId);
     expect(JSON.stringify(layoffsPayload)).not.toContain(
-      "onr_v1_202_genetics-visionary-acquisition",
+      414,
     );
     const runnerPublicPayload = getPlayerView(state, "runner").publicEvents.at(
       -1,
@@ -541,16 +541,16 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
     expect(JSON.stringify(runnerPublicPayload)).not.toContain(agendaId);
     expect(JSON.stringify(runnerPublicPayload)).not.toContain(
-      "onr_v1_202_genetics-visionary-acquisition",
+      414,
     );
 
-    moveCorpCardToHq(state, "onr_v1_292_management-shake-up");
+    moveCorpCardToHq(state, 504);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_292_management-shake-up",
+        sourceDefinition(state, action) === 504,
     );
     const managementOption = state.pendingChoice?.options.find(
       (option) => option.value === `${secondAgendaId}:3`,
@@ -560,7 +560,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(state.cardInstances[secondAgendaId]?.advancementCounters).toBe(6);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      sourceDefinitionId: "onr_v1_292_management-shake-up",
+      sourceDefinitionId: 504,
       addedAdvancementCounters: 3,
       publicTargetCount: 0,
       hiddenTargetCount: 1,
@@ -575,18 +575,18 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     state.corp.credits = 20;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.clicks = 5;
-    const firstAgendaId = putCorpRootInRemote(state, "simple_agenda");
+    const firstAgendaId = putCorpRootInRemote(state, 588);
     const secondAgendaId = putCorpRootInRemote(
       state,
-      "onr_v1_202_genetics-visionary-acquisition",
+      414,
     );
-    moveCorpCardToHq(state, "onr_v1_304_systematic-layoffs");
+    moveCorpCardToHq(state, 516);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     const layoffActions = getLegalActions(state, "corp").filter(
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
+        sourceDefinition(state, action) === 516,
     );
 
     expect(layoffActions).toHaveLength(1);
@@ -604,7 +604,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
+        sourceDefinition(state, action) === 516,
     );
     const placementOptions = state.pendingChoice?.options ?? [];
     expect(placementOptions).toHaveLength(3);
@@ -642,7 +642,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(state.cardInstances[secondAgendaId]?.advancementCounters).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+      sourceDefinitionId: 516,
       addedAdvancementCounters: 2,
       targetCount: 2,
       publicTargetCount: 0,
@@ -663,7 +663,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       id: "onr_v1_corp_systematic_layoffs_corporate_war",
       name: "O:NR V1.9.19 Advancement-Placement Corporate War",
       cards: [
-        { id: "onr_v1_196_corporate-war", quantity: 1 },
+        { id: 408, quantity: 1 },
         ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
       ],
     };
@@ -678,16 +678,16 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     state.corp.clicks = 5;
     const corporateWarId = putCorpRootInRemote(
       state,
-      "onr_v1_196_corporate-war",
+      408,
     );
-    moveCorpCardToHq(state, "onr_v1_304_systematic-layoffs");
+    moveCorpCardToHq(state, 516);
 
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
+        sourceDefinition(state, action) === 516,
     );
 
     expect(state.pendingChoice?.options).toHaveLength(1);
@@ -701,7 +701,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(state.cardInstances[corporateWarId]?.advancementCounters).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+      sourceDefinitionId: 516,
       addedAdvancementCounters: 2,
       targetCount: 1,
       publicTargetCount: 0,
@@ -717,18 +717,18 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     hardwareState.runner.credits = 20;
     const hardwareId = installRunnerHardwareForTest(
       hardwareState,
-      "simple_setup_hardware",
+      602,
     );
     putCorpRootInRemote(
       hardwareState,
-      "onr_v1_315_corprunners-shattered-remains",
+      527,
     );
     const shatteredId = hardwareState.corp.servers
       .flatMap((server) => server.root)
       .find(
         (id) =>
           hardwareState.cardInstances[id]?.definitionId ===
-          "onr_v1_315_corprunners-shattered-remains",
+          527,
       );
     expect(shatteredId).toBeDefined();
     if (shatteredId)
@@ -753,7 +753,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       (action) =>
         action.type === "rez_card" &&
         sourceDefinition(hardwareState, action) ===
-          "onr_v1_315_corprunners-shattered-remains",
+          527,
     );
     hardwareState = passRootRezWindowBeforeAccessIfOpen(hardwareState);
     hardwareState = apply(
@@ -764,7 +764,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(hardwareState.runner.heap).toContain(hardwareId);
     expect(hardwareState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "v1919_access_ambush_trash_installed",
-      ambushDefinitionId: "onr_v1_315_corprunners-shattered-remains",
+      ambushDefinitionId: 527,
     });
 
     let coreDamageState = toRunnerTurn(
@@ -774,7 +774,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     const coreBefore = coreDamageState.runner.coreDamage;
     const advancementCoreDamageAssetId = putCorpRootInRemote(
       coreDamageState,
-      "onr_v1_346_vacant-soulkiller",
+      558,
     );
     coreDamageState.cardInstances[advancementCoreDamageAssetId] = {
       ...coreDamageState.cardInstances[advancementCoreDamageAssetId]!,
@@ -797,7 +797,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       (action) =>
         action.type === "rez_card" &&
         sourceDefinition(coreDamageState, action) ===
-          "onr_v1_346_vacant-soulkiller",
+          558,
     );
     coreDamageState = passRootRezWindowBeforeAccessIfOpen(coreDamageState);
     coreDamageState = apply(
@@ -808,7 +808,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(coreDamageState.runner.coreDamage).toBe(coreBefore + 1);
     expect(coreDamageState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "v1919_access_ambush_damage",
-      ambushDefinitionId: "onr_v1_346_vacant-soulkiller",
+      ambushDefinitionId: 558,
       damageType: "core",
       damageAmount: 1,
     });
@@ -818,7 +818,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     netDamageState.runner.credits = 20;
     const gripBefore = netDamageState.runner.grip.length;
-    putCorpRootInRemote(netDamageState, "onr_v1_348_virus-test-site");
+    putCorpRootInRemote(netDamageState, 560);
     netDamageState = apply(
       netDamageState,
       "runner",
@@ -834,7 +834,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(netDamageState.runner.grip.length).toBe(Math.max(0, gripBefore - 1));
     expect(netDamageState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "v1919_access_ambush_damage",
-      ambushDefinitionId: "onr_v1_348_virus-test-site",
+      ambushDefinitionId: 560,
       damageType: "net",
       damageAmount: 1,
     });
@@ -847,9 +847,9 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     faitState.runner.credits = 20;
     const faitId = installRunnerProgramForTest(
       faitState,
-      "onr_v1_025_fait-accompli",
+      237,
     );
-    scoreRunnerAgendaForTest(faitState, "simple_agenda");
+    scoreRunnerAgendaForTest(faitState, 588);
     expect(
       getLegalActions(faitState, "runner").some(
         (action) =>
@@ -868,7 +868,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
           id: `${MECHANIC_SMOKE_DECKS.agendaScoring.corp.id}_with_city_surveillance`,
           cards: [
             ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
-            { id: "onr_v1_313_city-surveillance", quantity: 1 },
+            { id: 525, quantity: 1 },
           ],
         },
         agendaPointsToWin: 7,
@@ -880,11 +880,11 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     arasakaState.runner.coreDamage = 1;
     const arasakaId = moveRunnerCardToGrip(
       arasakaState,
-      "onr_v1_078_arasaka-owns-you",
+      290,
     );
     const cityId = putCorpRootInRemote(
       arasakaState,
-      "onr_v1_313_city-surveillance",
+      525,
     );
     arasakaState.cardInstances[cityId] = {
       ...arasakaState.cardInstances[cityId]!,
@@ -900,7 +900,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
         zone: { side: "runner", zone: "stack" },
       };
     }
-    moveCorpCardToHq(arasakaState, "onr_v1_302_scorched-earth");
+    moveCorpCardToHq(arasakaState, 514);
     arasakaState = apply(
       arasakaState,
       "runner",
@@ -916,7 +916,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(arasakaState, action) === "onr_v1_302_scorched-earth",
+        sourceDefinition(arasakaState, action) === 514,
     );
     expect(arasakaState.pendingChoice?.source).toContain("replacement");
     const arasakaOption = arasakaState.pendingChoice?.options.find(
@@ -953,7 +953,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
           id: "onr_v1_corp_v1919_olivia_rez_cost",
           cards: [
             ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
-            { id: "onr_v1_232_crystal-wall", quantity: 1 },
+            { id: 444, quantity: 1 },
           ],
         },
         agendaPointsToWin: 7,
@@ -963,7 +963,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     state.corp.credits = 2;
     state.corp.maxHandSize = 100;
-    const oliviaId = putCorpRootInRemote(state, "onr_v1_363_olivia-salazar");
+    const oliviaId = putCorpRootInRemote(state, 575);
     state.cardInstances[oliviaId] = {
       ...state.cardInstances[oliviaId]!,
       faceup: true,
@@ -972,7 +972,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     const iceId = putCorpIceOnServer(
       state,
       "remote_1",
-      "onr_v1_232_crystal-wall",
+      444,
     );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -995,7 +995,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(oliviaRez.payload).toMatchObject({
       cardId: iceId,
       discountedRezSourceCardId: oliviaId,
-      discountedRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
+      discountedRezSourceDefinitionId: 575,
       discountedRezCostBase: 4,
       temporaryDerezAfterRun: true,
       rezCostPaid: 2,
@@ -1058,8 +1058,8 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(state.run?.discountedRezUsedSourceIdsThisRun).toEqual([oliviaId]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "rez_ice",
-      cardDefinitionId: "onr_v1_232_crystal-wall",
-      discountedRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
+      cardDefinitionId: 444,
+      discountedRezSourceDefinitionId: 575,
       discountedRezCostBase: 4,
       temporaryDerezAfterRun: true,
       rezCostPaid: 2,
@@ -1089,8 +1089,8 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
           id: "onr_v1_corp_v1919_olivia_black_ice_quality_cinderella",
           cards: [
             ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
-            { id: "onr_v1_191_black-ice-quality-assurance", quantity: 1 },
-            { id: "onr_v1_228_cinderella", quantity: 1 },
+            { id: 403, quantity: 1 },
+            { id: 440, quantity: 1 },
           ],
         },
         agendaPointsToWin: 7,
@@ -1100,8 +1100,8 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     state.corp.credits = 4;
     state.corp.maxHandSize = 100;
-    scoreCorpAgendaForTest(state, "onr_v1_191_black-ice-quality-assurance");
-    const oliviaId = putCorpRootInRemote(state, "onr_v1_363_olivia-salazar");
+    scoreCorpAgendaForTest(state, 403);
+    const oliviaId = putCorpRootInRemote(state, 575);
     state.cardInstances[oliviaId] = {
       ...state.cardInstances[oliviaId]!,
       faceup: true,
@@ -1110,7 +1110,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     const iceId = putCorpIceOnServer(
       state,
       "remote_1",
-      "onr_v1_228_cinderella",
+      440,
     );
 
     state = toRunnerTurnFromCorpMain(state);
@@ -1152,7 +1152,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
           id: "onr_v1_corp_v1919_olivia_normal_rez",
           cards: [
             ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
-            { id: "onr_v1_232_crystal-wall", quantity: 1 },
+            { id: 444, quantity: 1 },
           ],
         },
         agendaPointsToWin: 7,
@@ -1162,7 +1162,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     state.corp.credits = 20;
     state.corp.maxHandSize = 100;
-    const oliviaId = putCorpRootInRemote(state, "onr_v1_363_olivia-salazar");
+    const oliviaId = putCorpRootInRemote(state, 575);
     state.cardInstances[oliviaId] = {
       ...state.cardInstances[oliviaId]!,
       faceup: true,
@@ -1171,7 +1171,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     const iceId = putCorpIceOnServer(
       state,
       "remote_1",
-      "onr_v1_232_crystal-wall",
+      444,
     );
 
     state = toRunnerTurnFromCorpMain(state);
@@ -1222,7 +1222,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
           id: "onr_v1_corp_v1919_olivia_quote_no_mutation",
           cards: [
             ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
-            { id: "onr_v1_232_crystal-wall", quantity: 1 },
+            { id: 444, quantity: 1 },
           ],
         },
         agendaPointsToWin: 7,
@@ -1232,7 +1232,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     state.corp.credits = 20;
     state.corp.maxHandSize = 100;
-    const oliviaId = putCorpRootInRemote(state, "onr_v1_363_olivia-salazar");
+    const oliviaId = putCorpRootInRemote(state, 575);
     state.cardInstances[oliviaId] = {
       ...state.cardInstances[oliviaId]!,
       faceup: true,
@@ -1241,7 +1241,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     const iceId = putCorpIceOnServer(
       state,
       "remote_1",
-      "onr_v1_232_crystal-wall",
+      444,
     );
     state = toRunnerTurnFromCorpMain(state);
     state = apply(
@@ -1268,7 +1268,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(oliviaQuote.publicPayload).toMatchObject({
       cardId: iceId,
       discountedRezSourceCardId: oliviaId,
-      discountedRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
+      discountedRezSourceDefinitionId: 575,
       discountedRezCostBase: 4,
       temporaryDerezAfterRun: true,
       rezCostPaid: 2,
@@ -1281,8 +1281,8 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       MECHANIC_SMOKE_GAMES.agendaScoring("v1919-fait-remote-counter"),
     );
     state.runner.credits = 20;
-    installRunnerProgramForTest(state, "onr_v1_025_fait-accompli");
-    putCorpRootInRemote(state, "onr_v1_363_olivia-salazar");
+    installRunnerProgramForTest(state, 237);
+    putCorpRootInRemote(state, 575);
     const remoteOne = state.corp.servers.find(
       (server) => server.id === "remote_1",
     );
@@ -1320,7 +1320,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     state = makeSuccessfulRemoteRun(state);
     expect(state.serverAgendaCostCountersByServer?.remote_1).toBe(2);
 
-    const agendaId = findCard(state, "simple_agenda");
+    const agendaId = findCard(state, 588);
     removeEverywhere(state, agendaId);
     remoteOne.root.push(agendaId);
     state.cardInstances[agendaId] = {
@@ -1359,7 +1359,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         );
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
     ).toBe("playable_mvp");
   });
 
@@ -1373,7 +1373,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           id: "onr_v1_corp_v1920_encryption_breakthrough_code_gate",
           cards: [
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
-            { id: "onr_v1_230_cortical-scanner", quantity: 1 },
+            { id: 442, quantity: 1 },
           ],
         },
         agendaPointsToWin: 7,
@@ -1384,19 +1384,19 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.corp.credits = 30;
     state.corp.clicks = 10;
     state.corp.maxHandSize = 99;
-    moveCorpCardToHq(state, "onr_v1_200_encryption-breakthrough");
+    moveCorpCardToHq(state, 412);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) ===
-          "onr_v1_200_encryption-breakthrough",
+          412,
     );
     const codeGateId = putCorpIceOnServer(
       state,
       "rd",
-      "onr_v1_230_cortical-scanner",
+      442,
     );
     for (let index = 0; index < 5; index += 1) {
       state = apply(
@@ -1405,7 +1405,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         (action) =>
           action.type === "advance_card" &&
           sourceDefinition(state, action) ===
-            "onr_v1_200_encryption-breakthrough",
+            412,
       );
     }
     const creditsBeforeScore = state.corp.credits;
@@ -1415,7 +1415,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       (action) =>
         action.type === "score_agenda" &&
         sourceDefinition(state, action) ===
-          "onr_v1_200_encryption-breakthrough",
+          412,
     );
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
@@ -1451,9 +1451,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     drawRunnerCardsForTest(state, 5);
     const scoredAgendaId = scoreCorpAgendaForTest(
       state,
-      "onr_v1_204_ice-transmutation",
+      416,
     );
-    const rockId = putCorpRootInRemote(state, "onr_v1_327_i-got-a-rock");
+    const rockId = putCorpRootInRemote(state, 539);
     state.cardInstances[rockId] = {
       ...state.cardInstances[rockId]!,
       faceup: true,
@@ -1482,7 +1482,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       abilityId: "tagged_meat_damage",
       agendaPointCost: 3,
       agendaPointCostPaid: 3,
-      spentAgendaDefinitionIds: "onr_v1_204_ice-transmutation",
+      spentAgendaDefinitionIds: 416,
       damageResolved: true,
       damageType: "meat",
       damageAmount: 15,
@@ -1505,7 +1505,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1920_emergency_self_construct_flatline",
           cards: [
-            { id: "onr_v1_302_scorched-earth", quantity: 1 },
+            { id: 514, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -1518,12 +1518,12 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.runner.coreDamage = 1;
     const emergencyId = installRunnerProgramForTest(
       state,
-      "onr_v1_022_emergency-self-construct",
+      234,
     );
     emptyRunnerGripForTest(state);
     drawRunnerCardsForTest(state, 2);
     const gripCardsLost = state.runner.grip.slice();
-    moveCorpCardToHq(state, "onr_v1_302_scorched-earth");
+    moveCorpCardToHq(state, 514);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
@@ -1534,7 +1534,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_302_scorched-earth",
+        sourceDefinition(state, action) === 514,
     );
     expect(state.pendingChoice?.source).toContain("replacement");
     const replacementOption = getPlayerView(
@@ -1559,7 +1559,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       replacementDecision: "apply",
       replacementOutcome: "replaced",
       flatlineReplacementAbility: "installed_flatline_prevention",
-      sourceDefinitionId: "onr_v1_022_emergency-self-construct",
+      sourceDefinitionId: 234,
       preventedAmount: 4,
       coreDamageRemoved: 1,
       gripCardsLost: 2,
@@ -1597,7 +1597,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1920_emergency_self_construct_prevention",
           cards: [
-            { id: "onr_v1_302_scorched-earth", quantity: 1 },
+            { id: 514, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -1607,10 +1607,10 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.runner.credits = 20;
     state.corp.credits = 20;
     state.runner.tags = 1;
-    installRunnerProgramForTest(state, "onr_v1_022_emergency-self-construct");
+    installRunnerProgramForTest(state, 234);
     emptyRunnerGripForTest(state);
     drawRunnerCardsForTest(state, 5);
-    moveCorpCardToHq(state, "onr_v1_302_scorched-earth");
+    moveCorpCardToHq(state, 514);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
@@ -1621,7 +1621,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_302_scorched-earth",
+        sourceDefinition(state, action) === 514,
     );
     expect(state.pendingChoice).toBeUndefined();
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
@@ -1655,13 +1655,13 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     state.corp.credits = 20;
     state.corp.clicks = 10;
-    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+    const iceId = putCorpIceOnServer(state, "rd", 444);
     state.cardInstances[iceId] = {
       ...state.cardInstances[iceId]!,
       faceup: true,
       rezzed: true,
     };
-    const agendaId = putCorpRootInRemote(state, "onr_v1_204_ice-transmutation");
+    const agendaId = putCorpRootInRemote(state, 416);
     state.cardInstances[agendaId] = {
       ...state.cardInstances[agendaId]!,
       advancementCounters: 5,
@@ -1681,7 +1681,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     expect(state.pendingChoice).toMatchObject({
       sourceCardInstanceId: agendaId,
-      sourceCardDefinitionId: "onr_v1_204_ice-transmutation",
+      sourceCardDefinitionId: 416,
     });
     expect(getPlayerView(state, "corp").pendingChoice?.options[0]?.value).toBe(
       iceId,
@@ -1704,7 +1704,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       abilityId: "scored_rezzed_ice_mark_modifier",
-      targetIceDefinitionId: "onr_v1_232_crystal-wall",
+      targetIceDefinitionId: 444,
       strengthBonus: 1,
       cardImplementationDuplicateEachSelfProvidedSubroutinePerCounter: true,
     });
@@ -1723,8 +1723,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       }),
     );
     state.runner.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_133_militech-mram-chip");
-    moveRunnerCardToGrip(state, "onr_v1_134_mram-chip");
+    moveRunnerCardToGrip(state, 345);
+    moveRunnerCardToGrip(state, 346);
 
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -1735,7 +1735,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_133_militech-mram-chip",
+        sourceDefinition(state, action) === 345,
     );
     expect(state.runner.memoryLimit).toBe(beforeMemoryLimit);
     expect(getPlayerView(state, "runner").own.maxHandSize).toBe(
@@ -1746,7 +1746,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_134_mram-chip",
+        sourceDefinition(state, action) === 346,
     );
     expect(state.runner.memoryLimit).toBe(beforeMemoryLimit);
 
@@ -1759,7 +1759,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(modifiers).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          sourceDefinitionId: "onr_v1_133_militech-mram-chip",
+          sourceDefinitionId: 345,
           kind: "max_hand_size",
           side: "runner",
           amount: 3,
@@ -1768,7 +1768,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           visibility: "public",
         }),
         expect.objectContaining({
-          sourceDefinitionId: "onr_v1_134_mram-chip",
+          sourceDefinitionId: 346,
           kind: "max_hand_size",
           side: "runner",
           amount: 2,
@@ -1783,17 +1783,17 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     expect(
       runnerView.own.rig?.find(
-        (card) => card.definitionId === "onr_v1_133_militech-mram-chip",
+        (card) => card.definitionId === 345,
       )?.maxHandSizeBonus,
     ).toBe(3);
     expect(
       runnerView.own.rig?.find(
-        (card) => card.definitionId === "onr_v1_134_mram-chip",
+        (card) => card.definitionId === 346,
       )?.maxHandSizeBonus,
     ).toBe(2);
     expect(
       getPlayerView(state, "corp").opponent.rig?.some(
-        (card) => card.definitionId === "onr_v1_133_militech-mram-chip",
+        (card) => card.definitionId === 345,
       ),
     ).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -1802,7 +1802,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
   });
 
   it("uses rezzed V1.9.20 action-economy assets through explicit legal actions", () => {
-    for (const definitionId of ["onr_v1_334_pacifica-regional-ai"]) {
+    for (const definitionId of [546]) {
       let state = apply(
         createGameAfterSetup({
           seed: `v1920-asset-actions-${definitionId}`,
@@ -1875,14 +1875,14 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.corp.credits = 10;
     const newsgroupId = putCorpRootInRemote(
       state,
-      "onr_v1_332_newsgroup-taunting",
+      544,
     );
     state.cardInstances[newsgroupId] = {
       ...state.cardInstances[newsgroupId]!,
       faceup: true,
       rezzed: true,
     };
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    putCorpCardOnTopOfRd(state, 596);
 
     const legal = mustAction(
       state,
@@ -1893,7 +1893,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(legal.costs[0]?.credits).toBe(1);
     expect(legal.payload).toMatchObject({
       runStartTaxCredits: 1,
-      runStartTaxSourceDefinitionIds: "onr_v1_332_newsgroup-taunting",
+      runStartTaxSourceDefinitionIds: 544,
     });
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -1906,7 +1906,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
       runStartTaxCredits: 1,
-      runStartTaxSourceDefinitionIds: "onr_v1_332_newsgroup-taunting",
+      runStartTaxSourceDefinitionIds: 544,
       runnerCreditsAfter: 0,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -1928,7 +1928,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     poorRunner.runner.clicks = 4;
     const poorNewsgroupId = putCorpRootInRemote(
       poorRunner,
-      "onr_v1_332_newsgroup-taunting",
+      544,
     );
     poorRunner.cardInstances[poorNewsgroupId] = {
       ...poorRunner.cardInstances[poorNewsgroupId]!,
@@ -1958,7 +1958,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.corp.maxHandSize = 100;
     const assetId = putCorpRootInRemote(
       state,
-      "onr_v1_334_pacifica-regional-ai",
+      546,
     );
     state.cardInstances[assetId] = {
       ...state.cardInstances[assetId]!,
@@ -2000,8 +2000,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       cards: [
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
-        { id: "simple_barrier_ice", quantity: 1 },
-        { id: "simple_code_gate_ice", quantity: 1 },
+        { id: 589, quantity: 1 },
+        { id: 590, quantity: 1 },
       ],
     };
     let state = apply(
@@ -2018,10 +2018,10 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.corp.maxHandSize = 100;
     const fortressId = putCorpRootInRemote(
       state,
-      "onr_v1_324_fortress-architects",
+      536,
     );
-    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
-    putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
+    putCorpIceOnServer(state, "rd", 589);
+    putCorpIceOnServer(state, "rd", 590);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(
@@ -2029,9 +2029,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_324_fortress-architects",
+        sourceDefinition(state, action) === 536,
     );
-    const iceId = moveCorpCardToHq(state, "onr_v1_232_crystal-wall");
+    const iceId = moveCorpCardToHq(state, 444);
     const legal = mustAction(
       state,
       "corp",
@@ -2046,7 +2046,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       iceInstallAdditionalCost: 0,
       iceInstallReduction: 1,
       iceInstallTotalCost: 1,
-      iceInstallReductionSourceDefinitionIds: "onr_v1_324_fortress-architects",
+      iceInstallReductionSourceDefinitionIds: 536,
     });
 
     const stale = structuredClone(state);
@@ -2078,7 +2078,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       iceInstallBaseCost: 2,
       iceInstallReduction: 1,
       iceInstallTotalCost: 1,
-      iceInstallReductionSourceDefinitionIds: "onr_v1_324_fortress-architects",
+      iceInstallReductionSourceDefinitionIds: 536,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"hq"\s*:|"rd"\s*:|"Simple Agenda"|"Simple Economy Operation"/,
@@ -2093,8 +2093,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       cards: [
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
-        { id: "simple_barrier_ice", quantity: 1 },
-        { id: "simple_code_gate_ice", quantity: 1 },
+        { id: 589, quantity: 1 },
+        { id: 590, quantity: 1 },
       ],
     };
     let unrezzed = apply(
@@ -2108,10 +2108,10 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       (action) => action.type === "mandatory_draw",
     );
     unrezzed.corp.credits = 20;
-    putCorpRootInRemote(unrezzed, "onr_v1_324_fortress-architects");
-    putCorpIceOnServer(unrezzed, "rd", "simple_barrier_ice");
-    putCorpIceOnServer(unrezzed, "rd", "simple_code_gate_ice");
-    const unrezzedIceId = moveCorpCardToHq(unrezzed, "onr_v1_232_crystal-wall");
+    putCorpRootInRemote(unrezzed, 536);
+    putCorpIceOnServer(unrezzed, "rd", 589);
+    putCorpIceOnServer(unrezzed, "rd", 590);
+    const unrezzedIceId = moveCorpCardToHq(unrezzed, 444);
     const unrezzedInstall = mustAction(
       unrezzed,
       "corp",
@@ -2137,15 +2137,15 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       (action) => action.type === "mandatory_draw",
     );
     nonIce.corp.credits = 20;
-    putCorpRootInRemote(nonIce, "onr_v1_324_fortress-architects");
+    putCorpRootInRemote(nonIce, 536);
     nonIce = apply(
       nonIce,
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(nonIce, action) === "onr_v1_324_fortress-architects",
+        sourceDefinition(nonIce, action) === 536,
     );
-    const regionId = moveCorpCardToHq(nonIce, "onr_v1_360_jerusalem-city-grid");
+    const regionId = moveCorpCardToHq(nonIce, 572);
     const regionInstall = mustAction(
       nonIce,
       "corp",
@@ -2171,16 +2171,16 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     state.corp.credits = 20;
     state.runner.credits = 20;
-    putCorpRootInRemote(state, "onr_v1_324_fortress-architects");
+    putCorpRootInRemote(state, 536);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_324_fortress-architects",
+        sourceDefinition(state, action) === 536,
     );
     state = toRunnerTurnFromCorpMain(state);
-    const decoderId = moveRunnerCardToGrip(state, "simple_decoder");
+    const decoderId = moveRunnerCardToGrip(state, 591);
     const legal = mustAction(
       state,
       "runner",
@@ -2203,7 +2203,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.runner.rig.programs).toContain(decoderId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
-      cardDefinitionId: "simple_decoder",
+      cardDefinitionId: 591,
     });
     expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
       "iceInstallReduction",
@@ -2228,7 +2228,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.corp.clicks = 10;
     state.corp.maxHandSize = 5;
 
-    moveCorpCardToHq(state, "onr_v1_205_main-office-relocation");
+    moveCorpCardToHq(state, 417);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(
@@ -2236,7 +2236,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_205_main-office-relocation",
+        sourceDefinition(state, action) === 417,
     );
     for (let index = 0; index < 4; index += 1) {
       state = apply(
@@ -2245,7 +2245,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         (action) =>
           action.type === "advance_card" &&
           sourceDefinition(state, action) ===
-            "onr_v1_205_main-office-relocation",
+            417,
       );
     }
     state = apply(
@@ -2253,7 +2253,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(state, action) === "onr_v1_205_main-office-relocation",
+        sourceDefinition(state, action) === 417,
     );
 
     expect(state.corp.maxHandSize).toBe(5);
@@ -2276,7 +2276,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       id: "onr_v1_corp_v1920_bioweapons_meat_damage",
       name: "O:NR V1.9.20 Bioweapons Meat Damage",
       cards: [
-        { id: "onr_v1_302_scorched-earth", quantity: 1 },
+        { id: 514, quantity: 1 },
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
@@ -2296,14 +2296,14 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.runner.tags = 1;
     drawRunnerCardsForTest(state, 3);
 
-    moveCorpCardToHq(state, "onr_v1_190_bioweapons-engineering");
+    moveCorpCardToHq(state, 402);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) ===
-          "onr_v1_190_bioweapons-engineering" &&
+          402 &&
         action.payload?.serverId === "new_remote" &&
         action.payload?.placement === "root",
     );
@@ -2314,7 +2314,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         (action) =>
           action.type === "advance_card" &&
           sourceDefinition(state, action) ===
-            "onr_v1_190_bioweapons-engineering",
+            402,
       );
     }
     state = apply(
@@ -2322,13 +2322,13 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(state, action) === "onr_v1_190_bioweapons-engineering",
+        sourceDefinition(state, action) === 402,
     );
     expect(
       state.corp.scoreArea.map((id) => state.cardInstances[id]?.definitionId),
-    ).toContain("onr_v1_190_bioweapons-engineering");
+    ).toContain(402);
 
-    moveCorpCardToHq(state, "onr_v1_302_scorched-earth");
+    moveCorpCardToHq(state, 514);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(
@@ -2336,12 +2336,12 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_302_scorched-earth",
+        sourceDefinition(state, action) === 514,
     );
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
-      cardDefinitionId: "onr_v1_302_scorched-earth",
+      cardDefinitionId: 514,
       damageResolved: true,
       damageType: "meat",
       baseDamageAmount: 4,
@@ -2368,7 +2368,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       }),
     );
     state.runner.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+    moveRunnerCardToGrip(state, 380);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(
@@ -2376,11 +2376,11 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_168_loan-from-chiba",
+        sourceDefinition(state, action) === 380,
     );
     const loanId = state.runner.rig.resources.find(
       (id) =>
-        state.cardInstances[id]?.definitionId === "onr_v1_168_loan-from-chiba",
+        state.cardInstances[id]?.definitionId === 380,
     );
     expect(loanId).toBeDefined();
     if (!loanId) throw new Error("Missing Loan from Chiba");
@@ -2388,17 +2388,17 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(cardCounterAmount(state, loanId, "recurring_credit")).toBe(0);
     expect(
       getPlayerView(state, "corp").opponent.rig?.find(
-        (card) => card.definitionId === "onr_v1_168_loan-from-chiba",
+        (card) => card.definitionId === 380,
       )?.counters?.recurring_credit,
     ).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_168_loan-from-chiba",
+      cardDefinitionId: 380,
       resolvedEffects: [
         expect.objectContaining({
           kind: "gain_credits",
           side: "runner",
           amount: 12,
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          sourceDefinitionId: 380,
           reason: "card_resolver",
         }),
       ],
@@ -2423,13 +2423,13 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     state.runner.credits = 20;
     state.corp.maxHandSize = 100;
-    moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+    moveRunnerCardToGrip(state, 380);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_168_loan-from-chiba",
+        sourceDefinition(state, action) === 380,
     );
     expect(state.runner.credits).toBe(32);
     const initial = structuredClone(state);
@@ -2453,7 +2453,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           side: "runner",
           amount: 1,
           reason: "start_of_turn",
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          sourceDefinitionId: 380,
         }),
       ]),
     });
@@ -2490,17 +2490,17 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       }),
     );
     state.runner.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+    moveRunnerCardToGrip(state, 380);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_168_loan-from-chiba",
+        sourceDefinition(state, action) === 380,
     );
     const loanId = state.runner.rig.resources.find(
       (id) =>
-        state.cardInstances[id]?.definitionId === "onr_v1_168_loan-from-chiba",
+        state.cardInstances[id]?.definitionId === 380,
     );
     expect(loanId).toBeDefined();
     if (!loanId) throw new Error("Missing Loan from Chiba");
@@ -2557,7 +2557,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.phase).toBe("runner_action_phase");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "end_turn",
-      sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+      sourceDefinitionId: 380,
       sourceTrashed: true,
       resolvedEffects: [
         expect.objectContaining({
@@ -2567,12 +2567,12 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           paidCredits: 10,
           gameLost: false,
           reason: "source_left_play",
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          sourceDefinitionId: 380,
         }),
         expect.objectContaining({
           kind: "trash_source",
           reason: "end_of_turn",
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          sourceDefinitionId: 380,
         }),
       ],
     });
@@ -2593,7 +2593,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.runner.credits).toBe(22);
     expect(
       JSON.stringify(state.eventLog.at(-1)?.publicPayload ?? {}),
-    ).not.toContain("onr_v1_168_loan-from-chiba");
+    ).not.toContain(380);
   });
 
   it("makes the Runner lose the game if Loan from Chiba leaves play without 10 credits", () => {
@@ -2607,13 +2607,13 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       }),
     );
     state.runner.credits = 0;
-    moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+    moveRunnerCardToGrip(state, 380);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_168_loan-from-chiba",
+        sourceDefinition(state, action) === 380,
     );
     state.runner.credits = 9;
     const leavePlayAction = mustAction(
@@ -2652,7 +2652,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           paidCredits: 0,
           gameLost: true,
           winner: "corp",
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          sourceDefinitionId: 380,
         }),
       ]),
     });
@@ -2671,17 +2671,17 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         agendaPointsToWin: 7,
       }),
     );
-    moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+    moveRunnerCardToGrip(state, 380);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_168_loan-from-chiba",
+        sourceDefinition(state, action) === 380,
     );
     const firstLoanId = state.runner.rig.resources.find(
       (id) =>
-        state.cardInstances[id]?.definitionId === "onr_v1_168_loan-from-chiba",
+        state.cardInstances[id]?.definitionId === 380,
     );
     if (!firstLoanId) throw new Error("Missing first Loan from Chiba");
     const secondLoanId = "loan_from_chiba_second" as CardInstanceId;
@@ -2737,7 +2737,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       id: "spotcheck_rabbit_trace_runner",
       name: "Spotcheck Rabbit Trace Runner",
       cards: [
-        { id: "onr_v1_051_rabbit", quantity: 1 },
+        { id: 263, quantity: 1 },
         ...MECHANIC_SMOKE_DECKS.traceTags.runner.cards,
       ],
     };
@@ -2750,8 +2750,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         agendaPointsToWin: 7,
       }),
     );
-    installRunnerProgramForTest(state, "onr_v1_051_rabbit");
-    putCorpIceOnServer(state, "rd", "onr_v1_221_asp");
+    installRunnerProgramForTest(state, 263);
+    putCorpIceOnServer(state, "rd", 433);
     state.corp.credits = 20;
     state.runner.credits = 4;
 
@@ -2766,7 +2766,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_221_asp",
+        sourceDefinition(state, action) === 433,
     );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -2785,7 +2785,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       ),
     ).toBe(true);
     expect(state.trace).toMatchObject({
-      sourceDefinitionId: "onr_v1_221_asp",
+      sourceDefinitionId: 433,
       effectiveTraceLimit: 4,
       corpBidMax: expectedCorpBidMax,
       rabbitTraceLimitReduction: 1,
@@ -2810,8 +2810,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           id: "spotcheck_artemis_runner",
           name: "Spotcheck Artemis Runner",
           cards: [
-            { id: "onr_v1_136_pandoras-deck", quantity: 1 },
-            { id: "onr_v1_122_artemis-2020", quantity: 1 },
+            { id: 348, quantity: 1 },
+            { id: 334, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -2821,18 +2821,18 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     state.runner.credits = 30;
     state.runner.clicks = 10;
-    moveRunnerCardToGrip(state, "onr_v1_136_pandoras-deck");
-    moveRunnerCardToGrip(state, "onr_v1_122_artemis-2020");
+    moveRunnerCardToGrip(state, 348);
+    moveRunnerCardToGrip(state, 334);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_136_pandoras-deck",
+        sourceDefinition(state, action) === 348,
     );
     const oldDeckId = state.runner.rig.hardware.find(
       (id) =>
-        state.cardInstances[id]?.definitionId === "onr_v1_136_pandoras-deck",
+        state.cardInstances[id]?.definitionId === 348,
     );
     const memoryBefore = state.runner.memoryLimit;
     state = apply(
@@ -2840,11 +2840,11 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_122_artemis-2020",
+        sourceDefinition(state, action) === 334,
     );
     const artemisId = state.runner.rig.hardware.find(
       (id) =>
-        state.cardInstances[id]?.definitionId === "onr_v1_122_artemis-2020",
+        state.cardInstances[id]?.definitionId === 334,
     );
     expect(artemisId).toBeDefined();
     if (!artemisId) throw new Error("Missing Artemis");
@@ -2871,14 +2871,14 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.corp.clicks = 3;
     const assetId = putCorpRootInRemote(
       state,
-      "onr_v1_343_south-african-mining-corp",
+      555,
     );
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
           action.type === "activated_card_ability" &&
           sourceDefinition(state, action) ===
-            "onr_v1_343_south-african-mining-corp",
+            555,
       ),
     ).toBe(false);
     state.cardInstances[assetId] = {
@@ -2892,7 +2892,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       (action) =>
         action.type === "activated_card_ability" &&
         sourceDefinition(state, action) ===
-          "onr_v1_343_south-african-mining-corp",
+          555,
     );
     expect(legal.costs).toEqual([{ clicks: 3 }]);
     expect(legal.label).toBe("6 Credits nehmen");
@@ -2904,7 +2904,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           (action) =>
             action.type === "activated_card_ability" &&
             sourceDefinition(lowClickLegalState, action) ===
-              "onr_v1_343_south-african-mining-corp",
+              555,
         ),
       ).toBe(false);
     }
@@ -2944,7 +2944,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.corp.archives).not.toContain(assetId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
-      cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+      cardDefinitionId: 555,
       cardImplementationAbility: "activated",
       gainedCredits: 6,
       corpCreditsAfter: 11,
@@ -2954,7 +2954,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           side: "corp",
           amount: 6,
           reason: "card_resolver",
-          sourceDefinitionId: "onr_v1_343_south-african-mining-corp",
+          sourceDefinitionId: 555,
           sourceTitle: "South African Mining Corp",
         }),
       ],
@@ -2968,7 +2968,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     const approachIce = (
       seed: string,
       iceServerId: "rd" | "remote_1",
-      iceDefinitionId = "onr_v1_232_crystal-wall",
+      iceDefinitionId = 444,
     ): GameState => {
       let state = apply(
         createGameAfterSetup({
@@ -2978,7 +2978,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
             cards: [
               ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
-              { id: "simple_code_gate_ice", quantity: 1 },
+              { id: 590, quantity: 1 },
             ],
           },
           agendaPointsToWin: 7,
@@ -2989,7 +2989,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       state.corp.credits = 20;
       const gridId = putCorpRootInRemote(
         state,
-        "onr_v1_360_jerusalem-city-grid",
+        572,
       );
       state.cardInstances[gridId] = {
         ...state.cardInstances[gridId]!,
@@ -3019,7 +3019,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     const sameServerNonWallState = approachIce(
       "spotcheck-jerusalem-city-grid-non-wall",
       "remote_1",
-      "simple_code_gate_ice",
+      590,
     );
     const ownServerRez = mustAction(
       ownServerState,
@@ -3042,7 +3042,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       rezCostReductionAmount: 2,
     });
     expect(ownServerRez.payload?.rezCostReductionSourceDefinitionIds).toContain(
-      "onr_v1_360_jerusalem-city-grid",
+      572,
     );
     expect(otherServerRez.costs[0]?.credits).toBe(4);
     expect(
@@ -3056,7 +3056,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(
       getPlayerView(ownServerAfterRez, "runner").run?.encounteredIce?.strength,
     ).toBe(
-      (CARD_DEFINITIONS_BY_ID["onr_v1_232_crystal-wall"]?.strength ?? 0) + 1,
+      (CARD_DEFINITIONS_BY_ID[444]?.strength ?? 0) + 1,
     );
     const otherServerAfterRez = apply(
       otherServerState,
@@ -3066,7 +3066,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(
       getPlayerView(otherServerAfterRez, "runner").run?.encounteredIce
         ?.strength,
-    ).toBe(CARD_DEFINITIONS_BY_ID["onr_v1_232_crystal-wall"]?.strength);
+    ).toBe(CARD_DEFINITIONS_BY_ID[444]?.strength);
     const sameServerNonWallAfterRez = apply(
       sameServerNonWallState,
       "corp",
@@ -3085,7 +3085,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       ?.root.find(
         (cardId) =>
           unrezzedGrid.cardInstances[cardId]?.definitionId ===
-          "onr_v1_360_jerusalem-city-grid",
+          572,
       );
     if (gridId) {
       unrezzedGrid.cardInstances[gridId] = {
@@ -3108,10 +3108,10 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(
       getPlayerView(unrezzedGridAfterRez, "runner").run?.encounteredIce
         ?.strength,
-    ).toBe(CARD_DEFINITIONS_BY_ID["onr_v1_232_crystal-wall"]?.strength);
+    ).toBe(CARD_DEFINITIONS_BY_ID[444]?.strength);
     expect(
       cardImplementationCoverageForDefinitionId(
-        "onr_v1_360_jerusalem-city-grid",
+        572,
       )?.status,
     ).toBe("implemented");
   });
@@ -3126,7 +3126,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         agendaPointsToWin: 7,
       }),
     );
-    const cityId = putCorpRootInRemote(state, "onr_v1_313_city-surveillance");
+    const cityId = putCorpRootInRemote(state, 525);
     state.corp.credits = 0;
     state.runner.credits = 1;
     state.runner.tags = 0;
@@ -3230,7 +3230,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       ).toBeDefined();
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
     ).toBe("playable_mvp");
   });
 
@@ -3244,7 +3244,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
           id: "onr_v1_corp_v1921_random_probe",
           name: "O:NR V1.9.21 Schlaghund Corp",
           cards: [
-            { id: "onr_v1_339_schlaghund", quantity: 1 },
+            { id: 551, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -3268,7 +3268,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       };
     }
 
-    const assetId = putCorpRootInRemote(state, "onr_v1_339_schlaghund");
+    const assetId = putCorpRootInRemote(state, 551);
     state.cardInstances[assetId] = {
       ...state.cardInstances[assetId]!,
       faceup: true,
@@ -3366,8 +3366,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
             id: "onr_v1_corp_v1921_rio_after_pass",
             name: "O:NR V1.9.21 Rio After Pass Corp",
             cards: [
-              { id: "onr_v1_367_rio-de-janeiro-city-grid", quantity: 1 },
-              { id: "simple_barrier_ice", quantity: 1 },
+              { id: 579, quantity: 1 },
+              { id: 589, quantity: 1 },
               ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
             ],
           },
@@ -3381,9 +3381,9 @@ describe("V1.9.21 Deterministic Random WIP", () => {
 
       const upgradeId = putCorpRootInRemote(
         state,
-        "onr_v1_367_rio-de-janeiro-city-grid",
+        579,
       );
-      const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+      const iceId = putCorpIceOnServer(state, "remote_1", 589);
       state.cardInstances[upgradeId] = {
         ...state.cardInstances[upgradeId]!,
         faceup: true,
@@ -3425,8 +3425,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "continue_run",
         abilityId: "rio_de_janeiro_passed_ice",
-        sourceDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
-        passedIceDefinitionId: "simple_barrier_ice",
+        sourceDefinitionId: 579,
+        passedIceDefinitionId: 589,
         serverLabel: "Remote 1",
         randomCounterAfter: randomBefore + 1,
         v1921DieRoll: expectedRoll,
@@ -3438,8 +3438,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
           getPlayerView(state, side).publicEvents.at(-1)?.publicPayload,
         ).toMatchObject({
           abilityId: "rio_de_janeiro_passed_ice",
-          sourceDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
-          passedIceDefinitionId: "simple_barrier_ice",
+          sourceDefinitionId: 579,
+          passedIceDefinitionId: 589,
           serverLabel: "Remote 1",
           v1921DieRoll: expectedRoll,
           rioRunEnded: expectedRunEnded,
@@ -3456,7 +3456,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
   );
 
   it("does not invent a manual Boardwalk die-probe action", () => {
-    for (const definitionId of ["onr_v1_008_boardwalk"]) {
+    for (const definitionId of [220]) {
       let state = toRunnerTurn(
         createGameAfterSetup({
           seed: `v1921-${definitionId}-program-die-probe`,
@@ -3500,7 +3500,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
           id: "onr_v1_runner_v1921_ai_boon_run_start",
           name: "O:NR V1.9.21 AI Boon Run Start Runner",
           cards: [
-            { id: "onr_v1_002_ai-boon", quantity: 1 },
+            { id: 214, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -3511,8 +3511,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     state.runner.credits = 20;
     state.runner.clicks = 3;
     state.runner.memoryLimit = 20;
-    installRunnerProgramForTest(state, "onr_v1_002_ai-boon");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    installRunnerProgramForTest(state, 214);
+    putCorpCardOnTopOfRd(state, 596);
 
     expect(
       getLegalActions(state, "runner").some(
@@ -3542,7 +3542,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
       abilityId: "run_start_random_strength_bonus",
-      sourceDefinitionId: "onr_v1_002_ai-boon",
+      sourceDefinitionId: 214,
       randomPurpose: "v1921.die.onr_v1_002_ai-boon.run_start_strength",
       randomCounterAfter: randomBefore + 1,
     });
@@ -3566,7 +3566,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       }),
     );
     withoutAiBoon.runner.clicks = 3;
-    putCorpCardOnTopOfRd(withoutAiBoon, "simple_economy_operation");
+    putCorpCardOnTopOfRd(withoutAiBoon, 596);
     const noSourceRandomBefore = withoutAiBoon.randomDrawRecords.length;
     withoutAiBoon = apply(
       withoutAiBoon,
@@ -3587,7 +3587,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
           id: "onr_v1_runner_random_dice_split_high_roll",
           name: "O:NR V1.9.21 Playful AI High Roll Runner",
           cards: [
-            { id: "onr_v1_104_playful-ai", quantity: 1 },
+            { id: 316, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -3598,7 +3598,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     state.runner.credits = 20;
     state.runner.clicks = 3;
 
-    const eventId = moveRunnerCardToGrip(state, "onr_v1_104_playful-ai");
+    const eventId = moveRunnerCardToGrip(state, 316);
     const legal = mustAction(
       state,
       "runner",
@@ -3665,7 +3665,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
           id: "onr_v1_runner_random_dice_split_split_loop",
           name: "O:NR V1.9.21 Playful AI Split Loop Runner",
           cards: [
-            { id: "onr_v1_104_playful-ai", quantity: 1 },
+            { id: 316, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -3680,7 +3680,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       typeof option.value === "number"
         ? option.value
         : Number(/^gain_(\d+)_set_aside_\d+$/.exec(option.id)?.[1] ?? 0);
-    const eventId = moveRunnerCardToGrip(state, "onr_v1_104_playful-ai");
+    const eventId = moveRunnerCardToGrip(state, 316);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     const randomBefore = state.randomDrawRecords.length;
@@ -3780,7 +3780,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
           id: "onr_v1_runner_v1921_quest_random_probe",
           name: "O:NR V1.9.21 Quest Random Probe Runner",
           cards: [
-            { id: "onr_v1_172_quest-for-cattekin", quantity: 1 },
+            { id: 384, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -3793,7 +3793,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
 
     const resourceId = installRunnerResourceForTest(
       state,
-      "onr_v1_172_quest-for-cattekin",
+      384,
     );
     expect(
       getLegalActions(state, "runner").some(

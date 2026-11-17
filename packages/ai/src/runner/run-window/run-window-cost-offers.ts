@@ -57,7 +57,7 @@ export function originalPaymentSelectionReachesWindow(
     first.publicPayload.abilityId ===
       "p3_54_delayed_success_intervention_choice" &&
     first.publicPayload.hiddenZoneBarrier === true &&
-    typeof first.publicPayload.sourceDefinitionId === "string" &&
+    typeof first.publicPayload.sourceDefinitionId === "number" &&
     last?.publicPayload.actionType === "resolve_choice" &&
     last.publicPayload.hiddenZoneAction ===
       "successful_run_temporary_encounter" &&
@@ -66,7 +66,7 @@ export function originalPaymentSelectionReachesWindow(
       first.publicPayload.sourceDefinitionId &&
     last.publicPayload.serverId === run.attackedServerId &&
     last.publicPayload.revealKind === "reveal" &&
-    typeof last.publicPayload.cardDefinitionId === "string" &&
+    typeof last.publicPayload.cardDefinitionId === "number" &&
     last.publicPayload.cardDefinitionId ===
       last.publicPayload.targetIceDefinitionId;
   return (
@@ -96,7 +96,7 @@ export function originalPaymentSelectionReachesWindow(
     last.publicPayload.runnerCostPenaltySupportWindowId === windowId &&
     last.publicPayload.runnerCostPenaltySupportOriginalActionId ===
       origin.originalActionId &&
-    typeof last.publicPayload.targetIceDefinitionId === "string"
+    typeof last.publicPayload.targetIceDefinitionId === "number"
   );
 }
 

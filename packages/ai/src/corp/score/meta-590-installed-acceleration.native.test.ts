@@ -37,9 +37,9 @@ it("finishes the installed terminal-steal agenda before a speculative defense dr
   );
   const decision = chooseAiAction(input),
     root =
-      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_206_marine-arcology_1%3Aremote_1";
+      "plan:corp.score_agenda:agenda%3Acorp_418_1%3Aremote_1";
   expect(decision.actionId).toBe(
-    "corp.play_operation.corp_onr_v1_304_systematic-layoffs_2.corp_onr_v1_304_systematic-layoffs_2",
+    "corp.play_operation.corp_516_2.corp_516_2",
   );
   expect(decision).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
   expect(decision.decisionDebug!.planFirstDecision!).toMatchObject({
@@ -71,7 +71,7 @@ it("finishes the installed terminal-steal agenda before a speculative defense dr
   const choice = getPlayerView(state, "corp").pendingChoice!;
   expect(choice.options).toHaveLength(1);
   expect(choice.options[0]!.id).toBe(
-    "placement_corp_onr_v1_206_marine-arcology_1_2",
+    "placement_corp_418_1_2",
   );
   step(
     getLegalActions(state, "corp").find((a) => a.type === "resolve_choice")!

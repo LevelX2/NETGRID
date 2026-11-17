@@ -28,7 +28,7 @@ import { runnerHqMemoryDiagnosticsForMetrics } from "./runner-hq-memory-diagnost
 import { runnerKnownCardPositionDiagnosticsForMetrics } from "./runner-known-card-position-diagnostics";
 
 export type RunnerCentralPressureDiagnosticsDependencies = {
-  rolesForCardId: (definitionId: string | undefined) => string[];
+  rolesForCardId: (definitionId: number | undefined) => string[];
   sourceDefinitionIdForSimulationAction: (
     input: AiDecisionInput,
     action: LegalAction,

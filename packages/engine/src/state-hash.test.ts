@@ -162,31 +162,31 @@ describe("mechanical StateHash baseline", () => {
       baseline: CURRENT_RULES_BASELINE,
       eventLog: [],
       cardInstances: {
-        z: { instanceId: "z", definitionId: "onr_v1_154_broker" },
+        z: { instanceId: "z", definitionId: 366 },
         classic: {
           instanceId: "classic",
-          definitionId: "onr_classic_031_rent-i-con",
+          definitionId: 35,
         },
-        testset: { instanceId: "testset", definitionId: "simple_agenda" },
+        testset: { instanceId: "testset", definitionId: 588 },
         preview: {
           instanceId: "preview",
-          definitionId: "catalog_preview_resource_001",
+          definitionId: 2,
         },
-        legacy: { instanceId: "legacy", definitionId: "onr_v1_001_afreet" },
-        a: { instanceId: "a", definitionId: "onr_v1_168_loan-from-chiba" },
+        legacy: { instanceId: "legacy", definitionId: 213 },
+        a: { instanceId: "a", definitionId: 380 },
         duplicate: {
           instanceId: "duplicate",
-          definitionId: "onr_v1_154_broker",
+          definitionId: 366,
         },
       },
     } as unknown as GameState;
 
     expect(matchCardSpecDefinitionIdsForState(state)).toEqual([
-      "onr_classic_031_rent-i-con",
-      "onr_v1_001_afreet",
-      "onr_v1_154_broker",
-      "onr_v1_168_loan-from-chiba",
-      "simple_agenda",
+      35,
+      213,
+      366,
+      380,
+      588,
     ]);
     const reordered = structuredClone(state);
     reordered.cardInstances = Object.fromEntries(
@@ -202,11 +202,11 @@ describe("mechanical StateHash baseline", () => {
       baseline: CURRENT_RULES_BASELINE,
       eventLog: [],
       cardInstances: {
-        legacy: { instanceId: "legacy", definitionId: "onr_v1_001_afreet" },
+        legacy: { instanceId: "legacy", definitionId: 213 },
       },
     } as unknown as GameState;
     expect(matchCardSpecDefinitionIdsForState(state)).toEqual([
-      "onr_v1_001_afreet",
+      213,
     ]);
   });
 
@@ -218,11 +218,11 @@ describe("mechanical StateHash baseline", () => {
     });
     const broker = createCurrentCardRegistryRulesContext({
       cardPoolSnapshotId: snapshot,
-      matchCardPoolDefinitionIds: ["onr_v1_154_broker"],
+      matchCardPoolDefinitionIds: [366],
     });
-    expect(broker.matchCardDefinitionIds).toEqual(["onr_v1_154_broker"]);
+    expect(broker.matchCardDefinitionIds).toEqual([366]);
     expect(
-      engineCardByDefinitionId("onr_v1_154_broker")?.cardRulesFingerprint,
+      engineCardByDefinitionId(366)?.cardRulesFingerprint,
     ).toMatch(/^fnv1a64x2:card-rules-v1:/);
     expect(broker.cardRulesAggregateFingerprint).not.toBe(
       empty.cardRulesAggregateFingerprint,

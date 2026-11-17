@@ -479,7 +479,7 @@ describe("Corp tactical plan modules", () => {
       ...cardAction(
         "night-shift",
         "economy.gain_credit",
-        "onr_v1_295_night-shift",
+        507,
       ),
       economyProjection: { cardsDrawn: 1 } as never,
     };
@@ -770,7 +770,7 @@ function emptyPortfolio(): ResidentPlanPortfolio {
 function cardAction(
   actionId: string,
   semanticActionType: string,
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
 ): ActionSemanticCandidate {
   return {
     ...candidate(actionId, actionId, semanticActionType),

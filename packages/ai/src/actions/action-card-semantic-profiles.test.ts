@@ -6,7 +6,7 @@ import { buildActionCardSemanticProfilesByDefinitionId } from "./action-card-sem
 describe("ActionCardSemanticProfiles", () => {
   it("keeps the cached semantic profile registry immutable", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
-    const profile = profiles["onr_v1_310_blood-cat"];
+    const profile = profiles[522];
 
     expect(Object.isFrozen(profiles)).toBe(true);
     expect(Object.isFrozen(profile)).toBe(true);
@@ -31,7 +31,7 @@ describe("ActionCardSemanticProfiles", () => {
 
   it("keeps card-wide static hint signals separate from action signals", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
-    const researchBunker = profiles["onr_proteus_072_research-bunker"];
+    const researchBunker = profiles[130];
 
     expect(researchBunker?.compatibilitySignals).toEqual(
       expect.arrayContaining([
@@ -49,13 +49,13 @@ describe("ActionCardSemanticProfiles", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
 
     for (const cardId of [
-      "simple_draw_event",
-      "simple_economy_event",
-      "onr_v1_043_mystery-box",
+      592,
+      595,
+      255,
     ]) {
       expect(profiles[cardId]?.strategySupport ?? []).toEqual([]);
     }
-    expect(profiles["onr_v1_043_mystery-box"]?.compatibilitySignals).toEqual(
+    expect(profiles[255]?.compatibilitySignals).toEqual(
       expect.arrayContaining([
         "line_support:runner.search.breaker",
         "strategic_role:support_tool",
@@ -65,8 +65,8 @@ describe("ActionCardSemanticProfiles", () => {
 
   it("retains static multiaccess without inventing capability-bound strategy pairs", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
-    const hqInterface = profiles["onr_v1_129_hq-interface"];
-    const rndInterface = profiles["onr_v1_139_r-and-d-interface"];
+    const hqInterface = profiles[341];
+    const rndInterface = profiles[351];
 
     expect(hqInterface?.tacticSignals).toContain("access.hq_multiaccess");
     expect(hqInterface?.functionalEffects).toContainEqual(
@@ -91,7 +91,7 @@ describe("ActionCardSemanticProfiles", () => {
 
   it("does not turn generic scored-agenda actions into score closeout signals", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
-    const netwatch = profiles["onr_v1_207_netwatch-operations-office"];
+    const netwatch = profiles[419];
 
     expect(netwatch?.tacticSignals).toEqual(
       expect.arrayContaining([
@@ -104,7 +104,7 @@ describe("ActionCardSemanticProfiles", () => {
 
   it("keeps Runner agenda-point conversion distinct from Corp scoring", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
-    const desperate = profiles["onr_v1_083_desperate-competitor"];
+    const desperate = profiles[295];
 
     expect(desperate?.tacticSignals).toContain(
       "runner.agenda_point_conversion",
@@ -115,7 +115,7 @@ describe("ActionCardSemanticProfiles", () => {
   it("preserves TKO's structured Runner action-loss signal", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
 
-    expect(profiles["onr_v1_271_tko-2-0"]?.tacticSignals).toContain(
+    expect(profiles[483]?.tacticSignals).toContain(
       "corp_ice.runner_action_loss",
     );
   });
@@ -123,7 +123,7 @@ describe("ActionCardSemanticProfiles", () => {
   it("retains delayed credit destinations as structured effect targets", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
 
-    expect(profiles["onr_v1_174_rigged-investments"]?.effectTargets).toEqual(
+    expect(profiles[386]?.effectTargets).toEqual(
       expect.arrayContaining([
         "economy.installment_credit",
         "economy.turn_start_credit",
@@ -135,7 +135,7 @@ describe("ActionCardSemanticProfiles", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
 
     expect(
-      profiles["onr_v1_309_bbs-whispering-campaign"]?.functionalEffects,
+      profiles[521]?.functionalEffects,
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -163,7 +163,7 @@ describe("ActionCardSemanticProfiles", () => {
   it("joins Blood Cat trace semantics from its canonical capability", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
     const abilityId =
-      "onr_v1_310_blood-cat:abilities_activated_corp_main_trace";
+      "522:abilities_activated_corp_main_trace";
     const action = {
       actionId: "blood-cat-trace",
       side: "corp",
@@ -181,7 +181,7 @@ describe("ActionCardSemanticProfiles", () => {
       },
       payload: {
         cardId: "blood-cat-instance",
-        sourceDefinitionId: "onr_v1_310_blood-cat",
+        sourceDefinitionId: 522,
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
         cardImplementationAbilityId: abilityId,
         cardImplementationAbilityKey: "abilities_activated_corp_main_trace",

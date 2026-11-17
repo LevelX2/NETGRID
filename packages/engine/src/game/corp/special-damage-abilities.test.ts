@@ -15,7 +15,7 @@ import {
 } from "./special-damage-abilities";
 
 function definition(
-  id: string,
+  id: number,
   title: string,
   type: CardDefinition["type"] = "asset",
 ): CardDefinition {
@@ -24,7 +24,7 @@ function definition(
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"] = {
     side: "corp",
     zone: "serverRoot",
@@ -54,8 +54,8 @@ function makeAction(payload: LegalAction["payload"]): LegalAction {
 
 function makeHost(legalAction?: LegalAction) {
   const definitions: Record<string, CardDefinition> = {
-    rock: definition("onr_v1_327_i-got-a-rock", "I Got a Rock"),
-    dog: definition("onr_v1_339_schlaghund", "Schlaghund"),
+    rock: definition(539, "I Got a Rock"),
+    dog: definition(551, "Schlaghund"),
     agenda: definition("agenda", "Agenda", "agenda"),
   };
   const cardInstances: Record<string, CardInstance> = {
@@ -288,7 +288,7 @@ describe("corp special damage abilities", () => {
     expect(result.handled).toBe(true);
     expect(calls.spentAgendaPointCosts).toEqual([3]);
     expect(calls.damages).toEqual([
-      { type: "meat", amount: 15, source: "onr_v1_327_i-got-a-rock" },
+      { type: "meat", amount: 15, source: 539 },
     ]);
     expect(legalAction.payload).toMatchObject({
       agendaPointCost: 3,
@@ -315,7 +315,7 @@ describe("corp special damage abilities", () => {
     });
     expect(calls.rolls).toEqual(["v1921.die.onr_v1_339_schlaghund.tag_damage"]);
     expect(calls.damages).toEqual([
-      { type: "meat", amount: 10, source: "onr_v1_339_schlaghund" },
+      { type: "meat", amount: 10, source: 551 },
     ]);
     expect(calls.trashedCorp).toEqual(["dog"]);
     expect(legalAction.payload).toMatchObject({

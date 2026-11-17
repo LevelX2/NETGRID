@@ -79,10 +79,10 @@ describe("strategic runtime context", () => {
       deckSnapshotId: "conditional-wall-bypass-contract",
       side: "runner",
       cards: [
-        { cardId: "onr_v1_006_black-dahlia", quantity: 1 },
-        { cardId: "onr_v1_016_cyfermaster", quantity: 1 },
-        { cardId: "onr_v1_094_inside-job", quantity: 2 },
-        { cardId: "onr_v1_107_romp-through-hq", quantity: 2 },
+        { cardId: 218, quantity: 1 },
+        { cardId: 228, quantity: 1 },
+        { cardId: 306, quantity: 2 },
+        { cardId: 319, quantity: 2 },
       ],
     };
     const strategyProfile = buildDeckStrategyProfile(snapshot);
@@ -222,10 +222,10 @@ describe("strategic runtime context", () => {
           action("trigger", "corp", "trigger_ability", 0, {
             sourceDefinitionId:
               strategyId === "corp.deck_recycle_engine"
-                ? "onr_v1_188_ai-chief-financial-officer"
+                ? 400
                 : strategyId === "corp.action_tempo"
-                  ? "onr_proteus_001_ai-board-member"
-                  : "onr_classic_025_strategic-planning-group",
+                  ? 59
+                  : 29,
           }),
           action("advance", "corp", "advance_card", 1),
         ],
@@ -351,7 +351,7 @@ describe("strategic runtime context", () => {
     });
     const corporateWar = (copy: number): VisibleCard => ({
       instanceId: "corporate-war-" + copy,
-      definitionId: "onr_v1_196_corporate-war",
+      definitionId: 408,
       known: true,
       type: "agenda",
     });
@@ -374,7 +374,7 @@ describe("strategic runtime context", () => {
       deckSnapshot: {
         deckSnapshotId: "three-corporate-war",
         side: "corp",
-        cards: [{ cardId: "onr_v1_196_corporate-war", quantity: 3 }],
+        cards: [{ cardId: 408, quantity: 3 }],
       },
     });
 

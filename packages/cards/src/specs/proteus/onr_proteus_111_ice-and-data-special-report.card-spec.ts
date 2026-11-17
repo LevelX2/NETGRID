@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_proteus_111_ice-and-data-special-report",
+      169,
     ),
     title: "Ice and Data Special Report",
     side: "runner",

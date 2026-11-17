@@ -19,9 +19,9 @@ import {
   quoteCorpPunishRoute,
 } from "./corp-punish-route-quotes";
 
-const WILSON = "onr_v1_187_wilson-weeflerunner-apprentice";
-const URBAN = "onr_v1_307_urban-renewal";
-const SCORCHED = "onr_v1_302_scorched-earth";
+const WILSON = 399;
+const URBAN = 519;
+const SCORCHED = 514;
 
 describe("Corp punish-route quote request", () => {
   it.each([true, false])(
@@ -73,8 +73,8 @@ describe("Corp punish-route quote request", () => {
       const tag = addCorpCardToHqForTest(
         state,
         source === "direct"
-          ? "onr_v1_306_trojan-horse"
-          : "onr_v1_284_chance-observation",
+          ? 518
+          : 496,
         "tag",
       );
       const damage = addCorpCardToHqForTest(state, URBAN, "damage");
@@ -103,7 +103,7 @@ describe("Corp punish-route quote request", () => {
     const wilson = addConcealedRunnerResource(state, WILSON, "spent");
     state.cardInstances[wilson]!.faceup = true;
     state.cardInstances[wilson]!.rezzed = true;
-    const tag = addCorpCardToHqForTest(state, "onr_v1_306_trojan-horse", "tag");
+    const tag = addCorpCardToHqForTest(state, 518, "tag");
     const damage = addCorpCardToHqForTest(state, URBAN, "damage");
     const action = getLegalActionForCard(state, tag);
     const started = applyAction(state, {
@@ -228,7 +228,7 @@ describe("Corp punish-route quote request", () => {
     state.runner.rig.hardware.push(fridge);
     state.cardInstances[fridge] = {
       instanceId: fridge,
-      definitionId: "onr_v1_121_armored-fridge",
+      definitionId: 333,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -248,7 +248,7 @@ describe("Corp punish-route quote request", () => {
         },
       },
     });
-    addConcealedRunnerResource(state, "onr_proteus_142_hq-mole", "rock-hidden");
+    addConcealedRunnerResource(state, 200, "rock-hidden");
     const unknown = quoteCorpPunishRoute(state, request);
     expect(unknown).toMatchObject({
       ok: true,
@@ -274,12 +274,12 @@ describe("Corp punish-route quote request", () => {
       state.runnerTurnFlags!.runAttemptsLastTurn = 1;
       const chance = addCorpCardToHqForTest(
         state,
-        "onr_v1_284_chance-observation",
+        496,
         "chance-above-printed",
       );
       const scorched = addCorpCardToHqForTest(
         state,
-        "onr_v1_302_scorched-earth",
+        514,
         "payoff",
       );
       const before = structuredClone(state);
@@ -291,7 +291,7 @@ describe("Corp punish-route quote request", () => {
             0,
             "trace_tag",
             chance,
-            "onr_v1_284_chance-observation",
+            496,
             "abilities_on_play_trace",
           ),
           canonicalStep(
@@ -299,7 +299,7 @@ describe("Corp punish-route quote request", () => {
             1,
             "meat_damage",
             scorched,
-            "onr_v1_302_scorched-earth",
+            514,
             "abilities_on_play_damage",
           ),
         ]),
@@ -328,7 +328,7 @@ describe("Corp punish-route quote request", () => {
     state.runner.credits = 1;
     const id = addCorpCardToHqForTest(
       state,
-      "onr_v1_207_netwatch-operations-office",
+      419,
       "scored-trace",
     );
     state.corp.hq = state.corp.hq.filter((x) => x !== id);
@@ -338,7 +338,7 @@ describe("Corp punish-route quote request", () => {
     state.cardInstances[id]!.rezzed = true;
     const urban = addCorpCardToHqForTest(
       state,
-      "onr_v1_307_urban-renewal",
+      519,
       "urban",
     );
     const request = routeRequest(state, [
@@ -347,7 +347,7 @@ describe("Corp punish-route quote request", () => {
         0,
         "trace_tag",
         id,
-        "onr_v1_207_netwatch-operations-office",
+        419,
         "abilities_activated_corp_main_trace",
       ),
       step(state, "damage", 1, "meat_damage", urban),
@@ -389,7 +389,7 @@ describe("Corp punish-route quote request", () => {
       if (boundary === "clicks") probe.corp.clicks = 0;
       if (boundary === "capability")
         req.steps[0]!.sourceCapabilityId =
-          "onr_v1_207_netwatch-operations-office:missing";
+          "419:missing";
       if (boundary === "action")
         req.steps[0]!.currentLegalActionId = "foreign-action";
       expect(quoteCorpPunishRoute(probe, req), boundary).toMatchObject({
@@ -415,17 +415,17 @@ describe("Corp punish-route quote request", () => {
       }
       const chance = addCorpCardToHqForTest(
         state,
-        "onr_v1_284_chance-observation",
+        496,
         "chance",
       );
       const urban = addCorpCardToHqForTest(
         state,
-        "onr_v1_307_urban-renewal",
+        519,
         "urban",
       );
       const crash = addConcealedRunnerResource(
         state,
-        "onr_classic_044_crash-space",
+        48,
         "public",
       );
       state.cardInstances[crash]!.faceup = true;
@@ -435,7 +435,7 @@ describe("Corp punish-route quote request", () => {
           0,
           "trace_tag",
           chance,
-          "onr_v1_284_chance-observation",
+          496,
           "abilities_on_play_trace",
         ),
         canonicalStep(
@@ -443,7 +443,7 @@ describe("Corp punish-route quote request", () => {
           1,
           "meat_damage",
           urban,
-          "onr_v1_307_urban-renewal",
+          519,
           "abilities_on_play_damage",
         ),
       ]);
@@ -469,7 +469,7 @@ describe("Corp punish-route quote request", () => {
       const concealed = structuredClone(state);
       concealed.cardInstances[crash]!.faceup = false;
       const other = structuredClone(concealed);
-      other.cardInstances[crash]!.definitionId = "onr_proteus_142_hq-mole";
+      other.cardInstances[crash]!.definitionId = 200;
       expect(quoteCorpPunishRoute(concealed, request)).toEqual(
         quoteCorpPunishRoute(other, request),
       );
@@ -513,14 +513,14 @@ describe("Corp punish-route quote request", () => {
     state.runner.tags = 1;
     const source = addCorpCardToHqForTest(
       state,
-      "onr_v1_299_power-grid-overload",
+      511,
       "hardware-trash",
     );
     const request = routeRequest(state, [
       {
         ...step(state, "hardware-trash", 0, "hardware_trash", source),
         sourceCapabilityBindingKind: "card_spec_capability_key",
-        sourceCapabilityId: "onr_v1_299_power-grid-overload:missing",
+        sourceCapabilityId: "511:missing",
       },
     ]);
 
@@ -537,7 +537,7 @@ describe("Corp punish-route quote request", () => {
     const state = corpActionState("punish-route-malformed-capability-id");
     const source = addCorpCardToHqForTest(
       state,
-      "onr_proteus_048_data-sifters",
+      106,
       "tag",
     );
     const request = routeRequest(state, [
@@ -562,12 +562,12 @@ describe("Corp punish-route quote request", () => {
     const state = corpActionState("punish-route-tag-four");
     const tag = addCorpCardToHqForTest(
       state,
-      "onr_proteus_048_data-sifters",
+      106,
       "tag",
     );
     const four = addCorpCardToHqForTest(
       state,
-      "onr_v1_302_scorched-earth",
+      514,
       "four",
     );
     const request = routeRequest(state, [
@@ -625,17 +625,17 @@ describe("Corp punish-route quote request", () => {
     const state = corpActionState("punish-route-direct-tag-prevention");
     const tag = addCorpCardToHqForTest(
       state,
-      "onr_proteus_048_data-sifters",
+      106,
       "direct-tag-prevention",
     );
     const damage = addCorpCardToHqForTest(
       state,
-      "onr_v1_302_scorched-earth",
+      514,
       "direct-tag-damage",
     );
     const fallGuy = addConcealedRunnerResource(
       state,
-      "onr_v1_161_fall-guy",
+      373,
       "direct-tag-fall-guy",
     );
     state.cardInstances[fallGuy]!.faceup = true;
@@ -679,7 +679,7 @@ describe("Corp punish-route quote request", () => {
     };
     const trojan = addCorpCardToHqForTest(
       state,
-      "onr_v1_306_trojan-horse",
+      518,
       "trojan-horse",
     );
     const currentAction = getLegalActionForCard(state, trojan);
@@ -712,9 +712,9 @@ describe("Corp punish-route quote request", () => {
         steps: [
           {
             kind: "tag",
-            sourceCardDefinitionId: "onr_v1_306_trojan-horse",
+            sourceCardDefinitionId: 518,
             sourceCapabilityId:
-              "onr_v1_306_trojan-horse:corp_utility_encounter_tag",
+              "518:corp_utility_encounter_tag",
             currentLegalAction: {
               actionId: currentAction.actionId,
               source: trojan,
@@ -728,8 +728,8 @@ describe("Corp punish-route quote request", () => {
   });
 
   it.each([
-    ["Datapool® by Zetatech", "onr_v1_287_datapool-by-zetatech", 2, 1],
-    ["Netwatch Credit Voucher", "onr_v1_293_netwatch-credit-voucher", 1, 0],
+    ["Datapool® by Zetatech", 499, 2, 1],
+    ["Netwatch Credit Voucher", 505, 1, 0],
   ] as const)(
     "certifies %s as an additional-tag route while the Runner is already tagged",
     (_title, definitionId, addedTags, credits) => {
@@ -785,17 +785,17 @@ describe("Corp punish-route quote request", () => {
     const state = corpActionState("punish-route-tag-four-two");
     const tag = addCorpCardToHqForTest(
       state,
-      "onr_proteus_048_data-sifters",
+      106,
       "tag",
     );
     const four = addCorpCardToHqForTest(
       state,
-      "onr_v1_302_scorched-earth",
+      514,
       "four",
     );
     const two = addCorpCardToHqForTest(
       state,
-      "onr_v1_301_punitive-counterstrike",
+      513,
       "two",
     );
 
@@ -840,12 +840,12 @@ describe("Corp punish-route quote request", () => {
     };
     const chance = addCorpCardToHqForTest(
       state,
-      "onr_v1_284_chance-observation",
+      496,
       "chance",
     );
     const scorched = addCorpCardToHqForTest(
       state,
-      "onr_v1_302_scorched-earth",
+      514,
       "scorched",
     );
     const request = routeRequest(state, [
@@ -854,7 +854,7 @@ describe("Corp punish-route quote request", () => {
         0,
         "trace_tag",
         chance,
-        "onr_v1_284_chance-observation",
+        496,
         "abilities_on_play_trace",
       ),
       canonicalStep(
@@ -862,7 +862,7 @@ describe("Corp punish-route quote request", () => {
         1,
         "meat_damage",
         scorched,
-        "onr_v1_302_scorched-earth",
+        514,
         "abilities_on_play_damage",
       ),
     ]);
@@ -909,10 +909,10 @@ describe("Corp punish-route quote request", () => {
         },
         steps: [
           {
-            sourceCardDefinitionId: "onr_v1_284_chance-observation",
+            sourceCardDefinitionId: 496,
           },
           {
-            sourceCardDefinitionId: "onr_v1_302_scorched-earth",
+            sourceCardDefinitionId: 514,
           },
         ],
       },
@@ -925,18 +925,18 @@ describe("Corp punish-route quote request", () => {
     const left = structuredClone(state);
     const leftFirst = addConcealedRunnerResource(
       left,
-      "onr_proteus_147_r-and-d-mole",
+      205,
       "first",
     );
     const leftSecond = addConcealedRunnerResource(
       left,
-      "onr_proteus_142_hq-mole",
+      200,
       "second",
     );
     const right = structuredClone(left);
-    right.cardInstances[leftFirst]!.definitionId = "onr_proteus_142_hq-mole";
+    right.cardInstances[leftFirst]!.definitionId = 200;
     right.cardInstances[leftSecond]!.definitionId =
-      "onr_proteus_147_r-and-d-mole";
+      205;
 
     const leftQuote = quoteCorpPunishRoute(left, request);
     const rightQuote = quoteCorpPunishRoute(right, request);
@@ -977,12 +977,12 @@ describe("Corp punish-route quote request", () => {
       };
       const manhunt = addCorpCardToHqForTest(
         state,
-        "onr_proteus_050_manhunt",
+        108,
         "manhunt",
       );
       const scorched = addCorpCardToHqForTest(
         state,
-        "onr_v1_302_scorched-earth",
+        514,
         "scorched-after-manhunt",
       );
 
@@ -994,7 +994,7 @@ describe("Corp punish-route quote request", () => {
             0,
             "trace_tag",
             manhunt,
-            "onr_proteus_050_manhunt",
+            108,
             "on_play_trace_six_tags_by_margin",
           ),
           canonicalStep(
@@ -1002,7 +1002,7 @@ describe("Corp punish-route quote request", () => {
             1,
             "meat_damage",
             scorched,
-            "onr_v1_302_scorched-earth",
+            514,
             "abilities_on_play_damage",
           ),
         ]),
@@ -1050,17 +1050,17 @@ describe("Corp punish-route quote request", () => {
     };
     const chance = addCorpCardToHqForTest(
       state,
-      "onr_v1_284_chance-observation",
+      496,
       "chance-visible-prevention",
     );
     const scorched = addCorpCardToHqForTest(
       state,
-      "onr_v1_302_scorched-earth",
+      514,
       "scorched-visible-prevention",
     );
     const fallGuy = addConcealedRunnerResource(
       state,
-      "onr_v1_161_fall-guy",
+      373,
       "visible-fall-guy",
     );
     state.cardInstances[fallGuy]!.faceup = true;
@@ -1075,7 +1075,7 @@ describe("Corp punish-route quote request", () => {
             0,
             "trace_tag",
             chance,
-            "onr_v1_284_chance-observation",
+            496,
             "abilities_on_play_trace",
           ),
           canonicalStep(
@@ -1083,7 +1083,7 @@ describe("Corp punish-route quote request", () => {
             1,
             "meat_damage",
             scorched,
-            "onr_v1_302_scorched-earth",
+            514,
             "abilities_on_play_damage",
           ),
         ]),
@@ -1122,12 +1122,12 @@ describe("Corp punish-route quote request", () => {
     };
     const chance = addCorpCardToHqForTest(
       state,
-      "onr_v1_284_chance-observation",
+      496,
       "chance-visible-damage-prevention",
     );
     const scorched = addCorpCardToHqForTest(
       state,
-      "onr_v1_302_scorched-earth",
+      514,
       "scorched-visible-damage-prevention",
     );
     const fridgeId =
@@ -1135,7 +1135,7 @@ describe("Corp punish-route quote request", () => {
     state.runner.rig.hardware.push(fridgeId);
     state.cardInstances[fridgeId] = {
       instanceId: fridgeId,
-      definitionId: "onr_v1_121_armored-fridge",
+      definitionId: 333,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -1155,7 +1155,7 @@ describe("Corp punish-route quote request", () => {
             0,
             "trace_tag",
             chance,
-            "onr_v1_284_chance-observation",
+            496,
             "abilities_on_play_trace",
           ),
           canonicalStep(
@@ -1163,7 +1163,7 @@ describe("Corp punish-route quote request", () => {
             1,
             "meat_damage",
             scorched,
-            "onr_v1_302_scorched-earth",
+            514,
             "abilities_on_play_damage",
           ),
         ]),
@@ -1202,17 +1202,17 @@ describe("Corp punish-route quote request", () => {
     };
     const chance = addCorpCardToHqForTest(
       state,
-      "onr_v1_284_chance-observation",
+      496,
       "chance",
     );
     const scorched = addCorpCardToHqForTest(
       state,
-      "onr_v1_302_scorched-earth",
+      514,
       "scorched",
     );
     const baseLink = addConcealedRunnerResource(
       state,
-      "onr_v1_148_access-through-alpha",
+      360,
       "visible-base-link",
     );
     state.cardInstances[baseLink]!.faceup = true;
@@ -1226,7 +1226,7 @@ describe("Corp punish-route quote request", () => {
             0,
             "trace_tag",
             chance,
-            "onr_v1_284_chance-observation",
+            496,
             "abilities_on_play_trace",
           ),
           canonicalStep(
@@ -1234,7 +1234,7 @@ describe("Corp punish-route quote request", () => {
             1,
             "meat_damage",
             scorched,
-            "onr_v1_302_scorched-earth",
+            514,
             "abilities_on_play_damage",
           ),
         ]),
@@ -1254,7 +1254,7 @@ describe("Corp punish-route quote request", () => {
     state.runner.credits = 9;
     const closedAccounts = addCorpCardToHqForTest(
       state,
-      "onr_v1_285_closed-accounts",
+      497,
       "closed-accounts",
     );
 
@@ -1297,9 +1297,9 @@ describe("Corp punish-route quote request", () => {
         steps: [
           {
             kind: "other_punish",
-            sourceCardDefinitionId: "onr_v1_285_closed-accounts",
+            sourceCardDefinitionId: 497,
             sourceCapabilityId:
-              "onr_v1_285_closed-accounts:abilities_on_play_lose_credits",
+              "497:abilities_on_play_lose_credits",
             clicks: 1,
             credits: 1,
             currentLegalAction: {
@@ -1322,7 +1322,7 @@ describe("Corp punish-route quote request", () => {
     state.corp.credits = 0;
     const closedAccounts = addCorpCardToHqForTest(
       state,
-      "onr_v1_285_closed-accounts",
+      497,
       "closed-accounts",
     );
     const request = routeRequest(state, [
@@ -1345,7 +1345,7 @@ describe("Corp punish-route quote request", () => {
         },
         steps: [
           {
-            sourceCardDefinitionId: "onr_v1_285_closed-accounts",
+            sourceCardDefinitionId: 497,
             credits: 1,
           },
         ],
@@ -1360,7 +1360,7 @@ describe("Corp punish-route quote request", () => {
     const state = corpActionState("punish-route-closed-accounts-untagged");
     const closedAccounts = addCorpCardToHqForTest(
       state,
-      "onr_v1_285_closed-accounts",
+      497,
       "closed-accounts",
     );
 
@@ -1384,12 +1384,12 @@ describe("Corp punish-route quote request", () => {
     const left = corpActionState("punish-route-hidden-twin");
     const tag = addCorpCardToHqForTest(
       left,
-      "onr_proteus_048_data-sifters",
+      106,
       "tag",
     );
     const four = addCorpCardToHqForTest(
       left,
-      "onr_v1_302_scorched-earth",
+      514,
       "four",
     );
     const right = structuredClone(left);
@@ -1462,7 +1462,7 @@ describe("Corp punish-route quote request", () => {
     const state = corpActionState(`punish-route-${errorCode}`);
     const tag = addCorpCardToHqForTest(
       state,
-      "onr_proteus_048_data-sifters",
+      106,
       "tag",
     );
     const request = routeRequest(state, [step(state, "tag", 0, "tag", tag)]);
@@ -1478,7 +1478,7 @@ describe("Corp punish-route quote request", () => {
     const state = corpActionState("punish-route-malformed");
     const tag = addCorpCardToHqForTest(
       state,
-      "onr_proteus_048_data-sifters",
+      106,
       "tag",
     );
     const valid = routeRequest(state, [step(state, "tag", 0, "tag", tag)]);
@@ -1513,12 +1513,12 @@ describe("Corp punish-route quote request", () => {
     const state = corpActionState("punish-route-fail-closed");
     const damage = addCorpCardToHqForTest(
       state,
-      "onr_v1_302_scorched-earth",
+      514,
       "damage",
     );
     const trace = addCorpCardToHqForTest(
       state,
-      "onr_proteus_052_schlaghund-pointers",
+      110,
       "trace",
     );
     state.runnerTurnFlags = {
@@ -1577,7 +1577,7 @@ function agendaFundedDamageState() {
   const state = corpActionState("sp-848-agenda-funded-damage");
   state.runner.tags = 2;
   state.corpBonusAgendaPoints = 3;
-  const definitionId = "onr_v1_327_i-got-a-rock";
+  const definitionId = 539;
   const id = addCorpCardToHqForTest(state, definitionId, "rock");
   state.corp.hq = state.corp.hq.filter((cardId) => cardId !== id);
   state.corp.servers.push({

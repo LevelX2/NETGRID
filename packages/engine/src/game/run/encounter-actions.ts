@@ -885,7 +885,7 @@ function subroutineBreakEffectSignature(subroutine: Subroutine): string {
 export function breakAbilityMatchesIce(
   ability: RuntimeIcebreakerAbility,
   iceSubtypes: readonly string[],
-  iceDefinitionId?: string,
+  iceDefinitionId?: number,
 ): boolean {
   if (ability.type !== "break_subroutine") return false;
   if (

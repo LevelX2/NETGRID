@@ -15,7 +15,7 @@ type CentralRunPressureJustificationDependencies = {
     input: AiDecisionInput,
     target: CentralServerTarget,
   ) => boolean;
-  rolesForCardId: (definitionId: string | undefined) => string[];
+  rolesForCardId: (definitionId: number | undefined) => string[];
   runnerCreditReserveTargetForInput: (input: AiDecisionInput) => number;
   trueCentralCloseoutProfileForMetrics: (
     input: AiDecisionInput,

@@ -13,7 +13,7 @@ import {
   type RunCardImplementationActionHost,
 } from "./card-implementation-run-actions";
 
-function definition(id: string, title: string): CardDefinition {
+function definition(id: number, title: string): CardDefinition {
   return {
     id,
     title,
@@ -81,7 +81,7 @@ function action(
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {

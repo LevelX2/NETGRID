@@ -126,7 +126,7 @@ describe("known exposed Corp card decision checkpoints", () => {
 function exposeEvent(
   eventId: string,
   serverId: string,
-  definitionId: string,
+  definitionId: number,
 ): PublicGameEvent {
   return {
     eventId,

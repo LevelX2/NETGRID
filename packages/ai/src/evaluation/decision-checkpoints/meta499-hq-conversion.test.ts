@@ -64,7 +64,7 @@ describe("native meta499 HQ conversion", () => {
     );
     const score = chooseAiAction(before.input);
     expect(score.actionId).toBe(
-      "corp.score_agenda.corp_onr_v1_194_corporate-downsizing_1.corp_onr_v1_194_corporate-downsizing_1",
+      "corp.score_agenda.corp_406_1.corp_406_1",
     );
     expect(
       score.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
@@ -75,7 +75,7 @@ describe("native meta499 HQ conversion", () => {
       after.input.legalActions.some((a) => a.actionId === choice.actionId),
     ).toBe(true);
     expect(choice.selectedChoices?.selectedOptionIds).toEqual([
-      "card_corp_onr_v1_201_executive-extraction_1",
+      "card_corp_413_1",
     ]);
     expect(choice.selectedChoices?.choiceId).toBe(
       after.input.playerView.pendingChoice?.choiceId,

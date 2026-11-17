@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_classic_001_data-fort-remapping"),
+    cardDefinitionId: cardDefinitionId(5),
     title: "Data Fort Remapping",
     side: "corp",
     cardType: "agenda",

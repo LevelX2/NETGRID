@@ -187,7 +187,7 @@ it("already values a BBS pool more highly behind effective protection", () => {
     });
   const ice =
     state.cardInstances[
-      putCorpIceOnServer(state, "remote_1", "onr_v1_279_wall-of-static")
+      putCorpIceOnServer(state, "remote_1", 491)
     ]!;
   ice.rezzed = true;
   ice.faceup = true;
@@ -290,13 +290,13 @@ function choiceState(
 ): GameState {
   const corpCards = [
     ...(trace
-      ? ["onr_v1_221_asp", "onr_v1_243_fetch-4-0-1"]
-      : ["onr_v1_237_data-wall", "onr_v1_279_wall-of-static"]),
-    "onr_v1_358_dr-dreff",
-    "onr_v1_199_employee-empowerment",
-    "onr_proteus_008_project-zurich",
-    "onr_v1_205_main-office-relocation",
-    "onr_v1_309_bbs-whispering-campaign",
+      ? [433, 455]
+      : [449, 491]),
+    570,
+    411,
+    66,
+    417,
+    521,
   ];
   let state = createGameAfterSetup({
     seed: "dreff-visible-budget",
@@ -314,12 +314,12 @@ function choiceState(
       ...ORIGINALSET_DEFAULT_DECKS.runner,
       cards: [
         {
-          id: trace ? "onr_v1_040_loony-goon" : "onr_v1_039_krash",
+          id: trace ? 252 : 251,
           quantity: 1,
         },
         ...ORIGINALSET_DEFAULT_DECKS.runner.cards.filter(
           (c) =>
-            c.id !== (trace ? "onr_v1_040_loony-goon" : "onr_v1_039_krash"),
+            c.id !== (trace ? 252 : 251),
         ),
       ],
     },
@@ -331,19 +331,19 @@ function choiceState(
     state.cardInstances[id]!.zone = { side: "corp", zone: "rd" };
   }
   const dreff =
-    state.cardInstances[putCorpRootInRemote(state, "onr_v1_358_dr-dreff")]!;
+    state.cardInstances[putCorpRootInRemote(state, 570)]!;
   dreff.faceup = true;
   dreff.rezzed = true;
   state.cardInstances[
-    putCorpRootInRemote(state, "onr_v1_199_employee-empowerment")
+    putCorpRootInRemote(state, 411)
   ]!.advancementCounters = 1;
   if (scoring) {
-    scoreCorpAgendaForTest(state, "onr_proteus_008_project-zurich");
+    scoreCorpAgendaForTest(state, 66);
     if (terminal)
-      scoreCorpAgendaForTest(state, "onr_v1_205_main-office-relocation");
+      scoreCorpAgendaForTest(state, 417);
     const bbsId = putCorpRootInRemote(
       state,
-      "onr_v1_309_bbs-whispering-campaign",
+      521,
     );
     state = applyMatching(
       state,
@@ -353,7 +353,7 @@ function choiceState(
   for (const id of corpCards.slice(0, 2)) moveCorpCardToHq(state, id);
   installRunnerProgramForTest(
     state,
-    trace ? "onr_v1_040_loony-goon" : "onr_v1_039_krash",
+    trace ? 252 : 251,
   );
   state.runner.credits = credits;
   state.corp.credits = 10;

@@ -16,7 +16,7 @@ it("SP-293 keeps a Runner bonus-point card outside Corp inventory and rezzes the
   };
   expect(input.playerView.opponent.scoreArea).toContainEqual(
     expect.objectContaining({
-      definitionId: "onr_v1_083_desperate-competitor",
+      definitionId: 295,
       owner: "runner",
     }),
   );

@@ -202,7 +202,7 @@ it("quotes known savings without treating the opaque outer ICE as guaranteed acc
       runnerCentralPressureHasMaterialMarginalValue,
     },
   )!;
-  expect(prep.visibleAnswer?.definitionId).toBe("onr_v1_014_codecracker");
+  expect(prep.visibleAnswer?.definitionId).toBe(226);
   expect(prep.totalRecoveryCost).toBe(6);
   expect(prep.sameTurnRunConversion).toBeUndefined();
   expect(prep.evidenceCodes).toContain(

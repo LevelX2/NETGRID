@@ -15,7 +15,7 @@ describe("assessCorpScoreRushRisk", () => {
     input.playerView.opponent.credits = 8;
     input.playerView.opponent.rig = [
       visibleCard("dwarf", "runner", "program", {
-        definitionId: "onr_v1_021_dwarf",
+        definitionId: 233,
         strength: 2,
         subtypes: ["icebreaker", "worm"],
       }),
@@ -68,7 +68,7 @@ describe("assessCorpScoreRushRisk", () => {
 });
 
 function fixedPostRezWallServer(input: AiDecisionInput, cardId: string) {
-  const definitionId = "onr_v1_279_wall-of-static";
+  const definitionId = 491;
   const runQuote: NonNullable<VisibleCard["effectiveRunQuote"]> = {
     iceInstanceId: cardId,
     iceDefinitionId: definitionId,

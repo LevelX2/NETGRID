@@ -27,7 +27,7 @@
       "id": "classic_runner_prep_economy_pressure_2026_07_01",
       "name": "Classic Runner - Prep Economy Pressure",
       "side": "runner",
-      "identity": "runner_identity_001",
+      "identity": 587,
       "focus": "Stabile Breaker-Basis mit viel Prep-Tempo, Kartenzugriff und verdeckter Ressourcensicherung. Das Deck testet vor allem Classic-Events, Such-/Setup-Karten und wiederholten Zentralserverdruck.",
       "totalCards": 45,
       "classicCards": 45,
@@ -39,83 +39,83 @@
       },
       "cards": [
         {
-          "id": "onr_classic_027_early-worm",
+          "id": 31,
           "quantity": 3
         },
         {
-          "id": "onr_classic_028_matador",
+          "id": 32,
           "quantity": 3
         },
         {
-          "id": "onr_classic_029_ms-todon",
+          "id": 33,
           "quantity": 2
         },
         {
-          "id": "onr_classic_030_psychic-friend",
+          "id": 34,
           "quantity": 2
         },
         {
-          "id": "onr_classic_031_rent-i-con",
+          "id": 35,
           "quantity": 2
         },
         {
-          "id": "onr_classic_032_schematics-search-engine",
+          "id": 36,
           "quantity": 2
         },
         {
-          "id": "onr_classic_033_superglue",
+          "id": 37,
           "quantity": 3
         },
         {
-          "id": "onr_classic_037_finders-keepers",
+          "id": 41,
           "quantity": 3
         },
         {
-          "id": "onr_classic_038_gypsytm-schedule-analyzer",
+          "id": 42,
           "quantity": 2
         },
         {
-          "id": "onr_classic_039_library-search",
+          "id": 43,
           "quantity": 3
         },
         {
-          "id": "onr_classic_040_meat-upgrade",
+          "id": 44,
           "quantity": 2
         },
         {
-          "id": "onr_classic_041_networking",
+          "id": 45,
           "quantity": 3
         },
         {
-          "id": "onr_classic_042_panzer-run",
+          "id": 46,
           "quantity": 3
         },
         {
-          "id": "onr_classic_043_running-interference",
+          "id": 47,
           "quantity": 2
         },
         {
-          "id": "onr_classic_045_elena-laskova",
+          "id": 49,
           "quantity": 2
         },
         {
-          "id": "onr_classic_046_executive-file-clerk",
+          "id": 50,
           "quantity": 2
         },
         {
-          "id": "onr_classic_047_little-black-box",
+          "id": 51,
           "quantity": 1
         },
         {
-          "id": "onr_classic_050_sandbox-dig",
+          "id": 54,
           "quantity": 2
         },
         {
-          "id": "onr_classic_051_vintage-camaro",
+          "id": 55,
           "quantity": 1
         },
         {
-          "id": "onr_classic_052_zetatech-portastation",
+          "id": 56,
           "quantity": 2
         }
       ],
@@ -129,7 +129,7 @@
       "id": "classic_runner_cybernetics_risk_rig_2026_07_01",
       "name": "Classic Runner - Cybernetics Risk Rig",
       "side": "runner",
-      "identity": "runner_identity_001",
+      "identity": 587,
       "focus": "Aggressiveres Rig mit Cybernetics, Hidden-Ressourcen und Stoer-Events. Das Deck deckt fast alle Classic-Runner-Bausteine ab und testet riskantere Setup-Entscheidungen.",
       "totalCards": 45,
       "classicCards": 45,
@@ -141,95 +141,95 @@
       },
       "cards": [
         {
-          "id": "onr_classic_027_early-worm",
+          "id": 31,
           "quantity": 2
         },
         {
-          "id": "onr_classic_028_matador",
+          "id": 32,
           "quantity": 2
         },
         {
-          "id": "onr_classic_029_ms-todon",
+          "id": 33,
           "quantity": 3
         },
         {
-          "id": "onr_classic_030_psychic-friend",
+          "id": 34,
           "quantity": 3
         },
         {
-          "id": "onr_classic_031_rent-i-con",
+          "id": 35,
           "quantity": 3
         },
         {
-          "id": "onr_classic_032_schematics-search-engine",
+          "id": 36,
           "quantity": 2
         },
         {
-          "id": "onr_classic_033_superglue",
+          "id": 37,
           "quantity": 2
         },
         {
-          "id": "onr_classic_034_boostergang-connections",
+          "id": 38,
           "quantity": 2
         },
         {
-          "id": "onr_classic_035_corruption",
+          "id": 39,
           "quantity": 2
         },
         {
-          "id": "onr_classic_036_do-the-drine",
+          "id": 40,
           "quantity": 2
         },
         {
-          "id": "onr_classic_037_finders-keepers",
+          "id": 41,
           "quantity": 2
         },
         {
-          "id": "onr_classic_038_gypsytm-schedule-analyzer",
+          "id": 42,
           "quantity": 2
         },
         {
-          "id": "onr_classic_039_library-search",
+          "id": 43,
           "quantity": 2
         },
         {
-          "id": "onr_classic_040_meat-upgrade",
+          "id": 44,
           "quantity": 2
         },
         {
-          "id": "onr_classic_041_networking",
+          "id": 45,
           "quantity": 2
         },
         {
-          "id": "onr_classic_042_panzer-run",
+          "id": 46,
           "quantity": 2
         },
         {
-          "id": "onr_classic_043_running-interference",
+          "id": 47,
           "quantity": 3
         },
         {
-          "id": "onr_classic_044_crash-space",
+          "id": 48,
           "quantity": 1
         },
         {
-          "id": "onr_classic_046_executive-file-clerk",
+          "id": 50,
           "quantity": 2
         },
         {
-          "id": "onr_classic_048_omnitech-spinal-tap-cybermodem",
+          "id": 52,
           "quantity": 1
         },
         {
-          "id": "onr_classic_049_omnitech-wet-drive",
+          "id": 53,
           "quantity": 1
         },
         {
-          "id": "onr_classic_050_sandbox-dig",
+          "id": 54,
           "quantity": 1
         },
         {
-          "id": "onr_classic_052_zetatech-portastation",
+          "id": 56,
           "quantity": 1
         }
       ],
@@ -243,7 +243,7 @@
       "id": "classic_corp_superserum_control_grid_2026_07_01",
       "name": "Classic Corp - Superserum Control Grid",
       "side": "corp",
-      "identity": "corp_identity_001",
+      "identity": 3,
       "focus": "Kontrolliertes Score-Deck um Superserum, Virusdruck-Gegenwehr, Hand-/Deck-Reset und breite ICE-Abdeckung. Die Liste ist fuer Tests des Superserum-Purge- und Prevention-Pfads gebaut.",
       "totalCards": 45,
       "classicCards": 45,
@@ -256,103 +256,103 @@
       },
       "cards": [
         {
-          "id": "onr_classic_001_data-fort-remapping",
+          "id": 5,
           "quantity": 2
         },
         {
-          "id": "onr_classic_002_superserum",
+          "id": 6,
           "quantity": 3
         },
         {
-          "id": "onr_classic_003_unlisted-research-lab",
+          "id": 7,
           "quantity": 2
         },
         {
-          "id": "onr_classic_004_theorem-proof",
+          "id": 8,
           "quantity": 1
         },
         {
-          "id": "onr_classic_005_baskerville",
+          "id": 9,
           "quantity": 2
         },
         {
-          "id": "onr_classic_006_bolter-swarm",
+          "id": 10,
           "quantity": 2
         },
         {
-          "id": "onr_classic_007_brain-drain",
+          "id": 11,
           "quantity": 2
         },
         {
-          "id": "onr_classic_008_deadeye",
+          "id": 12,
           "quantity": 2
         },
         {
-          "id": "onr_classic_009_dumpster",
+          "id": 13,
           "quantity": 1
         },
         {
-          "id": "onr_classic_010_entrapment",
+          "id": 14,
           "quantity": 2
         },
         {
-          "id": "onr_classic_011_glacier",
+          "id": 15,
           "quantity": 1
         },
         {
-          "id": "onr_classic_012_imperial-guard",
+          "id": 16,
           "quantity": 2
         },
         {
-          "id": "onr_classic_013_puzzle",
+          "id": 17,
           "quantity": 2
         },
         {
-          "id": "onr_classic_014_trapdoor",
+          "id": 18,
           "quantity": 1
         },
         {
-          "id": "onr_classic_015_vortex",
+          "id": 19,
           "quantity": 2
         },
         {
-          "id": "onr_classic_016_badtimes",
+          "id": 20,
           "quantity": 2
         },
         {
-          "id": "onr_classic_017_corporate-shuffle",
+          "id": 21,
           "quantity": 3
         },
         {
-          "id": "onr_classic_018_reclamation-project",
+          "id": 22,
           "quantity": 2
         },
         {
-          "id": "onr_classic_019_indiscriminate-response-team",
+          "id": 23,
           "quantity": 2
         },
         {
-          "id": "onr_classic_020_london-city-grid",
+          "id": 24,
           "quantity": 1
         },
         {
-          "id": "onr_classic_021_satellite-monitors",
+          "id": 25,
           "quantity": 2
         },
         {
-          "id": "onr_classic_022_self-destruct",
+          "id": 26,
           "quantity": 1
         },
         {
-          "id": "onr_classic_023_shock-treatment",
+          "id": 27,
           "quantity": 1
         },
         {
-          "id": "onr_classic_024_sterdroid",
+          "id": 28,
           "quantity": 2
         },
         {
-          "id": "onr_classic_025_strategic-planning-group",
+          "id": 29,
           "quantity": 2
         }
       ],
@@ -366,7 +366,7 @@
       "id": "classic_corp_remote_lab_deflection_2026_07_01",
       "name": "Classic Corp - Remote Lab Deflection",
       "side": "corp",
-      "identity": "corp_identity_001",
+      "identity": 3,
       "focus": "Remote-orientiertes Lab-Deck mit Deflector-ICE, Regions-/Upgrade-Paket und hohem Agenda-Durchsatz. Die Liste testet breiter die Classic-Korp-Assets und Upgrade-Interaktionen.",
       "totalCards": 45,
       "classicCards": 45,
@@ -379,107 +379,107 @@
       },
       "cards": [
         {
-          "id": "onr_classic_001_data-fort-remapping",
+          "id": 5,
           "quantity": 3
         },
         {
-          "id": "onr_classic_002_superserum",
+          "id": 6,
           "quantity": 2
         },
         {
-          "id": "onr_classic_003_unlisted-research-lab",
+          "id": 7,
           "quantity": 3
         },
         {
-          "id": "onr_classic_004_theorem-proof",
+          "id": 8,
           "quantity": 1
         },
         {
-          "id": "onr_classic_005_baskerville",
+          "id": 9,
           "quantity": 1
         },
         {
-          "id": "onr_classic_006_bolter-swarm",
+          "id": 10,
           "quantity": 2
         },
         {
-          "id": "onr_classic_007_brain-drain",
+          "id": 11,
           "quantity": 1
         },
         {
-          "id": "onr_classic_008_deadeye",
+          "id": 12,
           "quantity": 2
         },
         {
-          "id": "onr_classic_009_dumpster",
+          "id": 13,
           "quantity": 2
         },
         {
-          "id": "onr_classic_010_entrapment",
+          "id": 14,
           "quantity": 3
         },
         {
-          "id": "onr_classic_011_glacier",
+          "id": 15,
           "quantity": 2
         },
         {
-          "id": "onr_classic_012_imperial-guard",
+          "id": 16,
           "quantity": 1
         },
         {
-          "id": "onr_classic_013_puzzle",
+          "id": 17,
           "quantity": 2
         },
         {
-          "id": "onr_classic_014_trapdoor",
+          "id": 18,
           "quantity": 2
         },
         {
-          "id": "onr_classic_015_vortex",
+          "id": 19,
           "quantity": 1
         },
         {
-          "id": "onr_classic_016_badtimes",
+          "id": 20,
           "quantity": 1
         },
         {
-          "id": "onr_classic_017_corporate-shuffle",
+          "id": 21,
           "quantity": 2
         },
         {
-          "id": "onr_classic_018_reclamation-project",
+          "id": 22,
           "quantity": 3
         },
         {
-          "id": "onr_classic_019_indiscriminate-response-team",
+          "id": 23,
           "quantity": 1
         },
         {
-          "id": "onr_classic_020_london-city-grid",
+          "id": 24,
           "quantity": 2
         },
         {
-          "id": "onr_classic_021_satellite-monitors",
+          "id": 25,
           "quantity": 2
         },
         {
-          "id": "onr_classic_022_self-destruct",
+          "id": 26,
           "quantity": 2
         },
         {
-          "id": "onr_classic_023_shock-treatment",
+          "id": 27,
           "quantity": 1
         },
         {
-          "id": "onr_classic_024_sterdroid",
+          "id": 28,
           "quantity": 1
         },
         {
-          "id": "onr_classic_025_strategic-planning-group",
+          "id": 29,
           "quantity": 1
         },
         {
-          "id": "onr_classic_026_street-enforcer",
+          "id": 30,
           "quantity": 1
         }
       ],

@@ -25,8 +25,8 @@ function deck(id: string, side: Side): DeckDefinition {
 
 const runnerDeck = deck("standard_runner_connection_pressure_publicity_network", "runner");
 const corpDeck = deck("standard_corp_mp1ddh7c", "corp");
-const firstAgenda = "onr_v1_213_private-cybernet-police";
-const secondAgenda = "onr_v1_207_netwatch-operations-office";
+const firstAgenda = 425;
+const secondAgenda = 419;
 
 function step(
   state: GameState,
@@ -56,20 +56,20 @@ function fixture(firstAgendaExposed: boolean): GameState {
   const builder = RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
     .withCorpCardInHq(secondAgenda)
-    .withCorpCardInHq("onr_v1_212_priority-requisition")
-    .withCorpCardInHq("onr_v1_217_strike-force-kali")
-    .withCorpRemoteRoot("remote_1", "onr_v1_208_on-call-solo-team")
-    .withRezzedCorpIceOnServer("remote_1", "onr_v1_245_fire-wall")
+    .withCorpCardInHq(424)
+    .withCorpCardInHq(429)
+    .withCorpRemoteRoot("remote_1", 420)
+    .withRezzedCorpIceOnServer("remote_1", 457)
     .withCorpCredits(19)
     .withRunnerCredits(firstAgendaExposed ? 24 : 5)
-    .withRunnerProgramInstalled("onr_v1_039_krash");
+    .withRunnerProgramInstalled(251);
   if (firstAgendaExposed) builder.withCorpRemoteRoot("remote_2", firstAgenda);
   else builder.withCorpCardInHq(firstAgenda);
 
   for (const definitionId of [
-    "onr_v1_193_corporate-coup",
-    "onr_v1_201_executive-extraction",
-    "onr_v1_214_project-babylon",
+    405,
+    413,
+    426,
   ]) {
     builder.withCorpCardInHq(definitionId);
     const id = state.corp.hq.pop()!;

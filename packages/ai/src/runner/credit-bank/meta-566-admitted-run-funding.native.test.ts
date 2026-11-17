@@ -45,7 +45,7 @@ it("pays out a mature bank for the admitted HQ funding parent instead of three b
   );
   expect(selected).toMatchObject({
     type: "activated_card_ability",
-    source: "runner_onr_v1_154_broker_1",
+    source: "runner_366_1",
     payload: { cardImplementationAbilityKey: "withdraw_credits" },
   });
   expect(result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(

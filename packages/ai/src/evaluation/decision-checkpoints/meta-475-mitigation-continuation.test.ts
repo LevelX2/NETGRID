@@ -201,7 +201,7 @@ describe("SP-135: the paid mitigation pump keeps its exact break purpose", () =>
       unbrokenSubroutineCount: 2,
     };
     const breaker = input.playerView.own.rig!.find(
-      (card) => card.definitionId === "onr_v1_039_krash",
+      (card) => card.definitionId === 251,
     )!;
     expect(
       currentEncounterMitigationForBreaker(
@@ -227,7 +227,7 @@ describe("SP-135: the paid mitigation pump keeps its exact break purpose", () =>
       });
       const ice = currentEncounteredIceCard(input)!;
       const breaker = input.playerView.own.rig!.find(
-        (c) => c.definitionId === "onr_v1_039_krash",
+        (c) => c.definitionId === 251,
       )!;
       const mitigation = currentEncounterMitigationForBreaker(
         input,
@@ -242,7 +242,7 @@ describe("SP-135: the paid mitigation pump keeps its exact break purpose", () =>
           }).affordable,
         3,
       );
-      expect(ice.definitionId).toBe("onr_classic_005_baskerville");
+      expect(ice.definitionId).toBe(9);
       expect(state.runner.credits).toBe(credits - 8);
       if (credits === 10) {
         expect(mitigation?.subroutineIndexes).toEqual([0]);
@@ -295,16 +295,16 @@ function encounter(credits = 19): GameState {
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
-        { id: "onr_classic_008_deadeye", quantity: 1 },
-        { id: "onr_classic_005_baskerville", quantity: 1 },
+        { id: 12, quantity: 1 },
+        { id: 9, quantity: 1 },
         ...ORIGINALSET_DEFAULT_DECKS.corp.cards,
       ],
     },
   });
-  installRunnerProgramForTest(state, "onr_v1_039_krash");
+  installRunnerProgramForTest(state, 251);
   for (const definitionId of [
-    "onr_classic_008_deadeye",
-    "onr_classic_005_baskerville",
+    12,
+    9,
   ]) {
     const id = putCorpIceOnServer(state, "rd", definitionId);
     state.cardInstances[id]!.rezzed = true;

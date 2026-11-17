@@ -398,7 +398,7 @@ function corpVisibleFastAdvanceSupport(input: AiDecisionInput): boolean {
 
 function evaluateKnownRdAccessSequencePayoff(
   input: AiDecisionInput,
-  knownSequenceDefinitionIds: readonly string[] | undefined,
+  knownSequenceDefinitionIds: readonly number[] | undefined,
   path: { visibleBreakCost: number; creditsAfterPath: number },
   evidenceBase: string[],
 ): KnownCentralAccessPayoff | undefined {
@@ -613,7 +613,7 @@ function evaluateKnownHqAccessPayoff(
       (
         card,
       ): card is {
-        definitionId: string;
+        definitionId: number;
         trashCost: number;
       } => card !== undefined,
     );
@@ -913,7 +913,7 @@ function hqKnownnessPenalty(
 
 function expandHqSafeDefinitionIds(
   memory: NonNullable<BeliefState["runnerOpponentModel"]>["hqHandMemory"],
-): string[] {
+): number[] {
   const fromLedger = memory.ledger.safeDefinitions.flatMap((definition) =>
     Array.from({ length: definition.count }, () => definition.definitionId),
   );
@@ -923,7 +923,7 @@ function expandHqSafeDefinitionIds(
 }
 
 function hqDefinitionHasAffordableTrashPayoff(
-  definitionId: string,
+  definitionId: number,
   creditsAfterPath: number,
 ): boolean {
   const type = cardDefinitionType(definitionId);
@@ -933,7 +933,7 @@ function hqDefinitionHasAffordableTrashPayoff(
 }
 
 function hqDefinitionIsLowValueForAccess(
-  definitionId: string,
+  definitionId: number,
   creditsAfterPath: number,
 ): boolean {
   const type = cardDefinitionType(definitionId);
@@ -1076,7 +1076,7 @@ function installedRdAccessDepthEstimate(input: AiDecisionInput): number {
 }
 
 function runnerCardProvidesInstalledRdMultiaccess(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   if (!definitionId) return false;
   return runnerHintProvidesMultiaccess(
@@ -1085,14 +1085,14 @@ function runnerCardProvidesInstalledRdMultiaccess(
   );
 }
 
-function cardDefinitionTrashCost(definitionId: string): number | undefined {
+function cardDefinitionTrashCost(definitionId: number): number | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
     CARD_DEFINITIONS_BY_ID[definitionId]?.trashCost
   );
 }
 
-function cardDefinitionType(definitionId: string): string | undefined {
+function cardDefinitionType(definitionId: number): string | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.type ??
     CARD_DEFINITIONS_BY_ID[definitionId]?.type
@@ -1101,7 +1101,7 @@ function cardDefinitionType(definitionId: string): string | undefined {
 
 function recentRunnerDeclinedKnownRdTopTrash(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): boolean {
   const history = mergedPublicHistory(input);
   const accessIndex = findLastHistoryIndex(
@@ -1147,7 +1147,7 @@ function recentRunnerDeclinedKnownRdTopTrash(
 
 function recentRunnerDeclinedKnownHqTrash(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): boolean {
   const history = mergedPublicHistory(input);
   const accessIndex = findLastHistoryIndex(

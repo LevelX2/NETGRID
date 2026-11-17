@@ -342,8 +342,8 @@ function observedOperationDefinitions(
       (event.type === "play_operation" && actor === "corp") ||
       (event.type === "access_card" && actor === "runner")
     ) {
-      if (typeof cardDefinitionId === "string") ids.add(cardDefinitionId);
-      if (typeof sourceDefinitionId === "string") ids.add(sourceDefinitionId);
+      if (typeof cardDefinitionId === "number") ids.add(cardDefinitionId);
+      if (typeof sourceDefinitionId === "number") ids.add(sourceDefinitionId);
     }
   }
   return ids;

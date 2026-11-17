@@ -118,9 +118,9 @@ it("replaces the acceptable redundant program, funds and wins the original remot
     getPlayerView(state, "runner").own.rig?.map((c) => c.definitionId),
   ).toEqual(
     expect.arrayContaining([
-      "onr_v1_039_krash",
-      "onr_v1_021_dwarf",
-      "onr_v1_014_codecracker",
+      251,
+      233,
+      226,
     ]),
   );
   const replay = replayEvents(
@@ -140,7 +140,7 @@ it.each([
   const { checkpoint } = original(),
     input = checkpoint.input;
   const card = input.playerView.own.gripOrHq.find(
-    (c: any) => c.definitionId === "onr_v1_014_codecracker",
+    (c: any) => c.definitionId === 226,
   );
   if (boundary === "missing_native_route")
     input.legalActions = input.legalActions.filter(
@@ -148,7 +148,7 @@ it.each([
     );
   if (boundary === "lost_memory_provider")
     input.playerView.own.rig.find(
-      (c: any) => c.definitionId === "onr_proteus_098_vienna-22",
+      (c: any) => c.definitionId === 156,
     ).memoryLimitBonus = 1;
   const assessProgramInstallTarget = (
     current: typeof input,

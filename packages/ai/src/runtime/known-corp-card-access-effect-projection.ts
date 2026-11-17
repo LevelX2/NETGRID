@@ -9,7 +9,7 @@ import {
 
 export type KnownCorpCardAccessEffectProjection = {
   status: "complete" | "not_applicable" | "unknown";
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   activationCreditCost?: number;
   corpCanPayActivation?: boolean;
   damage?: {
@@ -34,7 +34,7 @@ const REQUIRED_POST_ACCESS_HAND_BUFFER = 1;
 
 export function projectKnownCorpCardAccessEffect(params: {
   input: AiDecisionInput;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   sourceCard?: VisibleCard;
 }): KnownCorpCardAccessEffectProjection {
   const card = cardSpecPlanningCardByDefinitionId(params.sourceDefinitionId);
@@ -333,7 +333,7 @@ function damageProjection(
 }
 
 function result(
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
   status: KnownCorpCardAccessEffectProjection["status"],
   threatValue: number,
   evidenceCodes: string[],
@@ -344,7 +344,7 @@ function result(
 /** Risk projection at the public canonical base price; never a future LegalAction. */
 export function projectKnownCorpCardProspectiveAccessEffect(params: {
   input: AiDecisionInput;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   sourceCard?: VisibleCard;
 }): KnownCorpCardAccessEffectProjection {
   const current = projectKnownCorpCardAccessEffect(params);

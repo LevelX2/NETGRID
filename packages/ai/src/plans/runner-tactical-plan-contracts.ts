@@ -29,7 +29,7 @@ export type RunnerRunRiskContractSignal = {
     serverId: string;
     observedAtStateVersion: number;
     breakerInstanceId: string;
-    breakerDefinitionId: string;
+    breakerDefinitionId: number;
     targetIceInstanceId: string;
     targetSubroutineId: string;
     successProbability: number;
@@ -64,7 +64,7 @@ export type RunnerPressureSignal = {
   reachable: boolean;
   marginalValue: number;
   evidenceCode: string;
-  sourceDefinitionIds?: string[];
+  sourceDefinitionIds?: number[];
   runActionIds?: string[];
   runActionValues?: Record<string, number>;
   runActionEvidence?: Record<string, string[]>;
@@ -95,7 +95,7 @@ export type RunnerPressureSignal = {
   informationBoundaryReassessment?: RunnerInformationBoundaryReassessmentSignal;
   accessPayoffCampaign?: {
     payoffCardInstanceId: string;
-    payoffDefinitionId: string;
+    payoffDefinitionId: number;
     desiredCopyCount: number;
     installedCopyCount: number;
     selectedCopyOrdinal: number;
@@ -137,7 +137,7 @@ export type RunnerRemoteContestSignal = {
   remoteExposePreparation?: {
     sourceActionId: string;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     targetCardInstanceId: string;
     targetRootIndex: number;
     observedAtStateVersion: number;
@@ -189,7 +189,7 @@ export type RunnerRunAccessCommitmentSignal = {
     | "access_bonus";
   intendedAction: "steal" | "trash" | "decline" | "access" | "replace_access";
   fortIceTrashObjective?: RunnerFortIceTrashObjective;
-  knownTargetDefinitionIds: string[];
+  knownTargetDefinitionIds: number[];
   trashBudget: RunnerAccessFacts["trashBudget"];
   evidenceCode: string;
 };
@@ -226,8 +226,8 @@ export type RunnerRunWindowActionAssessment = {
   programSearchCommitment?: {
     sourceActionId: string;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
-    targetDefinitionId: string;
+    sourceDefinitionId: number;
+    targetDefinitionId: number;
     serverId: string;
     runId: string;
     plannedAtStateVersion: number;

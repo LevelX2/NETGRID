@@ -28,24 +28,24 @@ import type {
   GameState,
 } from "@netgrid/shared";
 
-const DATA_FORT_REMAPPING = "onr_classic_001_data-fort-remapping";
-const SUPERSERUM = "onr_classic_002_superserum";
-const UNLISTED_RESEARCH_LAB = "onr_classic_003_unlisted-research-lab";
-const THEOREM_PROOF = "onr_classic_004_theorem-proof";
+const DATA_FORT_REMAPPING = 5;
+const SUPERSERUM = 6;
+const UNLISTED_RESEARCH_LAB = 7;
+const THEOREM_PROOF = 8;
 
 const CLASSIC_AGENDA_CORP_DECK: DeckDefinition = {
   id: "classic_agenda_smoke_corp",
   name: "Classic Agenda Smoke Corp",
   side: "corp",
-  identity: "corp_identity_001",
+  identity: 3,
   cards: [
     { id: DATA_FORT_REMAPPING, quantity: 1 },
     { id: SUPERSERUM, quantity: 1 },
     { id: UNLISTED_RESEARCH_LAB, quantity: 1 },
     { id: THEOREM_PROOF, quantity: 1 },
-    { id: "simple_agenda", quantity: 8 },
-    { id: "simple_barrier_ice", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 2 },
+    { id: 588, quantity: 8 },
+    { id: 589, quantity: 2 },
+    { id: 590, quantity: 2 },
   ],
 };
 
@@ -71,7 +71,7 @@ function corpMainClassicAgendaGame(seed: string): GameState {
 
 function scoreClassicAgenda(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   advancementRequirement: number,
 ): { state: GameState; agendaId: string } {
   const agendaId = putCorpRootInRemote(state, definitionId);
@@ -98,7 +98,7 @@ describe("Classic Agenda Implementation Smokes", () => {
       state = scoreClassicAgenda(state, DATA_FORT_REMAPPING, 4).state;
       state = toRunnerTurnFromCorpMain(state);
       if (rezzedIce) {
-        const ice = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        const ice = putCorpIceOnServer(state, "rd", 589);
         state.cardInstances[ice]!.rezzed = true;
         state.cardInstances[ice]!.faceup = true;
       }
@@ -161,7 +161,7 @@ describe("Classic Agenda Implementation Smokes", () => {
 
       state = toRunnerTurnFromCorpMain(state);
       if (rezzedIce) {
-        const ice = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        const ice = putCorpIceOnServer(state, "rd", 589);
         state.cardInstances[ice]!.rezzed = true;
         state.cardInstances[ice]!.faceup = true;
       }
@@ -450,12 +450,12 @@ describe("Classic Agenda Implementation Smokes", () => {
     state.runner.credits = 20;
     state.runner.clicks = 4;
     state.runner.memoryLimit = 4;
-    const firstProgram = installRunnerProgramForTest(state, "simple_decoder");
-    const secondProgram = installRunnerProgramForTest(state, "simple_fracter");
-    installRunnerProgramForTest(state, "simple_killer");
+    const firstProgram = installRunnerProgramForTest(state, 591);
+    const secondProgram = installRunnerProgramForTest(state, 597);
+    installRunnerProgramForTest(state, 598);
     const fourthProgram = Object.values(state.cardInstances).find(
       (instance) =>
-        instance.definitionId === "simple_decoder" &&
+        instance.definitionId === 591 &&
         instance.instanceId !== firstProgram,
     )?.instanceId;
     if (!fourthProgram) throw new Error("Zweite Simple-Decoder-Instanz fehlt.");
@@ -534,11 +534,11 @@ describe("Classic Agenda Implementation Smokes", () => {
     state = toRunnerTurnFromCorpMain(state);
     state.runner.credits = 20;
     state.runner.clicks = 4;
-    installRunnerProgramForTest(state, "onr_v1_015_codeslinger");
-    installRunnerProgramForTest(state, "onr_v1_052_raffles");
-    installRunnerProgramForTest(state, "onr_v1_054_raptor");
-    installRunnerProgramForTest(state, "onr_v1_070_tinweasel");
-    installRunnerHardwareForTest(state, "onr_v1_146_zetatech-mem-chip");
+    installRunnerProgramForTest(state, 227);
+    installRunnerProgramForTest(state, 264);
+    installRunnerProgramForTest(state, 266);
+    installRunnerProgramForTest(state, 282);
+    installRunnerHardwareForTest(state, 358);
     const theoremId = putCorpCardOnTopOfRd(state, THEOREM_PROOF);
 
     expect(state.runner.memoryLimit).toBe(4);

@@ -114,7 +114,7 @@ describe("SemanticShadowLeague", () => {
       expect(tied?.score).toBe(top?.score);
       expect(tiedCandidate).toMatchObject({
         actionType: "play_operation",
-        sourceDefinitionId: "simple_economy_operation",
+        sourceDefinitionId: 596,
         economyProjection: {
           grossLiquidCreditGain: 4,
           source: "legal_action_payload",

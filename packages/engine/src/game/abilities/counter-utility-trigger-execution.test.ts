@@ -125,7 +125,7 @@ describe("counter utility trigger execution", () => {
 
     state.corpTemporaryInstallRezCredits = {
       sourceCardInstanceId: "contract",
-      sourceDefinitionId: "onr_proteus_059_government-contract",
+      sourceDefinitionId: 117,
       remaining: 3,
       usableFor: "corp_install_or_rez",
       returnUnusedAtTurnEnd: true,
@@ -301,7 +301,7 @@ describe("counter utility trigger execution", () => {
 
     state.corpTemporaryInstallRezCredits = {
       sourceCardInstanceId: "contract",
-      sourceDefinitionId: "onr_proteus_059_government-contract",
+      sourceDefinitionId: 117,
       remaining: 3,
       usableFor: "corp_install_or_rez",
       returnUnusedAtTurnEnd: true,
@@ -370,10 +370,10 @@ type HostOptions = {
   traceCounterEffect?: {
     counterType: CounterType;
     removeCost: number;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
   };
   dataFortLock?: {
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     modifier: { corpTrashSourceCost: { clicks: number; credits: number } };
   };
 };
@@ -547,7 +547,7 @@ function setCounter(
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   owner: Side,
 ): CardInstance {
   return {
@@ -564,7 +564,7 @@ function instance(
   } as unknown as CardInstance;
 }
 
-function definition(id: string, type: CardDefinition["type"]): CardDefinition {
+function definition(id: number, type: CardDefinition["type"]): CardDefinition {
   return {
     id,
     title: id,

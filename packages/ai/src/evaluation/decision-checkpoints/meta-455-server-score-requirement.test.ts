@@ -31,7 +31,7 @@ it("quotes Babylon without Overtime and selects the newly reachable terminal Tyc
     input,
     runtime.residentPlanPortfolio!,
   );
-  const agenda = "corp_onr_v1_214_project-babylon_1";
+  const agenda = "corp_426_1";
   const paths = corpSameTurnScoreConversionPaths(input).filter(
     (p) => p.agendaCardId === agenda,
   );
@@ -59,10 +59,10 @@ it("quotes Babylon without Overtime and selects the newly reachable terminal Tyc
   )!;
   expect(action).toMatchObject({
     type: "play_operation",
-    source: "corp_onr_v1_297_overtime-incentives_3",
+    source: "corp_509_3",
   });
   const parent =
-    "plan:corp.score_agenda:agenda%3Acorp_onr_v1_220_tycho-extension_2%3Aremote_1";
+    "plan:corp.score_agenda:agenda%3Acorp_432_2%3Aremote_1";
   const plan = result.decisionDebug?.planFirstDecision;
   expect(plan?.rootPlanInstanceId).toBe(parent);
   expect(plan?.leafExecutorInstanceId).toBe(parent);

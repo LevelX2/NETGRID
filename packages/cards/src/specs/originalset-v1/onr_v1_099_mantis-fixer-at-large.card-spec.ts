@@ -7,7 +7,7 @@ const searchStackToGrip = capabilityKey(
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_099_mantis-fixer-at-large"),
+    cardDefinitionId: cardDefinitionId(311),
     title: "Mantis, Fixer-at-Large",
     side: "runner",
     cardType: "event",

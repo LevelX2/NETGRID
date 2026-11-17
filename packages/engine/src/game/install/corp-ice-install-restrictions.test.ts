@@ -14,7 +14,7 @@ describe("Classic Corp ICE install restrictions", () => {
   const newRemote = { id: "new_remote", kind: "remote" } as const;
 
   it("prevents Dumpster from being installed on Archives", () => {
-    const dumpster = ice("onr_classic_009_dumpster");
+    const dumpster = ice(13);
 
     expect(canInstallCorpIceInServer(dumpster, archives)).toBe(false);
     expect(canInstallCorpIceInServer(dumpster, hq)).toBe(true);
@@ -24,7 +24,7 @@ describe("Classic Corp ICE install restrictions", () => {
   });
 
   it("allows Trapdoor only on HQ or R&D", () => {
-    const trapdoor = ice("onr_classic_014_trapdoor");
+    const trapdoor = ice(18);
 
     expect(canInstallCorpIceInServer(trapdoor, hq)).toBe(true);
     expect(canInstallCorpIceInServer(trapdoor, rd)).toBe(true);
@@ -34,7 +34,7 @@ describe("Classic Corp ICE install restrictions", () => {
   });
 
   it("allows Panic Button only on HQ", () => {
-    const panicButton = ice("onr_proteus_067_panic-button");
+    const panicButton = ice(125);
 
     expect(canInstallCorpIceInServer(panicButton, hq)).toBe(true);
     expect(canInstallCorpIceInServer(panicButton, rd)).toBe(false);
@@ -44,7 +44,7 @@ describe("Classic Corp ICE install restrictions", () => {
   });
 
   it("allows Roving Submarine only inside a subsidiary data fort", () => {
-    const rovingSubmarine = ice("onr_v1_368_roving-submarine");
+    const rovingSubmarine = ice(580);
 
     expect(canInstallCorpIceInServer(rovingSubmarine, remote)).toBe(true);
     expect(canInstallCorpIceInServer(rovingSubmarine, newRemote)).toBe(true);
@@ -54,7 +54,7 @@ describe("Classic Corp ICE install restrictions", () => {
   });
 
   it("allows Glacier on every data fort", () => {
-    const glacier = ice("onr_classic_011_glacier");
+    const glacier = ice(15);
 
     expect(canInstallCorpIceInServer(glacier, remote)).toBe(true);
     expect(canInstallCorpIceInServer(glacier, newRemote)).toBe(true);

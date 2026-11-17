@@ -387,7 +387,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       advancementRequirement: 3,
     });
     const projectConsultants = operationCard("project-consultants", {
-      definitionId: "onr_v1_300_project-consultants",
+      definitionId: 512,
       title: "Project Consultants",
       cost: 10,
       rulesText:
@@ -425,11 +425,11 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
 
   it("does not charge a click for scoring after a visible two-counter burst", () => {
     const agenda = agendaCard("project-zurich", {
-      definitionId: "onr_proteus_008_project-zurich",
+      definitionId: 66,
       advancementRequirement: 3,
     });
     const systematicLayoffs = operationCard("systematic-layoffs", {
-      definitionId: "onr_v1_304_systematic-layoffs",
+      definitionId: 516,
       title: "Systematic Layoffs",
       cost: 5,
       rulesText:

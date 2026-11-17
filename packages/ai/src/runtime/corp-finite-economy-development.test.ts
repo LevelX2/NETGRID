@@ -10,17 +10,17 @@ import { buildAiDecisionInput } from "./ai-decision-input";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
-const pool = "onr_v1_337_rockerboy-promotion";
-const wall = "onr_v1_279_wall-of-static";
+const pool = 549;
+const wall = 491;
 const deck = {
   ...DEMO_DECKS.demo_corp_001,
   cards: [
     ...DEMO_DECKS.demo_corp_001.cards,
     { id: pool, quantity: 1 },
-    { id: "onr_v1_285_closed-accounts", quantity: 1 },
+    { id: 497, quantity: 1 },
     { id: wall, quantity: 1 },
-    { id: "onr_v1_237_data-wall", quantity: 1 },
-    { id: "onr_v1_278_wall-of-ice", quantity: 1 },
+    { id: 449, quantity: 1 },
+    { id: 490, quantity: 1 },
   ],
 };
 afterEach(resetResidentPlanPortfolioMemory);
@@ -50,9 +50,9 @@ function prepared(protectedRemote: boolean, credits = 8) {
     .withCorpCardInHq(pool)
     .withCorpCredits(credits);
   setup
-    .withRezzedCorpIceOnServer("hq", "onr_v1_237_data-wall")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_278_wall-of-ice");
-  setup.withCorpCardInHq("onr_v1_285_closed-accounts");
+    .withRezzedCorpIceOnServer("hq", 449)
+    .withRezzedCorpIceOnServer("rd", 490);
+  setup.withCorpCardInHq(497);
   if (protectedRemote) setup.withRezzedCorpIceOnServer("remote_1", wall);
   return state;
 }

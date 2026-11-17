@@ -35,7 +35,7 @@ it("publishes assessed zero break cost and installs the decoder under its actual
   const view = saved.checkpoint.input.playerView;
   const server = view.servers.find((s: any) => s.id === "remote_1");
   const decoder = view.own.gripOrHq.find(
-    (c: any) => c.definitionId === "onr_v1_014_codecracker",
+    (c: any) => c.definitionId === 226,
   );
   const beforePath = assessKnownRezzedIcePath(
     server.ice,

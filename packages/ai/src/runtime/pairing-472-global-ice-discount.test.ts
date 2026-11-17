@@ -15,25 +15,25 @@ import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-buil
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "./ai-decision-input";
 
-const fortress = "onr_v1_324_fortress-architects";
-const chester = "onr_v1_352_chester-mix";
-const filter = "onr_v1_244_filter";
+const fortress = 536;
+const chester = 564;
+const filter = 456;
 const corpDeck = {
   ...ORIGINALSET_DEFAULT_DECKS.corp,
   cards: [
     { id: fortress, quantity: 1 },
     { id: chester, quantity: 1 },
     { id: filter, quantity: 1 },
-    { id: "onr_v1_237_data-wall", quantity: 2 },
-    { id: "onr_v1_247_haunting-inquisition", quantity: 1 },
-    { id: "onr_v1_220_tycho-extension", quantity: 1 },
-    { id: "onr_v1_188_ai-chief-financial-officer", quantity: 33 },
+    { id: 449, quantity: 2 },
+    { id: 459, quantity: 1 },
+    { id: 432, quantity: 1 },
+    { id: 400, quantity: 33 },
   ],
 };
 const runnerDeck = {
   ...ORIGINALSET_DEFAULT_DECKS.runner,
   cards: [
-    { id: "onr_v1_021_dwarf", quantity: 1 },
+    { id: 233, quantity: 1 },
     ...ORIGINALSET_DEFAULT_DECKS.runner.cards,
   ],
 };
@@ -53,13 +53,13 @@ function prepared(sourceDefinitionId = fortress, hqDiscounted = false) {
     .withCorpHqSize(0)
     .withCorpCredits(2)
     .withRunnerCredits(20)
-    .withRunnerProgramInstalled("onr_v1_021_dwarf")
+    .withRunnerProgramInstalled(233)
     .withCorpCardInHq(filter)
-    .withCorpCardInHq("onr_v1_220_tycho-extension")
+    .withCorpCardInHq(432)
     .withCorpRemoteRoot("remote_1", sourceDefinitionId)
-    .withRezzedCorpIceOnServer("rd", "onr_v1_247_haunting-inquisition");
+    .withRezzedCorpIceOnServer("rd", 459);
   const wallIds = Object.values(state.cardInstances)
-    .filter((c) => c.definitionId === "onr_v1_237_data-wall")
+    .filter((c) => c.definitionId === 449)
     .map((c) => c.instanceId);
   for (const id of wallIds) {
     state.corp.hq = state.corp.hq.filter((c) => c !== id);

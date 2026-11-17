@@ -14,9 +14,9 @@ import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfol
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 
 const SCORE_ROOT =
-  "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_005_marked-accounts_1%3Aremote_1";
+  "plan:corp.score_agenda:agenda%3Acorp_63_1%3Aremote_1";
 const SCORE_SUPPORT =
-  "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_proteus_005_marked-accounts_1%3Aremote_1";
+  "plan:corp.economy:score-support%3Aagenda%3Acorp_63_1%3Aremote_1";
 
 describe("SP-082 score campaign multi-step regression", () => {
   it.each([0, 1])(

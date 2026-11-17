@@ -22,7 +22,7 @@ type ProgramTrashChoiceContext = {
   contextId: string;
   sourceIceId: string;
   subroutineIndex: number;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   subroutineId: string;
   subroutineType: string;
   continuation: "encounter" | "trace_success";
@@ -236,7 +236,7 @@ function isKnownInstalledRunnerProgram(card: VisibleCard): boolean {
     card.known === true &&
     card.controller === "runner" &&
     (card.type === "program" || card.installedAsRunnerProgram !== undefined) &&
-    typeof card.definitionId === "string" &&
+    typeof card.definitionId === "number" &&
     card.definitionId.length > 0
   );
 }

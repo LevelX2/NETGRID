@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
-const offSiteId = "onr_v1_296_off-site-backups";
-const reclamationId = "onr_classic_018_reclamation-project";
+const offSiteId = 508;
+const reclamationId = 22;
 
 function generatedHint(cardId: string) {
   const hint = AI_HINTS_BY_CARD.get(cardId);
@@ -46,12 +46,12 @@ function expectUnrestrictedRecovery(hint: {
 
 describe("typed Archives recovery hint semantics", () => {
   it.each([
-    "onr_classic_017_corporate-shuffle",
+    21,
     reclamationId,
-    "onr_classic_040_meat-upgrade",
-    "onr_classic_041_networking",
-    "onr_classic_042_panzer-run",
-    "onr_classic_043_running-interference",
+    44,
+    45,
+    46,
+    47,
   ])("retains the real additional play action in %s", (cardId) => {
     const compiled = deriveCardSpecAiHint(entry(cardId));
     const generated = generatedHint(cardId);

@@ -21,7 +21,7 @@ export type CorpTraceBidAssessment = {
   minimumGuaranteedBid?: number;
   followupCreditReserve?: number;
   followupCardId?: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
 };
 
 const NATIVE_TRACE_SUCCESS_PAYOFF_KINDS = new Set([
@@ -41,7 +41,7 @@ export function assessCorpTraceBid(params: {
   input: AiDecisionInput;
   traceContext: LatestTraceContext;
   maxBid: number;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
 }): CorpTraceBidAssessment {
   const terminalRunLockBid = currentTerminalRunLockBid(
     params.input,
@@ -211,7 +211,7 @@ function currentTerminalRunLockBid(
 }
 
 function sourceHasNativeTraceSuccessPayoff(
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
 ): boolean {
   const hint = AI_HINTS_BY_CARD.get(sourceDefinitionId);
   if (!hint || hint.cardType !== "ice") return false;

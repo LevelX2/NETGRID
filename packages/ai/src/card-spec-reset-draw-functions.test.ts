@@ -6,7 +6,7 @@ import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 
-const id = "onr_v1_101_mit-west-tier";
+const id = 313;
 const entry = cardSpecPlanningCards().find((c) => c.definition.id === id)!;
 
 it("projects compound pool reset and draw from mechanics without promising additive hand gain", () => {
@@ -39,7 +39,7 @@ it("counts the generated reset draw source in the actual Redline Riot profile", 
   const snapshot = {
     ...source,
     cards: source.cards.map(
-      (c: { cardId?: string; definitionId?: string; quantity: number }) => ({
+      (c: { cardId?: string; definitionId?: number; quantity: number }) => ({
         cardId: c.cardId ?? c.definitionId!,
         quantity: c.quantity,
       }),
@@ -53,7 +53,7 @@ it("counts the generated reset draw source in the actual Redline Riot profile", 
 
 it("recognizes reset mechanics on another supported card without planning annotations", () => {
   const other = cardSpecPlanningCards().find(
-    (c) => c.definition.id === "onr_v1_095_jack-n-joe",
+    (c) => c.definition.id === 307,
   )!;
   const planning = { ...entry.planning };
   delete planning.planningAnnotations;
@@ -65,7 +65,7 @@ it("recognizes reset mechanics on another supported card without planning annota
 
 it("does not add a pool shuffle to a plain draw event", () => {
   const draw = cardSpecPlanningCards().find(
-    (c) => c.definition.id === "onr_v1_095_jack-n-joe",
+    (c) => c.definition.id === 307,
   )!;
   expect(deriveCardSpecAiHint(draw).functionSignals).toContain("setup.draw");
   expect(deriveCardSpecAiHint(draw).functionSignals).not.toContain(

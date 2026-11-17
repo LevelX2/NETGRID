@@ -155,12 +155,12 @@ describe("selectedSearchChoiceOptionIds", () => {
     const choice = searchChoice(
       [
         option("psychic-friend", "Psychic Friend", "program", {
-          definitionId: "onr_classic_030_psychic-friend",
+          definitionId: 34,
           installCost: 2,
           memoryCost: 1,
         }),
         option("rent-i-con-a", "Rent-I-Con", "program", {
-          definitionId: "onr_classic_031_rent-i-con",
+          definitionId: 35,
           installCost: 3,
           memoryCost: 2,
         }),
@@ -175,15 +175,15 @@ describe("selectedSearchChoiceOptionIds", () => {
           memoryRemaining: 4,
           hasInstalledNonNoisyIcebreaker: true,
           rigRoles: new Set(["breaker_killer"]),
-          rigDefinitionIds: new Set(["onr_classic_028_matador"]),
+          rigDefinitionIds: new Set([32]),
         },
         effectsForCardId: () => [],
         rolesForCardId: (definitionId) =>
-          definitionId === "onr_classic_031_rent-i-con"
+          definitionId === 35
             ? ["breaker_universal"]
             : ["breaker_code_gate"],
         requiredCoverage: "breaker_code_gate",
-        preferredCardDefinitionId: "onr_classic_031_rent-i-con",
+        preferredCardDefinitionId: 35,
       }),
     ).toEqual(["rent-i-con-a"]);
   });
@@ -211,7 +211,7 @@ describe("selectedSearchChoiceOptionIds", () => {
         rolesForCardId: () => [],
         requiredCoverage: "breaker_code_gate",
         preferredCardInstanceId: "rent-i-con-3",
-        preferredCardDefinitionId: "onr_classic_031_rent-i-con",
+        preferredCardDefinitionId: 35,
       }),
     ).toEqual(["option-rent-i-con-3"]);
   });
@@ -219,8 +219,8 @@ describe("selectedSearchChoiceOptionIds", () => {
   it("prefers a new installable support program over breaker copies already in rig and grip", () => {
     const choice = searchChoice(
       [
-        canonicalProgramOption("krash", "onr_v1_039_krash"),
-        canonicalProgramOption("lockjaw", "onr_proteus_091_lockjaw"),
+        canonicalProgramOption("krash", 251),
+        canonicalProgramOption("lockjaw", 149),
       ],
       1,
     );
@@ -229,9 +229,9 @@ describe("selectedSearchChoiceOptionIds", () => {
         credits: 4,
         memoryRemaining: 2,
         hasInstalledNonNoisyIcebreaker: true,
-        rigRoles: new Set(AI_HINTS_BY_CARD.get("onr_v1_039_krash")!.roles),
-        rigDefinitionIds: new Set(["onr_v1_039_krash"]),
-        gripDefinitionCounts: new Map([["onr_v1_039_krash", 1]]),
+        rigRoles: new Set(AI_HINTS_BY_CARD.get(251)!.roles),
+        rigDefinitionIds: new Set([251]),
+        gripDefinitionCounts: new Map([[251, 1]]),
       },
       effectsForCardId: (id) => AI_HINTS_BY_CARD.get(id!)!.effects ?? [],
       rolesForCardId: (id) => AI_HINTS_BY_CARD.get(id!)!.roles,
@@ -243,8 +243,8 @@ describe("selectedSearchChoiceOptionIds", () => {
   it("prefers a fresh support definition over another copy already in grip", () => {
     const choice = searchChoice(
       [
-        canonicalProgramOption("lockjaw", "onr_proteus_091_lockjaw"),
-        canonicalProgramOption("clown", "onr_v1_012_clown"),
+        canonicalProgramOption("lockjaw", 149),
+        canonicalProgramOption("clown", 224),
       ],
       1,
     );
@@ -253,9 +253,9 @@ describe("selectedSearchChoiceOptionIds", () => {
         credits: 4,
         memoryRemaining: 2,
         hasInstalledNonNoisyIcebreaker: true,
-        rigRoles: new Set(AI_HINTS_BY_CARD.get("onr_v1_039_krash")!.roles),
-        rigDefinitionIds: new Set(["onr_v1_039_krash"]),
-        gripDefinitionCounts: new Map([["onr_proteus_091_lockjaw", 1]]),
+        rigRoles: new Set(AI_HINTS_BY_CARD.get(251)!.roles),
+        rigDefinitionIds: new Set([251]),
+        gripDefinitionCounts: new Map([[149, 1]]),
       },
       effectsForCardId: (id) => AI_HINTS_BY_CARD.get(id!)!.effects ?? [],
       rolesForCardId: (id) => AI_HINTS_BY_CARD.get(id!)!.roles,
@@ -523,7 +523,7 @@ function hiddenOption(
   } as PendingChoice["options"][number];
 }
 
-function canonicalProgramOption(optionId: string, definitionId: string) {
+function canonicalProgramOption(optionId: string, definitionId: number) {
   const card = CARD_DEFINITIONS_BY_ID[definitionId]!;
   return option(optionId, card.title, card.type, {
     definitionId: card.id,

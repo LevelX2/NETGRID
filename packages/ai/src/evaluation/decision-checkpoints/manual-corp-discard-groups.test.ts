@@ -21,18 +21,18 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
-const TROJAN = "onr_v1_306_trojan-horse";
-const AUDIT = "onr_v1_283_audit-of-call-records";
-const OVERTIME = "onr_v1_297_overtime-incentives";
-const PUNITIVE = "onr_v1_301_punitive-counterstrike";
-const SCORCHED = "onr_v1_302_scorched-earth";
-const URBAN = "onr_v1_307_urban-renewal";
-const POLITICAL_COUP = "onr_v1_209_political-coup";
-const WALL = "onr_v1_279_wall-of-static";
-const FALL_GUY = "onr_v1_161_fall-guy";
-const CREDIT = "onr_v1_281_accounts-receivable";
-const FILLER = "onr_v1_192_corporate-boon";
-const ON_CALL = "onr_v1_208_on-call-solo-team";
+const TROJAN = 518;
+const AUDIT = 495;
+const OVERTIME = 509;
+const PUNITIVE = 513;
+const SCORCHED = 514;
+const URBAN = 519;
+const POLITICAL_COUP = 421;
+const WALL = 491;
+const FALL_GUY = 373;
+const CREDIT = 493;
+const FILLER = 404;
+const ON_CALL = 420;
 
 const matchIds = new Set<string>();
 afterEach(() => {
@@ -101,7 +101,7 @@ describe("native cleanup choice", () => {
       opponent.credits = runnerCredits;
       opponent.rig = Array.from({ length: sources }, (_, index) => ({
         instanceId: `visible-nasuko-${index}`,
-        definitionId: "onr_v1_135_nasuko-cycle",
+        definitionId: 347,
         type: "resource",
         known: true,
       }));
@@ -290,7 +290,7 @@ function cleanup(options: {
   ]);
   const runnerDeck = deck("runner", [
     FALL_GUY,
-    ...Array<string>(7).fill("onr_v1_039_krash"),
+    ...Array<string>(7).fill(251),
   ]);
   const state = createGame({
     seed: "manual-corp-discard-groups",
@@ -306,7 +306,7 @@ function cleanup(options: {
     .withRunnerCredits(12);
   if (options.fallGuy) fixture.withRunnerResourceInstalled(FALL_GUY);
   fixture.withRunnerGripSize(options.grip ?? 5);
-  function move(definitionId: string, zone: "hq" | "archives" | "scoreArea") {
+  function move(definitionId: number, zone: "hq" | "archives" | "scoreArea") {
     const index = state.corp.rd.findIndex(
       (id) => state.cardInstances[id]?.definitionId === definitionId,
     );

@@ -22,8 +22,8 @@ import {
 } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 
-const CRASH_EVERETT = "onr_v1_157_crash-everett-inventive-fixer";
-const CITY_SURVEILLANCE = "onr_v1_313_city-surveillance";
+const CRASH_EVERETT = 369;
+const CITY_SURVEILLANCE = 525;
 
 describe("Crash Everett draw-plan continuation", () => {
   it.each([0, 2, 5, 6])(
@@ -356,7 +356,7 @@ function toRunnerTurn(state: GameState): GameState {
 
 function moveRunnerCardToGrip(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
 ): CardInstanceId {
   const entry = Object.entries(state.cardInstances).find(
     ([, card]) => card.definitionId === definitionId,
@@ -388,7 +388,7 @@ function moveRunnerCardToGrip(
 
 function moveCorpCardToRemoteAndRez(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
 ): CardInstanceId {
   const entry = Object.entries(state.cardInstances).find(
     ([, card]) => card.definitionId === definitionId,

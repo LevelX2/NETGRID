@@ -18,14 +18,14 @@ describe("remoteTrashRoleForVisibleCard", () => {
     expect(
       remoteTrashRoleForVisibleCard({
         ...card(),
-        definitionId: "simple_upgrade",
+        definitionId: 606,
         type: "upgrade",
       }),
     ).toBe("low_value");
     expect(
       remoteTrashRoleForVisibleCard({
         ...card(),
-        definitionId: "onr_v1_317_data-masons",
+        definitionId: 529,
       }),
     ).not.toBe("low_value");
   });
@@ -33,7 +33,7 @@ describe("remoteTrashRoleForVisibleCard", () => {
     expect(
       remoteTrashRoleForVisibleCard({
         ...card(),
-        definitionId: "onr_v1_312_chicago-branch",
+        definitionId: 524,
       }),
     ).toBe("score_acceleration");
   });
@@ -42,7 +42,7 @@ describe("remoteTrashRoleForVisibleCard", () => {
     expect(
       remoteTrashRoleForVisibleCard({
         ...card(),
-        definitionId: "onr_v1_330_krumz",
+        definitionId: 542,
         counters: { bit: 1 },
       }),
     ).toBe("economy");

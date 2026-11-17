@@ -17,16 +17,16 @@ function stateWithRun() {
 }
 
 it.each([
-  ["onr_v1_222_ball-and-chain", ["set_run_encounter_tax"]],
-  ["onr_proteus_016_coyote", ["set_run_future_strength_bonus"]],
-  ["onr_proteus_035_roadblock", ["end_the_run"]],
+  [434, ["set_run_encounter_tax"]],
+  [74, ["set_run_future_strength_bonus"]],
+  [93, ["end_the_run"]],
   [
-    "onr_v1_234_data-darts",
+    446,
     ["do_damage", "set_next_encounter_no_break_subroutines"],
   ],
-  ["onr_v1_223_banpei", ["trash_installed_program", "end_the_run"]],
-  ["onr_proteus_026_hunting-pack", []],
-  ["onr_proteus_021_dog-pile", ["do_damage", "end_the_run"]],
+  [435, ["trash_installed_program", "end_the_run"]],
+  [84, []],
+  [79, ["do_damage", "end_the_run"]],
 ] as const)(
   "projects actual temporary effect kinds for %s without changing the state",
   (id, types) => {
@@ -47,7 +47,7 @@ it.each([
     ).toMatchObject({
       temporaryEncounterSubroutineTypes: types,
       temporaryEncounterHasAdditionalMechanics:
-        id === "onr_proteus_035_roadblock",
+        id === 93,
     });
     expect(hashState(state)).toBe(before);
   },
@@ -79,7 +79,7 @@ it("projects pending and active public break restrictions independently to both 
 it("keeps unprojected entry payments explicitly outside the temporary break comparison", () => {
   const state = stateWithRun();
   const iceId = "temporary-wall" as CardInstanceId;
-  const definition = CARD_DEFINITIONS_BY_ID["onr_v1_279_wall-of-static"]!;
+  const definition = CARD_DEFINITIONS_BY_ID[491]!;
   state.cardInstances[iceId] = {
     ...state.cardInstances[state.corp.hq[0]!]!,
     definitionId: definition.id,

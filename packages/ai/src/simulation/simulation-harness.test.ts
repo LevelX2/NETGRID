@@ -114,7 +114,7 @@ describe("AI simulation harness", () => {
         id: "invalid-runtime-deck",
         name: "Invalid runtime deck",
         side: "runner",
-        identity: "runner_identity_001",
+        identity: 587,
         cards: [{ id: "missing-card", quantity: 1 }],
       } as never,
     });

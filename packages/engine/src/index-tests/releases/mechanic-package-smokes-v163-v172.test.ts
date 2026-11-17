@@ -196,23 +196,23 @@ describe("V1.6.3 Mechanikpaket C", () => {
         /hosting|daemon|stealth|unique_card|recurring_credit/,
       );
     }
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_233_d-arc-knight"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[445]).toMatchObject({
       rezCost: 6,
       strength: 2,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_267_sentinels-prime"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[479]).toMatchObject({
       rezCost: 8,
       strength: 4,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_273_triggerman"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[485]).toMatchObject({
       rezCost: 7,
       strength: 3,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_350_antiquated-interface-routines"],
+      CARD_DEFINITIONS_BY_ID[562],
     ).toMatchObject({ rezCost: 2, trashCost: 1 });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_371_tokyo-chiba-infighting"],
+      CARD_DEFINITIONS_BY_ID[583],
     ).toMatchObject({ rezCost: 0, trashCost: 6 });
   });
 
@@ -231,29 +231,29 @@ describe("V1.6.3 Mechanikpaket C", () => {
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_341_skalderviken-sa-beta-test-site"],
+      CARD_DEFINITIONS_BY_ID[553],
     ).toBeDefined();
   });
 
   it("resolves trash-program ICE subroutines deterministically and replay-safe", () => {
     const cases = [
-      "onr_v1_233_d-arc-knight",
-      "onr_v1_267_sentinels-prime",
-      "onr_v1_273_triggerman",
+      445,
+      479,
+      485,
     ] as const;
 
     for (const iceDefinitionId of cases) {
       let state = toRunnerTurn(
         v163CardReleaseGame(`v163-trash-${iceDefinitionId}`),
       );
-      installRunnerProgramForTest(state, "onr_v1_014_codecracker");
+      installRunnerProgramForTest(state, 226);
       const installedProgramId = state.runner.rig.programs.find(
         (id) =>
-          state.cardInstances[id]?.definitionId === "onr_v1_014_codecracker",
+          state.cardInstances[id]?.definitionId === 226,
       );
       expect(installedProgramId).toBeDefined();
       putCorpIceOnServer(state, "rd", iceDefinitionId);
-      putCorpCardOnTopOfRd(state, "simple_economy_operation");
+      putCorpCardOnTopOfRd(state, 596);
       state.corp.credits = 40;
       state.runner.credits = 10;
       const initial = structuredClone(state);
@@ -301,8 +301,8 @@ describe("V1.6.3 Mechanikpaket C", () => {
       id: "onr_v1_corp_v163_central_root_install",
       cards: [
         ...ONR_V1_6_3_CORP_DECK.cards,
-        { id: "simple_agenda", quantity: 1 },
-        { id: "simple_economy_asset", quantity: 1 },
+        { id: 588, quantity: 1 },
+        { id: 594, quantity: 1 },
       ],
     };
     let state = createGameAfterSetup({
@@ -318,10 +318,10 @@ describe("V1.6.3 Mechanikpaket C", () => {
     state.corp.maxHandSize = 100;
     const upgradeId = moveCorpCardToHq(
       state,
-      "onr_v1_350_antiquated-interface-routines",
+      562,
     );
-    const agendaId = moveCorpCardToHq(state, "simple_agenda");
-    const assetId = moveCorpCardToHq(state, "simple_economy_asset");
+    const agendaId = moveCorpCardToHq(state, 588);
+    const assetId = moveCorpCardToHq(state, 594);
     const upgradeTargets = getLegalActions(state, "corp")
       .filter(
         (action) =>
@@ -394,7 +394,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
     expect(
       getPlayerView(state, "corp").servers.find((server) => server.id === "hq")
         ?.root[0]?.definitionId,
-    ).toBe("onr_v1_350_antiquated-interface-routines");
+    ).toBe(562);
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "Antiquated Interface Routines",
     );
@@ -424,7 +424,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
     rdState.corp.clicks = 3;
     const rdUpgradeId = moveCorpCardToHq(
       rdState,
-      "onr_v1_350_antiquated-interface-routines",
+      562,
     );
     rdState = apply(
       rdState,
@@ -451,17 +451,17 @@ describe("V1.6.3 Mechanikpaket C", () => {
     strengthState.corp.maxHandSize = 100;
     putCorpRootInRemote(
       strengthState,
-      "onr_v1_350_antiquated-interface-routines",
+      562,
     );
-    putCorpIceOnServer(strengthState, "remote_1", "onr_v1_232_crystal-wall");
-    putCorpIceOnServer(strengthState, "rd", "onr_v1_233_d-arc-knight");
+    putCorpIceOnServer(strengthState, "remote_1", 444);
+    putCorpIceOnServer(strengthState, "rd", 445);
     strengthState = apply(
       strengthState,
       "corp",
       (action) =>
         action.type === "rez_card" &&
         sourceDefinition(strengthState, action) ===
-          "onr_v1_350_antiquated-interface-routines",
+          562,
     );
     strengthState = apply(
       strengthState,
@@ -479,7 +479,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(strengthState, action) === "onr_v1_232_crystal-wall",
+        sourceDefinition(strengthState, action) === 444,
     );
     expect(
       getPlayerView(strengthState, "runner").run?.encounteredIce?.strength,
@@ -500,7 +500,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(strengthState, action) === "onr_v1_233_d-arc-knight",
+        sourceDefinition(strengthState, action) === 445,
     );
     expect(
       getPlayerView(strengthState, "runner").run?.encounteredIce?.strength,
@@ -515,21 +515,21 @@ describe("V1.6.3 Mechanikpaket C", () => {
     tokyoState.corp.credits = 40;
     tokyoState.corp.maxHandSize = 100;
     tokyoState.corp.clicks = 10;
-    moveCorpCardToHq(tokyoState, "onr_v1_371_tokyo-chiba-infighting");
+    moveCorpCardToHq(tokyoState, 583);
     tokyoState = apply(
       tokyoState,
       "corp",
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(tokyoState, action) ===
-          "onr_v1_371_tokyo-chiba-infighting",
+          583,
     );
     const firstRegionId = tokyoState.corp.servers
       .find((server) => server.id === "remote_1")
       ?.root.find(
         (id) =>
           tokyoState.cardInstances[id]?.definitionId ===
-          "onr_v1_371_tokyo-chiba-infighting",
+          583,
       );
     expect(firstRegionId).toBeDefined();
     if (firstRegionId) {
@@ -539,7 +539,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
     const secondRegionId =
       Object.entries(tokyoState.cardInstances).find(
         ([id, card]) =>
-          card.definitionId === "onr_v1_371_tokyo-chiba-infighting" &&
+          card.definitionId === 583 &&
           id !== firstRegionId,
       )?.[0] ?? "";
     expect(secondRegionId).not.toBe("");
@@ -559,7 +559,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(tokyoState, action) ===
-          "onr_v1_371_tokyo-chiba-infighting" &&
+          583 &&
         action.payload?.serverId === "remote_1",
     );
     if (firstRegionId) {
@@ -570,10 +570,10 @@ describe("V1.6.3 Mechanikpaket C", () => {
       ?.root.filter(
         (id) =>
           tokyoState.cardInstances[id]?.definitionId ===
-          "onr_v1_371_tokyo-chiba-infighting",
+          583,
       ).length;
     expect(regionCountInRemote).toBe(1);
-    putCorpIceOnServer(tokyoState, "remote_1", "onr_v1_233_d-arc-knight");
+    putCorpIceOnServer(tokyoState, "remote_1", 445);
     tokyoState = apply(
       tokyoState,
       "corp",
@@ -590,7 +590,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(tokyoState, action) === "onr_v1_233_d-arc-knight",
+        sourceDefinition(tokyoState, action) === 445,
     );
     const creditsBeforeContinue = tokyoState.corp.credits;
     tokyoState = apply(
@@ -608,7 +608,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
           side: "corp",
           amount: 2,
           reason: "unsuccessful_run",
-          sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+          sourceDefinitionId: 583,
           sourceTitle: "Tokyo-Chiba Infighting",
           serverId: "remote_1",
           serverLabel: "Remote 1",
@@ -630,32 +630,32 @@ describe("V1.7.0 Mechanikpaket D", () => {
         /search|arrange|shuffle|trace_windowing|run_lock|counter_system|deterministischer_wuerfel/,
       );
     }
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_011_cloak"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[223]).toMatchObject({
       installCost: 7,
       memoryCost: 1,
       recurringCredits: 3,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_036_jackhammer"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[248]).toMatchObject({
       installCost: 1,
       memoryCost: 1,
       strength: 0,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_069_succubus"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[281]).toMatchObject({
       installCost: 3,
       memoryCost: 1,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_163_floating-runner-bbs"],
+      CARD_DEFINITIONS_BY_ID[375],
     ).toMatchObject({
       installCost: 6,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_180_smiths-pawnshop"]?.subtypes,
+      CARD_DEFINITIONS_BY_ID[392]?.subtypes,
     ).toContain("unique");
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_021_dwarf"]?.subtypes).toContain(
+    expect(CARD_DEFINITIONS_BY_ID[233]?.subtypes).toContain(
       "worm",
     );
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_074_worm"]?.subtypes).toContain(
+    expect(CARD_DEFINITIONS_BY_ID[286]?.subtypes).toContain(
       "worm",
     );
   });
@@ -675,24 +675,24 @@ describe("V1.7.0 Mechanikpaket D", () => {
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_371_tokyo-chiba-infighting"],
+      CARD_DEFINITIONS_BY_ID[583],
     ).toBeDefined();
   });
 
   it("hosts programs on Succubus without MU cost and trashes hosted programs when the daemon is trashed", () => {
     let state = toRunnerTurn(v170CardReleaseGame("v170-succubus-hosting"));
     state.runner.credits = 30;
-    moveRunnerCardToGrip(state, "onr_v1_069_succubus");
-    moveRunnerCardToGrip(state, "onr_v1_036_jackhammer");
+    moveRunnerCardToGrip(state, 281);
+    moveRunnerCardToGrip(state, 248);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_069_succubus",
+        sourceDefinition(state, action) === 281,
     );
     const succubusId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_069_succubus",
+      (id) => state.cardInstances[id]?.definitionId === 281,
     );
     expect(succubusId).toBeDefined();
     if (!succubusId) throw new Error("Missing installed Succubus");
@@ -701,7 +701,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_036_jackhammer" &&
+        sourceDefinition(state, action) === 248 &&
         action.payload?.hostOnCardId === succubusId,
     );
     const hostedJackhammerId = String(hostedInstall.payload?.cardId ?? "");
@@ -714,8 +714,8 @@ describe("V1.7.0 Mechanikpaket D", () => {
     expect(state.cardInstances[hostedJackhammerId]?.hostedOn).toBe(succubusId);
     expect(state.runner.memoryUsed).toBe(1);
 
-    putCorpIceOnServer(state, "rd", "onr_v1_233_d-arc-knight");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    putCorpIceOnServer(state, "rd", 445);
+    putCorpCardOnTopOfRd(state, 596);
     state.corp.credits = 40;
     state.runner.credits = 20;
     const initial = structuredClone(state);
@@ -732,7 +732,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_233_d-arc-knight",
+        sourceDefinition(state, action) === 445,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", `card_${succubusId}`);
@@ -757,29 +757,29 @@ describe("V1.7.0 Mechanikpaket D", () => {
       v170CardReleaseGame("v170-noisy-stealth-block"),
     );
     noisyState.runner.credits = 30;
-    moveRunnerCardToGrip(noisyState, "onr_v1_011_cloak");
-    moveRunnerCardToGrip(noisyState, "onr_v1_036_jackhammer");
+    moveRunnerCardToGrip(noisyState, 223);
+    moveRunnerCardToGrip(noisyState, 248);
     noisyState = apply(
       noisyState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(noisyState, action) === "onr_v1_011_cloak",
+        sourceDefinition(noisyState, action) === 223,
     );
     noisyState = apply(
       noisyState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(noisyState, action) === "onr_v1_036_jackhammer",
+        sourceDefinition(noisyState, action) === 248,
     );
     const jackhammerId = noisyState.runner.rig.programs.find(
       (id) =>
-        noisyState.cardInstances[id]?.definitionId === "onr_v1_036_jackhammer",
+        noisyState.cardInstances[id]?.definitionId === 248,
     );
     noisyState.runner.credits = 0;
-    putCorpIceOnServer(noisyState, "rd", "onr_v1_232_crystal-wall");
-    putCorpCardOnTopOfRd(noisyState, "simple_economy_operation");
+    putCorpIceOnServer(noisyState, "rd", 444);
+    putCorpCardOnTopOfRd(noisyState, 596);
     noisyState.corp.credits = 40;
     noisyState = apply(
       noisyState,
@@ -792,7 +792,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(noisyState, action) === "onr_v1_232_crystal-wall",
+        sourceDefinition(noisyState, action) === 444,
     );
     const noisyPump = getLegalActions(noisyState, "runner").find(
       (action) =>
@@ -805,33 +805,33 @@ describe("V1.7.0 Mechanikpaket D", () => {
       v170CardReleaseGame("v170-nonnoisy-stealth-allowed"),
     );
     nonNoisyState.runner.credits = 30;
-    moveRunnerCardToGrip(nonNoisyState, "onr_v1_011_cloak");
-    moveRunnerCardToGrip(nonNoisyState, "onr_v1_021_dwarf");
+    moveRunnerCardToGrip(nonNoisyState, 223);
+    moveRunnerCardToGrip(nonNoisyState, 233);
     nonNoisyState = apply(
       nonNoisyState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(nonNoisyState, action) === "onr_v1_011_cloak",
+        sourceDefinition(nonNoisyState, action) === 223,
     );
     nonNoisyState = apply(
       nonNoisyState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(nonNoisyState, action) === "onr_v1_021_dwarf",
+        sourceDefinition(nonNoisyState, action) === 233,
     );
     const cloakId = nonNoisyState.runner.rig.programs.find(
       (id) =>
-        nonNoisyState.cardInstances[id]?.definitionId === "onr_v1_011_cloak",
+        nonNoisyState.cardInstances[id]?.definitionId === 223,
     );
     const dwarfId = nonNoisyState.runner.rig.programs.find(
       (id) =>
-        nonNoisyState.cardInstances[id]?.definitionId === "onr_v1_021_dwarf",
+        nonNoisyState.cardInstances[id]?.definitionId === 233,
     );
     nonNoisyState.runner.credits = 0;
-    putCorpIceOnServer(nonNoisyState, "rd", "onr_v1_232_crystal-wall");
-    putCorpCardOnTopOfRd(nonNoisyState, "simple_economy_operation");
+    putCorpIceOnServer(nonNoisyState, "rd", 444);
+    putCorpCardOnTopOfRd(nonNoisyState, 596);
     nonNoisyState.corp.credits = 40;
     nonNoisyState = apply(
       nonNoisyState,
@@ -844,7 +844,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(nonNoisyState, action) === "onr_v1_232_crystal-wall",
+        sourceDefinition(nonNoisyState, action) === 444,
     );
     const nonNoisyPump = mustAction(
       nonNoisyState,
@@ -872,10 +872,10 @@ describe("V1.7.0 Mechanikpaket D", () => {
       id: "onr_v1_runner_v170_unique_invalid",
       name: "O:NR V1.7.0 Unique Invalid",
       side: "runner",
-      identity: "runner_identity_001",
+      identity: 587,
       cards: [
-        { id: "onr_v1_180_smiths-pawnshop", quantity: 2 },
-        { id: "simple_economy_event", quantity: 5 },
+        { id: 392, quantity: 2 },
+        { id: 595, quantity: 5 },
       ],
     };
     const invalidValidation = validateDeckDefinition(invalidUniqueDeck, {
@@ -888,10 +888,10 @@ describe("V1.7.0 Mechanikpaket D", () => {
       id: "onr_v1_runner_v170_unique_runtime",
       name: "O:NR V1.7.0 Unique Runtime",
       side: "runner",
-      identity: "runner_identity_001",
+      identity: 587,
       cards: [
-        { id: "onr_v1_180_smiths-pawnshop", quantity: 2 },
-        { id: "simple_economy_event", quantity: 6 },
+        { id: 392, quantity: 2 },
+        { id: 595, quantity: 6 },
       ],
     };
     let uniqueState = createGameAfterSetup({
@@ -903,19 +903,19 @@ describe("V1.7.0 Mechanikpaket D", () => {
     });
     uniqueState = toRunnerTurn(uniqueState);
     uniqueState.runner.credits = 10;
-    moveRunnerCardToGrip(uniqueState, "onr_v1_180_smiths-pawnshop");
-    moveRunnerCardToGrip(uniqueState, "onr_v1_180_smiths-pawnshop");
+    moveRunnerCardToGrip(uniqueState, 392);
+    moveRunnerCardToGrip(uniqueState, 392);
     uniqueState = apply(
       uniqueState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(uniqueState, action) === "onr_v1_180_smiths-pawnshop",
+        sourceDefinition(uniqueState, action) === 392,
     );
     const duplicateInstall = getLegalActions(uniqueState, "runner").find(
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(uniqueState, action) === "onr_v1_180_smiths-pawnshop",
+        sourceDefinition(uniqueState, action) === 392,
     );
     expect(duplicateInstall).toBeUndefined();
 
@@ -926,7 +926,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
         runnerDeck: {
           ...ONR_V1_7_0_RUNNER_DECK,
           cards: [
-            { id: "onr_v1_172_quest-for-cattekin", quantity: 1 },
+            { id: 384, quantity: 1 },
             ...ONR_V1_7_0_RUNNER_DECK.cards,
           ],
         },
@@ -935,31 +935,31 @@ describe("V1.7.0 Mechanikpaket D", () => {
       }),
     );
     smithState.runner.credits = 20;
-    moveRunnerCardToGrip(smithState, "onr_v1_163_floating-runner-bbs");
-    moveRunnerCardToGrip(smithState, "onr_v1_180_smiths-pawnshop");
-    moveRunnerCardToGrip(smithState, "onr_v1_028_force-shield");
-    moveRunnerCardToGrip(smithState, "onr_v1_172_quest-for-cattekin");
+    moveRunnerCardToGrip(smithState, 375);
+    moveRunnerCardToGrip(smithState, 392);
+    moveRunnerCardToGrip(smithState, 240);
+    moveRunnerCardToGrip(smithState, 384);
     smithState = apply(
       smithState,
       "runner",
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(smithState, action) ===
-          "onr_v1_163_floating-runner-bbs",
+          375,
     );
     smithState = apply(
       smithState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(smithState, action) === "onr_v1_180_smiths-pawnshop",
+        sourceDefinition(smithState, action) === 392,
     );
     smithState = apply(
       smithState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(smithState, action) === "onr_v1_028_force-shield",
+        sourceDefinition(smithState, action) === 240,
     );
     smithState = apply(
       smithState,
@@ -967,7 +967,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(smithState, action) ===
-          "onr_v1_172_quest-for-cattekin",
+          384,
     );
     const creditsBeforeStartTurn = smithState.runner.credits;
     const randomCounterBeforeStartTurn = smithState.randomCounter;
@@ -1001,7 +1001,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
       (option) =>
         typeof option.value === "string" &&
         smithState.cardInstances[option.value]?.definitionId ===
-          "onr_v1_180_smiths-pawnshop",
+          392,
     )?.id;
     if (!smithOrderOption) throw new Error("Smith-Startzugoption fehlt.");
     smithState = applyChoice(smithState, "runner", smithOrderOption);
@@ -1017,23 +1017,23 @@ describe("V1.7.0 Mechanikpaket D", () => {
         (option) =>
           typeof option.value === "string" &&
           smithState.cardInstances[option.value]?.definitionId ===
-            "onr_v1_172_quest-for-cattekin",
+            384,
       )?.id ?? "pass";
     smithState = applyChoice(smithState, "runner", questOption);
     expect(
       smithState.runner.heap.some(
         (id) =>
           smithState.cardInstances[id]?.definitionId ===
-          "onr_v1_172_quest-for-cattekin",
+          384,
       ),
     ).toBe(true);
     expect(smithState.randomCounter).toBe(randomCounterBeforeStartTurn);
     expect(smithState.runner.credits).toBe(creditsBeforeStartTurn + 3);
     expect(smithState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      sourceDefinitionId: "onr_v1_180_smiths-pawnshop",
+      sourceDefinitionId: 392,
       installedResourceTrashForCreditsTriggered: true,
-      trashedCardDefinitionId: "onr_v1_172_quest-for-cattekin",
+      trashedCardDefinitionId: 384,
       trashedCardTitle: "Quest for Cattekin",
       creditsGained: 2,
       gainedCredits: 2,
@@ -1051,20 +1051,20 @@ describe("V1.7.1 Mechanikpaket E", () => {
       );
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_114_temple-microcode-outlet"],
+      CARD_DEFINITIONS_BY_ID[326],
     ).toMatchObject({ cost: 1 });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_106_private-ldl-access"],
+      CARD_DEFINITIONS_BY_ID[318],
     ).toMatchObject({
       cost: 0,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_118_weather-to-finance-pipe"],
+      CARD_DEFINITIONS_BY_ID[330],
     ).toMatchObject({ cost: 0 });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_084_edited-shipping-manifests"],
+      CARD_DEFINITIONS_BY_ID[296],
     ).toMatchObject({ cost: 1 });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_129_hq-interface"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[341]).toMatchObject({
       installCost: 4,
     });
   });
@@ -1083,7 +1083,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_180_smiths-pawnshop"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID[392]).toBeDefined();
   });
 
   it("resolves Temple Microcode Outlet as hidden-zone stack search and deterministic shuffle", () => {
@@ -1091,11 +1091,11 @@ describe("V1.7.1 Mechanikpaket E", () => {
     state.runner.credits = 20;
     const templeId = moveRunnerCardToGrip(
       state,
-      "onr_v1_114_temple-microcode-outlet",
+      326,
     );
     const selectedProgram = putRunnerCardOnTopOfStack(
       state,
-      "onr_v1_036_jackhammer",
+      248,
     );
     const randomBefore = state.randomDrawRecords.length;
 
@@ -1106,7 +1106,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
         action.type === "play_event" &&
         String(action.payload?.cardId) === templeId &&
         sourceDefinition(state, action) ===
-          "onr_v1_114_temple-microcode-outlet",
+          326,
     );
     expect(
       state.pendingChoice?.source.startsWith("p3_37.search_stack_to_grip"),
@@ -1126,16 +1126,16 @@ describe("V1.7.1 Mechanikpaket E", () => {
     expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "p3_37_search_stack_to_grip",
-      publicRevealDefinitionId: "onr_v1_036_jackhammer",
+      publicRevealDefinitionId: 248,
     });
   });
 
   it("runs Private LDL Access on HQ and accesses R&D instead", () => {
     let state = toRunnerTurn(v171CardReleaseGame("v171-private-ldl-access"));
     state.runner.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_106_private-ldl-access");
-    putCorpCardOnTopOfRd(state, "onr_v1_203_hostile-takeover");
-    const hqOperationId = moveCorpCardToHq(state, "simple_economy_operation");
+    moveRunnerCardToGrip(state, 318);
+    putCorpCardOnTopOfRd(state, 415);
+    const hqOperationId = moveCorpCardToHq(state, 596);
     keepOnlyCorpHqCard(state, hqOperationId);
 
     state = apply(
@@ -1143,7 +1143,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_106_private-ldl-access" &&
+        sourceDefinition(state, action) === 318 &&
         action.payload?.serverId === "hq",
     );
     expect(state.run).toMatchObject({
@@ -1155,7 +1155,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "onr_v1_203_hostile-takeover",
+      cardDefinitionId: 415,
       title: "Hostile Takeover",
       serverLabel: "R&D",
     });
@@ -1172,17 +1172,17 @@ describe("V1.7.1 Mechanikpaket E", () => {
   it("runs P3.32 CardImplementation multiaccess events on their printed central servers", () => {
     let rdState = toRunnerTurn(v123CardReleaseGame("p3-32-custodial"));
     rdState.runner.credits = 20;
-    moveRunnerCardToGrip(rdState, "onr_v1_081_custodial-position");
-    putCorpCardOnTopOfRd(rdState, "onr_v1_203_hostile-takeover");
-    putCorpCardOnTopOfRd(rdState, "onr_v1_297_overtime-incentives");
-    putCorpCardOnTopOfRd(rdState, "onr_v1_306_trojan-horse");
+    moveRunnerCardToGrip(rdState, 293);
+    putCorpCardOnTopOfRd(rdState, 415);
+    putCorpCardOnTopOfRd(rdState, 509);
+    putCorpCardOnTopOfRd(rdState, 518);
 
     rdState = apply(
       rdState,
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(rdState, action) === "onr_v1_081_custodial-position" &&
+        sourceDefinition(rdState, action) === 293 &&
         action.payload?.serverId === "rd",
     );
 
@@ -1195,11 +1195,11 @@ describe("V1.7.1 Mechanikpaket E", () => {
 
     let hqState = toRunnerTurn(v123CardReleaseGame("p3-32-wiretaps"));
     hqState.runner.credits = 20;
-    moveRunnerCardToGrip(hqState, "onr_v1_085_executive-wiretaps");
+    moveRunnerCardToGrip(hqState, 297);
     const hqIds = [
-      moveCorpCardToHq(hqState, "onr_v1_203_hostile-takeover"),
-      moveCorpCardToHq(hqState, "onr_v1_297_overtime-incentives"),
-      moveCorpCardToHq(hqState, "onr_v1_306_trojan-horse"),
+      moveCorpCardToHq(hqState, 415),
+      moveCorpCardToHq(hqState, 509),
+      moveCorpCardToHq(hqState, 518),
     ];
     keepOnlyCorpHqCards(hqState, hqIds);
 
@@ -1208,7 +1208,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(hqState, action) === "onr_v1_085_executive-wiretaps" &&
+        sourceDefinition(hqState, action) === 297 &&
         action.payload?.serverId === "hq",
     );
 
@@ -1226,7 +1226,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
     let weatherState = toRunnerTurn(v171CardReleaseGame("v171-weather-pipe"));
     weatherState.runner.credits = 20;
     weatherState.corp.credits = 10;
-    moveRunnerCardToGrip(weatherState, "onr_v1_118_weather-to-finance-pipe");
+    moveRunnerCardToGrip(weatherState, 330);
     const weatherHqIds = weatherState.corp.hq.slice();
     weatherState = apply(
       weatherState,
@@ -1234,7 +1234,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(weatherState, action) ===
-          "onr_v1_118_weather-to-finance-pipe" &&
+          330 &&
         action.payload?.serverId === "hq",
     );
     expect(weatherState.run).toBeUndefined();
@@ -1247,7 +1247,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
       runSuccessful: true,
       accessSkipped: true,
       serverId: "hq",
-      sourceDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+      sourceDefinitionId: 330,
       sourceTitle: "Weather-to-Finance Pipe",
     });
     for (const hiddenHqId of weatherHqIds)
@@ -1274,16 +1274,16 @@ describe("V1.7.1 Mechanikpaket E", () => {
     );
     weatherIceState.runner.credits = 20;
     weatherIceState.corp.credits = 10;
-    moveRunnerCardToGrip(weatherIceState, "onr_v1_118_weather-to-finance-pipe");
+    moveRunnerCardToGrip(weatherIceState, 330);
     const weatherIceHqIds = weatherIceState.corp.hq.slice();
-    putCorpIceOnServer(weatherIceState, "hq", "onr_v1_232_crystal-wall");
+    putCorpIceOnServer(weatherIceState, "hq", 444);
     weatherIceState = apply(
       weatherIceState,
       "runner",
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(weatherIceState, action) ===
-          "onr_v1_118_weather-to-finance-pipe",
+          330,
     );
     expect(weatherIceState.timingPoint).toBe("run.approach_ice");
     weatherIceState = apply(
@@ -1306,7 +1306,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
       runSuccessful: true,
       accessSkipped: true,
       serverId: "hq",
-      sourceDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+      sourceDefinitionId: 330,
       sourceTitle: "Weather-to-Finance Pipe",
     });
     expect(
@@ -1330,7 +1330,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
     weatherLowCreditsState.corp.credits = 2;
     moveRunnerCardToGrip(
       weatherLowCreditsState,
-      "onr_v1_118_weather-to-finance-pipe",
+      330,
     );
     weatherLowCreditsState = apply(
       weatherLowCreditsState,
@@ -1338,7 +1338,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(weatherLowCreditsState, action) ===
-          "onr_v1_118_weather-to-finance-pipe",
+          330,
     );
     expect(weatherLowCreditsState.corp.credits).toBe(0);
     expect(weatherLowCreditsState.eventLog.at(-1)?.publicPayload).toMatchObject(
@@ -1358,12 +1358,12 @@ describe("V1.7.1 Mechanikpaket E", () => {
     failedWeatherState.corp.credits = 10;
     moveRunnerCardToGrip(
       failedWeatherState,
-      "onr_v1_118_weather-to-finance-pipe",
+      330,
     );
     const failedWeatherIceId = putCorpIceOnServer(
       failedWeatherState,
       "hq",
-      "onr_v1_232_crystal-wall",
+      444,
     );
     const failedWeatherEventStart = failedWeatherState.eventLog.length;
     failedWeatherState = apply(
@@ -1372,7 +1372,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(failedWeatherState, action) ===
-          "onr_v1_118_weather-to-finance-pipe",
+          330,
     );
     failedWeatherState = apply(
       failedWeatherState,
@@ -1388,7 +1388,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
     );
     expect(failedWeatherState.run).toBeUndefined();
     expect(failedWeatherState.corp.credits).toBe(
-      10 - (CARD_DEFINITIONS_BY_ID["onr_v1_232_crystal-wall"]?.rezCost ?? 0),
+      10 - (CARD_DEFINITIONS_BY_ID[444]?.rezCost ?? 0),
     );
     expect(
       failedWeatherState.eventLog
@@ -1406,7 +1406,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
           ...ONR_V1_7_1_RUNNER_DECK,
           id: "v171_edited_shipping_fall_guy_runner",
           cards: [
-            { id: "onr_v1_161_fall-guy", quantity: 1 },
+            { id: 373, quantity: 1 },
             ...ONR_V1_7_1_RUNNER_DECK.cards,
           ],
         },
@@ -1418,11 +1418,11 @@ describe("V1.7.1 Mechanikpaket E", () => {
     manifestsState.corp.credits = 8;
     const manifestsFallGuyId = installRunnerResourceForTest(
       manifestsState,
-      "onr_v1_161_fall-guy",
+      373,
     );
     moveRunnerCardToGrip(
       manifestsState,
-      "onr_v1_084_edited-shipping-manifests",
+      296,
     );
     const runnerCreditsBefore = manifestsState.runner.credits;
     const corpHqBefore = manifestsState.corp.hq.length;
@@ -1435,7 +1435,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(manifestsState, action) ===
-          "onr_v1_084_edited-shipping-manifests" &&
+          296 &&
         action.payload?.serverId === "hq",
     );
     expect(manifestsState.run).toBeDefined();
@@ -1498,11 +1498,11 @@ describe("V1.7.1 Mechanikpaket E", () => {
     noCreditsState.corp.credits = 0;
     moveRunnerCardToGrip(
       noCreditsState,
-      "onr_v1_084_edited-shipping-manifests",
+      296,
     );
     const hqCardId = moveCorpCardToHq(
       noCreditsState,
-      "simple_economy_operation",
+      596,
     );
     keepOnlyCorpHqCard(noCreditsState, hqCardId);
     noCreditsState = apply(
@@ -1511,7 +1511,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(noCreditsState, action) ===
-          "onr_v1_084_edited-shipping-manifests" &&
+          296 &&
         action.payload?.serverId === "hq",
     );
     expect(noCreditsState.run?.breach?.serverId).toBe("hq");
@@ -1525,15 +1525,15 @@ describe("V1.7.1 Mechanikpaket E", () => {
   it("uses P3.32 free-trash run events only for accessed cards from the printed central", () => {
     let kilroyState = toRunnerTurn(v192CardReleaseGame("p3-32-kilroy"));
     kilroyState.runner.credits = 20;
-    moveRunnerCardToGrip(kilroyState, "onr_v1_096_kilroy-was-here");
-    putCorpCardOnTopOfRd(kilroyState, "simple_economy_operation");
+    moveRunnerCardToGrip(kilroyState, 308);
+    putCorpCardOnTopOfRd(kilroyState, 596);
     kilroyState = apply(
       kilroyState,
       "runner",
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(kilroyState, action) ===
-          "onr_v1_096_kilroy-was-here" &&
+          308 &&
         action.payload?.serverId === "rd",
     );
     kilroyState = apply(
@@ -1552,15 +1552,15 @@ describe("V1.7.1 Mechanikpaket E", () => {
 
     let rompState = toRunnerTurn(v192CardReleaseGame("p3-32-romp"));
     rompState.runner.credits = 20;
-    moveRunnerCardToGrip(rompState, "onr_v1_107_romp-through-hq");
-    const hqCardId = moveCorpCardToHq(rompState, "simple_economy_operation");
+    moveRunnerCardToGrip(rompState, 319);
+    const hqCardId = moveCorpCardToHq(rompState, 596);
     keepOnlyCorpHqCard(rompState, hqCardId);
     rompState = apply(
       rompState,
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(rompState, action) === "onr_v1_107_romp-through-hq" &&
+        sourceDefinition(rompState, action) === 319 &&
         action.payload?.serverId === "hq",
     );
     rompState = apply(
@@ -1581,9 +1581,9 @@ describe("V1.7.1 Mechanikpaket E", () => {
   it("grants one additional HQ access per installed HQ Interface", () => {
     let state = toRunnerTurn(v171CardReleaseGame("v171-hq-interface"));
     state.runner.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_129_hq-interface");
-    const firstHqCard = moveCorpCardToHq(state, "simple_economy_operation");
-    const secondHqCard = moveCorpCardToHq(state, "onr_v1_295_night-shift");
+    moveRunnerCardToGrip(state, 341);
+    const firstHqCard = moveCorpCardToHq(state, 596);
+    const secondHqCard = moveCorpCardToHq(state, 507);
     keepOnlyCorpHqCards(state, [firstHqCard, secondHqCard]);
 
     state = apply(
@@ -1591,7 +1591,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_129_hq-interface",
+        sourceDefinition(state, action) === 341,
     );
     state = apply(
       state,
@@ -1616,25 +1616,25 @@ describe("V1.7.2 Mechanikpaket F", () => {
       );
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_283_audit-of-call-records"],
+      CARD_DEFINITIONS_BY_ID[495],
     ).toMatchObject({
       cost: 0,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_284_chance-observation"],
+      CARD_DEFINITIONS_BY_ID[496],
     ).toMatchObject({
       cost: 2,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_286_corporate-detective-agency"],
+      CARD_DEFINITIONS_BY_ID[498],
     ).toMatchObject({ cost: 1 });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_158_danshis-second-id"],
+      CARD_DEFINITIONS_BY_ID[370],
     ).toMatchObject({
       installCost: 0,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_179_silicon-saloon-franchise"],
+      CARD_DEFINITIONS_BY_ID[391],
     ).toMatchObject({ installCost: 8 });
   });
 
@@ -1652,7 +1652,7 @@ describe("V1.7.2 Mechanikpaket F", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_129_hq-interface"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID[341]).toBeDefined();
   });
 
   it("gates Chance Observation and Audit of Call Records by runner run attempts of the previous turn", () => {
@@ -1661,9 +1661,9 @@ describe("V1.7.2 Mechanikpaket F", () => {
     );
     oneAttemptState.runner.credits = 30;
     oneAttemptState.corp.credits = 30;
-    moveCorpCardToHq(oneAttemptState, "onr_v1_283_audit-of-call-records");
-    moveCorpCardToHq(oneAttemptState, "onr_v1_284_chance-observation");
-    putCorpIceOnServer(oneAttemptState, "rd", "onr_v1_232_crystal-wall");
+    moveCorpCardToHq(oneAttemptState, 495);
+    moveCorpCardToHq(oneAttemptState, 496);
+    putCorpIceOnServer(oneAttemptState, "rd", 444);
 
     oneAttemptState = apply(
       oneAttemptState,
@@ -1676,7 +1676,7 @@ describe("V1.7.2 Mechanikpaket F", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(oneAttemptState, action) === "onr_v1_232_crystal-wall",
+        sourceDefinition(oneAttemptState, action) === 444,
     );
     oneAttemptState = apply(
       oneAttemptState,
@@ -1697,17 +1697,17 @@ describe("V1.7.2 Mechanikpaket F", () => {
     const oneAttemptOps = getLegalActions(oneAttemptState, "corp")
       .filter((action) => action.type === "play_operation")
       .map((action) => sourceDefinition(oneAttemptState, action));
-    expect(oneAttemptOps).toContain("onr_v1_284_chance-observation");
-    expect(oneAttemptOps).not.toContain("onr_v1_283_audit-of-call-records");
+    expect(oneAttemptOps).toContain(496);
+    expect(oneAttemptOps).not.toContain(495);
 
     let twoAttemptState = toRunnerTurn(
       v172CardReleaseGame("v172-two-attempt-gate"),
     );
     twoAttemptState.runner.credits = 30;
     twoAttemptState.corp.credits = 30;
-    moveCorpCardToHq(twoAttemptState, "onr_v1_283_audit-of-call-records");
-    moveCorpCardToHq(twoAttemptState, "onr_v1_284_chance-observation");
-    putCorpIceOnServer(twoAttemptState, "rd", "onr_v1_232_crystal-wall");
+    moveCorpCardToHq(twoAttemptState, 495);
+    moveCorpCardToHq(twoAttemptState, 496);
+    putCorpIceOnServer(twoAttemptState, "rd", 444);
 
     twoAttemptState = apply(
       twoAttemptState,
@@ -1720,7 +1720,7 @@ describe("V1.7.2 Mechanikpaket F", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(twoAttemptState, action) === "onr_v1_232_crystal-wall",
+        sourceDefinition(twoAttemptState, action) === 444,
     );
     twoAttemptState = apply(
       twoAttemptState,
@@ -1752,8 +1752,8 @@ describe("V1.7.2 Mechanikpaket F", () => {
     const twoAttemptOps = getLegalActions(twoAttemptState, "corp")
       .filter((action) => action.type === "play_operation")
       .map((action) => sourceDefinition(twoAttemptState, action));
-    expect(twoAttemptOps).toContain("onr_v1_284_chance-observation");
-    expect(twoAttemptOps).toContain("onr_v1_283_audit-of-call-records");
+    expect(twoAttemptOps).toContain(496);
+    expect(twoAttemptOps).toContain(495);
 
     twoAttemptState.corp.maxHandSize = 100;
     twoAttemptState = apply(
@@ -1774,16 +1774,16 @@ describe("V1.7.2 Mechanikpaket F", () => {
     const resetOps = getLegalActions(twoAttemptState, "corp")
       .filter((action) => action.type === "play_operation")
       .map((action) => sourceDefinition(twoAttemptState, action));
-    expect(resetOps).not.toContain("onr_v1_284_chance-observation");
-    expect(resetOps).not.toContain("onr_v1_283_audit-of-call-records");
+    expect(resetOps).not.toContain(496);
+    expect(resetOps).not.toContain(495);
   });
 
   it("resolves operation traces outside runs and returns deterministically to corp action context", () => {
     let state = toRunnerTurn(v172CardReleaseGame("v172-operation-trace"));
     state.runner.credits = 30;
     state.corp.credits = 30;
-    moveCorpCardToHq(state, "onr_v1_283_audit-of-call-records");
-    putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+    moveCorpCardToHq(state, 495);
+    putCorpIceOnServer(state, "rd", 444);
 
     state = apply(
       state,
@@ -1796,7 +1796,7 @@ describe("V1.7.2 Mechanikpaket F", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_232_crystal-wall",
+        sourceDefinition(state, action) === 444,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(
@@ -1817,7 +1817,7 @@ describe("V1.7.2 Mechanikpaket F", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_283_audit-of-call-records",
+        sourceDefinition(state, action) === 495,
     );
 
     expect(state.pendingChoice?.side).toBe("corp");
@@ -1849,15 +1849,15 @@ describe("V1.7.2 Mechanikpaket F", () => {
     let state = toRunnerTurn(v172CardReleaseGame("v172-detective-agency"));
     state.runner.credits = 30;
     state.corp.credits = 30;
-    moveRunnerCardToGrip(state, "onr_v1_158_danshis-second-id");
-    moveRunnerCardToGrip(state, "onr_v1_179_silicon-saloon-franchise");
-    moveRunnerCardToGrip(state, "onr_v1_163_floating-runner-bbs");
+    moveRunnerCardToGrip(state, 370);
+    moveRunnerCardToGrip(state, 391);
+    moveRunnerCardToGrip(state, 375);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_158_danshis-second-id",
+        sourceDefinition(state, action) === 370,
     );
     state = apply(
       state,
@@ -1865,28 +1865,28 @@ describe("V1.7.2 Mechanikpaket F", () => {
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) ===
-          "onr_v1_179_silicon-saloon-franchise",
+          391,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_163_floating-runner-bbs",
+        sourceDefinition(state, action) === 375,
     );
     state.runner.tags = 1;
     const resourcesBefore = state.runner.rig.resources.slice();
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    moveCorpCardToHq(state, "onr_v1_286_corporate-detective-agency");
+    moveCorpCardToHq(state, 498);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "play_operation" &&
         sourceDefinition(state, action) ===
-          "onr_v1_286_corporate-detective-agency",
+          498,
     );
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
@@ -1926,11 +1926,11 @@ describe("V1.7.2 Mechanikpaket F", () => {
     state.runner.clicks = 10;
     const danshiId = moveRunnerCardToGrip(
       state,
-      "onr_v1_158_danshis-second-id",
+      370,
     );
     const siliconId = moveRunnerCardToGrip(
       state,
-      "onr_v1_179_silicon-saloon-franchise",
+      391,
     );
     state = apply(
       state,
@@ -1955,7 +1955,7 @@ describe("V1.7.2 Mechanikpaket F", () => {
       (action) =>
         action.type === "activated_card_ability" &&
         String(action.payload?.cardId) === danshiId &&
-        sourceDefinition(state, action) === "onr_v1_158_danshis-second-id",
+        sourceDefinition(state, action) === 370,
     );
     expect(state.runner.tags).toBe(tagsBefore - 3);
     expect(state.runner.credits).toBe(creditsBeforeDanshi);

@@ -27,10 +27,10 @@ import { selectedCorpRezOrTrashIceOptionId } from "./defense-choice-binding";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 
-const FAO = "onr_v1_086_forged-activation-orders";
-const CARYATID = "onr_proteus_013_caryatid";
-const HOMING = "onr_proteus_025_homing-missile";
-const GATEKEEPER = "onr_proteus_024_gatekeeper";
+const FAO = 298;
+const CARYATID = 71;
+const HOMING = 83;
+const GATEKEEPER = 82;
 function deck(side: "runner" | "corp"): DeckDefinition {
   const d = catalog.decks.find(
     (d) =>
@@ -48,7 +48,7 @@ function deck(side: "runner" | "corp"): DeckDefinition {
     identity: d.identityCardId,
     cards: [
       ...d.cards.map((c) => ({ id: c.cardId, quantity: c.quantity })),
-      ...(side === "runner" ? [{ id: "onr_v1_074_worm", quantity: 1 }] : []),
+      ...(side === "runner" ? [{ id: 286, quantity: 1 }] : []),
     ],
   };
 }
@@ -77,7 +77,7 @@ function apply(
   if (!result.ok) throw Error(JSON.stringify(result.error));
   return result.state;
 }
-function fixture(definitionId: string, credits = 20, worm = false) {
+function fixture(definitionId: number, credits = 20, worm = false) {
   let state = createGameAfterSetup({
     matchId: "forced:" + definitionId,
     seed: "forced:" + definitionId,
@@ -96,7 +96,7 @@ function fixture(definitionId: string, credits = 20, worm = false) {
     .withRunnerCredits(20)
     .withRunnerCardInGrip(FAO);
   if (worm) {
-    builder.withRunnerProgramInstalled("onr_v1_074_worm");
+    builder.withRunnerProgramInstalled(286);
     state.runner.memoryUsed = 1;
   }
   state = apply(

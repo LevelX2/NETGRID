@@ -185,7 +185,7 @@ import {
 } from "../../test-fixtures/index-test-helpers";
 
 describe("Proteus Phase 2b Scored-Agenda Bad Publicity", () => {
-  const CHARITY_TAKEOVER = "onr_proteus_002_charity-takeover";
+  const CHARITY_TAKEOVER = 60;
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
   const internalViewMarkers = /"cardInstances"|"privatePayload"/;
@@ -359,7 +359,7 @@ describe("Proteus Phase 2b Scored-Agenda Bad Publicity", () => {
 });
 
 describe("Proteus Phase 2c Direct Runner Event BP Damage", () => {
-  const FAKED_HIT = "onr_proteus_108_faked-hit";
+  const FAKED_HIT = 166;
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
 
@@ -526,10 +526,10 @@ describe("Proteus Phase 2c Direct Runner Event BP Damage", () => {
 });
 
 describe("Proteus Phase 2d Installed-Connection Bad Publicity Cost", () => {
-  const POISONED_WATER_SUPPLY = "onr_proteus_117_poisoned-water-supply";
-  const CONNECTION_A = "onr_v1_159_databroker";
-  const CONNECTION_B = "onr_v1_154_broker";
-  const CONNECTION_C = "onr_v1_156_corporate-ally";
+  const POISONED_WATER_SUPPLY = 175;
+  const CONNECTION_A = 371;
+  const CONNECTION_B = 366;
+  const CONNECTION_C = 368;
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
 
@@ -808,7 +808,7 @@ describe("Proteus Bad-Publicity-7+ engine harness", () => {
           id: `${seed}_runner`,
           cards: [
             ...DEMO_DECKS.demo_runner_008.cards,
-            { id: "onr_proteus_108_faked-hit", quantity: 1 },
+            { id: 166, quantity: 1 },
           ],
         },
         corpDeck: DEMO_DECKS.demo_corp_008,
@@ -817,14 +817,14 @@ describe("Proteus Bad-Publicity-7+ engine harness", () => {
     );
     state.runner.credits = 10;
     state.corp.badPublicity = badPublicityBefore;
-    moveRunnerCardToGrip(state, "onr_proteus_108_faked-hit");
+    moveRunnerCardToGrip(state, 166);
     const initial = structuredClone(state);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_proteus_108_faked-hit",
+        sourceDefinition(state, action) === 166,
     );
     return { initial, state, event: state.eventLog.at(-1) };
   }
@@ -859,7 +859,7 @@ describe("Proteus Bad-Publicity-7+ engine harness", () => {
       seed: "proteus-bp-t003",
       agendaPointsToWin: 1,
     });
-    scoreCorpAgendaForTest(corpAgendaState, "simple_agenda");
+    scoreCorpAgendaForTest(corpAgendaState, 588);
     corpAgendaState.corp.badPublicity = 7;
     checkWinConditions(corpAgendaState);
     expect(agendaPoints(corpAgendaState, "corp")).toBeGreaterThanOrEqual(1);
@@ -870,7 +870,7 @@ describe("Proteus Bad-Publicity-7+ engine harness", () => {
       seed: "proteus-bp-t004",
       agendaPointsToWin: 1,
     });
-    scoreRunnerAgendaForTest(runnerAgendaState, "simple_agenda");
+    scoreRunnerAgendaForTest(runnerAgendaState, 588);
     runnerAgendaState.corp.badPublicity = 7;
     checkWinConditions(runnerAgendaState);
     expect(agendaPoints(runnerAgendaState, "runner")).toBeGreaterThanOrEqual(1);
@@ -902,7 +902,7 @@ describe("Proteus Bad-Publicity-7+ engine harness", () => {
     const { state, event } = playBadPublicityCard("proteus-bp-t007-t010", 6);
     const publicPayloadJson = JSON.stringify(event?.publicPayload);
     expect(publicPayloadJson).toContain("bad_publicity_7");
-    expect(publicPayloadJson).toContain("onr_proteus_108_faked-hit");
+    expect(publicPayloadJson).toContain(166);
     expect(publicPayloadJson).not.toContain("cardInstances");
     expect(publicPayloadJson).not.toContain("privatePayload");
 

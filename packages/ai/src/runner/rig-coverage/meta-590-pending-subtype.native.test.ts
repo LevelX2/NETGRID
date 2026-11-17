@@ -68,7 +68,7 @@ it.each([
   const { input } = native(),
     caps = input.ownDeckCapabilities;
   const fubar = input.playerView.own.rig.find(
-    (c: { definitionId: string }) => c.definitionId === "onr_proteus_088_fubar",
+    (c: { definitionId: number }) => c.definitionId === 146,
   );
   if (mode === "already_selected") fubar.selectedSubtype = "code_gate";
   if (mode === "hand_only")

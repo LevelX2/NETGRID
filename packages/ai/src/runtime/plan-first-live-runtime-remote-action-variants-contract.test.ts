@@ -33,7 +33,7 @@ describe("plan-first Remote same-server action variants", () => {
         source: "inside-job-1",
         payload: {
           cardId: "inside-job-1",
-          sourceDefinitionId: "onr_v1_094_inside-job",
+          sourceDefinitionId: 306,
           serverId: "remote_1",
           runnerEventRun: true,
         },
@@ -49,7 +49,7 @@ describe("plan-first Remote same-server action variants", () => {
         source: "inside-job-2",
         payload: {
           cardId: "inside-job-2",
-          sourceDefinitionId: "onr_v1_094_inside-job",
+          sourceDefinitionId: 306,
           serverId: "remote_1",
           runnerEventRun: true,
         },
@@ -60,10 +60,10 @@ describe("plan-first Remote same-server action variants", () => {
     input.playerView.own.clicks = 4;
     input.playerView.own.gripOrHq = [
       visibleCard("inside-job-1", "runner", "event", {
-        definitionId: "onr_v1_094_inside-job",
+        definitionId: 306,
       }),
       visibleCard("inside-job-2", "runner", "event", {
-        definitionId: "onr_v1_094_inside-job",
+        definitionId: 306,
       }),
     ];
     input.playerView.servers = [

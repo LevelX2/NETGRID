@@ -14,10 +14,10 @@ import {
   isProtectBeforeAdvanceSimulationAction,
 } from "./final-advance-assessment";
 
-const GRID = "onr_v1_374_washington-d-c-city-grid";
-const TYCHO = "onr_v1_220_tycho-extension";
-const OVERTIME = "onr_v1_297_overtime-incentives";
-const ICE = "simple_barrier_ice";
+const GRID = 586;
+const TYCHO = 432;
+const OVERTIME = 509;
+const ICE = 589;
 const SERVER = "remote_1";
 const corpDeck = {
   ...DEMO_DECKS.demo_corp_001,

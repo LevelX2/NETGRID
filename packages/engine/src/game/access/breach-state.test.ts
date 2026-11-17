@@ -15,13 +15,13 @@ import {
   type BreachStateHost,
 } from "./breach-state";
 
-function definition(id: string, type: CardDefinition["type"]): CardDefinition {
+function definition(id: number, type: CardDefinition["type"]): CardDefinition {
   return { id: id as CardDefinitionId, title: id, type } as CardDefinition;
 }
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
   faceup = false,
   rezzed = false,

@@ -8,7 +8,7 @@ export type RunnerSelfTagPreventionNeed = {
   runActionId: string;
   installActionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   creditSaving: number;
   parentValue: number;
 };
@@ -63,7 +63,7 @@ export type RunnerDefenseSignals = {
     choiceId: string;
     stateVersion: number;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     replacementKind: "flatline_to_tag" | "prevent_meat_add_bad_publicity";
     selectedOptionId: string;
     optionIds: string[];

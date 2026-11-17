@@ -25,9 +25,9 @@ const checkpoint = JSON.parse(
   runtime: AiRuntimeCheckpointV1;
 };
 const parentId = "plan:runner.contest_remote:remote%3Aremote_1";
-const bankId = "plan:runner.credit_bank:runner_onr_v1_154_broker_2";
+const bankId = "plan:runner.credit_bank:runner_366_2";
 const cashoutId =
-  "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits";
+  "runner.activated_card_ability.runner_366_2.runner_366_2.activated.onr_v1_154_broker:withdraw_credits";
 afterEach(resetResidentPlanPortfolioMemory);
 
 it("preserves exact Remote funding through the generic matchpoint focus", () => {

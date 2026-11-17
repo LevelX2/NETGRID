@@ -269,8 +269,8 @@ export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScena
         fixture
           .withRunnerCredits(4)
           .withRunnerGripSize(1)
-          .withRezzedCorpIceOnServer("hq", "simple_code_gate_ice")
-          .withRezzedCorpIceOnServer("rd", "simple_sentry_ice");
+          .withRezzedCorpIceOnServer("hq", 590)
+          .withRezzedCorpIceOnServer("rd", 601);
       },
       ["fixture:low_hand_buffer"],
       "onr_origin_runner_ai_snapshot_v1",
@@ -354,7 +354,7 @@ export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScena
         fixture
           .withRunnerCredits(9)
           .ensureServer("remote_2")
-          .withCorpIceOnServer("remote_2", "simple_barrier_ice");
+          .withCorpIceOnServer("remote_2", 589);
       },
       ["fixture:runner_remote_with_ice_probe"],
       "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
@@ -396,7 +396,7 @@ export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScena
         fixture
           .withRunnerCredits(5)
           .ensureServer("remote_2")
-          .withCorpIceOnServer("remote_2", "simple_barrier_ice");
+          .withCorpIceOnServer("remote_2", 589);
       },
       ["fixture:runner_run_blocked_missing_coverage"],
       "onr_origin_runner_ai_snapshot_v1",
@@ -408,7 +408,7 @@ export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScena
         fixture
           .withRunnerCredits(0)
           .ensureServer("remote_2")
-          .withCorpIceOnServer("remote_2", "simple_barrier_ice");
+          .withCorpIceOnServer("remote_2", 589);
       },
       ["fixture:runner_run_blocked_unpayable"],
       "onr_origin_runner_ai_snapshot_v1",
@@ -429,8 +429,8 @@ export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScena
         fixture
           .withRunnerCredits(4)
           .withRunnerGripSize(1)
-          .withRezzedCorpIceOnServer("hq", "simple_code_gate_ice")
-          .withRezzedCorpIceOnServer("rd", "simple_sentry_ice");
+          .withRezzedCorpIceOnServer("hq", 590)
+          .withRezzedCorpIceOnServer("rd", 601);
       },
       ["fixture:runner_draw_before_damage_risk"],
       "onr_origin_runner_ai_snapshot_v1",
@@ -534,8 +534,8 @@ export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScena
       (fixture) => {
         fixture
           .withCorpCredits(0)
-          .withCorpIceOnServer("hq", "simple_barrier_ice")
-          .withCorpIceOnServer("rd", "simple_code_gate_ice");
+          .withCorpIceOnServer("hq", 589)
+          .withCorpIceOnServer("rd", 590);
       },
       [],
       "demo_corp_008_snapshot_v0_8",
@@ -583,7 +583,7 @@ export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScena
         fixture
           .withCorpCredits(5)
           .ensureServer("remote_2")
-          .withCorpIceOnServer("remote_2", "simple_barrier_ice");
+          .withCorpIceOnServer("remote_2", 589);
       },
       ["fixture:corp_remote_ice_defense"],
       "proteus_corp_region_fast_score_snapshot_v2026_05_25",
@@ -609,7 +609,7 @@ export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScena
       (fixture) => {
         fixture
           .withCorpCredits(7)
-          .withCorpRemoteRoot("remote_1", "simple_economy_asset")
+          .withCorpRemoteRoot("remote_1", 594)
           .ensureServer("remote_2");
       },
       ["fixture:corp_remote_double_asset_setup"],
@@ -654,7 +654,7 @@ export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScena
       (fixture) => {
         fixture
           .withCorpCredits(5)
-          .withCorpIceOnServer("hq", "simple_barrier_ice");
+          .withCorpIceOnServer("hq", 589);
       },
       ["fixture:corp_hq_pressure_defend"],
       "onr_origin_corp_ai_snapshot_v1",
@@ -665,7 +665,7 @@ export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScena
       (fixture) => {
         fixture
           .withCorpCredits(5)
-          .withCorpIceOnServer("rd", "simple_barrier_ice");
+          .withCorpIceOnServer("rd", 589);
       },
       ["fixture:corp_rnd_pressure_defend"],
       "onr_origin_corp_ai_snapshot_v1",
@@ -703,7 +703,7 @@ export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScena
       (fixture) => {
         fixture
           .withCorpCredits(7)
-          .withCorpRemoteRoot("remote_1", "simple_economy_asset");
+          .withCorpRemoteRoot("remote_1", 594);
       },
       ["fixture:corp_asset_economy_install"],
       "proteus_corp_region_fast_score_snapshot_v2026_05_25",

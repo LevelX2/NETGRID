@@ -56,7 +56,7 @@ describe("meta 420 known ambush run admission", () => {
           known: false,
         });
       if (state === "unrezzed") source.rezzed = false;
-      if (state === "safe") source.definitionId = "onr_v1_214_project-babylon";
+      if (state === "safe") source.definitionId = 426;
       expect(
         runnerKnownRemoteAccessDamageAmbushAssessment(input, server.id),
       ).toBeUndefined();

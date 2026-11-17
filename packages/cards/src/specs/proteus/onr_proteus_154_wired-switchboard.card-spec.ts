@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_proteus_154_wired-switchboard"),
+    cardDefinitionId: cardDefinitionId(212),
     title: "Wired Switchboard",
     side: "runner",
     cardType: "resource",

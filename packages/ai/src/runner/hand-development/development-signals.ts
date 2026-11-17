@@ -112,7 +112,7 @@ function runnerUnrepresentedProgramDevelopmentTargets(
 }
 
 export type RunnerStrategicProgramSearchTarget = {
-  definitionId: string;
+  definitionId: number;
   purpose:
     | "recurring_breaker_economy"
     | "memory_support"
@@ -636,7 +636,7 @@ export function runnerProgramSearchStrategyDevelopmentSignals(
     string,
     {
       sourceCardInstanceId: string;
-      sourceDefinitionId: string;
+      sourceDefinitionId: number;
       candidates: ActionSemanticCandidate[];
     }
   >();

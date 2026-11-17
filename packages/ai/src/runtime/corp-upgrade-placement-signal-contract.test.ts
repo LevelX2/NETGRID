@@ -14,10 +14,10 @@ import {
 } from "./corp-upgrade-placement";
 
 const AGENDA_DIFFICULTY_UPGRADES = [
-  "onr_v1_374_washington-d-c-city-grid",
-  "onr_proteus_065_networked-center",
-  "onr_proteus_072_research-bunker",
-  "onr_proteus_077_weapons-depot",
+  586,
+  123,
+  130,
+  135,
 ] as const;
 
 describe("Corp upgrade placement signal contract", () => {
@@ -87,11 +87,11 @@ describe("Corp upgrade placement signal contract", () => {
 
   it("gives Research Bunker its strongest fit on an active scoreline remote", () => {
     const component = placementComponent(
-      "onr_proteus_072_research-bunker",
+      130,
       "remote_1",
       {
         remoteRoot: [
-          visibleCard("remote-agenda", "simple_agenda", "agenda", {
+          visibleCard("remote-agenda", 588, "agenda", {
             advancementRequirement: 3,
             subtypes: ["research"],
           }),
@@ -111,14 +111,14 @@ describe("Corp upgrade placement signal contract", () => {
   });
 
   it("places an agenda-steal tax only beside a visible agenda", () => {
-    const active = placementComponent("onr_v1_366_red-herrings", "remote_1", {
+    const active = placementComponent(578, "remote_1", {
       remoteRoot: [
-        visibleCard("remote-agenda", "simple_agenda", "agenda", {
+        visibleCard("remote-agenda", 588, "agenda", {
           advancementRequirement: 3,
         }),
       ],
     });
-    const empty = placementComponent("onr_v1_366_red-herrings", "remote_1");
+    const empty = placementComponent(578, "remote_1");
 
     expect(active).toEqual(
       expect.objectContaining({
@@ -141,7 +141,7 @@ describe("Corp upgrade placement signal contract", () => {
   });
 
   it("recognizes a same-fort agenda-steal tax as useful on central servers", () => {
-    expect(placementComponent("onr_v1_366_red-herrings", "rd")).toEqual(
+    expect(placementComponent(578, "rd")).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_fit",
         value: 1700,
@@ -151,7 +151,7 @@ describe("Corp upgrade placement signal contract", () => {
   });
 
   it("keeps Panic Button as an HQ-only counterexample", () => {
-    expect(placementComponent("onr_proteus_067_panic-button", "hq")).toEqual(
+    expect(placementComponent(125, "hq")).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_fit",
         value: 1100,
@@ -159,7 +159,7 @@ describe("Corp upgrade placement signal contract", () => {
       }),
     );
     expect(
-      placementComponent("onr_proteus_067_panic-button", "remote_1"),
+      placementComponent(125, "remote_1"),
     ).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_mismatch",
@@ -170,7 +170,7 @@ describe("Corp upgrade placement signal contract", () => {
   });
 
   it("defers Dr. Dreff until the Engine certifies a concrete future encounter route", () => {
-    expect(placementComponent("onr_v1_358_dr-dreff", "hq")).toEqual(
+    expect(placementComponent(570, "hq")).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_defer",
         value: -900,
@@ -182,7 +182,7 @@ describe("Corp upgrade placement signal contract", () => {
   });
 
   it("keeps Simon Francisco on HQ or R&D as a central counterexample", () => {
-    expect(placementComponent("onr_proteus_073_simon-francisco", "rd")).toEqual(
+    expect(placementComponent(131, "rd")).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_fit",
         value: 1000,
@@ -190,7 +190,7 @@ describe("Corp upgrade placement signal contract", () => {
       }),
     );
     expect(
-      placementComponent("onr_proteus_073_simon-francisco", "remote_1"),
+      placementComponent(131, "remote_1"),
     ).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_mismatch",
@@ -201,7 +201,7 @@ describe("Corp upgrade placement signal contract", () => {
   });
 
   it("defers pass-ICE tax upgrades until their fort actually has ICE", () => {
-    const deferred = placementComponent("onr_proteus_070_rasmin-bridger", "hq");
+    const deferred = placementComponent(128, "hq");
     expect(deferred).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_defer",
@@ -210,7 +210,7 @@ describe("Corp upgrade placement signal contract", () => {
     );
     expect(deferred?.value).toBeLessThan(0);
     expect(
-      placementComponent("onr_proteus_070_rasmin-bridger", "hq", {
+      placementComponent(128, "hq", {
         hqIce: [visibleCard("hq-ice", "simple_ice", "ice")],
       }),
     ).toEqual(
@@ -224,7 +224,7 @@ describe("Corp upgrade placement signal contract", () => {
 
   it("defers a region replacement without active marginal utility", () => {
     const replacement = placementScenario(
-      "onr_proteus_072_research-bunker",
+      130,
       "remote_1",
       {
         regionReplacementWarning: true,
@@ -232,11 +232,11 @@ describe("Corp upgrade placement signal contract", () => {
         remoteRoot: [
           visibleCard(
             "research-bunker-installed",
-            "onr_proteus_072_research-bunker",
+            130,
             "upgrade",
             { subtypes: ["region"] },
           ),
-          eligibleAgenda("onr_proteus_072_research-bunker"),
+          eligibleAgenda(130),
         ],
       },
     );
@@ -260,14 +260,14 @@ describe("Corp upgrade placement signal contract", () => {
 
   it("allows a region replacement that activates the current agenda category", () => {
     const replacement = placementScenario(
-      "onr_proteus_072_research-bunker",
+      130,
       "remote_1",
       {
         regionReplacementWarning: true,
         remoteRoot: [
           visibleCard(
             "networked-center-installed",
-            "onr_proteus_065_networked-center",
+            123,
             "upgrade",
             { subtypes: ["region"] },
           ),
@@ -306,7 +306,7 @@ describe("Corp upgrade placement signal contract", () => {
   it.each(["wrong_category", "unknown", "missing_action", "wrong_source", "wrong_fort", "stale", "wrong_timing"])(
     "does not invent prepared Weapons Depot support from %s",
     (variant) => {
-      const agenda = eligibleAgenda("onr_proteus_077_weapons-depot");
+      const agenda = eligibleAgenda(135);
       const action = agendaInstall(agenda);
       if (variant === "wrong_category") agenda.subtypes = ["research"];
       if (variant === "unknown") agenda.known = false;
@@ -314,7 +314,7 @@ describe("Corp upgrade placement signal contract", () => {
       if (variant === "wrong_fort") action.payload!.serverId = "remote_2";
       if (variant === "stale") action.expiresAtStateVersion = 0;
       if (variant === "wrong_timing") action.timingPoint = "corp_discard.select_cards";
-      const scenario = placementScenario("onr_proteus_077_weapons-depot", "remote_1", {
+      const scenario = placementScenario(135, "remote_1", {
         remoteIce: [visibleCard("ice", "simple_ice", "ice")],
         hqAgendas: [agenda],
         agendaInstalls: variant === "missing_action" ? [] : [action],
@@ -327,7 +327,7 @@ describe("Corp upgrade placement signal contract", () => {
     const component = placementComponent(AGENDA_DIFFICULTY_UPGRADES[0], "remote_1", {
       remoteIce: [visibleCard("ice", "simple_ice", "ice")],
       remoteRoot: [
-        visibleCard("ambush", "onr_v1_348_virus-test-site", "asset", {
+        visibleCard("ambush", 560, "asset", {
           advancementCounters: 2,
         }),
       ],
@@ -343,7 +343,7 @@ describe("Corp upgrade placement signal contract", () => {
   });
 });
 
-function eligibleAgenda(definitionId: string): VisibleCard {
+function eligibleAgenda(definitionId: number): VisibleCard {
   const subtype = definitionId.includes("networked") ? "gray_ops"
     : definitionId.includes("weapons") ? "black_ops" : "research";
   return visibleCard("eligible-agenda", "test-agenda", "agenda", { subtypes: [subtype] });
@@ -360,7 +360,7 @@ function agendaInstall(card: VisibleCard): LegalAction {
 }
 
 function placementComponent(
-  definitionId: string,
+  definitionId: number,
   serverId: "hq" | "rd" | "remote_1",
   options: {
     regionReplacementWarning?: boolean;
@@ -377,7 +377,7 @@ function placementComponent(
 }
 
 function placementScenario(
-  definitionId: string,
+  definitionId: number,
   serverId: "hq" | "rd" | "remote_1",
   options: {
     regionReplacementWarning?: boolean;
@@ -457,7 +457,7 @@ function placementScenario(
 
 function visibleCard(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   type: NonNullable<VisibleCard["type"]>,
   extra: Omit<
     Partial<VisibleCard>,

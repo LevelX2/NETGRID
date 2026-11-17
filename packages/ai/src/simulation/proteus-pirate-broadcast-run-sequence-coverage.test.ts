@@ -134,10 +134,10 @@ function deck(deckId: string): DeckDefinition {
 function pirateBroadcastCoverageCorpDeck(): DeckDefinition {
   const result = deck("proteus_corp_region_fast_score_2026_05_25");
   const caryatid = result.cards.find(
-    (card) => card.id === "onr_proteus_013_caryatid",
+    (card) => card.id === 71,
   );
   const scaffolding = result.cards.find(
-    (card) => card.id === "onr_proteus_037_scaffolding",
+    (card) => card.id === 95,
   );
   if (!caryatid || !scaffolding) {
     throw new Error("Missing Pirate Broadcast coverage ICE");

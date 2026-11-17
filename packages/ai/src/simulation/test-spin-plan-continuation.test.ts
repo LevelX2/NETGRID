@@ -19,10 +19,10 @@ import {
 } from "../plans/resident-plan-portfolio-memory";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
-const TEST_SPIN = "onr_proteus_126_test-spin";
-const CONFERENCE = "onr_v1_184_top-runners-conference";
-const DEVELOPMENT_TARGET = "onr_proteus_085_disintegrator";
-const COVERAGE_TARGET = "onr_v1_014_codecracker";
+const TEST_SPIN = 184;
+const CONFERENCE = 396;
+const DEVELOPMENT_TARGET = 143;
+const COVERAGE_TARGET = 226;
 
 describe("Test Spin exact Engine continuation", () => {
   it.each([
@@ -175,7 +175,7 @@ function testSpinFixture(
     runnerDeck,
     corpDeck: deck("proteus_corp_region_fast_score_2026_05_25"),
   });
-  const find = (definitionId: string) => {
+  const find = (definitionId: number) => {
     const card = Object.values(state.cardInstances).find(
       (candidate) =>
         candidate.owner === "runner" && candidate.definitionId === definitionId,
@@ -187,12 +187,12 @@ function testSpinFixture(
   const target = find(
     owner === "development" ? DEVELOPMENT_TARGET : COVERAGE_TARGET,
   );
-  const sacrifice = find("onr_proteus_090_highlighter");
+  const sacrifice = find(148);
   const programs = memoryPressure
     ? [
         sacrifice,
         find(owner === "development" ? COVERAGE_TARGET : DEVELOPMENT_TARGET),
-        find("onr_v1_021_dwarf"),
+        find(233),
       ]
     : [];
   const conferences = Object.values(state.cardInstances).filter(

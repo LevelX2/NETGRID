@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { cardSupportAiSupportedData as cardSupportAiSupportedScenarioData } from "@netgrid/runtime-data/card-support";
 import {
   getCardSpecSupportSummary,
@@ -33,7 +34,7 @@ export type CardSetSchemaVersion = "card-set-v1";
 export type CardSupportSchemaVersion = "card-support-v1";
 
 export type CardSetCard = {
-  cardId: string;
+  cardId: CardDefinitionId;
   printingId: string;
   setId: string;
   title: string;
@@ -59,7 +60,7 @@ export type CardSetFile = {
 };
 
 export type CardSupportEntry = {
-  cardId: string;
+  cardId: CardDefinitionId;
   setId: string;
   statuses: Partial<CatalogStatuses>;
   support: {
@@ -85,7 +86,7 @@ const CARD_SPEC_AI_SCENARIO_REF =
   "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported";
 
 export type CardSpecSupportEvidence = {
-  cardDefinitionId: string;
+  cardDefinitionId: CardDefinitionId;
   validationStatus: "valid";
   runtimeProjectionStatus: "playable_mvp" | "catalog_only";
   planningProjectionStatus: "available" | "unavailable";
@@ -101,7 +102,7 @@ export type CardSpecSupportErrorCode =
 export class CardSpecSupportError extends Error {
   constructor(
     readonly code: CardSpecSupportErrorCode,
-    readonly cardDefinitionId: string,
+    readonly cardDefinitionId: CardDefinitionId,
   ) {
     super(`${code}: ${cardDefinitionId}`);
     this.name = "CardSpecSupportError";
@@ -109,10 +110,10 @@ export class CardSpecSupportError extends Error {
 }
 
 export function deriveCardSpecSupportEntry(
-  cardDefinitionId: string,
+  cardDefinitionId: CardDefinitionId,
   setId: string,
   evidence: CardSpecSupportEvidence | undefined,
-  aiScenarioCardIds: ReadonlySet<string>,
+  aiScenarioCardIds: ReadonlySet<CardDefinitionId>,
 ): CardSupportEntry {
   if (evidence === undefined)
     throw new CardSpecSupportError(
@@ -369,7 +370,7 @@ export function validateLoadedCardSets(
   loadedSets: readonly LoadedCardSet[],
 ): string[] {
   const errors: string[] = [];
-  const seenCardIds = new Set<string>();
+  const seenCardIds = new Set<CardDefinitionId>();
   const seenPrintingIds = new Set<string>();
 
   for (const loaded of loadedSets) {
@@ -384,8 +385,8 @@ export function validateLoadedCardSets(
         `${loaded.set.setId}: card set/support setId mismatch ${loaded.support.setId}.`,
       );
 
-    const cardsById = new Map<string, CardSetCard>();
-    const supportById = new Map<string, CardSupportEntry>();
+    const cardsById = new Map<CardDefinitionId, CardSetCard>();
+    const supportById = new Map<CardDefinitionId, CardSupportEntry>();
 
     for (const card of loaded.set.cards) {
       if (card.printingId.trim().length === 0)
@@ -493,7 +494,7 @@ export function createRuntimeCardsFromCardSets(): CatalogCard[] {
       );
     })
     .sort((left, right) =>
-      left.catalogCardId.localeCompare(right.catalogCardId),
+      left.catalogCardId - right.catalogCardId,
     );
 }
 
@@ -516,7 +517,7 @@ function toCatalogCard(
     setId: card.setId,
     setName: resolveCatalogSetName(card, set),
     collectorNumber:
-      card.collectorNumber ?? collectorNumberFromCardId(card.cardId),
+      card.collectorNumber ?? collectorNumberFromPrintingId(card.printingId),
     ...(card.rarity ? { rarity: { ...card.rarity } } : {}),
     text: card.text,
     displayOnlyText: card.displayOnlyText,
@@ -717,14 +718,14 @@ function isFinalPlayableStatus(statuses: CatalogStatuses): boolean {
 }
 
 function engineCardIdFromSupport(
-  fallbackCardId: string,
+  fallbackCardId: CardDefinitionId,
   supportEntry: CardSupportEntry | undefined,
-): string | null {
+): CardDefinitionId | null {
   const resolverRef = supportEntry?.support.resolverRef;
   if (!resolverRef) return null;
-  return resolverRef.startsWith("engine:")
-    ? resolverRef.slice("engine:".length)
-    : fallbackCardId;
+  if (resolverRef.startsWith("engine:") && resolverRef !== `engine:${fallbackCardId}`)
+    throw new Error(`Card ${fallbackCardId} has mismatched engine support.`);
+  return fallbackCardId;
 }
 
 function manifestReferenceFromSupport(
@@ -744,8 +745,8 @@ function manifestReferenceFromSupport(
   };
 }
 
-function collectorNumberFromCardId(cardId: string): string {
-  return cardId.match(/_(\d{3})_/)?.[1] ?? cardId;
+function collectorNumberFromPrintingId(printingId: string): string {
+  return printingId.match(/_(\d{3})_/)?.[1] ?? printingId;
 }
 
 function normalizeStatuses(
@@ -889,7 +890,7 @@ export const PROTEUS_VISIBLE_BASELINE_CARD_IDS = Object.freeze(
     .map((entry) => entry.cardId),
 );
 
-function cardIdsForSet(setId: string): string[] {
+function cardIdsForSet(setId: string): CardDefinitionId[] {
   return (
     CARD_SET_FILES.find(({ set }) => set.setId === setId)?.support.cards ?? []
   ).map((entry) => entry.cardId);

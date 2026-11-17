@@ -1073,7 +1073,7 @@ export function createCardRuntimeDepsHosts(
           state.cardInstances[cardId],
         definitionFor: (cardId: CardInstanceId) => definitionFor(state, cardId),
         runnerInstalledCardIds: () => runnerInstalledCardIds(state),
-        cardImplementationForDefinitionId: (definitionId: string) =>
+        cardImplementationForDefinitionId: (definitionId: number) =>
           cardImplementationForDefinitionId(definitionId as CardDefinitionId),
       },
       actions: {

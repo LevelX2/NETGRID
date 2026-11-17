@@ -128,7 +128,7 @@ it.each([
         expect(pf.selectedPlan?.moduleId).toBe("runner.convert_run_window");
       else expect(pf.leafExecutorInstanceId).toBe("rules.window_resolution");
       if (i < steps - 1)
-        expect(decision.actionId).toContain("runner_onr_v1_074_worm_1");
+        expect(decision.actionId).toContain("runner_286_1");
       else
         expect(
           input.legalActions.find((a) => a.actionId === decision.actionId)
@@ -148,7 +148,7 @@ function sixActualKrashPumps(state: GameState) {
       "runner",
       getLegalActions(state, "runner").find(
         (a) =>
-          a.type === "pump_breaker" && a.source === "runner_onr_v1_039_krash_1",
+          a.type === "pump_breaker" && a.source === "runner_251_1",
       )!.actionId,
     );
   return state;
@@ -158,7 +158,7 @@ it("keeps actually cheaper already-pumped Krash", () => {
   const pumped = sixActualKrashPumps(original.state);
   const r = source("g11d190", (state) => Object.assign(state, pumped));
   expect(decide(r.input, r.state).decision.actionId).toContain(
-    "break_subroutine.runner_onr_v1_039_krash_1",
+    "break_subroutine.runner_251_1",
   );
 });
 it("retains partial Safety mitigation when the whole encounter cannot be funded", () => {
@@ -167,7 +167,7 @@ it("retains partial Safety mitigation when the whole encounter cannot be funded"
   pumped.runner.credits = 4;
   const r = source("g11d190", (state) => Object.assign(state, pumped));
   expect(decide(r.input, r.state).decision.actionId).toContain(
-    "break_subroutine.runner_onr_v1_039_krash_1",
+    "break_subroutine.runner_251_1",
   );
 });
 it("keeps the cheaper nominal full route when run-only credits fund both", () => {
@@ -175,7 +175,7 @@ it("keeps the cheaper nominal full route when run-only credits fund both", () =>
     state.run!.badPublicityCredits = 20;
   });
   expect(decide(r.input, r.state).decision.actionId).toContain(
-    "pump_breaker.runner_onr_v1_074_worm_1",
+    "pump_breaker.runner_286_1",
   );
 });
 it("does not invent a whole mixed encounter when even Worm cannot be funded", () => {
@@ -187,9 +187,9 @@ it("does not invent a whole mixed encounter when even Worm cannot be funded", ()
   );
 });
 const permanent =
-  "corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_238_data-wall-2-0_1";
+  "corp.rez_ice.corp_450_1.corp_450_1";
 const temporary =
-  "corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1";
+  "corp.rez_ice.corp_450_1.hq.corp_450_1.corp_575_1";
 it("values same-ICE paid rez lifetime and actually preserves it over three Engine runs", () => {
   const r = source("g18d13"),
     { decision, pf } = decide(r.input, r.state);
@@ -223,7 +223,7 @@ it("preserves the same generic paid lifetime for the three currently funded Quan
     { decision, pf } = decide(r.input, r.state);
   expect(pf.selectedPlan?.moduleId).toBe("corp.defend_servers");
   expect(decision.actionId).toBe(
-    "corp.rez_ice.corp_onr_v1_261_quandary_2.corp_onr_v1_261_quandary_2",
+    "corp.rez_ice.corp_473_2.corp_473_2",
   );
   let state = take(r.state, "corp", decision.actionId);
   for (let i = 0; i < 3; i++) {
@@ -242,7 +242,7 @@ it("retains an actually free temporary Data Wall activation at G22", () => {
   const r = source("g22d10"),
     { decision } = decide(r.input, r.state);
   expect(decision.actionId).toBe(
-    "corp.rez_ice.corp_onr_v1_237_data-wall_3.rd.corp_onr_v1_237_data-wall_3.corp_onr_v1_363_olivia-salazar_1",
+    "corp.rez_ice.corp_449_3.rd.corp_449_3.corp_575_1",
   );
   expect(take(r.state, "corp", decision.actionId).corp.credits).toBe(
     r.state.corp.credits,
@@ -287,7 +287,7 @@ it("revalidates the mature fort after mandatory draw when public stack search is
     next = load("g23d401", "native");
   expect(hashGameState(state)).toBe(next.stateHash);
   RealEngineFixtureBuilder.forState(state).withRunnerCardInGrip(
-    "onr_v1_059_self-modifying-code",
+    271,
   );
   const input = liveInput(state, next);
   const second = decide(input, state);
@@ -372,8 +372,8 @@ it("revalidates the mature fort after mandatory draw when public stack search is
   duplicateLayer.scoreHorizonCertification = {
     ...duplicateLayer.scoreHorizonCertification!,
     layerInstanceIds: [
-      "corp_onr_v1_278_wall-of-ice_1",
-      "corp_onr_v1_278_wall-of-ice_1",
+      "corp_490_1",
+      "corp_490_1",
     ],
   };
   expect(

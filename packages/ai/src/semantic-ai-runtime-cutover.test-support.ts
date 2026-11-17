@@ -105,7 +105,7 @@ export function runnerWallCoverageInput(
       "remote_1",
       [
         withEffectiveRunQuote(
-          visibleCard("simple_barrier_ice", "corp", "ice", {
+          visibleCard(589, "corp", "ice", {
             title: "Simple Barrier ICE",
             rezzed: true,
             strength: 3,
@@ -117,20 +117,20 @@ export function runnerWallCoverageInput(
               {
                 id: "simple_barrier_ice-end-the-run",
                 type: "end_the_run",
-                sourceDefinitionId: "simple_barrier_ice",
+                sourceDefinitionId: 589,
                 sourceTitle: "Simple Barrier ICE",
               },
             ],
           },
         ),
       ],
-      [visibleCard("simple_agenda", "corp", "agenda")],
+      [visibleCard(588, "corp", "agenda")],
     ),
   ];
   attachOwnDeckSnapshot(input, {
     deckSnapshotId: "runner-wall-coverage-fixture",
     side: "runner",
-    cards: [{ cardId: "onr_v1_047_pile-driver", quantity: 1 }],
+    cards: [{ cardId: 259, quantity: 1 }],
   });
   return input;
 }
@@ -472,7 +472,7 @@ export function runtimeRunnerStrategyProfile(): AiDeckStrategyProfile {
         runtimeBlockers: [],
         anchorEvidence: [
           {
-            cardId: "onr_v1_081_custodial-position",
+            cardId: 293,
             quantity: 2,
             source: "derivedStrategyAnchor",
             strategyId: "runner.rnd_pressure",
@@ -507,7 +507,7 @@ export function tacticalDebugItems(
 export function rdAccessEvent(
   eventId: string,
   stateVersionBefore: number,
-  cardDefinitionId: string,
+  cardDefinitionId: number,
 ): PublicGameEvent {
   return {
     eventId,

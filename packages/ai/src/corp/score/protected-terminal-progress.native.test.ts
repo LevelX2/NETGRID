@@ -42,7 +42,7 @@ it("advances the admitted protected winning agenda before staging another remote
   const p = decision.decisionDebug!.planFirstDecision!;
   expect(p.selectedPlan!.moduleId).toBe("corp.score_agenda");
   expect(p.rootPlanInstanceId).toBe(
-    "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_006_please-dont-choke-anyone_1%3Aremote_1",
+    "plan:corp.score_agenda:agenda%3Acorp_64_1%3Aremote_1",
   );
   expect(p.leafExecutorInstanceId).toBe(p.rootPlanInstanceId);
   expect(p.route).toMatchObject({

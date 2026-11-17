@@ -51,7 +51,7 @@ describe("match FD7671 runner decision checkpoints", () => {
       const decoderId = state.runner.rig.programs.find(
         (instanceId) =>
           state.cardInstances[instanceId]?.definitionId ===
-          "onr_v1_016_cyfermaster",
+          228,
       );
       if (!decoderId) throw new Error("Expected installed Cyfermaster");
       state.runner.rig.programs = state.runner.rig.programs.filter(
@@ -71,7 +71,7 @@ describe("match FD7671 runner decision checkpoints", () => {
           { type: "gain_credit" },
         ],
         forbiddenActions: [
-          { sourceDefinitionId: "onr_v1_099_mantis-fixer-at-large" },
+          { sourceDefinitionId: 311 },
         ],
         runTargets: [
           {
@@ -146,7 +146,7 @@ function expectProspectiveCampaignTrash(
       {
         type: "trash_accessed_card",
         actionId:
-          "runner.trash_accessed_card.corp_onr_v1_337_rockerboy-promotion_1.3",
+          "runner.trash_accessed_card.corp_549_1.3",
       },
     ],
     planExecution: { acceptablePlanKinds: ["runner.convert_run_window"] },

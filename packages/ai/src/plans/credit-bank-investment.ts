@@ -6,7 +6,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate-types
 
 /** Canonical facts for a plain action-loaded, all-pool bank. These facts
  * describe a possible later conversion; only the Engine offers current actions. */
-export function clickCreditBankProfile(definitionId: string) {
+export function clickCreditBankProfile(definitionId: number) {
   const card = planningCardByDefinitionId(definitionId);
   const abilities = card?.engine.abilities;
   if (!card || abilities?.length !== 2) return undefined;

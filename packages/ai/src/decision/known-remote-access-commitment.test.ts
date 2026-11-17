@@ -45,12 +45,12 @@ describe("known remote access commitment", () => {
       aiInput({ credits: 4 }),
       {
         serverId: "remote_1",
-        definitionId: "onr_v1_326_holovid-campaign",
+        definitionId: 538,
         rootType: "asset",
         trashCost: 4,
         creditsAfterPath: 4,
         visibleCard: visibleCard("holovid", {
-          definitionId: "onr_v1_326_holovid-campaign",
+          definitionId: 538,
           title: "Holovid Campaign",
           type: "asset",
           counters: { bit: 5 },
@@ -86,12 +86,12 @@ describe("known remote access commitment", () => {
       aiInput({ credits: 2 }),
       {
         serverId: "remote_1",
-        definitionId: "onr_v1_326_holovid-campaign",
+        definitionId: 538,
         rootType: "asset",
         trashCost: 4,
         creditsAfterPath: 2,
         visibleCard: visibleCard("holovid", {
-          definitionId: "onr_v1_326_holovid-campaign",
+          definitionId: 538,
           title: "Holovid Campaign",
           type: "asset",
           counters: { bit: 5 },
@@ -120,12 +120,12 @@ describe("known remote access commitment", () => {
       aiInput({ credits: 8 }),
       {
         serverId: "remote_1",
-        definitionId: "onr_v1_366_red-herrings",
+        definitionId: 578,
         rootType: "upgrade",
         trashCost: 1,
         creditsAfterPath: 8,
         visibleCard: visibleCard("neutral-asset", {
-          definitionId: "onr_v1_366_red-herrings",
+          definitionId: 578,
           title: "Red Herrings",
           type: "upgrade",
         }),
@@ -159,7 +159,7 @@ describe("known remote access commitment", () => {
         credits: 4,
         rig: [
           visibleCard("poltergeist", {
-            definitionId: "onr_v1_048_poltergeist",
+            definitionId: 260,
             type: "program",
             counterDisplays: [
               {
@@ -182,7 +182,7 @@ describe("known remote access commitment", () => {
       }),
       {
         serverId: "remote_1",
-        definitionId: "onr_v1_326_holovid-campaign",
+        definitionId: 538,
         rootType: "asset",
         trashCost: 4,
         creditsAfterPath: 4,
@@ -196,7 +196,7 @@ describe("known remote access commitment", () => {
       aiInput({ credits: 8 }),
       {
         serverId: "remote_1",
-        definitionId: "onr_v1_322_euromarket-consortium",
+        definitionId: 534,
         rootType: "asset",
         trashCost: 4,
         creditsAfterPath: 8,
@@ -207,7 +207,7 @@ describe("known remote access commitment", () => {
           },
         },
         visibleCard: visibleCard("euromarket", {
-          definitionId: "onr_v1_322_euromarket-consortium",
+          definitionId: 534,
           title: "Euromarket Consortium",
           type: "asset",
         }),
@@ -235,12 +235,12 @@ describe("known remote access commitment", () => {
       aiInput({ credits: 10 }),
       {
         serverId: "remote_1",
-        definitionId: "onr_v1_326_holovid-campaign",
+        definitionId: 538,
         rootType: "asset",
         trashCost: 4,
         creditsAfterPath: 10,
         visibleCard: visibleCard("holovid", {
-          definitionId: "onr_v1_326_holovid-campaign",
+          definitionId: 538,
           title: "Holovid Campaign",
           type: "asset",
           counters: { bit: 0 },
@@ -269,12 +269,12 @@ describe("known remote access commitment", () => {
       aiInput({ credits: 4 }),
       {
         serverId: "remote_1",
-        definitionId: "onr_v1_347_vapor-ops",
+        definitionId: 559,
         rootType: "asset",
         trashCost: 1,
         creditsAfterPath: 4,
         visibleCard: visibleCard("counter-transfer-engine", {
-          definitionId: "onr_v1_347_vapor-ops",
+          definitionId: 559,
           title: "Vapor Ops",
           type: "asset",
           advancementCounters: 2,

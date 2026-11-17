@@ -130,7 +130,7 @@ export function bindSelectedCorpArchivesToHqChoiceContinuation(
   const eligibleScoreCards = input.playerView.own.heapOrArchives.filter(
     (card) =>
       card.known &&
-      typeof card.definitionId === "string" &&
+      typeof card.definitionId === "number" &&
       (profile.filterCardType === undefined ||
         card.type === profile.filterCardType),
   );
@@ -190,7 +190,7 @@ function selectedCorpArchivesToHqCards(
   const eligible = input.playerView.own.heapOrArchives.filter(
     (card) =>
       card.known === true &&
-      typeof card.definitionId === "string" &&
+      typeof card.definitionId === "number" &&
       (profile.filterCardType === undefined ||
         card.type === profile.filterCardType),
   );

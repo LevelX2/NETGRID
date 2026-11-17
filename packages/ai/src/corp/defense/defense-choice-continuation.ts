@@ -60,7 +60,7 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
           (card) =>
             card.instanceId === sourceCardId &&
             card.known &&
-            card.definitionId === "onr_v1_358_dr-dreff" &&
+            card.definitionId === 570 &&
             card.rezzed === true,
         )
     : undefined;

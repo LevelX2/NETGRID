@@ -122,7 +122,7 @@ describe("Score counter-bank funding resources", () => {
         sameTurnCloseout: true,
         counterBank: {
           sourceCardInstanceId: a.source!,
-          sourceDefinitionId: "onr_v1_347_vapor-ops",
+          sourceDefinitionId: 559,
           serverId: "remote_1",
           advancementCounters: 1,
           counterTarget: 1,

@@ -202,7 +202,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
     ).toBe("playable_mvp");
   });
 
@@ -213,7 +213,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     state.corp.credits = 10;
     state.runner.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const assetId = moveCorpCardToHq(state, "onr_v1_321_esa-contract");
+    const assetId = moveCorpCardToHq(state, 533);
     state = apply(
       state,
       "corp",
@@ -243,7 +243,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_321_esa-contract",
+        sourceDefinition(state, action) === 533,
     );
 
     const remote = state.corp.servers.find((server) =>
@@ -255,10 +255,10 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       getPlayerView(state, "runner")
         .servers.find((server) => server.id === remote?.id)
         ?.root.find((card) => card.instanceId === assetId)?.definitionId,
-    ).toBe("onr_v1_321_esa-contract");
+    ).toBe(533);
 
-    putCorpCardOnTopOfRd(state, "simple_agenda");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    putCorpCardOnTopOfRd(state, 588);
+    putCorpCardOnTopOfRd(state, 596);
     const creditsBeforeAbility = state.corp.credits;
     const clicksBeforeAbility = state.corp.clicks;
     const hqBeforeAbility = state.corp.hq.length;
@@ -294,16 +294,16 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
-      cardDefinitionId: "onr_v1_321_esa-contract",
+      cardDefinitionId: 533,
       cardImplementationAbility: "activated",
-      sourceDefinitionId: "onr_v1_321_esa-contract",
+      sourceDefinitionId: 533,
       drawnCards: 2,
       resolvedEffects: [
         expect.objectContaining({
           kind: "draw_cards",
           side: "corp",
           amount: 2,
-          sourceDefinitionId: "onr_v1_321_esa-contract",
+          sourceDefinitionId: 533,
           sourceTitle: "ESA Contract",
           reason: "card_resolver",
         }),
@@ -319,7 +319,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     accessState.runner.credits = 10;
     const accessedAssetId = putCorpRootInRemote(
       accessState,
-      "onr_v1_321_esa-contract",
+      533,
     );
     accessState.cardInstances[accessedAssetId] = {
       ...accessState.cardInstances[accessedAssetId]!,
@@ -339,7 +339,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     );
     expect(accessState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "onr_v1_321_esa-contract",
+      cardDefinitionId: 533,
     });
     expect(
       JSON.stringify(accessState.eventLog.at(-1)?.publicPayload),
@@ -356,7 +356,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         .servers.find((server) => server.id === "archives")
         ?.root.find((card) => card.instanceId === accessedAssetId)
         ?.definitionId,
-    ).toBe("onr_v1_321_esa-contract");
+    ).toBe(533);
     expect(validateGameState(accessState).ok).toBe(true);
   });
 
@@ -366,7 +366,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     );
     state.corp.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const campaignId = moveCorpCardToHq(state, "onr_v1_326_holovid-campaign");
+    const campaignId = moveCorpCardToHq(state, 538);
     state = apply(
       state,
       "corp",
@@ -381,7 +381,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_326_holovid-campaign",
+        sourceDefinition(state, action) === 538,
     );
     const creditsBeforeNextCorpTurn = state.corp.credits;
 
@@ -396,8 +396,8 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
 
   it("does not offer legacy manual economy actions for start-of-turn campaign assets", () => {
     const economyAssets = [
-      "onr_v1_311_braindance-campaign",
-      "onr_v1_326_holovid-campaign",
+      523,
+      538,
     ] as const;
     for (const definitionId of economyAssets) {
       let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
@@ -461,7 +461,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     );
     state.corp.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const firmId = moveCorpCardToHq(state, "onr_v1_329_investment-firm");
+    const firmId = moveCorpCardToHq(state, 541);
     state = apply(
       state,
       "corp",
@@ -475,7 +475,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_329_investment-firm",
+        sourceDefinition(state, action) === 541,
     );
     expect(
       getLegalActions(state, "corp").some(
@@ -613,7 +613,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         kind: "gain_credits",
         amount: 1,
         reason: "installed_economy_start_of_corp_turn",
-        sourceDefinitionId: "onr_v1_329_investment-firm",
+        sourceDefinitionId: 541,
         sourceCardInstanceId: firmId,
       }),
     );
@@ -627,7 +627,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         removedCounterAmount: 1,
         remainingCounters: 1,
         reason: "installed_economy_start_of_corp_turn",
-        sourceDefinitionId: "onr_v1_329_investment-firm",
+        sourceDefinitionId: 541,
         sourceCardInstanceId: firmId,
       }),
     );
@@ -653,7 +653,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         counterType: "recurring_credit",
         removedCounterAmount: 1,
         remainingCounters: 0,
-        sourceDefinitionId: "onr_v1_329_investment-firm",
+        sourceDefinitionId: 541,
       }),
     );
 
@@ -666,12 +666,12 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     const emptyFirmTurnStartEffects = (state.eventLog.at(-1)?.publicPayload
       .resolvedEffects ?? []) as Array<{
       kind?: string;
-      sourceDefinitionId?: string;
+      sourceDefinitionId?: number;
     }>;
     expect(
       emptyFirmTurnStartEffects.some(
         (effect) =>
-          effect.sourceDefinitionId === "onr_v1_329_investment-firm" &&
+          effect.sourceDefinitionId === 541 &&
           effect.kind === "gain_credits",
       ),
     ).toBe(false);
@@ -680,7 +680,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "v1917-investment-firm-multiple",
     );
     multi = apply(multi, "corp", (action) => action.type === "mandatory_draw");
-    const firstFirm = putCorpRootInRemote(multi, "onr_v1_329_investment-firm");
+    const firstFirm = putCorpRootInRemote(multi, 541);
     const secondFirm = `${firstFirm}_copy` as typeof firstFirm;
     const firstFirmZone = multi.cardInstances[firstFirm]?.zone;
     const firstFirmServerId =
@@ -731,14 +731,14 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
         id: "v1917_investment_firm_operation_gain_corp",
         cards: [
-          { id: "onr_v1_290_efficiency-experts", quantity: 1 },
+          { id: 502, quantity: 1 },
           ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards,
         ],
       },
       agendaPointsToWin: 7,
     });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const firmId = putCorpRootInRemote(state, "onr_v1_329_investment-firm");
+    const firmId = putCorpRootInRemote(state, 541);
     state.cardInstances[firmId] = {
       ...state.cardInstances[firmId]!,
       faceup: true,
@@ -746,7 +746,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     };
     const operationId = moveCorpCardToHq(
       state,
-      "onr_v1_290_efficiency-experts",
+      502,
     );
     const creditsBefore = state.corp.credits;
 
@@ -778,7 +778,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
         id: "v1917_investment_firm_lifecycle_corp",
         cards: [
-          { id: "onr_v1_308_acme-savings-and-loan", quantity: 1 },
+          { id: 520, quantity: 1 },
           ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards,
         ],
       },
@@ -786,8 +786,8 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 20;
-    scoreCorpAgendaForTest(state, "simple_agenda");
-    const firmId = putCorpRootInRemote(state, "onr_v1_329_investment-firm");
+    scoreCorpAgendaForTest(state, 588);
+    const firmId = putCorpRootInRemote(state, 541);
     state.cardInstances[firmId] = {
       ...state.cardInstances[firmId]!,
       faceup: true,
@@ -795,7 +795,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     };
     const acmeId = putCorpRootInRemote(
       state,
-      "onr_v1_308_acme-savings-and-loan",
+      520,
     );
 
     state = apply(
@@ -824,7 +824,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const spinnId = moveCorpCardToHq(
       state,
-      "onr_v1_344_spinn-public-relations",
+      556,
     );
     state = apply(
       state,
@@ -839,7 +839,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_344_spinn-public-relations",
+        sourceDefinition(state, action) === 556,
     );
     const creditsBeforeLoad = state.corp.credits;
 
@@ -856,7 +856,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(cardCounterAmount(state, spinnId, "bit")).toBe(3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
-      cardDefinitionId: "onr_v1_344_spinn-public-relations",
+      cardDefinitionId: 556,
       cardImplementationAbility: "activated",
       hostedCreditsAdded: 3,
       hostedCreditsAfter: 3,
@@ -885,8 +885,8 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
 
   it("refreshes all scoped V1.9.17 recurring assets together without hidden payloads", () => {
     const recurringAssets = [
-      "onr_v1_311_braindance-campaign",
-      "onr_v1_329_investment-firm",
+      523,
+      541,
     ] as const;
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-recurring-all-assets"),
@@ -898,9 +898,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         faceup: true,
         rezzed: true,
       };
-      if (definitionId === "onr_v1_311_braindance-campaign")
+      if (definitionId === 523)
         setCardCounterForTest(state, assetId, "bit", 12);
-      if (definitionId === "onr_v1_329_investment-firm")
+      if (definitionId === 541)
         setCardCounterForTest(state, assetId, "recurring_credit", 1);
     }
     const initial = structuredClone(state);
@@ -918,7 +918,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         server.root.some(
           (cardId) =>
             state.cardInstances[cardId]?.definitionId ===
-              "onr_v1_311_braindance-campaign" &&
+              523 &&
             cardCounterAmount(state, cardId, "bit") === 10,
         ),
       ),
@@ -928,7 +928,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         server.root.some(
           (cardId) =>
             state.cardInstances[cardId]?.definitionId ===
-              "onr_v1_329_investment-firm" &&
+              541 &&
             cardCounterAmount(state, cardId, "recurring_credit") === 0,
         ),
       ),
@@ -948,7 +948,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     );
     state.corp.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const bbsId = moveCorpCardToHq(state, "onr_v1_309_bbs-whispering-campaign");
+    const bbsId = moveCorpCardToHq(state, 521);
     state = apply(
       state,
       "corp",
@@ -977,7 +977,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       visibilityClass: "hidden_info_barrier",
       publicPayload: {
         actionType: "rez_card",
-        cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+        cardDefinitionId: 521,
       },
     });
     expect(cardCounterAmount(state, bbsId, "bit")).toBe(16);
@@ -994,11 +994,11 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     state.runner.credits = 10;
     const hostId = putCorpRootInRemote(
       state,
-      "onr_v1_309_bbs-whispering-campaign",
+      521,
     );
     const hostedId = putCorpRootInRemote(
       state,
-      "onr_v1_318_department-of-truth-enhancement",
+      530,
     );
     state.cardInstances[hostId] = {
       ...state.cardInstances[hostId]!,
@@ -1045,7 +1045,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("starts V1.9.17 trace asset abilities through the side-safe trace window", () => {
-    const traceAssets = [["onr_v1_310_blood-cat", 5]] as const;
+    const traceAssets = [[522, 5]] as const;
     for (const [definitionId, traceLimit] of traceAssets) {
       let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
         `v1917-trace-asset-window-${definitionId}`,
@@ -1106,7 +1106,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     state.corp.credits = 10;
     state.runner.credits = 0;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const krumzId = moveCorpCardToHq(state, "onr_v1_330_krumz");
+    const krumzId = moveCorpCardToHq(state, 542);
     state = apply(
       state,
       "corp",
@@ -1120,10 +1120,10 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_330_krumz",
+        sourceDefinition(state, action) === 542,
     );
     expect(cardCounterAmount(state, krumzId, "bit")).toBe(1);
-    const bloodCatId = moveCorpCardToHq(state, "onr_v1_310_blood-cat");
+    const bloodCatId = moveCorpCardToHq(state, 522);
     state = apply(
       state,
       "corp",
@@ -1137,7 +1137,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_310_blood-cat",
+        sourceDefinition(state, action) === 522,
     );
     state.corp.credits = 0;
 
@@ -1176,15 +1176,15 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     state.corp.credits = 10;
     const negotiatingCenterId = putCorpRootInRemote(
       state,
-      "onr_v1_314_corporate-negotiating-center",
+      526,
     );
     state.cardInstances[negotiatingCenterId] = {
       ...state.cardInstances[negotiatingCenterId]!,
       faceup: true,
       rezzed: true,
     };
-    const agendaId = moveCorpCardToHq(state, "simple_agenda");
-    const operationId = moveCorpCardToHq(state, "simple_economy_operation");
+    const agendaId = moveCorpCardToHq(state, 588);
+    const operationId = moveCorpCardToHq(state, 596);
     const creditsBefore = state.corp.credits;
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -1217,12 +1217,12 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "corp_hq_agenda_reveal",
-      sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+      sourceDefinitionId: 526,
       sourceTitle: "Corporate Negotiating Center",
       publicRevealKind: "reveal",
-      publicRevealDefinitionIds: "simple_agenda",
+      publicRevealDefinitionIds: 588,
       publicRevealTitles: "Simple Agenda",
-      revealedAgendaDefinitionIds: "simple_agenda",
+      revealedAgendaDefinitionIds: 588,
       revealedCount: 1,
       gainedCredits: 1,
     });
@@ -1234,7 +1234,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       runnerPublicEvent?.publicPayload ?? {},
     );
     expect(runnerPublicEvent?.publicPayload).toMatchObject({
-      publicRevealDefinitionIds: "simple_agenda",
+      publicRevealDefinitionIds: 588,
       publicRevealTitles: "Simple Agenda",
       revealedCount: 1,
     });
@@ -1242,7 +1242,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       operationId,
     );
     expect(JSON.stringify(runnerPublicEvent?.publicPayload)).not.toContain(
-      "simple_economy_operation",
+      596,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -1260,7 +1260,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
           id: "v1917_corporate_negotiating_center_two_copies",
           name: "Corporate Negotiating Center Two Copies",
           cards: MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards.map((card) =>
-            card.id === "onr_v1_314_corporate-negotiating-center"
+            card.id === 526
               ? { ...card, quantity: 2 }
               : card,
           ),
@@ -1271,7 +1271,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     const centerIds = Object.entries(state.cardInstances)
       .filter(
         ([, card]) =>
-          card.definitionId === "onr_v1_314_corporate-negotiating-center",
+          card.definitionId === 526,
       )
       .map(([id]) => id as CardInstanceId);
     expect(centerIds).toHaveLength(2);
@@ -1292,8 +1292,8 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         rezzed: true,
       };
     }
-    const firstAgendaId = moveCorpCardToHq(state, "simple_agenda");
-    const secondAgendaId = moveCorpCardCopyToHq(state, "simple_agenda");
+    const firstAgendaId = moveCorpCardToHq(state, 588);
+    const secondAgendaId = moveCorpCardCopyToHq(state, 588);
     const creditsBefore = state.corp.credits;
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
@@ -1341,7 +1341,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     );
     const reschedulerId = moveCorpCardToHq(
       reorderState,
-      "onr_v1_336_rescheduler",
+      548,
     );
     reorderState = apply(
       reorderState,
@@ -1356,18 +1356,18 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(reorderState, action) === "onr_v1_336_rescheduler",
+        sourceDefinition(reorderState, action) === 548,
     );
     addRezzedCorpRootForTest(
       reorderState,
-      "onr_classic_025_strategic-planning-group",
+      29,
       "remote_2",
       "rescheduler_spg",
     );
-    const hqAgendaId = moveCorpCardToHq(reorderState, "simple_agenda");
+    const hqAgendaId = moveCorpCardToHq(reorderState, 588);
     const hqOperationId = moveCorpCardToHq(
       reorderState,
-      "simple_economy_operation",
+      596,
     );
     const hqCount = reorderState.corp.hq.length;
     const initial = structuredClone(reorderState);
@@ -1421,7 +1421,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     );
     state.corp.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const soloSquadId = moveCorpCardToHq(state, "onr_v1_342_solo-squad");
+    const soloSquadId = moveCorpCardToHq(state, 554);
     state = apply(
       state,
       "corp",
@@ -1435,7 +1435,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_342_solo-squad",
+        sourceDefinition(state, action) === 554,
     );
     expect(
       getLegalActions(state, "corp").some(
@@ -1483,7 +1483,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       resolvedEffects: [
         expect.objectContaining({
           kind: "damage",
-          sourceDefinitionId: "onr_v1_342_solo-squad",
+          sourceDefinitionId: 554,
         }),
       ],
     });
@@ -1505,9 +1505,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     );
     const corpTargetId = putCorpRootInRemote(
       cowboyState,
-      "onr_v1_309_bbs-whispering-campaign",
+      521,
     );
-    const cowboyId = moveCorpCardToHq(cowboyState, "onr_v1_316_cowboy-sysop");
+    const cowboyId = moveCorpCardToHq(cowboyState, 528);
     cowboyState = apply(
       cowboyState,
       "corp",
@@ -1521,7 +1521,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(cowboyState, action) === "onr_v1_316_cowboy-sysop",
+        sourceDefinition(cowboyState, action) === 528,
     );
     const cowboyInitial = structuredClone(cowboyState);
     const cowboyReplayStart = cowboyState.eventLog.length;
@@ -1566,7 +1566,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     );
     const virusTargetId = installRunnerProgramForTest(
       disinfectantState,
-      "simple_decoder",
+      591,
     );
     disinfectantState.cardInstances[virusTargetId] = {
       ...disinfectantState.cardInstances[virusTargetId]!,
@@ -1574,7 +1574,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     };
     const disinfectantId = moveCorpCardToHq(
       disinfectantState,
-      "onr_v1_319_disinfectant-inc",
+      531,
     );
     disinfectantState = apply(
       disinfectantState,
@@ -1590,7 +1590,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       (action) =>
         action.type === "rez_card" &&
         sourceDefinition(disinfectantState, action) ===
-          "onr_v1_319_disinfectant-inc",
+          531,
     );
     expect(
       getLegalActions(disinfectantState, "corp").some(
@@ -1606,12 +1606,12 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   it("triggers Setup! and TRAP! only from legal access windows without leaking hidden payloads", () => {
     const ambushes = [
       {
-        definitionId: "onr_v1_340_setup",
+        definitionId: 552,
         expectedTagsAdded: 0,
         damageAmount: 2,
       },
       {
-        definitionId: "onr_v1_345_trap",
+        definitionId: 557,
         expectedTagsAdded: 1,
         damageAmount: 3,
       },
@@ -1651,7 +1651,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       );
       state = passRootRezWindowBeforeAccessIfOpen(state);
       state = apply(state, "runner", (action) => action.type === "access_card");
-      if (definitionId === "onr_v1_345_trap") {
+      if (definitionId === 557) {
         expect(state.pendingChoice?.source).toContain("p3_35.access_payment");
         state = applyChoice(state, "corp", "pay");
       }
@@ -1696,7 +1696,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
     ).toBe("playable_mvp");
   });
 
@@ -1707,7 +1707,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state.corp.credits = 10;
     state.runner.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const upgradeId = moveCorpCardToHq(state, "onr_v1_354_crybaby");
+    const upgradeId = moveCorpCardToHq(state, 566);
     state = apply(
       state,
       "corp",
@@ -1722,7 +1722,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_354_crybaby",
+        sourceDefinition(state, action) === 566,
     );
 
     const remote = state.corp.servers.find((server) =>
@@ -1734,7 +1734,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       getPlayerView(state, "runner")
         .servers.find((server) => server.id === remote?.id)
         ?.root.find((card) => card.instanceId === upgradeId)?.definitionId,
-    ).toBe("onr_v1_354_crybaby");
+    ).toBe(566);
 
     let accessState = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.assetNodeEffects(
@@ -1744,7 +1744,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     accessState.runner.credits = 10;
     const accessedUpgradeId = putCorpRootInRemote(
       accessState,
-      "onr_v1_354_crybaby",
+      566,
     );
     accessState.cardInstances[accessedUpgradeId] = {
       ...accessState.cardInstances[accessedUpgradeId]!,
@@ -1764,7 +1764,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     );
     expect(accessState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "onr_v1_354_crybaby",
+      cardDefinitionId: 566,
     });
     expect(
       JSON.stringify(accessState.eventLog.at(-1)?.publicPayload),
@@ -1781,7 +1781,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         .servers.find((server) => server.id === "archives")
         ?.root.find((card) => card.instanceId === accessedUpgradeId)
         ?.definitionId,
-    ).toBe("onr_v1_354_crybaby");
+    ).toBe(566);
     expect(validateGameState(accessState).ok).toBe(true);
   });
 
@@ -1793,7 +1793,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     );
     state.runner.credits = 20;
     state.corp.credits = 20;
-    const crybabyId = putCorpRootInRemote(state, "onr_v1_354_crybaby");
+    const crybabyId = putCorpRootInRemote(state, 566);
     state.cardInstances[crybabyId] = {
       ...state.cardInstances[crybabyId]!,
       faceup: true,
@@ -1809,7 +1809,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(cardCounterAmount(state, state.runner.identity, "crying")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "onr_v1_354_crybaby",
+      cardDefinitionId: 566,
       hiddenZoneAction: "v1918_crybaby_access_counter",
       remainingCounters: 1,
     });
@@ -1823,7 +1823,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     setCardCounterForTest(traceState, traceState.runner.identity, "crying", 1);
     const turbeauId = putCorpRootInRemote(
       traceState,
-      "onr_v1_372_turbeau-delacroix",
+      584,
     );
     traceState.cardInstances[turbeauId] = {
       ...traceState.cardInstances[turbeauId]!,
@@ -1844,7 +1844,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     traceState = applyChoice(traceState, "corp", "bid_0");
     expect(traceState.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceStep: "corp_bid",
-      sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
+      sourceDefinitionId: 584,
       runnerLink: 0,
       cryingCounterCount: 1,
       cryingLinkReduction: 2,
@@ -1874,13 +1874,13 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
   it("resolves V1.9.18 upgrade access ambush damage without public hidden-info leaks", () => {
     const cases = [
       {
-        definitionId: "onr_v1_356_dedicated-response-team",
+        definitionId: 568,
         damageType: "meat",
         damageAmount: 3,
         startingTags: 1,
       },
       {
-        definitionId: "onr_v1_357_dieter-esslin",
+        definitionId: 569,
         damageType: "net",
         damageAmount: 1,
         startingTags: 0,
@@ -1953,7 +1953,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state.runner.tags = 0;
     const upgradeId = putCorpRootInRemote(
       state,
-      "onr_v1_356_dedicated-response-team",
+      568,
     );
     state.cardInstances[upgradeId] = {
       ...state.cardInstances[upgradeId]!,
@@ -1975,7 +1975,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(state.runner.tags).toBe(0);
     expect(state.runner.grip.length).toBe(gripBefore);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      ambushDefinitionId: "onr_v1_356_dedicated-response-team",
+      ambushDefinitionId: 568,
       tagConditionMet: false,
       damageSkippedReason: "runner_not_tagged",
     });
@@ -1992,7 +1992,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state.runner.credits = 5;
     const upgradeId = putCorpRootInRemote(
       state,
-      "onr_v1_372_turbeau-delacroix",
+      584,
     );
     state.cardInstances[upgradeId] = {
       ...state.cardInstances[upgradeId]!,
@@ -2013,7 +2013,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(state.trace).toMatchObject({
       status: "corp_bid",
       traceLimit: 10,
-      sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
+      sourceDefinitionId: 584,
       returnPhase: "run",
       returnTimingPoint: "access.resolve_card",
       returnActiveSide: "runner",
@@ -2023,10 +2023,10 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
       traceStarted: true,
-      sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
+      sourceDefinitionId: 584,
       hiddenZoneBarrier: true,
       hiddenZoneAction: "v1918_upgrade_access_trace",
-      ambushDefinitionId: "onr_v1_372_turbeau-delacroix",
+      ambushDefinitionId: 584,
       oncePerRunConsumed: true,
       traceLimit: 10,
     });
@@ -2058,8 +2058,8 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-red-herrings-steal-tax"),
     );
     state.runner.credits = 7;
-    const redHerringsId = putCorpRootInRemote(state, "onr_v1_366_red-herrings");
-    const agendaId = putCorpRootInRemote(state, "simple_agenda");
+    const redHerringsId = putCorpRootInRemote(state, 578);
+    const agendaId = putCorpRootInRemote(state, 588);
     state.cardInstances[redHerringsId] = {
       ...state.cardInstances[redHerringsId]!,
       faceup: true,
@@ -2088,7 +2088,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(stealAction?.payload).toMatchObject({
       stealCost: 5,
       stealAdditionalCost: 5,
-      stealCostSourceDefinitionIds: "onr_v1_366_red-herrings",
+      stealCostSourceDefinitionIds: 578,
       stealCostSourceTitles: "Red Herrings",
     });
     expect(declineStealAction).toMatchObject({
@@ -2098,7 +2098,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         cardId: agendaId,
         stealCost: 5,
         stealAdditionalCost: 5,
-        stealCostSourceDefinitionIds: "onr_v1_366_red-herrings",
+        stealCostSourceDefinitionIds: 578,
       },
     });
 
@@ -2154,7 +2154,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       actionType: "steal_agenda",
       stealCost: 5,
       stealAdditionalCost: 5,
-      stealCostSourceDefinitionIds: "onr_v1_366_red-herrings",
+      stealCostSourceDefinitionIds: 578,
     });
     expect(validateGameState(state).ok).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -2167,8 +2167,8 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       MECHANIC_SMOKE_GAMES.assetNodeEffects("p311-red-herrings-scope"),
     );
     state.runner.credits = 4;
-    const redHerringsId = putCorpRootInRemote(state, "onr_v1_366_red-herrings");
-    putCorpRootInRemote(state, "simple_agenda");
+    const redHerringsId = putCorpRootInRemote(state, 578);
+    putCorpRootInRemote(state, 588);
     state.cardInstances[redHerringsId] = {
       ...state.cardInstances[redHerringsId]!,
       faceup: true,
@@ -2199,8 +2199,8 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     let unrezzed = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.assetNodeEffects("p311-red-herrings-unrezzed"),
     );
-    const unrezzedId = putCorpRootInRemote(unrezzed, "onr_v1_366_red-herrings");
-    putCorpRootInRemote(unrezzed, "simple_agenda");
+    const unrezzedId = putCorpRootInRemote(unrezzed, 578);
+    putCorpRootInRemote(unrezzed, 588);
     unrezzed.cardInstances[unrezzedId] = {
       ...unrezzed.cardInstances[unrezzedId]!,
       faceup: false,
@@ -2236,13 +2236,13 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     let otherFort = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.assetNodeEffects("p311-red-herrings-other-fort"),
     );
-    const otherId = putCorpRootInRemote(otherFort, "onr_v1_366_red-herrings");
+    const otherId = putCorpRootInRemote(otherFort, 578);
     otherFort.cardInstances[otherId] = {
       ...otherFort.cardInstances[otherId]!,
       faceup: true,
       rezzed: true,
     };
-    const agendaId = moveCorpCardToHq(otherFort, "simple_agenda");
+    const agendaId = moveCorpCardToHq(otherFort, 588);
     keepOnlyCorpHqCard(otherFort, agendaId);
     otherFort = apply(
       otherFort,
@@ -2272,7 +2272,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const firstGridId = moveCorpCardToHq(
       state,
-      "onr_v1_355_crystal-palace-station-grid",
+      567,
     );
     state = apply(
       state,
@@ -2284,7 +2284,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         action.payload?.placement === "root",
     );
 
-    const secondGridId = moveCorpCardToHq(state, "onr_v1_365_paris-city-grid");
+    const secondGridId = moveCorpCardToHq(state, 577);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     const replacementAction = mustAction(
@@ -2317,15 +2317,15 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       getPlayerView(state, "runner")
         .servers.find((server) => server.id === "archives")
         ?.root.find((card) => card.instanceId === firstGridId)?.definitionId,
-    ).toBe("onr_v1_355_crystal-palace-station-grid");
+    ).toBe(567);
     const replacementEvent = state.eventLog.at(-1);
     expect(replacementEvent?.publicPayload.resolvedEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           kind: "trash_card",
           reason: "region_limit",
-          sourceDefinitionId: "onr_v1_365_paris-city-grid",
-          cardDefinitionId: "onr_v1_355_crystal-palace-station-grid",
+          sourceDefinitionId: 577,
+          cardDefinitionId: 567,
           cardTitle: "Crystal Palace Station Grid",
         }),
       ]),
@@ -2344,7 +2344,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const firstGridId = moveCorpCardToHq(
       state,
-      "onr_v1_355_crystal-palace-station-grid",
+      567,
     );
     state = apply(
       state,
@@ -2361,7 +2361,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       rezzed: false,
     };
 
-    const secondGridId = moveCorpCardToHq(state, "onr_v1_365_paris-city-grid");
+    const secondGridId = moveCorpCardToHq(state, 577);
     const replacementAction = mustAction(
       state,
       "corp",
@@ -2382,13 +2382,13 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(state.corp.archives).toContain(firstGridId);
     const eventText = JSON.stringify(state.eventLog.at(-1)?.publicPayload);
     expect(eventText).not.toContain("Crystal Palace Station Grid");
-    expect(eventText).not.toContain("onr_v1_355_crystal-palace-station-grid");
+    expect(eventText).not.toContain(567);
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           kind: "trash_card",
           reason: "region_limit",
-          sourceDefinitionId: "onr_v1_365_paris-city-grid",
+          sourceDefinitionId: 577,
           redactedKind: "installed_card",
         }),
       ]),
@@ -2398,10 +2398,10 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
   it("applies the generic region install baseline for P3.12 city grids", () => {
     const p312Ids = new Set([
-      "onr_v1_360_jerusalem-city-grid",
-      "onr_v1_362_new-galveston-city-grid",
-      "onr_v1_374_washington-d-c-city-grid",
-      "simple_upgrade",
+      572,
+      574,
+      586,
+      606,
     ]);
     let state = createGameAfterSetup({
       seed: "p312-region-baseline",
@@ -2411,10 +2411,10 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         id: "p312_region_baseline_corp",
         name: "P3.12 Region Baseline Corp",
         cards: [
-          { id: "onr_v1_360_jerusalem-city-grid", quantity: 1 },
-          { id: "onr_v1_362_new-galveston-city-grid", quantity: 1 },
-          { id: "onr_v1_374_washington-d-c-city-grid", quantity: 1 },
-          { id: "simple_upgrade", quantity: 1 },
+          { id: 572, quantity: 1 },
+          { id: 574, quantity: 1 },
+          { id: 586, quantity: 1 },
+          { id: 606, quantity: 1 },
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
             (entry) => !p312Ids.has(entry.id),
           ),
@@ -2424,7 +2424,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const jerusalemId = moveCorpCardToHq(
       state,
-      "onr_v1_360_jerusalem-city-grid",
+      572,
     );
     state.corp.credits = 1;
     expect(
@@ -2458,7 +2458,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
     });
 
-    const nonRegionId = moveCorpCardToHq(state, "simple_upgrade");
+    const nonRegionId = moveCorpCardToHq(state, 606);
     expect(
       mustAction(
         state,
@@ -2473,7 +2473,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state.corp.credits = 7;
     const washingtonId = moveCorpCardToHq(
       state,
-      "onr_v1_374_washington-d-c-city-grid",
+      586,
     );
     const replaceWithWashington = mustAction(
       state,
@@ -2500,7 +2500,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state.corp.credits = 1;
     const newGalvestonId = moveCorpCardToHq(
       state,
-      "onr_v1_362_new-galveston-city-grid",
+      574,
     );
     const installOtherFortRegion = mustAction(
       state,
@@ -2532,13 +2532,13 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state.corp.credits = 10;
     state.runner.tags = 1;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const drDreffId = putCorpRootInRemote(state, "onr_v1_358_dr-dreff");
-    const parisId = putCorpRootInRemote(state, "onr_v1_365_paris-city-grid");
+    const drDreffId = putCorpRootInRemote(state, 570);
+    const parisId = putCorpRootInRemote(state, 577);
     const galvestonId = putCorpRootInRemote(
       state,
-      "onr_v1_362_new-galveston-city-grid",
+      574,
     );
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    putCorpCardOnTopOfRd(state, 596);
     for (const upgradeId of [drDreffId, parisId, galvestonId]) {
       state.cardInstances[upgradeId] = {
         ...state.cardInstances[upgradeId]!,
@@ -2590,7 +2590,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
           ...ONR_V1_6_2_RUNNER_DECK,
           cards: [
             ...ONR_V1_6_2_RUNNER_DECK.cards,
-            { id: "simple_decoder", quantity: 1 },
+            { id: 591, quantity: 1 },
           ],
         },
         corpDeck: {
@@ -2598,13 +2598,13 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
           cards: [
             ...ONR_V1_6_2_CORP_DECK.cards,
             {
-              id: "onr_v1_355_crystal-palace-station-grid",
+              id: 567,
               quantity: 1,
             },
             ...(withTesseract
               ? [
                   {
-                    id: "onr_v1_370_tesseract-fort-construction",
+                    id: 582,
                     quantity: 1,
                   },
                 ]
@@ -2622,7 +2622,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       state.runner.credits = 20;
       const crystalId = putCorpRootInRemote(
         state,
-        "onr_v1_355_crystal-palace-station-grid",
+        567,
       );
       state.cardInstances[crystalId] = {
         ...state.cardInstances[crystalId]!,
@@ -2632,7 +2632,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       if (withTesseract) {
         const tesseractId = putCorpRootInRemote(
           state,
-          "onr_v1_370_tesseract-fort-construction",
+          582,
         );
         state.cardInstances[tesseractId] = {
           ...state.cardInstances[tesseractId]!,
@@ -2640,10 +2640,10 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
           rezzed: true,
         };
       }
-      putCorpIceOnServer(state, targetServerId, "onr_v1_230_cortical-scanner");
+      putCorpIceOnServer(state, targetServerId, 442);
       state = toRunnerTurnFromCorpMain(state);
       state.runner.credits = 20;
-      const decoderId = moveRunnerCardToGrip(state, "simple_decoder");
+      const decoderId = moveRunnerCardToGrip(state, 591);
       state = apply(
         state,
         "runner",
@@ -2666,7 +2666,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         "runner",
         (action) =>
           action.type === "pump_breaker" &&
-          sourceDefinition(state, action) === "simple_decoder",
+          sourceDefinition(state, action) === 591,
       );
       return { state, crystalId };
     };
@@ -2679,7 +2679,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     const breakActions = getLegalActions(sameFort, "runner").filter(
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(sameFort, action) === "simple_decoder",
+        sourceDefinition(sameFort, action) === 591,
     );
     expect(breakActions).toHaveLength(3);
     expect(breakActions.map((action) => action.costs)).toEqual([
@@ -2693,7 +2693,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       breakSubroutineTotalCost: 2,
       breakSubroutineCostPerSubroutine: 1,
       breakSubroutineCostSourceDefinitionIds:
-        "onr_v1_355_crystal-palace-station-grid",
+        567,
       breakSubroutineCostSourceTitles: "Crystal Palace Station Grid",
     });
     expect(JSON.stringify(breakActions[0]?.payload)).not.toContain(crystalId);
@@ -2734,7 +2734,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         "runner",
         (action) =>
           action.type === "break_subroutine" &&
-          sourceDefinition(otherFort, action) === "simple_decoder",
+          sourceDefinition(otherFort, action) === 591,
       ).costs,
     ).toEqual([{ credits: 1 }]);
 
@@ -2749,7 +2749,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         "runner",
         (action) =>
           action.type === "break_subroutine" &&
-          sourceDefinition(unrezzed, action) === "simple_decoder",
+          sourceDefinition(unrezzed, action) === 591,
       ).costs,
     ).toEqual([{ credits: 1 }]);
 
@@ -2765,7 +2765,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         "runner",
         (action) =>
           action.type === "break_subroutine" &&
-          sourceDefinition(tesseractState, action) === "simple_decoder" &&
+          sourceDefinition(tesseractState, action) === 591 &&
           action.payload?.subroutineIndex === subroutineIndex,
       );
     }
@@ -2775,15 +2775,15 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         "runner",
         (action) =>
           action.type === "break_subroutine" &&
-          sourceDefinition(tesseractState, action) === "simple_decoder",
+          sourceDefinition(tesseractState, action) === 591,
       ).costs,
     ).toEqual([{ credits: 2 }]);
   });
 
   it("uses the generic region install baseline for Crystal Palace Station Grid", () => {
     const p316Ids = new Set([
-      "onr_v1_355_crystal-palace-station-grid",
-      "onr_v1_360_jerusalem-city-grid",
+      567,
+      572,
     ]);
     let state = createGameAfterSetup({
       seed: "p316-crystal-region-baseline",
@@ -2793,8 +2793,8 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         id: "p316_crystal_region_corp",
         name: "P3.16 Crystal Region Corp",
         cards: [
-          { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
-          { id: "onr_v1_360_jerusalem-city-grid", quantity: 1 },
+          { id: 567, quantity: 1 },
+          { id: 572, quantity: 1 },
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
             (entry) => !p316Ids.has(entry.id),
           ),
@@ -2804,7 +2804,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const crystalId = moveCorpCardToHq(
       state,
-      "onr_v1_355_crystal-palace-station-grid",
+      567,
     );
     state.corp.credits = 4;
     expect(
@@ -2818,7 +2818,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state.corp.credits = 7;
     const jerusalemId = moveCorpCardToHq(
       state,
-      "onr_v1_360_jerusalem-city-grid",
+      572,
     );
     state = apply(
       state,
@@ -2867,23 +2867,23 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
           id: "p316_crystal_pile_driver_runner",
           name: "P3.16 Crystal Pile Driver Runner",
           side: "runner",
-          identity: "runner_identity_001",
+          identity: 587,
           cards: [
-            { id: "onr_v1_047_pile-driver", quantity: 1 },
-            { id: "onr_v1_011_cloak", quantity: 1 },
-            { id: "simple_economy_event", quantity: 10 },
+            { id: 259, quantity: 1 },
+            { id: 223, quantity: 1 },
+            { id: 595, quantity: 10 },
           ],
         },
         corpDeck: {
           id: "p316_crystal_pile_driver_corp",
           name: "P3.16 Crystal Pile Driver Corp",
           side: "corp",
-          identity: "corp_identity_001",
+          identity: 3,
           cards: [
-            { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
-            { id: "onr_v1_278_wall-of-ice", quantity: 1 },
-            { id: "simple_agenda", quantity: 6 },
-            { id: "simple_economy_operation", quantity: 6 },
+            { id: 567, quantity: 1 },
+            { id: 490, quantity: 1 },
+            { id: 588, quantity: 6 },
+            { id: 596, quantity: 6 },
           ],
         },
         agendaPointsToWin: 7,
@@ -2893,20 +2893,20 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state.corp.credits = 20;
     const crystalId = putCorpRootInRemote(
       state,
-      "onr_v1_355_crystal-palace-station-grid",
+      567,
     );
     state.cardInstances[crystalId] = {
       ...state.cardInstances[crystalId]!,
       faceup: true,
       rezzed: true,
     };
-    installRunnerProgramForTest(state, "onr_v1_047_pile-driver");
-    const cloakId = installRunnerProgramForTest(state, "onr_v1_011_cloak");
+    installRunnerProgramForTest(state, 259);
+    const cloakId = installRunnerProgramForTest(state, 223);
     setCardCounterForTest(state, cloakId, "bit", 3);
     const iceId = putCorpIceOnServer(
       state,
       "remote_1",
-      "onr_v1_278_wall-of-ice",
+      490,
     );
 
     state = apply(
@@ -2936,14 +2936,14 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       breakSubroutineTotalCost: 7,
       breakSubroutineCostPerSubroutine: 1,
       breakSubroutineCostSourceDefinitionIds:
-        "onr_v1_355_crystal-palace-station-grid",
+        567,
     });
   });
 
   it("applies Washington D.C. City Grid as a same-fort agenda_difficulty modifier", () => {
     const p312Ids = new Set([
-      "onr_v1_374_washington-d-c-city-grid",
-      "simple_agenda",
+      586,
+      588,
     ]);
     let state = createGameAfterSetup({
       seed: "p312-washington-difficulty",
@@ -2953,8 +2953,8 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         id: "p312_washington_corp",
         name: "P3.12 Washington Corp",
         cards: [
-          { id: "onr_v1_374_washington-d-c-city-grid", quantity: 1 },
-          { id: "simple_agenda", quantity: 1 },
+          { id: 586, quantity: 1 },
+          { id: 588, quantity: 1 },
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
             (entry) => !p312Ids.has(entry.id),
           ),
@@ -2966,9 +2966,9 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state.corp.clicks = 10;
     const washingtonId = putCorpRootInRemote(
       state,
-      "onr_v1_374_washington-d-c-city-grid",
+      586,
     );
-    const agendaId = putCorpRootInRemote(state, "simple_agenda");
+    const agendaId = putCorpRootInRemote(state, 588);
     const printedDifficulty =
       CARD_DEFINITIONS_BY_ID.simple_agenda?.advancementRequirement ?? 0;
     state.cardInstances[agendaId] = {
@@ -3002,7 +3002,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       collectActiveModifiers(state).filter(
         (modifier) =>
           modifier.kind === "agenda_difficulty" &&
-          modifier.sourceDefinitionId === "onr_v1_374_washington-d-c-city-grid",
+          modifier.sourceDefinitionId === 586,
       ),
     ).toEqual(
       expect.arrayContaining([
@@ -3063,7 +3063,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     traceState.runner.credits = 0;
     const parisId = putCorpRootInRemote(
       traceState,
-      "onr_v1_365_paris-city-grid",
+      577,
     );
     traceState.cardInstances[parisId] = {
       ...traceState.cardInstances[parisId]!,
@@ -3073,7 +3073,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     };
     const turbeauId = putCorpRootInRemote(
       traceState,
-      "onr_v1_372_turbeau-delacroix",
+      584,
     );
     traceState.cardInstances[turbeauId] = {
       ...traceState.cardInstances[turbeauId]!,
@@ -3102,7 +3102,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       status: "corp_bid",
       traceLimit: 10,
       corpBidMax: 8,
-      sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
+      sourceDefinitionId: 584,
       fortTraceBitPoolSourceCardInstanceId: parisId,
       fortTraceBitPoolServerId: "remote_1",
     });
@@ -3133,7 +3133,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     runState.runner.credits = 20;
     const surveillanceId = putCorpRootInRemote(
       runState,
-      "onr_v1_373_twenty-four-hour-surveillance",
+      585,
     );
     runState.cardInstances[surveillanceId] = {
       ...runState.cardInstances[surveillanceId]!,
@@ -3142,17 +3142,17 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     };
     const breakerId = addInstalledRunnerProgramForTest(
       runState,
-      "onr_v1_014_codecracker",
+      226,
       "stealth_block_codecracker",
     );
     const stealthId = addInstalledRunnerProgramForTest(
       runState,
-      "onr_v1_035_invisibility",
+      247,
       "stealth_block_invisibility",
     );
     addRezzedCorpIceForTest(
       runState,
-      "onr_v1_261_quandary",
+      473,
       "remote_1",
       "stealth_block_quandary",
     );

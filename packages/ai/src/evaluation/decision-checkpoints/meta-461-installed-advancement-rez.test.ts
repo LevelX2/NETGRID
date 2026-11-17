@@ -32,9 +32,9 @@ it("rezzes installed advancement support as the exact first step of the winning 
   const decision = chooseAiAction(x);
   const action = x.legalActions.find((a) => a.actionId === decision.actionId)!;
   expect(action.type).toBe("rez_card");
-  expect(action.source).toBe("corp_onr_v1_312_chicago-branch_2");
+  expect(action.source).toBe("corp_524_2");
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_2%3Aremote_2",
+    "plan:corp.score_agenda:agenda%3Acorp_406_2%3Aremote_2",
   );
   expect(decision.fallbackUsed).toBe(false);
 });

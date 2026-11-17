@@ -15,7 +15,7 @@ describe("projectRunnerRunActions", () => {
         type: "trigger_ability",
         source: "decoy",
         payload: {
-          sourceDefinitionId: "onr_proteus_104_decoy-signal",
+          sourceDefinitionId: 162,
           cardId: "decoy",
           iceId: "hidden",
           serverId: "remote_1",
@@ -27,7 +27,7 @@ describe("projectRunnerRunActions", () => {
         type: "play_event",
         source: "decoy",
         payload: {
-          sourceDefinitionId: "onr_proteus_104_decoy-signal",
+          sourceDefinitionId: 162,
           cardId: "decoy",
           serverId: "remote_1",
           runnerEventRun: true,
@@ -82,7 +82,7 @@ describe("projectRunnerRunActions", () => {
       source: "lucidrine-instance",
       payload: {
         cardId: "lucidrine-instance",
-        sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+        sourceDefinitionId: 310,
         serverId: "rd",
         runnerEventRun: true,
         runTemporaryCredits: 9,
@@ -108,7 +108,7 @@ describe("projectRunnerRunActions", () => {
       source: "shipping-manifest-instance",
       payload: {
         cardId: "shipping-manifest-instance",
-        sourceDefinitionId: "onr_v1_084_edited-shipping-manifests",
+        sourceDefinitionId: 296,
         serverId: "hq",
         runnerEventRun: true,
         cardImplementationAbilityKey: "abilities_on_play_make_run",
@@ -185,7 +185,7 @@ describe("projectRunnerRunActions", () => {
       type: "install_card",
       payload: {
         cardId: "hq-interface",
-        sourceDefinitionId: "onr_v1_129_hq-interface",
+        sourceDefinitionId: 341,
         runActionSignals: ["hq_run"],
         serverId: "hq",
       },
@@ -533,7 +533,7 @@ describe("projectRunnerRunActions", () => {
       payload: {
         serverId: "rd",
         bonusRunNoClick: true,
-        bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+        bonusRunSource: 335,
       },
     });
     const decline = action({
@@ -542,7 +542,7 @@ describe("projectRunnerRunActions", () => {
       source: "bodyweight_1",
       payload: {
         cardId: "bodyweight_1",
-        sourceDefinitionId: "onr_v1_123_bodyweight-data-creche",
+        sourceDefinitionId: 335,
         runnerAbility: "decline_successful_run_extra_run",
         successfulRunExtraRunDecision: "decline",
       },
@@ -570,7 +570,7 @@ describe("projectRunnerRunActions", () => {
       source: "private-ldl-instance",
       payload: {
         cardId: "private-ldl-instance",
-        sourceDefinitionId: "onr_v1_106_private-ldl-access",
+        sourceDefinitionId: 318,
         serverId: "hq",
       },
     });

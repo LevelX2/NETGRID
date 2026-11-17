@@ -58,7 +58,7 @@ function decide(cp: ReturnType<typeof load>) {
 afterEach(resetResidentPlanPortfolioMemory);
 it.each([
   ["g1d9", "corp.decline_rez"],
-  ["g4d81", "corp.rez_ice.corp_onr_v1_277_virizz_3.corp_onr_v1_277_virizz_3"],
+  ["g4d81", "corp.rez_ice.corp_489_3.corp_489_3"],
 ])("keeps current native future-effect ownership for %s", (key, actionId) =>
   expect(decide(load(key)).actionId).toBe(actionId),
 );
@@ -69,7 +69,7 @@ it("uses the public actual HQ access destination on the physical Archives path a
   expect(decide(original).actionId).toBe("corp.decline_rez");
   const decision = decide(cp);
   expect(decision.actionId).toBe(
-    "corp.rez_ice.corp_onr_v1_252_keeper_2.corp_onr_v1_252_keeper_2",
+    "corp.rez_ice.corp_464_2.corp_464_2",
   );
   let state = load("g29d316-engine") as GameState;
   expect(hashGameState(state)).toBe(cp.stateHash);
@@ -121,14 +121,14 @@ it("binds possible off-server paths to real current own agenda exposure, without
   const action = positive.legalActions.find(
     (a: { actionId: string }) =>
       a.actionId ===
-      "corp.install_card.corp_onr_v1_250_ice-pick-willie_1.archives.corp_onr_v1_250_ice-pick-willie_1.2",
+      "corp.install_card.corp_462_1.archives.corp_462_1.2",
   );
   const candidate = buildActionSemanticCandidates({
     legalActions: [action],
     observerSide: "corp",
     stateVersion: positive.playerView.stateVersion,
     visibleSourceDefinitionsByInstanceId: {
-      [action.source]: "onr_v1_250_ice-pick-willie",
+      [action.source]: 462,
     },
   })[0]!;
   const assess = (input: typeof positive) =>

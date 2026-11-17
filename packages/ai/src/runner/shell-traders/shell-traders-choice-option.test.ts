@@ -181,7 +181,7 @@ function shellChoiceInput(params: {
   } as unknown as AiDecisionInput;
 }
 
-function program(instanceId: string, definitionId: string, memoryCost: number) {
+function program(instanceId: string, definitionId: number, memoryCost: number) {
   return {
     instanceId,
     definitionId,
@@ -192,7 +192,7 @@ function program(instanceId: string, definitionId: string, memoryCost: number) {
   };
 }
 
-function hardware(instanceId: string, definitionId: string) {
+function hardware(instanceId: string, definitionId: number) {
   return {
     instanceId,
     definitionId,
@@ -202,7 +202,7 @@ function hardware(instanceId: string, definitionId: string) {
   };
 }
 
-function roles(definitionId: string | undefined): readonly string[] {
+function roles(definitionId: number | undefined): readonly string[] {
   switch (definitionId) {
     case "decoder":
       return ["breaker_decoder"];

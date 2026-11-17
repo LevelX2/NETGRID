@@ -26,7 +26,7 @@ type DevelopmentLine = {
   cardInstanceIds: readonly string[];
 };
 type DevelopmentOption = {
-  definitionId: string;
+  definitionId: number;
   copies: number;
   missingRole: "tag" | "damage";
   line: DevelopmentLine;
@@ -106,7 +106,7 @@ export function prepareCorpPunishHandAssessment(input: AiDecisionInput) {
     turnSerial === undefined ? undefined : turnSerial - 1,
   );
   const operationCache = new Map<string, Operations>();
-  function operations(definitionId: string): Operations {
+  function operations(definitionId: number): Operations {
     const cached = operationCache.get(definitionId);
     if (cached) return cached;
     const tag = fixedTagOperation(definitionId);

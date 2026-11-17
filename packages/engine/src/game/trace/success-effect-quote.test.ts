@@ -6,11 +6,11 @@ describe("traceSuccessEffectCardImplementationQuotesForDefinition", () => {
   it("quotes the public margin-based operation effect without reducing it to a fixed tag", () => {
     expect(
       traceSuccessEffectCardImplementationQuotesForDefinition(
-        "onr_proteus_050_manhunt",
+        108,
       ),
     ).toEqual([
       {
-        sourceDefinitionId: "onr_proteus_050_manhunt",
+        sourceDefinitionId: 108,
         traceLimit: 6,
         traceSuccessEffect: {
           type: "add_tags_by_trace_margin_over_runner_link",
@@ -21,11 +21,11 @@ describe("traceSuccessEffectCardImplementationQuotesForDefinition", () => {
   it("quotes a public dynamic trace tag effect", () => {
     expect(
       traceSuccessEffectCardImplementationQuotesForDefinition(
-        "onr_proteus_026_hunting-pack",
+        84,
       ),
     ).toEqual([
       {
-        sourceDefinitionId: "onr_proteus_026_hunting-pack",
+        sourceDefinitionId: 84,
         traceLimit: 5,
         traceSuccessEffect: { type: "add_tag", amount: 1 },
       },
@@ -34,10 +34,10 @@ describe("traceSuccessEffectCardImplementationQuotesForDefinition", () => {
 
   it("quotes a public printed trace effect", () => {
     expect(
-      traceSuccessEffectCardImplementationQuotesForDefinition("onr_v1_264_rex"),
+      traceSuccessEffectCardImplementationQuotesForDefinition(476),
     ).toEqual([
       {
-        sourceDefinitionId: "onr_v1_264_rex",
+        sourceDefinitionId: 476,
         traceLimit: 3,
         traceSuccessEffect: {
           type: "end_run_and_run_lock",
@@ -50,11 +50,11 @@ describe("traceSuccessEffectCardImplementationQuotesForDefinition", () => {
   it("quotes a public declarative operation trace effect", () => {
     expect(
       traceSuccessEffectCardImplementationQuotesForDefinition(
-        "onr_v1_284_chance-observation",
+        496,
       ),
     ).toEqual([
       {
-        sourceDefinitionId: "onr_v1_284_chance-observation",
+        sourceDefinitionId: 496,
         traceLimit: 5,
         traceSuccessEffect: { type: "add_tag", amount: 1 },
       },

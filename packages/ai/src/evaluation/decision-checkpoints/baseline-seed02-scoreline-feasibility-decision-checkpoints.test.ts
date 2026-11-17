@@ -84,7 +84,7 @@ describe("baseline Seed 02 shared scoreline feasibility checkpoints", () => {
       currentClicks: 3,
       currentTurnClosableActionIds: [],
     });
-    expect(result.selectedAction?.source).toBe("corp_onr_v1_310_blood-cat_2");
+    expect(result.selectedAction?.source).toBe("corp_522_2");
 
     const lastDrawInput = structuredClone(result.input);
     lastDrawInput.playerView.opponent.agendaPoints = 0;
@@ -126,7 +126,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
 function syntheticAgenda(): VisibleCard {
   return {
     instanceId: "synthetic-one-advance-agenda",
-    definitionId: "onr_v1_191_black-ice-quality-assurance",
+    definitionId: 403,
     known: true,
     type: "agenda",
     owner: "corp",

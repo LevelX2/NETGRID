@@ -5,7 +5,7 @@ export type SemanticActionSignature = {
   actionType: string;
   semanticActionType: string;
   sourceKind: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   abilityId?: string;
   targetIdentity: string;
   costClass: string;
@@ -19,7 +19,7 @@ export type SemanticActionSignatureInput = {
   actionType: string;
   semanticActionType?: string;
   sourceKind?: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   abilityId?: string;
   targetIdentity?: string;
   costClass?: string;

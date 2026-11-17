@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_085_executive-wiretaps"),
+    cardDefinitionId: cardDefinitionId(297),
     title: "Executive Wiretaps",
     side: "runner",
     cardType: "event",

@@ -146,7 +146,7 @@ it("keeps the native positive Core path payable while funding the following ordi
     type: "play_event",
     payload: {
       cardImplementationAbilityId:
-        "onr_v1_108_score:abilities_on_play_gain_credits",
+        "320:abilities_on_play_gain_credits",
     },
   });
   expect(pf.selectedPlan?.moduleId).toBe("runner.economy");
@@ -240,7 +240,7 @@ it("feeds the native Corp defense owner complete public fixed-credit post-rez qu
     before = hashGameState(state);
   const ice = getPlayerView(state, "corp")
     .servers.find((s) => s.id === "remote_1")!
-    .ice.find((i) => i.definitionId === "onr_proteus_038_snowbank")!;
+    .ice.find((i) => i.definitionId === 96)!;
   expect(ice.effectivePostRezRunQuote).toMatchObject({
     complete: true,
     expiresAtStateVersion: state.stateVersion,
@@ -249,7 +249,7 @@ it("feeds the native Corp defense owner complete public fixed-credit post-rez qu
   const { d, pf } = decide(input);
   expect(pf.selectedPlan?.moduleId).toBe("corp.defend_servers");
   expect(d.actionId).toContain(
-    "corp.install_card.corp_onr_proteus_045_washed-up-solo-construct_2.rd.",
+    "corp.install_card.corp_103_2.rd.",
   );
   expect(
     apply(state, "corp", d.actionId!, d.selectedChoices).stateVersion,

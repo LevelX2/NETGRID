@@ -70,14 +70,14 @@ it("fails closed on missing current effect facts instead of silently declining",
   expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
 });
 
-it.each<{ definitionId: string; types: SubroutineType[]; useIce: boolean }>([
+it.each<{ definitionId: number; types: SubroutineType[]; useIce: boolean }>([
   {
-    definitionId: "onr_proteus_016_coyote",
+    definitionId: 74,
     types: ["set_run_future_strength_bonus"],
     useIce: false,
   },
   {
-    definitionId: "onr_v1_223_banpei",
+    definitionId: 435,
     types: ["trash_installed_program", "end_the_run"],
     useIce: true,
   },

@@ -57,7 +57,7 @@ describe("applyTagEffectSemantics", () => {
 });
 
 function semanticCandidate(
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
 ): ActionSemanticCandidate {
   return {
     sourceDefinitionId,

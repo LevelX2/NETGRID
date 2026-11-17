@@ -8,7 +8,7 @@ const hintById = new Map(hints.map((hint) => [hint.cardId, hint]));
 
 describe("static AI hint semantics", () => {
   it("keeps private fixture edits out of the canonical hint catalog", () => {
-    const cardId = "onr_v1_129_hq-interface";
+    const cardId = 341;
     const copy = createAiHintsByCard();
 
     expect(copy.delete(cardId)).toBe(true);
@@ -22,8 +22,8 @@ describe("static AI hint semantics", () => {
   });
 
   it("stores tactic signals and strategy anchors directly on the card", () => {
-    const hqInterface = hintById.get("onr_v1_129_hq-interface");
-    const rex = hintById.get("onr_v1_264_rex");
+    const hqInterface = hintById.get(341);
+    const rex = hintById.get(476);
 
     expect(hqInterface?.functionSignals).toContain("access.hq_multiaccess");
     expect(hqInterface?.strategyAnchors).toContain("runner.hq_pressure");
@@ -37,19 +37,19 @@ describe("static AI hint semantics", () => {
 
   it("feeds action semantics from the same static fields", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
-    const hqInterface = profiles["onr_v1_129_hq-interface"];
+    const hqInterface = profiles[341];
 
     expect(hqInterface?.tacticSignals).toEqual(
-      hintById.get("onr_v1_129_hq-interface")?.actionTacticSignals,
+      hintById.get(341)?.actionTacticSignals,
     );
     expect(hqInterface?.strategySupport).toEqual([]);
   });
 
   it("keeps the ETR compatibility and effect semantics of the audited ICE", () => {
     for (const cardId of [
-      "onr_v1_232_crystal-wall",
-      "onr_v1_252_keeper",
-      "onr_v1_261_quandary",
+      444,
+      464,
+      473,
     ]) {
       const hint = hintById.get(cardId);
       expect(hint?.tacticSignals).toContain("corp_ice.end_run");

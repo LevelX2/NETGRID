@@ -133,7 +133,7 @@ describe("Deck strategy runtime vertical slices", () => {
 
   it("does not invent tag-punish payoff or a speculative agenda-search window [legacy_compare]", () => {
     const closedAccounts = visibleCard("closed-accounts", "corp", "operation", {
-      definitionId: "onr_v1_285_closed-accounts",
+      definitionId: 497,
       title: "Closed Accounts",
     });
     const punish = legalAction(
@@ -203,7 +203,7 @@ describe("Deck strategy runtime vertical slices", () => {
 
   it("keeps Corp scoreline terminal windows above an unfunded contestable project [legacy_compare]", () => {
     const scoringAgenda = visibleCard("scoring-agenda", "corp", "agenda", {
-      definitionId: "simple_agenda",
+      definitionId: 588,
       title: "Simple Agenda",
       advancementRequirement: 3,
       advancementCounters: 3,
@@ -235,7 +235,7 @@ describe("Deck strategy runtime vertical slices", () => {
       strategyId: "corp.remote_scoring",
     });
     const exposedAgenda = visibleCard("exposed-agenda", "corp", "agenda", {
-      definitionId: "simple_agenda",
+      definitionId: 588,
       title: "Simple Agenda",
       advancementRequirement: 5,
       advancementCounters: 1,
@@ -302,7 +302,7 @@ describe("Deck strategy runtime vertical slices", () => {
 
   it("uses ICE-tax defense when affordable and economy when the defensive line is unfunded [legacy_compare]", () => {
     const installedIce = visibleCard("installed-rd-wall", "corp", "ice", {
-      definitionId: "onr_v1_237_data-wall",
+      definitionId: 449,
       title: "Data Wall",
       rezzed: false,
       rezCost: 1,
@@ -322,7 +322,7 @@ describe("Deck strategy runtime vertical slices", () => {
       },
     });
     const expensiveIce = visibleCard("expensive-rd-wall", "corp", "ice", {
-      definitionId: "onr_v1_237_data-wall",
+      definitionId: 449,
       title: "Data Wall",
       rezCost: 2,
       strength: 0,
@@ -360,7 +360,7 @@ describe("Deck strategy runtime vertical slices", () => {
         source: expensiveIce.instanceId,
         payload: {
           cardId: expensiveIce.instanceId,
-          sourceDefinitionId: "onr_v1_237_data-wall",
+          sourceDefinitionId: 449,
           placement: "ice",
           serverId: "remote_1",
           iceInstallBaseCost: 0,
@@ -445,7 +445,7 @@ describe("Deck strategy runtime vertical slices", () => {
           [],
           [
             visibleCard("agenda", "corp", "agenda", {
-              definitionId: "simple_agenda",
+              definitionId: 588,
               title: "Simple Agenda",
             }),
           ],
@@ -805,53 +805,53 @@ function productiveStrategyProfile(
 
 function runnerCentralPressureSnapshot(): AiDeckStrategyDeckSnapshot {
   return snapshot("dsr08-runner-central-pressure", "runner", [
-    ["onr_v1_081_custodial-position", 2],
-    ["onr_v1_085_executive-wiretaps", 2],
-    ["onr_v1_021_dwarf", 2],
-    ["onr_v1_039_krash", 2],
-    ["onr_v1_066_snowball", 2],
-    ["onr_v1_108_score", 3],
+    [293, 2],
+    [297, 2],
+    [233, 2],
+    [251, 2],
+    [278, 2],
+    [320, 3],
   ]);
 }
 
 function runnerRemoteContestSnapshot(): AiDeckStrategyDeckSnapshot {
   return snapshot("dsr08-runner-remote-contest", "runner", [
-    ["onr_v1_156_corporate-ally", 2],
-    ["onr_v1_173_restrictive-net-zoning", 2],
-    ["onr_v1_021_dwarf", 2],
-    ["onr_v1_039_krash", 2],
-    ["onr_v1_066_snowball", 2],
-    ["onr_v1_108_score", 3],
+    [368, 2],
+    [385, 2],
+    [233, 2],
+    [251, 2],
+    [278, 2],
+    [320, 3],
   ]);
 }
 
 function corpTagPunishSnapshot(): AiDeckStrategyDeckSnapshot {
   return snapshot("dsr08-corp-tag-punish", "corp", [
-    ["onr_v1_285_closed-accounts", 2],
-    ["onr_v1_299_power-grid-overload", 2],
-    ["onr_v1_249_hunter", 2],
-    ["onr_v1_236_data-raven", 2],
-    ["onr_v1_196_corporate-war", 4],
-    ["simple_economy_operation", 4],
+    [497, 2],
+    [511, 2],
+    [461, 2],
+    [448, 2],
+    [408, 4],
+    [596, 4],
   ]);
 }
 
 function corpRemoteScoringSnapshot(): AiDeckStrategyDeckSnapshot {
   return snapshot("dsr08-corp-remote-scoring", "corp", [
-    ["onr_v1_355_crystal-palace-station-grid", 2],
-    ["onr_v1_279_wall-of-static", 3],
-    ["simple_agenda", 4],
-    ["simple_economy_operation", 4],
+    [567, 2],
+    [491, 3],
+    [588, 4],
+    [596, 4],
   ]);
 }
 
 function corpIceTaxSnapshot(): AiDeckStrategyDeckSnapshot {
   return snapshot("dsr08-corp-ice-tax", "corp", [
-    ["onr_v1_232_crystal-wall", 2],
-    ["onr_v1_237_data-wall", 2],
-    ["onr_v1_261_quandary", 2],
-    ["onr_v1_279_wall-of-static", 2],
-    ["onr_v1_317_data-masons", 2],
-    ["simple_agenda", 3],
+    [444, 2],
+    [449, 2],
+    [473, 2],
+    [491, 2],
+    [529, 2],
+    [588, 3],
   ]);
 }

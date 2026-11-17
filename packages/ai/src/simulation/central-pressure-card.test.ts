@@ -13,12 +13,12 @@ describe("centralPressureTargetsForCard", () => {
   it("matches multiaccess roles by bounded role terms", () => {
     cardRoleMock.roles = ["interface_multiaccess"];
     expect(
-      centralPressureTargetsForCard("onr_v1_024_expert-schedule-analyzer"),
+      centralPressureTargetsForCard(236),
     ).toEqual(["hq", "rd"]);
 
     cardRoleMock.roles = ["multiaccessory_noise"];
     expect(
-      centralPressureTargetsForCard("onr_v1_024_expert-schedule-analyzer"),
+      centralPressureTargetsForCard(236),
     ).toEqual([]);
   });
 

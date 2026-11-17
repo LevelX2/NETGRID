@@ -118,7 +118,7 @@ describe("start-run-action-execution", () => {
     gameState.runner.rig.resources = [wilsonId];
     gameState.cardInstances[wilsonId] = {
       id: wilsonId,
-      definitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
+      definitionId: 399,
       owner: "runner",
       controller: "runner",
       faceup: true,
@@ -203,7 +203,7 @@ describe("start-run-action-execution", () => {
       action({
         serverId: "hq",
         bonusRunNoClick: true,
-        bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+        bonusRunSource: 335,
       }),
     );
 
@@ -319,7 +319,7 @@ describe("start-run-action-execution", () => {
         kind: "multi_server_success_sequence",
         sequence: "run_each_data_fort",
         sourceCardId: "pirate_1" as CardInstanceId,
-        sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
+        sourceDefinitionId: 174,
         sourceTitle: "Pirate Broadcast",
         pendingServerIds: ["rd", "archives"],
         successfulServerIds: ["hq"],
@@ -354,7 +354,7 @@ describe("start-run-action-execution", () => {
         serverId: "rd",
         bonusRunNoClick: true,
         multiServerSuccessSequenceRun: true,
-        bonusRunSource: "onr_proteus_116_pirate-broadcast",
+        bonusRunSource: 174,
       }),
     );
 

@@ -79,8 +79,8 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     for (const agenda of Object.values(state.cardInstances)
       .filter(
         (c) =>
-          c.definitionId === "onr_v1_209_political-coup" ||
-          c.definitionId === "onr_v1_193_corporate-coup",
+          c.definitionId === 421 ||
+          c.definitionId === 405,
       )
       .slice(0, 3)) {
       state.corp.hq = state.corp.hq.filter((id) => id !== agenda.instanceId);
@@ -93,8 +93,8 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       });
     }
     for (const id of [
-      "onr_v1_211_polymer-breakthrough",
-      "onr_v1_219_superior-net-barriers",
+      423,
+      431,
     ]) {
       const agenda = Object.values(state.cardInstances).find(
         (c) => c.definitionId === id,
@@ -115,10 +115,10 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     // Two independently mandatory self-trash triggers create a real Engine
     // ordering choice. An installed ETR makes the event's bypass material.
     const conferences = Object.values(state.cardInstances)
-      .filter((c) => c.definitionId === "onr_v1_184_top-runners-conference")
+      .filter((c) => c.definitionId === 396)
       .slice(0, 2);
     const inside = Object.values(state.cardInstances).find(
-      (c) => c.definitionId === "onr_v1_094_inside-job",
+      (c) => c.definitionId === 306,
     )!;
     for (const c of [...conferences, inside]) {
       state.runner.grip = state.runner.grip.filter((id) => id !== c.instanceId);
@@ -141,7 +141,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       });
     }
     const blocker = Object.values(state.cardInstances).find(
-      (c) => c.definitionId === "onr_v1_223_banpei",
+      (c) => c.definitionId === 435,
     )!;
     state.corp.hq = state.corp.hq.filter((id) => id !== blocker.instanceId);
     state.corp.rd = state.corp.rd.filter((id) => id !== blocker.instanceId);
@@ -152,7 +152,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       rezzed: true,
     });
     const rdBlocker = Object.values(state.cardInstances).find(
-      (c) => c.definitionId === "onr_v1_244_filter",
+      (c) => c.definitionId === 456,
     )!;
     state.corp.hq = state.corp.hq.filter((id) => id !== rdBlocker.instanceId);
     state.corp.rd = state.corp.rd.filter((id) => id !== rdBlocker.instanceId);
@@ -165,7 +165,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       rezzed: true,
     });
     const knownAgenda = Object.values(state.cardInstances).find(
-      (c) => c.definitionId === "onr_v1_200_encryption-breakthrough",
+      (c) => c.definitionId === 412,
     )!;
     state.corp.hq = state.corp.hq.filter((id) => id !== knownAgenda.instanceId);
     state.corp.rd = state.corp.rd.filter((id) => id !== knownAgenda.instanceId);
@@ -266,7 +266,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
             snapshot.input.playerView.own.gripOrHq.some(
               (card) =>
                 card.instanceId === action.source &&
-                card.definitionId === "onr_v1_095_jack-n-joe",
+                card.definitionId === 307,
             ),
         ),
     });
@@ -346,7 +346,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       visibility: "hidden_info_barrier",
     });
     const conferences = sourceCapture!.input.playerView.own.rig!.filter(
-      (card) => card.definitionId === "onr_v1_184_top-runners-conference",
+      (card) => card.definitionId === 396,
     );
     expect(conferences.length).toBeGreaterThanOrEqual(2);
     expect(
@@ -431,7 +431,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
         snapshot.input.legalActions.some(
           (action) =>
             action.type === "play_operation" &&
-            String(action.source).includes("onr_v1_296_off-site-backups"),
+            String(action.source).includes(508),
         ) ||
         snapshot.input.playerView.pendingChoice?.source.startsWith(
           "v1922.corp_archives_to_hq:",
@@ -447,7 +447,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       actionSequence.some(
         (entry) =>
           entry.actionType === "play_operation" &&
-          entry.selectedActionId?.includes("onr_v1_296_off-site-backups"),
+          entry.selectedActionId?.includes(508),
       ),
     ).toBe(false);
     expect(
@@ -456,7 +456,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
           .find(
             (entry) => entry.stateVersionBefore === capture.state.stateVersion,
           )
-          ?.selectedActionId?.includes("onr_v1_296_off-site-backups"),
+          ?.selectedActionId?.includes(508),
       ),
     ).toBeUndefined();
     expect(
@@ -477,7 +477,7 @@ type StandardDeck = {
   version: string;
   name: string;
   side: "runner" | "corp";
-  identityCardId: string;
+  identityCardId: number;
   cards: Array<{ cardId: string; quantity: number }>;
   cardPoolSnapshotId: string;
   cardPoolVersion: string;
@@ -542,10 +542,10 @@ function simulateStandardGame(params: {
 
 function singletonKeyCardRegressionCards(): StandardDeck["cards"] {
   const quantities = new Map([
-    ["onr_v1_076_all-nighter", 2],
-    ["onr_v1_086_forged-activation-orders", 2],
-    ["onr_v1_123_bodyweight-data-creche", 1],
-    ["onr_v1_179_silicon-saloon-franchise", 1],
+    [288, 2],
+    [298, 2],
+    [335, 1],
+    [391, 1],
   ]);
   return standardDeck(RUNNER_DECK_ID).cards.map((card) => ({
     ...card,

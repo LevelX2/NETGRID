@@ -14,7 +14,7 @@ const stateIdentity = {
 describe("runner credit-bank prospective planning", () => {
   it("projects Streetware's repeatable build and automatic payout without imposing Broker's shared limit", () => {
     const plan = runnerCreditBankProspectivePlan({
-      sourceDefinitionId: "onr_proteus_150_streetware-distributor",
+      sourceDefinitionId: 208,
       sourceCardInstanceId: "streetware-1",
       currentCredits: 3,
       currentActions: 4,
@@ -37,7 +37,7 @@ describe("runner credit-bank prospective planning", () => {
 
   it("admits Rigged Investments through its automatic lifecycle payout without inventing a cash-out action", () => {
     const plan = runnerCreditBankProspectivePlan({
-      sourceDefinitionId: "onr_v1_174_rigged-investments",
+      sourceDefinitionId: 386,
       sourceCardInstanceId: "rigged-1",
       currentCredits: 5,
       currentActions: 4,
@@ -45,7 +45,7 @@ describe("runner credit-bank prospective planning", () => {
     });
 
     expect(plan).toMatchObject({
-      sourceDefinitionId: "onr_v1_174_rigged-investments",
+      sourceDefinitionId: 386,
       sourceCardInstanceId: "rigged-1",
       owner: "runner.credit_bank",
       install: {
@@ -74,7 +74,7 @@ describe("runner credit-bank prospective planning", () => {
 
   it("treats Short-Term Contract's on-install load as the bank build", () => {
     const plan = runnerCreditBankProspectivePlan({
-      sourceDefinitionId: "onr_v1_178_short-term-contract",
+      sourceDefinitionId: 390,
       sourceCardInstanceId: "contract-1",
       currentCredits: 1,
       currentActions: 4,
@@ -107,7 +107,7 @@ describe("runner credit-bank prospective planning", () => {
 
   it("binds Broker install plus future build from the PlanningCardView without inventing an actionId", () => {
     const plan = runnerCreditBankProspectivePlan({
-      sourceDefinitionId: "onr_v1_154_broker",
+      sourceDefinitionId: 366,
       sourceCardInstanceId: "broker-1",
       currentCredits: 3,
       currentActions: 4,
@@ -115,7 +115,7 @@ describe("runner credit-bank prospective planning", () => {
     });
 
     expect(plan).toMatchObject({
-      sourceDefinitionId: "onr_v1_154_broker",
+      sourceDefinitionId: 366,
       sourceCardInstanceId: "broker-1",
       owner: "runner.credit_bank",
       install: {
@@ -131,7 +131,7 @@ describe("runner credit-bank prospective planning", () => {
         projection: "feasible_in_projection",
         resolution: "requires_engine_quote",
         capabilityKey: "store_credits",
-        canonicalCapabilityId: "onr_v1_154_broker:store_credits",
+        canonicalCapabilityId: "366:store_credits",
         actionCost: 1,
         hostedCreditsAdded: 3,
         sharedLimit: {
@@ -143,7 +143,7 @@ describe("runner credit-bank prospective planning", () => {
           sourceCardInstanceId: "broker-1",
           sourceAbilityBinding: {
             kind: "card_spec_capability_key",
-            sourceAbilityId: "onr_v1_154_broker:store_credits",
+            sourceAbilityId: "366:store_credits",
           },
         },
       },
@@ -159,7 +159,7 @@ describe("runner credit-bank prospective planning", () => {
 
   it("keeps a last-action install feasible but blocks the same-turn build projection", () => {
     const plan = runnerCreditBankProspectivePlan({
-      sourceDefinitionId: "onr_v1_154_broker",
+      sourceDefinitionId: 366,
       sourceCardInstanceId: "broker-1",
       currentCredits: 3,
       currentActions: 1,
@@ -176,7 +176,7 @@ describe("runner credit-bank prospective planning", () => {
 
   it("rematerializes only the exact current Engine candidate for the same instance, capability and owner", () => {
     const plan = runnerCreditBankProspectivePlan({
-      sourceDefinitionId: "onr_v1_154_broker",
+      sourceDefinitionId: 366,
       sourceCardInstanceId: "broker-1",
       currentCredits: 3,
       currentActions: 2,
@@ -187,19 +187,19 @@ describe("runner credit-bank prospective planning", () => {
     const exact = candidate({
       actionId: "broker-1-build-current",
       sourceCardInstanceId: "broker-1",
-      abilityId: "onr_v1_154_broker:store_credits",
+      abilityId: "366:store_credits",
       route: "build",
     });
     const sibling = candidate({
       actionId: "broker-2-build-current",
       sourceCardInstanceId: "broker-2",
-      abilityId: "onr_v1_154_broker:store_credits",
+      abilityId: "366:store_credits",
       route: "build",
     });
     const cashOut = candidate({
       actionId: "broker-1-cash-current",
       sourceCardInstanceId: "broker-1",
-      abilityId: "onr_v1_154_broker:withdraw_credits",
+      abilityId: "366:withdraw_credits",
       route: "cash_out",
     });
 
@@ -219,7 +219,7 @@ describe("runner credit-bank prospective planning", () => {
   it("fails closed for a non-bank specification and an unaffordable install", () => {
     expect(
       runnerCreditBankProspectivePlan({
-        sourceDefinitionId: "onr_v1_001_afreet",
+        sourceDefinitionId: 213,
         sourceCardInstanceId: "afreet-1",
         currentCredits: 20,
         currentActions: 4,
@@ -228,7 +228,7 @@ describe("runner credit-bank prospective planning", () => {
     ).toBeUndefined();
     expect(
       runnerCreditBankProspectivePlan({
-        sourceDefinitionId: "onr_v1_154_broker",
+        sourceDefinitionId: 366,
         sourceCardInstanceId: "broker-1",
         currentCredits: 2,
         currentActions: 4,
@@ -247,7 +247,7 @@ function candidate(params: {
   return {
     actorSide: "runner",
     actionId: params.actionId,
-    sourceDefinitionId: "onr_v1_154_broker",
+    sourceDefinitionId: 366,
     sourceCardInstanceId: params.sourceCardInstanceId,
     abilityId: params.abilityId,
     abilityBindingMethod: "canonical_capability_id",

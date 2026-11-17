@@ -15,10 +15,10 @@ import {
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { visibleCorpScoreContinuationQuote } from "../view/visible-corp-score-continuation-quote";
 
-const tycho = "onr_v1_220_tycho-extension";
-const corporateWar = "onr_v1_196_corporate-war";
-const directors = "onr_v1_189_artificial-security-directors";
-const washington = "onr_v1_374_washington-d-c-city-grid";
+const tycho = 432;
+const corporateWar = 408;
+const directors = 401;
+const washington = 586;
 
 function prepare(region?: string, agenda = tycho, directorsCount = 1) {
   const state = apply(
@@ -53,7 +53,7 @@ function prepare(region?: string, agenda = tycho, directorsCount = 1) {
 describe("agenda difficulty follows declared modifiers", () => {
   it.each([
     [undefined, 4, 1],
-    ["onr_v1_368_roving-submarine", 4, 1],
+    [580, 4, 1],
     [washington, 3, 0],
   ] as const)(
     "projects and quotes %s without an unrelated or duplicate discount",
@@ -154,7 +154,7 @@ describe("agenda difficulty follows declared modifiers", () => {
   });
 
   it("requires and scores all four Tycho counters beside a run-lock region", () => {
-    const { state, agendaId } = prepare("onr_v1_368_roving-submarine");
+    const { state, agendaId } = prepare(580);
     state.cardInstances[agendaId]!.advancementCounters = 4;
     const score = getLegalActions(state, "corp").find(
       (a) => a.type === "score_agenda",

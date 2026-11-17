@@ -12,9 +12,9 @@ import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-sour
 import { scoreProjectForCandidate } from "./score-project-signals";
 
 const actionId =
-  "corp.install_card.corp_onr_classic_002_superserum_1.remote_1.corp_onr_classic_002_superserum_1";
+  "corp.install_card.corp_6_1.remote_1.corp_6_1";
 const parent =
-  "plan:corp.score_agenda:agenda%3Acorp_onr_classic_002_superserum_1%3Aremote_1";
+  "plan:corp.score_agenda:agenda%3Acorp_6_1%3Aremote_1";
 
 function fixture() {
   const cp = JSON.parse(

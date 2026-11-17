@@ -102,7 +102,7 @@ it.each(["first-prefix", "last-actions"])(
     const { selected, result } = choose(f);
     expect(selected).toMatchObject({
       type: "install_card",
-      source: "runner_onr_v1_168_loan-from-chiba_1",
+      source: "runner_380_1",
       payload: { gainCreditsAmount: 12 },
     });
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({
@@ -141,7 +141,7 @@ it("includes a basic credit after debt when only the complete route covers the k
   const f = fixture();
   f.input.playerView.own.credits = 13;
   f.input.playerView.own.clicks = 3;
-  expect(choose(f).selected.source).toBe("runner_onr_v1_168_loan-from-chiba_1");
+  expect(choose(f).selected.source).toBe("runner_380_1");
   expect(facts(f.input).support?.routeAssessment).toMatchObject({
     status: "covered_guaranteed",
     totalClickCost: 2,

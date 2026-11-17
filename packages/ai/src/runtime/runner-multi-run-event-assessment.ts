@@ -2,7 +2,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 
 export type RunnerMultiRunEventAssessment = {
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   targetServerId: string;
   phase: "first_run" | "followup_run";
   canTakeRun: boolean;

@@ -45,7 +45,7 @@ export type RunnerCoverageGapSignal = {
   evidenceCode: string;
   deckHasAnswer: boolean;
   answerInHand: boolean;
-  handAnswerDefinitionId?: string;
+  handAnswerDefinitionId?: number;
   answerInstallCost?: number;
   installActionIds?: string[];
   installActionValues?: Record<string, number>;
@@ -54,7 +54,7 @@ export type RunnerCoverageGapSignal = {
     actionId: string;
     sourceCardInstanceId: string;
     targetCardInstanceId: string;
-    targetDefinitionId: string;
+    targetDefinitionId: number;
     savedLiquidCredits: number;
     stateVersion: number;
   };
@@ -64,7 +64,7 @@ export type RunnerCoverageGapSignal = {
     sourceCardInstanceId: string;
     currentTopCardInstanceId: string;
     targetCardInstanceId: string;
-    targetDefinitionId: string;
+    targetDefinitionId: number;
     recoveryCount: number;
     requiredClicks: number;
     upfrontCredits: number;
@@ -77,7 +77,7 @@ export type RunnerCoverageGapSignal = {
     needId: string;
     parentPlanInstanceId: string;
     gapId: string;
-    targetDefinitionId: string;
+    targetDefinitionId: number;
     targetCredits: number;
     gap: number;
     bankId: string;
@@ -107,7 +107,7 @@ export type RunnerCoverageGapSignal = {
   recoveryEvidenceCodes?: string[];
   upgradeQuote?: {
     schemaVersion: "runner-breaker-upgrade-economic-quote-v2";
-    targetDefinitionId: string;
+    targetDefinitionId: number;
     currentKnownPathCost: number;
     projectedKnownPathCost: number;
     savingsPerRun: number;
@@ -131,14 +131,14 @@ export type RunnerCoverageGapSignal = {
   directSearchChoiceBindings?: Array<{
     actionId: string;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     resolvedSearchChoice?: {
       choiceId: string;
       choiceSource: string;
       stateVersion: number;
     };
     targetCardInstanceId?: string;
-    targetDefinitionId?: string;
+    targetDefinitionId?: number;
     installMemorySacrificeBinding?: {
       targetCardInstanceId: string;
       targetMemoryCost?: number;

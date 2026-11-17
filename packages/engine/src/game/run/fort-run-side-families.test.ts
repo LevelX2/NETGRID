@@ -29,7 +29,7 @@ import {
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {
@@ -48,7 +48,7 @@ function instance(
 }
 
 function definition(
-  id: string,
+  id: number,
   title: string,
   options: Partial<CardDefinition> = {},
 ): CardDefinition {
@@ -106,14 +106,14 @@ function makeState(): GameState {
       ],
     },
     cardInstances: {
-      [aardvark]: instance(aardvark, "onr_v1_349_aardvark", {
+      [aardvark]: instance(aardvark, 561, {
         faceup: false,
         rezzed: false,
       }),
-      [roving]: instance(roving, "onr_v1_368_roving-submarine", {
+      [roving]: instance(roving, 580, {
         counters: { mark: 0 },
       }),
-      [paris]: instance(paris, "onr_v1_365_paris-city-grid", {
+      [paris]: instance(paris, 577, {
         counters: { bit: 3 },
       }),
       [ice]: instance(ice, "ice_definition", {
@@ -124,7 +124,7 @@ function makeState(): GameState {
         controller: "runner",
         zone: { side: "runner", zone: "rig" },
       }),
-      [breaker]: instance(breaker, "onr_v1_053_ramming-piston", {
+      [breaker]: instance(breaker, 265, {
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "rig" },
@@ -151,15 +151,15 @@ function makeState(): GameState {
 
 function definitions(): Record<string, CardDefinition> {
   return {
-    onr_v1_349_aardvark: definition("onr_v1_349_aardvark", "Aardvark", {
+    onr_v1_349_aardvark: definition(561, "Aardvark", {
       rezCost: 1,
     }),
-    "onr_v1_368_roving-submarine": definition(
-      "onr_v1_368_roving-submarine",
+    580: definition(
+      580,
       "Roving Submarine",
     ),
-    "onr_v1_365_paris-city-grid": definition(
-      "onr_v1_365_paris-city-grid",
+    577: definition(
+      577,
       "Paris City Grid",
     ),
     ice_definition: definition("ice_definition", "Simple ICE", { type: "ice" }),
@@ -168,8 +168,8 @@ function definitions(): Record<string, CardDefinition> {
       type: "program",
       subtypes: ["worm"],
     }),
-    "onr_v1_053_ramming-piston": definition(
-      "onr_v1_053_ramming-piston",
+    265: definition(
+      265,
       "Ramming Piston",
       { side: "runner", type: "program" },
     ),
@@ -371,7 +371,7 @@ describe("fort run side families", () => {
     expect(state.corp.credits).toBe(3);
     expect(state.runner.heap).toContain(worm);
     expect(action.payload).toMatchObject({
-      publicRevealDefinitionId: "onr_v1_349_aardvark",
+      publicRevealDefinitionId: 561,
       hiddenZoneAction: "aardvark_rez_trash_worm",
       aardvarkRezzed: true,
       aardvarkWormTrashed: true,
@@ -452,7 +452,7 @@ describe("fort run side families", () => {
     });
     expect(validateActivityGatedFortRun(host, "rd")).toMatchObject({
       runAllowed: true,
-      sourceDefinitionId: "onr_v1_368_roving-submarine",
+      sourceDefinitionId: 580,
     });
 
     clearActivityGatedFortRunMarkers(host);
@@ -584,7 +584,7 @@ describe("fort run side families", () => {
     expect(result).toMatchObject({
       handled: true,
       stealthCreditsLost: 2,
-      sourceDefinitionId: "onr_v1_053_ramming-piston",
+      sourceDefinitionId: 265,
       stateChanged: true,
     });
     expect(state.cardInstances.stealth_1?.counters?.recurring_credit).toBe(0);

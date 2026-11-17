@@ -76,7 +76,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
       effectivePostRezRunQuote: {
         context: "installed_post_rez",
         cardId: "remote-dynamic-wall",
-        iceDefinitionId: "simple_barrier_ice",
+        iceDefinitionId: 589,
         targetServerId: "remote_1",
         projectedServerId: "remote_1",
         expiresAtStateVersion: 1,

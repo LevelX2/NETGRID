@@ -28,19 +28,19 @@ function native() {
     ),
     cardSemanticProfilesByDefinitionId: buildActionCardSemanticProfilesByDefinitionId(),
   });
-  const recovery = candidates.find(c => c.sourceDefinitionId === "onr_v1_087_forgotten-backup-chip")!;
+  const recovery = candidates.find(c => c.sourceDefinitionId === 299)!;
   return { cp, input, candidates, recovery };
 }
 
 it("does not bind a Stack-only Worm answer to the native heap-only recovery action", () => {
   const { input, candidates, recovery } = native();
   expect(recovery.functionalEffects).toContainEqual(expect.objectContaining({ kind: "search", scope: "heap", target: "program" }));
-  expect(input.playerView.own.heapOrArchives.filter(c => c.type === "program").map(c => c.definitionId)).toEqual(["onr_v1_001_afreet"]);
+  expect(input.playerView.own.heapOrArchives.filter(c => c.type === "program").map(c => c.definitionId)).toEqual([213]);
   const result = coverageSupportActionIds(input, candidates, input.ownDeckCapabilities!, "breaker_wall", {
-    deckHasStackAnswerOverride: true, targetDefinitionIdOverride: "onr_v1_074_worm",
+    deckHasStackAnswerOverride: true, targetDefinitionIdOverride: 286,
   });
   expect(result.directSearchActionIds).not.toContain(recovery.actionId);
-  expect(result.directSearchChoiceBindings).not.toContainEqual(expect.objectContaining({ actionId: recovery.actionId, targetDefinitionId: "onr_v1_074_worm" }));
+  expect(result.directSearchChoiceBindings).not.toContainEqual(expect.objectContaining({ actionId: recovery.actionId, targetDefinitionId: 286 }));
 });
 
 it("keeps actual live ownership and the current state binding after rejecting the impossible source", () => {
@@ -52,8 +52,8 @@ it("keeps actual live ownership and the current state binding after rejecting th
   expect(plan.route).toMatchObject({ actionId: action.actionId, stateVersion: 192, planInstanceId: plan.leafExecutorInstanceId });
   const port = residentPlanPortfolioSnapshot(input)!;
   const impossible = port.instances.some(p => {
-    const state = p.moduleState as { gap?: { directSearchChoiceBindings?: Array<{ actionId: string; targetDefinitionId?: string }> } } | undefined;
-    return state?.gap?.directSearchChoiceBindings?.some(b => b.actionId === recovery.actionId && b.targetDefinitionId === "onr_v1_074_worm");
+    const state = p.moduleState as { gap?: { directSearchChoiceBindings?: Array<{ actionId: string; targetDefinitionId?: number }> } } | undefined;
+    return state?.gap?.directSearchChoiceBindings?.some(b => b.actionId === recovery.actionId && b.targetDefinitionId === 286);
   });
   expect(impossible).toBe(false);
   expect(JSON.stringify(input)).toBe(before);
@@ -62,7 +62,7 @@ it("keeps actual live ownership and the current state binding after rejecting th
 it("preserves exact heap coverage recovery in a prospective target-present companion", () => {
   const { input, candidates, recovery } = native();
   // This explicit prospective companion is not a historical checkpoint proof.
-  const target = { instanceId: "prospective-worm-in-heap", definitionId: "onr_v1_074_worm", title: "Worm", known: true, side: "runner" as const, type: "program" as const, subtypes: ["icebreaker", "fracter"] };
+  const target = { instanceId: "prospective-worm-in-heap", definitionId: 286, title: "Worm", known: true, side: "runner" as const, type: "program" as const, subtypes: ["icebreaker", "fracter"] };
   input.playerView.own.heapOrArchives.push(target);
   const result = coverageSupportActionIds(input, candidates, input.ownDeckCapabilities!, "breaker_wall", {
     deckHasStackAnswerOverride: false,

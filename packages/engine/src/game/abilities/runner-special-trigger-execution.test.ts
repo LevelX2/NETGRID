@@ -363,7 +363,7 @@ describe("runner special trigger execution", () => {
   it("does not add a generic Virus counter when Shell Traders installs Pattel's Virus", () => {
     const sourceId = "shell_1" as CardInstanceId;
     const targetId = "prepared_pattel" as CardInstanceId;
-    const pattelId = "onr_v1_046_pattels-virus";
+    const pattelId = 258;
     const state = baseState();
     state.runner.rig.resources = [sourceId];
     state.specialZones = { setAside: [targetId] } as SpecialZoneState;
@@ -907,7 +907,7 @@ function setCounter(
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   owner: Side,
   zone: "grip" | "heap" | "rig" | "set_aside" | "stack",
 ): CardInstance {

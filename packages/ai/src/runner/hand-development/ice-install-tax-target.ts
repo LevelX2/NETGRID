@@ -13,7 +13,7 @@ import { sourceDefinitionIdForAction } from "../../runtime/visible-card-lookup";
 
 export function runnerInstallTaxTarget(
   input: AiDecisionInputWithDeckCapabilities,
-  definitionId: string,
+  definitionId: number,
   candidates: readonly ActionSemanticCandidate[],
 ): { target?: { actionId: string; serverId: string } } | undefined {
   if (

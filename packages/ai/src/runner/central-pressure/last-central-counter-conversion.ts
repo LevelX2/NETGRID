@@ -8,7 +8,7 @@ import type { RunnerRunTargetEvaluation } from "../../runner-run-target-evaluati
 export function runnerLastCentralCounterConversion(
   input: AiDecisionInput,
   evaluation: RunnerRunTargetEvaluation,
-): { sourceDefinitionId: string; actionsDenied: number } | undefined {
+): { sourceDefinitionId: number; actionsDenied: number } | undefined {
   const server = input.playerView.servers.find(
     (s) => s.id === evaluation.targetServerId,
   );

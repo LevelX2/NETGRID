@@ -76,7 +76,7 @@ describe("Corp plan-bound rez-or-trash ICE choice", () => {
       kind: "rez_or_trash_ice",
       selectedOptionId: "trash_ice",
       preservedScoreProjectId:
-        "agenda:corp_onr_classic_003_unlisted-research-lab_1:remote_2",
+        "agenda:corp_7_1:remote_2",
       sourceStateVersion: 223,
     });
     expect(

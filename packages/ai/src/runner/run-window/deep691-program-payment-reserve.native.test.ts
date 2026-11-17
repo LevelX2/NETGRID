@@ -36,7 +36,7 @@ function decide(index: number, contrast?: "extra_cash" | "empty_cloak") {
   if (contrast === "extra_cash") raw.playerView.own.credits += 1;
   if (contrast === "empty_cloak") {
     const source = raw.playerView.own.rig?.find(
-      (c) => c.definitionId === "onr_v1_011_cloak",
+      (c) => c.definitionId === 223,
     );
     if (!source?.counters || !source.counterDisplays)
       throw new Error("native_cloak_pool_missing");

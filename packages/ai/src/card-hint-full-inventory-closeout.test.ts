@@ -35,24 +35,24 @@ describe("AI card hint full-inventory closeout", () => {
     const hints = hintById();
     const plans = (cardId: string) => hints.get(cardId)?.planRoles;
 
-    expect(plans("corp_identity_001")).toEqual([]);
-    expect(plans("runner_identity_001")).toEqual([]);
-    expect(plans("simple_run_event")).toEqual([]);
-    expect(plans("v08_overclock_run_event")).toEqual(["recover_economy"]);
-    expect(plans("simple_setup_hardware")).toEqual([]);
-    expect(plans("v08_memory_chip")).toEqual([]);
-    expect(plans("simple_draw_operation")).toEqual([
+    expect(plans(3)).toEqual([]);
+    expect(plans(587)).toEqual([]);
+    expect(plans(600)).toEqual([]);
+    expect(plans(615)).toEqual(["recover_economy"]);
+    expect(plans(602)).toEqual([]);
+    expect(plans(614)).toEqual([]);
+    expect(plans(593)).toEqual([
       "draw_for_answers",
       "setup",
     ]);
-    expect(plans("v08_archive_planning_operation")).toEqual([
+    expect(plans(608)).toEqual([
       "draw_for_answers",
       "setup",
     ]);
-    expect(plans("simple_tag_punishment_operation")).toEqual([
+    expect(plans(604)).toEqual([
       "punish_tagged_runner",
     ]);
-    expect(plans("simple_upgrade")).toEqual([]);
+    expect(plans(606)).toEqual([]);
   });
 
   it("contains neither deprecated aliases nor stale review dependencies", () => {

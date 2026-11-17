@@ -138,7 +138,7 @@ it.each([0, 1, 2])(
       expect(path.visibleBreakCost).toBe(8);
       expect(path.creditBudgetAfterPath?.credits).toBe(0);
       expect(path.runEndTrashSourceIds).toContain(
-        "runner_onr_classic_031_rent-i-con_2",
+        "runner_35_2",
       );
     }
     if (cash === 2) {
@@ -222,7 +222,7 @@ it("preserves the real temporary coverage search for the immediately contested r
   const d = chooseAiAction(input),
     a = input.legalActions.find((x) => x.actionId === d.actionId);
   expect(a?.type).toBe("play_event");
-  expect(a?.actionId).toContain("onr_v1_110_sneak-preview");
+  expect(a?.actionId).toContain(322);
   expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "runner.rig_and_coverage",
   );

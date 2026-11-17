@@ -36,7 +36,7 @@ it("leaves competing draw events with their development owner before search setu
   ).toBe(true);
   expect(result.fallbackUsed).toBe(false);
   const portfolio = residentPlanPortfolioSnapshot(input)!;
-  const drawId = "runner_onr_proteus_103_cruising-for-netwatch_1";
+  const drawId = "runner_161_1";
   expect(
     portfolio.instances.some(
       (entry) =>

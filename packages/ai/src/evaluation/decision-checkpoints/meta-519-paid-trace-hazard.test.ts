@@ -38,7 +38,7 @@ it("keeps the paid Asp avoidance cost but removes its prevented residual risk un
   expect(rd.score).toBeGreaterThan(0);
   const chosen = chooseAiAction(input);
   expect(chosen.actionId).toBe(
-    "runner.install_card.runner_onr_v1_129_hq-interface_2.runner_onr_v1_129_hq-interface_2",
+    "runner.install_card.runner_341_2.runner_341_2",
   );
   expect(chosen.fallbackUsed).toBe(false);
   expect(chosen.decisionDebug?.planFirstDecision).toMatchObject({
@@ -69,7 +69,7 @@ it.each(["credits", "coverage"] as const)(
         throw new Error("native_checkpoint_requires_runner_rig_and_memory");
       }
       input.playerView.own.rig = rig.filter(
-        (c) => c.definitionId !== "onr_v1_040_loony-goon",
+        (c) => c.definitionId !== 252,
       );
       input.playerView.own.memoryUsed = memoryUsed - 1;
     }

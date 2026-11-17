@@ -96,7 +96,7 @@ function isRecordedEventRunOrigin(event: PublicGameEvent): boolean {
   // deliberately not reconstructed from a card-wide run hint.
   if (
     payload.actor !== "runner" ||
-    typeof payload.cardDefinitionId !== "string"
+    typeof payload.cardDefinitionId !== "number"
   )
     return false;
   const card = cardSpecPlanningCardByDefinitionId(payload.cardDefinitionId);

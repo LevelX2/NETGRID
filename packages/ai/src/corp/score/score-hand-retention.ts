@@ -5,7 +5,7 @@ import { corpFixedOperationPlayCredits } from "../../runtime/corp-canonical-card
 
 /** The cleanup comparison can price plain action bursts as a group. More
  * complex conversion effects keep their existing per-card disposition. */
-export function fixedCorpScoreActionBurst(definitionId: string) {
+export function fixedCorpScoreActionBurst(definitionId: number) {
   const credits = corpFixedOperationPlayCredits(definitionId);
   if (credits === undefined) return undefined;
   const abilities =

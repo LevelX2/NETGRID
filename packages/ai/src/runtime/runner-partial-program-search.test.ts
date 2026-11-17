@@ -34,7 +34,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 it("projects the canonical own-stack program search without injected roles", () => {
   const { input } = fixture();
   expect(
-    AI_HINTS_BY_CARD.get("onr_v1_151_aujourdoui")?.targetProfiles,
+    AI_HINTS_BY_CARD.get(363)?.targetProfiles,
   ).toContainEqual(
     expect.objectContaining({
       zone: "stack_top",
@@ -46,7 +46,7 @@ it("projects the canonical own-stack program search without injected roles", () 
   const caps = buildDeckCapabilityProfileFromInput(input);
   expect(caps.runner?.searchAccess.tools).toContainEqual(
     expect.objectContaining({
-      cardId: "onr_v1_151_aujourdoui",
+      cardId: 363,
       canSearchPrograms: true,
       canSearchBreakers: true,
       legalNow: true,
@@ -81,8 +81,8 @@ it("selects the partial search through the real development executor and exact r
   ).toMatchObject({
     signal: {
       programSearchCommitment: {
-        sourceDefinitionId: "onr_v1_151_aujourdoui",
-        targetDefinitionId: "onr_v1_011_cloak",
+        sourceDefinitionId: 363,
+        targetDefinitionId: 223,
         selectedActionId: legal.actionId,
         selectedAtStateVersion: input.playerView.stateVersion,
       },
@@ -112,16 +112,16 @@ it.each([
     state.runner.clicks = 4;
     RealEngineFixtureBuilder.forState(state)
       .withRunnerGripSize(0)
-      .withRunnerCardInGrip("onr_v1_151_aujourdoui")
-      .withRunnerCardInGrip("onr_v1_161_fall-guy")
-      .withRunnerCardInGrip("onr_v1_056_replicator")
-      .withRunnerCardInGrip("onr_v1_121_armored-fridge")
-      .withRunnerProgramInstalled("onr_v1_074_worm")
-      .withRezzedCorpIceOnServer("hq", "onr_v1_230_cortical-scanner")
-      .withRezzedCorpIceOnServer("rd", "onr_v1_239_endless-corridor");
+      .withRunnerCardInGrip(363)
+      .withRunnerCardInGrip(373)
+      .withRunnerCardInGrip(268)
+      .withRunnerCardInGrip(333)
+      .withRunnerProgramInstalled(286)
+      .withRezzedCorpIceOnServer("hq", 442)
+      .withRezzedCorpIceOnServer("rd", 451);
     state.runner.memoryUsed = 1;
     const actions: string[] = [];
-    let targetDefinitionId: string | undefined;
+    let targetDefinitionId: number | undefined;
     let ownerInstanceId: string | undefined;
     let creditsBeforeChoice: number | undefined;
     for (let n = 0; n < 5; n++) {
@@ -135,7 +135,7 @@ it.each([
       });
       if (state.pendingChoice && tamper) {
         input.playerView.pendingChoice!.sourceCardDefinitionId =
-          "onr_v1_161_fall-guy";
+          373;
         expect(() => chooseAiAction(input)).toThrow("invalid_support_graph");
         return;
       }
@@ -151,7 +151,7 @@ it.each([
           gap: {
             directSearchChoiceBindings: Array<{
               actionId: string;
-              targetDefinitionId: string;
+              targetDefinitionId: number;
             }>;
           };
         };
@@ -176,7 +176,7 @@ it.each([
       }
       if (state.pendingChoice) {
         expect(input.playerView.pendingChoice).toMatchObject({
-          sourceCardDefinitionId: "onr_v1_151_aujourdoui",
+          sourceCardDefinitionId: 363,
           minSelections: 0,
         });
         expect(residentPlanPortfolioSnapshot(input)!.executorInstanceId).toBe(
@@ -246,10 +246,10 @@ it.each(["no_credit", "full_hand"])(
     state.runner.credits = boundary === "no_credit" ? 0 : 8;
     state.runner.clicks = 4;
     RealEngineFixtureBuilder.forState(state)
-      .withRunnerResourceInstalled("onr_v1_151_aujourdoui")
-      .withRunnerProgramInstalled("onr_v1_074_worm")
-      .withRezzedCorpIceOnServer("hq", "onr_v1_230_cortical-scanner")
-      .withRezzedCorpIceOnServer("rd", "onr_v1_239_endless-corridor");
+      .withRunnerResourceInstalled(363)
+      .withRunnerProgramInstalled(286)
+      .withRezzedCorpIceOnServer("hq", 442)
+      .withRezzedCorpIceOnServer("rd", 451);
     state.runner.memoryUsed = 1;
     if (boundary === "full_hand")
       while (state.runner.grip.length < state.runner.maxHandSize) {

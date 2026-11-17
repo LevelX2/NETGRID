@@ -47,7 +47,7 @@ type NoFreshCentralDependencies = {
 
 type TrueCentralCloseoutDependencies = {
   assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
-  rolesForCardId: (definitionId: string | undefined) => string[];
+  rolesForCardId: (definitionId: number | undefined) => string[];
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,

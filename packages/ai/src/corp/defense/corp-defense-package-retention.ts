@@ -44,7 +44,7 @@ export function corpDefensePackageRetentionPairs(
   const supports = retainedCards.filter(
     (card) =>
       card.known &&
-      typeof card.definitionId === "string" &&
+      typeof card.definitionId === "number" &&
       definitionHasActionIceRezSupport(card.definitionId),
   );
   return ice.flatMap((iceCard) =>

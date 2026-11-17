@@ -24,7 +24,7 @@ import type { AiCardHint } from "../ai-hints";
 
 export type RunnerBaselineSupportCompositionDependencies = {
   visibleBreakerRolesForAi: (card: VisibleCard) => readonly string[];
-  hintForDefinitionId: (definitionId: string) => AiCardHint | undefined;
+  hintForDefinitionId: (definitionId: number) => AiCardHint | undefined;
 } & Omit<
   SelectedChoicesForDecisionDependencies,
   | "discardKeepScore"

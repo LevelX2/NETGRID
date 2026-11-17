@@ -87,7 +87,7 @@ it.each([
       root.push({
         ...root[0]!,
         instanceId: "visible-corp-damage-payoff",
-        definitionId: "onr_v1_327_i-got-a-rock",
+        definitionId: 539,
         title: "I Got a Rock",
         rulesText:
           "A, 3 agenda points: Do 15 meat damage to Runner. Use this ability only if Runner has two or more tags.",

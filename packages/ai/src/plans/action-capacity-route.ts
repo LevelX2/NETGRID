@@ -37,7 +37,7 @@ export type ActionCapacityRouteStep = {
   netCurrentTurnActionDelta: number;
   reliability: ActionCapacityRouteReliability;
   sourceCardInstanceId?: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   sourceCounterType?: string;
   sourceCounterCost?: number;
   riskTags: string[];
@@ -83,7 +83,7 @@ export type FutureActionCapacityProjection = {
   earliestOwnTurnOffset: 1 | 2 | 3;
   reliability: ActionCapacityRouteReliability;
   requiredCurrentActionId?: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   evidence?: readonly string[];
 };
 

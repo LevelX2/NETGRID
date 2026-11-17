@@ -92,7 +92,7 @@ describe("runner Blink encounter break context", () => {
     };
 
     const assessment = createRunnerRandomBreakOrDamageEncounterContext({
-      sourceDefinitionIdForAction: () => "onr_v1_007_blink",
+      sourceDefinitionIdForAction: () => 219,
       randomBreakOrDamageRiskProfileForDefinitionId: () =>
         DEFAULT_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
       breakSubroutineIndexesForAction: () => new Set([0]),
@@ -137,7 +137,7 @@ describe("runner Blink encounter break context", () => {
         visibleCard(`grip-${index}`, "runner", "event"),
       );
       const context = createRunnerRandomBreakOrDamageEncounterContext({
-        sourceDefinitionIdForAction: () => "onr_v1_007_blink",
+        sourceDefinitionIdForAction: () => 219,
         randomBreakOrDamageRiskProfileForDefinitionId: () =>
           DEFAULT_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
         breakSubroutineIndexesForAction: () => new Set([1]),
@@ -191,7 +191,7 @@ function assessmentForRootCard(rootCard: VisibleCard) {
   };
 
   return createRunnerRandomBreakOrDamageEncounterContext({
-    sourceDefinitionIdForAction: () => "onr_v1_007_blink",
+    sourceDefinitionIdForAction: () => 219,
     randomBreakOrDamageRiskProfileForDefinitionId: () =>
       DEFAULT_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
     breakSubroutineIndexesForAction: () => new Set([1]),
@@ -247,7 +247,7 @@ function blinkBreakAction(): LegalAction {
 it("requires a consistent known root-agenda projection for Blink risk", () => {
   const agenda = {
     instanceId: "known-agenda",
-    definitionId: "onr_v1_209_political-coup",
+    definitionId: 421,
     known: true,
     title: "Political Coup",
   };

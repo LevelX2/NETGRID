@@ -30,7 +30,7 @@ it.each([false, true])(
       input.playerView.own.rig!.push({
         ...input.playerView.own.rig![0]!,
         instanceId: "current-hq-interface",
-        definitionId: "onr_v1_129_hq-interface",
+        definitionId: 341,
         title: "HQ Interface",
         type: "hardware",
         subtypes: [],

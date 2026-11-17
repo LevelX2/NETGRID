@@ -77,9 +77,9 @@ function fixture(seed: string): GameState {
     .withRunnerClicks(1);
   // The two open routes each offer a single unknown access near matchpoint.
   for (const id of [
-    "onr_v1_212_priority-requisition",
-    "onr_v1_201_executive-extraction",
-    "onr_v1_214_project-babylon",
+    424,
+    413,
+    426,
   ]) {
     builder.withCorpCardInHq(id);
     const instanceId = state.corp.hq.pop()!;
@@ -214,7 +214,7 @@ it("chooses the clearly safer R&D route directly when HQ has ICE", () => {
   const state = fixture("pilot-blocked-hq");
   RealEngineFixtureBuilder.forState(state).withRezzedCorpIceOnServer(
     "hq",
-    "onr_v1_245_fire-wall",
+    457,
   );
   const decision = chooseAiAction(inputFor(state), {
     ...simulationEngineRuntimeOptions(state),

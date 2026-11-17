@@ -73,13 +73,13 @@ export type FullyBrokenPassedIceWindowResult = EncounterSpecialWindowResult & {
 
 export type SubmarinePostBidMarkerResult = EncounterSpecialWindowResult & {
   sourceCardId?: CardInstanceId;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   forcedRunEndAfterEncounter?: boolean;
 };
 
 export type PostPassIceWindowResult = EncounterSpecialWindowResult & {
   sourceCardId?: CardInstanceId;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   dieRoll?: number;
 };
 

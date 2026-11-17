@@ -107,7 +107,7 @@ function runnerInput(hand: VisibleCard[], rig: VisibleCard[]): AiDecisionInput {
 }
 
 function card(
-  definitionId: string,
+  definitionId: number,
   type: NonNullable<VisibleCard["type"]>,
 ): VisibleCard {
   return {

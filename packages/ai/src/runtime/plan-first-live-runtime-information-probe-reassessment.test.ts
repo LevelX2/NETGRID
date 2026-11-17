@@ -101,7 +101,7 @@ describe("plan-first information-probe reassessment", () => {
       );
       input.playerView.own.rig = [
         visibleCard("blink", "runner", "program", {
-          definitionId: "onr_v1_007_blink",
+          definitionId: 219,
           title: "Blink",
           subtypes: ["icebreaker"],
           strength: 5,
@@ -109,7 +109,7 @@ describe("plan-first information-probe reassessment", () => {
       ];
       const quandary = withEffectiveRunQuote(
         visibleCard("quandary", "corp", "ice", {
-          definitionId: "onr_v1_261_quandary",
+          definitionId: 473,
           title: "Quandary",
           subtypes: ["code_gate"],
           rezzed: true,
@@ -121,7 +121,7 @@ describe("plan-first information-probe reassessment", () => {
             {
               id: "quandary-etr",
               type: "end_the_run",
-              sourceDefinitionId: "onr_v1_261_quandary",
+              sourceDefinitionId: 473,
               sourceTitle: "Quandary",
             },
           ],
@@ -248,7 +248,7 @@ describe("plan-first information-probe reassessment", () => {
     encounterInput.playerView.own.clicks = 2;
     encounterInput.playerView.own.rig = [
       visibleCard("krash", "runner", "program", {
-        definitionId: "onr_v1_039_krash",
+        definitionId: 251,
         title: "Krash",
         subtypes: ["icebreaker"],
         strength: 0,
@@ -256,7 +256,7 @@ describe("plan-first information-probe reassessment", () => {
     ];
     const dataWall = withEffectiveRunQuote(
       visibleCard("data-wall-2", "corp", "ice", {
-        definitionId: "onr_v1_238_data-wall-2-0",
+        definitionId: 450,
         title: "Data Wall 2.0",
         subtypes: ["wall"],
         rezzed: true,
@@ -268,7 +268,7 @@ describe("plan-first information-probe reassessment", () => {
           {
             id: "data-wall-2-etr",
             type: "end_the_run",
-            sourceDefinitionId: "onr_v1_238_data-wall-2-0",
+            sourceDefinitionId: 450,
             sourceTitle: "Data Wall 2.0",
           },
         ],
@@ -376,7 +376,7 @@ describe("plan-first information-probe reassessment", () => {
     secondEncounterInput.playerView.own.clicks = 2;
     secondEncounterInput.playerView.own.rig = [
       visibleCard("krash", "runner", "program", {
-        definitionId: "onr_v1_039_krash",
+        definitionId: 251,
         title: "Krash",
         subtypes: ["icebreaker"],
         strength: 1,
@@ -384,7 +384,7 @@ describe("plan-first information-probe reassessment", () => {
     ];
     const keeperAfterDataWall = withEffectiveRunQuote(
       visibleCard("keeper-after-data-wall", "corp", "ice", {
-        definitionId: "onr_v1_252_keeper",
+        definitionId: 464,
         title: "Keeper",
         subtypes: ["code_gate"],
         rezzed: true,
@@ -396,7 +396,7 @@ describe("plan-first information-probe reassessment", () => {
           {
             id: "keeper-after-data-wall-etr",
             type: "end_the_run",
-            sourceDefinitionId: "onr_v1_252_keeper",
+            sourceDefinitionId: 464,
             sourceTitle: "Keeper",
           },
         ],
@@ -510,14 +510,14 @@ describe("plan-first information-probe reassessment", () => {
     encounterInput.playerView.own.credits = 3;
     encounterInput.playerView.own.rig = [
       visibleCard("krash", "runner", "program", {
-        definitionId: "onr_v1_039_krash",
+        definitionId: 251,
         subtypes: ["icebreaker"],
         strength: 0,
       }),
     ];
     const keeper = withEffectiveRunQuote(
       visibleCard("keeper", "corp", "ice", {
-        definitionId: "onr_v1_252_keeper",
+        definitionId: 464,
         title: "Keeper",
         subtypes: ["code_gate"],
         rezzed: true,
@@ -529,7 +529,7 @@ describe("plan-first information-probe reassessment", () => {
           {
             id: "keeper-etr",
             type: "end_the_run",
-            sourceDefinitionId: "onr_v1_252_keeper",
+            sourceDefinitionId: 464,
             sourceTitle: "Keeper",
           },
         ],

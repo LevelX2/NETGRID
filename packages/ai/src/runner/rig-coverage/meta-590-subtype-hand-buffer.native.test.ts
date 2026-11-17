@@ -8,8 +8,8 @@ import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-port
 afterEach(resetResidentPlanPortfolioMemory);
 
 it.each([
-  [166, "breaker_wall", "onr_proteus_100_wrecking-ball"],
-  [168, "breaker_sentry", "onr_proteus_080_black-widow"],
+  [166, "breaker_wall", 158],
+  [168, "breaker_sentry", 138],
 ] as const)(
   "does not pay another subtype switch at D%i for a central run blocked by its parent's hand floor",
   (decisionNumber, role, definitionId) => {

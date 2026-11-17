@@ -81,7 +81,7 @@ it.each([
     const result = chooseAiAction(input);
     expect(result.actionId).toBe(
       game === 21
-        ? "runner.play_event.runner_onr_v1_079_bodyweight-synthetic-blood_2.runner_onr_v1_079_bodyweight-synthetic-blood_2.onr_v1_079_bodyweight-synthetic-blood:abilities_on_play_draw_cards"
+        ? "runner.play_event.runner_291_2.runner_291_2.onr_v1_079_bodyweight-synthetic-blood:abilities_on_play_draw_cards"
         : "runner.draw_card",
     );
     expect(result.fallbackUsed).toBe(false);

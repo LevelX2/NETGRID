@@ -114,7 +114,7 @@ describe("install card execution", () => {
 
   it("rejects illegal Classic Corp ICE placement before spending or moving the card", () => {
     const iceId = "dumpster" as CardInstanceId;
-    const iceDefinition = definition("onr_classic_009_dumpster", "ice");
+    const iceDefinition = definition(13, "ice");
     const state = minimalState({
       cardInstances: {
         [iceId]: instance(iceId, iceDefinition.id, "corp", "hq"),
@@ -274,7 +274,7 @@ describe("install card execution", () => {
       proteusDoomHits: 1,
       doomCountersBefore: 1,
       doomCountersAfter: 0,
-      proteusDoomSourceDefinitionId: "onr_proteus_078_armageddon",
+      proteusDoomSourceDefinitionId: 136,
       trashedInstalledCardDefinitionId: assetDefinition.id,
     });
   });
@@ -291,7 +291,7 @@ describe("install card execution", () => {
 });
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"],
   extras: Partial<CardDefinition> = {},
 ): CardDefinition {

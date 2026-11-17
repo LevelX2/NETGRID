@@ -15,7 +15,7 @@ export type CorpActionIceRezSupportLiability =
   | "installment";
 
 export function definitionHasActionIceRezSupport(
-  definitionId: string,
+  definitionId: number,
 ): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   return (
@@ -36,7 +36,7 @@ export function definitionHasActionIceRezSupport(
 }
 
 export function actionIceRezSupportLiability(
-  definitionId: string,
+  definitionId: number,
 ): CorpActionIceRezSupportLiability | undefined {
   if (!definitionHasActionIceRezSupport(definitionId)) return undefined;
   const tacticSignals = new Set(

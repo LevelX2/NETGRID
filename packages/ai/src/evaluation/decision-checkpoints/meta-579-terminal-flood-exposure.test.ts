@@ -46,7 +46,7 @@ function projects(input: AiDecisionInputWithDeckCapabilities) {
     .filter(
       (c) =>
         c.actionType === "install_card" &&
-        c.sourceDefinitionId === "onr_v1_196_corporate-war",
+        c.sourceDefinitionId === 408,
     )
     .flatMap((c) =>
       scoreProjectForCandidate(

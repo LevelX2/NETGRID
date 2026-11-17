@@ -142,7 +142,7 @@ describe("zone-mutation", () => {
     const current = state();
     current.cardInstances[CORP_ASSET] = {
       ...current.cardInstances[CORP_ASSET]!,
-      definitionId: "onr_v1_331_nevinyrral",
+      definitionId: 543,
       rezzed: true,
     };
 
@@ -164,7 +164,7 @@ describe("zone-mutation", () => {
         {
           side: "corp",
           sourceCardInstanceId: CORP_ASSET,
-          sourceDefinitionId: "onr_v1_335_remote-facility",
+          sourceDefinitionId: 547,
           restriction: "any_action",
           optional: true,
           remaining: 1,

@@ -38,9 +38,9 @@ describe("Inside Job central plan-first coverage", () => {
         source: "inside-job-card",
         payload: {
           cardId: "inside-job-card",
-          sourceDefinitionId: "onr_v1_094_inside-job",
+          sourceDefinitionId: 306,
           cardImplementationAbilityId:
-            "onr_v1_094_inside-job:abilities_on_play_make_run",
+            "306:abilities_on_play_make_run",
           cardImplementationAbilityKey: "abilities_on_play_make_run",
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           serverId: "rd",
@@ -62,7 +62,7 @@ describe("Inside Job central plan-first coverage", () => {
     input.playerView.own.clicks = 2;
     input.playerView.own.gripOrHq = [
       visibleCard("inside-job-card", "runner", "event", {
-        definitionId: "onr_v1_094_inside-job",
+        definitionId: 306,
         title: "Inside Job",
       }),
       ...Array.from({ length: 5 }, (_, index) =>
@@ -74,7 +74,7 @@ describe("Inside Job central plan-first coverage", () => {
     ];
     input.playerView.own.rig = [
       visibleCard("rd-interface", "runner", "hardware", {
-        definitionId: "onr_v1_139_r-and-d-interface",
+        definitionId: 351,
         title: "R&D Interface",
       }),
     ];
@@ -83,10 +83,10 @@ describe("Inside Job central plan-first coverage", () => {
       server("rd", [
         payOneToPassIce(
           "misleading-access-menus",
-          "onr_proteus_032_misleading-access-menus",
+          90,
           "Misleading Access Menus",
         ),
-        payOneToPassIce("snowbank", "onr_proteus_038_snowbank", "Snowbank"),
+        payOneToPassIce("snowbank", 96, "Snowbank"),
       ]),
       server("archives"),
     ];
@@ -232,7 +232,7 @@ describe("Inside Job central plan-first coverage", () => {
       consumableRunOpportunityQuote: {
         schemaVersion: "runner-consumable-run-opportunity-v1" as const,
         kind: "bypass_first_ice" as const,
-        sourceDefinitionId: "onr_v1_094_inside-job",
+        sourceDefinitionId: 306,
         gripCopyCount: 1,
         handAtCapacity: false,
         baseOpportunityCost: 45,
@@ -311,7 +311,7 @@ describe("Inside Job central plan-first coverage", () => {
     ];
     input.playerView.own.gripOrHq.push(
       visibleCard("inside-job-backup", "runner", "event", {
-        definitionId: "onr_v1_094_inside-job",
+        definitionId: 306,
         title: "Inside Job",
       }),
     );
@@ -404,7 +404,7 @@ function insideJobConflictFixture() {
       source: "inside-job-card",
       payload: {
         cardId: "inside-job-card",
-        sourceDefinitionId: "onr_v1_094_inside-job",
+        sourceDefinitionId: 306,
         serverId: "rd",
         effectKind: "run",
         bypassFirstIce: true,
@@ -421,7 +421,7 @@ function insideJobConflictFixture() {
       source: "social-engineering-card",
       payload: {
         cardId: "social-engineering-card",
-        sourceDefinitionId: "onr_v1_111_social-engineering",
+        sourceDefinitionId: 323,
       },
     },
   );
@@ -441,11 +441,11 @@ function insideJobConflictFixture() {
   input.playerView.opponent.deckCount = 10;
   input.playerView.own.gripOrHq = [
     visibleCard("inside-job-card", "runner", "event", {
-      definitionId: "onr_v1_094_inside-job",
+      definitionId: 306,
       title: "Inside Job",
     }),
     visibleCard("social-engineering-card", "runner", "event", {
-      definitionId: "onr_v1_111_social-engineering",
+      definitionId: 323,
       title: "Social Engineering",
     }),
   ];
@@ -455,7 +455,7 @@ function insideJobConflictFixture() {
     server("rd", [
       withEffectiveRunQuote(
         visibleCard("rd-wall", "corp", "ice", {
-          definitionId: "onr_v1_232_crystal-wall",
+          definitionId: 444,
           title: "Crystal Wall",
           rezzed: true,
           subtypes: ["wall"],
@@ -467,7 +467,7 @@ function insideJobConflictFixture() {
             {
               id: "rd-wall-end-the-run",
               type: "end_the_run",
-              sourceDefinitionId: "onr_v1_232_crystal-wall",
+              sourceDefinitionId: 444,
               sourceTitle: "Crystal Wall",
             },
           ],
@@ -484,7 +484,7 @@ function insideJobConflictFixture() {
     consumableRunOpportunityQuote: {
       schemaVersion: "runner-consumable-run-opportunity-v1" as const,
       kind: "bypass_first_ice" as const,
-      sourceDefinitionId: "onr_v1_094_inside-job",
+      sourceDefinitionId: 306,
       gripCopyCount: 1,
       handAtCapacity: false,
       baseOpportunityCost: 45,
@@ -520,7 +520,7 @@ function insideJobConflictFixture() {
 
 function payOneToPassIce(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   title: string,
 ) {
   return withEffectiveRunQuote(

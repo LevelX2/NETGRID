@@ -9,9 +9,9 @@ import {
 } from "./tag-punish-ontology-consumer";
 import type { LegalAction } from "@netgrid/shared";
 
-const marked = "onr_proteus_005_marked-accounts";
-const trap = "onr_v1_345_trap";
-const hunting = "onr_proteus_026_hunting-pack";
+const marked = 63;
+const trap = 557;
+const hunting = 84;
 
 function entry(id: string) {
   const result = cardSpecPlanningCards().find((c) => c.definition.id === id);
@@ -69,10 +69,10 @@ describe("native access and relative-ICE tag producers", () => {
 
   it("keeps non-tag accesses and damage-only relative ICE outside tag classification", () => {
     expect(
-      classifyTagSourceFromOntology(mechanicalHint("onr_proteus_004_fetal-ai")),
+      classifyTagSourceFromOntology(mechanicalHint(62)),
     ).toBeUndefined();
     expect(
-      classifyTagSourceFromOntology(mechanicalHint("onr_proteus_021_dog-pile")),
+      classifyTagSourceFromOntology(mechanicalHint(79)),
     ).toBeUndefined();
   });
 

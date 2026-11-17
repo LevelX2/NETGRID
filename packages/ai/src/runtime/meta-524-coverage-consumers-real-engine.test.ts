@@ -189,7 +189,7 @@ it("retains the unique just-drawn Gate answer for its exact coverage executor (G
   const decision = chooseAiAction(input);
   expect(decision.selectedChoices).toEqual({
     choiceId: "p3_61_crash_draw_32",
-    selectedOptionIds: ["trash_runner_onr_v1_184_top-runners-conference_1"],
+    selectedOptionIds: ["trash_runner_396_1"],
   });
   const result = applyAction(state, {
     matchId: state.matchId,
@@ -199,9 +199,9 @@ it("retains the unique just-drawn Gate answer for its exact coverage executor (G
     selectedChoices: decision.selectedChoices!,
   });
   if (!result.ok) throw Error(result.error.message);
-  expect(result.state.runner.grip).toContain("runner_onr_v1_014_codecracker_2");
+  expect(result.state.runner.grip).toContain("runner_226_2");
   expect(result.state.runner.heap).toContain(
-    "runner_onr_v1_184_top-runners-conference_1",
+    "runner_396_1",
   );
 });
 
@@ -209,12 +209,12 @@ it("still discards the duplicate Gate breaker when one is already installed (G35
   const { input } = replay(35);
   expect(
     input.playerView.own.rig!.some(
-      (c) => c.definitionId === "onr_v1_014_codecracker",
+      (c) => c.definitionId === 226,
     ),
   ).toBe(true);
   expect(chooseAiAction(input).selectedChoices).toEqual({
     choiceId: "p3_61_crash_draw_123",
-    selectedOptionIds: ["trash_runner_onr_v1_014_codecracker_2"],
+    selectedOptionIds: ["trash_runner_226_2"],
   });
 });
 

@@ -8,7 +8,7 @@ import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 export function runnerDevelopmentSearchTargetIsExecutable(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
-  targetDefinitionId: string,
+  targetDefinitionId: number,
 ): boolean {
   const fail = (reason: string): never => {
     throw new PlanResolutionFailure("invalid_plan_identity", {

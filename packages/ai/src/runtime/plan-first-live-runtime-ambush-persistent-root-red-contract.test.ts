@@ -235,14 +235,14 @@ describe("red contract: persistent Corp Ambush root and exact support children",
 
 function vacantSoulkiller(): VisibleCard {
   return visibleCard("vacant-soulkiller", "corp", "asset", {
-    definitionId: "onr_v1_346_vacant-soulkiller",
+    definitionId: 558,
     title: "Vacant Soulkiller",
   });
 }
 
 function scoreAgenda(advancementCounters: number): VisibleCard {
   return visibleCard("agenda-1", "corp", "agenda", {
-    definitionId: "onr_v1_189_artificial-security-directors",
+    definitionId: 401,
     title: "Artificial Security Directors",
     advancementCounters,
     advancementRequirement: 3,
@@ -309,7 +309,7 @@ function scoringServers(agenda: VisibleCard) {
       "remote_1",
       [
         visibleCard("remote-ice", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           title: "Data Wall",
           rezzed: true,
         }),

@@ -7,7 +7,7 @@ describe("projectKnownCorpCardAccessEffect", () => {
     expect(
       projectKnownCorpCardAccessEffect({
         input: input("runner", { corpCredits: 4, runnerHandCount: 3 }),
-        sourceDefinitionId: "onr_v1_345_trap",
+        sourceDefinitionId: 557,
         sourceCard: card("trap", "asset"),
       }),
     ).toMatchObject({
@@ -31,7 +31,7 @@ describe("projectKnownCorpCardAccessEffect", () => {
     expect(
       projectKnownCorpCardAccessEffect({
         input: current,
-        sourceDefinitionId: "onr_v1_345_trap",
+        sourceDefinitionId: 557,
         sourceCard: card("trap", "asset"),
       }),
     ).toMatchObject({
@@ -47,7 +47,7 @@ describe("projectKnownCorpCardAccessEffect", () => {
     expect(
       projectKnownCorpCardAccessEffect({
         input: input("runner", { corpCredits: 3, runnerHandCount: 5 }),
-        sourceDefinitionId: "onr_v1_345_trap",
+        sourceDefinitionId: 557,
         sourceCard: card("trap", "asset"),
       }),
     ).toMatchObject({
@@ -64,7 +64,7 @@ describe("projectKnownCorpCardAccessEffect", () => {
     expect(
       projectKnownCorpCardAccessEffect({
         input: input("corp", { runnerRig: [] }),
-        sourceDefinitionId: "onr_v1_323_experimental-ai",
+        sourceDefinitionId: 535,
         sourceCard: source,
       }),
     ).toMatchObject({
@@ -82,7 +82,7 @@ describe("projectKnownCorpCardAccessEffect", () => {
         input: input("corp", {
           runnerRig: [card("hardware", "hardware"), card("program", "program")],
         }),
-        sourceDefinitionId: "onr_v1_315_corprunners-shattered-remains",
+        sourceDefinitionId: 527,
         sourceCard: source,
       }),
     ).toMatchObject({

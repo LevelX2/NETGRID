@@ -13,12 +13,12 @@ import { bindHistoricalRunEventCadence, publishOpenTraceBid } from "./checkpoint
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
-const NEWSGROUP_INSTANCE_ID = "runner_onr_v1_045_newsgroup-filter_1";
+const NEWSGROUP_INSTANCE_ID = "runner_257_1";
 const SHATTERED_REMAINS_INSTANCE_ID =
-  "corp_onr_v1_315_corprunners-shattered-remains_1";
+  "corp_527_1";
 const VISIBLE_TAG_PUNISH_INSTANCE_ID =
   "corp_onr_classic_026_street-enforcer_fixture_1";
-const VISIBLE_TAG_PUNISH_DEFINITION_ID = "onr_classic_026_street-enforcer";
+const VISIBLE_TAG_PUNISH_DEFINITION_ID = 30;
 
 describe("match 5F6D runner decision checkpoints", () => {
   it.each([
@@ -148,7 +148,7 @@ describe("match 5F6D runner decision checkpoints", () => {
         forbiddenActions: [
           {
             actionId:
-              "runner.activated_card_ability.runner_onr_v1_045_newsgroup-filter_1.runner_onr_v1_045_newsgroup-filter_1.activated.0",
+              "runner.activated_card_ability.runner_257_1.runner_257_1.activated.0",
           },
         ],
       };
@@ -168,7 +168,7 @@ describe("match 5F6D runner decision checkpoints", () => {
         checkpoint.source.findingId = "5F6D-C03-FUNDED-CLOAK-FIRST";
         checkpoint.expectation = {
           choice: {
-            selectedOptionIdsPrefix: ["card_runner_onr_v1_011_cloak_2"],
+            selectedOptionIdsPrefix: ["card_runner_223_2"],
           },
         };
       },

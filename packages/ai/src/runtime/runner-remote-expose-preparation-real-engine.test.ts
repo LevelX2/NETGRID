@@ -82,10 +82,10 @@ function fixture(credits = 9, clicks = 4, advanced = 1) {
     .withRunnerGripSize(0)
     .withRunnerCredits(credits)
     .withRunnerClicks(clicks)
-    .withRunnerProgramInstalled("onr_v1_058_seeya")
-    .withRunnerProgramInstalled("onr_v1_039_krash")
-    .withRunnerCardInGrip("onr_v1_161_fall-guy")
-    .withCorpRemoteRoot("remote_1", "onr_v1_323_experimental-ai", advanced);
+    .withRunnerProgramInstalled(270)
+    .withRunnerProgramInstalled(251)
+    .withRunnerCardInGrip(373)
+    .withCorpRemoteRoot("remote_1", 535, advanced);
   state.runner.memoryUsed = 2;
   state.corp.credits = 8;
   return state;
@@ -153,7 +153,7 @@ it.each([5, 9])(
     expect(
       input(state).playerView.servers.find((s) => s.id === "remote_1")!.root[0]!
         .definitionId,
-    ).toBe("onr_v1_323_experimental-ai");
+    ).toBe(535);
     for (let i = 0; i < 3 && input(state).playerView.pendingChoice; i++) {
       const acknowledgment = chooseAiAction(input(state));
       state = apply(
@@ -172,7 +172,7 @@ it.each([5, 9])(
     ).toBe(false);
     expect(
       state.runner.rig.programs.some(
-        (id) => state.cardInstances[id]!.definitionId === "onr_v1_039_krash",
+        (id) => state.cardInstances[id]!.definitionId === 251,
       ),
     ).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(eventStart));
@@ -208,8 +208,8 @@ it("does not expose a known root repeatedly", () => {
 it("keeps a financed root preparation when a more advanced remote lacks a funded path", () => {
   const state = fixture();
   RealEngineFixtureBuilder.forState(state)
-    .withCorpRemoteRoot("remote_2", "onr_v1_217_strike-force-kali", 3)
-    .withRezzedCorpIceOnServer("remote_2", "onr_v1_278_wall-of-ice");
+    .withCorpRemoteRoot("remote_2", 429, 3)
+    .withRezzedCorpIceOnServer("remote_2", 490);
   const first = chooseAiAction(input(state));
   expect(first.actionId).toContain("seeya");
   expect(first.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
@@ -234,7 +234,7 @@ it.each(["source", "version", "target", "option", "origin"] as const)(
     let options = choice.options;
     if (variant === "source")
       choice.source = choice.source.replace(
-        "runner_onr_v1_058_seeya_1",
+        "runner_270_1",
         "wrong_source",
       );
     if (variant === "version") current.playerView.stateVersion += 1;

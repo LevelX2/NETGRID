@@ -27,7 +27,7 @@ describe("trigger ability execution", () => {
     state.runner.rig.programs = [sourceCardId, targetCardId];
     state.cardInstances[sourceCardId] = instance(
       sourceCardId,
-      "onr_proteus_091_lockjaw",
+      149,
       "runner",
     );
     state.cardInstances[targetCardId] = instance(
@@ -44,7 +44,7 @@ describe("trigger ability execution", () => {
     state.pendingPreventableTrashCostContinuation = {
       kind: "runner_run_strength_boost",
       sourceCardId,
-      sourceDefinitionId: "onr_proteus_091_lockjaw",
+      sourceDefinitionId: 149,
       targetCardId,
       runId: "run_lockjaw",
       amount: 2,
@@ -107,7 +107,7 @@ describe("trigger ability execution", () => {
 
     state.corpTemporaryInstallRezCredits = {
       sourceCardInstanceId: "contract",
-      sourceDefinitionId: "onr_proteus_059_government-contract",
+      sourceDefinitionId: 117,
       remaining: 3,
       usableFor: "corp_install_or_rez",
       returnUnusedAtTurnEnd: true,
@@ -174,7 +174,7 @@ describe("trigger ability execution", () => {
     state.corp.clicks = 3;
     state.corpTemporaryInstallRezCredits = {
       sourceCardInstanceId: "contract",
-      sourceDefinitionId: "onr_proteus_059_government-contract",
+      sourceDefinitionId: 117,
       remaining: 3,
       usableFor: "corp_install_or_rez",
       returnUnusedAtTurnEnd: true,
@@ -215,7 +215,7 @@ describe("trigger ability execution", () => {
     state.runner.rig.hardware.push(sourceCardId);
     state.cardInstances[sourceCardId] = instance(
       sourceCardId,
-      "onr_v1_123_bodyweight-data-creche",
+      335,
       "runner",
     );
     state.runnerTurnFlags = {
@@ -234,7 +234,7 @@ describe("trigger ability execution", () => {
       {
         runnerAbility: "decline_successful_run_extra_run",
         cardId: sourceCardId,
-        sourceDefinitionId: "onr_v1_123_bodyweight-data-creche",
+        sourceDefinitionId: 335,
         successfulRunExtraRunDecision: "decline",
       },
     );
@@ -473,7 +473,7 @@ function testHost(
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   owner: Side,
 ): CardInstance {
   return {

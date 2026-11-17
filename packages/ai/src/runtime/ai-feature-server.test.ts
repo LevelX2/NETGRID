@@ -5,13 +5,13 @@ import { visibleRunnerDrawTaxSourceCount } from "./ai-feature-server";
 describe("visibleRunnerDrawTaxSourceCount", () => {
   it("ignores a discarded rezzed tax while retaining a separate installed tax", () => {
     const input = inputWithRemoteRoot([
-      rootCard("onr_v1_313_city-surveillance", { rezzed: true }),
+      rootCard(525, { rezzed: true }),
     ]);
     input.playerView.servers.push({
       id: "archives",
       label: "Archives",
       ice: [],
-      root: [rootCard("onr_v1_313_city-surveillance", { rezzed: true })],
+      root: [rootCard(525, { rezzed: true })],
     });
     expect(visibleRunnerDrawTaxSourceCount(input)).toBe(1);
     input.playerView.servers[0]!.root = [];
@@ -21,7 +21,7 @@ describe("visibleRunnerDrawTaxSourceCount", () => {
     expect(
       visibleRunnerDrawTaxSourceCount(
         inputWithRemoteRoot([
-          rootCard("onr_v1_313_city-surveillance", { rezzed: true }),
+          rootCard(525, { rezzed: true }),
         ]),
       ),
     ).toBe(1);
@@ -31,12 +31,12 @@ describe("visibleRunnerDrawTaxSourceCount", () => {
     expect(
       visibleRunnerDrawTaxSourceCount(
         inputWithRemoteRoot([
-          rootCard("onr_v1_313_city-surveillance", {
+          rootCard(525, {
             known: false,
             rezzed: true,
           }),
-          rootCard("onr_v1_313_city-surveillance", { rezzed: false }),
-          rootCard("onr_v1_333_omniscience-foundation", { rezzed: true }),
+          rootCard(525, { rezzed: false }),
+          rootCard(545, { rezzed: true }),
           rootCard("custom-blank-asset", { rezzed: true }),
         ]),
       ),
@@ -102,7 +102,7 @@ function inputWithRemoteRoot(root: VisibleCard[]): AiDecisionInput {
 }
 
 function rootCard(
-  definitionId: string,
+  definitionId: number,
   overrides: Partial<VisibleCard> = {},
 ): VisibleCard {
   return {

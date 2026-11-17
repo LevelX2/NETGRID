@@ -45,20 +45,20 @@ describe("Corp mixed draw score-protection coverage", () => {
     const efficiencyAction = conversionCapture.input.legalActions.find(
       (action) =>
         action.type === "play_operation" &&
-        action.source === "corp_onr_v1_290_efficiency-experts_1",
+        action.source === "corp_502_1",
     );
     const annualReviewsAction = conversionCapture.input.legalActions.find(
       (action) =>
         action.type === "play_operation" &&
-        action.source === "corp_onr_v1_282_annual-reviews_1",
+        action.source === "corp_494_1",
     );
     expect(efficiencyAction).toMatchObject({
       side: "corp",
       type: "play_operation",
-      source: "corp_onr_v1_290_efficiency-experts_1",
+      source: "corp_502_1",
       costs: [{ clicks: 1, credits: 0 }],
       payload: {
-        cardId: "corp_onr_v1_290_efficiency-experts_1",
+        cardId: "corp_502_1",
         gainCreditsAmount: 3,
       },
     });
@@ -84,7 +84,7 @@ describe("Corp mixed draw score-protection coverage", () => {
       ),
     ).toMatchObject({
       semanticActionType: "economy.gain_credit",
-      sourceDefinitionId: "onr_v1_290_efficiency-experts",
+      sourceDefinitionId: 502,
       economyProjection: {
         kind: "immediate_liquid",
         netLiquidCreditGain: 3,
@@ -125,7 +125,7 @@ describe("Corp mixed draw score-protection coverage", () => {
     ).not.toContain(annualReviewsAction?.actionId);
     expect(
       drawCapture.input.playerView.own.gripOrHq.some(
-        (card) => card.definitionId === "onr_v1_290_efficiency-experts",
+        (card) => card.definitionId === 502,
       ),
     ).toBe(false);
   });

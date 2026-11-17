@@ -25,21 +25,21 @@ function forgedHint(cardId: string, mutate: (entry: any) => void) {
 
 describe("generic CardSpec AI-hint repair block", () => {
   it("projects expose, dynamic ICE trash and Corp rez-or-trash choices from exact typed effects", () => {
-    expect(hint("onr_v1_042_mouse").effects).toContainEqual(
+    expect(hint(254).effects).toContainEqual(
       expect.objectContaining({
         kind: "expose_info",
         scope: "installed_card",
         target: "info.expose_installed_card",
       }),
     );
-    expect(hint("onr_v1_080_core-command-jettison-ice").effects).toContainEqual(
+    expect(hint(292).effects).toContainEqual(
       expect.objectContaining({
         kind: "ice_trash",
         resource: "credits",
         target: "pay_rez_cost_to_trash_rezzed_ice",
       }),
     );
-    expect(hint("onr_v1_086_forged-activation-orders").effects).toEqual(
+    expect(hint(298).effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           kind: "rez",
@@ -54,7 +54,7 @@ describe("generic CardSpec AI-hint repair block", () => {
   });
 
   it("keeps top-trash recovery both recovery- and search-visible", () => {
-    const junkyard = hint("onr_v1_165_junkyard-bbs");
+    const junkyard = hint(377);
     expect(junkyard.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -79,7 +79,7 @@ describe("generic CardSpec AI-hint repair block", () => {
   });
 
   it("projects typed free-trash access without widening ordinary runs", () => {
-    const kilroy = hint("onr_v1_096_kilroy-was-here");
+    const kilroy = hint(308);
     expect(kilroy.effects).toContainEqual(
       expect.objectContaining({
         kind: "trash_credit",
@@ -93,7 +93,7 @@ describe("generic CardSpec AI-hint repair block", () => {
     expect(kilroy.functionSignals).toContain("economy.trash_credit");
 
     const ordinaryRun = structuredClone(
-      planningEntry("onr_v1_096_kilroy-was-here"),
+      planningEntry(308),
     );
     (
       ordinaryRun.planning.engine.abilities![0]!.effects[0] as any
@@ -108,7 +108,7 @@ describe("generic CardSpec AI-hint repair block", () => {
   });
 
   it("projects typed installed-program trash replacement as defense support", () => {
-    const microtech = hint("onr_v1_131_microtech-backup-drive");
+    const microtech = hint(343);
     expect(microtech.effects).toContainEqual(
       expect.objectContaining({
         kind: "program_trash_prevention",
@@ -126,7 +126,7 @@ describe("generic CardSpec AI-hint repair block", () => {
     );
 
     const ordinaryHardware = structuredClone(
-      planningEntry("onr_v1_131_microtech-backup-drive"),
+      planningEntry(343),
     );
     delete (ordinaryHardware.planning.engine as any).runnerUtilityLongtail;
     const planningAnnotations = ordinaryHardware.planning.planningAnnotations;
@@ -155,7 +155,7 @@ describe("generic CardSpec AI-hint repair block", () => {
   });
 
   it("projects a targeted bypass run only from the exact hidden replacement contract", () => {
-    const social = hint("onr_v1_111_social-engineering");
+    const social = hint(323);
     expect(social.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -177,28 +177,28 @@ describe("generic CardSpec AI-hint repair block", () => {
     );
 
     expect(
-      forgedHint("onr_v1_111_social-engineering", (entry) => {
+      forgedHint(323, (entry) => {
         entry.planning.engine.hiddenReplacementLongtail.visibility = "public";
       }),
     ).toThrow("card_spec_unknown_targeted_bypass_run_shape");
   });
 
   it("projects typed stack search and Blink random-break risk without card text", () => {
-    expect(hint("onr_v1_177_the-short-circuit").effects).toContainEqual(
+    expect(hint(389).effects).toContainEqual(
       expect.objectContaining({
         kind: "search",
         scope: "stack",
         target: "program",
       }),
     );
-    expect(hint("onr_v1_007_blink").breakerProfile?.randomOutcome).toEqual({
+    expect(hint(219).breakerProfile?.randomOutcome).toEqual({
       kind: "random_break_or_damage",
       successProbabilityPerAttempt: 0.5,
       failureDamageType: "net",
       maxSingleFailureDamage: 3,
     });
 
-    const ordinaryBreaker = structuredClone(planningEntry("onr_v1_007_blink"));
+    const ordinaryBreaker = structuredClone(planningEntry(219));
     (ordinaryBreaker.planning.engine.icebreakerAbilities![0]! as any).special =
       {
         kind: "run_end_trash_source_if_used",
@@ -210,7 +210,7 @@ describe("generic CardSpec AI-hint repair block", () => {
   });
 
   it("projects static central access modifiers and keeps non-noisy credits restricted", () => {
-    expect(hint("onr_v1_129_hq-interface").effects).toContainEqual(
+    expect(hint(341).effects).toContainEqual(
       expect.objectContaining({
         kind: "multiaccess",
         scope: "hq",
@@ -218,14 +218,14 @@ describe("generic CardSpec AI-hint repair block", () => {
         amount: 1,
       }),
     );
-    expect(hint("onr_v1_011_cloak").effects).toContainEqual(
+    expect(hint(223).effects).toContainEqual(
       expect.objectContaining({
         kind: "recurring_economy",
         economyMode: "restricted_credit",
         target: "non_noisy_icebreaker",
       }),
     );
-    expect(hint("onr_v1_011_cloak").effects).not.toContainEqual(
+    expect(hint(223).effects).not.toContainEqual(
       expect.objectContaining({
         kind: "recurring_economy",
         target: "link",
@@ -234,7 +234,7 @@ describe("generic CardSpec AI-hint repair block", () => {
   });
 
   it("normalizes shared damage prevention and tag avoidance without per-type duplicates", () => {
-    const skullcap = hint("onr_proteus_096_skullcap");
+    const skullcap = hint(154);
     expect(
       skullcap.effects?.filter((effect) => effect.kind === "damage_prevention"),
     ).toEqual([
@@ -244,7 +244,7 @@ describe("generic CardSpec AI-hint repair block", () => {
         target: "prevent.core_and_net_damage",
       }),
     ]);
-    expect(hint("onr_v1_135_nasuko-cycle").effects).toContainEqual(
+    expect(hint(347).effects).toContainEqual(
       expect.objectContaining({
         kind: "tag_prevention",
         target: "avoid_tag",
@@ -254,7 +254,7 @@ describe("generic CardSpec AI-hint repair block", () => {
   });
 
   it("projects tagged meat damage and threshold score swings with explicit risks", () => {
-    const taggedDamage = hint("onr_v1_327_i-got-a-rock");
+    const taggedDamage = hint(539);
     expect(taggedDamage.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -273,7 +273,7 @@ describe("generic CardSpec AI-hint repair block", () => {
       kind: "requires_runner_tagged",
     });
 
-    const scorchedEarth = hint("onr_v1_302_scorched-earth");
+    const scorchedEarth = hint(514);
     expect(scorchedEarth.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -292,7 +292,7 @@ describe("generic CardSpec AI-hint repair block", () => {
       kind: "requires_runner_tagged",
     });
 
-    const corporateWar = hint("onr_v1_196_corporate-war");
+    const corporateWar = hint(408);
     expect(corporateWar.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -323,7 +323,7 @@ describe("generic CardSpec AI-hint repair block", () => {
   });
 
   it("projects advancement-counter cashout and deferred encounter damage from their typed contracts", () => {
-    const laundering = hint("onr_v1_328_information-laundering");
+    const laundering = hint(540);
     expect(laundering.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -349,7 +349,7 @@ describe("generic CardSpec AI-hint repair block", () => {
       kind: "requires_advancement_counter",
     });
 
-    const fatalAttractor = hint("onr_v1_242_fatal-attractor");
+    const fatalAttractor = hint(454);
     expect(fatalAttractor.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -368,7 +368,7 @@ describe("generic CardSpec AI-hint repair block", () => {
   });
 
   it("projects advancement score conversion and keeps typed action capacity", () => {
-    expect(hint("onr_v1_292_management-shake-up").effects).toContainEqual(
+    expect(hint(504).effects).toContainEqual(
       expect.objectContaining({
         kind: "advance_burst",
         resource: "advancement_counters",
@@ -376,7 +376,7 @@ describe("generic CardSpec AI-hint repair block", () => {
         amount: 3,
       }),
     );
-    const falsified = hint("onr_v1_291_falsified-transactions-expert");
+    const falsified = hint(503);
     expect(falsified.effects).toContainEqual(
       expect.objectContaining({
         kind: "advance",
@@ -391,7 +391,7 @@ describe("generic CardSpec AI-hint repair block", () => {
       ]),
     );
     expect(
-      hint("onr_v1_297_overtime-incentives").actionCapacityProfiles,
+      hint(509).actionCapacityProfiles,
     ).toContainEqual(
       expect.objectContaining({
         class: "immediate_gain",
@@ -402,7 +402,7 @@ describe("generic CardSpec AI-hint repair block", () => {
   });
 
   it("projects hosted-credit load/cashout and Hacker Tracker trace pools", () => {
-    const braindance = hint("onr_v1_311_braindance-campaign");
+    const braindance = hint(523);
     expect(braindance.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -419,7 +419,7 @@ describe("generic CardSpec AI-hint repair block", () => {
       ]),
     );
 
-    const hackerTracker = hint("onr_v1_325_hacker-tracker-central");
+    const hackerTracker = hint(537);
     expect(hackerTracker.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -454,7 +454,7 @@ describe("generic CardSpec AI-hint repair block", () => {
   });
 
   it("projects Emergency Rig from the unbounded chosen-X free-rez contract", () => {
-    expect(hint("onr_proteus_049_emergency-rig").effects).toEqual(
+    expect(hint(107).effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           kind: "rez",
@@ -467,7 +467,7 @@ describe("generic CardSpec AI-hint repair block", () => {
       ]),
     );
     expect(
-      forgedHint("onr_proteus_049_emergency-rig", (entry) => {
+      forgedHint(107, (entry) => {
         entry.planning.engine.abilities[0].effects[0].amount = {
           kind: "bounded_x_by_rez_cost_min_one",
         };
@@ -477,48 +477,48 @@ describe("generic CardSpec AI-hint repair block", () => {
 
   it("fails closed for malformed near-shapes and does not widen restrictions", () => {
     const malformed = [
-      forgedHint("onr_v1_042_mouse", (entry) => {
+      forgedHint(254, (entry) => {
         entry.planning.engine.abilities[0].effects[0].visibility = "private";
       }),
-      forgedHint("onr_v1_165_junkyard-bbs", (entry) => {
+      forgedHint(377, (entry) => {
         entry.planning.engine.abilities[0].effects[0].recipient = "corp";
       }),
-      forgedHint("onr_v1_080_core-command-jettison-ice", (entry) => {
+      forgedHint(292, (entry) => {
         entry.planning.engine.abilities[0].effects[0].target =
           "chosen_unrezzed_ice";
       }),
-      forgedHint("onr_v1_086_forged-activation-orders", (entry) => {
+      forgedHint(298, (entry) => {
         entry.planning.engine.abilities[0].effects[0].visibility = "private";
       }),
-      forgedHint("onr_v1_129_hq-interface", (entry) => {
+      forgedHint(341, (entry) => {
         entry.planning.engine.modifiers[0].amount = 0;
       }),
-      forgedHint("onr_proteus_096_skullcap", (entry) => {
+      forgedHint(154, (entry) => {
         entry.planning.engine.damagePreventionSources[0].damageTypes = [];
       }),
-      forgedHint("onr_v1_135_nasuko-cycle", (entry) => {
+      forgedHint(347, (entry) => {
         entry.planning.engine.tagPreventionSources[0].amount = 2;
       }),
-      forgedHint("onr_v1_327_i-got-a-rock", (entry) => {
+      forgedHint(539, (entry) => {
         entry.planning.engine.uniqueDirectLongtail.damageType = "net";
       }),
-      forgedHint("onr_v1_196_corporate-war", (entry) => {
+      forgedHint(408, (entry) => {
         entry.planning.engine.scoredAgenda.threshold = 0;
       }),
-      forgedHint("onr_v1_291_falsified-transactions-expert", (entry) => {
+      forgedHint(503, (entry) => {
         entry.planning.engine.abilities[0].effects[0].maxAmount = 0;
       }),
-      forgedHint("onr_v1_311_braindance-campaign", (entry) => {
+      forgedHint(523, (entry) => {
         entry.planning.engine.lifecycle.on_rez[0].amount = 0;
       }),
-      forgedHint("onr_v1_325_hacker-tracker-central", (entry) => {
+      forgedHint(537, (entry) => {
         entry.planning.engine.remainingReplacementLongtail.traceValueAndLimitPerBit = 0;
       }),
     ];
     for (const derive of malformed)
       expect(derive).toThrow(/card_spec_unknown_/);
 
-    const linkOnly = structuredClone(planningEntry("onr_v1_011_cloak"));
+    const linkOnly = structuredClone(planningEntry(223));
     (linkOnly as any).planning.engine.restrictedHostedCreditSource.usableFor = [
       "increase_link",
     ];

@@ -195,8 +195,8 @@ function effectiveRunQuoteFor(
 }
 
 describe("Proteus Phase 3a Variable ICE Foundation", () => {
-  const DIGICONDA = "onr_proteus_020_digiconda";
-  const FOOD_FIGHT = "onr_proteus_022_food-fight";
+  const DIGICONDA = 78;
+  const FOOD_FIGHT = 80;
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
@@ -228,7 +228,7 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
           id: `${seed}_runner`,
           name: "Proteus Variable ICE Harness Runner",
           cards: [
-            { id: "simple_killer", quantity: 1 },
+            { id: 598, quantity: 1 },
             ...ONR_V1_1_2K_RUNNER_DECK.cards,
           ],
         },
@@ -365,7 +365,7 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
       state.corp.credits = 12;
       const killerId =
         subroutineCount > 0
-          ? installRunnerProgramForTest(state, "simple_killer")
+          ? installRunnerProgramForTest(state, 598)
           : undefined;
       if (killerId) state.runner.credits = 10;
       const iceId = putCorpIceOnServer(state, "rd", FOOD_FIGHT);
@@ -475,15 +475,15 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
   const phase3bCards = [
-    "onr_proteus_013_caryatid",
-    "onr_proteus_017_credit-blocks",
-    "onr_proteus_023_galatea",
-    "onr_proteus_024_gatekeeper",
-    "onr_proteus_025_homing-missile",
-    "onr_proteus_028_lesser-arcana",
-    "onr_proteus_036_sandstorm",
-    "onr_proteus_039_sphinx-2006",
-    "onr_proteus_040_sumo-2008",
+    71,
+    75,
+    81,
+    82,
+    83,
+    86,
+    94,
+    97,
+    98,
   ];
 
   function proteusPhase3bGame(seed: string): GameState {
@@ -495,9 +495,9 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
           id: `${seed}_runner`,
           name: "Proteus Phase 3b Runner",
           cards: [
-            { id: "simple_decoder", quantity: 1 },
-            { id: "simple_killer", quantity: 1 },
-            { id: "onr_v1_021_dwarf", quantity: 1 },
+            { id: 591, quantity: 1 },
+            { id: 598, quantity: 1 },
+            { id: 233, quantity: 1 },
             ...ONR_V1_1_2K_RUNNER_DECK.cards,
           ],
         },
@@ -544,12 +544,12 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
 
   it("stores alternate subtype rez choices and uses them for views and break projection", () => {
     const cases = [
-      ["onr_proteus_013_caryatid", "code_gate", "simple_decoder", 1],
-      ["onr_proteus_017_credit-blocks", "wall", "onr_v1_021_dwarf", 1],
-      ["onr_proteus_023_galatea", "code_gate", "simple_decoder", 1],
-      ["onr_proteus_028_lesser-arcana", "wall", "onr_v1_021_dwarf", 1],
-      ["onr_proteus_039_sphinx-2006", "sentry", "simple_killer", 4],
-      ["onr_proteus_040_sumo-2008", "wall", "onr_v1_021_dwarf", 1],
+      [71, "code_gate", 591, 1],
+      [75, "wall", 233, 1],
+      [81, "code_gate", 591, 1],
+      [86, "wall", 233, 1],
+      [97, "sentry", 598, 4],
+      [98, "wall", 233, 1],
     ] as const;
 
     for (const [
@@ -634,8 +634,8 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
 
   it("reuses paid ETR variable rez for Gatekeeper and Sandstorm", () => {
     for (const iceDefinitionId of [
-      "onr_proteus_024_gatekeeper",
-      "onr_proteus_036_sandstorm",
+      82,
+      94,
     ] as const) {
       let state = proteusPhase3bGame(
         `proteus-phase-3b-paid-etr-${iceDefinitionId}`,
@@ -694,7 +694,7 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
         "4 zusätzliche Credits beim Rezzen",
       );
       expect(variableSubroutineDisplay?.ariaLabel).toContain(
-        iceDefinitionId === "onr_proteus_024_gatekeeper"
+        iceDefinitionId === 82
           ? "7 Credits insgesamt"
           : "8 Credits insgesamt",
       );
@@ -715,7 +715,7 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
     const iceId = putCorpIceOnServer(
       state,
       "rd",
-      "onr_proteus_025_homing-missile",
+      83,
     );
     state = apply(
       state,
@@ -746,7 +746,7 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
       traceLimit: 5,
     });
     expect(getPlayerView(state, "runner").run?.encounteredIce).toMatchObject({
-      definitionId: "onr_proteus_025_homing-missile",
+      definitionId: 83,
       strength: 5,
     });
     expect(effectiveRunQuoteFor(state, "rd", iceId)?.subroutines).toEqual([
@@ -776,12 +776,12 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
 });
 
 describe("Proteus Phase 3c Relative Board-Count ICE", () => {
-  const BUG_ZAPPER = "onr_proteus_012_bug-zapper";
-  const DOG_PILE = "onr_proteus_021_dog-pile";
-  const HUNTING_PACK = "onr_proteus_026_hunting-pack";
-  const MASTERMIND = "onr_proteus_030_mastermind";
-  const OUTER_BLANK_ICE_A = "onr_proteus_024_gatekeeper";
-  const OUTER_BLANK_ICE_B = "onr_proteus_036_sandstorm";
+  const BUG_ZAPPER = 70;
+  const DOG_PILE = 79;
+  const HUNTING_PACK = 84;
+  const MASTERMIND = 88;
+  const OUTER_BLANK_ICE_A = 82;
+  const OUTER_BLANK_ICE_B = 94;
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
@@ -826,7 +826,7 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
 
   function encounterInnerRelativeIce(
     state: GameState,
-    targetDefinitionId: string,
+    targetDefinitionId: number,
   ): { state: GameState; targetId: CardInstanceId } {
     const targetId = putCorpIceOnServer(state, "rd", targetDefinitionId);
     const outerOne = putCorpIceOnServer(state, "rd", OUTER_BLANK_ICE_A);
@@ -1094,10 +1094,10 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
 });
 
 describe("Proteus Phase 3e ICE Repositioning", () => {
-  const MOBILE_BARRICADE = "onr_proteus_033_mobile-barricade";
-  const WALKING_WALL = "onr_proteus_044_walking-wall";
-  const INNER_ICE = "onr_proteus_024_gatekeeper";
-  const MIDDLE_ICE = "onr_proteus_036_sandstorm";
+  const MOBILE_BARRICADE = 91;
+  const WALKING_WALL = 102;
+  const INNER_ICE = 82;
+  const MIDDLE_ICE = 94;
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
@@ -1334,14 +1334,14 @@ describe("Proteus Phase 3e ICE Repositioning", () => {
 });
 
 describe("Proteus Dynamic Public ETR ICE", () => {
-  const MINOTAUR = "onr_proteus_031_minotaur";
-  const RIDDLER = "onr_proteus_034_riddler";
-  const TOUGHONIUM = "onr_proteus_041_toughoniumtm-wall";
-  const SPHINX_2006 = "onr_proteus_039_sphinx-2006";
-  const SUMO_2008 = "onr_proteus_040_sumo-2008";
-  const CODE_GATE = "onr_v1_230_cortical-scanner";
-  const WALL = "onr_v1_232_crystal-wall";
-  const SENTRY = "onr_v1_231_cortical-scrub";
+  const MINOTAUR = 89;
+  const RIDDLER = 92;
+  const TOUGHONIUM = 99;
+  const SPHINX_2006 = 97;
+  const SUMO_2008 = 98;
+  const CODE_GATE = 442;
+  const WALL = 444;
+  const SENTRY = 443;
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
@@ -1362,9 +1362,9 @@ describe("Proteus Dynamic Public ETR ICE", () => {
         ...ONR_V1_6_2_RUNNER_DECK,
         id: `${seed}_runner`,
         cards: [
-          { id: "simple_killer", quantity: 1 },
+          { id: 598, quantity: 1 },
           ...ONR_V1_6_2_RUNNER_DECK.cards.filter(
-            (card) => card.id !== "simple_killer",
+            (card) => card.id !== 598,
           ),
         ],
       },
@@ -1637,24 +1637,24 @@ describe("Proteus Dynamic Public ETR ICE", () => {
 });
 
 describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
-  const BRAIN_WASH = "onr_proteus_011_brain-wash";
-  const CHIHUAHUA = "onr_proteus_014_chihuahua";
-  const COLONEL_FAILURE = "onr_proteus_015_colonel-failure";
-  const COYOTE = "onr_proteus_016_coyote";
-  const DATACOMB = "onr_proteus_018_datacomb";
-  const DEATH_YO_YO = "onr_proteus_019_death-yo-yo";
-  const ICEBERG = "onr_proteus_027_iceberg";
-  const MARIONETTE = "onr_proteus_029_marionette";
-  const SCAFFOLDING = "onr_proteus_037_scaffolding";
-  const MISLEADING_ACCESS_MENUS = "onr_proteus_032_misleading-access-menus";
-  const SNOWBANK = "onr_proteus_038_snowbank";
-  const TUMBLERS = "onr_proteus_042_tumblers";
-  const TWISTY_PASSAGES = "onr_proteus_043_twisty-passages";
-  const WASHED_UP_SOLO_CONSTRUCT = "onr_proteus_045_washed-up-solo-construct";
+  const BRAIN_WASH = 69;
+  const CHIHUAHUA = 72;
+  const COLONEL_FAILURE = 73;
+  const COYOTE = 74;
+  const DATACOMB = 76;
+  const DEATH_YO_YO = 77;
+  const ICEBERG = 85;
+  const MARIONETTE = 87;
+  const SCAFFOLDING = 95;
+  const MISLEADING_ACCESS_MENUS = 90;
+  const SNOWBANK = 96;
+  const TUMBLERS = 100;
+  const TWISTY_PASSAGES = 101;
+  const WASHED_UP_SOLO_CONSTRUCT = 103;
   const SUNBURST_CRANIAL_INTERFACE =
-    "onr_proteus_151_sunburst-cranial-interface";
-  const RASMIN_BRIDGER = "onr_proteus_070_rasmin-bridger";
-  const SOCIAL_ENGINEERING = "onr_v1_111_social-engineering";
+    209;
+  const RASMIN_BRIDGER = 128;
+  const SOCIAL_ENGINEERING = 323;
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
@@ -1696,9 +1696,9 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       RASMIN_BRIDGER,
     ]);
     const runnerOverrideIds = new Set([
-      "simple_decoder",
-      "simple_fracter",
-      "simple_killer",
+      591,
+      597,
+      598,
       SUNBURST_CRANIAL_INTERFACE,
     ]);
     return createGameAfterSetup({
@@ -1707,9 +1707,9 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
         ...ONR_V1_6_2_RUNNER_DECK,
         id: `${seed}_runner`,
         cards: [
-          { id: "simple_decoder", quantity: 2 },
-          { id: "simple_fracter", quantity: 2 },
-          { id: "simple_killer", quantity: 2 },
+          { id: 591, quantity: 2 },
+          { id: 597, quantity: 2 },
+          { id: 598, quantity: 2 },
           { id: SUNBURST_CRANIAL_INTERFACE, quantity: 1 },
           ...ONR_V1_6_2_RUNNER_DECK.cards.filter(
             (card) => !runnerOverrideIds.has(card.id),
@@ -1781,7 +1781,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
 
   function startEncounterWithRezzedIce(
     state: GameState,
-    definitionId: string,
+    definitionId: number,
   ): { state: GameState; iceId: CardInstanceId } {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 30;
@@ -1801,7 +1801,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
 
   function startEncounterAndRezIce(
     state: GameState,
-    definitionId: string,
+    definitionId: number,
   ): { state: GameState; iceId: CardInstanceId; rezCreditsBefore: number } {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 30;
@@ -1953,9 +1953,9 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       COLONEL_FAILURE,
     );
     let { state } = setup;
-    installRunnerProgramForTest(state, "simple_decoder");
-    installRunnerProgramForTest(state, "simple_fracter");
-    installRunnerProgramForTest(state, "simple_killer");
+    installRunnerProgramForTest(state, 591);
+    installRunnerProgramForTest(state, 597);
+    installRunnerProgramForTest(state, 598);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     const continueAction = mustAction(
@@ -2033,9 +2033,9 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       );
       let { state } = setup;
       const installedProgramIds = [
-        "simple_decoder",
-        "simple_fracter",
-        "simple_killer",
+        591,
+        597,
+        598,
       ]
         .slice(0, programCount)
         .map((definitionId) =>
@@ -2279,7 +2279,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       proteusSimpleCorpIceGame("proteus-pro010-washed-up-paid"),
       WASHED_UP_SOLO_CONSTRUCT,
     ).state;
-    const programId = installRunnerProgramForTest(state, "simple_decoder");
+    const programId = installRunnerProgramForTest(state, 591);
     const paid = mustAction(
       state,
       "runner",
@@ -2309,7 +2309,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     ).state;
     const trashedProgramId = installRunnerProgramForTest(
       refusing,
-      "simple_decoder",
+      591,
     );
     refusing = apply(
       refusing,
@@ -2329,7 +2329,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       proteusSimpleCorpIceGame("proteus-pro010-washed-up-sunburst-bound"),
       WASHED_UP_SOLO_CONSTRUCT,
     ).state;
-    const programId = installRunnerProgramForTest(state, "simple_decoder");
+    const programId = installRunnerProgramForTest(state, 591);
     const sunburstId = installRunnerHardwareForTest(
       state,
       SUNBURST_CRANIAL_INTERFACE,
@@ -2380,7 +2380,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     );
     expect(state.run?.encounteredIceId).toBe(washedUpId);
 
-    const programId = installRunnerProgramForTest(state, "simple_decoder");
+    const programId = installRunnerProgramForTest(state, 591);
     const heapBefore = state.runner.heap.length;
     const creditsBefore = state.runner.credits;
     const payWashed = mustAction(

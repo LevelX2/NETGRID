@@ -82,7 +82,7 @@ describe("real Engine inputs through the live Semantic Runtime", () => {
       if (selected?.type === "play_event") {
         expect(selected?.payload?.cardId).toBe(selected?.source);
         expect(selected?.payload?.runnerEventRun).toBe(true);
-        expect(sourceDefinitionId).toBe("simple_run_event");
+        expect(sourceDefinitionId).toBe(600);
       }
       expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
       expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({

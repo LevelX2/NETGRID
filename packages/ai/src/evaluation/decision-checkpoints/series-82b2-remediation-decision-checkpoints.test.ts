@@ -50,7 +50,7 @@ describe("series 82b2 remediation decision checkpoints", () => {
     const fireWall = playerView.servers.find(
       (server) => server.id === run.attackedServerId,
     )?.ice[run.position.iceIndex];
-    expect(fireWall?.definitionId).toBe("onr_v1_245_fire-wall");
+    expect(fireWall?.definitionId).toBe(457);
     expect(fireWall?.effectiveRezResourceExchangeQuote).toMatchObject({
       complete: false,
       reason: "current_encounter_bypassed",

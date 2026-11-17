@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_370_tesseract-fort-construction",
+      582,
     ),
     title: "Tesseract Fort Construction",
     side: "corp",

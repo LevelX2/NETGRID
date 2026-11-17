@@ -90,8 +90,8 @@ it.each([
     card.type = variant === "other_agenda" ? "agenda" : "asset";
     card.definitionId =
       variant === "other_agenda"
-        ? "onr_v1_203_hostile-takeover"
-        : "onr_v1_309_bbs-whispering-campaign";
+        ? 415
+        : 521;
     input.playerView.servers.find((s) => s.id === "hq")!.root.push(card);
   }
   const candidates = buildActionSemanticCandidates({

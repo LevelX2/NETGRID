@@ -25,16 +25,16 @@ export type RunnerPressureMetricDependencies = {
   knownPositionMemoryForInput: (
     input: AiDecisionInput,
   ) => KnownPositionMemory[];
-  definitionTypeForMetrics: (definitionId: string) => string | undefined;
+  definitionTypeForMetrics: (definitionId: number) => string | undefined;
   remoteRootTrashCostForMetrics: (card: VisibleCard) => number | undefined;
   canBreakerDefinitionBreakIce: (
-    breakerDefinitionId: string,
-    iceDefinitionId: string,
+    breakerDefinitionId: number,
+    iceDefinitionId: number,
   ) => boolean;
   runnerVisibleIceCreatesCoverageNeedForMetrics: (
     ice: AiDecisionInput["playerView"]["servers"][number]["ice"][number],
   ) => boolean;
-  runnerMissingBreakerRolesForMetrics: (definitionId: string) => string[];
+  runnerMissingBreakerRolesForMetrics: (definitionId: number) => string[];
   runnerCoverageSearchActionForMetrics: (
     input: AiDecisionInput,
     action: LegalAction,

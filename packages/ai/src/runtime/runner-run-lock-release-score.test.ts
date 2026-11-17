@@ -66,7 +66,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
       withEffectiveRunQuote(
         {
           instanceId: "known-data-wall",
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           title: "Data Wall",
           type: "ice",
           known: true,
@@ -78,7 +78,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
             {
               id: "known-data-wall-end-the-run",
               type: "end_the_run",
-              sourceDefinitionId: "onr_v1_237_data-wall",
+              sourceDefinitionId: 449,
               sourceTitle: "Data Wall",
             },
           ],
@@ -99,7 +99,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     current.playerView.own.rig = [
       {
         instanceId: "cortical-cybermodem",
-        definitionId: "onr_proteus_134_cortical-cybermodem",
+        definitionId: 192,
         known: true,
       },
     ];

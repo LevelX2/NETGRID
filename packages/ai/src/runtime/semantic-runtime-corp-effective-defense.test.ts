@@ -10,7 +10,7 @@ import { withPostRezRunQuote } from "../effective-run-quote.test-support";
 describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
   it("retains the stop potential in a current composite trace-success quote", () => {
     const cinderella = corpIce("cinderella", {
-      definitionId: "onr_v1_228_cinderella",
+      definitionId: 440,
       title: "Cinderella",
     });
     expect(
@@ -41,7 +41,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
 
   it("uses current quoted subroutines instead of printed potential when supplied", () => {
     const hunting = corpIce("hunting", {
-      definitionId: "onr_proteus_026_hunting-pack",
+      definitionId: 84,
       title: "Hunting Pack",
     });
     expect(visibleCorpIceDefenseProfile(hunting)).toMatchObject({
@@ -71,7 +71,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     expect(
       visibleCorpIceDefenseProfile(
         corpIce("snowbank", {
-          definitionId: "onr_proteus_038_snowbank",
+          definitionId: 96,
           title: "Snowbank",
         }),
       ),
@@ -83,7 +83,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     expect(
       visibleCorpIceDefenseProfile(
         corpIce("chihuahua", {
-          definitionId: "onr_proteus_014_chihuahua",
+          definitionId: 72,
           title: "Chihuahua",
         }),
       ),
@@ -94,7 +94,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     expect(
       visibleCorpIceDefenseProfile(
         corpIce("colonel-failure", {
-          definitionId: "onr_proteus_015_colonel-failure",
+          definitionId: 73,
           title: "Colonel Failure",
         }),
       ),
@@ -110,7 +110,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     expect(
       visibleCorpIceDefenseProfile(
         corpIce("shock-r", {
-          definitionId: "onr_v1_268_shock-r",
+          definitionId: 480,
           title: "Shock.r",
           subtypes: ["sentry", "ap", "stun"],
         }),
@@ -126,7 +126,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     expect(
       visibleCorpIceDefenseProfile(
         corpIce("cinderella", {
-          definitionId: "onr_v1_228_cinderella",
+          definitionId: 440,
           title: "Cinderella",
         }),
       ),
@@ -138,7 +138,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     expect(
       visibleCorpIceDefenseProfile(
         corpIce("hunter", {
-          definitionId: "onr_v1_249_hunter",
+          definitionId: 461,
           title: "Hunter",
         }),
       ),
@@ -178,10 +178,13 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     });
   });
 
-  it("flags zero-effect X-strength rez actions encoded in the legal action id", () => {
+  it("flags zero-effect X-strength rez actions using their Engine payload", () => {
     const context = semanticRuntimeCorpEffectiveDefenseContext(
       corpInput(6),
-      rezAction("corp.rez_ice.test_ice.test_ice.x_strength.0.0", 6),
+      rezAction("17", 6, {
+        variableRezKind: "x_strength",
+        variableRezValue: 0,
+      }),
       undefined,
       { actionCreditCost },
     );
@@ -279,7 +282,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
         servers: [
           server("rd", [
             corpIce("quandary-installed", {
-              definitionId: "onr_v1_261_quandary",
+              definitionId: 473,
               title: "Quandary",
             }),
           ]),
@@ -385,7 +388,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
         servers: [
           server("rd", [
             corpIce("credit-blocks", {
-              definitionId: "onr_proteus_017_credit-blocks",
+              definitionId: 75,
               title: "Credit Blocks",
               subtypes: ["sentry"],
             }),
@@ -427,7 +430,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
         servers: [
           server("hq", [
             corpIce("credit-blocks", {
-              definitionId: "onr_proteus_017_credit-blocks",
+              definitionId: 75,
               title: "Credit Blocks",
               subtypes: ["sentry"],
             }),
@@ -466,7 +469,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
         servers: [
           server("rd", [
             corpIce("credit-blocks", {
-              definitionId: "onr_proteus_017_credit-blocks",
+              definitionId: 75,
               title: "Credit Blocks",
               subtypes: ["sentry"],
             }),
@@ -709,7 +712,7 @@ function postRezWallOfStatic(
   stateVersion: number,
 ) {
   const ice = corpIce(instanceId, {
-    definitionId: "onr_v1_279_wall-of-static",
+    definitionId: 491,
     title: "Wall of Static",
     subtypes: ["wall"],
     rezzed: false,
@@ -724,7 +727,7 @@ function postRezWallOfStatic(
         {
           id: `${instanceId}-end-the-run`,
           type: "end_the_run",
-          sourceDefinitionId: "onr_v1_279_wall-of-static",
+          sourceDefinitionId: 491,
           sourceTitle: "Wall of Static",
         },
       ],
@@ -753,7 +756,7 @@ function earlyWormBreaker(): NonNullable<
 >[number] {
   return {
     instanceId: "early-worm",
-    definitionId: "onr_classic_027_early-worm",
+    definitionId: 31,
     title: "Early Worm",
     known: true,
     type: "program",
@@ -768,7 +771,7 @@ function wallOnlyBreaker(): NonNullable<
 >[number] {
   return {
     instanceId: "pile-driver",
-    definitionId: "onr_v1_047_pile-driver",
+    definitionId: 259,
     title: "Pile Driver",
     known: true,
     type: "program",

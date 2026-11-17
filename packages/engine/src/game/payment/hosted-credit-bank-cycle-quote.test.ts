@@ -14,7 +14,7 @@ import {
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { quoteCorpHostedCreditBankCycle } from "./hosted-credit-bank-cycle-quote";
 
-const bankDefinition = "onr_v1_318_department-of-truth-enhancement";
+const bankDefinition = 530;
 function fixture(credits = 3, clicks = 3, rezzed = false) {
   let state = createGameAfterSetup({
     seed: "hosted-bank-cycle-boundary",

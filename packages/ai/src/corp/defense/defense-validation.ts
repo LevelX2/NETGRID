@@ -417,7 +417,7 @@ function validCommaSeparatedDefinitionIds(value: unknown): boolean {
   );
 }
 
-function commaSeparatedDefinitionIds(value: unknown): string[] | undefined {
+function commaSeparatedDefinitionIds(value: unknown): number[] | undefined {
   if (value === undefined) return [];
   if (!validCommaSeparatedDefinitionIds(value)) return undefined;
   return (value as string).split(",");

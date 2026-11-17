@@ -10,8 +10,8 @@ import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-buil
 import { chooseCorpAction } from "../index";
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
-const NETWATCH = "onr_v1_207_netwatch-operations-office",
-  URBAN = "onr_v1_307_urban-renewal";
+const NETWATCH = 419,
+  URBAN = 519;
 const deck = {
   ...DEMO_DECKS.demo_corp_001,
   id: "scored-trace-corp",

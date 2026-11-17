@@ -33,7 +33,7 @@ export const DEFAULT_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE: RandomBreakOrDamageRis
   };
 
 export function randomBreakOrDamageRiskProfileForDefinitionId(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RandomBreakOrDamageRiskProfile | undefined {
   if (!definitionId) return undefined;
   return randomBreakOrDamageRiskProfileForHint(

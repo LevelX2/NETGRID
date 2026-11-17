@@ -107,7 +107,7 @@ describe("e553 human-pattern historical evidence", () => {
       input.playerView.own.rig?.find(
         (card) => card.instanceId === action.source,
       )?.definitionId,
-    ).toBe("onr_v1_177_the-short-circuit");
+    ).toBe(389);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       selectedPlan: {
         moduleId: "runner.rig_and_coverage",
@@ -152,7 +152,7 @@ describe("e553 human-pattern historical evidence", () => {
     const paid = input.legalActions.filter(
       (action) =>
         action.payload?.delayedInstallAbility === "remove_shell_counter" &&
-        ["onr_v1_016_cyfermaster", "onr_v1_023_evil-twin"].includes(
+        [228, 235].includes(
           String(action.payload.targetCardDefinitionId),
         ),
     );
@@ -174,8 +174,8 @@ describe("e553 human-pattern historical evidence", () => {
     const { input } = structuredClone(lateShellJson) as Capture;
     // Projection counterfactual: identical visible Engine quotes, more liquid credits.
     input.playerView.own.credits = 100;
-    const source = "runner_onr_v1_176_the-shell-traders_1";
-    const target = "runner_onr_v1_016_cyfermaster_1";
+    const source = "runner_388_1";
+    const target = "runner_228_1";
     const assessment = assessShellTradersAccess(
       input,
       source,
@@ -188,7 +188,7 @@ describe("e553 human-pattern historical evidence", () => {
       requiredClicks: 1,
     });
     expect(assessment.completionCardIds).toEqual(
-      expect.arrayContaining([target, "runner_onr_v1_023_evil-twin_1"]),
+      expect.arrayContaining([target, "runner_235_1"]),
     );
     expect(assessment.knownPathCost).toBeGreaterThan(0);
     const fundedDecision = replay({ ...lateShellJson, input }).decision;
@@ -224,8 +224,8 @@ describe("e553 human-pattern historical evidence", () => {
     expect(
       assessShellTradersAccess(
         input,
-        "runner_onr_v1_176_the-shell-traders_1",
-        "runner_onr_v1_016_cyfermaster_1",
+        "runner_388_1",
+        "runner_228_1",
         "remote_1",
       ).status,
     ).toBe("unknown");
@@ -235,14 +235,14 @@ describe("e553 human-pattern historical evidence", () => {
     const { input } = structuredClone(lateShellJson);
     input.playerView.own.credits = 100;
     input.playerView.own.memoryLimit = 3;
-    const source = "runner_onr_v1_176_the-shell-traders_1";
-    const target = "runner_onr_v1_016_cyfermaster_1";
+    const source = "runner_388_1";
+    const target = "runner_228_1";
     expect(
       assessShellTradersAccess(input, source, target, "remote_1").status,
     ).toBe("blocked");
     expect(
       assessShellTradersAccess(input, source, target, "remote_1", [
-        "runner_onr_v1_036_jackhammer_1",
+        "runner_248_1",
       ]).status,
     ).toBe("funded");
     const action = input.legalActions.find(
@@ -253,7 +253,7 @@ describe("e553 human-pattern historical evidence", () => {
     action.expiresAtStateVersion -= 1;
     expect(
       assessShellTradersAccess(input, source, target, "remote_1", [
-        "runner_onr_v1_036_jackhammer_1",
+        "runner_248_1",
       ]).status,
     ).toBe("unknown");
   });

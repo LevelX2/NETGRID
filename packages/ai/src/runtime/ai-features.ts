@@ -7,7 +7,7 @@ export type AiFeatures = {
   memoryRemaining: number;
   hasInstalledNonNoisyIcebreaker: boolean;
   rigRoles: Set<string>;
-  rigDefinitionIds: Set<string>;
+  rigDefinitionIds: Set<number>;
   gripDefinitionCounts: Map<string, number>;
   serverFeaturesById: Map<string, ServerFeatures>;
 };

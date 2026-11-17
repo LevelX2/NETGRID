@@ -178,7 +178,7 @@ describe("plan-first Remote contest continuation", () => {
     } as VisibleCard;
     const dataWall = withEffectiveRunQuote(
       visibleCard("terminal-information-data-wall", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         title: "Data Wall",
         subtypes: ["wall"],
         rezzed: true,
@@ -190,7 +190,7 @@ describe("plan-first Remote contest continuation", () => {
           {
             id: "terminal-information-end-run",
             type: "end_the_run",
-            sourceDefinitionId: "onr_v1_237_data-wall",
+            sourceDefinitionId: 449,
             sourceTitle: "Data Wall",
           },
         ],
@@ -257,7 +257,7 @@ describe("plan-first Remote contest continuation", () => {
     encounterInput.playerView.own.clicks = 3;
     encounterInput.playerView.own.rig = [
       visibleCard("terminal-information-blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         title: "Blink",
         subtypes: ["icebreaker"],
         strength: 0,
@@ -348,7 +348,7 @@ describe("plan-first Remote contest continuation", () => {
     });
     const puzzle = withEffectiveRunQuote(
       visibleCard("puzzle", "corp", "ice", {
-        definitionId: "onr_classic_013_puzzle",
+        definitionId: 17,
         title: "Puzzle",
         rezzed: true,
         lifecycleMarkers: [
@@ -365,13 +365,13 @@ describe("plan-first Remote contest continuation", () => {
           {
             id: "puzzle-end-run-a",
             type: "end_the_run_and_trash_source_at_end_of_turn",
-            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceDefinitionId: 17,
             sourceTitle: "Puzzle",
           },
           {
             id: "puzzle-end-run-b",
             type: "end_the_run_and_trash_source_at_end_of_turn",
-            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceDefinitionId: 17,
             sourceTitle: "Puzzle",
           },
         ],
@@ -455,7 +455,7 @@ describe("plan-first Remote contest continuation", () => {
     });
     const puzzle = withEffectiveRunQuote(
       visibleCard("funded-puzzle", "corp", "ice", {
-        definitionId: "onr_classic_013_puzzle",
+        definitionId: 17,
         title: "Puzzle",
         rezzed: true,
         lifecycleMarkers: [
@@ -472,7 +472,7 @@ describe("plan-first Remote contest continuation", () => {
           {
             id: "funded-puzzle-end-run",
             type: "end_the_run_and_trash_source_at_end_of_turn",
-            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceDefinitionId: 17,
             sourceTitle: "Puzzle",
           },
         ],
@@ -541,7 +541,7 @@ describe("plan-first Remote contest continuation", () => {
         source: "codecracker-after-puzzle",
         payload: {
           cardId: "codecracker-after-puzzle",
-          sourceDefinitionId: "onr_v1_014_codecracker",
+          sourceDefinitionId: 226,
         },
       },
     );
@@ -565,7 +565,7 @@ describe("plan-first Remote contest continuation", () => {
     });
     const puzzle = withEffectiveRunQuote(
       visibleCard("coverage-puzzle", "corp", "ice", {
-        definitionId: "onr_classic_013_puzzle",
+        definitionId: 17,
         title: "Puzzle",
         rezzed: true,
         lifecycleMarkers: [
@@ -582,7 +582,7 @@ describe("plan-first Remote contest continuation", () => {
           {
             id: "coverage-puzzle-end-run",
             type: "end_the_run_and_trash_source_at_end_of_turn",
-            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceDefinitionId: 17,
             sourceTitle: "Puzzle",
           },
         ],
@@ -593,7 +593,7 @@ describe("plan-first Remote contest continuation", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("codecracker-after-puzzle", "runner", "program", {
-        definitionId: "onr_v1_014_codecracker",
+        definitionId: 226,
         title: "Codecracker",
         subtypes: ["icebreaker", "decoder"],
         installCost: 2,
@@ -604,7 +604,7 @@ describe("plan-first Remote contest continuation", () => {
       server("rd", [
         withEffectiveRunQuote(
           visibleCard("coverage-rd-code-gate", "corp", "ice", {
-            definitionId: "onr_v1_261_quandary",
+            definitionId: 473,
             rezzed: true,
             subtypes: ["code_gate"],
           }),
@@ -676,7 +676,7 @@ describe("plan-first Remote contest continuation", () => {
       knownAccessState: "known_payoff" as const,
       accessPayoff: "trash_affordable" as const,
       accessFacts: {
-        knownTargetDefinitionIds: ["onr_v1_347_vapor-ops"],
+        knownTargetDefinitionIds: [559],
         trashBudget: 1,
       },
       recommendation: "run_now" as const,
@@ -698,7 +698,7 @@ describe("plan-first Remote contest continuation", () => {
           : [],
     });
     const vaporOps = visibleCard("vapor-ops", "corp", "asset", {
-      definitionId: "onr_v1_347_vapor-ops",
+      definitionId: 559,
       title: "Vapor Ops",
       rezzed: true,
       trashCost: 1,
@@ -726,7 +726,7 @@ describe("plan-first Remote contest continuation", () => {
           accessCommitment: {
             payoff: "trash_affordable",
             intendedAction: "trash",
-            knownTargetDefinitionIds: ["onr_v1_347_vapor-ops"],
+            knownTargetDefinitionIds: [559],
             trashBudget: 1,
           },
         },
@@ -760,26 +760,26 @@ describe("plan-first Remote contest continuation", () => {
     encounterInput.playerView.own.clicks = 3;
     encounterInput.playerView.own.rig = [
       visibleCard("loony-goon", "runner", "program", {
-        definitionId: "onr_v1_040_loony-goon",
+        definitionId: 252,
         title: "Loony Goon",
         subtypes: ["icebreaker"],
         strength: 2,
       }),
       visibleCard("codecracker", "runner", "program", {
-        definitionId: "onr_v1_014_codecracker",
+        definitionId: 226,
         title: "Codecracker",
         subtypes: ["icebreaker"],
         strength: 0,
       }),
       visibleCard("short-term-contract", "runner", "resource", {
-        definitionId: "onr_v1_178_short-term-contract",
+        definitionId: 390,
         title: "Short-Term Contract",
         counters: { bit: 4 },
       }),
     ];
     const neuralBlade = withEffectiveRunQuote(
       visibleCard("neural-blade", "corp", "ice", {
-        definitionId: "onr_v1_258_neural-blade",
+        definitionId: 470,
         title: "Neural Blade",
         subtypes: ["sentry"],
         rezzed: true,
@@ -793,13 +793,13 @@ describe("plan-first Remote contest continuation", () => {
             type: "do_damage",
             amount: 1,
             damageType: "net",
-            sourceDefinitionId: "onr_v1_258_neural-blade",
+            sourceDefinitionId: 470,
             sourceTitle: "Neural Blade",
           },
           {
             id: "neural-blade-break-prohibition",
             type: "set_next_encounter_no_break_subroutines",
-            sourceDefinitionId: "onr_v1_258_neural-blade",
+            sourceDefinitionId: 470,
             sourceTitle: "Neural Blade",
             unbrokenRunEffect: { preventsFutureBreaking: true },
           },
@@ -808,7 +808,7 @@ describe("plan-first Remote contest continuation", () => {
     );
     const keeper = withEffectiveRunQuote(
       visibleCard("keeper", "corp", "ice", {
-        definitionId: "onr_v1_252_keeper",
+        definitionId: 464,
         title: "Keeper",
         subtypes: ["code_gate"],
         rezzed: true,
@@ -820,7 +820,7 @@ describe("plan-first Remote contest continuation", () => {
           {
             id: "keeper-end-the-run",
             type: "end_the_run",
-            sourceDefinitionId: "onr_v1_252_keeper",
+            sourceDefinitionId: 464,
             sourceTitle: "Keeper",
           },
         ],
@@ -894,7 +894,7 @@ describe("plan-first Remote contest continuation", () => {
       knownAccessState: "known_payoff" as const,
       accessPayoff: "trash_affordable" as const,
       accessFacts: {
-        knownTargetDefinitionIds: ["onr_v1_312_chicago-branch"],
+        knownTargetDefinitionIds: [524],
         trashBudget: 1,
       },
       runCommitment: "full_path" as const,
@@ -949,14 +949,14 @@ describe("plan-first Remote contest continuation", () => {
           : undefined,
     });
     const chicagoBranch = visibleCard("chicago-branch", "corp", "asset", {
-      definitionId: "onr_v1_312_chicago-branch",
+      definitionId: 524,
       title: "Chicago Branch",
       rezzed: true,
       trashCost: 1,
     });
     const filter = withEffectiveRunQuote(
       visibleCard("known-filter", "corp", "ice", {
-        definitionId: "onr_v1_244_filter",
+        definitionId: 456,
         title: "Filter",
         subtypes: ["code_gate"],
         rezzed: true,
@@ -968,7 +968,7 @@ describe("plan-first Remote contest continuation", () => {
           {
             id: "known-filter-end-the-run",
             type: "end_the_run",
-            sourceDefinitionId: "onr_v1_244_filter",
+            sourceDefinitionId: 456,
             sourceTitle: "Filter",
           },
         ],
@@ -1043,7 +1043,7 @@ describe("plan-first Remote contest continuation", () => {
     encounterInput.playerView.own.credits = 1;
     encounterInput.playerView.own.rig = [
       visibleCard("codecracker", "runner", "program", {
-        definitionId: "onr_v1_014_codecracker",
+        definitionId: 226,
         title: "Codecracker",
         subtypes: ["icebreaker"],
         strength: 0,
@@ -1161,7 +1161,7 @@ describe("plan-first Remote contest continuation", () => {
     } as VisibleCard;
     const snowbank = withEffectiveRunQuote(
       visibleCard("match-f5f54fac-snowbank", "corp", "ice", {
-        definitionId: "onr_proteus_038_snowbank",
+        definitionId: 96,
         title: "Snowbank",
         subtypes: ["wall"],
         rezzed: true,
@@ -1174,7 +1174,7 @@ describe("plan-first Remote contest continuation", () => {
             id: "match-f5f54fac-snowbank-pay-or-end-run",
             type: "end_the_run_unless_runner_pays",
             amount: 1,
-            sourceDefinitionId: "onr_proteus_038_snowbank",
+            sourceDefinitionId: 96,
             sourceTitle: "Snowbank",
           },
         ],
@@ -1191,7 +1191,7 @@ describe("plan-first Remote contest continuation", () => {
     startInput.playerView.own.credits = 7;
     startInput.playerView.own.rig = [
       visibleCard("match-f5f54fac-boring-bit", "runner", "program", {
-        definitionId: "onr_proteus_081_boring-bit",
+        definitionId: 139,
         title: "Boring Bit",
         subtypes: ["icebreaker"],
         strength: 0,
@@ -1239,7 +1239,7 @@ describe("plan-first Remote contest continuation", () => {
       {
         payload: {
           encounterContinue: true,
-          sourceDefinitionId: "onr_proteus_038_snowbank",
+          sourceDefinitionId: 96,
           unbrokenSubroutineCount: 1,
           encounterWillEndRun: false,
           encounterSubroutineIds: "match-f5f54fac-snowbank-pay-or-end-run",
@@ -1257,7 +1257,7 @@ describe("plan-first Remote contest continuation", () => {
       {
         payload: {
           encounterContinue: true,
-          sourceDefinitionId: "onr_proteus_038_snowbank",
+          sourceDefinitionId: 96,
           unbrokenSubroutineCount: 1,
           encounterWillEndRun: true,
           encounterSubroutineIds: "match-f5f54fac-snowbank-pay-or-end-run",
@@ -1282,7 +1282,7 @@ describe("plan-first Remote contest continuation", () => {
     );
     encounterInput.playerView.own.rig = [
       visibleCard("match-f5f54fac-boring-bit", "runner", "program", {
-        definitionId: "onr_proteus_081_boring-bit",
+        definitionId: 139,
         title: "Boring Bit",
         installCost: 6,
         subtypes: ["icebreaker"],

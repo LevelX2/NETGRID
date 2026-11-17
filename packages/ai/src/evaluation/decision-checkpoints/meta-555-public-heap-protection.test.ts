@@ -77,11 +77,11 @@ it.each(["g4-d595", "g17-d455"])(
     expect(candidate).toBeDefined();
     const before = JSON.stringify([input.playerView, input.legalActions]);
     expect(input.playerView.opponent.discardCards!.at(-1)?.definitionId).toBe(
-      "onr_classic_031_rent-i-con",
+      35,
     );
     expect(
       input.playerView.opponent.rig?.some(
-        (c) => c.definitionId === "onr_classic_031_rent-i-con",
+        (c) => c.definitionId === 35,
       ),
     ).toBe(false);
     expect(
@@ -178,7 +178,7 @@ it.each(["absent", "inactive", "hidden"])(
     const input = fixture("g17-d455");
     const runner = input.playerView.opponent;
     const bbs = runner.rig!.find(
-      (c) => c.definitionId === "onr_v1_165_junkyard-bbs",
+      (c) => c.definitionId === 377,
     )!;
     if (mode === "absent") runner.rig = runner.rig!.filter((c) => c !== bbs);
     else if (mode === "inactive") bbs.rezzed = false;
@@ -189,7 +189,7 @@ it.each(["absent", "inactive", "hidden"])(
 it("keeps a genuine current two-layer certificate when no public recovery is installed", () => {
   const input = fixture("g17-d455");
   input.playerView.opponent.rig = input.playerView.opponent.rig!.filter(
-    (c) => c.definitionId !== "onr_v1_165_junkyard-bbs",
+    (c) => c.definitionId !== 377,
   );
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -391,7 +391,7 @@ it("keeps the rezzed fort pass modifier in the score protection evidence", () =>
   const before = assess();
   server.root.push({
     instanceId: "pass-protection",
-    definitionId: "onr_v1_367_rio-de-janeiro-city-grid",
+    definitionId: 579,
     type: "upgrade",
     known: true,
     owner: "corp",

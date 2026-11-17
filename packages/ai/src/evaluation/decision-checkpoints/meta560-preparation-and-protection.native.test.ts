@@ -123,7 +123,7 @@ describe("pairing 560: purpose-bound preparation and honest protection facts", (
       expect(gap.installCreditPreparation).toMatchObject({
         actionId: action.actionId,
         savedLiquidCredits: 2,
-        targetDefinitionId: "onr_v1_014_codecracker",
+        targetDefinitionId: 226,
         stateVersion: 8,
       });
       const installed = apply(f.state, action.actionId, "runner");
@@ -255,7 +255,7 @@ describe("pairing 560: purpose-bound preparation and honest protection facts", (
       );
       expect(action).toMatchObject({
         type: "install_card",
-        source: "corp_onr_v1_317_data-masons_1",
+        source: "corp_529_1",
         payload: { serverId: "new_remote" },
       });
       expect(

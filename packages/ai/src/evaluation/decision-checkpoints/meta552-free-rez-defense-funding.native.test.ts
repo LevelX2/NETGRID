@@ -258,7 +258,7 @@ describe("native free rez before Defense funding", () => {
       } else {
         expect(current.corp.credits).toBe(7);
         expect(p?.rootPlanInstanceId).toBe(
-          "plan:corp.score_agenda:agenda%3Acorp_onr_v1_220_tycho-extension_1%3Aremote_1",
+          "plan:corp.score_agenda:agenda%3Acorp_432_1%3Aremote_1",
         );
         expect(p?.selectedPlan?.moduleId).toBe("corp.defend_servers");
       }

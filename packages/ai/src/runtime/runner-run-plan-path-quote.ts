@@ -1522,7 +1522,7 @@ function effectiveIceStrength(ice: VisibleCard): number | undefined {
 function iceBreakEstimateInput(
   ice: VisibleCard,
   strength = effectiveIceStrength(ice),
-): { definitionId?: string; subtypes?: string[]; strength?: number } {
+): { definitionId?: number; subtypes?: string[]; strength?: number } {
   return {
     ...(ice.definitionId ? { definitionId: ice.definitionId } : {}),
     ...(ice.subtypes ? { subtypes: ice.subtypes } : {}),

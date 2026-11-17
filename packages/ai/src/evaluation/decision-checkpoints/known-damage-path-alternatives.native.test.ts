@@ -50,18 +50,18 @@ function prepare(handCount = 3, credits = 13) {
       ...ORIGINALSET_DEFAULT_DECKS.runner,
       cards: [
         ...ORIGINALSET_DEFAULT_DECKS.runner.cards.filter(
-          (c) => c.id !== "onr_v1_039_krash",
+          (c) => c.id !== 251,
         ),
-        { id: "onr_v1_039_krash", quantity: 1 },
+        { id: 251, quantity: 1 },
       ],
     },
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
         ...ORIGINALSET_DEFAULT_DECKS.corp.cards.filter(
-          (c) => c.id !== "onr_v1_258_neural-blade",
+          (c) => c.id !== 470,
         ),
-        { id: "onr_v1_258_neural-blade", quantity: 2 },
+        { id: 470, quantity: 2 },
       ],
     },
   });
@@ -70,11 +70,11 @@ function prepare(handCount = 3, credits = 13) {
   while (state.activeSide === "corp" && state.pendingChoice)
     state = act(state, (a) => a.type === "resolve_choice");
   expect(state.activeSide).toBe("runner");
-  installRunnerProgramForTest(state, "onr_v1_039_krash");
+  installRunnerProgramForTest(state, 251);
   for (let n = 0; n < 2; n++) {
     const ice =
       state.cardInstances[
-        putCorpIceCopyOnServer(state, "hq", "onr_v1_258_neural-blade")
+        putCorpIceCopyOnServer(state, "hq", 470)
       ]!;
     ice.rezzed = true;
     ice.faceup = true;

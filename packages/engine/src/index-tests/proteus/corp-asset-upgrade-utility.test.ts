@@ -25,19 +25,19 @@ import {
 } from "@netgrid/shared";
 import { CARD_IMPLEMENTATIONS } from "../../card-implementations/registry";
 
-const CYBERTECH = "onr_proteus_055_cybertech-think-tank";
-const DEPARTMENT = "onr_proteus_056_department-of-misinformation";
-const GOVERNMENT_CONTRACT = "onr_proteus_059_government-contract";
-const LDL = "onr_proteus_061_ldl-traffic-analyzers";
-const PANIC_BUTTON = "onr_proteus_067_panic-button";
-const STRATEGIC_PLANNING_GROUP = "onr_classic_025_strategic-planning-group";
-const RAYMOND = "onr_proteus_071_raymond-ellison";
-const SIREN = "onr_proteus_074_siren";
-const SYD = "onr_proteus_076_syd-meyer-superstores";
-const ROVING_SUBMARINE = "onr_v1_368_roving-submarine";
-const WALL = "onr_v1_279_wall-of-static";
-const MOUSE = "onr_v1_042_mouse";
-const SCORCHED_EARTH = "onr_v1_302_scorched-earth";
+const CYBERTECH = 113;
+const DEPARTMENT = 114;
+const GOVERNMENT_CONTRACT = 117;
+const LDL = 119;
+const PANIC_BUTTON = 125;
+const STRATEGIC_PLANNING_GROUP = 29;
+const RAYMOND = 129;
+const SIREN = 132;
+const SYD = 134;
+const ROVING_SUBMARINE = 580;
+const WALL = 491;
+const MOUSE = 254;
+const SCORCHED_EARTH = 514;
 
 const PRO014_IDS = [
   CYBERTECH,
@@ -77,7 +77,7 @@ function baseState(seed: string): GameState {
 
 function addCorpRoot(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   serverId: Exclude<ServerId, "new_remote">,
   rezzed = true,
@@ -114,7 +114,7 @@ function addCorpRoot(
 
 function addCorpIce(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   serverId: Exclude<ServerId, "new_remote">,
   rezzed = true,
@@ -151,7 +151,7 @@ function addCorpIce(
 
 function addCorpHq(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -173,7 +173,7 @@ function addCorpHq(
 
 function addCorpRd(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -195,7 +195,7 @@ function addCorpRd(
 
 function addRunnerProgram(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -221,7 +221,7 @@ function addRunnerGrip(state: GameState, id: string): void {
   state.runner.grip.push(cardId);
   state.cardInstances[cardId] = {
     instanceId: cardId,
-    definitionId: "onr_v1_001_afreet" as CardDefinitionId,
+    definitionId: 213 as CardDefinitionId,
     owner: "runner",
     controller: "runner",
     zone: { side: "runner", zone: "grip" },
@@ -883,7 +883,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     const panicId = addCorpRoot(hqRun, PANIC_BUTTON, "panic_1", "hq", true);
     addCorpRoot(hqRun, STRATEGIC_PLANNING_GROUP, "panic_spg", "remote_1", true);
     addCorpRd(hqRun, WALL, "rd_draw");
-    addCorpRd(hqRun, "simple_economy_operation", "rd_spg_extra");
+    addCorpRd(hqRun, 596, "rd_spg_extra");
     hqRun = apply(
       hqRun,
       "runner",

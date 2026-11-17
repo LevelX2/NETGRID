@@ -87,7 +87,7 @@ export type CorpActionDispositionContributorFacts = Readonly<{
     scoreProjects: readonly CorpScoreProjectSignal[],
   ) => CorpDefensiveUpgradePlacement | undefined;
   corpDefinitionSupportsPunishPlan: (
-    definitionId: string | undefined,
+    definitionId: number | undefined,
   ) => boolean;
   corpConditionalPunishTagSourceHasNoVisiblePayoff: (
     input: AiDecisionInput,
@@ -135,7 +135,7 @@ export type CorpActionDispositionContributorFacts = Readonly<{
     project: CorpScoreProjectSignal,
   ) => boolean;
   corpScoreProjectId: (
-    agendaInstanceOrDefinitionId: string,
+    agendaInstanceOrDefinitionId: number,
     serverId: string | undefined,
   ) => string;
   corpScoredAgendaRevealWithoutPurposeDispositionEvidence: (

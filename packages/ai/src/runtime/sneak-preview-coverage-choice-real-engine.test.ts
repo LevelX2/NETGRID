@@ -28,7 +28,7 @@ describe("Sneak Preview coverage-search choice on real Engine inputs", () => {
 
     expect(first).toEqual(second);
     expect(first.ownerModuleId).toBe("runner.rig_and_coverage");
-    expect(first.selectedProgramDefinitionId).toBe("onr_v1_014_codecracker");
+    expect(first.selectedProgramDefinitionId).toBe(226);
   });
 
   it("prebinds an acceptable memory sacrifice before a heap coverage install", () => {
@@ -38,9 +38,9 @@ describe("Sneak Preview coverage-search choice on real Engine inputs", () => {
     expect(first).toEqual(second);
     expect(first.ownerModuleId).toBe("runner.rig_and_coverage");
     expect(first.selectedProgramDefinitionId).toBe(
-      "onr_classic_031_rent-i-con",
+      35,
     );
-    expect(first.trashedProgramDefinitionId).toBe("onr_v1_035_invisibility");
+    expect(first.trashedProgramDefinitionId).toBe(247);
   });
 
   it("prebinds an acceptable memory sacrifice before an Airport Locker stack coverage install", () => {
@@ -50,7 +50,7 @@ describe("Sneak Preview coverage-search choice on real Engine inputs", () => {
     expect(first).toEqual(second);
     expect(first.ownerModuleId).toBe("runner.rig_and_coverage");
     expect(first.selectedProgramDefinitionId).toBe(
-      "onr_classic_031_rent-i-con",
+      35,
     );
     expect(first.trashedProgramDefinitionId).toBeDefined();
   });
@@ -66,12 +66,12 @@ describe("Sneak Preview coverage-search choice on real Engine inputs", () => {
       .withRunnerCredits(5)
       .withRunnerClicks(4)
       .withRunnerGripSize(0)
-      .withRunnerResourceInstalled("onr_proteus_128_airport-locker")
-      .withRezzedCorpIceOnServer("rd", "onr_v1_224_bolter-cluster");
+      .withRunnerResourceInstalled(186)
+      .withRezzedCorpIceOnServer("rd", 436);
     const airportLockerId = state.runner.rig.resources.find(
       (cardId) =>
         state.cardInstances[cardId]?.definitionId ===
-        "onr_proteus_128_airport-locker",
+        186,
     );
     if (!airportLockerId)
       throw new Error("Missing installed Airport Locker fixture card.");
@@ -80,7 +80,7 @@ describe("Sneak Preview coverage-search choice on real Engine inputs", () => {
       faceup: false,
       rezzed: false,
     };
-    moveRunnerCardToStack(state, "onr_classic_031_rent-i-con");
+    moveRunnerCardToStack(state, 35);
 
     const input = runnerInputForSnapshot(
       state,
@@ -150,7 +150,7 @@ const HISTORICAL_SNEAK_PREVIEW_RUNNER_DECK: DeckDefinition = {
       id: card.cardId,
       quantity: card.quantity,
     })),
-    { id: "onr_v1_110_sneak-preview", quantity: 2 },
+    { id: 322, quantity: 2 },
   ],
 };
 
@@ -212,20 +212,20 @@ function runHistoricalSneakPreviewCoveragePath() {
     .withRunnerCredits(4)
     .withRunnerClicks(4)
     .withRunnerGripSize(0)
-    .withRunnerCardInGrip("onr_v1_110_sneak-preview")
-    .withRunnerCardInGrip("onr_v1_045_newsgroup-filter")
-    .withRunnerCardInGrip("onr_v1_079_bodyweight-synthetic-blood")
-    .withRunnerProgramInstalled("onr_v1_074_worm")
-    .withRunnerProgramInstalled("onr_v1_017_deep-thought")
-    .withRezzedCorpIceOnServer("hq", "onr_v1_244_filter")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_261_quandary")
-    .withCorpRemoteRoot("remote_1", "onr_v1_220_tycho-extension", 2)
-    .withRezzedCorpIceOnServer("remote_1", "onr_v1_244_filter");
-  moveRunnerCardToStack(state, "onr_v1_014_codecracker");
+    .withRunnerCardInGrip(322)
+    .withRunnerCardInGrip(257)
+    .withRunnerCardInGrip(291)
+    .withRunnerProgramInstalled(286)
+    .withRunnerProgramInstalled(229)
+    .withRezzedCorpIceOnServer("hq", 456)
+    .withRezzedCorpIceOnServer("rd", 473)
+    .withCorpRemoteRoot("remote_1", 432, 2)
+    .withRezzedCorpIceOnServer("remote_1", 456);
+  moveRunnerCardToStack(state, 226);
 
   const openingInput = runnerInput(state);
   const sneakCardId = openingInput.playerView.own.gripOrHq.find(
-    (card) => card.definitionId === "onr_v1_110_sneak-preview",
+    (card) => card.definitionId === 322,
   )?.instanceId;
   if (!sneakCardId) throw new Error("Missing Sneak Preview in Runner grip.");
   const sneakAction = findAction(
@@ -245,7 +245,7 @@ function runHistoricalSneakPreviewCoveragePath() {
   const sourceChoiceInput = runnerInput(state);
   expect(sourceChoiceInput.playerView.pendingChoice).toMatchObject({
     sourceCardInstanceId: sneakAction.source,
-    sourceCardDefinitionId: "onr_v1_110_sneak-preview",
+    sourceCardDefinitionId: 322,
     source: expect.stringMatching(
       /^p3_38\.stack_or_trash_program_install_source:/,
     ),
@@ -270,7 +270,7 @@ function runHistoricalSneakPreviewCoveragePath() {
   const programChoiceInput = runnerInput(state);
   expect(programChoiceInput.playerView.pendingChoice).toMatchObject({
     sourceCardInstanceId: sneakAction.source,
-    sourceCardDefinitionId: "onr_v1_110_sneak-preview",
+    sourceCardDefinitionId: 322,
     source: expect.stringMatching(/^p3_38\.stack_or_trash_program_install:/),
   });
   expect(coverageSearchActionId(programChoiceInput)).toBe(
@@ -291,7 +291,7 @@ function runHistoricalSneakPreviewCoveragePath() {
   state = applyDecision(state, programChoiceDecision);
   const selectedProgramId = state.runner.rig.programs.find(
     (cardId) =>
-      state.cardInstances[cardId]?.definitionId === "onr_v1_014_codecracker",
+      state.cardInstances[cardId]?.definitionId === 226,
   );
   expect(selectedProgramId).toBeDefined();
 
@@ -325,23 +325,23 @@ function runMemoryPressuredSneakPreviewCoveragePath() {
     // Three for Sneak, four for the known Bolter route, three retained reserve.
     .withRunnerClicks(4)
     .withRunnerGripSize(0)
-    .withRunnerCardInGrip("onr_v1_110_sneak-preview")
-    .withRunnerCardInGrip("onr_v1_079_bodyweight-synthetic-blood")
-    .withRunnerCardInGrip("onr_v1_108_score")
+    .withRunnerCardInGrip(322)
+    .withRunnerCardInGrip(291)
+    .withRunnerCardInGrip(320)
     // Keep a real sentry coverage gap. An installed universal Rent-I-Con
     // already answers Bolter; damage paid by that answer is not a new gap.
-    .withRunnerProgramInstalled("onr_v1_071_vewy-vewy-quiet")
-    .withRunnerProgramInstalled("onr_v1_035_invisibility")
-    .withRezzedCorpIceOnServer("hq", "onr_v1_224_bolter-cluster")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_237_data-wall")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_238_data-wall-2-0")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_245_fire-wall")
-    .withCorpRemoteRoot("remote_1", "onr_v1_193_corporate-coup", 2)
-    .withRezzedCorpIceOnServer("remote_1", "onr_v1_224_bolter-cluster");
+    .withRunnerProgramInstalled(283)
+    .withRunnerProgramInstalled(247)
+    .withRezzedCorpIceOnServer("hq", 436)
+    .withRezzedCorpIceOnServer("rd", 449)
+    .withRezzedCorpIceOnServer("rd", 450)
+    .withRezzedCorpIceOnServer("rd", 457)
+    .withCorpRemoteRoot("remote_1", 405, 2)
+    .withRezzedCorpIceOnServer("remote_1", 436);
   state.runner.memoryUsed = 3;
   const heapRentIConId = moveRunnerCardToHeap(
     state,
-    "onr_classic_031_rent-i-con",
+    35,
   );
   const openingInput = runnerInputForSnapshot(
     state,
@@ -353,7 +353,7 @@ function runMemoryPressuredSneakPreviewCoveragePath() {
     memoryLimit: 4,
   });
   const sneakCardId = openingInput.playerView.own.gripOrHq.find(
-    (card) => card.definitionId === "onr_v1_110_sneak-preview",
+    (card) => card.definitionId === 322,
   )?.instanceId;
   if (!sneakCardId) throw new Error("Missing Sneak Preview in Runner grip.");
   const sneakAction = findAction(
@@ -427,7 +427,7 @@ function runMemoryPressuredSneakPreviewCoveragePath() {
   );
   const installedInvisibilityId = (
     memoryChoiceInput.playerView.own.rig ?? []
-  ).find((card) => card.definitionId === "onr_v1_035_invisibility")?.instanceId;
+  ).find((card) => card.definitionId === 247)?.instanceId;
   if (!installedInvisibilityId) {
     throw new Error("Missing installed Invisibility sacrifice candidate.");
   }
@@ -481,24 +481,24 @@ function runMemoryPressuredAirportLockerCoveragePath() {
     .withRunnerCredits(11)
     .withRunnerClicks(1)
     .withRunnerGripSize(0)
-    .withRunnerCardInGrip("onr_proteus_106_disgruntled-ice-technician")
-    .withRunnerCardInGrip("onr_v1_113_synchronized-attack-on-hq")
-    .withRunnerResourceInstalled("onr_proteus_128_airport-locker")
-    .withRunnerProgramInstalled("onr_v1_035_invisibility")
-    .withRunnerProgramInstalled("onr_v1_071_vewy-vewy-quiet")
-    .withRezzedCorpIceOnServer("hq", "onr_v1_224_bolter-cluster")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_237_data-wall")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_238_data-wall-2-0")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_245_fire-wall");
+    .withRunnerCardInGrip(164)
+    .withRunnerCardInGrip(325)
+    .withRunnerResourceInstalled(186)
+    .withRunnerProgramInstalled(247)
+    .withRunnerProgramInstalled(283)
+    .withRezzedCorpIceOnServer("hq", 436)
+    .withRezzedCorpIceOnServer("rd", 449)
+    .withRezzedCorpIceOnServer("rd", 450)
+    .withRezzedCorpIceOnServer("rd", 457);
   moveRunnerCardToGrip(
     state,
-    "onr_v1_035_invisibility",
+    247,
     new Set(state.runner.rig.programs),
   );
   const concealedAirportLockerId = state.runner.rig.resources.find(
     (cardId) =>
       state.cardInstances[cardId]?.definitionId ===
-      "onr_proteus_128_airport-locker",
+      186,
   );
   if (!concealedAirportLockerId)
     throw new Error("Missing concealed Airport Locker fixture card.");
@@ -510,7 +510,7 @@ function runMemoryPressuredAirportLockerCoveragePath() {
   state.runner.memoryUsed = 3;
   const stackRentIConId = moveRunnerCardToStack(
     state,
-    "onr_classic_031_rent-i-con",
+    35,
   );
   const openingInput = runnerInputForSnapshot(
     state,
@@ -518,7 +518,7 @@ function runMemoryPressuredAirportLockerCoveragePath() {
     "airport-locker-memory",
   );
   const airportLockerId = openingInput.playerView.own.rig?.find(
-    (card) => card.definitionId === "onr_proteus_128_airport-locker",
+    (card) => card.definitionId === 186,
   )?.instanceId;
   if (!airportLockerId) throw new Error("Missing installed Airport Locker.");
   const searchAction = findAction(
@@ -544,7 +544,7 @@ function runMemoryPressuredAirportLockerCoveragePath() {
           directSearchChoiceBindings?: Array<{
             actionId?: string;
             targetCardInstanceId?: string;
-            targetDefinitionId?: string;
+            targetDefinitionId?: number;
             installMemorySacrificeBinding?: {
               selectedCards?: Array<{ cardInstanceId?: string }>;
             };
@@ -558,7 +558,7 @@ function runMemoryPressuredAirportLockerCoveragePath() {
     );
   expect(openingSearchBinding).toMatchObject({
     actionId: searchAction.actionId,
-    targetDefinitionId: "onr_classic_031_rent-i-con",
+    targetDefinitionId: 35,
   });
   expect(openingSearchBinding?.targetCardInstanceId).toBeUndefined();
 
@@ -589,7 +589,7 @@ function runMemoryPressuredAirportLockerCoveragePath() {
   if (typeof targetProgramId !== "string")
     throw new Error("Missing selected Airport Locker target program.");
   expect(state.cardInstances[targetProgramId]?.definitionId).toBe(
-    "onr_classic_031_rent-i-con",
+    35,
   );
   expect(programChoiceDecision.selectedChoices?.selectedOptionIds).toEqual([
     `card_${targetProgramId}`,
@@ -744,7 +744,7 @@ function coverageSearchActionId(input: ReturnType<typeof runnerInput>): string {
   return moduleState.selectedSearchActionId;
 }
 
-function moveRunnerCardToStack(state: GameState, definitionId: string): string {
+function moveRunnerCardToStack(state: GameState, definitionId: number): string {
   const entry = Object.entries(state.cardInstances).find(
     ([, card]) => card.definitionId === definitionId,
   );
@@ -774,7 +774,7 @@ function moveRunnerCardToStack(state: GameState, definitionId: string): string {
 
 function moveRunnerCardToGrip(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   excludedIds: ReadonlySet<string> = new Set(),
 ): string {
   const entry = Object.entries(state.cardInstances).find(
@@ -805,7 +805,7 @@ function moveRunnerCardToGrip(
   return cardId;
 }
 
-function moveRunnerCardToHeap(state: GameState, definitionId: string): string {
+function moveRunnerCardToHeap(state: GameState, definitionId: number): string {
   const installed = new Set(state.runner.rig.programs);
   const entry = Object.entries(state.cardInstances).find(
     ([cardId, card]) =>

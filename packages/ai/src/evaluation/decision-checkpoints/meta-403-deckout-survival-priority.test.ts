@@ -44,7 +44,7 @@ describe("meta 403 last executable deckout score window", () => {
       const { input, result, action, plan } = decide(undefined, json);
       expect(action.type).toBe("advance_card");
       expect(action.payload?.cardId).toBe(
-        "corp_onr_v1_200_encryption-breakthrough_2",
+        "corp_412_2",
       );
       expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
       expect(plan?.selectedPlan?.moduleId).toBe("corp.score_agenda");

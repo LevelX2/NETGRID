@@ -65,7 +65,7 @@ export function serverRunStartRestrictionSources(
 }
 
 export function runStartRestrictionCapabilityKey(
-  definitionId: string,
+  definitionId: number,
   implementation: ServerRunStartRestrictionImplementation,
 ): string {
   const capabilityKey =

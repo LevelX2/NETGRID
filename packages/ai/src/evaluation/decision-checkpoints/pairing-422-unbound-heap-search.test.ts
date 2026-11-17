@@ -39,7 +39,7 @@ it("classifies an unbound canonical heap search without inventing a recovery tar
   expect(input.playerView.stateVersion).toBe(295);
   expect(
     input.playerView.own.rig!.filter(
-      (card) => card.definitionId === "onr_classic_031_rent-i-con",
+      (card) => card.definitionId === 35,
     ),
   ).toHaveLength(2);
   const recovery = input.legalActions.find(

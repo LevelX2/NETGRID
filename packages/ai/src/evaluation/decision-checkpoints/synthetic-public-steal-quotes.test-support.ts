@@ -25,9 +25,9 @@ export function bindExplicitZeroPublicStealQuotes(
   expect(
     rezzed.every((id) =>
       [
-        "onr_v1_363_olivia-salazar",
-        "onr_v1_352_chester-mix",
-        "onr_v1_309_bbs-whispering-campaign",
+        575,
+        564,
+        521,
       ].includes(id!),
     ),
   ).toBe(true);

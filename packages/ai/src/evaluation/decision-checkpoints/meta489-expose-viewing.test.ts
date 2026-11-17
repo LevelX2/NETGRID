@@ -25,19 +25,19 @@ const read = (name: string) =>
     readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), "utf8"),
   );
 const root = "plan:runner.pressure_central:central%3Ahq";
-const SMARTEYE = "onr_v1_065_smarteye";
-const BLOCKS = "onr_proteus_017_credit-blocks";
+const SMARTEYE = 277;
+const BLOCKS = 75;
 const runnerDeck: DeckDefinition = {
   ...DEMO_DECKS.demo_runner_001,
   id: "current-smarteye-viewing-runner",
   cards: [
     ...DEMO_DECKS.demo_runner_001.cards,
     ...[
-      "onr_v1_030_grubb",
-      "onr_v1_054_raptor",
-      "onr_v1_014_codecracker",
+      242,
+      266,
+      226,
       SMARTEYE,
-      "onr_v1_129_hq-interface",
+      341,
     ].map((id) => ({ id, quantity: 1 })),
   ],
 };
@@ -46,7 +46,7 @@ const corpDeck: DeckDefinition = {
   id: "current-smarteye-viewing-corp",
   cards: [
     ...DEMO_DECKS.demo_corp_001.cards,
-    ...[BLOCKS, "onr_v1_278_wall-of-ice", "onr_v1_290_efficiency-experts"].map(
+    ...[BLOCKS, 490, 502].map(
       (id) => ({ id, quantity: 1 }),
     ),
   ],
@@ -77,15 +77,15 @@ function checkpoint() {
   RealEngineFixtureBuilder.forState(state)
     .withRunnerCredits(20)
     .withRunnerGripSize(5)
-    .withRunnerProgramInstalled("onr_v1_030_grubb")
-    .withRunnerProgramInstalled("onr_v1_054_raptor")
-    .withRunnerProgramInstalled("onr_v1_014_codecracker")
+    .withRunnerProgramInstalled(242)
+    .withRunnerProgramInstalled(266)
+    .withRunnerProgramInstalled(226)
     .withRunnerProgramInstalled(SMARTEYE)
-    .withRunnerCardInGrip("onr_v1_129_hq-interface")
-    .withCorpCardInHq("simple_agenda")
-    .withCorpCardInHq("onr_v1_290_efficiency-experts")
+    .withRunnerCardInGrip(341)
+    .withCorpCardInHq(588)
+    .withCorpCardInHq(502)
     .withCorpIceOnServer("hq", BLOCKS)
-    .withRezzedCorpIceOnServer("rd", "onr_v1_278_wall-of-ice")
+    .withRezzedCorpIceOnServer("rd", 490)
     .withCorpCredits(6);
   state.runner.memoryUsed = 4;
   const interfaceAction = getLegalActions(state, "runner").find(
@@ -93,7 +93,7 @@ function checkpoint() {
       a.type === "install_card" &&
       typeof a.payload?.cardId === "string" &&
       state.cardInstances[a.payload.cardId]?.definitionId ===
-        "onr_v1_129_hq-interface",
+        341,
   )!;
   state = apply(state, "runner", interfaceAction.actionId);
   const build = (s: GameState) =>

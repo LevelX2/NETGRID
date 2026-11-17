@@ -94,17 +94,26 @@ function extractId(file, exportName, pathSegments) {
       throw new Error(`expected_single_${segment}:${file}`);
     current = unwrapExpression(matches[0].initializer);
   }
-  if (ts.isStringLiteralLike(current)) return current.text;
+  if (pathSegments.at(-1) !== "cardDefinitionId" && ts.isStringLiteralLike(current)) return current.text;
+  if (pathSegments.at(-1) === "cardDefinitionId" && ts.isNumericLiteral(current))
+    return positiveId(current.text, file);
   if (
     pathSegments.at(-1) === "cardDefinitionId" &&
     ts.isCallExpression(current) &&
     ts.isIdentifier(current.expression) &&
     current.expression.text === "cardDefinitionId" &&
     current.arguments.length === 1 &&
-    ts.isStringLiteralLike(current.arguments[0])
+    ts.isNumericLiteral(current.arguments[0])
   )
-    return current.arguments[0].text;
+    return positiveId(current.arguments[0].text, file);
   throw new Error(`expected_literal_${pathSegments.at(-1)}:${file}`);
+}
+
+function positiveId(text, file) {
+  const id = Number(text);
+  if (!Number.isSafeInteger(id) || id <= 0)
+    throw new Error(`invalid_card_definition_id:${file}`);
+  return id;
 }
 
 function unwrapExpression(expression) {
@@ -158,7 +167,7 @@ export async function generateCardSpecImportIndex(root, options = {}) {
       id: extractId(file, "setSpec", ["setId"]),
     }))
     .filter((entry) => profile !== "release" || entry.id !== "testset");
-  cards.sort((left, right) => compareText(left.id, right.id));
+  cards.sort((left, right) => left.id - right.id);
   sets.sort((left, right) => compareText(left.id, right.id));
   assertUnique(cards, "cardDefinitionId");
   assertUnique(sets, "setId");
@@ -243,11 +252,11 @@ async function runSelfTest() {
     mkdirSync(testCards, { recursive: true });
     writeFileSync(
       path.join(cards, "z.card-spec.ts"),
-      '// cardDefinitionId: "decoy"\nconst decoy = { identity: { cardDefinitionId: "also-decoy" } };\nexport const cardSpec = { identity: { cardDefinitionId: cardDefinitionId("z-card") } };\n',
+      '// cardDefinitionId: "decoy"\nconst decoy = { identity: { cardDefinitionId: "also-decoy" } };\nexport const cardSpec = { identity: { cardDefinitionId: cardDefinitionId(30) } };\n',
     );
     writeFileSync(
       path.join(cards, "a.card-spec.ts"),
-      'export const cardSpec = { identity: { cardDefinitionId: "a-card" } };\n',
+      'export const cardSpec = { identity: { cardDefinitionId: 2 } };\n',
     );
     writeFileSync(
       path.join(sets, "base.set-spec.ts"),
@@ -255,7 +264,7 @@ async function runSelfTest() {
     );
     writeFileSync(
       path.join(testCards, "excluded.card-spec.ts"),
-      'export const cardSpec = { identity: { cardDefinitionId: "test-card" } };\n',
+      'export const cardSpec = { identity: { cardDefinitionId: 5 } };\n',
     );
     writeFileSync(
       path.join(sets, "testset.set-spec.ts"),
@@ -273,8 +282,8 @@ async function runSelfTest() {
       first,
       /export const GENERATED_SET_SPECS = \[\s*setSpec0,\s*setSpec1,\s*\] as const satisfies readonly SetSpec\[\];/,
     );
-    assert.ok(first.includes('cardDefinitionId: "a-card"'));
-    assert.ok(first.includes('cardDefinitionId: "test-card"'));
+    assert.ok(first.includes('cardDefinitionId: 2'));
+    assert.ok(first.includes('cardDefinitionId: 5'));
     assert.ok(
       first.includes('sourcePath: "packages/cards/src/specs/a.card-spec.ts"'),
     );
@@ -282,7 +291,7 @@ async function runSelfTest() {
       root,
       "packages/cards/src/generated/card-spec-release-import-index.ts",
     );
-    assert.ok(!release.includes("test-card"));
+    assert.ok(!release.includes("excluded.card-spec"));
     assert.ok(!release.includes("testset.set-spec"));
     assert.ok(release.includes("(release)"));
     const output = path.join(root, OUTPUT_RELATIVE);
@@ -297,9 +306,9 @@ async function runSelfTest() {
     await writeCardSpecImportIndex(root);
     writeFileSync(
       path.join(cards, "untracked.card-spec.ts"),
-      'export const cardSpec = { identity: { cardDefinitionId: "m-card" } };\n',
+      'export const cardSpec = { identity: { cardDefinitionId: 9 } };\n',
     );
-    assert.ok((await generateCardSpecImportIndex(root)).includes("m-card"));
+    assert.ok((await generateCardSpecImportIndex(root)).includes("cardDefinitionId: 9"));
     assert.ok(
       (await generateCardSpecImportIndex(root)).includes("untracked.card-spec"),
     );
@@ -331,11 +340,11 @@ async function runSelfTest() {
     rmSync(invalid);
     writeFileSync(
       path.join(cards, "duplicate.card-spec.ts"),
-      'export const cardSpec = { identity: { cardDefinitionId: "a-card" } };\n',
+      'export const cardSpec = { identity: { cardDefinitionId: 2 } };\n',
     );
     await assert.rejects(
       generateCardSpecImportIndex(root),
-      /duplicate_cardDefinitionId:a-card/,
+      /duplicate_cardDefinitionId:2/,
     );
     rmSync(path.join(cards, "duplicate.card-spec.ts"));
     writeFileSync(

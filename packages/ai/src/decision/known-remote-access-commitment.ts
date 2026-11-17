@@ -91,7 +91,7 @@ export function projectKnownRemoteTrashCommitment(
   input: AiDecisionInput,
   params: {
     serverId: string;
-    definitionId: string;
+    definitionId: number;
     rootType: string;
     trashCost: number;
     creditsAfterPath: number;
@@ -351,7 +351,7 @@ function knownRemoteTrashCreditSupport(
 }
 
 function knownRemoteTrashTargetProfile(
-  definitionId: string,
+  definitionId: number,
   visibleCard: VisibleCard | undefined,
 ): {
   value: number;

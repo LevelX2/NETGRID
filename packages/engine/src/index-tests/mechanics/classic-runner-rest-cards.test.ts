@@ -29,24 +29,24 @@ import {
   toRunnerTurnFromCorpMain,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 
-const BADTIMES = "onr_classic_016_badtimes";
-const BOOSTERGANG_CONNECTIONS = "onr_classic_034_boostergang-connections";
-const CORRUPTION = "onr_classic_035_corruption";
-const DO_THE_DRINE = "onr_classic_036_do-the-drine";
-const FINDERS_KEEPERS = "onr_classic_037_finders-keepers";
-const GYPSYTM_SCHEDULE_ANALYZER = "onr_classic_038_gypsytm-schedule-analyzer";
-const LIBRARY_SEARCH = "onr_classic_039_library-search";
-const RUNNING_INTERFERENCE = "onr_classic_043_running-interference";
-const CRASH_SPACE = "onr_classic_044_crash-space";
-const ELENA_LASKOVA = "onr_classic_045_elena-laskova";
-const EXECUTIVE_FILE_CLERK = "onr_classic_046_executive-file-clerk";
-const LITTLE_BLACK_BOX = "onr_classic_047_little-black-box";
+const BADTIMES = 20;
+const BOOSTERGANG_CONNECTIONS = 38;
+const CORRUPTION = 39;
+const DO_THE_DRINE = 40;
+const FINDERS_KEEPERS = 41;
+const GYPSYTM_SCHEDULE_ANALYZER = 42;
+const LIBRARY_SEARCH = 43;
+const RUNNING_INTERFERENCE = 47;
+const CRASH_SPACE = 48;
+const ELENA_LASKOVA = 49;
+const EXECUTIVE_FILE_CLERK = 50;
+const LITTLE_BLACK_BOX = 51;
 const OMNITECH_SPINAL_TAP_CYBERMODEM =
-  "onr_classic_048_omnitech-spinal-tap-cybermodem";
-const OMNITECH_WET_DRIVE = "onr_classic_049_omnitech-wet-drive";
-const SANDBOX_DIG = "onr_classic_050_sandbox-dig";
-const VINTAGE_CAMARO = "onr_classic_051_vintage-camaro";
-const ZETATECH_PORTASTATION = "onr_classic_052_zetatech-portastation";
+  52;
+const OMNITECH_WET_DRIVE = 53;
+const SANDBOX_DIG = 54;
+const VINTAGE_CAMARO = 55;
+const ZETATECH_PORTASTATION = 56;
 
 const CLASSIC_09_IDS = [
   BADTIMES,
@@ -71,12 +71,12 @@ const CLASSIC_09_CORP_DECK: DeckDefinition = {
   id: "classic_09_runner_rest_smoke_corp",
   name: "Classic 09 Runner Rest Smoke Corp",
   side: "corp",
-  identity: "corp_identity_001",
+  identity: 3,
   cards: [
     { id: BADTIMES, quantity: 1 },
-    { id: "simple_agenda", quantity: 8 },
-    { id: "simple_barrier_ice", quantity: 3 },
-    { id: "simple_economy_operation", quantity: 8 },
+    { id: 588, quantity: 8 },
+    { id: 589, quantity: 3 },
+    { id: 596, quantity: 8 },
   ],
 };
 
@@ -84,7 +84,7 @@ const CLASSIC_09_RUNNER_DECK: DeckDefinition = {
   id: "classic_09_runner_rest_smoke_runner",
   name: "Classic 09 Runner Rest Smoke Runner",
   side: "runner",
-  identity: "runner_identity_001",
+  identity: 587,
   cards: [
     { id: BOOSTERGANG_CONNECTIONS, quantity: 1 },
     { id: CORRUPTION, quantity: 1 },
@@ -102,10 +102,10 @@ const CLASSIC_09_RUNNER_DECK: DeckDefinition = {
     { id: SANDBOX_DIG, quantity: 1 },
     { id: VINTAGE_CAMARO, quantity: 1 },
     { id: ZETATECH_PORTASTATION, quantity: 1 },
-    { id: "simple_setup_hardware", quantity: 2 },
-    { id: "simple_fracter", quantity: 1 },
-    { id: "simple_economy_event", quantity: 12 },
-    { id: "simple_run_event", quantity: 1 },
+    { id: 602, quantity: 2 },
+    { id: 597, quantity: 1 },
+    { id: 595, quantity: 12 },
+    { id: 600, quantity: 1 },
   ],
 };
 
@@ -243,8 +243,8 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     let state = toRunnerClassic09Game("classic-09-boostergang-choice");
     emptyRunnerGripForTest(state);
     const eventId = moveRunnerCardCopyToGrip(state, BOOSTERGANG_CONNECTIONS);
-    moveRunnerCardCopyToGrip(state, "simple_economy_event");
-    moveRunnerCardCopyToGrip(state, "simple_run_event");
+    moveRunnerCardCopyToGrip(state, 595);
+    moveRunnerCardCopyToGrip(state, 600);
     const selectedThird = putRunnerCardOnTopOfStack(state, CRASH_SPACE);
     const selectedSecond = putRunnerCardOnTopOfStack(
       state,
@@ -252,7 +252,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     );
     const unchosenTop = putRunnerCardOnTopOfStack(state, LIBRARY_SEARCH);
     installRunnerHardwareForTest(state, OMNITECH_WET_DRIVE);
-    installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, 597);
     state.runner.credits = 40;
 
     state = apply(
@@ -272,8 +272,8 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     ).toEqual(
       expect.arrayContaining([
         BOOSTERGANG_CONNECTIONS,
-        "simple_economy_event",
-        "simple_run_event",
+        595,
+        600,
       ]),
     );
     expect(state.pendingChoice).toMatchObject({
@@ -374,7 +374,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
   it("transfers this-turn stolen agenda points through Corruption", () => {
     let state = toRunnerClassic09Game("classic-09-corruption");
     emptyRunnerGripForTest(state);
-    const agendaId = scoreRunnerAgendaForTest(state, "simple_agenda");
+    const agendaId = scoreRunnerAgendaForTest(state, 588);
     state.runnerTurnFlags = {
       ...state.runnerTurnFlags!,
       stolenAgendaIdsThisTurn: [agendaId],
@@ -433,9 +433,9 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     let state = toRunnerClassic09Game("classic-09-do-the-drine");
     emptyRunnerGripForTest(state);
     const eventId = moveRunnerCardCopyToGrip(state, DO_THE_DRINE);
-    moveRunnerCardCopyToGrip(state, "simple_economy_event");
-    moveRunnerCardCopyToGrip(state, "simple_run_event");
-    moveRunnerCardCopyToGrip(state, "simple_setup_hardware");
+    moveRunnerCardCopyToGrip(state, 595);
+    moveRunnerCardCopyToGrip(state, 600);
+    moveRunnerCardCopyToGrip(state, 602);
     state.runner.credits = 0;
 
     const drineActions = getLegalActions(state, "runner").filter(
@@ -581,9 +581,9 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     let state = toRunnerClassic09Game("classic-09-gypsy-reveal-agenda");
     emptyRunnerGripForTest(state);
     const eventId = moveRunnerCardCopyToGrip(state, GYPSYTM_SCHEDULE_ANALYZER);
-    const agendaId = putCorpCardOnTopOfRd(state, "simple_agenda");
-    const iceId = putCorpCardOnTopOfRd(state, "simple_barrier_ice");
-    const operationId = putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const agendaId = putCorpCardOnTopOfRd(state, 588);
+    const iceId = putCorpCardOnTopOfRd(state, 589);
+    const operationId = putCorpCardOnTopOfRd(state, 596);
     setCorpRdForTest(state, [operationId, iceId, agendaId]);
 
     const initial = structuredClone(state);
@@ -629,7 +629,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
       choiceVisibility: "hidden_info_barrier",
       publicRevealKind: "reveal",
-      publicRevealDefinitionIds: "simple_economy_operation",
+      publicRevealDefinitionIds: 596,
       publicRevealTitles: "Simple Economy Operation",
       revealedAgendaDefinitionIds: "",
       revealedCount: 1,
@@ -665,7 +665,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
         "simple_economy_operation,simple_barrier_ice,simple_agenda",
       publicRevealTitles:
         "Simple Economy Operation||Simple Barrier ICE||Simple Agenda",
-      revealedAgendaDefinitionIds: "simple_agenda",
+      revealedAgendaDefinitionIds: 588,
       revealedCount: 3,
       revealedNonAgendaCount: 2,
       agendaStoredInHq: false,
@@ -693,11 +693,11 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
         "simple_economy_operation,simple_barrier_ice,simple_agenda",
       publicRevealTitles:
         "Simple Economy Operation||Simple Barrier ICE||Simple Agenda",
-      revealedAgendaDefinitionIds: "simple_agenda",
+      revealedAgendaDefinitionIds: 588,
       revealedCount: 3,
       revealedNonAgendaCount: 2,
       agendaStoredInHq: true,
-      storedAgendaDefinitionId: "simple_agenda",
+      storedAgendaDefinitionId: 588,
       shuffledIntoRdCount: 2,
     });
     expect(
@@ -719,8 +719,8 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     let state = toRunnerClassic09Game("classic-09-gypsy-no-agenda");
     emptyRunnerGripForTest(state);
     const eventId = moveRunnerCardCopyToGrip(state, GYPSYTM_SCHEDULE_ANALYZER);
-    const iceId = putCorpCardOnTopOfRd(state, "simple_barrier_ice");
-    const operationId = putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const iceId = putCorpCardOnTopOfRd(state, 589);
+    const operationId = putCorpCardOnTopOfRd(state, 596);
     setCorpRdForTest(state, [operationId, iceId]);
 
     state = apply(
@@ -742,7 +742,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
-      publicRevealDefinitionIds: "simple_economy_operation",
+      publicRevealDefinitionIds: 596,
       publicRevealTitles: "Simple Economy Operation",
       revealedAgendaDefinitionIds: "",
       revealedCount: 1,

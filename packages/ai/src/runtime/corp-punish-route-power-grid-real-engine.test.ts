@@ -22,12 +22,12 @@ import {
   withDecisionLocalCorpPunishRouteQuotes,
 } from "../corp/punish/punish-route-quote-input";
 
-const POWER_GRID = "onr_v1_299_power-grid-overload";
+const POWER_GRID = 511;
 const POWER_GRID_CAPABILITY_ID = `${POWER_GRID}:corp_utility_installed_hardware_trash_by_counter`;
-const RD_INTERFACE = "onr_v1_139_r-and-d-interface";
-const SIMPLE_HARDWARE = "simple_setup_hardware";
-const CYBERNETICS = "onr_v1_127_full-body-conversion";
-const UMBRELLA_POLICY = "onr_v1_186_umbrella-policy";
+const RD_INTERFACE = 351;
+const SIMPLE_HARDWARE = 602;
+const CYBERNETICS = 339;
+const UMBRELLA_POLICY = 398;
 
 const CORP_DECK = withCards(DEMO_DECKS.demo_corp_001, "power-grid-quote-corp", [
   POWER_GRID,
@@ -470,7 +470,7 @@ function applyLegal(
 
 function installRunnerCard(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   zone: "hardware" | "resource",
 ): CardInstanceId {
   const entry = Object.entries(state.cardInstances).find(
@@ -493,7 +493,7 @@ function installRunnerCard(
   return cardId;
 }
 
-function moveCorpCardToHq(state: GameState, definitionId: string): void {
+function moveCorpCardToHq(state: GameState, definitionId: number): void {
   const entry = Object.entries(state.cardInstances).find(
     ([, instance]) => instance.definitionId === definitionId,
   );

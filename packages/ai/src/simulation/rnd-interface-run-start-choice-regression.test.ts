@@ -16,8 +16,8 @@ import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfol
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
-const PROTOCOL = "onr_v1_050_r-and-d-protocol-files";
-const CONFERENCE = "onr_v1_184_top-runners-conference";
+const PROTOCOL = 262;
+const CONFERENCE = 396;
 
 describe("R&D Interface Dig run-start choice regression", () => {
   it.each([0, 37])(

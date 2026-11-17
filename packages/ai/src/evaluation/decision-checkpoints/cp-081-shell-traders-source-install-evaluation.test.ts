@@ -23,7 +23,7 @@ describe("CP-081 Shell Traders source-install evaluation", () => {
       strategicIntent,
     }).find(
       (evaluation) =>
-        evaluation.definitionId === "onr_v1_176_the-shell-traders",
+        evaluation.definitionId === 388,
     );
 
     expect(strategicIntent.engineLineIds).toContain(
@@ -37,7 +37,7 @@ describe("CP-081 Shell Traders source-install evaluation", () => {
       deferReason: "none",
       priority: 1000,
       legalActionId:
-        "runner.install_card.runner_onr_v1_176_the-shell-traders_2.runner_onr_v1_176_the-shell-traders_2",
+        "runner.install_card.runner_388_2.runner_388_2",
       persistentInstallEvaluation: {
         engineAssessment: {
           kind: "delayed_install_engine",

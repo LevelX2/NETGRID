@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import { applyCreditGain, creditGainPublicPayload } from "./credit-gain";
 
-const ELENA_LASKOVA = "onr_classic_045_elena-laskova";
-const FINDERS_KEEPERS = "onr_classic_037_finders-keepers";
+const ELENA_LASKOVA = 49;
+const FINDERS_KEEPERS = 41;
 
 describe("authoritative credit gain pipeline", () => {
   it("applies installed first-prep modifiers to the first gain only", () => {
@@ -70,7 +70,7 @@ describe("authoritative credit gain pipeline", () => {
       baseAmount: 4,
       source: {
         kind: "temporary_grant",
-        sourceDefinitionId: "simple_economy_asset",
+        sourceDefinitionId: 594,
         reason: "temporary_install_or_rez_credits",
       },
     });
@@ -91,7 +91,7 @@ describe("authoritative credit gain pipeline", () => {
     )!;
     state.cardInstances[firmId] = {
       instanceId: firmId,
-      definitionId: "onr_v1_329_investment-firm",
+      definitionId: 541,
       owner: "corp",
       controller: "corp",
       zone: { side: "corp", zone: "serverRoot", serverId: server.id },
@@ -108,7 +108,7 @@ describe("authoritative credit gain pipeline", () => {
       baseAmount: 4,
       source: {
         kind: "temporary_grant",
-        sourceDefinitionId: "simple_economy_asset",
+        sourceDefinitionId: 594,
         reason: "temporary_install_or_rez_credits",
       },
     });

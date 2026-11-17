@@ -53,7 +53,7 @@ describe("selfplay cycle 245 decision checkpoints", () => {
           dispositions: expect.arrayContaining([
             expect.objectContaining({
               actionId:
-                "runner.play_event.runner_onr_v1_097_livewires-contacts_3.runner_onr_v1_097_livewires-contacts_3.onr_v1_097_livewires-contacts:abilities_on_play_gain_credits",
+                "runner.play_event.runner_309_3.runner_309_3.onr_v1_097_livewires-contacts:abilities_on_play_gain_credits",
               disposition: "explicitly_nonproductive",
               ownerModuleId: "runner.economy",
               evidenceCode:
@@ -110,7 +110,7 @@ describe("selfplay cycle 245 decision checkpoints", () => {
       expect.objectContaining({
         disposition: "explicitly_nonproductive",
         ownerModuleId: "runner.develop_board_and_hand",
-        evidenceCode: "runner_hand_development_rejected:no_current_need:runner_onr_v1_095_jack-n-joe_3",
+        evidenceCode: "runner_hand_development_rejected:no_current_need:runner_307_3",
       }),
     ]);
   });
@@ -136,9 +136,9 @@ describe("selfplay cycle 245 decision checkpoints", () => {
 });
 
 function activeDrawTaxFixture(overflow: number) {
-  const jack = "onr_v1_095_jack-n-joe";
-  const city = "onr_v1_313_city-surveillance";
-  const setup = "onr_v1_340_setup";
+  const jack = 307;
+  const city = 525;
+  const setup = 552;
   const runnerDeck = { ...ORIGINALSET_DEFAULT_DECKS.runner, cards: [
     ...ORIGINALSET_DEFAULT_DECKS.runner.cards.filter((c) => c.id !== jack),
     { id: jack, quantity: 1 },

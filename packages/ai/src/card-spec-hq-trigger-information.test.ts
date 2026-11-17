@@ -6,7 +6,7 @@ import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 
 describe("HQ access triggers preserve their actual information target (SP-615)", () => {
   const source = cardSpecPlanningCards().find(
-    (card) => card.definition.id === "onr_classic_032_schematics-search-engine",
+    (card) => card.definition.id === 36,
   )!;
 
   it.each(["canonical", "renamed"])(
@@ -18,7 +18,7 @@ describe("HQ access triggers preserve their actual information target (SP-615)",
         ...source,
         definition: identity === "canonical" ? source.definition : {
           ...source.definition,
-          id: "onr_v1_183_technician-lover",
+          id: 395,
           title: "Unrelated title",
         },
         planning: mechanical,

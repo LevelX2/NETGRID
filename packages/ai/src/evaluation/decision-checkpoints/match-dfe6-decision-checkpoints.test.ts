@@ -35,12 +35,12 @@ describe("match DFE6 exact decision checkpoints", () => {
       const fetch = state.corp.servers
         .find((server) => server.id === "hq")!
         .ice.map((id) => state.cardInstances[id]!)
-        .find((card) => card.definitionId === "onr_v1_243_fetch-4-0-1")!;
+        .find((card) => card.definitionId === 455)!;
       fetch.strengthModifier += 10;
       // Isolate the unmitigated Trace: the original position has two Fall Guys.
       state.runner.rig.resources = state.runner.rig.resources.filter((id) => {
         const card = state.cardInstances[id]!;
-        if (card.definitionId !== "onr_v1_161_fall-guy") return true;
+        if (card.definitionId !== 373) return true;
         card.zone = { side: "runner", zone: "heap" };
         state.runner.heap.push(id);
         return false;

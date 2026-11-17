@@ -79,7 +79,7 @@ export function remoteHasNearFinalAgenda(
 }
 
 export function rezCostForDefinitionId(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): number {
   if (!definitionId) return 0;
   return (

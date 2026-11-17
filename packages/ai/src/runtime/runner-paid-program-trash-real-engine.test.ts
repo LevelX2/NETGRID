@@ -13,8 +13,8 @@ import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-buil
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "./ai-decision-input";
 
-const CODECRACKER = "onr_v1_014_codecracker";
-const INSTALLER = "onr_v1_075_zetatech-software-installer";
+const CODECRACKER = 226;
+const INSTALLER = 287;
 const decks = Object.fromEntries(
   (["corp", "runner"] as const).map((side) => {
     const id =
@@ -61,11 +61,11 @@ function fixture(fullMemory: boolean) {
     .withCorpHqSize(5)
     .withRunnerGripSize(0)
     .withRunnerCardInGrip(CODECRACKER)
-    .withRunnerProgramInstalled("onr_v1_045_newsgroup-filter")
+    .withRunnerProgramInstalled(257)
     .withRunnerProgramInstalled(INSTALLER)
-    .withRezzedCorpIceOnServer("rd", "onr_v1_270_sleeper")
+    .withRezzedCorpIceOnServer("rd", 482)
     .withRunnerCredits(6);
-  if (fullMemory) builder.withRunnerProgramInstalled("onr_v1_017_deep-thought");
+  if (fullMemory) builder.withRunnerProgramInstalled(229);
   state.runner.memoryUsed = fullMemory ? 4 : 3;
   state.corp.clicks = 0;
   state = apply(

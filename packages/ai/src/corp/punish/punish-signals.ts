@@ -867,7 +867,7 @@ function preparationAndResourceTrashSignals(
 }
 
 export function corpDefinitionSupportsPunishPlan(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   if (!definitionId) return false;
   const hint = AI_HINTS_BY_CARD.get(definitionId);

@@ -11,7 +11,7 @@ describe("runnerVisibleSearchCoverageNeed", () => {
         rig: [
           visibleCard({
             instanceId: "pile-driver",
-            definitionId: "onr_v1_047_pile-driver",
+            definitionId: 259,
             title: "Pile Driver",
             type: "program",
             subtypes: ["icebreaker", "fracter", "noisy"],
@@ -22,7 +22,7 @@ describe("runnerVisibleSearchCoverageNeed", () => {
           server("remote_1", [
             quotedIce({
               instanceId: "shotgun-wire",
-              definitionId: "onr_v1_269_shotgun-wire",
+              definitionId: 481,
               title: "Shotgun Wire",
               type: "ice",
               subtypes: ["wall"],
@@ -32,7 +32,7 @@ describe("runnerVisibleSearchCoverageNeed", () => {
           server("rd", [
             quotedIce({
               instanceId: "keeper",
-              definitionId: "onr_v1_252_keeper",
+              definitionId: 464,
               title: "Keeper",
               type: "ice",
               subtypes: ["code_gate"],

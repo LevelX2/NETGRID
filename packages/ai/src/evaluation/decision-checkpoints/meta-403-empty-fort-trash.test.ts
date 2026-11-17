@@ -20,7 +20,7 @@ describe("meta 403 post-success fort sabotage", () => {
       const action = capture.input.legalActions.find(
         (entry) =>
           entry.abilityRef?.sourceAbilityId ===
-          "onr_proteus_121_remote-detonator:on_play_trash_last_run_fort_ice_add_tags",
+          "179:on_play_trash_last_run_fort_ice_add_tags",
       )!;
       expect(action).toBeDefined();
       if (count !== "missing") {

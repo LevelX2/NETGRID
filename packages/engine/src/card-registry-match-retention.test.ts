@@ -186,7 +186,7 @@ function isAuthorityShapedClone(value: object): boolean {
   )
     return true;
   if (
-    typeof record.cardDefinitionId === "string" &&
+    typeof record.cardDefinitionId === "number" &&
     (Array.isArray(record.abilities) ||
       ("engine" in record && "cardRulesFingerprint" in record))
   )

@@ -5,8 +5,8 @@ import projectBabylonCreditPoolJson from "../../../../../data/scenarios/ai-decis
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
-const PROJECT_BABYLON = "corp_onr_v1_214_project-babylon_1";
-const TYCHO_EXTENSION = "corp_onr_v1_220_tycho-extension_1";
+const PROJECT_BABYLON = "corp_426_1";
+const TYCHO_EXTENSION = "corp_432_1";
 
 describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", () => {
   it("preserves the exposed agenda conversion clock before adding central ICE", () => {
@@ -83,7 +83,7 @@ describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", ()
             {
               type: "install_card",
               targetServerId: "rd",
-              sourceDefinitionId: "onr_v1_270_sleeper",
+              sourceDefinitionId: 482,
             },
           ],
           forbiddenActions: [

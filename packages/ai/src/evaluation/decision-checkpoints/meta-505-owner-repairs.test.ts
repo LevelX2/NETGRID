@@ -68,7 +68,7 @@ it("binds the current tag-defense installation to its exact visible source", () 
   const input = fixture("g11d289");
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(
-    "runner.install_card.runner_onr_v1_135_nasuko-cycle_2.runner_onr_v1_135_nasuko-cycle_2",
+    "runner.install_card.runner_347_2.runner_347_2",
   );
   expect(decision.fallbackUsed).toBe(false);
   expect(

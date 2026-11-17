@@ -16,9 +16,9 @@ import { createRunnerPressureMetricContext } from "./runner-pressure-metrics";
 import { countRunnerCoverageConversions } from "./runner-setup-metric-counts";
 
 it("respects a fort's Trace payment restriction without treating bad publicity as liquid reserve", () => {
-  const lockout = "onr_v1_373_twenty-four-hour-surveillance";
+  const lockout = 585;
   const baseCorp = DEMO_DECKS.demo_corp_001;
-  const cloak = "onr_v1_011_cloak";
+  const cloak = 223;
   const baseRunner = DEMO_DECKS.demo_runner_001;
   const runnerDeck = {
     ...baseRunner,
@@ -128,7 +128,7 @@ it("respects a fort's Trace payment restriction without treating bad publicity a
 });
 
 it("counts a native event-started run as pressure and as a coverage follow-up", () => {
-  const insideJob = "onr_v1_094_inside-job";
+  const insideJob = 306;
   const baseRunner = DEMO_DECKS.demo_runner_001;
   const runnerDeck = {
     ...baseRunner,

@@ -38,7 +38,7 @@ describe("PublicEvent projection", () => {
         corpDeckId: "demo_corp_008",
       }),
     );
-    putCorpCardOnTopOfRd(state, "v08_project_agenda");
+    putCorpCardOnTopOfRd(state, 617);
 
     state = apply(
       state,

@@ -7,7 +7,7 @@ import { assessRunnerAdditionalAccessRunWindowAction } from "../runner/run-windo
 
 describe("Proteus R&D Mole plan-first run-window coverage", () => {
   it("converts its exact funded R&D multiaccess action before continue", () => {
-    const moleInstanceId = "runner_onr_proteus_147_r-and-d-mole_2";
+    const moleInstanceId = "runner_205_2";
     const legalActions: LegalAction[] = [
       {
         actionId: "runner.activate-rd-mole",
@@ -42,14 +42,14 @@ describe("Proteus R&D Mole plan-first run-window coverage", () => {
       observerSide: "runner",
       stateVersion: 68,
       visibleSourceDefinitionsByInstanceId: {
-        [moleInstanceId]: "onr_proteus_147_r-and-d-mole",
+        [moleInstanceId]: 205,
       },
       cardSemanticProfilesByDefinitionId:
         buildActionCardSemanticProfilesByDefinitionId(),
     });
     const moleCandidate = candidates.find(
       (candidate) =>
-        candidate.sourceDefinitionId === "onr_proteus_147_r-and-d-mole",
+        candidate.sourceDefinitionId === 205,
     );
 
     expect(moleCandidate).toMatchObject({

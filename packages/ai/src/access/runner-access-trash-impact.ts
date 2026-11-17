@@ -11,7 +11,7 @@ export type RunnerAccessTrashImpactClass =
   | "other_visible_impact";
 
 export type RunnerAccessTrashImpactAssessment = Readonly<{
-  targetDefinitionId: string;
+  targetDefinitionId: number;
   trashCost: number;
   dedicatedTrashCredits: number;
   generalCreditCost: number;

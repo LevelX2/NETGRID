@@ -91,7 +91,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     expect(compiled).toEqual(priorGeneratedCards);
     expect(
       priorGeneratedCards.find(
-        (record) => record.cardId === "onr_v1_154_broker",
+        (record) => record.cardId === 366,
       ),
     ).toMatchObject({
       hint: {
@@ -120,7 +120,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     const hints = new Map(
       reviewedGolden.cards.map((record) => [record.cardId, record.hint]),
     );
-    expect(hints.get("onr_classic_029_ms-todon")?.breakerProfile).toMatchObject(
+    expect(hints.get(33)?.breakerProfile).toMatchObject(
       {
         baseStrength: 2,
         restrictions: ["first_sentry_break_each_run_gives_runner_tag"],
@@ -128,13 +128,13 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
       },
     );
     expect(
-      hints.get("onr_classic_030_psychic-friend")?.breakerProfile,
+      hints.get(34)?.breakerProfile,
     ).toMatchObject({
       baseStrength: 1,
       sideEffects: ["temporary_strength"],
     });
     expect(
-      hints.get("onr_classic_051_vintage-camaro")?.actionCapacityProfiles,
+      hints.get(55)?.actionCapacityProfiles,
     ).toEqual([
       {
         class: "action_debt",
@@ -170,7 +170,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
       actionPairs
         .filter(
           ({ cardId, pair }) =>
-            cardId === "onr_classic_039_library-search" &&
+            cardId === 43 &&
             pair.strategyId === "runner.interface_closeout",
         )
         .map(({ pair }) => pair.evidence),
@@ -183,7 +183,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
   it("rejects unknown families, unsupported target owners and malformed action debt", () => {
     const entries = cardSpecPlanningCards();
     const vintage = entries.find(
-      (entry) => entry.definition.id === "onr_classic_051_vintage-camaro",
+      (entry) => entry.definition.id === 55,
     )!;
     expect(() =>
       deriveCardSpecAiHint({
@@ -213,7 +213,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     ).toThrow("card_spec_unknown_action_debt_tag_prevention_shape");
 
     const targetOwner = entries.find(
-      (entry) => entry.definition.id === "onr_classic_046_executive-file-clerk",
+      (entry) => entry.definition.id === 50,
     )!;
     expect(() =>
       deriveCardSpecAiHint({
@@ -234,7 +234,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     const entries = cardSpecPlanningCards();
     const baskerville = structuredClone(
       entries.find(
-        (entry) => entry.definition.id === "onr_classic_005_baskerville",
+        (entry) => entry.definition.id === 9,
       )!,
     );
     const baskervillePair =
@@ -249,7 +249,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
 
     const library = structuredClone(
       entries.find(
-        (entry) => entry.definition.id === "onr_classic_039_library-search",
+        (entry) => entry.definition.id === 43,
       )!,
     );
     const libraryPair =
@@ -269,7 +269,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
 
     const forgedAnchor = structuredClone(
       entries.find(
-        (entry) => entry.definition.id === "onr_classic_039_library-search",
+        (entry) => entry.definition.id === 43,
       )!,
     );
     const forgedPair =
@@ -287,7 +287,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
 
   it("rejects missing scenario evidence and compatibility-container mechanics", () => {
     const entry = cardSpecPlanningCards().find(
-      (candidate) => candidate.definition.id === "onr_classic_041_networking",
+      (candidate) => candidate.definition.id === 45,
     )!;
     expect(() =>
       deriveCardSpecAiHint({

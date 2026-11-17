@@ -52,10 +52,10 @@ export function bindSelectedPlanActionOrigin(
           "secret_spend_guess_then_targeted_bypass_run"));
   const canOpenRunnerVacuumLinkRewind =
     selectedAction?.type === "continue_run" &&
-    selectedAction.payload?.sourceDefinitionId === "onr_v1_275_vacuum-link" &&
+    selectedAction.payload?.sourceDefinitionId === 487 &&
     Number(selectedAction.payload?.unbrokenSubroutineCount) > 0 &&
     input.playerView.run?.encounteredIce?.definitionId ===
-      "onr_v1_275_vacuum-link";
+      487;
   const postBreakStealthLoss = selectedAction
     ? runnerPostBreakStealthLossChoiceBinding(input, selectedAction)
     : undefined;
@@ -184,7 +184,7 @@ export function bindSelectedPlanActionOrigin(
             sourceActionType: "continue_run",
             sourceCardInstanceId:
               input.playerView.run!.encounteredIce!.instanceId,
-            sourceCardDefinitionId: "onr_v1_275_vacuum-link",
+            sourceCardDefinitionId: 487,
           }
         : {
             rootPlanInstanceId,

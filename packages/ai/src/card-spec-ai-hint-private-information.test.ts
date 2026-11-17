@@ -5,7 +5,7 @@ import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 describe("private information capability translation", () => {
   it.each([
     [
-      "onr_classic_046_executive-file-clerk",
+      50,
       "hq",
       "hq_info",
       "full_reveal",
@@ -13,7 +13,7 @@ describe("private information capability translation", () => {
       true,
     ],
     [
-      "onr_classic_050_sandbox-dig",
+      54,
       "rnd",
       "topdeck_info",
       "top_cards",
@@ -21,7 +21,7 @@ describe("private information capability translation", () => {
       true,
     ],
     [
-      "onr_v1_183_technician-lover",
+      395,
       "rnd",
       "topdeck_info",
       "top_cards",
@@ -63,14 +63,14 @@ describe("private information capability translation", () => {
 
   it("does not infer information from a sibling capability or the card identity", () => {
     const entry = cardSpecPlanningCards().find(
-      (card) => card.definition.id === "onr_classic_050_sandbox-dig",
+      (card) => card.definition.id === 54,
     )!;
     const ability = entry.planning.engine.abilities![0]!;
     const hint = deriveCardSpecAiHint({
       ...entry,
       definition: {
         ...entry.definition,
-        id: "onr_v1_183_technician-lover",
+        id: 395,
         title: "Renamed witness",
         rulesText: "Unrelated text",
       },

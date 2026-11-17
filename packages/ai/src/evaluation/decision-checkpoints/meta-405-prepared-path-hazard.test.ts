@@ -38,7 +38,7 @@ it.each([false, true])(
         creditGap: 2,
       });
       expect(decision.actionId).toBe(
-        "runner.play_event.runner_onr_proteus_101_all-hands_1.hq.runner_onr_proteus_101_all-hands_1.onr_proteus_101_all-hands:on_play_hq_run_access_four_prohibit_noisy_icebreakers",
+        "runner.play_event.runner_159_1.hq.runner_159_1.onr_proteus_101_all-hands:on_play_hq_run_access_four_prohibit_noisy_icebreakers",
       );
       const central = evaluateRunnerRunTargets({ input }).find(
         (target) => target.actionId === decision.actionId,

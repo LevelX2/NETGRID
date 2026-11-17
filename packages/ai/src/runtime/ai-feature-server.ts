@@ -36,7 +36,7 @@ export function visibleRunnerDrawTaxSourceCount(
   );
 }
 
-function drawTaxProfileMatches(definitionId: string | undefined): boolean {
+function drawTaxProfileMatches(definitionId: number | undefined): boolean {
   const profile = classifyTagSourceFromOntology(definitionId);
   return Boolean(
     profile?.conditionKinds.includes("requires_runner_draw") &&

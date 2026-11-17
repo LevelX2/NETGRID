@@ -49,7 +49,7 @@ describe("tag prevention consumption follows the actual typed source cost", () =
   });
   it("does not mark repeatable Nasuko protection as a self-consuming persistent provider", () => {
     const card = visibleCard("nasuko", {
-      definitionId: "onr_v1_135_nasuko-cycle",
+      definitionId: 347,
       type: "hardware",
       installCost: 1,
     });
@@ -62,7 +62,7 @@ describe("tag prevention consumption follows the actual typed source cost", () =
   });
   it("retains the actual consuming Fall Guy counterpart", () => {
     const card = visibleCard("fall-guy", {
-      definitionId: "onr_v1_161_fall-guy",
+      definitionId: 373,
       type: "resource",
       installCost: 0,
     });

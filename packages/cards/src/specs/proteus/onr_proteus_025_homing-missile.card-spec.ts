@@ -5,7 +5,7 @@ const rezWithXStrengthTrace = capabilityKey("rez_with_x_strength_trace");
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_proteus_025_homing-missile"),
+    cardDefinitionId: cardDefinitionId(83),
     title: "Homing Missile",
     side: "corp",
     cardType: "ice",

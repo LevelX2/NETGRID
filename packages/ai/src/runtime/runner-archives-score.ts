@@ -103,7 +103,7 @@ function runnerHiddenArchivesCount(input: AiDecisionInput): number {
     input.playerView.servers
       .find((server) => server.id === "archives")
       ?.root.filter(
-        (card) => card.known && typeof card.definitionId === "string",
+        (card) => card.known && typeof card.definitionId === "number",
       ).length ?? 0;
   return Math.max(0, input.playerView.opponent.discardCount - knownRootCount);
 }

@@ -9,7 +9,7 @@ export type ShellCoverageSubstitution = Readonly<{
   stateVersion: number;
   gapId: string;
   targetCardInstanceId: string;
-  targetDefinitionId: string;
+  targetDefinitionId: number;
   shellActionId: string;
   shellCredits: number;
   replacedInstallActionIds: string[];

@@ -9,9 +9,9 @@ import {
 } from "./runtime-checkpoint";
 
 afterEach(resetResidentPlanPortfolioMemory);
-const installed = "corp_onr_v1_217_strike-force-kali_1";
+const installed = "corp_429_1";
 const newInstall =
-  "corp.install_card.corp_onr_v1_212_priority-requisition_1.new_remote.corp_onr_v1_212_priority-requisition_1";
+  "corp.install_card.corp_424_1.new_remote.corp_424_1";
 function checkpoint() {
   return JSON.parse(
     readFileSync(
@@ -63,7 +63,7 @@ it("funds the already certified terminal continuation instead of opening an unpr
   expect(result.actionId).toBe("corp.gain_credit");
   expect(plan.selectedPlan?.moduleId).toBe("corp.economy");
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:corp.score_agenda:agenda%3Acorp_onr_v1_217_strike-force-kali_1%3Aremote_1",
+    "plan:corp.score_agenda:agenda%3Acorp_429_1%3Aremote_1",
   );
   expect(plan.priority?.effectiveClass).toBe("P2");
   expect(plan.leafExecutorInstanceId).toBe(plan.selectedPlan?.instanceId);

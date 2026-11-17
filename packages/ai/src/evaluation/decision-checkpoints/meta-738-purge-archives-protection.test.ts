@@ -19,12 +19,12 @@ const checkpoint = capture as unknown as {
 const nativeQuote =
   quoteFixture as unknown as VisibleAgendaPurgeArchivesProtectionQuote;
 const split = [
-  "agenda_purge_corp_onr_classic_013_puzzle_1_rd_fixed",
-  "agenda_purge_corp_onr_classic_013_puzzle_3_archives_fixed",
+  "agenda_purge_corp_17_1_rd_fixed",
+  "agenda_purge_corp_17_3_archives_fixed",
 ];
 const together = [
-  "agenda_purge_corp_onr_classic_013_puzzle_1_archives_fixed",
-  "agenda_purge_corp_onr_classic_013_puzzle_3_archives_fixed",
+  "agenda_purge_corp_17_1_archives_fixed",
+  "agenda_purge_corp_17_3_archives_fixed",
 ];
 const owner = "plan:corp.defend_servers:server-defense-portfolio";
 afterEach(resetResidentPlanPortfolioMemory);

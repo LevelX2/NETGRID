@@ -336,7 +336,7 @@ function planBoundRunnerBrokenIceVirusCounterOptions(
           (card) =>
             card.known &&
             card.rezzed === true &&
-            typeof card.definitionId === "string" &&
+            typeof card.definitionId === "number" &&
             (typeof card.effectiveRunQuote?.effectiveStrength === "number" ||
               typeof card.strength === "number"),
         )

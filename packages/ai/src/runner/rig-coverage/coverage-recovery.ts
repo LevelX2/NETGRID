@@ -41,7 +41,7 @@ export type RunnerCostEffectiveCoverageRecovery = Readonly<{
   visibleAnswer?: VisibleCard;
   installActionId?: string;
   deckHasAlternative: boolean;
-  targetDefinitionId?: string;
+  targetDefinitionId?: number;
   recoveryMode:
     | "install_visible_answer"
     | "search_known_alternative"
@@ -450,7 +450,7 @@ export function runnerCostEffectiveDeckCoverageAlternative(
   server: AiDecisionInput["playerView"]["servers"][number],
   deckCapabilities: DeckCapabilityProfile,
   role: RunnerCoverageGapSignal["requiredRole"],
-  installedDefinitionIds: ReadonlySet<string>,
+  installedDefinitionIds: ReadonlySet<number>,
   currentKnownPathCost: number,
   comparisonBudget: number,
 ):

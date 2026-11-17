@@ -305,29 +305,29 @@ function engineArchivesDiscardInput(options: {
       id: "archives-test-runner",
       name: "Archives test Runner",
       side: "runner",
-      identity: "runner_identity_001",
-      cards: [{ id: "onr_v1_039_krash", quantity: 6 }],
+      identity: 587,
+      cards: [{ id: 251, quantity: 6 }],
     },
     corpDeck: {
       id: "archives-test-corp",
       name: "Archives test Corp",
       side: "corp",
-      identity: "corp_identity_001",
+      identity: 3,
       cards: [
-        { id: "onr_proteus_030_mastermind", quantity: 1 },
-        { id: "onr_v1_196_corporate-war", quantity: 4 },
-        { id: "onr_v1_203_hostile-takeover", quantity: 1 },
-        { id: "onr_proteus_031_minotaur", quantity: 3 },
+        { id: 88, quantity: 1 },
+        { id: 408, quantity: 4 },
+        { id: 415, quantity: 1 },
+        { id: 89, quantity: 3 },
       ],
     },
   });
-  const card = (definitionId: string) =>
+  const card = (definitionId: number) =>
     Object.values(state.cardInstances).find(
       (c) => c.definitionId === definitionId,
     )!;
-  const mastermind = card("onr_proteus_030_mastermind");
-  const hostile = card("onr_v1_203_hostile-takeover");
-  const scored = card("onr_v1_196_corporate-war");
+  const mastermind = card(88);
+  const hostile = card(415);
+  const scored = card(408);
   const archives = state.corp.servers.find((s) => s.id === "archives")!;
   const outsideHq = new Set([
     mastermind.instanceId,
@@ -349,7 +349,7 @@ function engineArchivesDiscardInput(options: {
   scored.faceup = true;
   if (options.runnerMatchpoint === false) scored.agendaPointsSpent = 1;
   if (options.rig !== false) {
-    const krash = card("onr_v1_039_krash");
+    const krash = card(251);
     state.runner.stack = state.runner.stack.filter(
       (id) => id !== krash.instanceId,
     );

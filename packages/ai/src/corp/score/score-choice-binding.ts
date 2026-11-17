@@ -105,7 +105,7 @@ export function selectedCorpSatelliteMonitorsStartOptionId(
           (card) =>
             card.instanceId === sourceCardId &&
             card.known &&
-            card.definitionId === "onr_classic_021_satellite-monitors" &&
+            card.definitionId === 25 &&
             card.type === "asset" &&
             card.rezzed === true,
         )

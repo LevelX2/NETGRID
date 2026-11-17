@@ -31,7 +31,7 @@ export type CandidateTargetIdentityResolverInput = {
   actionType: string;
   targetIdentity?: string;
   targetContextStatus?: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   actorSide?: "runner" | "corp";
   abilityId?: string;
   hardGateSummary?: string;

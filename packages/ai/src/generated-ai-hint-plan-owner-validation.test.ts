@@ -65,6 +65,6 @@ function artifactWithBrokerBindings(): any {
 
 function brokerHint(artifact: any): any {
   return artifact.cards.find(
-    (record: any) => record.cardId === "onr_v1_154_broker",
+    (record: any) => record.cardId === 366,
   ).hint;
 }

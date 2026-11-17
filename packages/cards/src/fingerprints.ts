@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { CardSpec, SetSpec } from "./contracts";
 import {
   assertStrictlySerializable,
@@ -36,12 +37,12 @@ export type EngineRegistryVersionContext = {
   cardImplementationVersion: string;
   primitiveContractVersion: string;
   cardPoolSnapshotId: string;
-  matchCardPoolDefinitionIds: readonly string[];
+  matchCardPoolDefinitionIds: readonly CardDefinitionId[];
 };
 
 export type CardRegistryRulesContext = {
   schemaVersion: typeof CARD_REGISTRY_CONTEXT_SCHEMA_VERSION;
-  matchCardDefinitionIds: readonly string[];
+  matchCardDefinitionIds: readonly CardDefinitionId[];
   cardRulesAggregateFingerprint: Fingerprint;
   cardPoolFingerprint: Fingerprint;
   cardPoolSnapshotId: string;
@@ -111,13 +112,13 @@ export function cardSectionFingerprints(
 
 export function registryFingerprints(
   cards: readonly {
-    cardDefinitionId: string;
+    cardDefinitionId: CardDefinitionId;
     fingerprints: CardSectionFingerprints;
   }[],
   sets: readonly SetSpec[],
 ): CardRegistryFingerprints {
   const orderedCards = [...cards].sort((left, right) =>
-    compareText(left.cardDefinitionId, right.cardDefinitionId),
+    left.cardDefinitionId - right.cardDefinitionId,
   );
   const orderedSets = [...sets].sort((left, right) =>
     compareText(left.setId, right.setId),
@@ -174,7 +175,7 @@ export function registryFingerprints(
 
 export function createCardRegistryRulesContext(
   selection: {
-    matchCardDefinitionIds: readonly string[];
+    matchCardDefinitionIds: readonly CardDefinitionId[];
     cardRulesAggregateFingerprint: Fingerprint;
     cardPoolFingerprint: Fingerprint;
   },
@@ -183,7 +184,7 @@ export function createCardRegistryRulesContext(
   assertEngineRegistryVersionContext(versions);
   const matchCardPoolDefinitionIds = [
     ...versions.matchCardPoolDefinitionIds,
-  ].sort(compareText);
+  ].sort((left, right) => left - right);
   if (
     selection.matchCardDefinitionIds.length !==
       matchCardPoolDefinitionIds.length ||
@@ -224,14 +225,14 @@ export function assertEngineRegistryVersionContext(
   if (
     !Array.isArray(versions.matchCardPoolDefinitionIds) ||
     versions.matchCardPoolDefinitionIds.some(
-      (entry) => typeof entry !== "string" || entry.trim().length === 0,
+      (entry) => !Number.isSafeInteger(entry) || entry <= 0,
     ) ||
     new Set(versions.matchCardPoolDefinitionIds).size !==
       versions.matchCardPoolDefinitionIds.length
   )
     throw new FingerprintContractError(
       "invalid_version_context",
-      "matchCardPoolDefinitionIds must be a unique non-empty string array",
+      "matchCardPoolDefinitionIds must be an array of unique positive safe integers",
     );
 }
 
@@ -278,7 +279,7 @@ export function assertCardRegistryRulesContext(
   const ids = record.matchCardDefinitionIds;
   if (
     !Array.isArray(ids) ||
-    ids.some((id) => typeof id !== "string" || id.trim().length === 0) ||
+    ids.some((id) => typeof id !== "number" || !Number.isSafeInteger(id) || id <= 0) ||
     new Set(ids).size !== ids.length ||
     ids.some((id, index) => index > 0 && ids[index - 1] >= id)
   )

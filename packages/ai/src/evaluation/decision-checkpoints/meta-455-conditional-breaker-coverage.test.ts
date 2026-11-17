@@ -13,12 +13,12 @@ import {
 } from "./runtime-checkpoint";
 
 it.each([
-  ["onr_proteus_082_bulldozer", true, false, false],
-  ["onr_proteus_080_black-widow", false, false, true],
-  ["onr_proteus_087_forwards-legacy", false, false, true],
-  ["onr_proteus_095_skeleton-passkeys", false, true, false],
-  ["onr_proteus_088_fubar", true, true, true],
-  ["onr_proteus_092_morphing-tool", true, true, true],
+  [140, true, false, false],
+  [138, false, false, true],
+  [145, false, false, true],
+  [153, false, true, false],
+  [146, true, true, true],
+  [150, true, true, true],
 ] as const)(
   "uses canonical acquisition coverage for %s",
   (id, wall, gate, sentry) => {
@@ -42,7 +42,7 @@ it("does not add a conditional Sentry rider to the canonical deck inventory", ()
     input.ownDeckSnapshot,
   );
   const bulldozer = profile.runner!.breakerInventory.find(
-    (c) => c.cardId === "onr_proteus_082_bulldozer",
+    (c) => c.cardId === 140,
   )!;
   expect(bulldozer.coverage).toContain("wall");
   expect(bulldozer.coverage).not.toContain("sentry");

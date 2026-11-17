@@ -44,7 +44,7 @@ function apply(
   return result.state;
 }
 it("avoids a public draw-tax tag by placing the same credit click before the draw", () => {
-  const city = "onr_v1_313_city-surveillance";
+  const city = 525;
   let initial = createGameAfterSetup({
     matchId: "draw-tax-order",
     seed: "draw-tax-order",

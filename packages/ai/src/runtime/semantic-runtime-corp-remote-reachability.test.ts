@@ -13,7 +13,7 @@ describe("visibleCorpRootProvidesRemoteProtection", () => {
   it("does not activate a scored-agenda modifier from an installed agenda", () => {
     const agenda = card(
       "black-ice-quality-assurance",
-      "onr_v1_191_black-ice-quality-assurance",
+      403,
       { type: "agenda" },
     );
 
@@ -31,7 +31,7 @@ describe("visibleCorpRootProvidesRemoteProtection", () => {
   it("keeps the same persistent modifier active in the score area", () => {
     const agenda = card(
       "black-ice-quality-assurance",
-      "onr_v1_191_black-ice-quality-assurance",
+      403,
       { type: "agenda" },
     );
 
@@ -49,7 +49,7 @@ describe("visibleCorpRootProvidesRemoteProtection", () => {
   it("counts persistent root protection only after the upgrade is rezzed", () => {
     const upgrade = card(
       "antiquated-interface-routines",
-      "onr_v1_350_antiquated-interface-routines",
+      562,
       { type: "upgrade", rezzed: false },
     );
 
@@ -74,7 +74,7 @@ describe("visibleCorpRootProvidesRemoteProtection", () => {
   });
 
   it("keeps an unrezzed on-access trap as a defensive root benefit", () => {
-    const accessTrap = card("crybaby", "onr_v1_354_crybaby", {
+    const accessTrap = card("crybaby", 566, {
       type: "upgrade",
       rezzed: false,
     });
@@ -93,7 +93,7 @@ describe("visibleCorpRootProvidesRemoteProtection", () => {
   it("does not activate an advancement-dependent access trap at zero counters", () => {
     const accessTrap = card(
       "shattered-remains",
-      "onr_v1_315_corprunners-shattered-remains",
+      527,
       { type: "asset", rezzed: false, advancementCounters: 0 },
     );
 
@@ -122,8 +122,8 @@ describe("visibleCorpRootProvidesRemoteProtection", () => {
 
   it("does not treat trace-credit or remote-capacity upgrades as protection", () => {
     for (const [instanceId, definitionId] of [
-      ["paris-city-grid", "onr_v1_365_paris-city-grid"],
-      ["namatoki-plaza", "onr_v1_361_namatoki-plaza"],
+      ["paris-city-grid", 577],
+      ["namatoki-plaza", 573],
     ] as const)
       expect(
         visibleCorpRootProvidesRemoteProtection(
@@ -142,7 +142,7 @@ describe("visibleCorpRootProvidesRemoteProtection", () => {
 
 function card(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   overrides: Partial<VisibleCard> = {},
 ): VisibleCard {
   return {

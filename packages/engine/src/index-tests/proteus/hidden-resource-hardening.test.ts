@@ -245,7 +245,7 @@ function payableBreakerEncounter(seed: string): {
   let state = runnerState(seed);
   const breakerId = addRunnerGripCard(
     state,
-    "onr_v1_021_dwarf",
+    233,
     `${seed}_dwarf`,
   );
   const installBreaker = getLegalActions(state, "runner").find(
@@ -257,12 +257,12 @@ function payableBreakerEncounter(seed: string): {
   state = applyLegal(state, "runner", installBreaker!).state;
   const chibaId = installHiddenResource(
     state,
-    "onr_proteus_133_chiba-bank-account",
+    191,
     `${seed}_chiba`,
   );
   const iceId = addCorpServerCard(
     state,
-    "onr_v1_232_crystal-wall",
+    444,
     `${seed}_crystal_wall`,
     "hq",
     "ice",
@@ -309,12 +309,12 @@ describe("PRO011 hidden resource timing hardening", () => {
       let state = runnerState(`bank-krash-path-${credits}`);
       const chiba = installHiddenResource(
         state,
-        "onr_proteus_133_chiba-bank-account",
+        191,
         "bank_path_chiba",
       );
       const krash = addRunnerGripCard(
         state,
-        "onr_v1_039_krash",
+        251,
         "bank_path_krash",
       );
       state.runner.grip = state.runner.grip.filter((id) => id !== krash);
@@ -326,7 +326,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       });
       const wall = addCorpServerCard(
         state,
-        "onr_v1_238_data-wall-2-0",
+        450,
         "bank_path_wall",
         "remote_1",
         "ice",
@@ -399,7 +399,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       expectHiddenResourceTrashed(
         state,
         chiba,
-        "onr_proteus_133_chiba-bank-account",
+        191,
       );
       expectReplayStable(initial, state);
     },
@@ -428,18 +428,18 @@ describe("PRO011 hidden resource timing hardening", () => {
       state.runner.clicks = 1;
       const chiba = installHiddenResource(
         state,
-        "onr_proteus_133_chiba-bank-account",
+        191,
         "install_bank",
       );
       state.cardInstances[chiba]!.tapped = tapped;
       const dwarf = addRunnerGripCard(
         state,
-        "onr_v1_021_dwarf",
+        233,
         "install_dwarf",
       );
       const other = addRunnerGripCard(
         state,
-        "onr_v1_039_krash",
+        251,
         "other_program",
       );
       const initial = structuredClone(state);
@@ -517,12 +517,12 @@ describe("PRO011 hidden resource timing hardening", () => {
       let state = runnerState(`encounter-tax-bank-${credits}`);
       const chibaId = installHiddenResource(
         state,
-        "onr_proteus_133_chiba-bank-account",
+        191,
         "entry_chiba",
       );
       const iceId = addCorpServerCard(
         state,
-        "onr_v1_266_scramble",
+        478,
         "entry_scramble",
         "hq",
         "ice",
@@ -543,7 +543,7 @@ describe("PRO011 hidden resource timing hardening", () => {
         successful: false,
         accessCount: 1,
         encounterTaxForFutureIce: 2,
-        encounterTaxSourceDefinitionId: "onr_v1_222_ball-and-chain",
+        encounterTaxSourceDefinitionId: 434,
         nextEncounterJackOutLock: true,
       };
       if (entry === "corp_decline") {
@@ -600,12 +600,12 @@ describe("PRO011 hidden resource timing hardening", () => {
     let state = runnerState("pro011-airport-locker-main");
     const lockerId = installHiddenResource(
       state,
-      "onr_proteus_128_airport-locker",
+      186,
       "pro011_airport_locker_main",
     );
     const programId = addRunnerStackCard(
       state,
-      "onr_v1_014_codecracker",
+      226,
       "pro011_airport_locker_program",
     );
     const mainAction = getLegalActions(state, "runner").find(
@@ -623,7 +623,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     expectHiddenResourceTrashed(
       state,
       lockerId,
-      "onr_proteus_128_airport-locker",
+      186,
     );
     expect(state.pendingChoice?.source).toContain("p3_38.search_stack_install");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
@@ -639,9 +639,9 @@ describe("PRO011 hidden resource timing hardening", () => {
     expect(state.runner.stack).not.toContain(programId);
     expect(state.runner.credits).toBe(23);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      sourceDefinitionId: "onr_proteus_128_airport-locker",
+      sourceDefinitionId: 186,
       hiddenZoneAction: "p3_38_search_stack_install",
-      installedProgramDefinitionId: "onr_v1_014_codecracker",
+      installedProgramDefinitionId: 226,
       installed: true,
     });
     expectReplayStable(before, state);
@@ -649,12 +649,12 @@ describe("PRO011 hidden resource timing hardening", () => {
     const lowFunds = runnerState("pro011-airport-locker-low-funds");
     const lowFundsLockerId = installHiddenResource(
       lowFunds,
-      "onr_proteus_128_airport-locker",
+      186,
       "pro011_airport_locker_low_funds",
     );
     addRunnerStackCard(
       lowFunds,
-      "onr_v1_014_codecracker",
+      226,
       "pro011_airport_locker_low_funds_program",
     );
     lowFunds.runner.credits = 6;
@@ -669,17 +669,17 @@ describe("PRO011 hidden resource timing hardening", () => {
     const encounter = runnerState("pro011-airport-locker-encounter");
     const encounterLockerId = installHiddenResource(
       encounter,
-      "onr_proteus_128_airport-locker",
+      186,
       "pro011_airport_locker_encounter",
     );
     addRunnerStackCard(
       encounter,
-      "onr_v1_014_codecracker",
+      226,
       "pro011_airport_locker_encounter_program",
     );
     const iceId = addCorpServerCard(
       encounter,
-      "onr_v1_232_crystal-wall",
+      444,
       "pro011_airport_locker_ice",
       "hq",
       "ice",
@@ -731,12 +731,12 @@ describe("PRO011 hidden resource timing hardening", () => {
     const state = runnerState("hidden-bank-preselection-view");
     const chibaId = installHiddenResource(
       state,
-      "onr_proteus_133_chiba-bank-account",
+      191,
       "preselection_chiba",
     );
     const swissId = installHiddenResource(
       state,
-      "onr_proteus_152_swiss-bank-account",
+      210,
       "preselection_swiss",
     );
 
@@ -747,7 +747,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     ).toEqual([
       {
         sourceAbilityId:
-          "onr_proteus_133_chiba-bank-account:pay_and_trash_source_gain_four_credits",
+          "191:pay_and_trash_source_gain_four_credits",
         capabilityKey: "pay_and_trash_source_gain_four_credits",
         timing: "runner_cost_penalty_support",
         label: "Chiba Bank Account: 4 Credits nehmen",
@@ -762,7 +762,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     ).toEqual([
       {
         sourceAbilityId:
-          "onr_proteus_152_swiss-bank-account:trash_source_gain_two_credits",
+          "210:trash_source_gain_two_credits",
         capabilityKey: "trash_source_gain_two_credits",
         timing: "runner_cost_penalty_support",
         label: "Swiss Bank Account: 2 Credits nehmen",
@@ -772,7 +772,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       },
       {
         sourceAbilityId:
-          "onr_proteus_152_swiss-bank-account:pay_three_trash_source_gain_six",
+          "210:pay_three_trash_source_gain_six",
         capabilityKey: "pay_three_trash_source_gain_six",
         timing: "runner_cost_penalty_support",
         label: "Swiss Bank Account: 6 Credits nehmen",
@@ -804,7 +804,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     state.runner.credits = 3;
     const swissId = installHiddenResource(
       state,
-      "onr_proteus_152_swiss-bank-account",
+      210,
       "pro011_dominance_swiss",
     );
     state.runner.credits = 3;
@@ -831,12 +831,12 @@ describe("PRO011 hidden resource timing hardening", () => {
     state.runner.credits = 1;
     const chibaId = installHiddenResource(
       state,
-      "onr_proteus_133_chiba-bank-account",
+      191,
       "pro011_chiba",
     );
     const expensiveProgramId = addRunnerGripCard(
       state,
-      "onr_v1_010_cascade",
+      222,
       "pro011_expensive_program",
     );
     expect(
@@ -904,7 +904,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenRunnerResourceRevealed: true,
-      publicRevealDefinitionId: "onr_proteus_133_chiba-bank-account",
+      publicRevealDefinitionId: 191,
       sourceTrashed: true,
       cardImplementationAbilityTiming: "runner_cost_penalty_support",
     });
@@ -926,12 +926,12 @@ describe("PRO011 hidden resource timing hardening", () => {
     state.runner.credits = 2;
     const chibaId = installHiddenResource(
       state,
-      "onr_proteus_133_chiba-bank-account",
+      191,
       "pro011_event_chiba",
     );
     const scoreId = addRunnerGripCard(
       state,
-      "onr_v1_108_score",
+      320,
       "pro011_score",
     );
 
@@ -972,13 +972,13 @@ describe("PRO011 hidden resource timing hardening", () => {
   });
 
   it.each([
-    ["Chiba Bank Account", "onr_proteus_133_chiba-bank-account", 1],
+    ["Chiba Bank Account", 191, 1],
     [
       "Liberated Savings Account",
-      "onr_proteus_143_liberated-savings-account",
+      201,
       7,
     ],
-    ["Swiss Bank Account", "onr_proteus_152_swiss-bank-account", 3],
+    ["Swiss Bank Account", 210, 3],
   ] as const)(
     "offers voluntary %s support for an already payable event",
     (_title, definitionId, expectedCreditCost) => {
@@ -991,7 +991,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       );
       const scoreId = addRunnerGripCard(
         state,
-        "onr_v1_108_score",
+        320,
         `voluntary_score_${definitionId}`,
       );
       const playScore = getLegalActions(state, "runner").find(
@@ -1033,12 +1033,12 @@ describe("PRO011 hidden resource timing hardening", () => {
     state.runner.credits = 8;
     const swissId = installHiddenResource(
       state,
-      "onr_proteus_152_swiss-bank-account",
+      210,
       "voluntary_running_interference_swiss",
     );
     const runningInterferenceId = addRunnerGripCard(
       state,
-      "onr_classic_043_running-interference",
+      47,
       "voluntary_running_interference",
     );
     const playRunningInterference = getLegalActions(state, "runner").find(
@@ -1110,7 +1110,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     expectHiddenResourceTrashed(
       state,
       chibaId,
-      "onr_proteus_133_chiba-bank-account",
+      191,
     );
 
     const continuation = getLegalActions(state, "runner").find(
@@ -1176,12 +1176,12 @@ describe("PRO011 hidden resource timing hardening", () => {
     state.runner.credits = 1;
     const chibaId = installHiddenResource(
       state,
-      "onr_proteus_133_chiba-bank-account",
+      191,
       "pro011_access_chiba",
     );
     const assetId = addCorpServerCard(
       state,
-      "onr_v1_309_bbs-whispering-campaign",
+      521,
       "pro011_bbs_campaign",
       "remote_1",
       "root",
@@ -1236,12 +1236,12 @@ describe("PRO011 hidden resource timing hardening", () => {
     state.runner.credits = 0;
     const swissId = installHiddenResource(
       state,
-      "onr_proteus_152_swiss-bank-account",
+      210,
       "pro011_run_swiss",
     );
     const taxAssetId = addCorpServerCard(
       state,
-      "onr_v1_332_newsgroup-taunting",
+      544,
       "pro011_newsgroup",
       "hq",
       "root",
@@ -1276,7 +1276,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     expectHiddenResourceTrashed(
       state,
       swissId,
-      "onr_proteus_152_swiss-bank-account",
+      210,
     );
 
     const continued = getLegalActions(state, "runner").find(
@@ -1297,12 +1297,12 @@ describe("PRO011 hidden resource timing hardening", () => {
     state.runner.credits = 0;
     const swissId = installHiddenResource(
       state,
-      "onr_proteus_152_swiss-bank-account",
+      210,
       "pro011_snowbank_swiss",
     );
     const snowbankId = addCorpServerCard(
       state,
-      "onr_proteus_038_snowbank",
+      96,
       "pro011_snowbank",
       "rd",
       "ice",
@@ -1360,7 +1360,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     expectHiddenResourceTrashed(
       state,
       swissId,
-      "onr_proteus_152_swiss-bank-account",
+      210,
     );
 
     const resumed = getLegalActions(state, "runner").find(
@@ -1383,7 +1383,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     let state = runnerState("pro011-1-mole");
     const hqMoleId = installHiddenResource(
       state,
-      "onr_proteus_142_hq-mole",
+      200,
       "pro011_hq_mole",
     );
     state.run = {
@@ -1457,12 +1457,12 @@ describe("PRO011 hidden resource timing hardening", () => {
     state.runner.credits = 17;
     const firstMoleId = installHiddenResource(
       state,
-      "onr_proteus_147_r-and-d-mole",
+      205,
       "pro011_rd_mole_first",
     );
     const secondMoleId = installHiddenResource(
       state,
-      "onr_proteus_147_r-and-d-mole",
+      205,
       "pro011_rd_mole_second",
     );
     state.run = {
@@ -1474,7 +1474,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       resolvedSubroutineIndexes: [],
       successful: true,
       accessCount: 4,
-      successfulRunSourceDefinitionId: "onr_proteus_122_rush-hour",
+      successfulRunSourceDefinitionId: 180,
       successfulRunSourceTitle: "Rush Hour",
       hiddenRunnerResourceAccessStartServerId: "rd",
     };
@@ -1516,11 +1516,11 @@ describe("PRO011 hidden resource timing hardening", () => {
       expectHiddenResourceTrashed(
         state,
         moleId,
-        "onr_proteus_147_r-and-d-mole",
+        205,
       );
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "activated_card_ability",
-        cardDefinitionId: "onr_proteus_147_r-and-d-mole",
+        cardDefinitionId: 205,
         title: "R&D Mole",
         sourceTrashed: true,
         hiddenRunnerResourceRevealed: true,
@@ -1557,12 +1557,12 @@ describe("PRO011 hidden resource timing hardening", () => {
     state.runner.credits = 11;
     const firstMoleId = installHiddenResource(
       state,
-      "onr_proteus_142_hq-mole",
+      200,
       "pro011_hq_mole_first",
     );
     const secondMoleId = installHiddenResource(
       state,
-      "onr_proteus_142_hq-mole",
+      200,
       "pro011_hq_mole_second",
     );
     state.run = {
@@ -1611,10 +1611,10 @@ describe("PRO011 hidden resource timing hardening", () => {
       );
       expect(state.runner.credits).toBe(creditsBefore - 4);
       expect(state.run?.accessCount).toBe(index === 0 ? 3 : 5);
-      expectHiddenResourceTrashed(state, moleId, "onr_proteus_142_hq-mole");
+      expectHiddenResourceTrashed(state, moleId, 200);
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "activated_card_ability",
-        cardDefinitionId: "onr_proteus_142_hq-mole",
+        cardDefinitionId: 200,
         title: "HQ Mole",
         sourceTrashed: true,
         hiddenRunnerResourceRevealed: true,
@@ -1650,12 +1650,12 @@ describe("PRO011 hidden resource timing hardening", () => {
     const runnerTurn = runnerState("pro011-1-time-runner-turn");
     const timeId = installHiddenResource(
       runnerTurn,
-      "onr_proteus_153_time-to-collect",
+      211,
       "pro011_time_runner_turn",
     );
     const otherId = installHiddenResource(
       runnerTurn,
-      "onr_proteus_128_airport-locker",
+      186,
       "pro011_other_resource",
     );
     runnerTurn.activeSide = "corp";
@@ -1676,17 +1676,17 @@ describe("PRO011 hidden resource timing hardening", () => {
     const corpTurn = runnerState("pro011-1-time-corp-turn");
     const corpTimeId = installHiddenResource(
       corpTurn,
-      "onr_proteus_153_time-to-collect",
+      211,
       "pro011_time_corp_turn",
     );
     const corpOtherId = installHiddenResource(
       corpTurn,
-      "onr_proteus_128_airport-locker",
+      186,
       "pro011_other_resource_corp_turn",
     );
     const corpOtherSecondId = installHiddenResource(
       corpTurn,
-      "onr_proteus_133_chiba-bank-account",
+      191,
       "pro011_other_resource_second_corp_turn",
     );
     corpTurn.phase = "corp_action_phase";
@@ -1756,7 +1756,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     let state = runnerState("pro012-bolt-hole");
     const boltId = installHiddenResource(
       state,
-      "onr_proteus_132_bolt-hole",
+      190,
       "pro012_bolt",
     );
     expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
@@ -1819,15 +1819,15 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     const result = resolveChoice(state, "runner", optionId);
     expect(result.ok).toBe(true);
     state = result.state;
-    expectHiddenResourceTrashed(state, boltId, "onr_proteus_132_bolt-hole");
+    expectHiddenResourceTrashed(state, boltId, 190);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       eventModificationOutcome: "partially_prevented",
       preventedAmount: 2,
       damageAmount: 1,
       hiddenRunnerResourceRevealed: true,
-      publicRevealDefinitionId: "onr_proteus_132_bolt-hole",
+      publicRevealDefinitionId: 190,
       sourceTrashed: true,
-      trashedCardDefinitionId: "onr_proteus_132_bolt-hole",
+      trashedCardDefinitionId: 190,
     });
     const replay = replayEvents(
       before,
@@ -1842,7 +1842,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     state.runner.credits = 1;
     const expendableId = installHiddenResource(
       state,
-      "onr_proteus_140_expendable-family-member",
+      198,
       "pro012_expendable",
     );
     const action = {
@@ -1882,15 +1882,15 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expectHiddenResourceTrashed(
       state,
       expendableId,
-      "onr_proteus_140_expendable-family-member",
+      198,
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       eventModificationOutcome: "avoided",
       paidCredits: 1,
       hiddenRunnerResourceRevealed: true,
-      publicRevealDefinitionId: "onr_proteus_140_expendable-family-member",
+      publicRevealDefinitionId: 198,
       sourceTrashed: true,
-      trashedCardDefinitionId: "onr_proteus_140_expendable-family-member",
+      trashedCardDefinitionId: 198,
     });
   });
 
@@ -1898,12 +1898,12 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     const state = runnerState("deep667-root-trash-count");
     installHiddenResource(
       state,
-      "onr_proteus_137_death-from-above",
+      195,
       "deep667_death",
     );
     const target = addCorpServerCard(
       state,
-      "onr_v1_313_city-surveillance",
+      525,
       "deep667_city",
       "remote_1",
       "root",
@@ -1911,14 +1911,14 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     const ice = [
       addCorpServerCard(
         state,
-        "onr_v1_261_quandary",
+        473,
         "deep667_quandary",
         "remote_1",
         "ice",
       ),
       addCorpServerCard(
         state,
-        "onr_v1_279_wall-of-static",
+        491,
         "deep667_wall",
         "remote_1",
         "ice",
@@ -1959,12 +1959,12 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     const state = runnerState("deep667-ice-only-root-trash");
     const source = installHiddenResource(
       state,
-      "onr_proteus_137_death-from-above",
+      195,
       "deep667_empty_death",
     );
     addCorpServerCard(
       state,
-      "onr_v1_261_quandary",
+      473,
       "deep667_empty_quandary",
       "remote_1",
       "ice",
@@ -1996,7 +1996,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     let creditState = runnerState("pro012-credit-subversion");
     const creditSourceId = installHiddenResource(
       creditState,
-      "onr_proteus_136_credit-subversion",
+      194,
       "pro012_credit_subversion",
     );
     creditState.corp.credits = 2;
@@ -2026,30 +2026,30 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     );
     expect(runnerCreditAction?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+        "194:hq_success_reveal_trash_source_corp_lose_three",
       cardImplementationAbilityKey:
         "hq_success_reveal_trash_source_corp_lose_three",
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
       cardImplementationEffectKind: "corp_lose_credits",
       sourceCardId: creditSourceId,
-      sourceDefinitionId: "onr_proteus_136_credit-subversion",
+      sourceDefinitionId: 194,
     });
     expect(runnerCreditAction?.abilityRef).toEqual({
       sourceCardInstanceId: creditSourceId,
       sourceAbilityId:
-        "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+        "194:hq_success_reveal_trash_source_corp_lose_three",
     });
     expect(creditAction?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+        "194:hq_success_reveal_trash_source_corp_lose_three",
       cardImplementationAbilityKey:
         "hq_success_reveal_trash_source_corp_lose_three",
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
       cardImplementationEffectKind: "corp_lose_credits",
       sourceCardId: creditSourceId,
-      sourceDefinitionId: "onr_proteus_136_credit-subversion",
+      sourceDefinitionId: 194,
       proteusHiddenSuccessfulRunFollowup: "corp_lose_credits",
     });
     const corpCreditViewBeforeReveal = JSON.stringify(
@@ -2057,7 +2057,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     );
     expect(corpCreditViewBeforeReveal).not.toContain("Credit Subversion");
     expect(corpCreditViewBeforeReveal).not.toContain(
-      "onr_proteus_136_credit-subversion",
+      194,
     );
     expect(corpCreditViewBeforeReveal).not.toContain(
       "successful_run_before_access",
@@ -2080,19 +2080,19 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expectHiddenResourceTrashed(
       creditState,
       creditSourceId,
-      "onr_proteus_136_credit-subversion",
+      194,
     );
     expect(creditState.eventLog.at(-1)?.publicPayload).toMatchObject({
       creditLoss: 2,
       hiddenRunnerResourceRevealed: true,
-      publicRevealDefinitionId: "onr_proteus_136_credit-subversion",
+      publicRevealDefinitionId: 194,
       sourceTrashed: true,
-      trashedCardDefinitionId: "onr_proteus_136_credit-subversion",
+      trashedCardDefinitionId: 194,
     });
     const creditPublicPayload =
       creditState.eventLog.at(-1)?.publicPayload ?? {};
     expect(creditPublicPayload).toMatchObject({
-      sourceDefinitionId: "onr_proteus_136_credit-subversion",
+      sourceDefinitionId: 194,
       visibility: { class: "hidden_info_barrier", hiddenZoneBarrier: true },
     });
     expect(creditPublicPayload).not.toHaveProperty(
@@ -2114,7 +2114,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     );
     expect(
       getPlayerView(creditState, "corp").opponent.rig?.some(
-        (card) => card.definitionId === "onr_proteus_136_credit-subversion",
+        (card) => card.definitionId === 194,
       ),
     ).toBe(false);
     const creditReplay = replayEvents(
@@ -2136,7 +2136,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     const wrongHqTiming = runnerState("pro012-credit-subversion-rd");
     installHiddenResource(
       wrongHqTiming,
-      "onr_proteus_136_credit-subversion",
+      194,
       "pro012_credit_subversion_wrong",
     );
     wrongHqTiming.run = {
@@ -2158,26 +2158,26 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     let deathState = runnerState("pro012-death-from-above");
     const deathSourceId = installHiddenResource(
       deathState,
-      "onr_proteus_137_death-from-above",
+      195,
       "pro012_death",
     );
     const assetId = addCorpServerCard(
       deathState,
-      "onr_v1_309_bbs-whispering-campaign",
+      521,
       "pro012_remote_asset",
       "remote_1",
       "root",
     );
     const upgradeId = addCorpServerCard(
       deathState,
-      "onr_v1_350_antiquated-interface-routines",
+      562,
       "pro012_remote_upgrade",
       "remote_1",
       "root",
     );
     const iceId = addCorpServerCard(
       deathState,
-      "onr_v1_221_asp",
+      433,
       "pro012_remote_ice",
       "remote_1",
       "ice",
@@ -2202,14 +2202,14 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(deathAction).toBeDefined();
     expect(deathAction?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_proteus_137_death-from-above:remote_success_reveal_trash_source_and_fort",
+        "195:remote_success_reveal_trash_source_and_fort",
       cardImplementationAbilityKey:
         "remote_success_reveal_trash_source_and_fort",
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
       cardImplementationEffectKind: "trash_remote_fort",
       sourceCardId: deathSourceId,
-      sourceDefinitionId: "onr_proteus_137_death-from-above",
+      sourceDefinitionId: 195,
       proteusHiddenSuccessfulRunFollowup: "trash_remote_fort",
     });
     const corpDeathViewBeforeReveal = JSON.stringify(
@@ -2217,7 +2217,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     );
     expect(corpDeathViewBeforeReveal).not.toContain("Death from Above");
     expect(corpDeathViewBeforeReveal).not.toContain(
-      "onr_proteus_137_death-from-above",
+      195,
     );
     expect(corpDeathViewBeforeReveal).not.toContain("trash_remote_fort");
     const deathReplayStart = deathState.eventLog.length;
@@ -2228,7 +2228,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expectHiddenResourceTrashed(
       deathState,
       deathSourceId,
-      "onr_proteus_137_death-from-above",
+      195,
     );
     expect(deathState.corp.archives).toEqual(
       expect.arrayContaining([assetId, upgradeId]),
@@ -2247,13 +2247,13 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(deathState.eventLog.at(-1)?.publicPayload).toMatchObject({
       trashedCount: 2,
       hiddenRunnerResourceRevealed: true,
-      publicRevealDefinitionId: "onr_proteus_137_death-from-above",
+      publicRevealDefinitionId: 195,
       sourceTrashed: true,
-      trashedCardDefinitionId: "onr_proteus_137_death-from-above",
+      trashedCardDefinitionId: 195,
     });
     const deathPublicPayload = deathState.eventLog.at(-1)?.publicPayload ?? {};
     expect(deathPublicPayload).toMatchObject({
-      sourceDefinitionId: "onr_proteus_137_death-from-above",
+      sourceDefinitionId: 195,
       visibility: { class: "hidden_info_barrier", hiddenZoneBarrier: true },
     });
     expect(deathPublicPayload).not.toHaveProperty(
@@ -2276,7 +2276,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     let emptyDeathState = runnerState("pro012-death-empty-remote");
     installHiddenResource(
       emptyDeathState,
-      "onr_proteus_137_death-from-above",
+      195,
       "pro012_death_empty",
     );
     emptyDeathState.corp.servers = emptyDeathState.corp.servers.filter(
@@ -2314,7 +2314,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       const wrongServerState = runnerState(`pro012-death-${serverId}`);
       installHiddenResource(
         wrongServerState,
-        "onr_proteus_137_death-from-above",
+        195,
         `pro012_death_${serverId}`,
       );
       wrongServerState.run = {
@@ -2343,12 +2343,12 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     mercenaryState.runner.credits = 4;
     const mercenaryId = installHiddenResource(
       mercenaryState,
-      "onr_proteus_145_mercenary-subcontract",
+      203,
       "pro012_mercenary",
     );
     const operationId = addCorpServerCard(
       mercenaryState,
-      "onr_v1_281_accounts-receivable",
+      493,
       "pro012_accessed_operation",
       "rd",
       "root",
@@ -2389,7 +2389,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expectHiddenResourceTrashed(
       mercenaryState,
       mercenaryId,
-      "onr_proteus_145_mercenary-subcontract",
+      203,
     );
     result = resolveChoice(mercenaryState, "runner", operationId);
     expect(result.ok).toBe(true);
@@ -2397,9 +2397,9 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(mercenaryState.corp.archives).toContain(operationId);
     expect(mercenaryState.eventLog.at(-2)?.publicPayload).toMatchObject({
       hiddenRunnerResourceRevealed: true,
-      publicRevealDefinitionId: "onr_proteus_145_mercenary-subcontract",
+      publicRevealDefinitionId: 203,
       sourceTrashed: true,
-      trashedCardDefinitionId: "onr_proteus_145_mercenary-subcontract",
+      trashedCardDefinitionId: 203,
       hiddenZoneAction: "proteus_hidden_current_access_free_trash_choice",
     });
     expect(mercenaryState.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -2409,12 +2409,12 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     const agendaState = runnerState("pro012-mercenary-agenda");
     installHiddenResource(
       agendaState,
-      "onr_proteus_145_mercenary-subcontract",
+      203,
       "pro012_mercenary_agenda",
     );
     const agendaId = addCorpServerCard(
       agendaState,
-      "onr_v1_188_ai-chief-financial-officer",
+      400,
       "pro012_accessed_agenda",
       "rd",
       "root",
@@ -2454,7 +2454,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     let state = runnerState("pro012-back-door");
     const backDoorId = installHiddenResource(
       state,
-      "onr_proteus_129_back-door-to-netwatch",
+      187,
       "pro012_back_door",
     );
     state.runner.credits = 3;
@@ -2462,7 +2462,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     state.trace = {
       traceId: "pro012_trace",
       sourceCardInstanceId: "corp_trace_source" as CardInstanceId,
-      sourceDefinitionId: "onr_v1_188_ai-chief-financial-officer",
+      sourceDefinitionId: 400,
       traceLimit: 5,
       status: "trace_success_cancel",
       successEffect: { type: "net_damage", amount: 1 },
@@ -2505,7 +2505,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expectHiddenResourceTrashed(
       state,
       backDoorId,
-      "onr_proteus_129_back-door-to-netwatch",
+      187,
     );
     expect(state.corp.badPublicity).toBe(7);
     expect(state.winner).toBe("runner");
@@ -2513,9 +2513,9 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceEffectCanceled: true,
       hiddenRunnerResourceRevealed: true,
-      publicRevealDefinitionId: "onr_proteus_129_back-door-to-netwatch",
+      publicRevealDefinitionId: 187,
       sourceTrashed: true,
-      trashedCardDefinitionId: "onr_proteus_129_back-door-to-netwatch",
+      trashedCardDefinitionId: 187,
       badPublicityAdded: 1,
     });
     const replay = replayEvents(
@@ -2528,14 +2528,14 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     const tagsOnly = runnerState("pro012-back-door-tags");
     const tagsBackDoorId = installHiddenResource(
       tagsOnly,
-      "onr_proteus_129_back-door-to-netwatch",
+      187,
       "pro012_back_door_tags",
     );
     tagsOnly.runner.credits = 3;
     tagsOnly.trace = {
       traceId: "pro012_tags_trace",
       sourceCardInstanceId: "corp_trace_source_tags" as CardInstanceId,
-      sourceDefinitionId: "onr_v1_188_ai-chief-financial-officer",
+      sourceDefinitionId: 400,
       traceLimit: 5,
       status: "trace_success_cancel",
       successEffect: { type: "add_tag", amount: 1 },
@@ -2578,25 +2578,25 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     let state = runnerState("pro012-rumble");
     const rumbleId = installHiddenResource(
       state,
-      "onr_proteus_141_get-ready-to-rumble",
+      199,
       "pro012_rumble",
     );
-    addRunnerGripCard(state, "onr_v1_010_cascade", "pro012_grip_1");
-    addRunnerGripCard(state, "onr_v1_011_cloak", "pro012_grip_2");
-    addRunnerGripCard(state, "onr_v1_012_clown", "pro012_grip_3");
+    addRunnerGripCard(state, 222, "pro012_grip_1");
+    addRunnerGripCard(state, 223, "pro012_grip_2");
+    addRunnerGripCard(state, 224, "pro012_grip_3");
     addCorpHqCard(
       state,
-      "onr_v1_188_ai-chief-financial-officer",
+      400,
       "pro012_hq_1",
     );
     addCorpHqCard(
       state,
-      "onr_v1_188_ai-chief-financial-officer",
+      400,
       "pro012_hq_2",
     );
     addCorpHqCard(
       state,
-      "onr_v1_188_ai-chief-financial-officer",
+      400,
       "pro012_hq_3",
     );
     const hqCountBefore = state.corp.hq.length;
@@ -2628,7 +2628,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expectHiddenResourceTrashed(
       state,
       rumbleId,
-      "onr_proteus_141_get-ready-to-rumble",
+      199,
     );
     expect(state.corp.hq).toHaveLength(hqCountBefore - 2);
     expect(state.corp.archives).toHaveLength(archivesCountBefore + 2);
@@ -2637,7 +2637,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       hiddenResourcePostMeatDamageDecision: "apply",
       hiddenRunnerResourceRevealed: true,
       sourceTrashed: true,
-      trashedCardDefinitionId: "onr_proteus_141_get-ready-to-rumble",
+      trashedCardDefinitionId: 199,
       discardedHqCount: 2,
     });
     const replay = replayEvents(
@@ -2650,10 +2650,10 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     const netState = runnerState("pro012-rumble-net");
     installHiddenResource(
       netState,
-      "onr_proteus_141_get-ready-to-rumble",
+      199,
       "pro012_rumble_net",
     );
-    addRunnerGripCard(netState, "onr_v1_010_cascade", "pro012_net_grip");
+    addRunnerGripCard(netState, 222, "pro012_net_grip");
     doDamage(netState, {
       damageId: "pro012_net",
       damageType: "net",
@@ -2665,7 +2665,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     const flatlineState = runnerState("pro012-rumble-flatline");
     installHiddenResource(
       flatlineState,
-      "onr_proteus_141_get-ready-to-rumble",
+      199,
       "pro012_rumble_flatline",
     );
     flatlineState.runner.grip = [];

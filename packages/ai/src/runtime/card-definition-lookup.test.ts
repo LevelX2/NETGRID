@@ -7,7 +7,7 @@ describe("visibleCardDefinition", () => {
   it("resolves a definition only for an explicitly known card", () => {
     const card = {
       instanceId: "data-wall",
-      definitionId: "onr_v1_237_data-wall",
+      definitionId: 449,
       known: true,
     } as VisibleCard;
 

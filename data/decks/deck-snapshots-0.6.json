@@ -12,34 +12,34 @@
       "deckVersion": "0.1.0",
       "name": "Corp Demo Deck 01 - Build & Score",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.5",
       "formatProfileId": "local-demo-v0.6",
       "rulesBaselineId": "rules-baseline-mvp-0.1",
       "immutable": true,
       "cards": [
         {
-          "cardId": "simple_agenda",
+          "cardId": 588,
           "quantity": 3
         },
         {
-          "cardId": "simple_barrier_ice",
+          "cardId": 589,
           "quantity": 3
         },
         {
-          "cardId": "simple_code_gate_ice",
+          "cardId": 590,
           "quantity": 3
         },
         {
-          "cardId": "simple_economy_asset",
+          "cardId": 594,
           "quantity": 3
         },
         {
-          "cardId": "simple_economy_operation",
+          "cardId": 596,
           "quantity": 3
         },
         {
-          "cardId": "simple_sentry_ice",
+          "cardId": 601,
           "quantity": 3
         }
       ],
@@ -54,13 +54,13 @@
       },
       "publicMetadata": {
         "side": "corp",
-        "identityCardId": "corp_identity_001",
+        "identityCardId": 3,
         "deckName": "Corp Demo Deck 01 - Build & Score",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:b07b9fbb"
+        "deckHash": "fnv1a:c28b3e81"
       },
-      "deckHash": "fnv1a:b07b9fbb"
+      "deckHash": "fnv1a:c28b3e81"
     },
     {
       "deckSnapshotId": "demo_corp_004_snapshot_v0_6",
@@ -68,58 +68,58 @@
       "deckVersion": "0.4.0",
       "name": "Corp Demo Deck 04 - Build, Tax & Tag",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.5",
       "formatProfileId": "local-demo-v0.6",
       "rulesBaselineId": "rules-baseline-mvp-0.4",
       "immutable": true,
       "cards": [
         {
-          "cardId": "simple_agenda",
+          "cardId": 588,
           "quantity": 2
         },
         {
-          "cardId": "simple_barrier_ice",
+          "cardId": 589,
           "quantity": 2
         },
         {
-          "cardId": "simple_code_gate_ice",
+          "cardId": 590,
           "quantity": 2
         },
         {
-          "cardId": "simple_draw_operation",
+          "cardId": 593,
           "quantity": 2
         },
         {
-          "cardId": "simple_economy_asset",
+          "cardId": 594,
           "quantity": 2
         },
         {
-          "cardId": "simple_economy_operation",
+          "cardId": 596,
           "quantity": 3
         },
         {
-          "cardId": "simple_priority_agenda",
+          "cardId": 599,
           "quantity": 1
         },
         {
-          "cardId": "simple_sentry_ice",
+          "cardId": 601,
           "quantity": 2
         },
         {
-          "cardId": "simple_tag_ice",
+          "cardId": 603,
           "quantity": 2
         },
         {
-          "cardId": "simple_tag_punishment_operation",
+          "cardId": 604,
           "quantity": 2
         },
         {
-          "cardId": "simple_taxing_barrier_ice",
+          "cardId": 605,
           "quantity": 2
         },
         {
-          "cardId": "simple_upgrade",
+          "cardId": 606,
           "quantity": 2
         }
       ],
@@ -134,13 +134,13 @@
       },
       "publicMetadata": {
         "side": "corp",
-        "identityCardId": "corp_identity_001",
+        "identityCardId": 3,
         "deckName": "Corp Demo Deck 04 - Build, Tax & Tag",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:54c7851f"
+        "deckHash": "fnv1a:f8ae8139"
       },
-      "deckHash": "fnv1a:54c7851f"
+      "deckHash": "fnv1a:f8ae8139"
     },
     {
       "deckSnapshotId": "demo_runner_001_snapshot_v0_6",
@@ -148,30 +148,30 @@
       "deckVersion": "0.1.0",
       "name": "Runner Demo Deck 01 - Run & Steal",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.5",
       "formatProfileId": "local-demo-v0.6",
       "rulesBaselineId": "rules-baseline-mvp-0.1",
       "immutable": true,
       "cards": [
         {
-          "cardId": "simple_decoder",
+          "cardId": 591,
           "quantity": 2
         },
         {
-          "cardId": "simple_economy_event",
+          "cardId": 595,
           "quantity": 3
         },
         {
-          "cardId": "simple_fracter",
+          "cardId": 597,
           "quantity": 2
         },
         {
-          "cardId": "simple_killer",
+          "cardId": 598,
           "quantity": 2
         },
         {
-          "cardId": "simple_run_event",
+          "cardId": 600,
           "quantity": 3
         }
       ],
@@ -186,13 +186,13 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "Runner Demo Deck 01 - Run & Steal",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:b4f61cd0"
+        "deckHash": "fnv1a:5f6bb935"
       },
-      "deckHash": "fnv1a:b4f61cd0"
+      "deckHash": "fnv1a:5f6bb935"
     },
     {
       "deckSnapshotId": "demo_runner_004_snapshot_v0_6",
@@ -200,42 +200,42 @@
       "deckVersion": "0.4.0",
       "name": "Runner Demo Deck 04 - Setup & Pressure",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.5",
       "formatProfileId": "local-demo-v0.6",
       "rulesBaselineId": "rules-baseline-mvp-0.4",
       "immutable": true,
       "cards": [
         {
-          "cardId": "efficient_fracter",
+          "cardId": 4,
           "quantity": 2
         },
         {
-          "cardId": "simple_decoder",
+          "cardId": 591,
           "quantity": 2
         },
         {
-          "cardId": "simple_draw_event",
+          "cardId": 592,
           "quantity": 3
         },
         {
-          "cardId": "simple_economy_event",
+          "cardId": 595,
           "quantity": 3
         },
         {
-          "cardId": "simple_fracter",
+          "cardId": 597,
           "quantity": 2
         },
         {
-          "cardId": "simple_killer",
+          "cardId": 598,
           "quantity": 2
         },
         {
-          "cardId": "simple_run_event",
+          "cardId": 600,
           "quantity": 3
         },
         {
-          "cardId": "simple_setup_hardware",
+          "cardId": 602,
           "quantity": 2
         }
       ],
@@ -250,13 +250,13 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "Runner Demo Deck 04 - Setup & Pressure",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:d3ad4e1c"
+        "deckHash": "fnv1a:8fcdd81b"
       },
-      "deckHash": "fnv1a:d3ad4e1c"
+      "deckHash": "fnv1a:8fcdd81b"
     }
   ]
 }

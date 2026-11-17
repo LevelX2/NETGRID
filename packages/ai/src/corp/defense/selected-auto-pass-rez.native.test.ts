@@ -25,8 +25,8 @@ import { RealEngineFixtureBuilder } from "../../evaluation/real-engine-fixture-b
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 
-const ICE = "onr_v1_261_quandary";
-const SOCIAL = "onr_v1_111_social-engineering";
+const ICE = 473;
+const SOCIAL = 323;
 const corpDeck: DeckDefinition = {
   ...DEMO_DECKS.demo_corp_001,
   id: "bypass-rez-corp",

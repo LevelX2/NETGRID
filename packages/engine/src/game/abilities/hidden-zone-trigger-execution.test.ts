@@ -215,7 +215,7 @@ function testHost(
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   owner: Side,
 ): CardInstance {
   return {

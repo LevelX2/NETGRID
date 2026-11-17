@@ -19,8 +19,8 @@ import { buildAiDecisionInput } from "./ai-decision-input";
 import { costProfileForAction } from "../actions/action-cost-timing";
 import { buildAiDecisionInputDto } from "../input-dto";
 
-const SOLO = "onr_v1_208_on-call-solo-team",
-  URBAN = "onr_v1_307_urban-renewal";
+const SOLO = 420,
+  URBAN = 519;
 const entry = catalog.decks.find(
   (d) => d.standardDeckId === "standard_corp_shadoe_tag_bag",
 )!;
@@ -92,7 +92,7 @@ function fixture(hand = 0, scored = true, source = SOLO) {
 }
 function input(s: GameState) {
   const activeDeck = Object.values(s.cardInstances).some(
-    (c) => c.definitionId === "onr_proteus_003_corporate-headhunters",
+    (c) => c.definitionId === 61,
   )
     ? scoredDomainDeck
     : deck;
@@ -140,8 +140,8 @@ it("converts a current tag before advancing a score project that cannot close th
   const s = fixture(5, false);
   RealEngineFixtureBuilder.forState(s)
     .withCorpRemoteRoot("remote_1", SOLO, 1)
-    .withCorpCardInHq("onr_v1_302_scorched-earth")
-    .withCorpCardInHq("onr_v1_284_chance-observation")
+    .withCorpCardInHq(514)
+    .withCorpCardInHq(496)
     .withCorpCardInHq(URBAN)
     .withCorpCredits(3)
     .withRunnerCredits(11);
@@ -155,7 +155,7 @@ it("converts a current tag before advancing a score project that cannot close th
   expect(action).toMatchObject({
     type: "play_operation",
     payload: {
-      cardImplementationAbilityId: "onr_v1_302_scorched-earth:abilities_on_play_damage",
+      cardImplementationAbilityId: "514:abilities_on_play_damage",
     },
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
@@ -213,7 +213,7 @@ it("keeps an untagged runner outside the damage route", () => {
 });
 
 it("projects the scored domain damage as damage with its exact capability, without credit income", () => {
-  const state = fixture(0, true, "onr_proteus_003_corporate-headhunters");
+  const state = fixture(0, true, 61);
   const sourceId = state.corp.scoreArea[0]!;
   const action = getLegalActions(state, "corp").find(
     (a) => a.source === sourceId,
@@ -225,7 +225,7 @@ it("projects the scored domain damage as damage with its exact capability, witho
     damageAmount: 1,
     cardImplementationCapabilityBindingKind: "card_spec_capability_key",
     cardImplementationAbilityId:
-      "onr_proteus_003_corporate-headhunters:tagged_runner_meat_damage_reduce_hand_size_on_success",
+      "61:tagged_runner_meat_damage_reduce_hand_size_on_success",
   });
   const projected = input(state).legalActions.find(
     (a) => a.actionId === action.actionId,
@@ -242,7 +242,7 @@ it("projects the scored domain damage as damage with its exact capability, witho
 });
 
 it("discovers, quotes and executes the existing scored domain's immediate lethal route", () => {
-  const state = fixture(0, true, "onr_proteus_003_corporate-headhunters");
+  const state = fixture(0, true, 61);
   const before = JSON.stringify(state);
   const requests = buildBoundedCorpPunishRouteRequests(input(state));
   expect(requests).not.toHaveLength(0);
@@ -273,7 +273,7 @@ it("discovers, quotes and executes the existing scored domain's immediate lethal
 });
 
 it("requotes the scored domain after nonlethal damage while preserving its hand-size consequence", () => {
-  let state = fixture(1, true, "onr_proteus_003_corporate-headhunters");
+  let state = fixture(1, true, 61);
   const first = decide(state);
   expect(first.action.source).toBe(state.corp.scoreArea[0]);
   state = apply(state, first.action.actionId);
@@ -290,7 +290,7 @@ it.each(["hq", "untagged"] as const)(
     const state = fixture(
       0,
       variant === "untagged",
-      "onr_proteus_003_corporate-headhunters",
+      61,
     );
     if (variant === "untagged") state.runner.tags = 0;
     expect(buildBoundedCorpPunishRouteRequests(input(state))).toEqual([]);
@@ -301,12 +301,12 @@ it.each(["hq", "untagged"] as const)(
 );
 
 it("keeps concealed response identities out of the scored domain's damage guarantee", () => {
-  const left = fixture(0, true, "onr_proteus_003_corporate-headhunters");
+  const left = fixture(0, true, 61);
   const hiddenId = "scored_domain_concealed_response" as CardInstanceId;
   left.runner.rig.resources.push(hiddenId);
   left.cardInstances[hiddenId] = {
     instanceId: hiddenId,
-    definitionId: "onr_proteus_142_hq-mole" as CardDefinitionId,
+    definitionId: 200 as CardDefinitionId,
     owner: "runner",
     controller: "runner",
     zone: { side: "runner", zone: "rig" },
@@ -317,7 +317,7 @@ it("keeps concealed response identities out of the scored domain's damage guaran
   };
   const right = structuredClone(left);
   right.cardInstances[hiddenId]!.definitionId =
-    "onr_proteus_132_bolt-hole" as CardDefinitionId;
+    190 as CardDefinitionId;
   expect(input(left)).toEqual(input(right));
   const request = buildBoundedCorpPunishRouteRequests(input(left))[0]!;
   const quote = quoteCorpPunishRoute(left, request);

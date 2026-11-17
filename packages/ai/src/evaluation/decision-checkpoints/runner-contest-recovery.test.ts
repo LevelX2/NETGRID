@@ -408,7 +408,7 @@ describe("Runner contest recovery", () => {
           actor: "corp",
           actionType: "score_agenda",
           targets: { scoredFromServerId: id },
-          cardDefinitionId: "onr_v1_193_corporate-coup",
+          cardDefinitionId: 405,
         },
       },
     ];

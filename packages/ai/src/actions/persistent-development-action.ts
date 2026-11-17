@@ -9,7 +9,7 @@ export type PersistentDevelopmentRoute =
 export type PersistentDevelopmentActionProjection = {
   route: PersistentDevelopmentRoute;
   targetCardId: string;
-  targetDefinitionId?: string;
+  targetDefinitionId?: number;
   developsGripCard: boolean;
   appliesInstallFitNow: boolean;
   evidence: string[];

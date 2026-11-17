@@ -30,7 +30,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     const belief = beliefWithKnownRemoteRoot(
       "remote_1",
       "root:4",
-      "onr_v1_210_political-overthrow",
+      422,
       "old-access",
     );
     expect(
@@ -83,7 +83,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     input.playerView.own.credits = 12;
     input.playerView.servers[0]!.root = [
       visibleCard("dr-dreff", {
-        definitionId: "onr_v1_358_dr-dreff",
+        definitionId: 570,
         title: "Dr. Dreff",
         type: "upgrade",
         trashCost: 3,
@@ -92,7 +92,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     ];
     input.playerView.servers[0]!.ice = [
       visibleCard("passed-data-wall", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         title: "Data Wall",
         type: "ice",
         rezzed: true,
@@ -127,7 +127,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     ];
     input.playerView.servers[0]!.root = [
       visibleCard("known-damage-agenda", {
-        definitionId: "onr_proteus_004_fetal-ai",
+        definitionId: 62,
         title: "Known Damage Agenda",
         type: "agenda",
       }),
@@ -143,7 +143,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
           actor: "runner",
           actionType: "access_card",
           serverId: "remote_1",
-          cardDefinitionId: "onr_proteus_004_fetal-ai",
+          cardDefinitionId: 62,
           accessedCardPositionKey: "root:0",
           damageResolved: true,
           damageType: "net",
@@ -168,7 +168,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     const belief = beliefWithKnownRemoteRoot(
       "remote_1",
       "root:0",
-      "onr_proteus_004_fetal-ai",
+      62,
       "evt-access",
     );
     input.playerView.servers[0]!.root[0]!.effectiveStealCostQuote = {
@@ -229,7 +229,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
       beliefWithKnownRemoteRoot(
         "remote_1",
         "root:0",
-        "onr_v1_345_trap",
+        557,
         "evt-expose-trap",
       ),
     );
@@ -240,7 +240,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
       contestable: false,
       knownAccessThreatProjection: {
         status: "complete",
-        sourceDefinitionId: "onr_v1_345_trap",
+        sourceDefinitionId: 557,
         activationCreditCost: 4,
         corpCanPayActivation: true,
         damage: {
@@ -271,7 +271,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
       beliefWithKnownRemoteRoot(
         "remote_1",
         "root:0",
-        "onr_v1_345_trap",
+        557,
         "evt-expose-trap",
       ),
     );
@@ -297,7 +297,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
       beliefWithInvalidations([]),
     );
     expect(payoff.payoff).toBe("unknown");
-    expect(payoff.evidence.join("|")).not.toContain("onr_v1_345_trap");
+    expect(payoff.evidence.join("|")).not.toContain(557);
   });
 
   it("does not value a known program-trash Ambush as material without visible targets", () => {
@@ -316,7 +316,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
       beliefWithKnownRemoteRoot(
         "remote_1",
         "root:0",
-        "onr_v1_323_experimental-ai",
+        535,
         "evt-expose-experimental-ai",
       ),
     );
@@ -330,7 +330,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
 
 function inputWithDepletedFreeTrashTarget(): AiDecisionInput {
   const root = visibleCard("depleted-holovid", {
-    definitionId: "onr_v1_326_holovid-campaign",
+    definitionId: 538,
     title: "Holovid Campaign",
     type: "asset",
     counters: { bit: 0 },
@@ -355,7 +355,7 @@ function inputWithDepletedFreeTrashTarget(): AiDecisionInput {
       scoreArea: [],
       rig: [
         visibleCard("kilroy", {
-          definitionId: "onr_v1_096_kilroy-was-here",
+          definitionId: 308,
           title: "Kilroy Was Here",
           type: "event",
         }),
@@ -431,7 +431,7 @@ function beliefWithInvalidations(invalidationLog: string[]): BeliefState {
 function beliefWithKnownRemoteRoot(
   zone: string,
   positionKey: string,
-  definitionId: string,
+  definitionId: number,
   sourceEventId: string,
 ): BeliefState {
   return {

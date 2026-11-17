@@ -202,10 +202,10 @@ describe("pairing 561 native Trace payment and installed-source memory", () => {
     );
     expect(
       memory.some(
-        (m) => m.definitionId === "onr_v1_309_bbs-whispering-campaign",
+        (m) => m.definitionId === 521,
       ),
     ).toBe(false);
-    expect(memory.some((m) => m.definitionId === "onr_v1_244_filter")).toBe(
+    expect(memory.some((m) => m.definitionId === 456)).toBe(
       true,
     );
     const target = evaluateRunnerRunTargets({

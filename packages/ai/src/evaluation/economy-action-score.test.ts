@@ -28,10 +28,10 @@ describe("common economy action score", () => {
     const reserve = demand("reserve", "phase_reserve", 8);
     const basic = candidate("basic", 1);
     const bbs = candidate("bbs", 2, {
-      sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      sourceDefinitionId: 521,
     });
     const coup = candidate("coup", 3, {
-      sourceDefinitionId: "onr_v1_193_corporate-coup",
+      sourceDefinitionId: 405,
     });
 
     expect(
@@ -89,15 +89,15 @@ describe("common economy action score", () => {
       kind: "stored_credit_build",
       timing: "setup",
       storedCreditsAdded: 3,
-      sourceDefinitionId: "onr_v1_154_broker",
+      sourceDefinitionId: 366,
     });
     const cashout = candidate("broker-cashout", 6, {
       payoutMode: "all_available",
-      sourceDefinitionId: "onr_v1_154_broker",
+      sourceDefinitionId: 366,
       effectTargets: ["economy.bank_cashout_all"],
     });
     const coup = candidate("coup", 3, {
-      sourceDefinitionId: "onr_v1_193_corporate-coup",
+      sourceDefinitionId: 405,
     });
 
     expect(
@@ -134,10 +134,10 @@ describe("common economy action score", () => {
   it("marks +1 and +2 pure payouts dominated by a comparable +3 payout", () => {
     const basic = candidate("basic", 1);
     const bbs = candidate("bbs", 2, {
-      sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      sourceDefinitionId: 521,
     });
     const coup = candidate("coup", 3, {
-      sourceDefinitionId: "onr_v1_193_corporate-coup",
+      sourceDefinitionId: 405,
     });
 
     expect(dominatedEconomyActionIds([basic, bbs, coup])).toEqual(
@@ -156,7 +156,7 @@ describe("common economy action score", () => {
       sourcePool: "finite",
     });
     const ordinary = candidate("ordinary-payout", 2, {
-      sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      sourceDefinitionId: 521,
     });
 
     expect(economyActionMode(finite)).toBe("fixed_pool_payout");
@@ -229,7 +229,7 @@ function candidate(
   actionId: string,
   gain: number,
   overrides: Partial<ActionEconomyProjection> & {
-    sourceDefinitionId?: string;
+    sourceDefinitionId?: number;
     effectTargets?: string[];
   } = {},
 ): ActionSemanticCandidate {

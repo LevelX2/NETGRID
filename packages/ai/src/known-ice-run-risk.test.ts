@@ -36,7 +36,7 @@ describe("known visible ICE run risk", () => {
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
     const state = engineRunnerTurnWithRezzedIce(
       "known-ice-run-risk-engine-dto",
-      "onr_v1_249_hunter",
+      461,
     );
     const playerView = getPlayerView(state, "runner");
     const playerViewHunter = playerView.servers.find(
@@ -93,7 +93,7 @@ describe("known visible ICE run risk", () => {
   it("preserves public Deflector fields through Engine PlayerView DTO into runner AI", () => {
     const state = engineRunnerTurnWithRezzedIce(
       "known-deflector-run-quote-engine-dto",
-      "onr_classic_014_trapdoor",
+      18,
     );
     const playerView = getPlayerView(state, "runner");
     const playerViewTrapdoor = playerView.servers.find(
@@ -182,7 +182,7 @@ describe("known visible ICE run risk", () => {
           ice: [hunterTraceTagIce("remote-hunter")],
           root: [
             visibleCard("remote-agenda", {
-              definitionId: "simple_agenda",
+              definitionId: 588,
               title: "Simple Agenda",
               type: "agenda",
               known: true,
@@ -238,7 +238,7 @@ describe("known visible ICE run risk", () => {
           ],
           root: [
             visibleCard("remote-agenda", {
-              definitionId: "simple_agenda",
+              definitionId: 588,
               title: "Simple Agenda",
               type: "agenda",
               known: true,
@@ -488,7 +488,7 @@ function visibleCard(
 function hunterTraceTagIce(instanceId: string): VisibleCard {
   const ice: VisibleCard = {
     instanceId,
-    definitionId: "onr_v1_249_hunter",
+    definitionId: 461,
     title: "Hunter",
     type: "ice",
     subtypes: ["sentry", "bloodhound"],
@@ -502,7 +502,7 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
       {
         id: `${instanceId}_trace`,
         type: "initiate_trace",
-        sourceDefinitionId: "onr_v1_249_hunter",
+        sourceDefinitionId: 461,
         sourceTitle: "Hunter",
         traceLimit: 5,
         traceSuccessEffect: { type: "add_tag", amount: 1 },
@@ -560,7 +560,7 @@ function semanticGuidanceReason(
 
 function engineRunnerTurnWithRezzedIce(
   seed: string,
-  definitionId: string,
+  definitionId: number,
 ): GameState {
   const state = createGameAfterSetup({ seed });
   state.activeSide = "runner";
@@ -578,7 +578,7 @@ function engineRunnerTurnWithRezzedIce(
 function addCorpIceToServerForTest(
   state: GameState,
   serverId: "hq" | "rd" | "archives" | `remote_${number}`,
-  definitionId: string,
+  definitionId: number,
 ): CardInstanceId {
   const id =
     `test_corp_ice_${serverId}_${definitionId}_${Object.keys(state.cardInstances).length}` as CardInstanceId;

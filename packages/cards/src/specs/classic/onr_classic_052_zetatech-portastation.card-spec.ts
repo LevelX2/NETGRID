@@ -3,7 +3,7 @@ import { cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_classic_052_zetatech-portastation"),
+    cardDefinitionId: cardDefinitionId(56),
     title: "Zetatech Portastation",
     side: "runner",
     cardType: "hardware",

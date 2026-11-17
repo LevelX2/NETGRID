@@ -59,15 +59,15 @@ describe("AI hint ontology validation", () => {
       })),
     ).toEqual([
       {
-        cardId: "onr_v1_308_acme-savings-and-loan",
+        cardId: 520,
         errors: ["asset_economy_without_economy_evidence"],
       },
       {
-        cardId: "onr_v1_314_corporate-negotiating-center",
+        cardId: 526,
         errors: ["asset_economy_without_economy_evidence"],
       },
       {
-        cardId: "onr_v1_329_investment-firm",
+        cardId: 541,
         errors: ["asset_economy_without_economy_evidence"],
       },
     ]);
@@ -75,26 +75,26 @@ describe("AI hint ontology validation", () => {
 
   it("keeps the Phase 2 high-impact pilot cards structured and valid", () => {
     const pilotCardIds = [
-      "onr_v1_210_political-overthrow",
-      "onr_v1_037_japanese-water-torture",
-      "onr_v1_059_self-modifying-code",
-      "onr_v1_043_mystery-box",
-      "onr_v1_057_scatter-shot",
-      "onr_v1_355_crystal-palace-station-grid",
-      "onr_v1_366_red-herrings",
-      "onr_v1_274_tutor",
-      "onr_v1_277_virizz",
-      "onr_v1_302_scorched-earth",
+      422,
+      249,
+      271,
+      255,
+      269,
+      567,
+      578,
+      486,
+      489,
+      514,
     ];
     const hintsByCard = new Map(
       currentHints.map((hint) => [hint.cardId, hint]),
     );
     const strategyCoveredPilotCardIds = new Set([
-      "onr_v1_355_crystal-palace-station-grid",
-      "onr_v1_366_red-herrings",
-      "onr_v1_274_tutor",
-      "onr_v1_277_virizz",
-      "onr_v1_302_scorched-earth",
+      567,
+      578,
+      486,
+      489,
+      514,
     ]);
 
     for (const cardId of pilotCardIds) {

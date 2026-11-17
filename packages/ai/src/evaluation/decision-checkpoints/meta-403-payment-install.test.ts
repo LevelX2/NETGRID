@@ -69,7 +69,7 @@ describe("SP-286 prospective payment setup for the exact run", () => {
       ).toContain(executor);
       if (index === 1)
         expect(action.source).toBe(
-          "runner_onr_proteus_133_chiba-bank-account_1",
+          "runner_191_1",
         );
       if (index === 2)
         expect(action.actionId).toBe("runner.start_run.remote_1");
@@ -142,7 +142,7 @@ describe("SP-286 prospective payment setup for the exact run", () => {
     const exact = route(10, 14, 3);
     expect(runnerFundingPaymentWindowQuote(exact, setups)).toEqual({
       creditGain: 4,
-      installedCardIds: ["runner_onr_proteus_133_chiba-bank-account_1"],
+      installedCardIds: ["runner_191_1"],
     });
     expect(runnerFundingPaymentWindowQuote(exact, [])).toBeUndefined();
     for (const boundary of [

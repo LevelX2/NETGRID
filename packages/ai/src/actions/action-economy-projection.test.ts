@@ -322,7 +322,7 @@ describe("action economy projection", () => {
       zoneTransitionAction({
         actionId: "ai-cfo-refresh",
         sourceCardInstanceId: "ai-cfo",
-        sourceDefinitionId: "onr_v1_188_ai-chief-financial-officer",
+        sourceDefinitionId: 400,
         kind: "shuffle_hq_archives_into_rd_then_draw",
         grossDrawCount: 5,
         hqCardsRecycledBeforeDrawCount: 2,
@@ -349,7 +349,7 @@ describe("action economy projection", () => {
       zoneTransitionAction({
         actionId: "rescheduler-refresh",
         sourceCardInstanceId: "rescheduler",
-        sourceDefinitionId: "onr_v1_336_rescheduler",
+        sourceDefinitionId: 548,
         kind: "shuffle_hq_into_rd_then_draw_same_count",
         grossDrawCount: 3,
         hqCardsRecycledBeforeDrawCount: 3,
@@ -615,7 +615,7 @@ function corporateShuffleAction(complete: boolean): LegalAction {
       corpZoneTransitionProjectionComplete: complete,
       corpZoneTransitionProjectionSourceCardInstanceId: "shuffle-card",
       corpZoneTransitionProjectionSourceDefinitionId:
-        "onr_classic_017_corporate-shuffle",
+        21,
       corpZoneTransitionProjectionStateVersion: 1,
       corpZoneTransitionProjectionTimingPoint: "corp_action.main",
       corpZoneTransitionProjectionActionId: "corp-shuffle",
@@ -640,7 +640,7 @@ function corporateShuffleAction(complete: boolean): LegalAction {
 function zoneTransitionAction(params: {
   actionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   kind:
     | "shuffle_hq_archives_into_rd_then_draw"
     | "shuffle_hq_into_rd_then_draw_same_count";

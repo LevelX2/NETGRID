@@ -531,11 +531,11 @@ describe("activatedAbilityPayload advancement semantics", () => {
 
 describe("score-conversion card-family contract", () => {
   it.each([
-    ["onr_v1_304_systematic-layoffs", 2, "any_combination"],
-    ["onr_v1_292_management-shake-up", 3, "any_combination"],
-    ["onr_v1_300_project-consultants", 4, "any_combination"],
-    ["onr_v1_305_team-restructuring", 2, "up_to_distinct_targets_one_each"],
-    ["onr_v1_312_chicago-branch", 2, "single_target"],
+    [516, 2, "any_combination"],
+    [504, 3, "any_combination"],
+    [512, 4, "any_combination"],
+    [517, 2, "up_to_distinct_targets_one_each"],
+    [524, 2, "single_target"],
   ] as const)(
     "%s publishes its exact placement amount and distribution",
     (definitionId, amount, distribution) => {
@@ -549,8 +549,8 @@ describe("score-conversion card-family contract", () => {
   );
 
   it.each([
-    ["onr_v1_291_falsified-transactions-expert", "chosen_card", 3],
-    ["onr_v1_347_vapor-ops", "source_card", "all"],
+    [503, "chosen_card", 3],
+    [559, "source_card", "all"],
   ] as const)(
     "%s publishes its exact transfer source and maximum",
     (definitionId, sourceMode, maximum) => {
@@ -566,9 +566,9 @@ describe("score-conversion card-family contract", () => {
   );
 
   it.each([
-    ["onr_v1_297_overtime-incentives", 2],
-    ["onr_v1_334_pacifica-regional-ai", 1],
-    ["onr_v1_192_corporate-boon", 1],
+    [509, 2],
+    [546, 1],
+    [404, 1],
   ] as const)(
     "%s publishes immediate action capacity",
     (definitionId, amount) => {
@@ -587,7 +587,7 @@ describe("score-conversion card-family contract", () => {
 });
 
 function scoreConversionPayload(
-  definitionId: string,
+  definitionId: number,
   effectKind?: string,
 ): Record<string, string | number | boolean> {
   const implementation = cardImplementationForDefinitionId(

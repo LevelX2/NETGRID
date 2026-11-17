@@ -72,10 +72,10 @@ function fixture(credits = 9, clicks = 4, advanced = 1) {
     .withRunnerGripSize(0)
     .withRunnerCredits(credits)
     .withRunnerClicks(clicks)
-    .withRunnerProgramInstalled("onr_v1_058_seeya")
-    .withRunnerProgramInstalled("onr_v1_039_krash")
-    .withRunnerCardInGrip("onr_v1_161_fall-guy")
-    .withCorpRemoteRoot("remote_1", "onr_v1_323_experimental-ai", advanced);
+    .withRunnerProgramInstalled(270)
+    .withRunnerProgramInstalled(251)
+    .withRunnerCardInGrip(373)
+    .withCorpRemoteRoot("remote_1", 535, advanced);
   state.runner.memoryUsed = 2;
   state.corp.credits = 8;
   return state;
@@ -172,7 +172,7 @@ it("does not invent program trash from zero advancement counters", () => {
 it("keeps missing installed program identity explicitly unknown", () => {
   const i = input(afterNativeExpose());
   delete i.playerView.own.rig!.find(
-    (card) => card.definitionId === "onr_v1_039_krash",
+    (card) => card.definitionId === 251,
   )!.definitionId;
   const payoff = evaluateKnownRemoteAccessPayoff(i, "remote_1");
   expect(payoff.knownAccessThreatProjection?.status).toBe("unknown");
@@ -188,14 +188,14 @@ it("retains the factual current-state projection for the existing Corp consumers
   expect(
     projectKnownCorpCardAccessEffect({
       input: i,
-      sourceDefinitionId: "onr_v1_323_experimental-ai",
+      sourceDefinitionId: 535,
       sourceCard: root,
     }),
   ).toMatchObject({ status: "not_applicable", threatValue: 0 });
   expect(
     projectKnownCorpCardAccessEffect({
       input: i,
-      sourceDefinitionId: "onr_v1_323_experimental-ai",
+      sourceDefinitionId: 535,
       sourceCard: { ...root, rezzed: true },
     }),
   ).toMatchObject({
@@ -250,7 +250,7 @@ it("does not retain the observed identity after an actual root replacement", () 
       .actionId,
   );
   RealEngineFixtureBuilder.forState(state).withCorpCardInHq(
-    "onr_v1_217_strike-force-kali",
+    429,
   );
   const install = getLegalActions(state, "corp").find(
     (a) =>

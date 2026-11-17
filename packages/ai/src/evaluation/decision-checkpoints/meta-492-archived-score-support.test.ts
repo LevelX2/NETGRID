@@ -32,7 +32,7 @@ it("executes the native Babylon advance at original R4 G1 D171 without projectin
   );
   const archivedSupport = input.playerView.servers
     .find((s) => s.id === "archives")!
-    .root.find((c) => c.definitionId === "onr_v1_312_chicago-branch")!;
+    .root.find((c) => c.definitionId === 524)!;
   expect(archivedSupport.rezzed).toBe(true);
   expect(corpInstalledAdvancementPreparations(input)).not.toContainEqual(
     expect.objectContaining({ sourceCardId: archivedSupport.instanceId }),

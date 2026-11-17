@@ -25,49 +25,49 @@ const hints = createAiHintsByCard();
 
 describe("canonical Corp card facts", () => {
   it("includes declarative encounter-tag utilities without making the conditional operation live", () => {
-    expect(corpDefinitionHasTagSource("onr_v1_306_trojan-horse")).toBe(true);
-    expect(corpDefinitionHasTagSource("onr_v1_307_urban-renewal")).toBe(false);
-    expect(corpDefinitionHasTagSource("onr_v1_094_inside-job")).toBe(false);
+    expect(corpDefinitionHasTagSource(518)).toBe(true);
+    expect(corpDefinitionHasTagSource(519)).toBe(false);
+    expect(corpDefinitionHasTagSource(306)).toBe(false);
   });
   it("certifies only a fixed public reusable off-server access path", () => {
     expect(
       corpPublicFixedOffServerRunProfiles(
-        "onr_v1_062_shredder-uplink-protocol",
+        274,
       ),
     ).toEqual([{ entryServerId: "archives", accessServerId: "hq" }]);
     for (const definitionId of [
       undefined,
       "unknown",
-      "onr_v1_094_inside-job",
-      "onr_v1_111_social-engineering",
-      "onr_v1_187_wilson-weeflerunner-apprentice",
-      "onr_v1_039_krash",
-      "onr_v1_252_keeper",
+      306,
+      323,
+      399,
+      251,
+      464,
     ]) {
       expect(corpPublicFixedOffServerRunProfiles(definitionId)).toEqual([]);
     }
   });
   it("distinguishes a plain scored credit pool from installed banks and conditional score rewards", () => {
     expect(
-      corpScoreHostedCreditPayoutProfile("onr_v1_209_political-coup"),
+      corpScoreHostedCreditPayoutProfile(421),
     ).toEqual({ poolCredits: 12, payoutCredits: 3 });
     expect(
-      corpScoreHostedCreditPayoutProfile("onr_v1_309_bbs-whispering-campaign"),
+      corpScoreHostedCreditPayoutProfile(521),
     ).toBeUndefined();
     expect(
-      corpScoreHostedCreditPayoutProfile("onr_v1_196_corporate-war"),
+      corpScoreHostedCreditPayoutProfile(408),
     ).toBeUndefined();
   });
   it("reads the complete Archives-to-HQ choice contract from CardSpec mechanics", () => {
     expect(
-      corpArchivesToHqOperationProfile("onr_v1_296_off-site-backups"),
+      corpArchivesToHqOperationProfile(508),
     ).toMatchObject({
       capabilityKey: "corp_utility_corp_archives_to_hq",
       maxSelections: 1,
       visibility: "hidden_info_barrier",
     });
     expect(
-      corpArchivesToHqOperationProfile("onr_classic_018_reclamation-project"),
+      corpArchivesToHqOperationProfile(22),
     ).toMatchObject({
       capabilityKey: "return_archives_ice_to_hq",
       maxSelections: "all",
@@ -75,20 +75,20 @@ describe("canonical Corp card facts", () => {
       visibility: "hidden_info_barrier",
     });
     expect(
-      corpArchivesToHqOperationProfile("onr_v1_281_accounts-receivable"),
+      corpArchivesToHqOperationProfile(493),
     ).toBeUndefined();
   });
 
   it("reads conditional score thresholds and hosted banks from CardSpec mechanics", () => {
     expect(
-      corpConditionalScoreCreditProfile("onr_v1_196_corporate-war"),
+      corpConditionalScoreCreditProfile(408),
     ).toEqual({ threshold: 12, gainAmount: 12 });
     expect(
       corpConditionalScoreCreditProfile("onr_v1_201_foetal-ai"),
     ).toBeUndefined();
 
     expect(
-      corpHostedCreditBankProfile("onr_v1_309_bbs-whispering-campaign"),
+      corpHostedCreditBankProfile(521),
     ).toEqual({
       poolCredits: 16,
       payoutCredits: 2,
@@ -96,9 +96,9 @@ describe("canonical Corp card facts", () => {
       payoutTiming: "action",
     });
     expect(
-      corpHostedCreditBankProfile("onr_v1_165_junkyard-bbs"),
+      corpHostedCreditBankProfile(377),
     ).toBeUndefined();
-    expect(corpHostedCreditBankProfile("onr_v1_326_holovid-campaign")).toEqual({
+    expect(corpHostedCreditBankProfile(538)).toEqual({
       poolCredits: 12,
       payoutCredits: 1,
       payoutActionCost: 0,
@@ -109,81 +109,81 @@ describe("canonical Corp card facts", () => {
   it("recognizes immediate Corp economy without requiring a historical signal", () => {
     expect(
       corpImmediateEconomyGainFromHint(
-        hints.get("onr_v1_281_accounts-receivable"),
+        hints.get(493),
       ),
     ).toBe(9);
     expect(
-      corpImmediateEconomyGainFromHint(hints.get("onr_v1_295_night-shift")),
+      corpImmediateEconomyGainFromHint(hints.get(507)),
     ).toBe(2);
     expect(
       corpImmediateEconomyGainFromHint(
-        hints.get("onr_v1_309_bbs-whispering-campaign"),
+        hints.get(521),
       ),
     ).toBeUndefined();
   });
 
   it("distinguishes trace sources and tagged-damage payoffs mechanically", () => {
-    expect(corpDefinitionHasTraceSource("onr_proteus_050_manhunt")).toBe(true);
-    expect(corpDefinitionHasTraceSource("onr_v1_221_asp")).toBe(true);
-    expect(corpDefinitionHasTraceSource("onr_v1_196_corporate-war")).toBe(
+    expect(corpDefinitionHasTraceSource(108)).toBe(true);
+    expect(corpDefinitionHasTraceSource(433)).toBe(true);
+    expect(corpDefinitionHasTraceSource(408)).toBe(
       false,
     );
     expect(
-      corpDefinitionHasTraceTagSource("onr_v1_284_chance-observation"),
+      corpDefinitionHasTraceTagSource(496),
     ).toBe(true);
     expect(
-      corpTraceTagSourceProfile("onr_v1_284_chance-observation"),
+      corpTraceTagSourceProfile(496),
     ).toMatchObject({ capabilityKey: "abilities_on_play_trace" });
-    expect(corpDefinitionHasTraceTagSource("onr_v1_221_asp")).toBe(false);
-    expect(corpDefinitionHasTagSource("onr_v1_284_chance-observation")).toBe(
+    expect(corpDefinitionHasTraceTagSource(433)).toBe(false);
+    expect(corpDefinitionHasTagSource(496)).toBe(
       true,
     );
-    expect(corpDefinitionHasTagSource("onr_v1_302_scorched-earth")).toBe(false);
+    expect(corpDefinitionHasTagSource(514)).toBe(false);
     expect(
-      corpDirectTagOperationProfile("onr_proteus_048_data-sifters"),
+      corpDirectTagOperationProfile(106),
     ).toMatchObject({ capabilityKey: "on_play_tag_after_runner_trashed_node" });
     expect(
-      corpDirectTagOperationProfile("onr_v1_306_trojan-horse"),
+      corpDirectTagOperationProfile(518),
     ).toMatchObject({
       capabilityKey: "corp_utility_encounter_tag",
-      sourceCapabilityId: "onr_v1_306_trojan-horse:corp_utility_encounter_tag",
+      sourceCapabilityId: "518:corp_utility_encounter_tag",
     });
     expect(
-      corpTaggedCreditDenialOperationProfile("onr_v1_285_closed-accounts"),
+      corpTaggedCreditDenialOperationProfile(497),
     ).toMatchObject({ capabilityKey: "abilities_on_play_lose_credits" });
 
-    expect(corpTaggedDamagePayoffProfile("onr_v1_327_i-got-a-rock")).toEqual({
+    expect(corpTaggedDamagePayoffProfile(539)).toEqual({
       requiredRunnerTags: 2,
       agendaPointCost: 3,
       damageType: "meat",
       damageAmount: 15,
     });
     expect(
-      corpTaggedDamagePayoffProfile("onr_proteus_050_manhunt"),
+      corpTaggedDamagePayoffProfile(108),
     ).toBeUndefined();
     expect(
-      corpTaggedMeatDamageOperationProfile("onr_v1_302_scorched-earth"),
+      corpTaggedMeatDamageOperationProfile(514),
     ).toMatchObject({
       capabilityKey: "abilities_on_play_damage",
       damageAmount: 4,
     });
     expect(
-      corpTaggedMeatDamageOperationProfile("onr_v1_284_chance-observation"),
+      corpTaggedMeatDamageOperationProfile(496),
     ).toBeUndefined();
   });
 
   it("classifies mechanical score conversions and rejects ordinary economy", () => {
     expect(
-      corpScoreConversionProfile("onr_v1_300_project-consultants"),
+      corpScoreConversionProfile(512),
     ).toMatchObject({ placesAdvancementCounters: true });
     expect(
-      corpScoreConversionProfile("onr_v1_297_overtime-incentives"),
+      corpScoreConversionProfile(509),
     ).toMatchObject({ gainsCorpActions: true });
-    expect(corpScoreConversionProfile("onr_v1_347_vapor-ops")).toMatchObject({
+    expect(corpScoreConversionProfile(559)).toMatchObject({
       movesAdvancementCounters: true,
     });
     expect(
-      corpScoreConversionProfile("onr_v1_281_accounts-receivable"),
+      corpScoreConversionProfile(493),
     ).toBeUndefined();
   });
 });
