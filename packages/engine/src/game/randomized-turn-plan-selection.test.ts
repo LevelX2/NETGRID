@@ -60,6 +60,15 @@ describe("Engine-randomized TurnPlan selection", () => {
     expect(replay.state.aiTurnPlanRandomDrawRecords?.at(-1)).toEqual(
       applied.receipt.randomDraw,
     );
+    const recorded = structuredClone(applied.state.aiTurnPlanRandomDrawRecords);
+    const privateReceipt = structuredClone(
+      applied.event.privatePayload?.corp?.randomizedTurnPlanSelectionReceipt,
+    );
+    Reflect.set(applied.receipt.randomDraw.purpose, 3, 0);
+    expect(applied.state.aiTurnPlanRandomDrawRecords).toEqual(recorded);
+    expect(
+      applied.event.privatePayload?.corp?.randomizedTurnPlanSelectionReceipt,
+    ).toEqual(privateReceipt);
   });
 
   it("rejects an unsafe aggregate candidate weight", () => {

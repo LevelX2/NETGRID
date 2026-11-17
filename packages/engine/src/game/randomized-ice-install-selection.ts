@@ -1,4 +1,9 @@
 import {
+  randomContextFingerprint,
+  serializeRandomPurpose,
+  type RandomPurpose,
+} from "@netgrid/shared";
+import {
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
   type ApplyActionOptions,
   type EngineError,
@@ -213,7 +218,11 @@ export function buildApplyRandomizedIceInstallSelection(
   const randomDraw = applied.state.randomDrawRecords.find(
     (record) => record.counter === counterBefore,
   );
-  if (!randomDraw || randomDraw.purpose !== purpose) {
+  if (
+    !randomDraw ||
+    serializeRandomPurpose(randomDraw.purpose) !==
+      serializeRandomPurpose(purpose)
+  ) {
     return applyFail(
       state,
       "ERR_INVARIANT_FAILED",
@@ -266,16 +275,17 @@ export function candidateFingerprint(
 
 function randomizedSelectionPurpose(
   quote: EngineRandomizedIceInstallSelectionQuote,
-): string {
-  return encodeParts([
-    "engine.randomized_ice_install_selection",
-    quote.schemaVersion,
-    quote.side,
-    String(quote.stateVersion),
-    quote.timingPoint,
-    quote.planStepId,
-    quote.candidateFingerprint,
-  ]);
+): RandomPurpose {
+  return [
+    61,
+    quote.stateVersion,
+    randomContextFingerprint([
+      quote.schemaVersion,
+      quote.timingPoint,
+      quote.planStepId,
+      quote.candidateFingerprint,
+    ]),
+  ];
 }
 
 function canonicalCandidates(

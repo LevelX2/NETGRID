@@ -1,5 +1,9 @@
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "@netgrid/engine";
-import type { LegalAction } from "@netgrid/shared";
+import {
+  isRandomPurposeCode,
+  type LegalAction,
+  type RandomPurposeCode,
+} from "@netgrid/shared";
 import type {
   ActionBadPublicityDecisionModel,
   ActionRandomBadPublicityModel,
@@ -36,7 +40,7 @@ export function projectRandomBadPublicityModel(
 function projectRandomOutcome(
   action: LegalAction,
 ): ActionRandomOutcomeModel | undefined {
-  const purpose = firstStringPayload(action, RANDOM_PURPOSE_KEYS);
+  const purpose = firstRandomPurposeCodePayload(action, RANDOM_PURPOSE_KEYS);
   const counter = safeIntegerPayload(action, "randomCounterAfter");
   const counterAfter =
     counter !== undefined && counter >= 0 ? counter : undefined;
@@ -155,13 +159,13 @@ function hasBadPublicitySemantics(candidate: ActionSemanticCandidate): boolean {
   });
 }
 
-function firstStringPayload(
+function firstRandomPurposeCodePayload(
   action: LegalAction,
   keys: readonly string[],
-): string | undefined {
+): RandomPurposeCode | undefined {
   for (const key of keys) {
     const value = action.payload?.[key];
-    if (typeof value === "string" && value.length > 0) return value;
+    if (isRandomPurposeCode(value)) return value;
   }
   return undefined;
 }

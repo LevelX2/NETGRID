@@ -1,3 +1,4 @@
+import { isRandomPurposeCode } from "@netgrid/shared";
 /**
  * Builds public action context payloads from already-created engine actions.
  *
@@ -2218,7 +2219,7 @@ export function publicContextForAction(
     if (legalAction.payload.selfTrashed === true) context.selfTrashed = true;
     if (typeof legalAction.payload.randomCounterAfter === "number")
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
-    if (typeof legalAction.payload.randomPurpose === "string")
+    if (isRandomPurposeCode(legalAction.payload.randomPurpose))
       context.randomPurpose = legalAction.payload.randomPurpose;
   }
   if (typeof legalAction.payload?.v1921UpgradeAbility === "string") {
@@ -2235,7 +2236,7 @@ export function publicContextForAction(
       context.rioRunEnded = legalAction.payload.rioRunEnded;
     if (typeof legalAction.payload.randomCounterAfter === "number")
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
-    if (typeof legalAction.payload.randomPurpose === "string")
+    if (isRandomPurposeCode(legalAction.payload.randomPurpose))
       context.randomPurpose = legalAction.payload.randomPurpose;
   }
   if (typeof legalAction.payload?.v1921RunnerProgramAbility === "string") {
@@ -2250,7 +2251,7 @@ export function publicContextForAction(
       context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
     if (typeof legalAction.payload.randomCounterAfter === "number")
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
-    if (typeof legalAction.payload.randomPurpose === "string")
+    if (isRandomPurposeCode(legalAction.payload.randomPurpose))
       context.randomPurpose = legalAction.payload.randomPurpose;
   }
   if (typeof legalAction.payload?.v1922RunnerEventAbility === "string") {
@@ -2418,7 +2419,7 @@ export function publicContextForAction(
         legalAction.payload.randomDiceLoopComplete;
     if (typeof legalAction.payload.randomCounterAfter === "number")
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
-    if (typeof legalAction.payload.randomPurpose === "string")
+    if (isRandomPurposeCode(legalAction.payload.randomPurpose))
       context.randomPurpose = legalAction.payload.randomPurpose;
   }
   if (typeof legalAction.payload?.v1921RunnerResourceAbility === "string") {
@@ -2428,7 +2429,7 @@ export function publicContextForAction(
       context.v1921DieRoll = legalAction.payload.v1921DieRoll;
     if (typeof legalAction.payload.randomCounterAfter === "number")
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
-    if (typeof legalAction.payload.randomPurpose === "string")
+    if (isRandomPurposeCode(legalAction.payload.randomPurpose))
       context.randomPurpose = legalAction.payload.randomPurpose;
   }
   if (typeof legalAction.payload?.v1919AgendaDifficulty === "number")

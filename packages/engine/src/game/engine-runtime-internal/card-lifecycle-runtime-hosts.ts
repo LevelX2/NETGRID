@@ -1005,7 +1005,7 @@ export function createCardLifecycleRuntimeHosts(
     state.runner.stack = shuffleStateIds(
       state,
       allIds,
-      `${sourceDefinitionId}.shuffle_grip_heap_stack:${state.stateVersion + 1}`,
+      [30, sourceDefinitionId, state.stateVersion + 1],
     );
     for (const id of state.runner.stack) {
       state.cardInstances[id] = {
@@ -1065,7 +1065,7 @@ export function createCardLifecycleRuntimeHosts(
     state.runner.stack = shuffleStateIds(
       state,
       allIds,
-      `${sourceDefinitionId}.shuffle_grip_heap_stack:${state.stateVersion + 1}`,
+      [30, sourceDefinitionId, state.stateVersion + 1],
     );
     for (const id of state.runner.stack) {
       state.cardInstances[id] = {

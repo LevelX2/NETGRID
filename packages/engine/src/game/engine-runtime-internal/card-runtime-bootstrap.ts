@@ -1215,7 +1215,7 @@ export function configureCardRuntimeBootstrap() {
           runtimePorts.discardRandomCorpHqCards(
             state,
             count,
-            `card_implementation.random.${sourceDefinitionId}.hq_discard`,
+            [51, sourceDefinitionId],
           ),
         startDistributeAdvancementCounters:
           runtimePorts.startCardImplementationAdvancementDistributionChoice,

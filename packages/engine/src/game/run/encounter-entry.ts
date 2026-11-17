@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardInstance,
@@ -48,7 +49,7 @@ export type EncounterEntryHost = {
   callbacks: {
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
     continueRun?: (legalAction?: LegalAction) => void;
-    rollDie?: (purpose: string) => number;
+    rollDie?: (purpose: RandomPurpose) => number;
   };
 };
 
@@ -266,12 +267,12 @@ function resolveRandomStrengthOrDerezAutoPassEncounter(
       "Random-Encounter braucht einen deterministischen Wuerfel.",
     );
   const dieRoll = host.callbacks.rollDie(
-    `card_implementation.die.${encounteredDefinition.id}.encounter.${run.runId}.${encounteredIceId}`,
+    [15, encounteredDefinition.id, run.runId, encounteredIceId],
   );
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      randomPurpose: `card_implementation.die.${encounteredDefinition.id}.encounter`,
+      randomPurpose: 15,
       dieSize: 6,
       dieRoll,
       randomCounterAfter: host.state.randomCounter,

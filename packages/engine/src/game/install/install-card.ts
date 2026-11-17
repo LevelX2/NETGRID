@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import {
   type CardDefinition,
   type CardDefinitionId,
@@ -150,7 +151,7 @@ export type InstallCardHost = {
       counterType: string,
       amount: number,
     ) => void;
-    rollDeterministicDie: (purpose: string) => number;
+    rollDeterministicDie: (purpose: RandomPurpose) => number;
   };
   lifecycle: {
     executeOnInstall: (
@@ -818,11 +819,9 @@ function applyArmageddonDoomCounterInstallRolls(
   if (!corpCounters || countersBefore <= 0) return;
   let hits = 0;
   const dieRolls: number[] = [];
-  const randomPurposes: string[] = [];
   for (let index = 0; index < countersBefore; index += 1) {
-    const randomPurpose = `virus.${owner.cardDefinitionId}.install.${state.stateVersion}.${installedCardId}.${index}`;
+    const randomPurpose: RandomPurpose = [14, owner.cardDefinitionId, state.stateVersion, installedCardId, index];
     const dieRoll = host.counters.rollDeterministicDie(randomPurpose);
-    randomPurposes.push(randomPurpose);
     dieRolls.push(dieRoll);
     if (dieRoll === trigger.successDieValue) hits += 1;
   }
@@ -851,7 +850,7 @@ function applyArmageddonDoomCounterInstallRolls(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     proteusDoomInstallRolls: dieRolls.join(","),
-    proteusDoomRandomPurposes: randomPurposes.join(","),
+    proteusDoomRandomPurpose: 14,
     proteusDoomHits: hits,
     doomCountersBefore: countersBefore,
     doomCountersAfter: purgeableRunnerVirusCounterAmount(

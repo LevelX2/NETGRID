@@ -3,17 +3,24 @@ import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
   applyAction,
-  applyRandomizedIceInstallSelection,
   createGame,
   createGameAfterSetup,
   getLegalActions,
   hashGameState,
-  quoteRandomizedIceInstallSelection,
+  validateGameState,
 } from "@netgrid/engine";
-import type { PlayerAction, Side, ServerId } from "@netgrid/shared";
+import type {
+  CardInstanceId,
+  GameState,
+  PlayerAction,
+  Side,
+} from "@netgrid/shared";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
-import { putRunnerCardOnTopOfStack, removeEverywhere } from "../../../engine/src/test-fixtures/mechanic-smoke-fixtures";
+import {
+  putRunnerCardOnTopOfStack,
+  removeEverywhere,
+} from "../../../engine/src/test-fixtures/mechanic-smoke-fixtures";
 import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
@@ -25,10 +32,15 @@ type Fixture = {
   gameNumber: number;
   options: Parameters<typeof createGame>[0];
   initialHash: string;
+  setupArrangement: {
+    runnerGrip: CardInstanceId[];
+    runnerStack: CardInstanceId[];
+    corpHq: CardInstanceId[];
+    corpRd: CardInstanceId[];
+  };
   commands: {
     side: Side;
     applied: Pick<PlayerAction, "actionId" | "selectedChoices">;
-    random?: { rngDrawPurpose: string; rngDrawCounter: number };
     hash: string;
   }[];
   checkpoint: {
@@ -40,7 +52,7 @@ type Fixture = {
     ownDeckSnapshot: NonNullable<
       Parameters<typeof buildAiDecisionInput>[2]
     >["ownDeckSnapshot"];
-    originalLegalActionIds: string[];
+    legalActionIds: string[];
     runtime: AiRuntimeCheckpointV1;
   };
 };
@@ -55,86 +67,44 @@ const fixtures = JSON.parse(
 ) as Fixture[];
 afterEach(resetResidentPlanPortfolioMemory);
 
-function decodeParts(value: string): string[] {
-  const mark = value.indexOf(";");
-  expect(mark).toBeGreaterThan(0);
-  const count = Number(value.slice(0, mark));
-  expect(Number.isSafeInteger(count) && count >= 0).toBe(true);
-  let at = mark + 1;
-  const result: string[] = [];
-  for (let n = 0; n < count; n++) {
-    const colon = value.indexOf(":", at);
-    expect(colon).toBeGreaterThan(at);
-    const length = Number(value.slice(at, colon));
-    expect(Number.isSafeInteger(length) && length >= 0).toBe(true);
-    at = colon + 1;
-    expect(at + length).toBeLessThanOrEqual(value.length);
-    result.push(value.slice(at, at + length));
-    at += length;
+function arrangeAfterSetup(state: GameState, fixture: Fixture) {
+  const arrangement = fixture.setupArrangement;
+  expect(
+    [...arrangement.runnerGrip, ...arrangement.runnerStack].sort(),
+  ).toEqual([...state.runner.grip, ...state.runner.stack].sort());
+  expect([...arrangement.corpHq, ...arrangement.corpRd].sort()).toEqual(
+    [...state.corp.hq, ...state.corp.rd].sort(),
+  );
+  state.runner.grip = [...arrangement.runnerGrip];
+  state.runner.stack = [...arrangement.runnerStack];
+  state.corp.hq = [...arrangement.corpHq];
+  state.corp.rd = [...arrangement.corpRd];
+  for (const [zone, ids] of [
+    [{ side: "runner", zone: "grip" }, state.runner.grip],
+    [{ side: "runner", zone: "stack" }, state.runner.stack],
+    [{ side: "corp", zone: "hq" }, state.corp.hq],
+    [{ side: "corp", zone: "rd" }, state.corp.rd],
+  ] as const) {
+    for (const id of ids) state.cardInstances[id]!.zone = { ...zone };
   }
-  expect(at).toBe(value.length);
-  return result;
+  expect(validateGameState(state)).toEqual({ ok: true, errors: [] });
+  state.eventLog.at(-1)!.stateHashAfter = hashGameState(state);
 }
 
 function replay(gameNumber: number) {
   const fixture = fixtures.find((f) => f.gameNumber === gameNumber)!;
   let state = createGame(fixture.options);
   expect(hashGameState(state)).toBe(fixture.initialHash);
-  for (const command of fixture.commands) {
-    let result;
-    if (command.random) {
-      const parts = decodeParts(command.random.rngDrawPurpose);
-      expect(parts).toHaveLength(7);
-      expect(parts[0]).toBe("engine.randomized_ice_install_selection");
-      expect(parts[2]).toBe("corp");
-      expect(command.side).toBe("corp");
-      expect(Number(parts[3])).toBe(state.stateVersion);
-      expect(parts[4]).toBe(state.timingPoint);
-      expect(command.random.rngDrawCounter).toBe(state.randomCounter);
-      const fingerprint = decodeParts(parts[6]!);
-      expect(fingerprint[0]).toBe(parts[1]);
-      const count = Number(fingerprint[1]);
-      expect(Number.isSafeInteger(count) && count >= 2).toBe(true);
-      expect(fingerprint).toHaveLength(2 + count * 2);
-      const request: Parameters<typeof quoteRandomizedIceInstallSelection>[1] =
-        {
-          schemaVersion: parts[1] as Parameters<
-            typeof quoteRandomizedIceInstallSelection
-          >[1]["schemaVersion"],
-          matchId: state.matchId,
-          side: "corp",
-          stateVersion: state.stateVersion,
-          timingPoint: state.timingPoint,
-          planStepId: parts[5]!,
-          candidates: Array.from({ length: count }, (_, i) => ({
-            actionId: fingerprint[2 + i * 2]!,
-            targetServerId: fingerprint[3 + i * 2]! as ServerId,
-          })),
-        };
-      const quoted = quoteRandomizedIceInstallSelection(state, request);
-      if (!quoted.ok) throw Error("original_random_quote_rejected");
-      expect(quoted.quote.candidateFingerprint).toBe(parts[6]);
-      result = applyRandomizedIceInstallSelection(state, {
-        kind: "engine_randomized_ice_install_selection",
-        quote: quoted.quote,
-      });
-      if (!result.ok) throw Error("original_random_command_rejected");
-      expect(result.receipt.selectedLegalAction.actionId).toBe(
-        command.applied.actionId,
-      );
-      expect(result.receipt.randomDraw.purpose).toBe(
-        command.random.rngDrawPurpose,
-      );
-    } else {
-      result = applyAction(state, {
-        matchId: state.matchId,
-        side: command.side,
-        clientKnownStateVersion: state.stateVersion,
-        ...command.applied,
-      });
-    }
+  for (const [index, command] of fixture.commands.entries()) {
+    const result = applyAction(state, {
+      matchId: state.matchId,
+      side: command.side,
+      clientKnownStateVersion: state.stateVersion,
+      ...command.applied,
+    });
     if (!result.ok) throw Error(result.error.message);
     state = result.state;
+    if (index === 1) arrangeAfterSetup(state, fixture);
     expect(hashGameState(state)).toBe(command.hash);
   }
   const cp = fixture.checkpoint;
@@ -150,10 +120,9 @@ function replay(gameNumber: number) {
     actionNumber: cp.actionNumber,
     profileId: cp.profileId,
   };
-  // Legal-action ordering is not part of replay identity. Preserve the exact
-  // multiset of commands while allowing the current Engine's presentation order.
+  // The fixture binds the exact multiset of current offered commands.
   expect(input.legalActions.map((a) => a.actionId).sort()).toEqual(
-    [...cp.originalLegalActionIds].sort(),
+    [...cp.legalActionIds].sort(),
   );
   restoreAiRuntimeCheckpoint(
     input,
@@ -163,7 +132,7 @@ function replay(gameNumber: number) {
   return { state, input };
 }
 
-it("executes the ready Inside Job without borrowing the normal run's Wall support (G6 D158, 157 original commands)", () => {
+it("executes the ready Inside Job without borrowing the normal run's Wall support in the authored G6 scene", () => {
   const { state, input } = replay(6);
   const decision = chooseAiAction(input);
   const action = input.legalActions.find(
@@ -189,7 +158,7 @@ it("executes the ready Inside Job without borrowing the normal run's Wall suppor
   expect(result.state.run?.attackedServerId).toBe("r1");
 });
 
-it("retains the unique just-drawn Gate answer for its exact coverage executor (G18 D33, 32 original commands)", () => {
+it("retains the unique just-drawn Gate answer for its exact coverage executor in the authored G18 scene", () => {
   const { state, input } = replay(18);
   const decision = chooseAiAction(input);
   expect(decision.selectedChoices).toEqual({
@@ -205,17 +174,21 @@ it("retains the unique just-drawn Gate answer for its exact coverage executor (G
   });
   if (!result.ok) throw Error(result.error.message);
   expect(result.state.runner.grip).toContain("c1ea");
-  expect(result.state.runner.heap).toContain(
-    "c2g1",
-  );
+  expect(result.state.runner.heap).toContain("c2g1");
 });
 
 it("discards the newly drawn duplicate Gate breaker when another copy is installed", () => {
   const fixture = fixtures.find((candidate) => candidate.gameNumber === 18)!;
-  let state = createGameAfterSetup({ ...fixture.options, seed: "coverage-duplicate-gate-draw" });
+  let state = createGameAfterSetup({
+    ...fixture.options,
+    seed: "coverage-duplicate-gate-draw",
+  });
   for (const type of ["mandatory_draw", "end_turn"] as const) {
-    if (type === "end_turn") RealEngineFixtureBuilder.forState(state).withCorpHqSize(0);
-    const action = getLegalActions(state, "corp").find((candidate) => candidate.type === type)!;
+    if (type === "end_turn")
+      RealEngineFixtureBuilder.forState(state).withCorpHqSize(0);
+    const action = getLegalActions(state, "corp").find(
+      (candidate) => candidate.type === type,
+    )!;
     const applied = applyAction(state, {
       matchId: state.matchId,
       side: "corp",
@@ -235,17 +208,20 @@ it("discards the newly drawn duplicate Gate breaker when another copy is install
   state.runnerTurnFlags!.runLockActionsPending = 1;
   state.runnerTurnFlags!.runnerRunLockCreditCost = 10;
   const installed = state.runner.rig.programs[0]!;
-  const duplicate = Object.values(state.cardInstances).find((card) =>
-    card.definitionId === 226 && card.instanceId !== installed,
+  const duplicate = Object.values(state.cardInstances).find(
+    (card) => card.definitionId === 226 && card.instanceId !== installed,
   )!;
   removeEverywhere(state, duplicate.instanceId);
   duplicate.zone = { side: "runner", zone: "stack" };
   state.runner.stack.unshift(duplicate.instanceId);
   putRunnerCardOnTopOfStack(state, 396);
-  const decide = (current: typeof state) => chooseAiAction(buildAiDecisionInput(current, "runner", {
-    difficulty: "hard",
-    ownDeckSnapshot: fixture.checkpoint.ownDeckSnapshot,
-  }));
+  const decide = (current: typeof state) =>
+    chooseAiAction(
+      buildAiDecisionInput(current, "runner", {
+        difficulty: "hard",
+        ownDeckSnapshot: fixture.checkpoint.ownDeckSnapshot,
+      }),
+    );
   const draw = decide(state);
   expect(draw.actionId).toBe("runner.draw_card");
   const drawn = applyAction(state, {
@@ -260,7 +236,8 @@ it("discards the newly drawn duplicate Gate breaker when another copy is install
     choiceId: drawn.state.pendingChoice?.choiceId,
     selectedOptionIds: ["trash_" + duplicate.instanceId],
   });
-  if (!decision.selectedChoices) throw Error("Missing native draw replacement choice");
+  if (!decision.selectedChoices)
+    throw Error("Missing native draw replacement choice");
   const applied = applyAction(drawn.state, {
     matchId: state.matchId,
     side: "runner",

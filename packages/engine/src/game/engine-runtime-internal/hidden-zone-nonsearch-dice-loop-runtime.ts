@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -14,7 +15,7 @@ import { creditGainPublicPayload } from "../economy/credit-gain";
 type HiddenZoneNonSearchDiceLoopRuntimeDeps = RuntimeDeps & {
   credits: typeof import("../state/economy-mutation").credits;
   definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
-  rollDeterministicDie: (state: GameState, purpose: string) => number;
+  rollDeterministicDie: (state: GameState, purpose: RandomPurpose) => number;
   runnerEventLongtailForDefinition: (
     definition: CardDefinition,
   ) => CardRunnerEventLongtailImplementation | undefined;
@@ -71,7 +72,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
     const randomDiceLoop = requireRandomDiceLoopImplementation(implementation);
     const dieRoll = typedDeps.rollDeterministicDie(
       state,
-      `v1921.die.${sourceDefinitionId}.dice_loop.initial`,
+      [21, sourceDefinitionId],
     );
     const choiceOpened = randomDiceLoop.choiceOn.includes(
       dieRoll as (typeof randomDiceLoop.choiceOn)[number],
@@ -281,7 +282,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
       remainingDice -= 1;
       const nextRoll = typedDeps.rollDeterministicDie(
         state,
-        `v1921.die.${sourceDefinitionId}.dice_loop.followup.${state.stateVersion + 1}.${nextRollIndex}`,
+        [22, sourceDefinitionId, state.stateVersion + 1, nextRollIndex],
       );
       nextRollIndex += 1;
       rolledDice.push(nextRoll);

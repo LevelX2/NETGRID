@@ -152,7 +152,7 @@ export function resolveCorpShuffleRunnerGripAfterSuccessfulRunChoice(
     };
   } else {
     const shuffledCount = host.runnerCards.shuffleGripIntoStack(
-      `classic.indiscriminate_response_team.${run.runId}.${sourceId}.${host.state.stateVersion}`,
+      [56, run.runId, sourceId, host.state.stateVersion],
     );
     const drawSummary = host.runnerCards.drawCards(shuffledCount);
     legalAction.payload = {

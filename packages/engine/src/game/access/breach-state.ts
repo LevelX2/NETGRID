@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import type { RunId } from "@netgrid/shared";
 import type {
   CardDefinition,
@@ -25,7 +26,7 @@ export type BreachStateHost = {
     mustServer: (serverId: Exclude<ServerId, "new_remote">) => CorpServer;
   };
   rng: {
-    nextRandom: (purpose: string) => number;
+    nextRandom: (purpose: RandomPurpose) => number;
   };
 };
 
@@ -207,7 +208,7 @@ function randomHqAccessQueue(
   const limit = Math.min(accessCount, available.length);
   for (let index = 0; index < limit; index += 1) {
     const value = host.rng.nextRandom(
-      `hq_multiaccess:${runId}:selection:${index}`,
+      [10, runId, index],
     );
     const selectedIndex = Math.floor(value * available.length);
     const cardId = available[selectedIndex];

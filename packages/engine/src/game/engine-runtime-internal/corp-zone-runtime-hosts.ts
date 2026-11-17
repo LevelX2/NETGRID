@@ -504,7 +504,7 @@ export function createCorpZoneRuntimeHosts(
     state.corp.rd = deps.shuffleStateIds(
       state,
       state.corp.rd,
-      `card_implementation.${sourceDefinitionId}.${reason}.shuffle_into_rd`,
+      [34, sourceDefinitionId, reason === "lifecycle" ? 0 : reason === "access" ? 1 : 2],
     );
     for (const rdCardId of state.corp.rd) {
       state.cardInstances[rdCardId] = {

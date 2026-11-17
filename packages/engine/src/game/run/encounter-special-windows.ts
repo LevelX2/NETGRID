@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   type CardDefinition,
@@ -24,7 +25,7 @@ export type EncounterSpecialWindowHost = {
     derezCorpInstalledCard?: (cardId: CardInstanceId) => void;
     finishRun?: (successful: boolean, legalAction?: LegalAction) => void;
     resetBreakerStrength?: () => void;
-    rollDie?: (purpose: string) => number;
+    rollDie?: (purpose: RandomPurpose) => number;
     spendCredits?: (side: Side, amount: number) => void;
     trashCorpInstalledCard?: (cardId: CardInstanceId) => void;
     trashRunnerInstalledCardToHeap?: (
@@ -259,7 +260,7 @@ export function resolveRezzedIceRewindSubroutine(
   if (currentIndex < 0)
     throw new Error("Rezzed-ICE-Rewind konnte das Encounter-ICE nicht finden.");
 
-  const randomPurpose = `rewind_run_to_rezzed_ice_by_die.${run.runId}.${run.encounteredIceId}`;
+  const randomPurpose: RandomPurpose = [17, run.runId, run.encounteredIceId!];
   const die = rollDie(host, randomPurpose);
   legalActionPayload(legalAction, { rezzedIceRewindDieRoll: die });
   if (die >= 4) {
@@ -439,7 +440,7 @@ export function applyPassedIceRunEndTrigger(
 
   for (const rioId of rioIds) {
     const rioDefinitionId = definitionFor(state, rioId).id;
-    const randomPurpose = `v1921.die.${rioDefinitionId}.passed_ice.${run.runId}.${passedIceId}.${rioId}`;
+    const randomPurpose: RandomPurpose = [18, rioDefinitionId, run.runId, passedIceId, rioId];
     const dieRoll = rollDie(host, randomPurpose);
     const runEnded = dieRoll === 1;
     legalActionPayload(legalAction, {
@@ -450,7 +451,7 @@ export function applyPassedIceRunEndTrigger(
       passedIceDefinitionId: definitionFor(state, passedIceId).id,
       ...(server.label ? { serverLabel: server.label } : {}),
       v1921DieRoll: dieRoll,
-      randomPurpose,
+      randomPurpose: randomPurpose[0],
       randomCounterAfter: state.randomCounter,
       rioRunEnded: runEnded,
     });
@@ -1074,7 +1075,7 @@ function spendCredits(
   host.callbacks.spendCredits(side, amount);
 }
 
-function rollDie(host: EncounterSpecialWindowHost, purpose: string): number {
+function rollDie(host: EncounterSpecialWindowHost, purpose: RandomPurpose): number {
   if (!host.callbacks?.rollDie) throw new Error("RNG-Callback fehlt.");
   return host.callbacks.rollDie(purpose);
 }

@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import { parseRunIdToken, type RunId } from "@netgrid/shared";
 import type {
   CardDefinition,
@@ -70,7 +71,7 @@ export type RunAccessTransitionHost = {
   rng: {
     shuffleStateIds: (
       ids: CardInstanceId[],
-      purpose: string,
+      purpose: RandomPurpose,
     ) => CardInstanceId[];
   };
   access: {
@@ -981,7 +982,7 @@ function finishGypsyRdReveal(
   }
   const shuffledRd = host.rng.shuffleStateIds(
     [...remainingRd, ...revealedNonAgendaIds],
-    `successful_run.reveal_rd_until_agenda.${run.runId}`,
+    [35, run.runId],
   );
   host.state.corp.rd = shuffledRd;
   for (const cardId of shuffledRd) {
@@ -1330,7 +1331,7 @@ function applyArchivesFaceupToRdReplacement(
   );
   const shuffled = host.rng.shuffleStateIds(
     faceupIds,
-    `p3_33.archives_faceup_to_rd_replacement.${run.runId}`,
+    [36, run.runId],
   );
   const moveCount = Math.min(
     Math.max(0, Math.floor(run.successfulRunArchivesMoveCount ?? 2)),

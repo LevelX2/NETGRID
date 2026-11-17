@@ -3,6 +3,7 @@ import type {
   CardDefinitionId,
   CardInstanceId,
   LegalAction,
+  RandomPurposeCode,
 } from "@netgrid/shared";
 import type {
   AiHintActionCapacityProfile,
@@ -393,7 +394,7 @@ export type ActionRunAccessDecisionModel = {
 export type ActionRandomOutcomeModel = {
   schemaVersion: "random-outcome-model-v1";
   outcomeStatus: "not_drawn";
-  purpose?: string;
+  purpose?: RandomPurposeCode;
   randomCounterAfter?: number;
   source: "engine_random_draw_records_only";
   futureOutcomeAccess: "forbidden";

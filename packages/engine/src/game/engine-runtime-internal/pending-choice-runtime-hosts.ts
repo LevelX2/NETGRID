@@ -1080,7 +1080,7 @@ export function createPendingChoiceRuntimeHosts(
       selectedCards = deps.discardRandomCorpHqCards(
         state,
         expectedCount,
-        "v191.random.runner_virus_hq_discard_phase",
+        [53],
       );
     } else {
       const selectedIds = deps.selectedChoiceIds(playerAction.selectedChoices);
@@ -1219,7 +1219,7 @@ export function createPendingChoiceRuntimeHosts(
       const shuffled = deps.shuffleStateIds(
         state,
         allIds,
-        "setup.shuffle.runner.mulligan",
+        [5],
       );
       const grip = shuffled.splice(0, handSize);
       state.runner.grip = grip;
@@ -1231,7 +1231,7 @@ export function createPendingChoiceRuntimeHosts(
         };
       deps.recordStateRandomMarkers(
         state,
-        "setup.draw.runner.mulligan_hand",
+        [7],
         grip.length,
       );
       return;
@@ -1246,7 +1246,7 @@ export function createPendingChoiceRuntimeHosts(
     const shuffled = deps.shuffleStateIds(
       state,
       allIds,
-      "setup.shuffle.corp.mulligan",
+      [6],
     );
     const hq = shuffled.splice(0, handSize);
     state.corp.hq = hq;
@@ -1258,7 +1258,7 @@ export function createPendingChoiceRuntimeHosts(
       };
     deps.recordStateRandomMarkers(
       state,
-      "setup.draw.corp.mulligan_hand",
+      [8],
       hq.length,
     );
   }
@@ -1314,7 +1314,7 @@ export function createPendingChoiceRuntimeHosts(
     for (let index = 0; index < continuation.runAttemptsLastTurn; index += 1) {
       const roll = rollDeterministicDie(
         state,
-        `classic.satellite_monitors.corp_start.${state.stateVersion}.${continuation.sourceCardId}.${index}`,
+        [26, state.stateVersion, continuation.sourceCardId, index],
       );
       rolls.push(roll);
       if (roll === 1) tagsAdded += 1;

@@ -1,3 +1,4 @@
+import type { RandomHqDiscardContext } from "@netgrid/shared";
 /** Declarative typed port for the cardRuntimeResolvers composition group. */
 import type {
   CardHiddenReplacementLongtailImplementation,
@@ -40,7 +41,7 @@ export type CardRuntimeResolverPort = {
   randomCorpHqDiscard: (
     state: GameState,
     amount: number,
-    purposePrefix: string,
+    purposePrefix: RandomHqDiscardContext,
   ) => CardInstanceId[];
   installTargetBindingForDefinition: (
     definition: CardDefinition,

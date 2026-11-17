@@ -1205,7 +1205,7 @@ export function createHiddenZoneNonSearchRuntime(
     );
     if (!installed)
       throw new Error("Das Programm kann nicht installiert werden.");
-    shuffleRunnerStack(state, `pro018_test_spin:${choice.choiceId}:shuffle`);
+    shuffleRunnerStack(state, [38, choice.stateVersion]);
     delete state.pendingChoice;
     const serverId = (serverIdRaw || "hq") as Exclude<ServerId, "new_remote">;
     deps.startRun(

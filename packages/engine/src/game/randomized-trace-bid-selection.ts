@@ -1,4 +1,10 @@
 import {
+  randomContextFingerprint,
+  serializeRandomPurpose,
+  isRandomDrawRecord,
+  type RandomPurpose,
+} from "@netgrid/shared";
+import {
   ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION,
   type AiTurnPlanRandomDrawRecord,
   type ApplyActionOptions,
@@ -15,7 +21,7 @@ import {
 import { buildApplyAction, type ApplyActionCoreHost } from "./apply-action";
 import { cloneGameStateForAction } from "./apply-action-state";
 import { getLegalActions } from "./legal-actions";
-import { deterministicNumber, nextRandom } from "./state/draw-random";
+import { createRandomDraw, nextRandom } from "./state/draw-random";
 
 let defaultHost: ApplyActionCoreHost | undefined;
 
@@ -142,7 +148,8 @@ export function quoteRandomizedTraceBidSelection(
       state.aiTurnPlanRandomDrawRecords.some(
         (record, index) =>
           record.counter !== index ||
-          record.domain !== "ai_turn_plan_selection",
+          record.domain !== "ai_turn_plan_selection" ||
+          !isRandomDrawRecord(record, "ai_turn_plan_selection"),
       )
     )
       return fail(
@@ -302,7 +309,10 @@ export function buildApplyRandomizedTraceBidSelection(
       ? applied.state.aiTurnPlanRandomDrawRecords!
       : applied.state.randomDrawRecords
   ).find(
-    (record) => record.counter === counterBefore && record.purpose === purpose,
+    (record) =>
+      record.counter === counterBefore &&
+      serializeRandomPurpose(record.purpose) ===
+        serializeRandomPurpose(purpose),
   );
   if (!randomDraw) {
     return applyFail(
@@ -368,31 +378,29 @@ function canonicalCandidates(
 
 function traceBidSelectionPurpose(
   quote: EngineRandomizedTraceBidSelectionQuote,
-): string {
-  return encodeParts([
-    "engine.randomized_trace_bid_selection",
-    quote.side,
-    "kind" in quote.assessment
-      ? quote.assessment.kind
-      : String(quote.assessment.traceId),
-    quote.choiceId,
-    quote.planStepId,
-    quote.candidateFingerprint,
-  ]);
+): RandomPurpose {
+  return [
+    62,
+    quote.side === "runner" ? 0 : 1,
+    "kind" in quote.assessment ? 1 : 0,
+    "kind" in quote.assessment ? 0 : quote.assessment.traceId,
+    quote.stateVersion,
+    randomContextFingerprint([
+      quote.choiceId,
+      quote.planStepId,
+      quote.candidateFingerprint,
+    ]),
+  ];
 }
 
 function drawSecretGuess(
   state: GameState,
-  purpose: string,
+  purpose: RandomPurpose,
 ): AiTurnPlanRandomDrawRecord {
   const counter = state.aiTurnPlanRandomCounter!;
   const record: AiTurnPlanRandomDrawRecord = {
+    ...createRandomDraw(state.seed, purpose, counter, "ai_turn_plan_selection"),
     domain: "ai_turn_plan_selection",
-    counter,
-    purpose,
-    value: deterministicNumber(
-      `${state.seed}:ai_turn_plan_selection:${purpose}:${counter}`,
-    ),
   };
   state.aiTurnPlanRandomCounter = counter + 1;
   state.aiTurnPlanRandomDrawRecords = [

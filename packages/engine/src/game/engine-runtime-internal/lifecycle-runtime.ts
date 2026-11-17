@@ -1,3 +1,4 @@
+import type { RandomHqDiscardContext } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -36,7 +37,7 @@ export function createLifecycleRuntime(
   function discardRandomCorpHqCards(
     state: GameState,
     maxCount: number,
-    purposePrefix: string,
+    purposePrefix: RandomHqDiscardContext,
   ): CardInstanceId[] {
     const available = state.corp.hq.slice();
     const discarded: CardInstanceId[] = [];
@@ -44,7 +45,7 @@ export function createLifecycleRuntime(
     for (let index = 0; index < limit; index += 1) {
       const value = deps.nextRandom(
         state,
-        `${purposePrefix}:selection:${index}`,
+        [...purposePrefix, index],
       );
       const selectedIndex = Math.floor(value * available.length);
       const cardId = deps.mustArrayValue(
