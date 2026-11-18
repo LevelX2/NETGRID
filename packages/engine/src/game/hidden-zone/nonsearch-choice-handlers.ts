@@ -926,7 +926,14 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
       CardInstanceId,
     ];
     const server = host.servers.mustServer(serverId);
-    if (!server.ice.includes(iceId))
+    const position = option?.metadata?.targetIcePosition;
+    if (
+      option?.metadata?.targetServerId !== serverId ||
+      typeof position !== "number" ||
+      !Number.isSafeInteger(position) ||
+      position < 0 ||
+      server.ice[position] !== iceId
+    )
       throw new Error(
         "Das Secret-Spend-Guess-ICE-Ziel ist nicht mehr installiert.",
       );
@@ -988,13 +995,17 @@ function startSecretSpendGuessTargetedBypassRunTargetChoice(
         fallback,
       );
       return {
-        id: `ice_${slot.cardId}`,
+        id: `ice_${slot.serverId}.${slot.index.toString(36)}`,
         label:
           labels.label === fallback
             ? fallback
             : `${labels.label} (${fallback})`,
         publicLabel: fallback,
         value: `${slot.serverId}|${slot.cardId}`,
+        metadata: {
+          targetServerId: slot.serverId,
+          targetIcePosition: slot.index,
+        },
       };
     }),
     minSelections: 1,

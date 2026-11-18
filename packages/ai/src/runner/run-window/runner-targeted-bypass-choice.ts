@@ -83,14 +83,12 @@ export function selectedRunnerTargetedBypassChoiceOptionId(
   )?.ice[continuation.icePosition];
   const exactOptions =
     currentIce && currentIce.instanceId === continuation.visibleIceInstanceId
-      ? selectableOptions.filter((option) => {
-          const value = targetedBypassOptionValue(option.value);
-          return (
+      ? selectableOptions.filter(
+          (option) =>
             option.selectable !== false &&
-            value?.serverId === continuation.serverId &&
-            value.iceInstanceId === currentIce.instanceId
-          );
-        })
+            option.metadata?.targetServerId === continuation.serverId &&
+            option.metadata?.targetIcePosition === continuation.icePosition,
+        )
       : [];
   if (exactOptions.length !== 1) {
     throw targetedBypassChoiceFailure(
@@ -310,20 +308,6 @@ function targetedBypassChoiceSource(
     return undefined;
   }
   return { sourceCardInstanceId, choiceStateVersion };
-}
-
-function targetedBypassOptionValue(
-  value: PendingChoiceOptions[number]["value"] | undefined,
-): { serverId: string; iceInstanceId: string } | undefined {
-  if (typeof value !== "string") return undefined;
-  const separator = value.indexOf("|");
-  if (separator <= 0 || separator === value.length - 1) return undefined;
-  const serverId = value.slice(0, separator);
-  const iceInstanceId = value.slice(separator + 1);
-  if (!serverId || !iceInstanceId || iceInstanceId.includes("|")) {
-    return undefined;
-  }
-  return { serverId, iceInstanceId };
 }
 
 function targetedBypassChoiceFailure(

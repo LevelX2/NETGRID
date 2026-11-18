@@ -1,3 +1,5 @@
+import { instantiatePlanProposal } from "../plans/plan-instance";
+import type { PlanInstance, PlanModuleId } from "../plans/plan-kernel-types";
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { RunnerRunTargetEvaluation } from "../run-analysis/runner-run-target-types";
 import type {
@@ -274,7 +276,7 @@ describe("Runner targeted ICE disruption plan", () => {
     ]);
     expect(candidate.actionId).toBe("runner.play.jettison-1");
     expect(portfolio.executorInstanceId).toBe(
-      "plan:runner.pressure_central:central%3Ard",
+      "pa90fufw9vc5bkshp96ztlryxl",
     );
     const continuation = (
       portfolio.instances[0]!.moduleState as {
@@ -418,7 +420,7 @@ describe("Runner targeted ICE disruption plan", () => {
   it("recognizes the canonical unrezzed-ICE capability and values the route it opens", () => {
     const action = {
       actionId:
-        "runner.play_event.worm-1.worm-1.onr_v1_109_security-code-worm-chip:abilities_on_play_trash_unrezzed_ice",
+        "rh.worm-1.worm-1.onr_v1_109_security-code-worm-chip:abilities_on_play_trash_unrezzed_ice",
       type: "play_event",
       side: "runner",
       label: "Security Code WORM Chip spielen",
@@ -558,10 +560,10 @@ describe("Runner targeted ICE disruption plan", () => {
       schemaVersion: "resident-plan-portfolio-v2",
       side: "runner",
       stateVersion: 10,
-      executorInstanceId: "plan:runner.develop_board_and_hand:jettison",
+      executorInstanceId: "p85e2anuqvf9fdg1movaib1a81",
       instances: [
         {
-          instanceId: "plan:runner.develop_board_and_hand:jettison",
+          instanceId: "p85e2anuqvf9fdg1movaib1a81",
           moduleId: "runner.develop_board_and_hand",
           executionState: "executor",
           moduleState: { kind: "development" },
@@ -675,7 +677,7 @@ function targetedUnrezzedTrashCandidate(): ActionSemanticCandidate {
 function canonicalForgedCandidate(): ActionSemanticCandidate {
   const action = {
     actionId:
-      "runner.play_event.forged-1.forged-1.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+      "rh.forged-1.forged-1.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
     type: "play_event",
     side: "runner",
     label: "Forged Activation Orders spielen",
@@ -807,29 +809,25 @@ function unrezzedIce(instanceId: string): VisibleCard {
 function pressurePortfolio(
   commitment: RunnerTargetedIceTrashCommitment,
 ): ResidentPlanPortfolio {
+  const instance = currentTargetedPlanInstance(
+    "runner.pressure_central",
+    "central:rd",
+    {
+      kind: "central_pressure",
+      signal: { targetedIceTrashCommitment: commitment },
+    },
+    10,
+  );
   return {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "runner",
     stateVersion: 10,
-    rootForegroundInstanceId: "plan:runner.pressure_central:central%3Ard",
-    executorInstanceId: "plan:runner.pressure_central:central%3Ard",
-    instances: [
-      {
-        instanceId: "plan:runner.pressure_central:central%3Ard",
-        moduleId: "runner.pressure_central",
-        dedupeKey: "central:rd",
-        executionState: "executor",
-        moduleState: {
-          kind: "central_pressure",
-          signal: {
-            targetedIceTrashCommitment: commitment,
-          },
-        },
-      },
-    ],
+    rootForegroundInstanceId: instance.instanceId,
+    executorInstanceId: instance.instanceId,
+    instances: [instance],
     completionHistory: [],
     transitions: [],
-  } as unknown as ResidentPlanPortfolio;
+  };
 }
 
 function targetedChoiceInput(
@@ -955,5 +953,46 @@ function choiceDependencies(): Parameters<
     }),
     rolesForCardId: () => [],
     effectsForCardId: () => [],
+  };
+}
+
+function currentTargetedPlanInstance(
+  moduleId: PlanModuleId,
+  dedupeKey: string,
+  moduleState: unknown,
+  stateVersion: number,
+): PlanInstance {
+  return {
+    ...instantiatePlanProposal(
+      {
+        moduleId,
+        moduleVersion: "1",
+        dedupeKey,
+        side: "runner",
+        strategyLineIds: [],
+        executionClass: "bounded_sequence",
+        initialViability: "ready",
+        persistencePolicy: "locked_sequence",
+        retentionPolicy: {
+          blockedStateVersionTtl: 2,
+          dormantStateVersionTtl: 2,
+          completedHistoryStateVersionTtl: 4,
+          abandonWhenTargetMissing: true,
+          protectedWhileNeedOpen: true,
+          protectedWhileCommitted: true,
+        },
+        phase: "targeted_preparation",
+        milestone: "choice_bound",
+        moduleState,
+        blockers: [],
+        resumeConditions: [],
+        completionConditions: [],
+        abandonmentConditions: [],
+        evidenceRefs: [],
+      },
+      stateVersion,
+    ),
+    executionState: "executor",
+    portfolioRole: "foreground",
   };
 }

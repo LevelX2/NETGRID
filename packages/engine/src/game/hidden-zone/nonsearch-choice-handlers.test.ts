@@ -685,7 +685,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
       "hidden_zone.secret_spend_guess_then_targeted_bypass_run.target",
     );
 
-    host.playerAction = playerAction([`ice_${ice}`]);
+    host.playerAction = playerAction(["ice_r1.0"]);
     const result = handleHiddenZoneNonSearchChoice(host);
     expect(result.handled).toBe(true);
     expect(calls).toEqual([{ serverId: "r1", iceId: ice }]);
@@ -725,22 +725,25 @@ describe("hidden-zone nonsearch choice handlers", () => {
 
     expect(host.state.pendingChoice?.options).toEqual([
       {
-        id: `ice_${hiddenIce}`,
+        id: "ice_hq.0",
         label: "HQ ICE 1",
         publicLabel: "HQ ICE 1",
         value: `hq|${hiddenIce}`,
+        metadata: { targetServerId: "hq", targetIcePosition: 0 },
       },
       {
-        id: `ice_${firstQuandary}`,
+        id: "ice_hq.1",
         label: "Quandary (HQ ICE 2)",
         publicLabel: "HQ ICE 2",
         value: `hq|${firstQuandary}`,
+        metadata: { targetServerId: "hq", targetIcePosition: 1 },
       },
       {
-        id: `ice_${secondQuandary}`,
+        id: "ice_hq.2",
         label: "Quandary (HQ ICE 3)",
         publicLabel: "HQ ICE 3",
         value: `hq|${secondQuandary}`,
+        metadata: { targetServerId: "hq", targetIcePosition: 2 },
       },
     ]);
   });
