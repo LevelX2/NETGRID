@@ -1,3 +1,4 @@
+import { decisionEventHistory } from "../../decision-event-history";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { validOptionalCardDefinitionIds } from "../../card-definition-id-input";
 import {
@@ -570,13 +571,7 @@ function structuredRecentPressure(
 ): { events: number; successful: number } | undefined {
   const turns = new Set<number>();
   let events = 0;
-  const eventsById = new Map(
-    [...input.playerView.publicEvents, ...input.eventTail].map((event) => [
-      event.eventId,
-      event,
-    ]),
-  );
-  for (const event of eventsById.values()) {
+  for (const event of decisionEventHistory(input)) {
     if (
       !Number.isSafeInteger(event.stateVersionAfter) ||
       event.stateVersionAfter > input.playerView.stateVersion

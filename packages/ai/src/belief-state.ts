@@ -14,6 +14,7 @@ import {
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "./ai-hints";
 import { decisionDerivedValue } from "./decision-derived-cache";
+import { decisionEventHistory } from "./decision-event-history";
 import { publicInstalledExposures } from "./public-installed-exposure";
 
 type PublicHiddenZoneMutation = {
@@ -288,7 +289,7 @@ export function reconstructBeliefState(input: AiDecisionInput): BeliefState {
 }
 
 function buildBeliefState(input: AiDecisionInput): BeliefState {
-  const history = beliefHistory(input);
+  const history = decisionEventHistory(input);
   const classifications = history.map(classifyBeliefEvent);
   const invalidationLog = deriveInvalidationLog(classifications);
   const remoteRootTypeDeductions =
@@ -484,20 +485,6 @@ export function normalizedBeliefUncertaintyValue(rawValue: number): number {
 function activeBeliefUncertaintyCount(uncertainty: readonly string[]): number {
   return uncertainty.filter((entry) => entry !== "known_projection_only")
     .length;
-}
-
-function beliefHistory(input: AiDecisionInput): PublicGameEvent[] {
-  const eventById = new Map<MatchEventId, PublicGameEvent>();
-  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
-    const previous = eventById.get(event.eventId);
-    if (!previous || previous.stateVersionAfter <= event.stateVersionAfter)
-      eventById.set(event.eventId, event);
-  }
-  return [...eventById.values()].sort(
-    (left, right) =>
-      left.stateVersionBefore - right.stateVersionBefore ||
-      left.eventId - right.eventId,
-  );
 }
 
 function classifyBeliefEvent(

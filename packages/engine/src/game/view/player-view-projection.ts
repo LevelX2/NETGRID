@@ -74,7 +74,11 @@ export function buildPlayerViewProjection(
   state: GameState,
   side: Side,
   legalActions: LegalAction[],
+  options: { publicEventLimit?: number } = {},
 ): PlayerView {
+  const limit = options.publicEventLimit;
+  if (limit !== undefined && (!Number.isSafeInteger(limit) || limit < 0))
+    throw new Error("PlayerView public event limit must be a nonnegative integer.");
   const runnerSide = side === "runner";
   const corpCentralAccessQuotes =
     side === "corp" ? quoteCorpCentralAccesses(state) : undefined;
@@ -706,7 +710,7 @@ export function buildPlayerViewProjection(
           },
         }
       : {}),
-    publicEvents: state.eventLog.map((event) =>
+    publicEvents: (limit === undefined ? state.eventLog : limit === 0 ? [] : state.eventLog.slice(-limit)).map((event) =>
       toPublicEventForSide(event, side),
     ),
     legalActions,

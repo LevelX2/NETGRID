@@ -45,10 +45,11 @@ import {
   type StorageMaintenanceOwnDeckSnapshot,
 } from "./maintenance-own-deck-snapshot";
 import { SIDE_PAYLOAD_EVENT_TAIL_LIMIT } from "./multiplayer-payload";
+import { advancePublicEventHistory, initialPublicEventHistory, isStoredPublicEventHistory, type StoredPublicEventHistory } from "./public-event-history";
 import { preserveStoppedSqliteTarget } from "./storage-restore-snapshot";
 import { isStateSnapshotId, type StateSnapshotId } from "./state-snapshot-id";
 
-export const SQLITE_STORAGE_SCHEMA_VERSION = 10;
+export const SQLITE_STORAGE_SCHEMA_VERSION = 11;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
 export const DEFAULT_SQLITE_STORAGE_PATH =
   "data/runtime/multiplayer/netgrid.sqlite";
@@ -2197,6 +2198,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           state_version_after INTEGER NOT NULL,
           state_hash_after TEXT NOT NULL,
           public_payload_json TEXT NOT NULL,
+          history_json TEXT NOT NULL,
           private_payload_local_only INTEGER NOT NULL,
           hidden_info_barrier INTEGER NOT NULL,
           PRIMARY KEY (match_id, event_id),
@@ -2386,73 +2388,64 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     }
 
     if (this.tableExists("events")) {
-      const events = this.db
-        .prepare(
-          options.actionPersistence
-            ? `WITH event_total AS (
-                 SELECT COUNT(*) AS total FROM events WHERE match_id = ?
-               )
-               SELECT event_id AS eventId, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter,
-                 state_hash_after AS stateHashAfter,
-                 CASE WHEN event_index >= event_total.total - ? THEN public_payload_json ELSE NULL END AS publicPayloadJson,
-                 json_extract(public_payload_json, '$.type') AS eventType,
-                 json_extract(public_payload_json, '$.publicPayload.actor') AS actor,
-                 json_extract(public_payload_json, '$.publicPayload.actionType') AS actionType,
-                 json_extract(public_payload_json, '$.publicPayload.discardResolved') AS discardResolved,
-                 json_extract(public_payload_json, '$.publicPayload.hiddenZoneAction') AS hiddenZoneAction,
-                 json_extract(public_payload_json, '$.publicPayload.accessIndex') AS accessIndex,
-                 json_extract(public_payload_json, '$.publicPayload.runnerEventRun') AS runnerEventRun,
-                 json_extract(public_payload_json, '$.publicPayload.agendaPoints') AS agendaPoints,
-                 private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier
-               FROM events, event_total WHERE match_id = ? ORDER BY event_index ASC`
-            : "SELECT event_id AS eventId, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, public_payload_json AS publicPayloadJson, NULL AS eventType, NULL AS actor, NULL AS actionType, NULL AS discardResolved, NULL AS hiddenZoneAction, NULL AS accessIndex, NULL AS runnerEventRun, NULL AS agendaPoints, private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier FROM events WHERE match_id = ? ORDER BY event_index ASC",
-        )
-        .all(
-          ...(options.actionPersistence
-            ? [matchId, SIDE_PAYLOAD_EVENT_TAIL_LIMIT, matchId]
-            : [matchId]),
-        ) as Array<{
-        eventId: MatchEventId;
-        stateVersionBefore: number;
-        stateVersionAfter: number;
-        stateHashAfter: string;
-        publicPayloadJson: string | null;
-        eventType?: string | null;
-        actor?: string | null;
-        actionType?: string | null;
-        discardResolved?: number | null;
-        hiddenZoneAction?: string | null;
-        accessIndex?: number | null;
-        runnerEventRun?: number | null;
-        agendaPoints?: number | null;
-        privatePayloadLocalOnly: number;
-        hiddenInfoBarrier: number;
+      const events = this.db.prepare(
+        options.actionPersistence
+          ? `SELECT * FROM (
+               SELECT event_id AS eventId, event_index AS eventIndex,
+                 state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter,
+                 state_hash_after AS stateHashAfter, public_payload_json AS publicPayloadJson,
+                 history_json AS historyJson, private_payload_local_only AS privatePayloadLocalOnly,
+                 hidden_info_barrier AS hiddenInfoBarrier
+               FROM events WHERE match_id = ? ORDER BY event_index DESC LIMIT ?
+             ) ORDER BY eventIndex ASC`
+          : `SELECT event_id AS eventId, event_index AS eventIndex,
+               state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter,
+               state_hash_after AS stateHashAfter, public_payload_json AS publicPayloadJson,
+               history_json AS historyJson, private_payload_local_only AS privatePayloadLocalOnly,
+               hidden_info_barrier AS hiddenInfoBarrier
+             FROM events WHERE match_id = ? ORDER BY event_index ASC`,
+      ).all(...(options.actionPersistence ? [matchId, SIDE_PAYLOAD_EVENT_TAIL_LIMIT] : [matchId])) as Array<{
+        eventId: MatchEventId; eventIndex: number;
+        stateVersionBefore: number; stateVersionAfter: number; stateHashAfter: string;
+        publicPayloadJson: string; historyJson: string;
+        privatePayloadLocalOnly: number; hiddenInfoBarrier: number;
       }>;
-      if (events.length > 0) {
-        record.eventLog = events.map((event) => ({
-          matchId,
-          eventId: event.eventId,
-          stateVersionBefore: Number(event.stateVersionBefore),
-          stateVersionAfter: Number(event.stateVersionAfter),
-          stateHashAfter: event.stateHashAfter,
-          publicPayload: event.publicPayloadJson !== null
-            ? decodeStoredPublicEvent({
-                ...event,
-                publicPayloadJson: event.publicPayloadJson,
-              })
-            : actionContextPublicEvent(event),
-          privatePayloadLocalOnly: event.privatePayloadLocalOnly === 1,
-          hiddenInfoBarrier: event.hiddenInfoBarrier === 1,
-        }));
+      const histories = events.map((event) => decodePublicEventHistory(event.historyJson, event.eventIndex));
+      const publicEvents = events.map(decodeStoredPublicEvent);
+      for (let index = 0; index < events.length; index += 1) {
+        const history = histories[index]!;
+        const next = advancePublicEventHistory(history.before, publicEvents[index]!);
+        if (
+          JSON.stringify(next.stored.context) !== JSON.stringify(history.context) ||
+          (index + 1 < events.length && JSON.stringify(next.after) !== JSON.stringify(histories[index + 1]!.before)) ||
+          (!options.actionPersistence && index === 0 && JSON.stringify(history.before) !== JSON.stringify(initialPublicEventHistory()))
+        ) throw invalidStoredGameState("Die gespeicherte Ereignisfortsetzung ist nicht konsistent.");
       }
+      if (options.actionPersistence)
+        record.publicHistoryPrefix = histories[0]?.before ?? initialPublicEventHistory();
+      record.eventLog = events.map((event, index) => ({
+        matchId, eventId: event.eventId,
+        stateVersionBefore: Number(event.stateVersionBefore),
+        stateVersionAfter: Number(event.stateVersionAfter),
+        stateHashAfter: event.stateHashAfter,
+        publicPayload: publicEvents[index]!,
+        privatePayloadLocalOnly: event.privatePayloadLocalOnly === 1,
+        hiddenInfoBarrier: event.hiddenInfoBarrier === 1,
+        history: histories[index]!,
+      }));
     }
 
     if (this.tableExists("engine_events")) {
       const events = this.db
         .prepare(
-          "SELECT event_id AS eventId, event_json AS eventJson FROM engine_events WHERE match_id = ? ORDER BY event_index ASC",
+          options.actionPersistence && record.match.mode === "human_vs_human"
+            ? `SELECT * FROM (SELECT event_id AS eventId, event_index AS eventIndex, event_json AS eventJson
+                FROM engine_events WHERE match_id = ? ORDER BY event_index DESC LIMIT ?)
+               ORDER BY eventIndex ASC`
+            : "SELECT event_id AS eventId, event_json AS eventJson FROM engine_events WHERE match_id = ? ORDER BY event_index ASC",
         )
-        .all(matchId) as StoredEngineEventRow[];
+        .all(...(options.actionPersistence && record.match.mode === "human_vs_human"
+          ? [matchId, SIDE_PAYLOAD_EVENT_TAIL_LIMIT] : [matchId])) as StoredEngineEventRow[];
       if (events.length > 0) {
         engineEventLog = events.map(decodeStoredEngineEvent);
         if (record.gameState) record.gameState.eventLog = engineEventLog;
@@ -2628,6 +2621,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         engineEventCount: Number(counts.engineEventCount),
         actionReceiptCount: Number(counts.actionReceiptCount),
         aiDecisionTraceCount: Number(counts.aiDecisionTraceCount),
+        loadedPublicEventCount: record.eventLog.length,
+        loadedEngineEventCount: record.gameState.eventLog.length,
         loadedActionReceiptCount: record.actionReceipts.length,
         loadedAiDecisionTraceCount: record.aiDecisionTraces?.length ?? 0,
       };
@@ -2635,6 +2630,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   }
 
   private saveRecord(record: StoredMatch): void {
+    if (record.publicHistoryPrefix)
+      throw new StorageError("stored_match_invalid", "Ein begrenzter Aktionsload benötigt Delta-Persistenz.");
     dedupeStateSnapshots(record);
     const matchId = record.match.matchId;
     const stateVersion = record.gameState?.stateVersion ?? null;
@@ -2829,8 +2826,9 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     const engineEvents = record.gameState.eventLog;
     const traces = record.aiDecisionTraces ?? [];
     if (
-      record.eventLog.length < baseline.publicEventCount ||
-      engineEvents.length < baseline.engineEventCount ||
+      record.eventLog.length < baseline.loadedPublicEventCount ||
+      engineEvents.length < baseline.loadedEngineEventCount ||
+      (record.publicHistoryPrefix?.eventCount ?? 0) + baseline.loadedPublicEventCount !== baseline.publicEventCount ||
       record.actionReceipts.length < baseline.loadedActionReceiptCount ||
       traces.length < baseline.loadedAiDecisionTraceCount
     ) {
@@ -2874,6 +2872,15 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       );
     }
 
+    if (baseline.loadedPublicEventCount > 0) {
+      const firstLoaded = this.db.prepare(
+        "SELECT history_json AS historyJson FROM events WHERE match_id = ? AND event_index = ?",
+      ).get(matchId, baseline.publicEventCount - baseline.loadedPublicEventCount) as { historyJson: string } | undefined;
+      if (!firstLoaded || JSON.stringify(decodePublicEventHistory(
+        firstLoaded.historyJson, baseline.publicEventCount - baseline.loadedPublicEventCount,
+      ).before) !== JSON.stringify(record.publicHistoryPrefix ?? initialPublicEventHistory()))
+        throw new StorageError("action_persistence_conflict", "Das geladene Ereignispräfix ist nicht mehr konsistent.");
+    }
     const stateVersion = record.gameState.stateVersion;
     const stateHash = hashState(record.gameState);
     const matchUpdate = this.db
@@ -2926,11 +2933,18 @@ export class SqliteMatchStorage implements MultiplayerStorage {
 
     const insertEvent = this.db.prepare(
       `INSERT INTO events
-       (match_id, event_id, event_index, state_version_before, state_version_after, state_hash_after, public_payload_json, private_payload_local_only, hidden_info_barrier)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (match_id, event_id, event_index, state_version_before, state_version_after, state_hash_after, public_payload_json, history_json, private_payload_local_only, hidden_info_barrier)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
+    let publicHistory = record.publicHistoryPrefix ?? initialPublicEventHistory();
+    const publicHistories = record.eventLog.map((event) => {
+      const next = advancePublicEventHistory(publicHistory, event.publicPayload);
+      publicHistory = next.after;
+      event.history = next.stored;
+      return next.stored;
+    });
     record.eventLog
-      .slice(baseline.publicEventCount)
+      .slice(baseline.loadedPublicEventCount)
       .forEach((event, offset) => {
         insertEvent.run(
           matchId,
@@ -2940,6 +2954,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           event.stateVersionAfter,
           event.stateHashAfter,
           JSON.stringify(publicEventForStorage(event.publicPayload)),
+          JSON.stringify(publicHistories[baseline.loadedPublicEventCount + offset]),
           event.privatePayloadLocalOnly ? 1 : 0,
           event.hiddenInfoBarrier ? 1 : 0,
         );
@@ -2948,7 +2963,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     const insertEngineEvent = this.db.prepare(
       "INSERT INTO engine_events (match_id, event_id, event_index, event_json) VALUES (?, ?, ?, ?)",
     );
-    engineEvents.slice(baseline.engineEventCount).forEach((event, offset) => {
+    engineEvents.slice(baseline.loadedEngineEventCount).forEach((event, offset) => {
       insertEngineEvent.run(
         matchId,
         event.eventId,
@@ -3075,9 +3090,16 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     this.truncateEventTable("events", matchId, eventIds.slice(0, prefixLength));
     const insertEvent = this.db.prepare(
       `INSERT INTO events
-       (match_id, event_id, event_index, state_version_before, state_version_after, state_hash_after, public_payload_json, private_payload_local_only, hidden_info_barrier)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (match_id, event_id, event_index, state_version_before, state_version_after, state_hash_after, public_payload_json, history_json, private_payload_local_only, hidden_info_barrier)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
+    let publicHistory = initialPublicEventHistory();
+    const publicHistories = events.map((event) => {
+      const next = advancePublicEventHistory(publicHistory, event.publicPayload);
+      publicHistory = next.after;
+      event.history = next.stored;
+      return next.stored;
+    });
     events.slice(prefixLength).forEach((event, offset) => {
       const index = prefixLength + offset;
       insertEvent.run(
@@ -3088,6 +3110,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         event.stateVersionAfter,
         event.stateHashAfter,
         JSON.stringify(publicEventForStorage(event.publicPayload)),
+        JSON.stringify(publicHistories[index]),
         event.privatePayloadLocalOnly ? 1 : 0,
         event.hiddenInfoBarrier ? 1 : 0,
       );
@@ -5330,41 +5353,13 @@ function matchCandidateFromRow(row: MatchStateRow): StoredMatch {
   } as StoredMatch;
 }
 
-function actionContextPublicEvent(event: {
-  eventId: MatchEventId;
-  stateVersionBefore: number;
-  stateVersionAfter: number;
-  stateHashAfter: string;
-  eventType?: string | null;
-  actor?: string | null;
-  actionType?: string | null;
-  discardResolved?: number | null;
-  hiddenZoneAction?: string | null;
-  accessIndex?: number | null;
-  runnerEventRun?: number | null;
-  agendaPoints?: number | null;
-}): StoredMatch["eventLog"][number]["publicPayload"] {
-  const context: Record<string, unknown> = {};
-  if (event.actor === "runner" || event.actor === "corp")
-    context.actor = event.actor;
-  if (event.actionType) context.actionType = event.actionType;
-  if (event.discardResolved !== null && event.discardResolved !== undefined)
-    context.discardResolved = event.discardResolved === 1;
-  if (event.hiddenZoneAction) context.hiddenZoneAction = event.hiddenZoneAction;
-  if (event.accessIndex !== null && event.accessIndex !== undefined)
-    context.accessIndex = Number(event.accessIndex);
-  if (event.runnerEventRun !== null && event.runnerEventRun !== undefined)
-    context.runnerEventRun = event.runnerEventRun === 1;
-  if (event.agendaPoints !== null && event.agendaPoints !== undefined)
-    context.agendaPoints = Number(event.agendaPoints);
-  return {
-    eventId: event.eventId,
-    type: event.eventType ?? "action_applied",
-    stateVersionBefore: Number(event.stateVersionBefore),
-    stateVersionAfter: Number(event.stateVersionAfter),
-    stateHashAfter: event.stateHashAfter,
-    publicPayload: context,
-  } as StoredMatch["eventLog"][number]["publicPayload"];
+function decodePublicEventHistory(json: string, eventIndex: number): StoredPublicEventHistory {
+  let value: unknown;
+  try { value = JSON.parse(json); }
+  catch { throw invalidStoredGameState("Der Ereigniskontext ist kein gültiges JSON."); }
+  if (!isStoredPublicEventHistory(value, eventIndex))
+    throw invalidStoredGameState("Der Ereigniskontext passt nicht zum gespeicherten Präfix.");
+  return value;
 }
 
 function aiDecisionTraceRecordFromRow(
@@ -5410,6 +5405,7 @@ function hydrateSnapshotGameState(
 function compactRecordForStorage(record: StoredMatch): StoredMatchMetadata {
   const {
     actionPersistenceBaseline: _actionPersistenceBaseline,
+    publicHistoryPrefix: _publicHistoryPrefix,
     gameState: _gameState,
     ...persistedRecord
   } = record;

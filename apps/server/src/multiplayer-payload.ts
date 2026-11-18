@@ -16,6 +16,7 @@ import type {
   StoredMatch,
 } from "./multiplayer";
 import { chronicleTurnContextByEventId } from "./chronicle-turn-context";
+import { advancePublicEventHistory, initialPublicEventHistory } from "./public-event-history";
 
 export const SIDE_PAYLOAD_EVENT_TAIL_LIMIT = 80;
 
@@ -42,18 +43,27 @@ export function buildSidePayload(
 ): SidePayload {
   if (!record.gameState) throw new Error("match_not_active");
   const opponentSide = opposite(side);
-  const chronicleTurnContext = chronicleTurnContextByEventId(
-    record.eventLog.map((event) => event.publicPayload),
-  );
-  const eventTail = record.eventLog
-    .slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT)
+  const tail = record.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT);
+  let prefix = tail[0]?.history?.before;
+  if (!prefix) {
+    prefix = record.publicHistoryPrefix ?? initialPublicEventHistory();
+    for (const event of record.eventLog.slice(0, -SIDE_PAYLOAD_EVENT_TAIL_LIMIT))
+      prefix = advancePublicEventHistory(prefix, event.publicPayload).after;
+  }
+  const chronicleTurnContext = tail.every((event) => event.history !== undefined)
+    ? Object.fromEntries(tail.flatMap((event) => event.history!.context
+        ? [[event.eventId, event.history!.context]] : []))
+    : chronicleTurnContextByEventId(
+        tail.map((event) => event.publicPayload), prefix.chronicle,
+      );
+  const eventTail = tail
     .map((event) =>
       withChronicleTurnContext(
         redactPublicEventForSide(event.publicPayload, side),
         chronicleTurnContext[event.eventId],
       ),
     );
-  const engineView = getPlayerView(record.gameState, side);
+  const engineView = getPlayerView(record.gameState, side, { publicEventLimit: 0 });
   const playerView = {
     ...engineView,
     legalActions:

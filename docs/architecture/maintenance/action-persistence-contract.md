@@ -1,6 +1,6 @@
 # Aktionspersistenz in SQLite
 
-Stand: 2026-11-17
+Stand: 2026-11-18
 Status: aktueller Implementierungsvertrag
 
 ## Zuständigkeit und Ladepfad
@@ -9,8 +9,10 @@ Status: aktueller Implementierungsvertrag
 und `actionPersistenceBaseline`. `apps/server/src/storage-sqlite.ts`
 implementiert den begrenzten Aktionsload und den atomaren Delta-Save.
 Normale Aktionen benötigen keine vollständige Hydration aller öffentlichen
-Events, KI-Traces, Receipts und Snapshots. Der aktuelle GameState bleibt
-einschließlich seiner Engine-Historie verfügbar.
+Events, KI-Traces, Receipts und Snapshots. Der aktuelle Kernzustand ist vollständig. Öffentliche Aktionsloads lesen höchstens
+80 Ereignisse direkt in SQL. In reinen Human-Partien gilt dieselbe Grenze für
+Engine-Ereignisse; KI-Partien behalten die vollständige side-sichere Chronologie
+für ihre bestehenden Beobachtungs- und Belief-Verträge.
 
 Der aktuelle Spielzustand steht in `game_states`. Die JSON-Metadaten in
 `matches.record_json` enthalten keinen Spielzustand. Zustände und Snapshots
@@ -46,7 +48,7 @@ Fehlgeschlagene KI-Versuche führen ihren Diagnosecode im Fehlerdatensatz.
 Ereignisblobs beziehen ihre ID aus der Tabellenzeile. Öffentliche
 Ereignisblobs beziehen daraus auch StateVersions und StateHash.
 
-Das Match-Schema 10 speichert die typisierten RNG-Tuples und numerische Run-IDs
+Das Match-Schema 11 speichert die typisierten RNG-Tuples und numerische Run-IDs
 und erfordert einen passenden Matchdatenpfad. Ein konfigurierter
 separater Accountpfad kann die Konto-Tabellen einer Datenbank mit Schema 3
 weiterverwenden.
@@ -56,6 +58,23 @@ anbietet und eine verifizierte Baseline liefert. Adapter ohne diese Fähigkeit
 und vollständige Lifecycle-, Undo- und Replaypfade verwenden den vollständigen
 Load-/Save-Vertrag. Das beschreibt die bestehende explizite Adaptergrenze;
 ein Delta-Konflikt wird dadurch nicht abgefangen oder still wiederholt.
+
+Jede öffentliche Ereigniszeile speichert ihren Chronikkontext und die kleine
+Präfixzusammenfassung vor diesem Ereignis. Sie umfasst den fortsetzbaren
+Zugcursor einschließlich noch offener End-of-Turn-Ablage sowie kumulierte
+Aktions-, erfolgreiche Run-, Steal- und Scorezähler. Ein begrenzter Load beginnt
+mit genau diesem Präfix. Neue Ereignisse führen es fort; Ergebnisstatistik und
+KI-Traceturns müssen frühere Ereignisblobs nicht erneut laden. Gesamte und
+bereits geladene History-Zähler sind getrennt an die Delta-Baseline gebunden.
+Undo, Replay und explizite vollständige Loads behalten den vollständigen Verlauf.
+Ein Full Save eines begrenzten Records wird abgelehnt.
+
+Die PlayerView-Projektion kann ihre öffentliche Historie an der Quelle auslassen.
+Der Live-Server verwendet diese Projektion und setzt nur sein seitensicheres
+Chroniktail ein; die vollständige aktuelle Board-/Choice-Projektion bleibt erhalten.
+KI-Belief-, Central-Defense- und Random-Break-Risk-Consumer teilen eine pro
+Entscheidung deduplizierte Chronologie. Ältere erlaubte Beobachtungen bleiben
+enthalten; eine neue Entscheidung baut die Chronologie erneut auf.
 
 ## Transaktion und Sicherheit
 

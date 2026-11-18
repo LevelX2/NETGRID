@@ -4,9 +4,32 @@ import type { PublicGameEvent, Side } from "@netgrid/shared";
 import {
   chronicleTurnContextByEventId,
   chronicleTurnNumberForEvent,
+  advanceChronicleTurnContext,
+  initialChronicleTurnCursor,
 } from "./chronicle-turn-context";
 
 describe("chronicle turn context", () => {
+  it("continues from a persisted prefix at every boundary, including end-turn discards", () => {
+    const events = [
+      event(1, "corp", "mandatory_draw"),
+      event(2, "corp", "end_turn"),
+      event(3, "corp", "resolve_choice", { discardResolved: true }),
+      event(4, "corp", "resolve_choice", { hiddenZoneAction: "discard_phase" }),
+      event(5, "runner", "gain_credit"),
+      event(6, "runner", "end_turn"),
+      event(7, "corp", "mandatory_draw"),
+    ];
+    const full = chronicleTurnContextByEventId(events);
+    for (let split = 0; split <= events.length; split += 1) {
+      let cursor = initialChronicleTurnCursor();
+      for (const entry of events.slice(0, split))
+        cursor = advanceChronicleTurnContext(cursor, entry).cursor;
+      const tail = events.slice(split);
+      const continued = chronicleTurnContextByEventId(tail, JSON.parse(JSON.stringify(cursor)));
+      for (const entry of tail) expect(continued[entry.eventId]).toEqual(full[entry.eventId]);
+    }
+  });
+
   it("keeps all decisions in one turn together and increments only on side change", () => {
     const events = [
       event(1, "corp", "mandatory_draw"),

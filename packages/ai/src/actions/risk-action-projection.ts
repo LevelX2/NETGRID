@@ -1,3 +1,4 @@
+import { decisionEventHistory } from "../decision-event-history";
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
@@ -472,10 +473,7 @@ function recentRandomBreakFailureFromEvents(
   recentDamageAmount: number;
   targetServerId?: string;
 } {
-  const history = [
-    ...(input.playerView.publicEvents ?? []),
-    ...(input.eventTail ?? []),
-  ];
+  const history = decisionEventHistory(input);
   let activeRunServerId: string | undefined;
   for (let index = history.length - 1; index >= 0; index -= 1) {
     const event = history[index]!;

@@ -17,8 +17,33 @@ import {
   SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
 } from "./multiplayer-payload";
 import type { EventRecord, StoredMatch } from "./multiplayer";
+import { advancePublicEventHistory, initialPublicEventHistory } from "./public-event-history";
 
 describe("multiplayer side payload projection", () => {
+  it("builds a live update from persisted tail context without traversing discarded public or Engine history", () => {
+    const record = storedMatchWithEvents(SIDE_PAYLOAD_EVENT_TAIL_LIMIT + 7);
+    let history = initialPublicEventHistory();
+    for (const event of record.eventLog) {
+      const next = advancePublicEventHistory(history, event.publicPayload);
+      event.history = next.stored;
+      history = next.after;
+    }
+    const deps = {
+      isAiSide: () => false, safeDisplayNameFor: () => "Gegenüber",
+      aiTurnPresentationFor: () => undefined, resultSummaryFor: () => undefined,
+      retentionProtectionPayload: { retentionProtected: false },
+    };
+    const expected = buildSidePayload(record, "runner", deps);
+    for (const event of record.eventLog.slice(0, 7))
+      Object.defineProperty(event, "publicPayload", {
+        get: () => { throw new Error("Discarded events must not be projected."); },
+      });
+    Object.defineProperty(record.gameState, "eventLog", {
+      get: () => { throw new Error("The Engine history must not be projected for a live update."); },
+    });
+    expect(buildSidePayload(record, "runner", deps)).toEqual(expected);
+  });
+
   it("limits normal playerView publicEvents to the side event tail", () => {
     const record = storedMatchWithEvents(SIDE_PAYLOAD_EVENT_TAIL_LIMIT + 7);
     const payload = buildSidePayload(record, "runner", {

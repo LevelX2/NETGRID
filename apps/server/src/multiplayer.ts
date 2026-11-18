@@ -151,6 +151,7 @@ import {
   type SpectatorProjectionV1,
 } from "./spectator-projection";
 import { chronicleTurnNumberForEvent } from "./chronicle-turn-context";
+import { publicEventHistorySummary, type PublicEventHistorySummary, type StoredPublicEventHistory } from "./public-event-history";
 import type {
   BackupManifest,
   StorageHealth,
@@ -377,7 +378,10 @@ export type StateSnapshot = {
   hiddenInfoBarrier: boolean;
 };
 
-export type EventRecord = ServerEventRecord;
+export type EventRecord = ServerEventRecord & {
+  /** Server-private continuation and context persisted alongside this event. */
+  history?: StoredPublicEventHistory;
+};
 
 export type ActionReceipt = {
   idempotencyKey: string;
@@ -409,6 +413,8 @@ export type ActionPersistenceBaseline = {
   engineEventCount: number;
   actionReceiptCount: number;
   aiDecisionTraceCount: number;
+  loadedPublicEventCount: number;
+  loadedEngineEventCount: number;
   loadedActionReceiptCount: number;
   loadedAiDecisionTraceCount: number;
 };
@@ -446,6 +452,8 @@ export type StoredMatch = {
   };
   pendingUndo?: PendingUndoRequest;
   actionPersistenceBaseline?: ActionPersistenceBaseline;
+  /** Prefix preceding the SQL-bounded public tail; never part of player payloads. */
+  publicHistoryPrefix?: PublicEventHistorySummary;
 };
 
 export type AiDecisionTraceRecord = {
@@ -6184,9 +6192,9 @@ export class MultiplayerService {
     if (
       !series.results.some((result) => result.matchId === record.match.matchId)
     ) {
-      const runnerAgendaPoints = getPlayerView(state, "runner").own
+      const runnerAgendaPoints = getPlayerView(state, "runner", { publicEventLimit: 0 }).own
         .agendaPoints;
-      const corpAgendaPoints = getPlayerView(state, "corp").own.agendaPoints;
+      const corpAgendaPoints = getPlayerView(state, "corp", { publicEventLimit: 0 }).own.agendaPoints;
       const lifecycleReason = record.lifecycleResult?.reason;
       const reason: GameResultReason =
         lifecycleReason === "forfeit" || lifecycleReason === "time_expired"
@@ -6552,6 +6560,7 @@ export class MultiplayerService {
       chronicleTurnNumberForEvent(
         record.eventLog.map((entry) => entry.publicPayload),
         anchorEvent.eventId,
+        record.publicHistoryPrefix?.chronicle,
       ) ?? 1;
     const trace: AiDecisionTraceRecord = {
       matchId: record.match.matchId,
@@ -7393,7 +7402,7 @@ function replayAnalysisFrameFor(
 }
 
 function replayPlayerViewFor(state: GameState, side: Side): PlayerView {
-  const { pendingChoice: _pendingChoice, ...view } = getPlayerView(state, side);
+  const { pendingChoice: _pendingChoice, ...view } = getPlayerView(state, side, { publicEventLimit: 0 });
   return {
     ...view,
     publicEvents: [],
@@ -7707,7 +7716,7 @@ function aiDecisionTraceFor(
     projectEngineEventToPublicEvent(event),
   ];
   const turn =
-    chronicleTurnNumberForEvent(chronologicalEvents, event.eventId) ?? 1;
+    chronicleTurnNumberForEvent(chronologicalEvents, event.eventId, record.publicHistoryPrefix?.chronicle) ?? 1;
   return {
     matchId: record.match.matchId,
     eventId: event.eventId,
@@ -7966,7 +7975,7 @@ function historicalAuditFor(
   beliefState: AiDecisionBeliefCapture,
   decisionInput: AiDecisionInputWithDeckCapabilities,
 ): AiDecisionHistoricalAudit {
-  const actorView = getPlayerView(state, side);
+  const actorView = getPlayerView(state, side, { publicEventLimit: 0 });
   const choiceQuote =
     decisionInput.playerView.pendingChoice?.agendaPurgeArchivesProtectionQuote;
   if (choiceQuote) {
@@ -8105,7 +8114,7 @@ function historicalFailureAuditFor(
   decisionInput: AiDecisionInputWithDeckCapabilities | undefined,
   selectedAction?: LegalAction,
 ): AiDecisionHistoricalAudit {
-  const actorView = getPlayerView(state, side);
+  const actorView = getPlayerView(state, side, { publicEventLimit: 0 });
   const {
     legalActions: _legalActions,
     publicEvents: _publicEvents,
@@ -8494,7 +8503,7 @@ function beliefCaptureFor(
     runtimeVersion: belief.version,
     invariantSignature: beliefStateInvariantSignature(belief),
     stateVersion: state.stateVersion,
-    lastEventIndex: Math.max(-1, record.eventLog.length - 1),
+    lastEventIndex: Math.max(-1, (record.publicHistoryPrefix?.eventCount ?? 0) + record.eventLog.length - 1),
     ...(runnerModel
       ? {
           hqHandMemory: structuredClone(runnerModel.hqHandMemory),
@@ -9235,13 +9244,9 @@ function matchResultSnapshotFor(
   const winner =
     record.lifecycleResult?.winnerSide ?? record.match.winner ?? state?.winner;
   if (!state || !winner) return undefined;
-  const runnerAgendaPoints = getPlayerView(state, "runner").own.agendaPoints;
-  const corpAgendaPoints = getPlayerView(state, "corp").own.agendaPoints;
-  const actionEvents = record.eventLog.filter(
-    (event) => event.publicPayload.type !== "game_created",
-  );
-  const countType = (type: string) =>
-    actionEvents.filter((event) => event.publicPayload.type === type).length;
+  const runnerAgendaPoints = getPlayerView(state, "runner", { publicEventLimit: 0 }).own.agendaPoints;
+  const corpAgendaPoints = getPlayerView(state, "corp", { publicEventLimit: 0 }).own.agendaPoints;
+  const history = publicEventHistorySummary(record);
   const finalStateHash =
     record.lifecycleResult?.finalEngineStateHash ?? hashState(state);
   const runnerMatchPoints = singleGameMatchPointsFor(
@@ -9297,12 +9302,12 @@ function matchResultSnapshotFor(
         ? { deckName: record.match.deckSetup.corp.deckName }
         : {}),
     },
-    actionCount: actionEvents.length,
+    actionCount: history.actionCount,
     runCount: runCountForResult(state),
     agendaPointsToWin: record.match.settings.agendaPointsToWin,
-    successfulRunCount: successfulRunCountForResult(actionEvents),
-    stolenAgendaCount: stolenAgendaCountForResult(actionEvents),
-    scoredAgendaCount: countType("score_agenda"),
+    successfulRunCount: history.successfulRunCount,
+    stolenAgendaCount: history.stolenAgendaCount,
+    scoredAgendaCount: history.scoredAgendaCount,
     finalStateHash,
     ...(record.match.series
       ? {
@@ -9810,7 +9815,7 @@ function safeError(
     code,
     message,
     ...(state ? { currentStateVersion: state.stateVersion } : {}),
-    ...(state && side ? { playerView: getPlayerView(state, side) } : {}),
+    ...(state && side ? { playerView: getPlayerView(state, side, { publicEventLimit: 0 }) } : {}),
   };
 }
 

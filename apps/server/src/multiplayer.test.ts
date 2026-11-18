@@ -98,6 +98,7 @@ import {
   type StoredMatch,
 } from "./multiplayer";
 import { SIDE_PAYLOAD_EVENT_TAIL_LIMIT } from "./multiplayer-payload";
+import { publicEventHistorySummary } from "./public-event-history";
 import {
   SqliteMatchStorage,
   SQLITE_STORAGE_SCHEMA_VERSION,
@@ -3597,7 +3598,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     if (!full || !legacyPartial || !bounded)
       throw new Error("Missing bounded-load fixture");
 
-    expect(bounded.eventLog).toHaveLength(full.eventLog.length);
+    expect(bounded.eventLog).toHaveLength(SIDE_PAYLOAD_EVENT_TAIL_LIMIT);
     expect(bounded.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT)).toEqual(
       full.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT),
     );
@@ -3606,6 +3607,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     );
     const boundedChronicle = chronicleTurnContextByEventId(
       bounded.eventLog.map((event) => event.publicPayload),
+      bounded.publicHistoryPrefix?.chronicle,
     );
     for (const event of bounded.eventLog.slice(
       -SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
@@ -3618,12 +3620,12 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       JSON.stringify(bounded.eventLog.slice(0, -SIDE_PAYLOAD_EVENT_TAIL_LIMIT)),
     ).not.toContain("EARLY_PUBLIC_PAYLOAD_SENTINEL");
     expect(successfulRunCountForResult(full.eventLog)).toBe(2);
-    expect(successfulRunCountForResult(bounded.eventLog)).toBe(2);
+    expect(publicEventHistorySummary(bounded).successfulRunCount).toBe(2);
     expect(runCountForResult(full.gameState)).toBe(1);
     expect(runCountForResult(bounded.gameState)).toBe(1);
     expect(stolenAgendaCountForResult(full.eventLog)).toBe(1);
-    expect(stolenAgendaCountForResult(bounded.eventLog)).toBe(1);
-    expect(bounded.gameState.eventLog).toEqual(full.gameState.eventLog);
+    expect(publicEventHistorySummary(bounded).stolenAgendaCount).toBe(1);
+    expect(bounded.gameState.eventLog).toEqual(full.gameState.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT));
     expect(bounded.aiDecisionTraces).toHaveLength(
       SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
     );
@@ -3634,19 +3636,25 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       bounded.actionReceipts.map((receipt) => receipt.idempotencyKey),
     ).toEqual(["receipt-4"]);
     expect(bounded.stateSnapshots).toEqual([]);
-    const previousActionHistoryBytes = JSON.stringify({
-      events: legacyPartial.eventLog,
-      traces: legacyPartial.aiDecisionTraces,
-      receipts: legacyPartial.actionReceipts,
-      snapshots: legacyPartial.stateSnapshots,
-    }).length;
-    const boundedHistoryBytes = JSON.stringify({
-      events: bounded.eventLog,
-      traces: bounded.aiDecisionTraces,
-      receipts: bounded.actionReceipts,
-      snapshots: bounded.stateSnapshots,
-    }).length;
-    expect(boundedHistoryBytes).toBeLessThan(previousActionHistoryBytes);
+    await expect(storage.save(bounded)).rejects.toMatchObject({ code: "stored_match_invalid" });
+    const tamperedPrefix = structuredClone(bounded);
+    tamperedPrefix.publicHistoryPrefix!.actionCount += 1;
+    await expect(storage.saveActionDelta(tamperedPrefix)).rejects.toMatchObject({ code: "action_persistence_conflict" });
+    expect((await storage.load(record.match.matchId))?.eventLog).toEqual(full.eventLog);
+    const historyDb = new DatabaseSync(dbPath);
+    try {
+      const firstIndex = full.eventLog.length - SIDE_PAYLOAD_EVENT_TAIL_LIMIT;
+      const row = historyDb.prepare("SELECT history_json AS historyJson FROM events WHERE match_id = ? AND event_index = ?")
+        .get(record.match.matchId, firstIndex) as { historyJson: string };
+      const invalidHistory = JSON.parse(row.historyJson);
+      invalidHistory.before.chronicle.turnNumber = 0;
+      historyDb.prepare("UPDATE events SET history_json = ? WHERE match_id = ? AND event_index = ?")
+        .run(JSON.stringify(invalidHistory), record.match.matchId, firstIndex);
+      await expect(storage.loadForAction(record.match.matchId, { side: "runner" }))
+        .rejects.toMatchObject({ code: "stored_match_invalid" });
+      historyDb.prepare("UPDATE events SET history_json = ? WHERE match_id = ? AND event_index = ?")
+        .run(row.historyJson, record.match.matchId, firstIndex);
+    } finally { historyDb.close(); }
     expect(bounded.actionPersistenceBaseline).toMatchObject({
       expectedMatchVersion: record.match.matchVersion,
       expectedStateVersion: record.gameState.stateVersion,
@@ -3685,10 +3693,87 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     expect(JSON.stringify(duplicate.actorPayload)).not.toMatch(
       /EARLY_PUBLIC_PAYLOAD_SENTINEL|EARLY_TRACE_SENTINEL/,
     );
-    console.info(
-      `[delta-action-history-probe] ${JSON.stringify({ previousActionHistoryBytes, boundedHistoryBytes })}`,
-    );
     storage.close();
+  });
+
+  it("keeps native history tails accurate through reopen, undo and reapply after 80 events", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    let storage = new SqliteMatchStorage({ dbPath, backupDir: join(dir, "backups") });
+    let service = new MultiplayerService(storage, { tokenSalt: "history-prefix-native" });
+    try {
+      const created = await service.createMatch({ hostSide: "corp", seed: "history-prefix-native" });
+      const joinToken = new URL(created.joinUrl!).searchParams.get("joinToken")!;
+      const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+      if ("error" in joined) throw new Error(joined.error.message);
+      const sessions = {
+        corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+        runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken },
+      };
+      await forceSetupComplete(service, created.matchId, dbPath);
+      let previousHash = "";
+      let lastSide: Side = "corp";
+      let lastEventId = 0;
+      for (let index = 0; index < 100; index += 1) {
+        const record = (await storage.load(created.matchId, { includeStateSnapshots: false }))!;
+        const side = record.gameState.pendingChoice?.side ?? record.gameState.activeSide;
+        const payload = await bootstrap(service, created.matchId, sessions[side]);
+        const choice = payload.playerView.pendingChoice;
+        const action = choice
+          ? payload.playerView.legalActions.find((candidate) => candidate.type === "resolve_choice")
+          : payload.playerView.legalActions.find((candidate) => candidate.type === "mandatory_draw") ??
+            payload.playerView.legalActions.find((candidate) => candidate.type === "gain_credit") ??
+            payload.playerView.legalActions.find((candidate) => candidate.type === "end_turn");
+        if (!action) throw new Error("Native turn action missing.");
+        previousHash = hashState(record.gameState);
+        const applied = await service.submitAction({
+          matchId: created.matchId, side, sessionToken: sessions[side].sessionToken,
+          actionId: action.actionId, clientKnownMatchVersion: payload.matchVersion,
+          clientKnownStateVersion: payload.playerView.stateVersion, idempotencyKey: `prefix-native-${index}`,
+          ...(choice ? { selectedChoices: { choiceId: choice.choiceId,
+            selectedOptionIds: choice.options.slice(0, choice.minSelections).map((option) => option.id) } } : {}),
+        });
+        if (!applied.ok) throw new Error(applied.error.message);
+        lastSide = side;
+        lastEventId = applied.publicEvent!.eventId;
+        if (index >= 90 && action.type === "gain_credit") break;
+      }
+      const full = (await storage.load(created.matchId))!;
+      const bounded = (await storage.loadForAction(created.matchId, { side: lastSide }))!;
+      expect(full.eventLog.length).toBeGreaterThan(SIDE_PAYLOAD_EVENT_TAIL_LIMIT);
+      expect(bounded.eventLog).toHaveLength(SIDE_PAYLOAD_EVENT_TAIL_LIMIT);
+      expect(bounded.gameState.eventLog).toHaveLength(SIDE_PAYLOAD_EVENT_TAIL_LIMIT);
+      expect(publicEventHistorySummary(bounded)).toEqual(publicEventHistorySummary(full));
+      const beforeReopen = await bootstrap(service, created.matchId, sessions[lastSide]);
+      storage.close();
+      storage = new SqliteMatchStorage({ dbPath, backupDir: join(dir, "backups") });
+      service = new MultiplayerService(storage, { tokenSalt: "history-prefix-native" });
+      const reconnected = await service.reconnectMatch(created.matchId, sessions[lastSide]);
+      if ("error" in reconnected) throw new Error(reconnected.error.message);
+      expect(reconnected.playerView).toEqual(beforeReopen.playerView);
+      const undo = await service.requestUndo({
+        matchId: created.matchId, side: lastSide, sessionToken: sessions[lastSide].sessionToken,
+        clientKnownMatchVersion: reconnected.matchVersion, targetEventId: lastEventId,
+      });
+      if (!undo.ok) throw new Error(undo.error.message);
+      if (!undo.undoRequest) throw new Error("Undo request missing.");
+      const opponent = lastSide === "corp" ? "runner" : "corp";
+      const accepted = await service.acceptUndo({
+        matchId: created.matchId, side: opponent, sessionToken: sessions[opponent].sessionToken,
+        undoRequestId: undo.undoRequest.undoRequestId,
+      });
+      if (!accepted.ok) throw new Error(accepted.error.message);
+      const restored = (await storage.load(created.matchId))!;
+      expect(hashState(restored.gameState)).toBe(previousHash);
+      expect(restored.eventLog.some((event) => event.eventId === lastEventId)).toBe(false);
+      const reapplied = await submit(service, created.matchId, sessions[lastSide],
+        (action) => action.type === "gain_credit", "prefix-native-reapply");
+      expect(reapplied.publicEvent!.eventId).toBe(lastEventId);
+      const final = (await storage.load(created.matchId))!;
+      const finalBounded = (await storage.loadForAction(created.matchId, { side: lastSide }))!;
+      expect(publicEventHistorySummary(finalBounded)).toEqual(publicEventHistorySummary(final));
+      expect(await service.replayMatch(created.matchId)).toMatchObject({ ok: true, errors: [] });
+    } finally { storage.close(); }
   });
 
   it("appends action deltas without updating or deleting persisted history prefixes", async () => {
@@ -17065,6 +17150,8 @@ class ActionDeltaTrackingStorage implements MultiplayerStorage {
       engineEventCount: record.gameState.eventLog.length,
       actionReceiptCount: record.actionReceipts.length,
       aiDecisionTraceCount: record.aiDecisionTraces?.length ?? 0,
+      loadedPublicEventCount: record.eventLog.length,
+      loadedEngineEventCount: record.gameState.eventLog.length,
       loadedActionReceiptCount: record.actionReceipts.length,
       loadedAiDecisionTraceCount: record.aiDecisionTraces?.length ?? 0,
     };
